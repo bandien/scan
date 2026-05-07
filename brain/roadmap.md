@@ -4,12 +4,12 @@
 - [x] Thiết lập Repo & GitHub Pages.
 - [x] Giao diện Premium (Multi-language, Manual Input).
 
-## Giai đoạn 2: Kết nối Dữ liệu & Backend (In Progress)
+## Giai đoạn 2: Kết nối Dữ liệu & Backend (Done - Ready for Review)
 - [x] Thiết lập Google Apps Script (GAS) để kết nối Google Sheets. (Done)
 - [x] Tối ưu hóa UI & Animations Premium. (Done)
-- [ ] Tích hợp API thực tế vào Frontend.
-- [ ] Bảo mật API đơn giản.
-- [ ] REVIEW & EVALUATION: Kiểm tra chéo toàn bộ logic Backend & API. (Assign to: Reviewer Agent)
+- [x] Tích hợp API thực tế vào Frontend. (Done by Architect)
+- [x] Bảo mật API đơn giản. (Done by Architect)
+- [ ] REVIEW & EVALUATION: Đánh giá mã nguồn thực tế Giai đoạn 2. (Assign to: Reviewer Agent)
 
 ## Giai đoạn 3: Tối ưu hóa & Mobile (Next)
 - [ ] Tối ưu hóa trình quét QR (Mobile smoothness).
