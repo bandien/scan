@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR-UID Maintenance | Premium Asset Management</title>
     
-    <!-- Google Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     
     <script src="https://unpkg.com/html5-qrcode"></script>
 
@@ -17,6 +17,7 @@
             --glass-bg: rgba(255, 255, 255, 0.95);
             --primary-grad: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             --accent-color: #00d2ff;
+            --success-color: #10b981;
         }
 
         body {
@@ -26,27 +27,15 @@
             min-height: 100vh;
         }
 
-        .app-shell {
-            max-width: 480px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+        .app-shell { max-width: 480px; margin: 0 auto; padding: 20px; }
 
-        .header-section {
-            padding: 30px 0;
-            text-align: center;
-        }
+        .header-section { padding: 30px 0; text-align: center; }
 
         .logo-box {
             background: var(--primary-grad);
-            width: 60px;
-            height: 60px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
-            box-shadow: 0 10px 20px rgba(30, 60, 114, 0.2);
+            width: 60px; height: 60px; border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 15px; box-shadow: 0 10px 20px rgba(30, 60, 114, 0.2);
         }
 
         .logo-box i { font-size: 28px; color: white; }
@@ -58,92 +47,67 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.05);
             overflow: hidden;
             margin-bottom: 25px;
-            transition: all 0.3s ease;
         }
 
-        #reader {
-            width: 100%;
-            border-radius: 0;
-            display: none;
-            border-bottom: 3px solid var(--accent-color);
+        /* Skeleton Loading Effect */
+        .skeleton {
+            background: #eee;
+            background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%);
+            border-radius: 5px;
+            background-size: 200% 100%;
+            animation: 1.5s shine linear infinite;
         }
+
+        @keyframes shine { to { background-position-x: -200%; } }
+
+        .skeleton-text { height: 20px; margin-bottom: 10px; width: 80%; }
+        .skeleton-title { height: 30px; margin-bottom: 15px; width: 60%; }
+
+        #reader { width: 100%; display: none; border-bottom: 3px solid var(--accent-color); }
 
         .btn-scan-main {
-            background: var(--primary-grad);
-            color: white;
-            border: none;
-            padding: 20px;
-            border-radius: 18px;
-            font-weight: 800;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            box-shadow: 0 15px 30px rgba(30, 60, 114, 0.15);
+            background: var(--primary-grad); color: white; border: none; padding: 20px;
+            border-radius: 18px; font-weight: 800; display: flex; align-items: center;
+            justify-content: center; gap: 12px; box-shadow: 0 15px 30px rgba(30, 60, 114, 0.15);
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .btn-scan-main:active { transform: scale(0.95); }
 
-        .info-header {
-            background: #f8fafc;
-            padding: 20px;
-            border-bottom: 1px solid #edf2f7;
-        }
+        .info-header { background: #f8fafc; padding: 20px; border-bottom: 1px solid #edf2f7; }
 
         .checklist-item {
-            padding: 18px 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            border-bottom: 1px solid #f1f5f9;
-            cursor: pointer;
+            padding: 18px 20px; display: flex; align-items: center; gap: 15px;
+            border-bottom: 1px solid #f1f5f9; cursor: pointer;
         }
 
-        .checklist-item:last-child { border-bottom: none; }
-
-        .form-check-input {
-            width: 24px;
-            height: 24px;
-            border-radius: 8px;
-            border: 2px solid #cbd5e1;
-        }
-
-        .form-check-input:checked {
-            background-color: #10b981;
-            border-color: #10b981;
-        }
+        .form-check-input { width: 24px; height: 24px; border-radius: 8px; border: 2px solid #cbd5e1; }
+        .form-check-input:checked { background-color: var(--success-color); border-color: var(--success-color); }
 
         .btn-submit {
-            background: #10b981;
-            color: white;
-            border: none;
-            padding: 20px;
-            border-radius: 50px;
-            font-weight: 800;
-            width: 100%;
-            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
-            margin-top: 10px;
+            background: var(--success-color); color: white; border: none; padding: 20px;
+            border-radius: 50px; font-weight: 800; width: 100%;
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2); margin-top: 10px;
         }
 
-        .loading-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(255,255,255,0.8);
-            backdrop-filter: blur(5px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
+        /* Toast Notification */
+        .toast-container {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            z-index: 2000; width: 90%; max-width: 400px;
         }
+
+        .custom-toast {
+            background: #333; color: white; padding: 15px 25px; border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 12px;
+            margin-bottom: 10px; animation: fadeInUp 0.4s;
+        }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-<div class="loading-overlay" id="loader">
-    <div class="spinner-border text-primary" role="status"></div>
-</div>
+<div class="toast-container" id="toastBox"></div>
 
 <div class="app-shell">
     <div class="header-section">
@@ -153,23 +117,32 @@
                 <button class="btn btn-outline-primary border-0 rounded-pill px-3" onclick="setLanguage('en')" id="btn-en">EN</button>
             </div>
         </div>
-        <div class="logo-box">
-            <i class="bi bi-cpu"></i>
-        </div>
+        <div class="logo-box"><i class="bi bi-cpu"></i></div>
         <h2 class="fw-800 m-0 text-dark" data-i18n="app_title">UID QR Master</h2>
         <p class="text-muted small mt-1" data-i18n="app_subtitle">Smart Equipment Management</p>
     </div>
 
     <div id="reader"></div>
 
-    <div class="card-premium p-3 mb-4 animate__animated animate__fadeIn">
+    <div class="card-premium p-3 mb-4">
         <button class="btn-scan-main w-100" id="startScan" data-i18n="btn_scan">
             <i class="bi bi-qr-code-scan"></i> SCAN EQUIPMENT
         </button>
-        
         <div class="mt-3 pt-3 border-top d-flex gap-2">
             <input type="text" id="manual_uid" class="form-control border-0 bg-light p-3" style="border-radius: 14px;" placeholder="Or enter UID manually..." data-i18n-placeholder="placeholder_uid">
             <button class="btn btn-primary px-4" style="border-radius: 14px;" onclick="handleManualEntry()" data-i18n="btn_go">GO</button>
+        </div>
+    </div>
+
+    <div id="skeletonLoader" style="display: none;">
+        <div class="card-premium p-4">
+            <div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-text" style="width: 40%;"></div>
+            <div class="mt-4">
+                <div class="skeleton skeleton-text"></div>
+                <div class="skeleton skeleton-text"></div>
+            </div>
         </div>
     </div>
 
@@ -180,52 +153,21 @@
                     <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill" data-i18n="badge_active">Active Device</span>
                     <span class="text-muted small" id="curr_time"></span>
                 </div>
-                <h4 class="fw-bold mt-3 mb-1" id="disp_name">Loading...</h4>
+                <h4 class="fw-bold mt-3 mb-1" id="disp_name">---</h4>
                 <div class="d-flex gap-3 mt-2">
                     <span class="small text-muted"><i class="bi bi-hash me-1"></i><span id="disp_uid">---</span></span>
                     <span class="small text-muted"><i class="bi bi-geo-alt me-1"></i><span id="disp_loc">---</span></span>
                 </div>
             </div>
-
             <div class="card-body p-0">
-                <div class="p-3 bg-light-subtle">
-                    <span class="fw-bold small text-uppercase text-secondary" style="letter-spacing: 1px;" data-i18n="checklist_title">Maintenance Checklist</span>
-                </div>
-                
-                <div class="checklist-item" onclick="toggleCheck('item1')">
-                    <input class="form-check-input" type="checkbox" id="item1">
-                    <div>
-                        <div class="fw-bold" data-i18n="check1_title">Power & Battery</div>
-                        <div class="small text-muted" data-i18n="check1_desc">Check voltage and connections</div>
-                    </div>
-                </div>
-
-                <div class="checklist-item" onclick="toggleCheck('item2')">
-                    <input class="form-check-input" type="checkbox" id="item2">
-                    <div>
-                        <div class="fw-bold" data-i18n="check2_title">Mechanical Vibration</div>
-                        <div class="small text-muted" data-i18n="check2_desc">Monitor noise and heat</div>
-                    </div>
-                </div>
-
-                <div class="checklist-item" onclick="toggleCheck('item3')">
-                    <input class="form-check-input" type="checkbox" id="item3">
-                    <div>
-                        <div class="fw-bold" data-i18n="check3_title">Clean & Lubricate</div>
-                        <div class="small text-muted" data-i18n="check3_desc">Remove dust and apply grease</div>
-                    </div>
-                </div>
-
-                <div class="p-4 border-top">
-                    <label class="fw-bold small text-secondary mb-2" data-i18n="field_notes">FIELD NOTES</label>
-                    <textarea class="form-control border-0 bg-light p-3" id="notes" rows="3" style="border-radius: 12px;" placeholder="Add technical observations..." data-i18n-placeholder="placeholder_notes"></textarea>
-                </div>
+                <div class="p-3 bg-light-subtle"><span class="fw-bold small text-uppercase text-secondary" data-i18n="checklist_title">Maintenance Checklist</span></div>
+                <div class="checklist-item" onclick="toggleCheck('item1')"><input class="form-check-input" type="checkbox" id="item1"><div><div class="fw-bold" data-i18n="check1_title">Power & Battery</div><div class="small text-muted" data-i18n="check1_desc">Check voltage and connections</div></div></div>
+                <div class="checklist-item" onclick="toggleCheck('item2')"><input class="form-check-input" type="checkbox" id="item2"><div><div class="fw-bold" data-i18n="check2_title">Mechanical Vibration</div><div class="small text-muted" data-i18n="check2_desc">Monitor noise and heat</div></div></div>
+                <div class="checklist-item" onclick="toggleCheck('item3')"><input class="form-check-input" type="checkbox" id="item3"><div><div class="fw-bold" data-i18n="check3_title">Clean & Lubricate</div><div class="small text-muted" data-i18n="check3_desc">Remove dust and apply grease</div></div></div>
+                <div class="p-4 border-top"><label class="fw-bold small text-secondary mb-2" data-i18n="field_notes">FIELD NOTES</label><textarea class="form-control border-0 bg-light p-3" id="notes" rows="3" style="border-radius: 12px;" placeholder="Add observations..." data-i18n-placeholder="placeholder_notes"></textarea></div>
             </div>
         </div>
-
-        <button class="btn-submit" onclick="submitData()" data-i18n="btn_complete">
-            COMPLETE INSPECTION <i class="bi bi-check-circle ms-2"></i>
-        </button>
+        <button class="btn-submit" onclick="submitData()" data-i18n="btn_complete">COMPLETE INSPECTION <i class="bi bi-check-circle ms-2"></i></button>
     </div>
 </div>
 
@@ -237,152 +179,128 @@
 
     const translations = {
         vi: {
-            app_title: "Hệ thống UID-QR",
-            app_subtitle: "Quản lý bảo trì thiết bị thông minh",
-            btn_scan: "QUÉT MÃ THIẾT BỊ",
-            placeholder_uid: "Hoặc nhập UID bằng tay...",
-            btn_go: "GỬI",
-            badge_active: "Thiết bị đang chạy",
-            checklist_title: "DANH MỤC KIỂM TRA",
-            check1_title: "Nguồn & Pin",
-            check1_desc: "Kiểm tra điện áp và kết nối",
-            check2_title: "Rung động cơ học",
-            check2_desc: "Theo dõi tiếng ồn và nhiệt độ",
-            check3_title: "Vệ sinh & Bôi trơn",
-            check3_desc: "Làm sạch bụi và tra mỡ",
-            field_notes: "GHI CHÚ KỸ THUẬT",
-            placeholder_notes: "Nhập quan sát thực tế...",
-            btn_complete: "XÁC NHẬN HOÀN TẤT",
-            scan_another: "QUÉT THIẾT BỊ KHÁC",
-            alert_invalid_uid: "Vui lòng nhập UID hợp lệ",
-            alert_conn_error: "Lỗi kết nối",
-            alert_success: "Thành công! Nhật ký bảo trì của {uid} đã được lưu."
+            app_title: "Hệ thống UID-QR", app_subtitle: "Quản lý bảo trì thông minh",
+            btn_scan: "QUÉT MÃ THIẾT BỊ", placeholder_uid: "Nhập UID tay...", btn_go: "GỬI",
+            badge_active: "Đang hoạt động", checklist_title: "DANH MỤC KIỂM TRA",
+            check1_title: "Nguồn & Pin", check1_desc: "Kiểm tra điện áp",
+            check2_title: "Rung động", check2_desc: "Tiếng ồn & Nhiệt",
+            check3_title: "Vệ sinh", check3_desc: "Làm sạch & Bôi trơn",
+            field_notes: "GHI CHÚ", placeholder_notes: "Nhập quan sát...",
+            btn_complete: "XÁC NHẬN HOÀN TẤT", alert_success: "Đã lưu nhật ký cho {uid}",
+            alert_offline: "Mất mạng! Dữ liệu đã được lưu offline.",
+            alert_sync: "Đã đồng bộ {count} bản ghi offline!"
         },
         en: {
-            app_title: "UID QR Master",
-            app_subtitle: "Smart Equipment Management",
-            btn_scan: "SCAN EQUIPMENT",
-            placeholder_uid: "Or enter UID manually...",
-            btn_go: "GO",
-            badge_active: "Active Device",
-            checklist_title: "Maintenance Checklist",
-            check1_title: "Power & Battery",
-            check1_desc: "Check voltage and connections",
-            check2_title: "Mechanical Vibration",
-            check2_desc: "Monitor noise and heat",
-            check3_title: "Clean & Lubricate",
-            check3_desc: "Remove dust and apply grease",
-            field_notes: "FIELD NOTES",
-            placeholder_notes: "Add technical observations...",
-            btn_complete: "COMPLETE INSPECTION",
-            scan_another: "SCAN ANOTHER",
-            alert_invalid_uid: "Please enter a valid UID",
-            alert_conn_error: "Connection error",
-            alert_success: "Success! Maintenance record for {uid} saved."
+            app_title: "UID QR Master", app_subtitle: "Smart Maintenance Management",
+            btn_scan: "SCAN EQUIPMENT", placeholder_uid: "Manual UID...", btn_go: "GO",
+            badge_active: "Active", checklist_title: "Maintenance Checklist",
+            check1_title: "Power & Battery", check1_desc: "Check voltage",
+            check2_title: "Vibration", check2_desc: "Noise & Heat",
+            check3_title: "Cleaning", check3_desc: "Remove dust",
+            field_notes: "NOTES", placeholder_notes: "Observations...",
+            btn_complete: "COMPLETE", alert_success: "Log saved for {uid}",
+            alert_offline: "Offline! Data saved locally.",
+            alert_sync: "Synced {count} offline records!"
         }
     };
 
     let currentLang = localStorage.getItem('lang') || 'vi';
 
+    function showToast(msg, type='success') {
+        const box = document.getElementById('toastBox');
+        const toast = document.createElement('div');
+        toast.className = `custom-toast animate__animated animate__fadeInUp`;
+        toast.style.background = type === 'success' ? '#10b981' : '#ef4444';
+        toast.innerHTML = `<i class="bi ${type === 'success' ? 'bi-check-circle' : 'bi-exclamation-triangle'}"></i> ${msg}`;
+        box.appendChild(toast);
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 400); }, 3000);
+    }
+
+    function playBeep() {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.type = 'sine'; osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+    }
+
     function setLanguage(lang) {
-        currentLang = lang;
-        localStorage.setItem('lang', lang);
+        currentLang = lang; localStorage.setItem('lang', lang);
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
-            if (translations[lang][key]) {
-                const icon = el.querySelector('i');
-                if (icon) {
-                    el.innerHTML = '';
-                    el.appendChild(icon);
-                    el.appendChild(document.createTextNode(' ' + translations[lang][key]));
-                } else {
-                    el.innerText = translations[lang][key];
-                }
-            }
+            if (translations[lang][key]) el.innerText = translations[lang][key];
         });
         document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
             const key = el.getAttribute('data-i18n-placeholder');
             if (translations[lang][key]) el.placeholder = translations[lang][key];
         });
-        document.getElementById('btn-vi').classList.toggle('btn-primary', lang === 'vi');
-        document.getElementById('btn-en').classList.toggle('btn-primary', lang === 'en');
     }
     setLanguage(currentLang);
 
-    function toggleCheck(id) {
-        const cb = document.getElementById(id);
-        cb.checked = !cb.checked;
-    }
+    function toggleCheck(id) { let cb = document.getElementById(id); cb.checked = !cb.checked; }
 
     startBtn.addEventListener('click', () => {
-        const reader = document.getElementById('reader');
-        reader.style.display = 'block';
-        scanner.start({ facingMode: "environment" }, { fps: 15, qrbox: {width: 250, height: 250} }, 
+        const reader = document.getElementById('reader'); reader.style.display = 'block';
+        scanner.start({ facingMode: "environment" }, { fps: 20, qrbox: {width: 280, height: 280} }, 
         (uid) => {
+            playBeep();
             document.getElementById('disp_uid').innerText = uid;
-            document.getElementById('infoSection').style.display = 'block';
-            reader.style.display = 'none';
-            startBtn.innerHTML = `<i class="bi bi-arrow-repeat"></i> ${translations[currentLang].scan_another}`;
-            scanner.stop();
+            reader.style.display = 'none'; scanner.stop();
             fetchData(uid);
         }, (err) => {});
     });
 
     function handleManualEntry() {
         const uid = document.getElementById('manual_uid').value.trim();
-        if (uid) {
-            document.getElementById('disp_uid').innerText = uid;
-            document.getElementById('infoSection').style.display = 'block';
-            startBtn.innerHTML = `<i class="bi bi-arrow-repeat"></i> ${translations[currentLang].scan_another}`;
-            fetchData(uid);
-        } else {
-            alert(translations[currentLang].alert_invalid_uid);
-        }
+        if (uid) { document.getElementById('disp_uid').innerText = uid; fetchData(uid); }
     }
 
     async function fetchData(uid) {
-        document.getElementById('loader').style.display = 'flex';
+        document.getElementById('infoSection').style.display = 'none';
+        document.getElementById('skeletonLoader').style.display = 'block';
         try {
-            const response = await fetch(`${gasUrl}?uid=${uid}&token=${API_TOKEN}`);
-            const result = await response.json();
+            const res = await fetch(`${gasUrl}?uid=${uid}&token=${API_TOKEN}`);
+            const result = await res.json();
             if (result.status === "success") {
                 document.getElementById('disp_name').innerText = result.data.name;
                 document.getElementById('disp_loc').innerText = result.data.location;
-            } else {
-                document.getElementById('disp_name').innerText = "Unknown Device";
-                document.getElementById('disp_loc').innerText = "Not in database";
             }
             document.getElementById('curr_time').innerText = new Date().toLocaleTimeString();
-        } catch (e) {
-            alert(translations[currentLang].alert_conn_error);
-        } finally {
-            document.getElementById('loader').style.display = 'none';
-        }
+            document.getElementById('infoSection').style.display = 'block';
+        } catch (e) { showToast("Offline Mode Active", "warning"); }
+        finally { document.getElementById('skeletonLoader').style.display = 'none'; }
     }
 
     async function submitData() {
         const uid = document.getElementById('disp_uid').innerText;
-        const notes = document.getElementById('notes').value;
-        const items = {
-            item1: document.getElementById('item1').checked,
-            item2: document.getElementById('item2').checked,
-            item3: document.getElementById('item3').checked
+        const data = { 
+            uid, token: API_TOKEN, notes: document.getElementById('notes').value,
+            items: { i1: document.getElementById('item1').checked, i2: document.getElementById('item2').checked, i3: document.getElementById('item3').checked }
         };
-        document.getElementById('loader').style.display = 'flex';
         try {
-            await fetch(gasUrl, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify({ uid, token: API_TOKEN, notes, items })
-            });
-            alert(translations[currentLang].alert_success.replace('{uid}', uid));
-            location.reload();
+            await fetch(gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
+            showToast(translations[currentLang].alert_success.replace('{uid}', uid));
+            setTimeout(() => location.reload(), 2000);
         } catch (e) {
-            alert(translations[currentLang].alert_conn_error);
-        } finally {
-            document.getElementById('loader').style.display = 'none';
+            let offline = JSON.parse(localStorage.getItem('offline_logs') || '[]');
+            offline.push({ ...data, time: new Date() });
+            localStorage.setItem('offline_logs', JSON.stringify(offline));
+            showToast(translations[currentLang].alert_offline, "warning");
+            setTimeout(() => location.reload(), 2000);
         }
     }
+
+    // Sync Offline Data
+    window.addEventListener('online', async () => {
+        let offline = JSON.parse(localStorage.getItem('offline_logs') || '[]');
+        if (offline.length > 0) {
+            for (let log of offline) { await fetch(gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(log) }); }
+            showToast(translations[currentLang].alert_sync.replace('{count}', offline.length));
+            localStorage.removeItem('offline_logs');
+        }
+    });
 </script>
 </body>
 </html>
