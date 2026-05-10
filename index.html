@@ -113,6 +113,9 @@
 <div class="app-shell">
     <div class="header-section">
         <div class="d-flex justify-content-end px-3 gap-2">
+            <button class="btn btn-sm btn-outline-dark rounded-pill px-3" onclick="toggleKanban()" id="btn-kanban">
+                <i class="bi bi-kanban"></i> Kanban
+            </button>
             <button class="btn btn-sm btn-outline-dark rounded-pill px-3" onclick="toggleDashboard()" id="btn-dashboard">
                 <i class="bi bi-bar-chart-fill"></i> Dashboard
             </button>
@@ -132,6 +135,40 @@
     <div id="dashboardSection" class="card-premium p-3 mb-4" style="display: none;">
         <h5 class="fw-bold mb-3"><i class="bi bi-pie-chart"></i> Asset Status Overview</h5>
         <canvas id="assetChart"></canvas>
+    </div>
+
+    <!-- Kanban Section -->
+    <div id="kanbanSection" class="card-premium p-3 mb-4" style="display: none;">
+        <h5 class="fw-bold mb-3"><i class="bi bi-kanban"></i> Task Board (Kanban)</h5>
+        <div class="d-flex gap-3 overflow-auto pb-2" style="scroll-snap-type: x mandatory;">
+            <!-- TODO Column -->
+            <div class="kanban-col" style="min-width: 250px; scroll-snap-align: start; background: #f8fafc; border-radius: 12px; padding: 10px;">
+                <h6 class="fw-bold text-secondary mb-3">📋 CẦN LÀM</h6>
+                <div class="card p-2 mb-2 border-0 shadow-sm" style="border-left: 4px solid #f59e0b !important;">
+                    <div class="fw-bold small">Kiểm tra tủ điện tầng 1</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">Assigned: Tổ Điện</div>
+                    <span class="badge bg-danger mt-1">High Priority</span>
+                </div>
+            </div>
+            <!-- IN PROGRESS Column -->
+            <div class="kanban-col" style="min-width: 250px; scroll-snap-align: start; background: #f8fafc; border-radius: 12px; padding: 10px;">
+                <h6 class="fw-bold text-primary mb-3">⏳ ĐANG LÀM</h6>
+                <div class="card p-2 mb-2 border-0 shadow-sm" style="border-left: 4px solid #3b82f6 !important;">
+                    <div class="fw-bold small">Vệ sinh rêu hồ nước</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">Assigned: Tổ Nước (NV. Bình)</div>
+                    <span class="badge bg-warning text-dark mt-1">Normal</span>
+                </div>
+            </div>
+            <!-- DONE Column -->
+            <div class="kanban-col" style="min-width: 250px; scroll-snap-align: start; background: #f8fafc; border-radius: 12px; padding: 10px;">
+                <h6 class="fw-bold text-success mb-3">✅ HOÀN THÀNH</h6>
+                <div class="card p-2 mb-2 border-0 shadow-sm" style="border-left: 4px solid #10b981 !important;">
+                    <div class="fw-bold small">Thay đèn sảnh chính</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">Assigned: Tổ Điện</div>
+                    <span class="badge bg-success mt-1">Done</span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Search & Filter Section -->
@@ -283,6 +320,7 @@
 
     let chartInstance = null;
     function toggleDashboard() {
+        document.getElementById('kanbanSection').style.display = 'none';
         const dash = document.getElementById('dashboardSection');
         if (dash.style.display === 'none') {
             dash.style.display = 'block';
@@ -300,6 +338,12 @@
         } else {
             dash.style.display = 'none';
         }
+    }
+
+    function toggleKanban() {
+        document.getElementById('dashboardSection').style.display = 'none';
+        const kb = document.getElementById('kanbanSection');
+        kb.style.display = kb.style.display === 'none' ? 'block' : 'none';
     }
 
     async function fetchData(uid) {
