@@ -48,19 +48,19 @@ graph TD
 
 Để sửa chữa hoặc nâng cấp một tính năng, hãy tìm kiếm các ID/Function sau trong file `index.html`:
 
-| Khu vực UI (Giao diện) | HTML ID / Class | JS Function liên quan | Nguồn Dữ liệu (Nơi cấp data) |
-| :--- | :--- | :--- | :--- |
-| **Màn hình Đăng nhập** | `#loginOverlay`, `#pinInput` | `doLogin()` | Google Sheets (`Users`) -> `localStorage` |
-| **Thanh Tiêu đề (Header)** | `.header-section` | `toggleDashboard()`, `setLanguage()` | Tĩnh (Static) |
-| **Hồ sơ Nhân viên** | `#userBadge`, `#userNameDisplay`| `updateUI(user)` | `localStorage.getItem('currentUser')` |
-| **Trạng thái Đồng bộ** | `#syncBadge` | `updateSyncStatus()` | `localStorage.getItem('offline_logs')` |
-| **Camera Quét QR** | `#reader`, `#startScan` | `Html5Qrcode` library | Camera thiết bị |
-| **Hiển thị Thiết bị** | `#infoSection`, `#disp_name` | `fetchData(uid)` | `localStorage.getItem('localDevices')` |
-| **Mẫu Checklist** | `#dynamicChecklist` | `renderChecklist(type)` | Tĩnh (Cấu hình cứng trong mảng JS) |
-| **Gửi Dữ liệu (Submit)** | `.btn-submit`, `#notes` | `submitData()` | Đẩy thẳng lên GAS POST |
-| **Bảng Dashboard** | `#dashboardSection`, `#assetChart`| `toggleDashboard()` | `Chart.js` (Đang là Mock Data) |
-| **Bảng Kanban** | `#kanbanSection` | `toggleKanban()` | (Đang là Mock Data) |
-| **Bảng Lịch (Calendar)** | `#calendarSection` | `toggleCalendar()` | (Đang là Mock Data) |
+| Khu vực UI (Giao diện) | HTML ID / Class | JS Function liên quan | Nguồn Dữ liệu (Nơi cấp data) | Mã Vị trí (Copy to Prompt) |
+| :--- | :--- | :--- | :--- | :--- |
+| **Màn hình Đăng nhập** | `#loginOverlay`, `#pinInput` | `doLogin()` | Google Sheets (`Users`) -> `localStorage` | `[index.html#loginOverlay]` |
+| **Thanh Tiêu đề (Header)** | `.header-section` | `toggleDashboard()`, `setLanguage()` | Tĩnh (Static) | `[index.html.header-section]` |
+| **Hồ sơ Nhân viên** | `#userBadge`, `#userNameDisplay`| `updateUI(user)` | `localStorage.getItem('currentUser')` | `[index.html#userBadge]` |
+| **Trạng thái Đồng bộ** | `#syncBadge` | `updateSyncStatus()` | `localStorage.getItem('offline_logs')` | `[index.html:updateSyncStatus]` |
+| **Camera Quét QR** | `#reader`, `#startScan` | `Html5Qrcode` library | Camera thiết bị | `[index.html#reader]` |
+| **Hiển thị Thiết bị** | `#infoSection`, `#disp_name` | `fetchData(uid)` | `localStorage.getItem('localDevices')` | `[index.html:fetchData]` |
+| **Mẫu Checklist** | `#dynamicChecklist` | `renderChecklist(type)` | Tĩnh (Cấu hình cứng trong mảng JS) | `[index.html:renderChecklist]` |
+| **Gửi Dữ liệu (Submit)** | `.btn-submit`, `#notes` | `submitData()` | Đẩy thẳng lên GAS POST | `[index.html:submitData]` |
+| **Bảng Dashboard** | `#dashboardSection`, `#assetChart`| `toggleDashboard()` | `Chart.js` (Đang là Mock Data) | `[index.html#dashboardSection]` |
+| **Bảng Kanban** | `#kanbanSection` | `toggleKanban()` | (Đang là Mock Data) | `[index.html#kanbanSection]` |
+| **Bảng Lịch (Calendar)** | `#calendarSection` | `toggleCalendar()` | (Đang là Mock Data) | `[index.html#calendarSection]` |
 
 ## 3. Kiến trúc Luồng Dữ liệu (Data Flow)
 
