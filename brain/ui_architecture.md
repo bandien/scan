@@ -50,7 +50,8 @@ graph TD
 
 | Khu vực UI (Giao diện) | HTML ID / Class | JS Function liên quan | Nguồn Dữ liệu (Nơi cấp data) | Mã Vị trí (Copy to Prompt) |
 | :--- | :--- | :--- | :--- | :--- |
-| **Màn hình Đăng nhập** | `#loginOverlay`, `#pinInput` | `doLogin()` | Google Sheets (`Users`) -> `localStorage` | `[index.html#loginOverlay]` |
+| **Màn hình Đăng nhập** | `#loginOverlay`, `#usernameInput`, `#passwordInput` | `doLogin()` | Google Sheets (`Users`) -> `localStorage` | `[index.html#loginOverlay]` |
+| **Chuyển ngôn ngữ (Login)** | `#loginLangToggle` | `setLanguage()` | Tĩnh (Static) | `[index.html#loginLangToggle]` |
 | **Thanh Tiêu đề (Header)** | `.header-section` | `toggleDashboard()`, `setLanguage()` | Tĩnh (Static) | `[index.html.header-section]` |
 | **Hồ sơ Nhân viên** | `#userBadge`, `#userNameDisplay`| `updateUI(user)` | `localStorage.getItem('currentUser')` | `[index.html#userBadge]` |
 | **Trạng thái Đồng bộ** | `#syncBadge` | `updateSyncStatus()` | `localStorage.getItem('offline_logs')` | `[index.html:updateSyncStatus]` |
