@@ -24,29 +24,45 @@ Mục tiêu: Quản lý nhân lực và điều hành công việc trực quan.
 - [ ] **Workload Analytics**: Báo cáo khối lượng công việc của từng tổ/nhân viên trên Dashboard.
 - [ ] **REVIEW & EVALUATION**: Kiểm tra và chạy thử thực tế Giai đoạn 7 để đảm bảo tính năng không có lỗi. (Assign to: Reviewer Agent)
 
-## Giai đoạn 8: Quản lý Vật tư & Phân quyền
-Mục tiêu: Chuyên nghiệp hóa đầu ra và bảo mật dữ liệu.
-- [ ] **Automated Reports**: Xuất báo cáo bảo trì định kỳ sang file PDF hoặc Excel.
-- [ ] **Audit Log**: Ghi lại lịch sử chỉnh sửa hệ thống (Ai đã thay đổi thông tin thiết bị).
-- [ ] **Performance KPIs**: Tính toán tự động chỉ số MTTR (Thời gian sửa chữa trung bình) và MTBF (Thời gian giữa các lần hỏng).
-- [ ] **REVIEW & EVALUATION**: Kiểm tra và chạy thử thực tế Giai đoạn 8 để đảm bảo tính năng không có lỗi. (Assign to: Reviewer Agent)
+## Giai đoạn 8: Work Orders, Vật tư & Báo cáo (CMMS Core)
+Mục tiêu: Xây dựng hệ thống lệnh công việc (Work Orders) chuẩn CMMS, quản lý vật tư và KPI thực tế.
+- [ ] **Work Orders Sheet & API**: Tạo Sheet `WorkOrders` (ID, Type[PM/CM/Inspection], Priority[Low/Med/High/Urgent], Status[New/Assigned/InProgress/Done/Closed], AssetUID, AssignedTo, DueDate, Description, PartsUsed). Backend CRUD qua GAS.
+- [ ] **Kanban Live Data**: Kết nối bảng Kanban với Sheet `WorkOrders` thật (thay mock data). Kéo thả card = cập nhật Status.
+- [ ] **Inventory (Vật tư cơ bản)**: Tạo Sheet `Inventory` (PartCode, Name, Stock, MinStock, Unit). Cảnh báo khi Stock < MinStock.
+- [ ] **KPI Dashboard thật**: Tính MTTR, MTBF, % PM đúng hạn từ dữ liệu thực trong `Logs` và `WorkOrders`.
+- [ ] **Export Excel**: GAS tạo báo cáo tự động trên Google Sheet → chia sẻ link download.
+- [ ] **Audit Log**: Sheet `AuditLog` ghi mọi thay đổi (User, Timestamp, Action, OldValue, NewValue).
+- [ ] **REVIEW & EVALUATION**: Kiểm tra và chạy thử thực tế Giai đoạn 8.
 
 ## Giai đoạn 9: Phân quyền (RBAC) & Tối ưu Hiệu suất (Smart Preload)
 Mục tiêu: Đảm bảo khả năng mở rộng, bảo mật và tốc độ phản hồi tức thì (0.1s) trong khi vẫn duy trì kiến trúc miễn phí (GAS + Sheets).
-- [ ] **Login & Role-Based Access**: Màn hình đăng nhập cho nhân viên bằng mã PIN. Phân loại người dùng theo Tổ/Đội (Điện, Nước, Điều hòa, Quản lý).
-- [ ] **Smart Data Fetching**: Khi đăng nhập thành công, hệ thống chỉ tải dữ liệu (Danh sách thiết bị, Task) thuộc quyền hạn của Tổ đó từ Google Sheets.
-- [ ] **Local-First Architecture**: Lưu toàn bộ dữ liệu vừa tải vào `localStorage`. Khi quét QR, tìm kiếm dữ liệu trực tiếp tại Local (Tốc độ 0.01s) thay vì gọi API Google.
-- [ ] **Background Syncing**: Các báo cáo checklist mới sẽ được lưu cục bộ và đồng bộ ngầm lên Google Sheets để không làm gián đoạn người dùng.
+- [x] **Login & Role-Based Access**: Màn hình đăng nhập (Username + Password). Phân loại người dùng theo Tổ/Đội.
+- [x] **Smart Data Fetching**: Khi đăng nhập thành công, hệ thống tải dữ liệu thuộc quyền hạn của Tổ đó.
+- [x] **Local-First Architecture**: Lưu toàn bộ dữ liệu vào `localStorage`. Tốc độ 0.01s.
+- [x] **Background Syncing**: Báo cáo checklist lưu cục bộ và đồng bộ ngầm lên Google Sheets.
 - [ ] **REVIEW & EVALUATION**: Đánh giá tốc độ truy vấn thực tế.
 
 ## Giai đoạn 10: Admin Portal (Giao diện Quản trị)
-Mục tiêu: Xây dựng trung tâm điều hành cho Quản lý để nhập liệu và cấu hình hệ thống mà không cần chạm vào Google Sheets.
-- [ ] **Admin Authentication**: Chức năng đăng nhập bảo mật dành riêng cho cấp quản lý.
-- [ ] **Device Data Entry (CRUD)**: Giao diện thêm mới, sửa, xóa thông tin thiết bị, tạo và in mã QR UID tự động.
-- [ ] **Task & Personnel Manager**: Giao diện giao việc (Assign) cho nhân viên/tổ nhóm thẳng vào Kanban. Thêm/sửa danh sách nhân viên.
-- [ ] **Checklist Builder**: Giao diện kéo thả để tự tạo các mẫu Checklist động mới cho các loại máy khác nhau.
-- [ ] **REVIEW & EVALUATION**: Kiểm tra tính năng phân quyền và nhập liệu của Admin Portal.
+Mục tiêu: Xây dựng trung tâm điều hành cho Quản lý.
+- [ ] **Admin Authentication**: Đăng nhập bảo mật dành riêng cho cấp quản lý.
+- [ ] **Asset Hierarchy (Cây phân cấp)**: Giao diện quản lý thiết bị theo cấu trúc Khu vực → Tòa nhà → Tầng → Phòng → Thiết bị.
+- [ ] **Device CRUD + QR Generator**: Thêm/Sửa/Xóa thiết bị, tạo và in mã QR UID tự động.
+- [ ] **WO Manager**: Tạo/Giao Work Order cho nhân viên/tổ nhóm. Thiết lập mức ưu tiên và hạn xử lý.
+- [ ] **Checklist Builder**: Giao diện tự tạo mẫu Checklist cho các loại máy khác nhau.
+- [ ] **Photo Before/After**: Chụp ảnh trước/sau bảo trì, lưu Google Drive qua GAS.
+- [ ] **REVIEW & EVALUATION**: Kiểm tra tính năng Admin Portal.
+
+## Giai đoạn 11: Metering & Năng lượng (Mới — từ CMMS Prompt)
+Mục tiêu: Quản lý điểm đo điện/nước và phân tích tiêu thụ năng lượng.
+- [ ] **Meter Points**: Sheet `MeterPoints` (MeterID, Type[Điện/Nước], Location, Unit, Multiplier, Threshold).
+- [ ] **Readings Input**: Kỹ thuật viên ghi chỉ số định kỳ qua WebApp, có thể chụp ảnh đồng hồ.
+- [ ] **Auto Calculate**: Sản lượng = Chỉ số mới - Chỉ số cũ × Hệ số. Cảnh báo khi vượt ngưỡng.
+- [ ] **Energy Dashboard**: Biểu đồ xu hướng tiêu thụ điện/nước theo tháng, so sánh cùng kỳ.
+- [ ] **Location Feedback**: Nút "Sai vị trí?" trên màn hình thiết bị → ghi nhận đề xuất sửa vị trí.
+- [ ] **REVIEW & EVALUATION**: Kiểm tra tính năng Metering.
 
 ---
 **Lead Architect:** Antigravity
 **Infrastructure:** GitHub Pages + Google Apps Script + Google Sheets
+**Reference:** Tính năng nghiệp vụ chắt lọc từ `cmms-prompt.md` (CMMS Hapulico Enterprise Spec)
+
