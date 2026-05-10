@@ -137,7 +137,16 @@
 
 <div class="app-shell" id="appShell" style="display: none;">
     <div class="header-section">
-        <div class="d-flex justify-content-end px-3 gap-2">
+        <div class="d-flex justify-content-between px-3 align-items-center mb-2">
+            <div class="d-flex gap-2 align-items-center">
+                <span class="badge bg-light text-dark shadow-sm px-3 py-2 rounded-pill border" id="userBadge" style="display: none;">
+                    <i class="bi bi-person-circle text-primary me-1"></i> <span id="userNameDisplay">User</span>
+                </span>
+                <span class="badge bg-success-subtle text-success shadow-sm px-2 py-2 rounded-pill" id="syncBadge" style="display: none;" title="Data Synced">
+                    <i class="bi bi-cloud-check-fill"></i>
+                </span>
+            </div>
+            <div class="d-flex justify-content-end gap-2">
             <button class="btn btn-sm btn-outline-dark rounded-pill px-3" onclick="toggleCalendar()" id="btn-calendar">
                 <i class="bi bi-calendar-event"></i> Lịch
             </button>
@@ -150,6 +159,7 @@
             <div class="btn-group btn-group-sm bg-white rounded-pill shadow-sm p-1">
                 <button class="btn btn-outline-primary border-0 rounded-pill px-3" onclick="setLanguage('vi')" id="btn-vi">VN</button>
                 <button class="btn btn-outline-primary border-0 rounded-pill px-3" onclick="setLanguage('en')" id="btn-en">EN</button>
+            </div>
             </div>
         </div>
         <div class="logo-box"><i class="bi bi-cpu"></i></div>
@@ -433,6 +443,27 @@
         });
     }
 
+    function updateUI(user) {
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('appShell').style.display = 'block';
+        document.getElementById('userBadge').style.display = 'inline-block';
+        document.getElementById('userNameDisplay').innerText = user.name;
+        updateSyncStatus();
+    }
+
+    function updateSyncStatus() {
+        const syncBadge = document.getElementById('syncBadge');
+        syncBadge.style.display = 'inline-block';
+        const offlineLogs = JSON.parse(localStorage.getItem('offline_logs') || '[]');
+        if (offlineLogs.length > 0) {
+            syncBadge.className = 'badge bg-warning-subtle text-warning shadow-sm px-2 py-2 rounded-pill';
+            syncBadge.innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i> ' + offlineLogs.length;
+        } else {
+            syncBadge.className = 'badge bg-success-subtle text-success shadow-sm px-2 py-2 rounded-pill';
+            syncBadge.innerHTML = '<i class="bi bi-cloud-check-fill"></i>';
+        }
+    }
+
     async function doLogin() {
         const pin = document.getElementById('pinInput').value;
         if (!pin) { showToast("Vui lòng nhập mã PIN", "warning"); return; }
@@ -444,13 +475,9 @@
             const res = await fetch(`${gasUrl}?action=login&pin=${pin}&token=${API_TOKEN}`);
             const result = await res.json();
             if (result.status === "success") {
-                // Store user and devices locally
                 localStorage.setItem('currentUser', JSON.stringify(result.user));
                 localStorage.setItem('localDevices', JSON.stringify(result.devices));
-                
-                // Hide login, show app
-                document.getElementById('loginOverlay').style.display = 'none';
-                document.getElementById('appShell').style.display = 'block';
+                updateUI(result.user);
                 showToast(`Xin chào ${result.user.name} (${result.user.role})`);
             } else {
                 showToast(result.message || "Mã PIN không hợp lệ", "danger");
@@ -466,10 +493,9 @@
 
     // Check if already logged in
     window.onload = () => {
-        const user = localStorage.getItem('currentUser');
-        if (user) {
-            document.getElementById('loginOverlay').style.display = 'none';
-            document.getElementById('appShell').style.display = 'block';
+        const userStr = localStorage.getItem('currentUser');
+        if (userStr) {
+            updateUI(JSON.parse(userStr));
         }
     };
 
@@ -511,12 +537,14 @@
         try {
             await fetch(gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
             showToast(translations[currentLang].alert_success.replace('{uid}', uid));
+            updateSyncStatus();
             setTimeout(() => location.reload(), 2000);
         } catch (e) {
             let offline = JSON.parse(localStorage.getItem('offline_logs') || '[]');
             offline.push({ ...data, time: new Date() });
             localStorage.setItem('offline_logs', JSON.stringify(offline));
             showToast(translations[currentLang].alert_offline, "warning");
+            updateSyncStatus();
             setTimeout(() => location.reload(), 2000);
         }
     }
@@ -525,9 +553,11 @@
     window.addEventListener('online', async () => {
         let offline = JSON.parse(localStorage.getItem('offline_logs') || '[]');
         if (offline.length > 0) {
+            showToast(`Đang đồng bộ ${offline.length} bản ghi...`, 'info');
             for (let log of offline) { await fetch(gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(log) }); }
             showToast(translations[currentLang].alert_sync.replace('{count}', offline.length));
             localStorage.removeItem('offline_logs');
+            updateSyncStatus();
         }
     });
 </script>
