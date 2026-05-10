@@ -1,9 +1,10 @@
 # Task Management
 
 ## Active Tasks
-- [ ] **Task 015-016**: Lập lịch PM & Asset Profile Backend (In Progress)
+- [ ] (No active tasks - Waiting for Review)
 
 ## Completed Tasks
+- [x] **Task 015-016**: Lập lịch PM & Asset Profile Backend (V2)
 - [x] **Task 017-018**: Calendar UI & Dynamic Checklists (V2)
 - [x] **Task 013-014**: Quản lý Nhân sự & Kanban UI (V2)
 - [x] **Task 011-012**: Dashboard & Advanced Filter (V2)

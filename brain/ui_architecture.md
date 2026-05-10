@@ -42,6 +42,18 @@ graph TD
     submitData -.-> OfflineSync[Offline Sync Logic]
     submitData -.-> GAS_POST[GAS POST Endpoint]
     OfflineSync -.-> updateSyncStatus((updateSyncStatus))
+
+    %% Kanban / Work Orders
+    Kanban --> loadKanban((loadKanban function))
+    Kanban --> WOModal[WO Detail Modal<br/>#woDetailModal]
+    Kanban --> CreateWO[Create WO Modal<br/>#createWOModal]
+    loadKanban -.-> LocalStorage
+    loadKanban -.-> GAS_GET_WO[GAS GET action=getWorkOrders]
+    WOModal --> updateWOStatus((updateWOStatus))
+    updateWOStatus -.-> GAS_POST
+    updateWOStatus -.-> LocalStorage
+    CreateWO --> submitCreateWO((submitCreateWO))
+    submitCreateWO -.-> GAS_POST
 ```
 
 ## 2. Từ điển Mapping (UI to Code)
@@ -60,7 +72,9 @@ graph TD
 | **Mẫu Checklist** | `#dynamicChecklist` | `renderChecklist(type)` | Tĩnh (Cấu hình cứng trong mảng JS) | `[index.html:renderChecklist]` |
 | **Gửi Dữ liệu (Submit)** | `.btn-submit`, `#notes` | `submitData()` | Đẩy thẳng lên GAS POST | `[index.html:submitData]` |
 | **Bảng Dashboard** | `#dashboardSection`, `#assetChart`| `toggleDashboard()` | `Chart.js` (Đang là Mock Data) | `[index.html#dashboardSection]` |
-| **Bảng Kanban** | `#kanbanSection` | `toggleKanban()` | (Đang là Mock Data) | `[index.html#kanbanSection]` |
+| **Bảng Kanban (Live)** | `#kanbanSection`, `#kanbanBoard` | `toggleKanban()`, `loadKanban()`, `renderKanban()` | GAS GET `action=getWorkOrders` → `localStorage('localWorkOrders')` | `[index.html#kanbanSection]` |
+| **WO Detail Modal** | `#woDetailModal`, `#woDetailBody`, `#woNextStatusBtn` | `openWODetail(wo)`, `advanceWOStatus()`, `updateWOStatus()`, `quickAdvanceStatus()` | `localWorkOrders` → GAS POST `action=updateWOStatus` | `[index.html#woDetailModal]` |
+| **Form Tạo WO** | `#createWOModal`, `#woType`, `#woPriority`, `#woAsset`, `#woDescription`, `#woDueDate` | `showCreateWOModal()`, `submitCreateWO()` | `localDevices` (dropdown) → GAS POST `action=createWO` | `[index.html#createWOModal]` |
 | **Bảng Lịch (Calendar)** | `#calendarSection` | `toggleCalendar()` | (Đang là Mock Data) | `[index.html#calendarSection]` |
 
 ## 3. Kiến trúc Luồng Dữ liệu (Data Flow)

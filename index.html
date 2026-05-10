@@ -12,6 +12,7 @@
     
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <style>
         :root {
@@ -225,33 +226,85 @@
 
     <!-- Kanban Section -->
     <div id="kanbanSection" class="card-premium p-3 mb-4" style="display: none;">
-        <h5 class="fw-bold mb-3"><i class="bi bi-kanban"></i> Task Board (Kanban)</h5>
-        <div class="d-flex gap-3 overflow-auto pb-2" style="scroll-snap-type: x mandatory;">
-            <!-- TODO Column -->
-            <div class="kanban-col" style="min-width: 250px; scroll-snap-align: start; background: #f8fafc; border-radius: 12px; padding: 10px;">
-                <h6 class="fw-bold text-secondary mb-3">📋 CẦN LÀM</h6>
-                <div class="card p-2 mb-2 border-0 shadow-sm" style="border-left: 4px solid #f59e0b !important;">
-                    <div class="fw-bold small">Kiểm tra tủ điện tầng 1</div>
-                    <div class="text-muted" style="font-size: 0.75rem;">Assigned: Tổ Điện</div>
-                    <span class="badge bg-danger mt-1">High Priority</span>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0"><i class="bi bi-kanban"></i> Work Orders</h5>
+            <button class="btn btn-sm btn-primary rounded-pill px-3" onclick="showCreateWOModal()">
+                <i class="bi bi-plus-lg"></i> Tạo WO
+            </button>
+        </div>
+        <div id="kanbanBoard" class="d-flex gap-3 pb-2" style="overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;">
+            <div class="text-center text-muted p-4 w-100">
+                <div class="spinner-border spinner-border-sm me-2"></div> Đang tải...
+            </div>
+        </div>
+    </div>
+
+    <!-- WO Detail Modal -->
+    <div class="modal fade" id="woDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-clipboard-check me-2 text-primary"></i>Chi tiết Work Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="woDetailBody"></div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary rounded-pill px-4" id="woNextStatusBtn" onclick="advanceWOStatus()">
+                        <i class="bi bi-arrow-right-circle me-1"></i> Chuyển trạng thái
+                    </button>
                 </div>
             </div>
-            <!-- IN PROGRESS Column -->
-            <div class="kanban-col" style="min-width: 250px; scroll-snap-align: start; background: #f8fafc; border-radius: 12px; padding: 10px;">
-                <h6 class="fw-bold text-primary mb-3">⏳ ĐANG LÀM</h6>
-                <div class="card p-2 mb-2 border-0 shadow-sm" style="border-left: 4px solid #3b82f6 !important;">
-                    <div class="fw-bold small">Vệ sinh rêu hồ nước</div>
-                    <div class="text-muted" style="font-size: 0.75rem;">Assigned: Tổ Nước (NV. Bình)</div>
-                    <span class="badge bg-warning text-dark mt-1">Normal</span>
+        </div>
+    </div>
+
+    <!-- Create WO Modal -->
+    <div class="modal fade" id="createWOModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle me-2 text-primary"></i>Tạo Work Order mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-            </div>
-            <!-- DONE Column -->
-            <div class="kanban-col" style="min-width: 250px; scroll-snap-align: start; background: #f8fafc; border-radius: 12px; padding: 10px;">
-                <h6 class="fw-bold text-success mb-3">✅ HOÀN THÀNH</h6>
-                <div class="card p-2 mb-2 border-0 shadow-sm" style="border-left: 4px solid #10b981 !important;">
-                    <div class="fw-bold small">Thay đèn sảnh chính</div>
-                    <div class="text-muted" style="font-size: 0.75rem;">Assigned: Tổ Điện</div>
-                    <span class="badge bg-success mt-1">Done</span>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Loại WO (Type)</label>
+                        <select class="form-select rounded-3" id="woType">
+                            <option value="Corrective">Corrective - Sửa chữa</option>
+                            <option value="Preventive">Preventive - Bảo dưỡng</option>
+                            <option value="Emergency">Emergency - Khẩn cấp</option>
+                            <option value="Inspection">Inspection - Kiểm tra</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Mức độ ưu tiên (Priority)</label>
+                        <select class="form-select rounded-3" id="woPriority">
+                            <option value="Low">Low - Thấp</option>
+                            <option value="Medium" selected>Medium - Trung bình</option>
+                            <option value="High">High - Cao</option>
+                            <option value="Urgent">Urgent - Khẩn cấp</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Thiết bị (Asset)</label>
+                        <select class="form-select rounded-3" id="woAsset">
+                            <option value="">-- Chọn thiết bị --</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Mô tả công việc</label>
+                        <textarea class="form-control rounded-3" id="woDescription" rows="3" placeholder="Mô tả chi tiết công việc cần làm..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Hạn hoàn thành (Due Date)</label>
+                        <input type="date" class="form-control rounded-3" id="woDueDate">
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary rounded-pill px-4" onclick="submitCreateWO()">
+                        <i class="bi bi-check-lg me-1"></i> Tạo WO
+                    </button>
                 </div>
             </div>
         </div>
@@ -589,6 +642,178 @@
             updateSyncStatus();
         }
     });
+
+    // ── Work Orders / Kanban Live ──────────────────────────────────────────────
+    const WO_STATUSES = ['New', 'Assigned', 'In Progress', 'Done', 'Closed'];
+    const WO_STATUS_LABELS = {
+        'New': '🆕 New', 'Assigned': '👤 Assigned',
+        'In Progress': '⏳ In Progress', 'Done': '✅ Done', 'Closed': '🔒 Closed'
+    };
+    const WO_STATUS_COLORS = {
+        'New': '#6366f1', 'Assigned': '#3b82f6',
+        'In Progress': '#f59e0b', 'Done': '#10b981', 'Closed': '#6b7280'
+    };
+    const PRIORITY_BS = { 'Low': 'success', 'Medium': 'primary', 'High': 'warning text-dark', 'Urgent': 'danger' };
+
+    let currentWO = null;
+
+    function toggleKanban() {
+        document.getElementById('dashboardSection').style.display = 'none';
+        document.getElementById('calendarSection').style.display = 'none';
+        const section = document.getElementById('kanbanSection');
+        if (section.style.display === 'none') {
+            section.style.display = 'block';
+            loadKanban();
+        } else {
+            section.style.display = 'none';
+        }
+    }
+
+    async function loadKanban() {
+        const board = document.getElementById('kanbanBoard');
+        board.innerHTML = '<div class="text-center text-muted p-4 w-100"><div class="spinner-border spinner-border-sm me-2"></div> Đang tải...</div>';
+
+        const cached = localStorage.getItem('localWorkOrders');
+        if (cached) renderKanban(JSON.parse(cached));
+
+        try {
+            const res = await fetch(`${gasUrl}?action=getWorkOrders&token=${API_TOKEN}`);
+            const result = await res.json();
+            if (result.status === 'success' && result.data) {
+                localStorage.setItem('localWorkOrders', JSON.stringify(result.data));
+                renderKanban(result.data);
+            } else if (!cached) {
+                board.innerHTML = '<div class="text-center text-muted p-4 w-100"><i class="bi bi-inbox me-2"></i>Không có dữ liệu</div>';
+            }
+        } catch (e) {
+            if (!cached) board.innerHTML = '<div class="text-center text-warning p-4 w-100"><i class="bi bi-wifi-off me-2"></i>Offline — không có cache</div>';
+        }
+    }
+
+    function renderKanban(workOrders) {
+        const board = document.getElementById('kanbanBoard');
+        board.innerHTML = '';
+        WO_STATUSES.forEach(status => {
+            const cards = (workOrders || []).filter(wo => wo.Status === status);
+            const col = document.createElement('div');
+            col.style.cssText = 'min-width: 210px; scroll-snap-align: start; background: #f8fafc; border-radius: 12px; padding: 10px; flex-shrink: 0;';
+            const hColor = WO_STATUS_COLORS[status] || '#6b7280';
+            col.innerHTML = `<h6 class="fw-bold mb-3" style="color:${hColor}; font-size:0.82rem;">${WO_STATUS_LABELS[status]}</h6>${cards.length === 0 ? '<div class="text-muted small text-center py-2">Trống</div>' : ''}`;
+            cards.forEach(wo => {
+                const pbClass = PRIORITY_BS[wo.Priority] || 'secondary';
+                const card = document.createElement('div');
+                card.className = 'card p-2 mb-2 border-0 shadow-sm';
+                card.style.cssText = `border-left: 4px solid ${hColor} !important; cursor: pointer;`;
+                card.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-start mb-1">
+                        <span class="fw-bold small text-primary">#${wo.WO_ID || '—'}</span>
+                        <span class="badge bg-${pbClass} rounded-pill" style="font-size:0.65rem;">${wo.Priority || 'N/A'}</span>
+                    </div>
+                    <div class="fw-semibold small mb-1" style="line-height:1.3;">${wo.AssetName || wo.AssetUID || '—'}</div>
+                    <div class="text-muted" style="font-size:0.72rem;"><i class="bi bi-person me-1"></i>${wo.AssignedTo || 'Chưa giao'}</div>
+                    <div class="text-muted" style="font-size:0.72rem;"><i class="bi bi-calendar me-1"></i>${wo.DueDate || '—'}</div>
+                    <button class="btn btn-outline-secondary btn-sm w-100 mt-2 rounded-pill" style="font-size:0.7rem;"
+                        onclick="event.stopPropagation(); quickAdvanceStatus('${wo.WO_ID}','${wo.Status}')">
+                        <i class="bi bi-arrow-right-circle me-1"></i>Next Status
+                    </button>`;
+                card.addEventListener('click', () => openWODetail(wo));
+                col.appendChild(card);
+            });
+            board.appendChild(col);
+        });
+    }
+
+    function openWODetail(wo) {
+        currentWO = wo;
+        const pbClass = PRIORITY_BS[wo.Priority] || 'secondary';
+        const sColor = WO_STATUS_COLORS[wo.Status] || '#6b7280';
+        document.getElementById('woDetailBody').innerHTML = `
+            <div class="row g-2">
+                <div class="col-6"><div class="p-3 bg-light rounded-3"><div class="text-muted small">WO ID</div><div class="fw-bold">#${wo.WO_ID || '—'}</div></div></div>
+                <div class="col-6"><div class="p-3 bg-light rounded-3"><div class="text-muted small">Loại</div><div class="fw-bold">${wo.Type || '—'}</div></div></div>
+                <div class="col-12"><div class="p-3 bg-light rounded-3">
+                    <div class="text-muted small mb-1">Trạng thái &amp; Ưu tiên</div>
+                    <span class="badge rounded-pill me-2" style="background:${sColor};">${wo.Status}</span>
+                    <span class="badge bg-${pbClass} rounded-pill">${wo.Priority || 'N/A'}</span>
+                </div></div>
+                <div class="col-12"><div class="p-3 bg-light rounded-3"><div class="text-muted small">Thiết bị</div><div class="fw-bold">${wo.AssetName || wo.AssetUID || '—'}</div></div></div>
+                <div class="col-6"><div class="p-3 bg-light rounded-3"><div class="text-muted small">Giao cho</div><div class="fw-bold">${wo.AssignedTo || 'Chưa giao'}</div></div></div>
+                <div class="col-6"><div class="p-3 bg-light rounded-3"><div class="text-muted small">Hạn hoàn thành</div><div class="fw-bold">${wo.DueDate || '—'}</div></div></div>
+                ${wo.Description ? `<div class="col-12"><div class="p-3 bg-light rounded-3"><div class="text-muted small">Mô tả</div><div>${wo.Description}</div></div></div>` : ''}
+            </div>`;
+        const nextStatus = WO_STATUSES[WO_STATUSES.indexOf(wo.Status) + 1];
+        const btn = document.getElementById('woNextStatusBtn');
+        if (nextStatus) {
+            btn.style.display = 'inline-block';
+            btn.innerHTML = `<i class="bi bi-arrow-right-circle me-1"></i> → ${nextStatus}`;
+        } else {
+            btn.style.display = 'none';
+        }
+        new bootstrap.Modal(document.getElementById('woDetailModal')).show();
+    }
+
+    async function advanceWOStatus() {
+        if (!currentWO) return;
+        const nextStatus = WO_STATUSES[WO_STATUSES.indexOf(currentWO.Status) + 1];
+        if (!nextStatus) return;
+        bootstrap.Modal.getInstance(document.getElementById('woDetailModal')).hide();
+        await updateWOStatus(currentWO.WO_ID, nextStatus);
+    }
+
+    async function quickAdvanceStatus(woId, currentStatus) {
+        const nextStatus = WO_STATUSES[WO_STATUSES.indexOf(currentStatus) + 1];
+        if (!nextStatus) { showToast('WO đã ở trạng thái cuối', 'warning'); return; }
+        await updateWOStatus(woId, nextStatus);
+    }
+
+    async function updateWOStatus(woId, newStatus) {
+        showToast(`Đang cập nhật WO #${woId}...`);
+        try {
+            await fetch(gasUrl, {
+                method: 'POST', mode: 'no-cors',
+                body: JSON.stringify({ action: 'updateWOStatus', token: API_TOKEN, wo_id: woId, status: newStatus })
+            });
+            const cached = JSON.parse(localStorage.getItem('localWorkOrders') || '[]');
+            const updated = cached.map(wo => wo.WO_ID === woId ? { ...wo, Status: newStatus } : wo);
+            localStorage.setItem('localWorkOrders', JSON.stringify(updated));
+            renderKanban(updated);
+            showToast(`WO #${woId} → ${newStatus}`);
+        } catch (e) {
+            showToast('Lỗi cập nhật, thử lại sau', 'danger');
+        }
+    }
+
+    function showCreateWOModal() {
+        const devices = JSON.parse(localStorage.getItem('localDevices') || '[]');
+        const sel = document.getElementById('woAsset');
+        sel.innerHTML = '<option value="">-- Chọn thiết bị --</option>';
+        devices.forEach(d => { sel.innerHTML += `<option value="${d.uid}">${d.name} (${d.uid})</option>`; });
+        const due = new Date(); due.setDate(due.getDate() + 7);
+        document.getElementById('woDueDate').value = due.toISOString().split('T')[0];
+        new bootstrap.Modal(document.getElementById('createWOModal')).show();
+    }
+
+    async function submitCreateWO() {
+        const desc = document.getElementById('woDescription').value.trim();
+        if (!desc) { showToast('Vui lòng nhập mô tả công việc', 'warning'); return; }
+        const payload = {
+            action: 'createWO', token: API_TOKEN,
+            type: document.getElementById('woType').value,
+            priority: document.getElementById('woPriority').value,
+            assetUID: document.getElementById('woAsset').value,
+            description: desc,
+            dueDate: document.getElementById('woDueDate').value
+        };
+        try {
+            await fetch(gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+            bootstrap.Modal.getInstance(document.getElementById('createWOModal')).hide();
+            document.getElementById('woDescription').value = '';
+            showToast('Đã tạo Work Order mới!');
+            setTimeout(() => loadKanban(), 1500);
+        } catch (e) {
+            showToast('Lỗi tạo WO, kiểm tra kết nối', 'danger');
+        }
+    }
 </script>
 </body>
 </html>
