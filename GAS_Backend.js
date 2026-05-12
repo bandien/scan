@@ -59,10 +59,26 @@ function doGet(e) {
       });
     }
 
+    // Preload checklists from "Checklists" sheet
+    const checkSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Checklists");
+    let checklists = [];
+    if (checkSheet) {
+      const checkData = checkSheet.getDataRange().getValues();
+      for (let i = 1; i < checkData.length; i++) {
+        checklists.push({
+          type: String(checkData[i][0]).trim().toLowerCase(),
+          id: checkData[i][1],
+          title: checkData[i][2],
+          desc: checkData[i][3]
+        });
+      }
+    }
+
     return contentResponse({ 
       status: "success", 
       user: { name: userName, role: userRole },
-      devices: devices 
+      devices: devices,
+      checklists: checklists
     });
   }
 

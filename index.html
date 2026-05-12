@@ -484,27 +484,19 @@
         cal.style.display = cal.style.display === 'none' ? 'block' : 'none';
     }
 
-    const checklistTemplates = {
-        'default': [
-            { id: 'item1', title: 'Power & Battery', desc: 'Check voltage and connections' },
-            { id: 'item2', title: 'Mechanical Vibration', desc: 'Monitor noise and heat' },
-            { id: 'item3', title: 'Clean & Lubricate', desc: 'Remove dust and apply grease' }
-        ],
-        'hvac': [
-            { id: 'item1', title: 'Lọc gió', desc: 'Kiểm tra và vệ sinh màng lọc' },
-            { id: 'item2', title: 'Gas Lạnh', desc: 'Kiểm tra áp suất gas' },
-            { id: 'item3', title: 'Ống thoát nước', desc: 'Thông tắc đường ống' }
-        ]
-    };
-
     function renderChecklist(type) {
-        const list = checklistTemplates[type] || checklistTemplates['default'];
+        const allChecklists = JSON.parse(localStorage.getItem('localChecklists') || '[]');
+        let list = allChecklists.filter(c => c.type === type);
+        
+        // Fallback to default if no specific type found
+        if (list.length === 0) list = allChecklists.filter(c => c.type === 'default');
+
         const container = document.getElementById('dynamicChecklist');
         container.innerHTML = '';
         list.forEach(item => {
             container.innerHTML += `
                 <div class="checklist-item" onclick="toggleCheck('${item.id}')">
-                    <input class="form-check-input" type="checkbox" id="${item.id}">
+                    <input class="form-check-input checklist-cb" type="checkbox" id="${item.id}" data-title="${item.title}">
                     <div>
                         <div class="fw-bold">${item.title}</div>
                         <div class="small text-muted">${item.desc}</div>
@@ -526,6 +518,8 @@
     function doLogout() {
         localStorage.removeItem('currentUser');
         localStorage.removeItem('localDevices');
+        localStorage.removeItem('localChecklists');
+        localStorage.removeItem('localWorkOrders');
         localStorage.removeItem('offline_logs');
         location.reload();
     }
@@ -557,6 +551,7 @@
             if (result.status === "success") {
                 localStorage.setItem('currentUser', JSON.stringify(result.user));
                 localStorage.setItem('localDevices', JSON.stringify(result.devices));
+                localStorage.setItem('localChecklists', JSON.stringify(result.checklists || []));
                 updateUI(result.user);
                 showToast(`Xin chào ${result.user.name} (${result.user.role})`);
             } else {
@@ -610,9 +605,16 @@
 
     async function submitData() {
         const uid = document.getElementById('disp_uid').innerText;
+        
+        // Dynamically collect all checklist items
+        const items = {};
+        document.querySelectorAll('.checklist-cb').forEach(cb => {
+            items[cb.id] = cb.checked;
+        });
+
         const data = { 
             uid, token: API_TOKEN, notes: document.getElementById('notes').value,
-            items: { i1: document.getElementById('item1').checked, i2: document.getElementById('item2').checked, i3: document.getElementById('item3').checked }
+            items: items
         };
         try {
             await fetch(gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
