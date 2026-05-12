@@ -405,14 +405,6 @@
                     <span class="small text-muted"><i class="bi bi-hash me-1"></i><span id="disp_uid">---</span></span>
                     <span class="small text-muted"><i class="bi bi-geo-alt me-1"></i><span id="disp_loc">---</span></span>
                 </div>
-                <div class="mt-3 d-flex gap-2">
-                    <button class="btn btn-success flex-fill rounded-pill fw-bold" onclick="handleInOut('IN')">
-                        <i class="bi bi-box-arrow-in-right me-1"></i> IN
-                    </button>
-                    <button class="btn btn-warning flex-fill rounded-pill fw-bold" onclick="handleInOut('OUT')">
-                        <i class="bi bi-box-arrow-right me-1"></i> OUT
-                    </button>
-                </div>
             </div>
             <div class="card-body p-0">
                 <div class="p-3">
@@ -432,6 +424,28 @@
                 <div class="p-3 bg-light-subtle"><span class="fw-bold small text-uppercase text-secondary" data-i18n="checklist_title">Maintenance Checklist</span></div>
                 <div id="dynamicChecklist">
                     <!-- Checklists will be rendered here dynamically based on device type -->
+                </div>
+
+                <!-- New Section: Inventory & Installation -->
+                <div class="p-3 bg-light-subtle border-top">
+                    <span class="fw-bold small text-uppercase text-secondary">Lịch sử lắp đặt & Quản lý kho</span>
+                </div>
+                <div class="p-3">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div>
+                            <p class="mb-0 small text-muted">Trạng thái hiện tại:</p>
+                            <h6 class="fw-bold mb-0" id="disp_current_status_text">Đang ở trong kho</h6>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-primary btn-sm rounded-pill px-3" data-bs-toggle="dropdown">
+                                <i class="bi bi-arrow-left-right me-1"></i> Cập nhật trạng thái
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
+                                <li><a class="dropdown-item py-2" href="#" onclick="handleInOut('IN')"><i class="bi bi-box-arrow-in-right me-2 text-success"></i> Nhập kho (IN)</a></li>
+                                <li><a class="dropdown-item py-2" href="#" onclick="handleInOut('OUT')"><i class="bi bi-box-arrow-right me-2 text-warning"></i> Xuất kho / Lắp đặt (OUT)</a></li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
                 <div class="p-4 border-top"><label class="fw-bold small text-secondary mb-2" data-i18n="field_notes">FIELD NOTES</label><textarea class="form-control border-0 bg-light p-3" id="notes" rows="3" style="border-radius: 12px;" placeholder="Add observations..." data-i18n-placeholder="placeholder_notes"></textarea></div>
             </div>
@@ -747,12 +761,16 @@
                 
                 // Show current In/Out status
                 const badge = document.getElementById('disp_status_badge');
+                const statusText = document.getElementById('disp_current_status_text');
+                
                 if (device.status === 'OUT') {
                     badge.innerText = 'Đang mượn (OUT)';
                     badge.className = 'badge bg-warning-subtle text-warning px-3 py-2 rounded-pill';
+                    statusText.innerText = 'Đã xuất kho / Đang lắp đặt';
                 } else {
                     badge.innerText = 'Trong kho (IN)';
                     badge.className = 'badge bg-success-subtle text-success px-3 py-2 rounded-pill';
+                    statusText.innerText = 'Đang có sẵn trong kho';
                 }
 
                 renderChecklist(device.name.toLowerCase().includes('điều hòa') ? 'hvac' : 'default');
