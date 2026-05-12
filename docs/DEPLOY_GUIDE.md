@@ -24,5 +24,16 @@ Chào mừng bạn đến với hệ thống UID QR Maintenance. Dưới đây l
 3. Vào **Settings > Pages** của Repository trên GitHub, chọn branch `main` và nhấn **Save**.
 4. Chờ 1 phút, ứng dụng của bạn sẽ online tại địa chỉ `https://<your-username>.github.io/<repo-name>/`.
 
+## Cách cập nhật khi có phiên bản mới
+Khi dự án gốc có các tính năng mới (ví dụ: Mini Log, Chụp ảnh), bạn hãy làm theo các bước sau:
+
+1. **Đồng bộ GitHub**: 
+   - Trên GitHub, vào Repo của bạn và nhấn **Sync Fork > Update Branch**.
+2. **Cập nhật Apps Script**:
+   - Mở file `Backend.gs` mới và dán đè vào Apps Script của bạn.
+   - **Quan trọng**: Nhấn **Deploy > New Deployment** để tạo phiên bản mới nhất.
+3. **Kiểm tra Cấu hình**:
+   - Nếu bạn có thay đổi `gasUrl` hoặc `apiToken` trước đó, hãy đảm bảo các thông số này trong file `index.html` mới vẫn chính xác với hệ thống của bạn.
+
 ---
 *Lưu ý: Để tính năng chụp ảnh hoạt động, hãy đảm bảo bạn đã cấp quyền cho Script truy cập vào Google Drive của mình khi Deploy.*
