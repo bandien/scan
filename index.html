@@ -383,13 +383,21 @@
         <div class="card-premium animate__animated animate__fadeInUp">
             <div class="info-header">
                 <div class="d-flex justify-content-between">
-                    <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill" data-i18n="badge_active">Active Device</span>
+                    <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill" id="disp_status_badge" data-i18n="badge_active">Active</span>
                     <span class="text-muted small" id="curr_time"></span>
                 </div>
                 <h4 class="fw-bold mt-3 mb-1" id="disp_name">---</h4>
                 <div class="d-flex gap-3 mt-2">
                     <span class="small text-muted"><i class="bi bi-hash me-1"></i><span id="disp_uid">---</span></span>
                     <span class="small text-muted"><i class="bi bi-geo-alt me-1"></i><span id="disp_loc">---</span></span>
+                </div>
+                <div class="mt-3 d-flex gap-2">
+                    <button class="btn btn-success flex-fill rounded-pill fw-bold" onclick="handleInOut('IN')">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> IN
+                    </button>
+                    <button class="btn btn-warning flex-fill rounded-pill fw-bold" onclick="handleInOut('OUT')">
+                        <i class="bi bi-box-arrow-right me-1"></i> OUT
+                    </button>
                 </div>
             </div>
             <div class="card-body p-0">
@@ -476,7 +484,13 @@
 
     startBtn.addEventListener('click', () => {
         const reader = document.getElementById('reader'); reader.style.display = 'block';
-        scanner.start({ facingMode: "environment" }, { fps: 20, qrbox: {width: 280, height: 280} }, 
+        // Support Barcode + QR with optimized box for Barcodes
+        scanner.start({ facingMode: "environment" }, 
+        { 
+            fps: 20, 
+            qrbox: {width: 280, height: 180}, // Wider and shorter for barcodes
+            aspectRatio: 1.777778
+        }, 
         (uid) => {
             playBeep();
             document.getElementById('disp_uid').innerText = uid;
@@ -627,6 +641,17 @@
             if (device) {
                 document.getElementById('disp_name').innerText = device.name;
                 document.getElementById('disp_loc').innerText = device.location;
+                
+                // Show current In/Out status
+                const badge = document.getElementById('disp_status_badge');
+                if (device.status === 'OUT') {
+                    badge.innerText = 'Đang mượn (OUT)';
+                    badge.className = 'badge bg-warning-subtle text-warning px-3 py-2 rounded-pill';
+                } else {
+                    badge.innerText = 'Trong kho (IN)';
+                    badge.className = 'badge bg-success-subtle text-success px-3 py-2 rounded-pill';
+                }
+
                 renderChecklist(device.name.toLowerCase().includes('điều hòa') ? 'hvac' : 'default');
                 
                 document.getElementById('curr_time').innerText = new Date().toLocaleTimeString();
@@ -886,6 +911,30 @@
             setTimeout(() => doLogout(), 2000);
         } catch (e) {
             showToast("Lỗi kết nối hoặc mật khẩu không đúng", "danger");
+        }
+    }
+    async function handleInOut(status) {
+        const uid = document.getElementById('disp_uid').innerText;
+        const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        
+        showToast(`Đang ghi nhận ${status}...`);
+        try {
+            await fetch(gasUrl, {
+                method: 'POST', mode: 'no-cors',
+                body: JSON.stringify({ action: 'logInOut', token: API_TOKEN, uid: uid, status: status, user: user.name })
+            });
+            showToast(`Đã ghi nhận: ${status} thành công!`);
+            
+            // Update local state
+            const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+            if (deviceMap[uid]) {
+                deviceMap[uid].status = status;
+                localStorage.setItem('localDevicesMap', JSON.stringify(deviceMap));
+            }
+            
+            setTimeout(() => fetchData(uid), 1000);
+        } catch (e) {
+            showToast('Lỗi ghi nhận, thử lại sau', 'danger');
         }
     }
 </script>

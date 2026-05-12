@@ -274,6 +274,34 @@ function doPost(e) {
       return contentResponse({ status: "success" });
     }
 
+    // action=logInOut — Record IN/OUT movement and update Device status
+    if (params.action === 'logInOut') {
+      const devSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Devices");
+      const logSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Logs");
+      
+      const devData = devSheet.getDataRange().getValues();
+      let updated = false;
+      for (let i = 1; i < devData.length; i++) {
+        if (String(devData[i][0]) === String(params.uid)) {
+          // Update Status in a new column (assuming Column G / 7 for Status)
+          devSheet.getRange(i + 1, 7).setValue(params.status); 
+          updated = true;
+          break;
+        }
+      }
+      
+      // Append to Logs
+      logSheet.appendRow([
+        new Date(),
+        params.uid,
+        params.status, // IN or OUT
+        params.notes || '',
+        params.user || 'Mobile User'
+      ]);
+
+      return contentResponse({ status: "success", updated: updated });
+    }
+
     const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Logs");
 
     sheet.appendRow([
