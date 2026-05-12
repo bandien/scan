@@ -1,9 +1,19 @@
-# Roadmap: Mobile QR System (Standalone & Sync)
+# Roadmap: 11_BanDienScan (Electrical Board Maintenance)
 
-> Module quét QR báo cáo bảo trì độc lập. Nhanh, nhẹ, và không phụ thuộc server cục bộ lúc nhập liệu.
+> Module quét QR báo cáo bảo trì bản điện độc lập. Bản sao từ `vanhanh-ai/qr`.
 
-**Status**: Active
-**Last Updated**: 2026-05-12
+**Status**: Active (Initialized)
+**Last Updated**: 2026-05-13
+
+## ✅ Trạng thái Hiện tại
+- [x] Khởi tạo module từ repository gốc `vanhanh-ai/qr`.
+- [x] Thiết lập `upstream` remote để nhận cập nhật.
+- [x] Thiết lập `origin` remote hướng về `bandien/scan.git`.
+
+## 🚀 Nhiệm vụ Tiếp theo
+- [ ] Tạo Google Sheet riêng cho Bản điện.
+- [ ] Cập nhật `MANUAL_SHEET_ID` trong `Backend.gs`.
+- [ ] Khởi tạo Apps Script project mới (Clasp) và Deploy.
 
 ## 🎯 Tầm nhìn & Nguyên tắc
 - **Mã QR tinh gọn**: Chỉ chứa dữ liệu thô là UID (ví dụ: `TB001`). **Không** chứa URL để tránh việc phải in lại nhãn mỗi khi thay đổi domain/server.

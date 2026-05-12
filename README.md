@@ -1,3 +1,19 @@
+# 11_BanDienScan (Bản điện Scan)
+
+Module quản lý bảo trì bản điện, dựa trên [vanhanh-ai/qr](https://github.com/vanhanh-ai/qr).
+Repo quản lý: [bandien/scan](https://github.com/bandien/scan.git)
+
+---
+
+## 🔄 Cập nhật từ bản gốc
+Để cập nhật các tính năng mới từ hệ thống lõi `vanhanh-ai/qr`, sử dụng các lệnh sau:
+```bash
+git fetch upstream
+git merge upstream/master
+```
+
+---
+
 # UID QR Code Maintenance System
 
 Hệ thống quản lý bảo trì thiết bị thông minh sử dụng mã QR UID.
