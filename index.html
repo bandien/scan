@@ -65,7 +65,8 @@
         .skeleton-text { height: 20px; margin-bottom: 10px; width: 80%; }
         .skeleton-title { height: 30px; margin-bottom: 15px; width: 60%; }
 
-        #reader { width: 100%; display: none; border-bottom: 3px solid var(--accent-color); }
+        #reader { width: 100%; display: none; border-bottom: 3px solid var(--accent-color); position: relative; }
+        #scanner-ui-overlay { position: absolute; top: 10px; right: 10px; z-index: 100; }
 
         .btn-scan-main {
             background: var(--primary-grad); color: white; border: none; padding: 20px;
@@ -191,7 +192,13 @@
         <p class="text-muted small mt-1" data-i18n="app_subtitle">Smart Equipment Management</p>
     </div>
 
-    <div id="reader"></div>
+    <div id="reader">
+        <div id="scanner-ui-overlay">
+            <button id="torchBtn" class="btn btn-dark btn-sm rounded-circle shadow" style="width: 40px; height: 40px; display: none;">
+                <i class="bi bi-flashlight"></i>
+            </button>
+        </div>
+    </div>
 
     <!-- Dashboard Section -->
     <div id="dashboardSection" class="card-premium p-3 mb-4" style="display: none;">
@@ -483,20 +490,38 @@
     function toggleCheck(id) { let cb = document.getElementById(id); cb.checked = !cb.checked; }
 
     startBtn.addEventListener('click', () => {
-        const reader = document.getElementById('reader'); reader.style.display = 'block';
-        // Support Barcode + QR with optimized box for Barcodes
+        const reader = document.getElementById('reader'); 
+        const torchBtn = document.getElementById('torchBtn');
+        reader.style.display = 'block';
+        
         scanner.start({ facingMode: "environment" }, 
         { 
             fps: 20, 
-            qrbox: {width: 280, height: 180}, // Wider and shorter for barcodes
+            qrbox: {width: 280, height: 180},
             aspectRatio: 1.777778
         }, 
         (uid) => {
             playBeep();
+            if (navigator.vibrate) navigator.vibrate(100); // Haptic feedback
             document.getElementById('disp_uid').innerText = uid;
-            reader.style.display = 'none'; scanner.stop();
+            reader.style.display = 'none'; 
+            torchBtn.style.display = 'none';
+            scanner.stop();
             fetchData(uid);
         }, (err) => {});
+
+        // Enable Torch Button if supported
+        setTimeout(() => {
+            const track = scanner.getVideoTracks()[0];
+            const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+            if (capabilities.torch) {
+                torchBtn.style.display = 'block';
+                torchBtn.onclick = () => {
+                    const settings = track.getSettings();
+                    track.applyConstraints({ advanced: [{ torch: !settings.torch }] });
+                };
+            }
+        }, 2000);
     });
 
     function handleManualEntry() {
@@ -700,11 +725,17 @@
     window.addEventListener('online', async () => {
         let offline = JSON.parse(localStorage.getItem('offline_logs') || '[]');
         if (offline.length > 0) {
-            showToast(`Đang đồng bộ ${offline.length} bản ghi...`, 'info');
-            for (let log of offline) { await fetch(gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(log) }); }
-            showToast(translations[currentLang].alert_sync.replace('{count}', offline.length));
-            localStorage.removeItem('offline_logs');
+            showToast(`Đang đồng bộ ${offline.length} báo cáo offline...`, "info");
+            for (const log of offline) {
+                try {
+                    await fetch(gasUrl, { method: 'POST', body: JSON.stringify(log) });
+                } catch (e) {
+                    console.error("Sync failed for log:", log);
+                }
+            }
+            localStorage.setItem('offline_logs', '[]');
             updateSyncStatus();
+            showToast("Đã đồng bộ dữ liệu thành công!", "success");
         }
     });
 
