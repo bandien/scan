@@ -34,6 +34,9 @@ Khi dự án gốc có các tính năng mới (ví dụ: Mini Log, Chụp ảnh)
    - **Quan trọng**: Nhấn **Deploy > New Deployment** để tạo phiên bản mới nhất.
 3. **Kiểm tra Cấu hình**:
    - Nếu bạn có thay đổi `gasUrl` hoặc `apiToken` trước đó, hãy đảm bảo các thông số này trong file `index.html` mới vẫn chính xác với hệ thống của bạn.
+4. **Cập nhật Cấu trúc Sheet (Nếu có)**:
+   - Kiểm tra file [SHEET_STRUCTURE.md](./SHEET_STRUCTURE.md) xem có cột nào mới được thêm vào không.
+   - Nếu có cột mới, bạn phải **thêm thủ công** cột đó vào đúng vị trí trong Google Sheet của mình để tránh lỗi lệch dữ liệu.
 
 ---
 *Lưu ý: Để tính năng chụp ảnh hoạt động, hãy đảm bảo bạn đã cấp quyền cho Script truy cập vào Google Drive của mình khi Deploy.*
