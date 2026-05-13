@@ -1,6 +1,6 @@
-# 11_BanDienScan (Bản điện Scan)
+# 11_BanDienScan (Ban điện Scan)
 
-Module quản lý bảo trì bản điện, dựa trên [vanhanh-ai/qr](https://github.com/vanhanh-ai/qr).
+Module quản lý bảo trì ban điện, dựa trên [vanhanh-ai/qr](https://github.com/vanhanh-ai/qr).
 Repo quản lý: [bandien/scan](https://github.com/bandien/scan.git)
 
 ---

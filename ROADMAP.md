@@ -1,6 +1,6 @@
-# Roadmap: 11_BanDienScan (Electrical Board Maintenance)
+# Roadmap: 11_BanDienScan (Electrical Department Maintenance)
 
-> Module quét QR báo cáo bảo trì bản điện độc lập. Bản sao từ `vanhanh-ai/qr`.
+> Module quét QR báo cáo bảo trì ban điện độc lập. Bản sao từ `vanhanh-ai/qr`.
 
 **Status**: Active (Initialized)
 **Last Updated**: 2026-05-13
@@ -11,7 +11,7 @@
 - [x] Thiết lập `origin` remote hướng về `bandien/scan.git`.
 
 ## 🚀 Nhiệm vụ Tiếp theo
-- [ ] Tạo Google Sheet riêng cho Bản điện.
+- [ ] Tạo Google Sheet riêng cho Ban điện.
 - [ ] Cập nhật `MANUAL_SHEET_ID` trong `Backend.gs`.
 - [ ] Khởi tạo Apps Script project mới (Clasp) và Deploy.
 

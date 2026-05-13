@@ -14,7 +14,7 @@
 // ==========================================
 // Nếu dùng Script độc lập, hãy dán ID của Google Sheet vào đây.
 // Nếu Script được gắn trực tiếp vào Sheet (Container-bound), nó sẽ tự lấy ID.
-const MANUAL_SHEET_ID = "1aK1KMrG5Bn4hYy-QSS5SAST_Xl4Ta_hCbVmqyHXJjUo"; 
+const MANUAL_SHEET_ID = "1K_5jb0-TrshgCyNs_l5jjTpVjwdmHI-l9gpSHWXTdSg"; 
 const API_TOKEN = "HAPU_QR_SECRET_2026"; 
 
 // Tự động xác định SHEET_ID
