@@ -17,12 +17,41 @@ Chào mừng bạn đến với hệ thống UID QR Maintenance. Dưới đây l
 4. Nhấn **Deploy** và copy đoạn **Web App URL** nhận được.
 
 ## Bước 3: Thiết lập Frontend (GitHub Pages)
-1. Fork hoặc Download mã nguồn này về GitHub của bạn.
-2. Mở file `index.html`, tìm khối `CONFIG` ở đầu thẻ `<script>`:
+
+### 3.1. Đẩy mã nguồn lên GitHub của bạn
+Nếu bạn clone dự án về máy tính, hãy chạy các lệnh sau để đẩy lên Repo mới của bạn:
+
+```bash
+# 1. Khởi tạo Git (nếu chưa có)
+git init
+
+# 2. Add tất cả các file
+git add .
+
+# 3. Commit lần đầu
+git commit -m "Initial commit - QR System"
+
+# 4. Tạo Repo mới trên GitHub, sau đó dán link vào đây:
+git remote add origin https://github.com/USER_CUA_BAN/TEN_REPO_MOI.git
+
+# 5. Đẩy code lên
+git push -u origin master
+```
+
+### 3.2. Cấu hình file `index.html`
+1. Mở file `index.html`, tìm khối `CONFIG` ở đầu thẻ `<script>`:
    - Dán URL bạn vừa copy ở Bước 2 vào biến `gasUrl`.
    - Đổi `apiToken` thành một mã bí mật của riêng bạn (nhớ đổi tương ứng trong file Apps Script).
-3. Vào **Settings > Pages** của Repository trên GitHub, chọn branch `main` và nhấn **Save**.
-4. Chờ 1 phút, ứng dụng của bạn sẽ online tại địa chỉ `https://<your-username>.github.io/<repo-name>/`.
+2. Lưu file và đẩy lên GitHub: `git add . && git commit -m "Update config" && git push`.
+
+### 3.3. Kích hoạt GitHub Pages (Build and deployment)
+1. Truy cập vào Repository của bạn trên GitHub.
+2. Chọn tab **Settings** > **Pages** (cột bên trái).
+3. Tại mục **Build and deployment** > **Source**:
+   - Đảm bảo đang chọn là **Deploy from a branch**.
+   - Mục **Branch**: Chọn `master` (hoặc `main`) và folder `/ (root)`.
+4. Nhấn **Save**.
+5. Chờ khoảng 1-2 phút, bạn sẽ thấy link app hiện ra ở đầu trang (ví dụ: `https://user.github.io/repo/`).
 
 ## Cách cập nhật khi có phiên bản mới
 Khi dự án gốc có các tính năng mới (ví dụ: Mini Log, Chụp ảnh), bạn hãy làm theo các bước sau:
