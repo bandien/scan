@@ -89,32 +89,39 @@ function doGet(e) {
       }
     }
 
-    if (action === 'getDeviceHistory') {
-      const logSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Logs");
-      const logData = logSheet.getDataRange().getValues();
-      let history = [];
-      
-      // Duyệt ngược từ cuối lên để lấy dữ liệu mới nhất
-      for (let i = logData.length - 1; i >= 1; i--) {
-        if (String(logData[i][1]) === String(uid)) {
-          history.push({
-            time: logData[i][0],
-            action: logData[i][2], // IN, OUT hoặc Checklist JSON
-            notes: logData[i][3],
-            user: logData[i][4]
-          });
-        }
-        if (history.length >= 5) break;
-      }
-      return contentResponse({ status: "success", history: history });
-    }
-
     return contentResponse({ 
       status: "success", 
       user: { name: userName, role: userRole },
       devices: devices,
       checklists: checklists
     });
+  }
+
+  // action=ping - Simple connectivity test
+  if (action === 'ping') {
+    return contentResponse({ status: "success", message: "Pong! API is active." });
+  }
+
+  // action=getDeviceHistory — Fetch history for a specific UID
+  if (action === 'getDeviceHistory') {
+    const logSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Logs");
+    if (!logSheet) return contentResponse({ status: "error", message: "Logs sheet not found" });
+    const logData = logSheet.getDataRange().getValues();
+    let history = [];
+    
+    // Duyệt ngược từ cuối lên để lấy dữ liệu mới nhất
+    for (let i = logData.length - 1; i >= 1; i--) {
+      if (String(logData[i][1]) === String(uid)) {
+        history.push({
+          time: logData[i][0],
+          action: logData[i][2], // IN, OUT hoặc Checklist JSON
+          notes: logData[i][3],
+          user: logData[i][4]
+        });
+      }
+      if (history.length >= 5) break;
+    }
+    return contentResponse({ status: "success", history: history });
   }
 
   // action=getWorkOrders — Return work orders list (filtered by assignedTo if role is Technician)
