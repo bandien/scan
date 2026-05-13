@@ -136,10 +136,23 @@
         <h3 class="fw-bold text-dark mb-1">UID Master</h3>
         <p class="text-muted small mb-4" id="loginSubtitle">Đăng nhập để truy cập hệ thống</p>
         <input type="text" id="usernameInput" class="form-control mb-3" style="border-radius: 12px; padding: 14px 18px;" placeholder="Tên đăng nhập">
-        <input type="password" id="passwordInput" class="form-control mb-3" style="border-radius: 12px; padding: 14px 18px;" placeholder="Mật khẩu (PIN)">
+        <input type="password" id="passwordInput" class="form-control mb-2" style="border-radius: 12px; padding: 14px 18px;" placeholder="Mật khẩu (PIN)">
+        
+        <div class="d-flex justify-content-start mb-3 px-2">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="rememberMe">
+                <label class="form-check-label small text-muted" for="rememberMe">
+                    Ghi nhớ đăng nhập
+                </label>
+            </div>
+        </div>
+
         <button id="btnLogin" class="btn btn-primary w-100 py-3 rounded-pill fw-bold" onclick="doLogin()">
             ĐĂNG NHẬP <i class="bi bi-box-arrow-in-right ms-2"></i>
         </button>
+        <div class="mt-3">
+            <small class="text-muted" style="font-size: 0.7rem;">Phiên bản v2.1.0</small>
+        </div>
         <div id="loginSpinner" class="spinner-border text-primary mt-3" style="display: none;" role="status"></div>
     </div>
 </div>
@@ -461,7 +474,8 @@
         gasUrl: 'https://script.google.com/macros/s/AKfycbyf6TODSr3VdoTtH1yOLI6y2CEWGIYYcidh6Pl9acHNFZJ2oIOF3frcan80Tt3LnTb4/exec',
         apiToken: 'HAPU_QR_SECRET_2026',
         appTitle: 'UID QR Master',
-        companyName: 'Community Open Source'
+        companyName: 'Community Open Source',
+        version: 'v2.1.0'
     };
     
     // Legacy variables (pointing to CONFIG for compatibility)
@@ -656,29 +670,6 @@
         }
     }
 
-    function enterDemoMode() {
-        const demoUser = { name: "Demo User", role: "Admin" };
-        const demoDevices = [
-            { uid: "TB001", name: "Máy nén khí Demo", location: "Khu A", specs: "10HP", cycle: 30, status: "IN" },
-            { uid: "TB002", name: "Điều hòa LG Demo", location: "Phòng Server", specs: "24k BTU", cycle: 90, status: "IN" }
-        ];
-        const demoChecklists = [
-            { type: "default", id: "c1", title: "Kiểm tra nguồn", desc: "Nguồn điện ổn định" },
-            { type: "default", id: "c2", title: "Độ rung", desc: "Không có tiếng động lạ" }
-        ];
-
-        localStorage.setItem('currentUser', JSON.stringify(demoUser));
-        localStorage.setItem('localDevices', JSON.stringify(demoDevices));
-        localStorage.setItem('localChecklists', JSON.stringify(demoChecklists));
-        
-        // Build map
-        const map = {}; demoDevices.forEach(d => map[d.uid] = d);
-        localStorage.setItem('localDevicesMap', JSON.stringify(map));
-
-        showToast("Đang vào chế độ Demo...", "info");
-        setTimeout(() => location.reload(), 1000);
-    }
-
     async function doLogin() {
         const username = document.getElementById('usernameInput').value.trim();
         const password = document.getElementById('passwordInput').value;
@@ -688,19 +679,26 @@
         document.getElementById('loginSpinner').style.display = 'inline-block';
 
         try {
-            const res = await fetch(`${gasUrl}?action=login&username=${encodeURIComponent(username)}&pin=${encodeURIComponent(password)}&token=${API_TOKEN}`);
+            const res = await fetch(`${gasUrl}?action=login&user=${encodeURIComponent(username)}&pin=${encodeURIComponent(password)}&token=${API_TOKEN}`);
             const result = await res.json();
+            
             if (result.status === "success") {
+                // Remember Me Logic
+                if (document.getElementById('rememberMe').checked) {
+                    localStorage.setItem('rememberedUser', JSON.stringify({ user: username, pin: password }));
+                } else {
+                    localStorage.removeItem('rememberedUser');
+                }
+
                 localStorage.setItem('currentUser', JSON.stringify(result.user));
                 
-                // OPTIMIZATION: Convert array to Object for O(1) Lookup
                 const deviceMap = {};
                 (result.devices || []).forEach(d => { deviceMap[d.uid] = d; });
                 localStorage.setItem('localDevicesMap', JSON.stringify(deviceMap));
                 
                 localStorage.setItem('localChecklists', JSON.stringify(result.checklists || []));
                 updateUI(result.user);
-                showToast(`Xin chào ${result.user.name} (${result.user.role})`);
+                showToast(`Xin chào ${result.user.name}`);
             } else {
                 showToast(result.message || "Sai tên hoặc mật khẩu", "danger");
                 document.getElementById('btnLogin').style.display = 'block';
@@ -715,6 +713,15 @@
 
     // Check if already logged in
     window.onload = () => {
+        // Remember Me fill
+        const savedUser = localStorage.getItem('rememberedUser');
+        if (savedUser) {
+            const data = JSON.parse(savedUser);
+            document.getElementById('usernameInput').value = data.user;
+            document.getElementById('passwordInput').value = data.pin;
+            document.getElementById('rememberMe').checked = true;
+        }
+
         const userStr = localStorage.getItem('currentUser');
         if (userStr) {
             updateUI(JSON.parse(userStr));
@@ -809,22 +816,17 @@
         const cacheKey = `history_${uid}`;
         const cachedData = localStorage.getItem(cacheKey);
 
-        // Hiển thị dữ liệu từ cache ngay lập tức nếu có
-        if (cachedData) {
-            renderHistoryUI(JSON.parse(cachedData));
-        }
+        if (cachedData) renderHistoryUI(JSON.parse(cachedData));
 
         try {
-            const resp = await fetch(`${gasUrl}?action=getDeviceHistory&uid=${uid}&token=${API_TOKEN}`);
-            const data = await resp.json();
+            const response = await fetch(`${gasUrl}?action=getDeviceHistory&uid=${uid}&token=${API_TOKEN}`);
+            const data = await response.json();
             if (data.status === 'success') {
                 localStorage.setItem(cacheKey, JSON.stringify(data.history));
                 renderHistoryUI(data.history);
             }
         } catch (e) {
-            if (!cachedData) {
-                container.innerHTML = '<p class="text-danger small text-center mb-0">Không thể tải lịch sử</p>';
-            }
+            if (!cachedData) container.innerHTML = '<p class="text-danger small text-center mb-0">Lỗi tải lịch sử</p>';
         }
     }
 
