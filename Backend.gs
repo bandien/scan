@@ -225,6 +225,9 @@ function doGet(e) {
   deviceData.history = history;
 
   return contentResponse({ status: "success", data: deviceData });
+  } catch (err) {
+    return contentResponse({ status: "error", message: "Server Error (GET): " + err.toString() });
+  }
 }
 
 function doPost(e) {
