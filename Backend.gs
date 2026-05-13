@@ -28,16 +28,33 @@ const SHEET_ID = (function() {
 // ==========================================
 
 function doGet(e) {
+  // 1. Xử lý khi nhấn nút 'Run' trong Editor hoặc truy cập trình duyệt trực tiếp
+  if (!e || !e.parameter) {
+    return HtmlService.createHtmlOutput(
+      "<div style='font-family: sans-serif; padding: 20px; border-radius: 10px; background: #f0f4f8;'>" +
+      "<h2>✅ QR System Backend is Live!</h2>" +
+      "<p>Hệ thống Backend đang hoạt động tốt.</p>" +
+      "<p><b>Hướng dẫn:</b> Để kiểm tra cấu hình, hãy chọn hàm <code style='background:#eee;padding:2px 5px'>testConnection</code> trên thanh công cụ Script Editor và nhấn <b>Run</b>.</p>" +
+      "<p>Dữ liệu API chỉ có thể truy cập thông qua Web App URL từ ứng dụng di động.</p></div>"
+    );
+  }
+
   const token = e.parameter.token;
   const uid = e.parameter.uid;
   const action = e.parameter.action;
 
-  // Security Check
-  if (token !== API_TOKEN) {
-    return contentResponse({ status: "error", message: "Unauthorized access" });
+  // 2. Phản hồi nhanh cho lệnh ping (Không cần token nếu chỉ để check live)
+  if (action === 'ping') {
+    return contentResponse({ status: "success", message: "Pong! Backend is responsive." });
   }
 
-  if (action === 'login') {
+  // 3. Kiểm tra bảo mật (Security Check)
+  if (token !== API_TOKEN) {
+    return contentResponse({ status: "error", message: "Unauthorized: Invalid API Token" });
+  }
+
+  try {
+    if (action === 'login') {
     const pin = e.parameter.pin;
     const username = e.parameter.username;
     if (!pin || !username) return contentResponse({ status: "error", message: "Missing credentials" });
@@ -404,3 +421,39 @@ function writeAuditLog(user, action, target, details) {
     // Non-fatal: audit failure must not block the main operation
   }
 }
+
+// ==========================================
+// DIAGNOSTIC TOOLS / CÔNG CỤ CHẨN ĐOÁN
+// ==========================================
+
+/**
+ * Kiểm tra kết nối và cấu hình Sheet.
+ * Chạy hàm này lần đầu để cấp quyền truy cập và kiểm tra cấu trúc bảng.
+ */
+function testConnection() {
+  console.log("🚀 Bắt đầu chẩn đoán hệ thống QR-UID...");
+  try {
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+    console.log("✅ Kết nối Spreadsheet thành công: " + ss.getName());
+    console.log("ID: " + SHEET_ID);
+    
+    const requiredSheets = ["Users", "Devices", "Logs", "Checklists", "WorkOrders", "AuditLog", "Inventory"];
+    console.log("--- Kiểm tra các Tab dữ liệu ---");
+    
+    requiredSheets.forEach(name => {
+      const sheet = ss.getSheetByName(name);
+      if (sheet) {
+        console.log(`✅ [${name}]: Tìm thấy (${sheet.getLastRow()} dòng)`);
+      } else {
+        console.warn(`❌ [${name}]: KHÔNG TÌM THẤY! Bạn cần tạo tab này.`);
+      }
+    });
+    
+    console.log("---");
+    console.log("💡 Chẩn đoán hoàn tất. Nếu mọi tab đều báo ✅, hệ thống đã sẵn sàng Deploy.");
+  } catch (e) {
+    console.error("❌ Lỗi nghiêm trọng: " + e.toString());
+    console.log("👉 Gợi ý: Hãy kiểm tra lại MANUAL_SHEET_ID và đảm bảo Script có quyền truy cập.");
+  }
+}
+
