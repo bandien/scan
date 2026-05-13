@@ -28,6 +28,11 @@ const SHEET_ID = (function() {
 // ==========================================
 
 function doGet(e) {
+  // Prevent crash when run manually from the script editor
+  if (!e || !e.parameter) {
+    return ContentService.createTextOutput("Script is running. Please use the Web App URL with parameters.");
+  }
+
   const token = e.parameter.token;
   const uid = e.parameter.uid;
   const action = e.parameter.action;
@@ -396,11 +401,6 @@ function doPost(e) {
   }
 }
 
-function contentResponse(obj) {
-  return ContentService.createTextOutput(JSON.stringify(obj))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-
 // Write a row to the AuditLog sheet (columns: Timestamp, User, Action, Target, Details)
 function writeAuditLog(user, action, target, details) {
   try {
@@ -410,4 +410,50 @@ function writeAuditLog(user, action, target, details) {
   } catch (err) {
     // Non-fatal: audit failure must not block the main operation
   }
+}
+
+function contentResponse(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// ==========================================
+// THIẾT LẬP & KIỂM TRA (FOR EDITOR)
+// ==========================================
+
+/**
+ * Hàm này dùng để kích hoạt bảng cấp quyền (Authorization) và kiểm tra kết nối Sheets.
+ * Hãy chọn hàm này trong danh sách và nhấn "Run" ở Script Editor.
+ */
+function testAuthorization() {
+  console.log("--- ĐANG KIỂM TRA KẾT NỐI ---");
+  console.log("Sheet ID đang sử dụng: " + SHEET_ID);
+  
+  try {
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+    console.log("Kết nối Spreadsheet thành công: " + ss.getName());
+    
+    const sheets = ["Users", "Devices", "Logs", "Checklists", "WorkOrders", "AuditLog"];
+    sheets.forEach(name => {
+      const s = ss.getSheetByName(name);
+      if (s) {
+        console.log("✅ Tìm thấy sheet: " + name + " (" + s.getLastRow() + " hàng)");
+      } else {
+        console.warn("❌ KHÔNG tìm thấy sheet: " + name);
+      }
+    });
+    
+    console.log("--- HOÀN TẤT KIỂM TRA ---");
+    console.log("Nếu bạn thấy các thông báo '✅' ở trên, Backend đã sẵn sàng!");
+  } catch (err) {
+    console.error("❌ LỖI KẾT NỐI: " + err.toString());
+    console.error("Vui lòng kiểm tra lại MANUAL_SHEET_ID và đảm bảo bạn đã cấp quyền truy cập.");
+  }
+}
+
+/**
+ * Hàm ping đơn giản cho phép gọi từ bên ngoài để kiểm tra API live hay không.
+ */
+function ping() {
+  return contentResponse({ status: "success", message: "Pong! API is active." });
 }
