@@ -26,12 +26,12 @@ Mục tiêu: Quản lý nhân lực và điều hành công việc trực quan.
 
 ## Giai đoạn 8: Work Orders, Vật tư & Báo cáo (CMMS Core)
 Mục tiêu: Xây dựng hệ thống lệnh công việc (Work Orders) chuẩn CMMS, quản lý vật tư và KPI thực tế.
-- [ ] **Work Orders Sheet & API**: Tạo Sheet `WorkOrders` (ID, Type[PM/CM/Inspection], Priority[Low/Med/High/Urgent], Status[New/Assigned/InProgress/Done/Closed], AssetUID, AssignedTo, DueDate, Description, PartsUsed). Backend CRUD qua GAS.
-- [ ] **Kanban Live Data**: Kết nối bảng Kanban với Sheet `WorkOrders` thật (thay mock data). Kéo thả card = cập nhật Status.
+- [x] **Work Orders Sheet & API**: Tạo Sheet `WorkOrders` (ID, Type[PM/CM/Inspection], Priority[Low/Med/High/Urgent], Status[New/Assigned/InProgress/Done/Closed], AssetUID, AssignedTo, DueDate, Description, PartsUsed). Backend CRUD qua GAS.
+- [x] **Kanban Live Data**: Kết nối bảng Kanban với Sheet `WorkOrders` thật (thay mock data). Kéo thả card = cập nhật Status.
 - [ ] **Inventory (Vật tư cơ bản)**: Tạo Sheet `Inventory` (PartCode, Name, Stock, MinStock, Unit). Cảnh báo khi Stock < MinStock.
 - [ ] **KPI Dashboard thật**: Tính MTTR, MTBF, % PM đúng hạn từ dữ liệu thực trong `Logs` và `WorkOrders`.
 - [ ] **Export Excel**: GAS tạo báo cáo tự động trên Google Sheet → chia sẻ link download.
-- [ ] **Audit Log**: Sheet `AuditLog` ghi mọi thay đổi (User, Timestamp, Action, OldValue, NewValue).
+- [x] **Audit Log**: Sheet `AuditLog` ghi mọi thay đổi (User, Timestamp, Action, OldValue, NewValue).
 - [ ] **REVIEW & EVALUATION**: Kiểm tra và chạy thử thực tế Giai đoạn 8.
 
 ## Giai đoạn 9: Phân quyền (RBAC) & Tối ưu Hiệu suất (Smart Preload)
@@ -40,7 +40,8 @@ Mục tiêu: Đảm bảo khả năng mở rộng, bảo mật và tốc độ p
 - [x] **Smart Data Fetching**: Khi đăng nhập thành công, hệ thống tải dữ liệu thuộc quyền hạn của Tổ đó.
 - [x] **Local-First Architecture**: Lưu toàn bộ dữ liệu vào `localStorage`. Tốc độ 0.01s.
 - [x] **Background Syncing**: Báo cáo checklist lưu cục bộ và đồng bộ ngầm lên Google Sheets.
-- [ ] **REVIEW & EVALUATION**: Đánh giá tốc độ truy vấn thực tế.
+- [x] **Change Password**: Đổi mật khẩu từ giao diện người dùng.
+- [x] **REVIEW & EVALUATION**: Đánh giá tốc độ truy vấn thực tế — hoàn thành, Local-First đạt 0.01s.
 
 ## Giai đoạn 10: Admin Portal (Giao diện Quản trị)
 Mục tiêu: Xây dựng trung tâm điều hành cho Quản lý.

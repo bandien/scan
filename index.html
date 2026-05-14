@@ -209,29 +209,7 @@
     <!-- Calendar Section -->
     <div id="calendarSection" class="card-premium p-3 mb-4" style="display: none;">
         <h5 class="fw-bold mb-3"><i class="bi bi-calendar-check"></i> Lịch Bảo Trì (PM)</h5>
-        <div class="list-group">
-            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                <div>
-                    <h6 class="mb-0 fw-bold">Điều hòa trung tâm (HAPU001)</h6>
-                    <small class="text-muted">Hạn cuối: Hôm nay</small>
-                </div>
-                <span class="badge bg-danger rounded-pill">Urgent</span>
-            </div>
-            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                <div>
-                    <h6 class="mb-0 fw-bold">Thang máy số 2 (HAPU005)</h6>
-                    <small class="text-muted">Hạn cuối: Ngày mai</small>
-                </div>
-                <span class="badge bg-warning text-dark rounded-pill">Due Soon</span>
-            </div>
-            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                <div>
-                    <h6 class="mb-0 fw-bold">Máy bơm nước PCCC (HAPU012)</h6>
-                    <small class="text-muted">Hạn cuối: 15/05/2026</small>
-                </div>
-                <span class="badge bg-success rounded-pill">Scheduled</span>
-            </div>
-        </div>
+        <div id="calendarList" class="list-group"></div>
     </div>
 
     <!-- Kanban Section -->
@@ -579,27 +557,64 @@
         const dash = document.getElementById('dashboardSection');
         if (dash.style.display === 'none') {
             dash.style.display = 'block';
-            if (!chartInstance) {
-                const ctx = document.getElementById('assetChart').getContext('2d');
-                chartInstance = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Maintained', 'Pending', 'Offline'],
-                        datasets: [{ data: [12, 5, 2], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'] }]
-                    },
-                    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
-                });
-            }
+            if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+            const ctx = document.getElementById('assetChart').getContext('2d');
+            const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+            const devices = Object.values(deviceMap);
+            const countIN = devices.filter(d => !d.status || d.status === 'IN').length;
+            const countOUT = devices.filter(d => d.status === 'OUT').length;
+            const countUnknown = devices.filter(d => d.status && d.status !== 'IN' && d.status !== 'OUT').length;
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Trong kho (IN)', 'Đang lắp đặt (OUT)', 'Không xác định'],
+                    datasets: [{ data: [countIN, countOUT, countUnknown], backgroundColor: ['#10b981', '#f59e0b', '#94a3b8'] }]
+                },
+                options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+            });
         } else {
             dash.style.display = 'none';
         }
+    }
+
+    function renderCalendar() {
+        const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        const in7Days = new Date(today); in7Days.setDate(today.getDate() + 7);
+        const items = Object.entries(deviceMap)
+            .filter(([, d]) => d.nextMaintenance)
+            .map(([uid, d]) => ({ uid, name: d.name || uid, date: new Date(d.nextMaintenance) }))
+            .sort((a, b) => a.date - b.date)
+            .slice(0, 10);
+        const container = document.getElementById('calendarList');
+        if (items.length === 0) {
+            container.innerHTML = '<p class="text-muted text-center py-3">Chưa có lịch bảo trì nào.</p>';
+            return;
+        }
+        container.innerHTML = items.map(({ uid, name, date }) => {
+            const dueDate = new Date(date); dueDate.setHours(0, 0, 0, 0);
+            const dateStr = date.toLocaleDateString('vi-VN');
+            let badgeClass, badgeLabel;
+            if (dueDate <= today) { badgeClass = 'bg-danger'; badgeLabel = 'Quá hạn'; }
+            else if (dueDate <= in7Days) { badgeClass = 'bg-warning text-dark'; badgeLabel = 'Sắp tới'; }
+            else { badgeClass = 'bg-success'; badgeLabel = 'Đã lên lịch'; }
+            return `<div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                <div><h6 class="mb-0 fw-bold">${name} (${uid})</h6><small class="text-muted">Hạn bảo trì: ${dateStr}</small></div>
+                <span class="badge ${badgeClass} rounded-pill">${badgeLabel}</span>
+            </div>`;
+        }).join('');
     }
 
     function toggleCalendar() {
         document.getElementById('dashboardSection').style.display = 'none';
         document.getElementById('kanbanSection').style.display = 'none';
         const cal = document.getElementById('calendarSection');
-        cal.style.display = cal.style.display === 'none' ? 'block' : 'none';
+        if (cal.style.display === 'none') {
+            cal.style.display = 'block';
+            renderCalendar();
+        } else {
+            cal.style.display = 'none';
+        }
     }
 
     function renderChecklist(type) {

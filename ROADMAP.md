@@ -1,56 +1,92 @@
 # Roadmap: 11_BanDienScan (Electrical Department Maintenance)
 
-> Module quét QR báo cáo bảo trì ban điện độc lập. Bản sao từ `vanhanh-ai/qr`.
+> Module quét QR báo cáo bảo trì ban điện độc lập. CMMS Mini WebApp cho Ban Điện — Hapulico.
 
-**Status**: Active (Initialized)
-**Last Updated**: 2026-05-13
+**Status**: Active — Phase 9 Complete, Phase 10+ Pending
+**Last Updated**: 2026-05-14
+
+---
 
 ## ✅ Trạng thái Hiện tại
-- [x] Khởi tạo module từ repository gốc `vanhanh-ai/qr`.
-- [x] Thiết lập `upstream` remote để nhận cập nhật.
-- [x] Thiết lập `origin` remote hướng về `bandien/scan.git`.
-
-## 🚀 Nhiệm vụ Tiếp theo
-- [ ] Tạo Google Sheet riêng cho Ban điện.
-- [ ] Cập nhật `MANUAL_SHEET_ID` trong `Backend.gs`.
-- [ ] Khởi tạo Apps Script project mới (Clasp) và Deploy.
-
-## 🎯 Tầm nhìn & Nguyên tắc
-- **Mã QR tinh gọn**: Chỉ chứa dữ liệu thô là UID (ví dụ: `TB001`). **Không** chứa URL để tránh việc phải in lại nhãn mỗi khi thay đổi domain/server.
-- **Hệ thống Hybrid**: 
-  - Frontend (Giao diện): Đặt trên GitHub Pages (Short URL: `https://vanhanh-ai.github.io/qr/`).
-  - Backend (Database tạm): Google Sheets.
-- **Kết nối API**: Sử dụng Google Apps Script (GAS) làm cầu nối xử lý và ghi dữ liệu từ Frontend xuống Sheets.
-- **Đa phương thức nhập**: Hỗ trợ cả hai cách ngay tại màn hình chính:
-  1. Quét QR (bằng Camera thiết bị).
-  2. Nhập tay (Manual Input UID).
-- **Đa ngôn ngữ (i18n)**: Tích hợp chuyển đổi Tiếng Việt/Tiếng Anh mượt mà, lưu tùy chọn ngôn ngữ theo từng người dùng.
+- [x] Module khởi tạo từ repository gốc `vanhanh-ai/qr`.
+- [x] Google Sheet riêng cho Ban Điện (`Sheet ID: 1K_5jb0-TrshgCyNs_l5jjTpVjwdmHI-l9gpSHWXTdSg`).
+- [x] GAS Backend deployed (`Backend.gs`, 460 lines).
+- [x] Frontend production-ready (`index.html`, 61KB, Bootstrap 5 + Chart.js + html5-qrcode).
+- [x] RBAC Login (Username + Password + Role).
+- [x] Local-First Architecture (localStorage, tốc độ 0.01s).
 
 ---
 
 ## 🗺️ Các Giai Đoạn Phát Triển
 
-### Phase 1: Xây dựng Frontend (GitHub Pages)
-- [ ] Khởi tạo giao diện tĩnh (HTML/CSS/JS) tối ưu cho Mobile.
-- [ ] Tích hợp thư viện quét mã QR (hỗ trợ camera điện thoại).
-- [ ] Xây dựng form nhập liệu thủ công cho UID.
-- [ ] Triển khai đa ngôn ngữ (i18n) với Tiếng Việt và Tiếng Anh (sử dụng LocalStorage để lưu trạng thái).
-- [ ] Xuất bản dự án lên GitHub Pages.
+### ✅ Phase 1–4: Nền tảng Core (DONE)
+- [x] Frontend tĩnh tối ưu Mobile (HTML/CSS/JS).
+- [x] Quét mã QR bằng camera (html5-qrcode) + nhập tay UID.
+- [x] GAS Backend nhận HTTP POST, ghi Google Sheets, trả JSON (CORS OK).
+- [x] Bảo mật API bằng token (`HAPU_QR_SECRET_2026`).
+- [x] UI refinement: Toast thông báo, âm thanh, rung haptic, skeleton loader.
+- [x] Đa ngôn ngữ (VI/EN) lưu vào localStorage.
 
-### Phase 2: Xây dựng GAS Backend & Google Sheets
-- [ ] Khởi tạo và thiết kế cấu trúc bảng tính Google Sheets:
-  - Bảng Lịch sử Báo cáo (UID, Ngày giờ, Vị trí, Tình trạng, Người báo).
-- [ ] Viết Google Apps Script (GAS) nhận HTTP POST request từ Frontend.
-- [ ] Xử lý lưu trữ dữ liệu vào bảng tính và trả về phản hồi (CORS, JSON response).
-- [ ] Deploy GAS dưới dạng Web App API endpoint.
-- [ ] Kết nối giao diện GitHub Pages để gọi API này.
+### ✅ Phase 5: Dashboard + Asset Profile (DONE)
+- [x] Phân cấp thiết bị: Khu vực > Loại > Thiết bị.
+- [x] Tìm kiếm thông minh theo khu vực / trạng thái.
+- [x] Dashboard Chart.js: biểu đồ tròn trạng thái thiết bị.
+- [x] Asset Profile chi tiết: thông tin kỹ thuật + lịch sử bảo trì.
 
-### Phase 3: Hệ thống Đồng bộ NAS (PostgreSQL)
-- [ ] Xây dựng script đồng bộ (`google-sheets-sync.ts` hoặc tương tự) chạy trên NAS.
-- [ ] Lên lịch Cron job trên NAS để tự động kéo dữ liệu từ Sheets về cơ sở dữ liệu PostgreSQL cục bộ.
-- [ ] Cập nhật trạng thái "đã đồng bộ" lên Sheets hoặc quản lý bằng timestamp.
+### ✅ Phase 6: PM Calendar + Checklist Templates (DONE — UI tĩnh)
+- [x] Giao diện lịch bảo trì (PM Calendar view).
+- [x] Thư viện mẫu Checklist theo loại thiết bị (Điều hòa, Thang máy, Hệ thống điện).
+- [x] Chu kỳ bảo trì cấu hình được (7/30/90 ngày).
 
-### Phase 4: Test & Tối ưu
-- [ ] Kiểm thử quét mã vạch trong điều kiện thiếu sáng.
-- [ ] Thêm phản hồi UI (rung, âm thanh, popup) khi quét và gửi thành công.
-- [ ] Xử lý lưu cache (Offline fallback) nếu thiết bị mất mạng.
+### ✅ Phase 7: Kanban Work Orders (DONE)
+- [x] Giao diện Kanban Board (Todo → In Progress → Done).
+- [x] Giao việc theo Tổ / Cá nhân.
+- [x] Mobile-first: cuộn ngang các cột.
+
+### ✅ Phase 8 (Partial): Work Orders API + CMMS Core (DONE in code)
+- [x] `WorkOrders` Sheet & API: `createWO`, `updateWOStatus`, `getWorkOrders` (Backend.gs).
+- [x] `getInventory` action trong GAS.
+- [x] `AuditLog` Sheet: ghi mọi thay đổi (User, Timestamp, Action).
+- [x] Kanban Live Data: kéo từ localStorage (offline-first).
+- [ ] Cảnh báo tồn kho khi `Stock < MinStock`.
+- [ ] KPI Dashboard thật: MTTR, MTBF, % PM đúng hạn.
+- [ ] Export Excel / báo cáo tự động.
+
+### ✅ Phase 9: RBAC + Smart Preload + Local-First (DONE)
+- [x] Màn hình Login (Username + Password). Phân quyền theo Tổ/Đội.
+- [x] Smart Data Fetching: tải dữ liệu theo quyền hạn sau login.
+- [x] Local-First Architecture: toàn bộ dữ liệu lưu localStorage.
+- [x] Background Syncing: checklist lưu cục bộ, đồng bộ ngầm lên Sheets.
+- [x] Đổi mật khẩu.
+
+### 🔜 Pending: Live Data cho Calendar & Dashboard
+- [ ] Calendar section kéo dữ liệu `nextMaintenance` từ `localDevicesMap` (thay hardcode).
+- [ ] Dashboard chart tính từ `localDevicesMap` (thay `data: [12, 5, 2]`).
+
+### ⏳ Phase 10: Admin Portal (NOT STARTED)
+- [ ] Đăng nhập bảo mật riêng cấp Quản lý.
+- [ ] Cây phân cấp thiết bị: Khu vực → Tòa nhà → Tầng → Phòng → Thiết bị.
+- [ ] Device CRUD + QR Generator tự động.
+- [ ] WO Manager: tạo/giao WO, ưu tiên, hạn xử lý.
+- [ ] Checklist Builder tự tạo mẫu.
+- [ ] Photo Before/After lưu Google Drive.
+
+### ⏳ Phase 11: Metering & Năng lượng (NOT STARTED)
+- [ ] Sheet `MeterPoints`: điện/nước, vị trí, hệ số, ngưỡng.
+- [ ] Ghi chỉ số định kỳ qua WebApp.
+- [ ] Tính sản lượng tự động, cảnh báo vượt ngưỡng.
+- [ ] Biểu đồ xu hướng tiêu thụ theo tháng.
+
+---
+
+## 🎯 Tầm nhìn & Nguyên tắc
+- **Mã QR tinh gọn**: Chỉ chứa UID (ví dụ: `TB001`). Không chứa URL — tránh in lại nhãn khi đổi domain.
+- **Hệ thống Hybrid**: Frontend trên GitHub Pages + Backend GAS + Google Sheets.
+- **Local-First**: Mọi dữ liệu cache trong localStorage để tốc độ 0.01s.
+- **API Security**: Token-based (`HAPU_QR_SECRET_2026`) trên mọi endpoint.
+
+---
+
+**Lead:** Antigravity  
+**Infrastructure:** GitHub Pages + Google Apps Script + Google Sheets  
+**GAS URL:** `https://script.google.com/macros/s/AKfycby3E0dxQIjudu1v1skcZvYT-ItkPYOn7vDu6jMYtR1so6nxW40URBGtf3ILzjWM8Ced/exec`

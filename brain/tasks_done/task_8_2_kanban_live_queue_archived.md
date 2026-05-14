@@ -1,7 +1,7 @@
 # TASK: Phase 8.2 — Kanban Live UI + Work Order Frontend
 **Agent:** Codex  
 **Priority:** HIGH  
-**Status:** PENDING  
+**Status:** DONE (Archived from tasks_queue — already implemented in index.html)
 **Depends on:** task_8_1_wo_backend (phải hoàn thành trước)
 
 ## Mô tả
@@ -48,3 +48,6 @@ Nâng cấp giao diện Kanban trong `index.html` từ Mock Data sang dữ liệ
 - Form tạo WO mới hoạt động
 - `ui_architecture.md` được cập nhật đồng bộ
 - Commit và push lên branch `master`
+
+---
+**Archived:** 2026-05-14 — All requirements confirmed implemented in index.html
