@@ -75,7 +75,9 @@ function doGet(e) {
         location: devData[i][2],
         specs: devData[i][3] || "N/A",
         cycle: devData[i][4] || 30,
-        nextMaintenance: devData[i][5] || ""
+        nextMaintenance: devData[i][5] || "",
+        manager: devData[i][6] || "Chưa phân công",
+        shift: devData[i][7] || "Chưa phân công"
       });
     }
 

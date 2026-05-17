@@ -379,9 +379,11 @@
                     <span class="text-muted small" id="curr_time"></span>
                 </div>
                 <h4 class="fw-bold mt-3 mb-1" id="disp_name">---</h4>
-                <div class="d-flex gap-3 mt-2">
+                <div class="d-flex gap-3 mt-2 flex-wrap">
                     <span class="small text-muted"><i class="bi bi-hash me-1"></i><span id="disp_uid">---</span></span>
                     <span class="small text-muted"><i class="bi bi-geo-alt me-1"></i><span id="disp_loc">---</span></span>
+                    <span class="small text-muted"><i class="bi bi-person-badge me-1"></i><span id="disp_manager">---</span></span>
+                    <span class="small text-muted"><i class="bi bi-clock-history me-1"></i><span id="disp_shift">---</span></span>
                 </div>
             </div>
             <div class="card-body p-0">
@@ -788,6 +790,8 @@
             if (device) {
                 document.getElementById('disp_name').innerText = device.name;
                 document.getElementById('disp_loc').innerText = device.location;
+                document.getElementById('disp_manager').innerText = device.manager || 'Chưa phân công';
+                document.getElementById('disp_shift').innerText = device.shift || 'Chưa phân công';
                 
                 // Show current In/Out status
                 const badge = document.getElementById('disp_status_badge');
