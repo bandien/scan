@@ -17,6 +17,11 @@
 const MANUAL_SHEET_ID = "1K_5jb0-TrshgCyNs_l5jjTpVjwdmHI-l9gpSHWXTdSg"; 
 const API_TOKEN = "HAPU_QR_SECRET_2026"; 
 
+// [TÙY CHỌN] Webhook nhận thông báo tự động
+const DISCORD_WEBHOOK_URL = ""; // VD: "https://discord.com/api/webhooks/..."
+const TELEGRAM_BOT_TOKEN = ""; // VD: "123456789:ABCdef..."
+const TELEGRAM_CHAT_ID = ""; // VD: "-100..."
+
 // Tự động xác định SHEET_ID
 const SHEET_ID = (function() {
   try {
@@ -233,6 +238,39 @@ function doPost(e) {
       return contentResponse({ status: "error", message: "Unauthorized access" });
     }
 
+    // action=createDevice - Admin can add device from Web App
+    if (params.action === 'createDevice') {
+      const devSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Devices");
+      if (!devSheet) return contentResponse({ status: "error", message: "Devices sheet not found" });
+
+      // Check if UID already exists
+      const devData = devSheet.getDataRange().getValues();
+      for (let i = 1; i < devData.length; i++) {
+        if (String(devData[i][0]).trim() === String(params.uid).trim()) {
+          return contentResponse({ status: "error", message: "UID đã tồn tại!" });
+        }
+      }
+
+      devSheet.appendRow([
+        params.uid || '',
+        params.name || '',
+        params.location || '',
+        params.specs || '',
+        params.cycle || 30,
+        params.nextMaintenance || '',
+        params.manager || 'Chưa phân công',
+        params.shift || 'Chưa phân công'
+      ]);
+
+      // Write audit log entry
+      writeAuditLog(params.user || 'System', 'createDevice', params.uid, 'Created new device via Web App');
+      
+      const msg = `✨ **Thiết bị mới:** ${params.name}\n**UID:** ${params.uid}\n**Vị trí:** ${params.location}\n**Tổ:** ${params.manager}\n**Lịch bảo trì:** ${params.cycle} ngày/lần (Tới hạn: ${params.nextMaintenance || 'Chưa rõ'})`;
+      sendAlert(msg);
+
+      return contentResponse({ status: "success", message: "Đã thêm thiết bị mới" });
+    }
+
     // action=createWO — Create a new Work Order with auto-generated WO_ID (WO-YYYYMM-NNNNN)
     if (params.action === 'createWO') {
       const woSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("WorkOrders");
@@ -411,6 +449,55 @@ function writeAuditLog(user, action, target, details) {
     auditSheet.appendRow([new Date(), user, action, target, details]);
   } catch (err) {
     // Non-fatal: audit failure must not block the main operation
+  }
+}
+
+// Send alert to Telegram / Discord if configured
+function sendAlert(message) {
+  try {
+    if (DISCORD_WEBHOOK_URL) {
+      UrlFetchApp.fetch(DISCORD_WEBHOOK_URL, {
+        method: "post",
+        contentType: "application/json",
+        payload: JSON.stringify({ content: message })
+      });
+    }
+    if (TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID) {
+      const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+      UrlFetchApp.fetch(url, {
+        method: "post",
+        contentType: "application/json",
+        payload: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: message })
+      });
+    }
+  } catch (err) {
+    // Ignore alert failure
+  }
+}
+
+// Hàm chạy định kỳ (Daily Trigger) để kiểm tra lịch bảo trì
+function checkMaintenanceDue() {
+  const devSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Devices");
+  if (!devSheet) return;
+  const devData = devSheet.getDataRange().getValues();
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  
+  let dueList = [];
+  
+  for (let i = 1; i < devData.length; i++) {
+    const nextStr = String(devData[i][5]).trim();
+    if (nextStr) {
+      const nextDate = new Date(nextStr);
+      if (!isNaN(nextDate) && nextDate <= today) {
+        dueList.push(`- **${devData[i][1]}** (UID: ${devData[i][0]}) - Tại: ${devData[i][2]} (Tổ: ${devData[i][6]})`);
+      }
+    }
+  }
+  
+  if (dueList.length > 0) {
+    const msg = `⚠️ **CẢNH BÁO BẢO TRÌ TỚI HẠN** ⚠️\nHôm nay có ${dueList.length} thiết bị cần bảo trì:\n${dueList.join("\n")}`;
+    sendAlert(msg);
   }
 }
 
