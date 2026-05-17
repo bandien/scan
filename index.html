@@ -345,21 +345,31 @@
                         </div>
                     </div>
                     <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label fw-bold small">Chu kỳ bảo trì (Ngày)</label>
-                            <input type="number" class="form-control rounded-3" id="newDevCycle" list="dlCycle" placeholder="VD: 30" onchange="suggestNextMaintenance()">
-                            <small class="text-muted" style="font-size:0.65rem;">Gợi ý: 7, 30, 90, 180, 365</small>
+                        <div class="col-4">
+                            <label class="form-label fw-bold small">Chu kỳ (Ngày)</label>
+                            <input type="number" class="form-control rounded-3 px-2" id="newDevCycle" list="dlCycle" placeholder="VD: 30" onchange="suggestNextMaintenance()">
                             <datalist id="dlCycle">
-                                <option value="7">Hàng tuần (7 ngày)</option>
-                                <option value="30">Hàng tháng (30 ngày)</option>
-                                <option value="90">Hàng quý (90 ngày)</option>
-                                <option value="180">Nửa năm (180 ngày)</option>
-                                <option value="365">Hàng năm (365 ngày)</option>
+                                <option value="7">Tuần (7)</option>
+                                <option value="30">Tháng (30)</option>
+                                <option value="90">Quý (90)</option>
+                                <option value="180">Nửa năm (180)</option>
+                                <option value="365">Năm (365)</option>
                             </datalist>
                         </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold small">Bảo trì tiếp theo</label>
-                            <input type="date" class="form-control rounded-3" id="newDevNextMaint">
+                        <div class="col-4">
+                            <label class="form-label fw-bold small">Ngày kế tiếp</label>
+                            <input type="date" class="form-control rounded-3 px-2" id="newDevNextMaint">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label fw-bold small">Báo trước</label>
+                            <input type="number" class="form-control rounded-3 px-2" id="newDevWarning" list="dlWarning" placeholder="VD: 7">
+                            <datalist id="dlWarning">
+                                <option value="1">1 ngày</option>
+                                <option value="3">3 ngày</option>
+                                <option value="7">1 tuần</option>
+                                <option value="14">2 tuần</option>
+                                <option value="30">1 tháng</option>
+                            </datalist>
                         </div>
                     </div>
                 </div>
@@ -1264,6 +1274,7 @@
             document.getElementById('newDevManager').value = '';
             document.getElementById('newDevShift').value = '';
             document.getElementById('newDevCycle').value = '30';
+            document.getElementById('newDevWarning').value = '7';
             suggestNextMaintenance();
         }
         new bootstrap.Modal(document.getElementById('addDeviceModal')).show();
@@ -1289,7 +1300,8 @@
                 manager: document.getElementById('newDevManager').value.trim(),
                 shift: document.getElementById('newDevShift').value.trim(),
                 cycle: document.getElementById('newDevCycle').value.trim() || 30,
-                nextMaintenance: document.getElementById('newDevNextMaint').value
+                nextMaintenance: document.getElementById('newDevNextMaint').value,
+                warningDays: document.getElementById('newDevWarning').value.trim() || 7
             };
 
             const res = await fetch(gasUrl, {

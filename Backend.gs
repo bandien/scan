@@ -82,7 +82,8 @@ function doGet(e) {
         cycle: devData[i][4] || 30,
         nextMaintenance: devData[i][5] || "",
         manager: devData[i][6] || "Chưa phân công",
-        shift: devData[i][7] || "Chưa phân công"
+        shift: devData[i][7] || "Chưa phân công",
+        warningDays: devData[i][8] || 7
       });
     }
 
@@ -259,13 +260,14 @@ function doPost(e) {
         params.cycle || 30,
         params.nextMaintenance || '',
         params.manager || 'Chưa phân công',
-        params.shift || 'Chưa phân công'
+        params.shift || 'Chưa phân công',
+        params.warningDays || 7
       ]);
 
       // Write audit log entry
       writeAuditLog(params.user || 'System', 'createDevice', params.uid, 'Created new device via Web App');
       
-      const msg = `✨ **Thiết bị mới:** ${params.name}\n**UID:** ${params.uid}\n**Vị trí:** ${params.location}\n**Tổ:** ${params.manager}\n**Lịch bảo trì:** ${params.cycle} ngày/lần (Tới hạn: ${params.nextMaintenance || 'Chưa rõ'})`;
+      const msg = `✨ **Thiết bị mới:** ${params.name}\n**UID:** ${params.uid}\n**Vị trí:** ${params.location}\n**Tổ:** ${params.manager}\n**Lịch bảo trì:** ${params.cycle} ngày/lần (Tới hạn: ${params.nextMaintenance || 'Chưa rõ'} - Báo trước: ${params.warningDays || 7} ngày)`;
       sendAlert(msg);
 
       return contentResponse({ status: "success", message: "Đã thêm thiết bị mới" });
@@ -484,20 +486,43 @@ function checkMaintenanceDue() {
   today.setHours(0,0,0,0);
   
   let dueList = [];
+  let approachingList = [];
   
   for (let i = 1; i < devData.length; i++) {
     const nextStr = String(devData[i][5]).trim();
     if (nextStr) {
       const nextDate = new Date(nextStr);
-      if (!isNaN(nextDate) && nextDate <= today) {
-        dueList.push(`- **${devData[i][1]}** (UID: ${devData[i][0]}) - Tại: ${devData[i][2]} (Tổ: ${devData[i][6]})`);
+      if (!isNaN(nextDate)) {
+        const warningDays = parseInt(devData[i][8]) || 7; // Column I (index 8)
+        
+        // Calculate difference in days
+        const diffTime = nextDate.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays < 0) {
+          dueList.push(`- 🔴 **Quá hạn ${Math.abs(diffDays)} ngày:** ${devData[i][1]} (${devData[i][0]}) - Tổ: ${devData[i][6]}`);
+        } else if (diffDays === 0) {
+          dueList.push(`- 🟠 **Hôm nay:** ${devData[i][1]} (${devData[i][0]}) - Tổ: ${devData[i][6]}`);
+        } else if (diffDays <= warningDays) {
+          approachingList.push(`- 🟡 **Còn ${diffDays} ngày:** ${devData[i][1]} (${devData[i][0]}) - Tổ: ${devData[i][6]}`);
+        }
       }
     }
   }
   
+  let msgLines = [];
   if (dueList.length > 0) {
-    const msg = `⚠️ **CẢNH BÁO BẢO TRÌ TỚI HẠN** ⚠️\nHôm nay có ${dueList.length} thiết bị cần bảo trì:\n${dueList.join("\n")}`;
-    sendAlert(msg);
+    msgLines.push(`⚠️ **ĐẾN HẠN/QUÁ HẠN BẢO TRÌ (${dueList.length})** ⚠️`);
+    msgLines.push(dueList.join("\n"));
+  }
+  if (approachingList.length > 0) {
+    if (msgLines.length > 0) msgLines.push("\n");
+    msgLines.push(`🔔 **SẮP ĐẾN HẠN BẢO TRÌ (${approachingList.length})** 🔔`);
+    msgLines.push(approachingList.join("\n"));
+  }
+
+  if (msgLines.length > 0) {
+    sendAlert(msgLines.join("\n"));
   }
 }
 
