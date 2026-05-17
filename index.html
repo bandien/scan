@@ -703,9 +703,24 @@
         document.getElementById('loginSpinner').style.display = 'inline-block';
 
         try {
-            const res = await fetch(`${gasUrl}?action=login&username=${encodeURIComponent(username)}&pin=${encodeURIComponent(password)}&token=${API_TOKEN}`);
-            const result = await res.json();
+            console.log(`[DEBUG] Attempting login for ${username}...`);
+            const fetchUrl = `${gasUrl}?action=login&username=${encodeURIComponent(username)}&pin=${encodeURIComponent(password)}&token=${API_TOKEN}`;
+            const res = await fetch(fetchUrl);
+            const text = await res.text();
+            console.log(`[DEBUG] Server response:`, text);
+            let result;
+            try {
+                result = JSON.parse(text);
+            } catch(e) {
+                console.error("[DEBUG] JSON Parse Error:", e);
+                showToast(`Lỗi dữ liệu: ${e.message}`, "danger");
+                document.getElementById('btnLogin').style.display = 'block';
+                document.getElementById('loginSpinner').style.display = 'none';
+                return;
+            }
+
             if (result.status === "success") {
+                console.log(`[DEBUG] Login successful. Role: ${result.user.role}`);
                 localStorage.setItem('currentUser', JSON.stringify(result.user));
                 
                 // OPTIMIZATION: Convert array to Object for O(1) Lookup
@@ -717,12 +732,14 @@
                 updateUI(result.user);
                 showToast(`Xin chào ${result.user.name} (${result.user.role})`);
             } else {
+                console.warn(`[DEBUG] Login failed: ${result.message}`);
                 showToast(result.message || "Sai tên hoặc mật khẩu", "danger");
                 document.getElementById('btnLogin').style.display = 'block';
                 document.getElementById('loginSpinner').style.display = 'none';
             }
         } catch (e) {
-            showToast("Lỗi kết nối", "danger");
+            console.error("[DEBUG] Network error:", e);
+            showToast(`Lỗi kết nối: ${e.message}`, "danger");
             document.getElementById('btnLogin').style.display = 'block';
             document.getElementById('loginSpinner').style.display = 'none';
         }
