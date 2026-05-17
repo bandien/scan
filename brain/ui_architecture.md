@@ -72,7 +72,7 @@ graph TD
 | **Mẫu Checklist** | `#dynamicChecklist` | `renderChecklist(type)` | Tĩnh (Cấu hình cứng trong mảng JS) | `[index.html:renderChecklist]` |
 | **Gửi Dữ liệu (Submit)** | `.btn-submit`, `#notes` | `submitData()` | Đẩy thẳng lên GAS POST | `[index.html:submitData]` |
 | **Bảng Dashboard** | `#dashboardSection`, `#assetChart`| `toggleDashboard()` | `Chart.js` (Đang là Mock Data) | `[index.html#dashboardSection]` |
-| **Bảng Kanban (Live)** | `#kanbanSection`, `#kanbanBoard` | `toggleKanban()`, `loadKanban()`, `renderKanban()` | GAS GET `action=getWorkOrders` → `localStorage('localWorkOrders')` | `[index.html#kanbanSection]` |
+| **Bảng Kanban (Live)** | `#kanbanSection`, `#kanbanBoard` | `toggleKanban()`, `loadKanban()`, `normalizeWorkOrders()`, `renderKanban()` | GAS GET `action=getWorkOrders` → chuẩn hóa schema WO → `localStorage('localWorkOrders')` | `[index.html#kanbanSection]` |
 | **WO Detail Modal** | `#woDetailModal`, `#woDetailBody`, `#woNextStatusBtn` | `openWODetail(wo)`, `advanceWOStatus()`, `updateWOStatus()`, `quickAdvanceStatus()` | `localWorkOrders` → GAS POST `action=updateWOStatus` | `[index.html#woDetailModal]` |
 | **Form Tạo WO** | `#createWOModal`, `#woType`, `#woPriority`, `#woAsset`, `#woDescription`, `#woDueDate` | `showCreateWOModal()`, `submitCreateWO()` | `localDevices` (dropdown) → GAS POST `action=createWO` | `[index.html#createWOModal]` |
 | **Bảng Lịch (Calendar)** | `#calendarSection` | `toggleCalendar()` | (Đang là Mock Data) | `[index.html#calendarSection]` |

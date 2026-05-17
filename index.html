@@ -1036,8 +1036,33 @@
         'In Progress': '#f59e0b', 'Done': '#10b981', 'Closed': '#6b7280'
     };
     const PRIORITY_BS = { 'Low': 'success', 'Medium': 'primary', 'High': 'warning text-dark', 'Urgent': 'danger' };
+    const WO_STATUS_ALIASES = { 'InProgress': 'In Progress', 'In progress': 'In Progress' };
 
     let currentWO = null;
+
+    function normalizeWOStatus(status) {
+        return WO_STATUS_ALIASES[status] || status || 'New';
+    }
+
+    function normalizeWorkOrder(wo) {
+        const assetUID = wo.AssetUID || wo.assetUID || '';
+        const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+        return {
+            WO_ID: wo.WO_ID || wo.woId || wo.wo_id || '',
+            Type: wo.Type || wo.type || '',
+            Priority: wo.Priority || wo.priority || 'Medium',
+            Status: normalizeWOStatus(wo.Status || wo.status),
+            AssetUID: assetUID,
+            AssetName: wo.AssetName || wo.assetName || (deviceMap[assetUID] && deviceMap[assetUID].name) || '',
+            AssignedTo: wo.AssignedTo || wo.assignedTo || '',
+            DueDate: wo.DueDate || wo.dueDate || '',
+            Description: wo.Description || wo.description || ''
+        };
+    }
+
+    function normalizeWorkOrders(workOrders) {
+        return (workOrders || []).map(normalizeWorkOrder);
+    }
 
     function toggleKanban() {
         document.getElementById('dashboardSection').style.display = 'none';
@@ -1056,14 +1081,16 @@
         board.innerHTML = '<div class="text-center text-muted p-4 w-100"><div class="spinner-border spinner-border-sm me-2"></div> Đang tải...</div>';
 
         const cached = localStorage.getItem('localWorkOrders');
-        if (cached) renderKanban(JSON.parse(cached));
+        if (cached) renderKanban(normalizeWorkOrders(JSON.parse(cached)));
 
         try {
             const res = await fetch(`${gasUrl}?action=getWorkOrders&token=${API_TOKEN}`);
             const result = await res.json();
-            if (result.status === 'success' && result.data) {
-                localStorage.setItem('localWorkOrders', JSON.stringify(result.data));
-                renderKanban(result.data);
+            const workOrders = result.data || result.workOrders;
+            if (result.status === 'success' && workOrders) {
+                const normalized = normalizeWorkOrders(workOrders);
+                localStorage.setItem('localWorkOrders', JSON.stringify(normalized));
+                renderKanban(normalized);
             } else if (!cached) {
                 board.innerHTML = '<div class="text-center text-muted p-4 w-100"><i class="bi bi-inbox me-2"></i>Không có dữ liệu</div>';
             }
@@ -1153,7 +1180,7 @@
         try {
             await fetch(gasUrl, {
                 method: 'POST', mode: 'no-cors',
-                body: JSON.stringify({ action: 'updateWOStatus', token: API_TOKEN, wo_id: woId, status: newStatus })
+                body: JSON.stringify({ action: 'updateWOStatus', token: API_TOKEN, woId: woId, wo_id: woId, status: newStatus })
             });
             const cached = JSON.parse(localStorage.getItem('localWorkOrders') || '[]');
             const updated = cached.map(wo => wo.WO_ID === woId ? { ...wo, Status: newStatus } : wo);
