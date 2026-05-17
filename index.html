@@ -182,6 +182,7 @@
                     <i class="bi bi-grid-fill me-1"></i> Menu
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 mt-2 p-2" style="min-width: 200px;">
+                    <li id="menuAddDevice" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="showAddDeviceModal()"><i class="bi bi-plus-square-dotted me-2 text-success"></i> Thêm thiết bị mới</a></li>
                     <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleCalendar()" id="btn-calendar"><i class="bi bi-calendar-event me-2 text-primary"></i> Lịch Bảo Trì</a></li>
                     <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleKanban()" id="btn-kanban"><i class="bi bi-kanban me-2 text-primary"></i> Kanban WO</a></li>
                     <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleDashboard()" id="btn-dashboard"><i class="bi bi-bar-chart-fill me-2 text-primary"></i> Dashboard</a></li>
@@ -299,6 +300,48 @@
                     <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
                     <button type="button" class="btn btn-primary rounded-pill px-4" onclick="submitCreateWO()">
                         <i class="bi bi-check-lg me-1"></i> Tạo WO
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Device Modal -->
+    <div class="modal fade" id="addDeviceModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-plus-square-dotted me-2 text-primary"></i>Thêm thiết bị mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Mã thiết bị (UID)</label>
+                        <input type="text" class="form-control rounded-3" id="newDevUID" placeholder="VD: HAPU-PUMP-01">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Tên thiết bị</label>
+                        <input type="text" class="form-control rounded-3" id="newDevName" placeholder="VD: Bơm tăng áp">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Vị trí lắp đặt</label>
+                        <input type="text" class="form-control rounded-3" id="newDevLoc" placeholder="VD: Tầng hầm B1">
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold small">Tổ quản lý</label>
+                            <input type="text" class="form-control rounded-3" id="newDevManager" placeholder="VD: Cơ Điện">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold small">Ca trực</label>
+                            <input type="text" class="form-control rounded-3" id="newDevShift" placeholder="VD: Ca sáng">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary rounded-pill px-4" onclick="submitAddDevice()">
+                        <i class="bi bi-check-lg me-1"></i> Lưu thiết bị
                     </button>
                 </div>
             </div>
@@ -445,7 +488,7 @@
     // APP CONFIGURATION (Cấu hình ứng dụng)
     // ==========================================
     const CONFIG = {
-        gasUrl: 'https://script.google.com/macros/s/AKfycby-mdMMfmNVGddhuvBcSxwqVEEYpniWY55HryMdm0k0bzyOfzy8xhip8r19K-BKY49Q/exec',
+        gasUrl: 'https://script.google.com/macros/s/AKfycbzW4TxDarLBOpZvO8hnE0R65IsCd95a5l-XPASjUmZNuefH5MiWMs8lCpLpggzFwyXK/exec',
         apiToken: 'HAPU_QR_SECRET_2026',
         appTitle: 'BanDienScan',
         companyName: 'HAPU Complex'
@@ -656,6 +699,11 @@
         document.getElementById('userBadge').style.display = 'inline-block';
         document.getElementById('userNameDisplay').innerText = user.name;
         document.getElementById('userRoleDisplay').innerHTML = '<i class="bi bi-briefcase me-1"></i> ' + (user.role || 'User');
+        if (user.role === 'Admin' || user.role === 'Manager') {
+            document.getElementById('menuAddDevice').style.display = 'block';
+        } else {
+            document.getElementById('menuAddDevice').style.display = 'none';
+        }
         updateSyncStatus();
     }
 
@@ -1133,6 +1181,56 @@
             setTimeout(() => loadKanban(), 1500);
         } catch (e) {
             showToast('Lỗi tạo WO, kiểm tra kết nối', 'danger');
+        }
+    }
+
+    function showAddDeviceModal() {
+        document.getElementById('newDevUID').value = '';
+        document.getElementById('newDevName').value = '';
+        document.getElementById('newDevLoc').value = '';
+        document.getElementById('newDevManager').value = '';
+        document.getElementById('newDevShift').value = '';
+        new bootstrap.Modal(document.getElementById('addDeviceModal')).show();
+    }
+
+    async function submitAddDevice() {
+        const uid = document.getElementById('newDevUID').value.trim();
+        const name = document.getElementById('newDevName').value.trim();
+        if (!uid || !name) { showToast('UID và Tên thiết bị không được để trống', 'warning'); return; }
+
+        showToast('Đang thêm thiết bị...');
+        
+        try {
+            const userStr = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+            const user = JSON.parse(userStr);
+            const payload = {
+                action: 'createDevice',
+                token: API_TOKEN,
+                user: user.name,
+                uid: uid,
+                name: name,
+                location: document.getElementById('newDevLoc').value.trim(),
+                manager: document.getElementById('newDevManager').value.trim(),
+                shift: document.getElementById('newDevShift').value.trim()
+            };
+
+            const res = await fetch(gasUrl, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            if (result.status === 'success') {
+                showToast('Đã thêm thiết bị thành công! Vui lòng tải lại trang.', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('addDeviceModal')).hide();
+                // Optionally add it to local storage right away to avoid reload
+                const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+                deviceMap[uid] = payload;
+                localStorage.setItem('localDevicesMap', JSON.stringify(deviceMap));
+            } else {
+                showToast(result.message || 'Lỗi từ máy chủ', 'danger');
+            }
+        } catch (e) {
+            showToast('Lỗi khi thêm thiết bị', 'danger');
         }
     }
 
