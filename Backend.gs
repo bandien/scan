@@ -19,8 +19,8 @@ const API_TOKEN = "HAPU_QR_SECRET_2026";
 
 // [TÙY CHỌN] Webhook nhận thông báo tự động
 const DISCORD_WEBHOOK_URL = ""; // VD: "https://discord.com/api/webhooks/..."
-const TELEGRAM_BOT_TOKEN = ""; // VD: "123456789:ABCdef..."
-const TELEGRAM_CHAT_ID = ""; // VD: "-100..."
+const TELEGRAM_BOT_TOKEN = "8123778511:AAFofqkL1DBCgl41GVXPWaq6keNG2HDfj1I";
+const TELEGRAM_CHAT_ID = "-4279433930";
 
 // Tự động xác định SHEET_ID
 const SHEET_ID = (function() {
