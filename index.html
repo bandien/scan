@@ -317,24 +317,31 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label fw-bold small">Mã thiết bị (UID)</label>
-                        <input type="text" class="form-control rounded-3" id="newDevUID" placeholder="VD: HAPU-PUMP-01">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="newDevUID" placeholder="VD: HAPU-PUMP-01">
+                            <button class="btn btn-outline-secondary" type="button" onclick="startScannerForNewDevice()"><i class="bi bi-qr-code-scan"></i></button>
+                        </div>
                     </div>
+                    <datalist id="dlName"></datalist>
+                    <datalist id="dlLoc"></datalist>
+                    <datalist id="dlManager"></datalist>
+                    <datalist id="dlShift"></datalist>
                     <div class="mb-3">
                         <label class="form-label fw-bold small">Tên thiết bị</label>
-                        <input type="text" class="form-control rounded-3" id="newDevName" placeholder="VD: Bơm tăng áp">
+                        <input type="text" class="form-control rounded-3" id="newDevName" list="dlName" placeholder="VD: Bơm tăng áp">
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold small">Vị trí lắp đặt</label>
-                        <input type="text" class="form-control rounded-3" id="newDevLoc" placeholder="VD: Tầng hầm B1">
+                        <input type="text" class="form-control rounded-3" id="newDevLoc" list="dlLoc" placeholder="VD: Tầng hầm B1">
                     </div>
                     <div class="row g-2 mb-3">
                         <div class="col-6">
                             <label class="form-label fw-bold small">Tổ quản lý</label>
-                            <input type="text" class="form-control rounded-3" id="newDevManager" placeholder="VD: Cơ Điện">
+                            <input type="text" class="form-control rounded-3" id="newDevManager" list="dlManager" placeholder="VD: Cơ Điện">
                         </div>
                         <div class="col-6">
                             <label class="form-label fw-bold small">Ca trực</label>
-                            <input type="text" class="form-control rounded-3" id="newDevShift" placeholder="VD: Ca sáng">
+                            <input type="text" class="form-control rounded-3" id="newDevShift" list="dlShift" placeholder="VD: Ca sáng">
                         </div>
                     </div>
                 </div>
@@ -1184,12 +1191,52 @@
         }
     }
 
+    let isScanningForNewDevice = false;
+
+    function startScannerForNewDevice() {
+        isScanningForNewDevice = true;
+        bootstrap.Modal.getInstance(document.getElementById('addDeviceModal')).hide();
+        const reader = document.getElementById('reader'); 
+        const torchBtn = document.getElementById('torchBtn');
+        reader.style.display = 'block';
+        
+        scanner.start({ facingMode: "environment" }, 
+        { fps: 20, qrbox: {width: 280, height: 180}, aspectRatio: 1.777778 }, 
+        (uid) => {
+            playBeep();
+            if (navigator.vibrate) navigator.vibrate(100);
+            reader.style.display = 'none'; 
+            torchBtn.style.display = 'none';
+            scanner.stop();
+            
+            document.getElementById('newDevUID').value = uid;
+            new bootstrap.Modal(document.getElementById('addDeviceModal')).show();
+            isScanningForNewDevice = false;
+        }, (err) => {});
+    }
+
     function showAddDeviceModal() {
-        document.getElementById('newDevUID').value = '';
-        document.getElementById('newDevName').value = '';
-        document.getElementById('newDevLoc').value = '';
-        document.getElementById('newDevManager').value = '';
-        document.getElementById('newDevShift').value = '';
+        const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+        const names = new Set(), locs = new Set(), managers = new Set(), shifts = new Set();
+        Object.values(deviceMap).forEach(d => {
+            if (d.name) names.add(d.name);
+            if (d.location) locs.add(d.location);
+            if (d.manager && d.manager !== 'Chưa phân công') managers.add(d.manager);
+            if (d.shift && d.shift !== 'Chưa phân công') shifts.add(d.shift);
+        });
+        const makeOptions = (set) => Array.from(set).map(v => `<option value="${v}">`).join('');
+        document.getElementById('dlName').innerHTML = makeOptions(names);
+        document.getElementById('dlLoc').innerHTML = makeOptions(locs);
+        document.getElementById('dlManager').innerHTML = makeOptions(managers);
+        document.getElementById('dlShift').innerHTML = makeOptions(shifts);
+
+        if (!isScanningForNewDevice) {
+            document.getElementById('newDevUID').value = '';
+            document.getElementById('newDevName').value = '';
+            document.getElementById('newDevLoc').value = '';
+            document.getElementById('newDevManager').value = '';
+            document.getElementById('newDevShift').value = '';
+        }
         new bootstrap.Modal(document.getElementById('addDeviceModal')).show();
     }
 
