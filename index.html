@@ -186,7 +186,7 @@
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 mt-2 p-2" style="min-width: 200px;">
                     <li id="menuAddDevice" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="showAddDeviceModal()"><i class="bi bi-plus-square-dotted me-2 text-success"></i> Thêm thiết bị mới</a></li>
-                    <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleDeviceList()" id="btn-devices"><i class="bi bi-cpu me-2 text-primary"></i> Danh sách Thiết bị</a></li>
+                    <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleDeviceList()" id="btn-device-list"><i class="bi bi-cpu me-2 text-primary"></i> Thiết bị của tôi</a></li>
                     <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleCalendar()" id="btn-calendar"><i class="bi bi-calendar-event me-2 text-primary"></i> Lịch Bảo Trì</a></li>
                     <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleKanban()" id="btn-kanban"><i class="bi bi-kanban me-2 text-primary"></i> Kanban WO</a></li>
                     <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleDashboard()" id="btn-dashboard"><i class="bi bi-bar-chart-fill me-2 text-primary"></i> Dashboard</a></li>
@@ -224,6 +224,31 @@
         <div id="calendarList" class="list-group"></div>
     </div>
 
+    <!-- Device List Section -->
+    <div id="deviceListSection" class="card-premium p-3 mb-4" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0 text-gradient"><i class="bi bi-cpu"></i> Thiết bị của tôi</h5>
+            <span class="badge bg-primary rounded-pill px-3 py-1" id="deviceListCount">0 máy</span>
+        </div>
+        
+        <!-- Role-based Tabs/Toggles -->
+        <div id="deviceListTabs" class="d-flex gap-2 mb-3" style="display: none !important;">
+            <button class="btn btn-sm btn-primary rounded-pill px-3" id="tabMyDevices" onclick="setDeviceListFilter('my')">Tổ của tôi</button>
+            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" id="tabAllDevices" onclick="setDeviceListFilter('all')">Tất cả thiết bị</button>
+        </div>
+
+        <div class="mb-3">
+            <div class="input-group">
+                <span class="input-group-text bg-light border-0"><i class="bi bi-search"></i></span>
+                <input type="text" class="form-control bg-light border-0" placeholder="Tìm nhanh thiết bị..." id="deviceSearchInput" oninput="renderDeviceList()">
+            </div>
+        </div>
+
+        <div id="deviceListContainer" class="d-flex flex-column gap-2" style="max-height: 400px; overflow-y: auto;">
+            <!-- Devices rendered here dynamically -->
+        </div>
+    </div>
+
     <!-- Kanban Section -->
     <div id="kanbanSection" class="card-premium p-3 mb-4" style="display: none;">
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -236,33 +261,6 @@
             <div class="text-center text-muted p-4 w-100">
                 <div class="spinner-border spinner-border-sm me-2"></div> Đang tải...
             </div>
-        </div>
-    </div>
-
-    <!-- Device List Section -->
-    <div id="deviceListSection" class="card-premium p-3 mb-4" style="display: none;">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="fw-bold mb-0"><i class="bi bi-cpu"></i> Danh sách thiết bị</h5>
-            <div class="input-group input-group-sm w-50" style="max-width: 200px;">
-                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-                <input type="text" id="deviceListSearch" class="form-control border-start-0" placeholder="Tìm kiếm..." oninput="filterDeviceList()">
-            </div>
-        </div>
-        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-            <table class="table table-hover align-middle mb-0" style="font-size: 0.83rem;">
-                <thead class="table-light sticky-top">
-                    <tr>
-                        <th>Mã UID</th>
-                        <th>Tên thiết bị</th>
-                        <th>Vị trí</th>
-                        <th>Tổ / Ca</th>
-                        <th>Trạng thái</th>
-                    </tr>
-                </thead>
-                <tbody id="deviceListTableBody">
-                    <!-- Dynamic Rows -->
-                </tbody>
-            </table>
         </div>
     </div>
 
@@ -699,6 +697,148 @@
         }
     }
 
+    let deviceListFilterMode = 'my';
+
+    function setDeviceListFilter(mode) {
+        deviceListFilterMode = mode;
+        const btnMy = document.getElementById('tabMyDevices');
+        const btnAll = document.getElementById('tabAllDevices');
+        if (mode === 'my') {
+            btnMy.classList.replace('btn-outline-secondary', 'btn-primary');
+            btnAll.classList.replace('btn-primary', 'btn-outline-secondary');
+        } else {
+            btnAll.classList.replace('btn-outline-secondary', 'btn-primary');
+            btnMy.classList.replace('btn-primary', 'btn-outline-secondary');
+        }
+        renderDeviceList();
+    }
+
+    function toggleDeviceList() {
+        document.getElementById('dashboardSection').style.display = 'none';
+        document.getElementById('kanbanSection').style.display = 'none';
+        document.getElementById('calendarSection').style.display = 'none';
+        const section = document.getElementById('deviceListSection');
+        if (section.style.display === 'none') {
+            section.style.display = 'block';
+            renderDeviceList();
+        } else {
+            section.style.display = 'none';
+        }
+    }
+
+    function renderDeviceList() {
+        const userStr = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+        if (!userStr) return;
+        const user = JSON.parse(userStr);
+        const role = user.role || 'Vận hành';
+        const username = String(user.name).toLowerCase().trim();
+        
+        const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+        const devices = Object.values(deviceMap);
+        const searchInput = document.getElementById('deviceSearchInput').value.toLowerCase().trim();
+
+        // Control tabs display based on role
+        const tabEl = document.getElementById('deviceListTabs');
+        if (role === 'Admin' || role === 'Manager') {
+            tabEl.style.cssText = 'display: flex !important;';
+        } else {
+            tabEl.style.cssText = 'display: none !important;';
+            deviceListFilterMode = 'my'; // Force Operator to only see assigned
+        }
+
+        let filtered = devices.filter(d => {
+            // Apply Search filter
+            const matchesSearch = String(d.name || '').toLowerCase().includes(searchInput) || 
+                                  String(d.uid || '').toLowerCase().includes(searchInput) ||
+                                  String(d.location || '').toLowerCase().includes(searchInput);
+            if (!matchesSearch) return false;
+
+            // Apply Role-based access control
+            if (role === 'Admin') {
+                if (deviceListFilterMode === 'my') {
+                    // Admin's "my" shows devices managed by user "admin"
+                    const devManager = String(d.manager || '').toLowerCase().trim();
+                    return devManager.includes(username);
+                }
+                return true; // Admin "all" shows everything
+            } else if (role === 'Manager') {
+                if (deviceListFilterMode === 'my') {
+                    // Manager's "my" shows devices managed by their team
+                    const devManager = String(d.manager || '').toLowerCase().trim();
+                    return devManager.includes(username) || devManager.includes('quản lý') || devManager.includes('cơ điện');
+                }
+                return true; // Manager "all" shows everything
+            } else {
+                // Operator (Vận hành / Kỹ thuật) can ONLY see assigned
+                const devManager = String(d.manager || '').toLowerCase().trim();
+                const devShift = String(d.shift || '').toLowerCase().trim();
+                return devManager.includes(username) || devShift.includes(username) || devManager.includes('vận hành');
+            }
+        });
+
+        // Sort: Overdue PM first, then active
+        const today = new Date(); today.setHours(0,0,0,0);
+        filtered.sort((a, b) => {
+            if (a.nextMaintenance && b.nextMaintenance) {
+                return new Date(a.nextMaintenance) - new Date(b.nextMaintenance);
+            }
+            return a.nextMaintenance ? -1 : 1;
+        });
+
+        // Set count badge
+        document.getElementById('deviceListCount').innerText = `${filtered.length} máy`;
+
+        const container = document.getElementById('deviceListContainer');
+        if (filtered.length === 0) {
+            container.innerHTML = '<div class="text-muted text-center py-4"><i class="bi bi-cpu me-2" style="font-size: 1.5rem;"></i> Không tìm thấy thiết bị nào.</div>';
+            return;
+        }
+
+        container.innerHTML = filtered.map(d => {
+            const isOut = d.status === 'OUT';
+            const statusClass = isOut ? 'bg-warning-subtle text-warning' : 'bg-success-subtle text-success';
+            const statusLabel = isOut ? 'OUT (Lắp đặt)' : 'IN (Trong kho)';
+            
+            // Check PM Overdue status
+            let pmAlert = '';
+            if (d.nextMaintenance) {
+                const nextDate = new Date(d.nextMaintenance);
+                nextDate.setHours(0,0,0,0);
+                if (nextDate <= today) {
+                    pmAlert = '<span class="badge bg-danger rounded-pill ms-2" style="font-size: 0.6rem;">Overdue PM</span>';
+                }
+            }
+
+            return `
+                <div class="card p-3 border-light shadow-sm device-card animate__animated animate__fadeInUp" onclick="selectDevice('${d.uid}')" style="cursor: pointer; border-radius: 16px; transition: transform 0.2s, box-shadow 0.2s; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); margin-bottom: 8px;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="fw-bold text-dark d-flex align-items-center" style="font-size: 0.95rem;">
+                            ${d.name || d.uid}
+                            ${pmAlert}
+                        </div>
+                        <span class="badge ${statusClass} rounded-pill" style="font-size: 0.65rem; padding: 4px 10px;">${statusLabel}</span>
+                    </div>
+                    <div class="d-flex gap-3 flex-wrap text-muted" style="font-size: 0.75rem;">
+                        <span><i class="bi bi-hash text-primary me-1"></i>${d.uid}</span>
+                        <span><i class="bi bi-geo-alt text-primary me-1"></i>${d.location || 'Chưa rõ'}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mt-2 pt-2 border-top border-light text-muted" style="font-size: 0.7rem;">
+                        <span><i class="bi bi-person-badge me-1"></i>${d.manager || 'Chưa phân công'}</span>
+                        <span><i class="bi bi-clock-history me-1"></i>${d.shift || 'Chưa phân công'}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function selectDevice(uid) {
+        document.getElementById('deviceListSection').style.display = 'none';
+        document.getElementById('manual_uid').value = uid;
+        document.getElementById('disp_uid').innerText = uid;
+        fetchData(uid);
+        document.getElementById('infoSection').scrollIntoView({ behavior: 'smooth' });
+    }
+
     function renderCalendar() {
         const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
         const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -738,90 +878,6 @@
         } else {
             cal.style.display = 'none';
         }
-    }
-
-    function toggleDeviceList() {
-        document.getElementById('dashboardSection').style.display = 'none';
-        document.getElementById('kanbanSection').style.display = 'none';
-        document.getElementById('calendarSection').style.display = 'none';
-        const section = document.getElementById('deviceListSection');
-        if (section.style.display === 'none') {
-            section.style.display = 'block';
-            renderDeviceList();
-        } else {
-            section.style.display = 'none';
-        }
-    }
-
-    function renderDeviceList() {
-        const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
-        const devices = Object.values(deviceMap);
-        const tbody = document.getElementById('deviceListTableBody');
-        
-        if (devices.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">Chưa có thiết bị nào được lưu trữ.</td></tr>';
-            return;
-        }
-
-        const today = new Date(); today.setHours(0, 0, 0, 0);
-        
-        tbody.innerHTML = devices.map(d => {
-            let statusBadge = '';
-            if (d.nextMaintenance) {
-                const nextDate = new Date(d.nextMaintenance);
-                if (!isNaN(nextDate)) {
-                    nextDate.setHours(0,0,0,0);
-                    const warningDays = parseInt(d.warningDays) || 7;
-                    const diffTime = nextDate.getTime() - today.getTime();
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    
-                    if (diffDays < 0) {
-                        statusBadge = `<span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill">🔴 Quá hạn ${Math.abs(diffDays)} ngày</span>`;
-                    } else if (diffDays === 0) {
-                        statusBadge = `<span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill">🟠 Hôm nay</span>`;
-                    } else if (diffDays <= warningDays) {
-                        statusBadge = `<span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill">🟡 Còn ${diffDays} ngày</span>`;
-                    } else {
-                        statusBadge = `<span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">🟢 Đã lên lịch</span>`;
-                    }
-                } else {
-                    statusBadge = `<span class="badge bg-secondary-subtle text-secondary rounded-pill">Chưa lên lịch</span>`;
-                }
-            } else {
-                statusBadge = `<span class="badge bg-secondary-subtle text-secondary rounded-pill">Chưa lên lịch</span>`;
-            }
-
-            const managerStr = d.manager && d.manager !== 'Chưa phân công' ? d.manager : '—';
-            const shiftStr = d.shift && d.shift !== 'Chưa phân công' ? d.shift : '—';
-            const locationStr = d.location || '—';
-
-            return `
-                <tr style="cursor: pointer;" onclick="selectDeviceFromList('${d.uid}')">
-                    <td class="fw-bold text-primary">${d.uid}</td>
-                    <td class="fw-semibold">${d.name || '—'}</td>
-                    <td>${locationStr}</td>
-                    <td><small class="text-muted">${managerStr} / ${shiftStr}</small></td>
-                    <td>${statusBadge}</td>
-                </tr>
-            `;
-        }).join('');
-    }
-
-    function filterDeviceList() {
-        const query = document.getElementById('deviceListSearch').value.toLowerCase().trim();
-        const rows = document.querySelectorAll('#deviceListTableBody tr');
-        
-        rows.forEach(row => {
-            const cells = Array.from(row.querySelectorAll('td'));
-            const matches = cells.some(cell => cell.textContent.toLowerCase().includes(query));
-            row.style.display = matches ? '' : 'none';
-        });
-    }
-
-    function selectDeviceFromList(uid) {
-        document.getElementById('deviceListSection').style.display = 'none';
-        document.getElementById('disp_uid').innerText = uid;
-        fetchData(uid);
     }
 
     function renderChecklist(type) {
@@ -1429,12 +1485,19 @@
             });
             const result = await res.json();
             if (result.status === 'success') {
-                showToast('Đã thêm thiết bị thành công! Vui lòng tải lại trang.', 'success');
+                showToast('Đã thêm thiết bị thành công!', 'success');
                 bootstrap.Modal.getInstance(document.getElementById('addDeviceModal')).hide();
-                // Optionally add it to local storage right away to avoid reload
+                // Add it to local storage right away to avoid reload
                 const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
                 deviceMap[uid] = payload;
                 localStorage.setItem('localDevicesMap', JSON.stringify(deviceMap));
+                
+                if (document.getElementById('deviceListSection').style.display !== 'none') {
+                    renderDeviceList();
+                }
+                if (document.getElementById('calendarSection').style.display !== 'none') {
+                    renderCalendar();
+                }
             } else {
                 showToast(result.message || 'Lỗi từ máy chủ', 'danger');
             }
@@ -1499,6 +1562,9 @@
             if (deviceMap[uid]) {
                 deviceMap[uid].status = status;
                 localStorage.setItem('localDevicesMap', JSON.stringify(deviceMap));
+            }
+            if (document.getElementById('deviceListSection').style.display !== 'none') {
+                renderDeviceList();
             }
             
             setTimeout(() => fetchData(uid), 1000);
