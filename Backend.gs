@@ -363,6 +363,78 @@ function doPost(e) {
       return contentResponse({ status: "success" });
     }
 
+    // action=createChecklistItem — Create a new checklist item in the Checklists tab
+    if (params.action === 'createChecklistItem') {
+      const checkSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Checklists");
+      if (!checkSheet) return contentResponse({ status: "error", message: "Checklists sheet not found" });
+
+      // Check if ID already exists for this type
+      const checkData = checkSheet.getDataRange().getValues();
+      for (let i = 1; i < checkData.length; i++) {
+        if (String(checkData[i][0]).trim().toLowerCase() === String(params.type).trim().toLowerCase() && 
+            String(checkData[i][1]).trim() === String(params.id).trim()) {
+          return contentResponse({ status: "error", message: "ID cho loại thiết bị này đã tồn tại!" });
+        }
+      }
+
+      checkSheet.appendRow([
+        String(params.type).trim().toLowerCase(),
+        String(params.id).trim(),
+        params.title || '',
+        params.desc || ''
+      ]);
+
+      writeAuditLog(params.user || 'System', 'createChecklistItem', params.id, 'Created new checklist item: ' + params.title + ' for type: ' + params.type);
+      return contentResponse({ status: "success", message: "Đã thêm hạng mục thành công" });
+    }
+
+    // action=updateChecklistItem — Update an existing checklist item in the Checklists tab
+    if (params.action === 'updateChecklistItem') {
+      const checkSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Checklists");
+      if (!checkSheet) return contentResponse({ status: "error", message: "Checklists sheet not found" });
+
+      const checkData = checkSheet.getDataRange().getValues();
+      let updated = false;
+      for (let i = 1; i < checkData.length; i++) {
+        if (String(checkData[i][0]).trim().toLowerCase() === String(params.originalType).trim().toLowerCase() && 
+            String(checkData[i][1]).trim() === String(params.originalId).trim()) {
+          checkSheet.getRange(i + 1, 1).setValue(String(params.type).trim().toLowerCase());
+          checkSheet.getRange(i + 1, 2).setValue(String(params.id).trim());
+          checkSheet.getRange(i + 1, 3).setValue(params.title || '');
+          checkSheet.getRange(i + 1, 4).setValue(params.desc || '');
+          updated = true;
+          break;
+        }
+      }
+
+      if (!updated) return contentResponse({ status: "error", message: "Hạng mục không tìm thấy" });
+
+      writeAuditLog(params.user || 'System', 'updateChecklistItem', params.id, 'Updated checklist item: ' + params.title + ' for type: ' + params.type);
+      return contentResponse({ status: "success", message: "Đã cập nhật hạng mục" });
+    }
+
+    // action=deleteChecklistItem — Delete a checklist item from the Checklists tab
+    if (params.action === 'deleteChecklistItem') {
+      const checkSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Checklists");
+      if (!checkSheet) return contentResponse({ status: "error", message: "Checklists sheet not found" });
+
+      const checkData = checkSheet.getDataRange().getValues();
+      let deleted = false;
+      for (let i = 1; i < checkData.length; i++) {
+        if (String(checkData[i][0]).trim().toLowerCase() === String(params.type).trim().toLowerCase() && 
+            String(checkData[i][1]).trim() === String(params.id).trim()) {
+          checkSheet.deleteRow(i + 1);
+          deleted = true;
+          break;
+        }
+      }
+
+      if (!deleted) return contentResponse({ status: "error", message: "Hạng mục không tìm thấy" });
+
+      writeAuditLog(params.user || 'System', 'deleteChecklistItem', params.id, 'Deleted checklist item for type: ' + params.type);
+      return contentResponse({ status: "success", message: "Đã xóa hạng mục" });
+    }
+
     // action=logInOut — Record IN/OUT movement and update Device status
     if (params.action === 'logInOut') {
       const devSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Devices");

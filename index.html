@@ -150,7 +150,7 @@
             ĐĂNG NHẬP <i class="bi bi-box-arrow-in-right ms-2"></i>
         </button>
         <div id="loginSpinner" class="spinner-border text-primary mt-3" style="display: none;" role="status"></div>
-        <p class="mt-4 mb-0 text-muted" style="font-size: 0.75rem;"><span data-i18n="version">Phiên bản</span> v1.3.1</p>
+        <p class="mt-4 mb-0 text-muted" style="font-size: 0.75rem;"><span data-i18n="version">Phiên bản</span> v1.4.0</p>
     </div>
 </div>
 
@@ -443,6 +443,89 @@
             </div>
         </div>
     </div>
+
+    <!-- Checklist Manager Modal -->
+    <div class="modal fade" id="checklistManagerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px);">
+                <div class="modal-header border-light">
+                    <h5 class="modal-title fw-bold text-dark"><i class="bi bi-gear-fill text-primary me-2"></i> Quản lý Danh mục kiểm tra</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex gap-2 align-items-center">
+                            <label class="small text-muted fw-bold mb-0">Loại:</label>
+                            <select id="checklistFilterType" class="form-select form-select-sm rounded-pill px-3" style="width: 150px;" onchange="renderChecklistManagerItems()">
+                                <option value="all">Tất cả</option>
+                                <option value="default">Default</option>
+                                <option value="hvac">HVAC</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-sm btn-primary rounded-pill px-3" onclick="showAddChecklistItemModal()">
+                            <i class="bi bi-plus-circle me-1"></i> Thêm hạng mục
+                        </button>
+                    </div>
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-hover align-middle" style="font-size: 0.85rem;">
+                            <thead class="table-light text-secondary">
+                                <tr>
+                                    <th>Loại</th>
+                                    <th>ID</th>
+                                    <th>Tiêu đề</th>
+                                    <th>Mô tả</th>
+                                    <th class="text-end" style="min-width: 120px;">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody id="checklistManagerTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Checklist Item Modal -->
+    <div class="modal fade" id="checklistItemEditModal" tabindex="-1" aria-hidden="true" style="z-index: 1065;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+                <div class="modal-header border-light">
+                    <h5 class="modal-title fw-bold" id="checklistItemModalTitle">Thêm hạng mục kiểm tra</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="checklistItemForm">
+                        <input type="hidden" id="editChecklistOriginalId">
+                        <input type="hidden" id="editChecklistOriginalType">
+                        
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Loại thiết bị (Type)</label>
+                            <input type="text" class="form-control rounded-pill px-3" id="editChecklistType" placeholder="Ví dụ: default hoặc hvac" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Mã ID (Unique ID)</label>
+                            <input type="text" class="form-control rounded-pill px-3" id="editChecklistId" placeholder="Ví dụ: check_power" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Tiêu đề (Title)</label>
+                            <input type="text" class="form-control rounded-pill px-3" id="editChecklistTitle" placeholder="Ví dụ: Kiểm tra nguồn điện" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Mô tả chi tiết (Description)</label>
+                            <textarea class="form-control rounded-3 p-3" id="editChecklistDesc" rows="3" placeholder="Mô tả các bước thực hiện..." required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-light">
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary rounded-pill px-4" onclick="submitChecklistItem()">Lưu lại</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="card-premium p-3 mb-4" id="searchSection" style="display: none;">
         <h6 class="fw-bold mb-2">Advanced Search</h6>
         <div class="input-group mb-2">
@@ -508,7 +591,12 @@
                     </div>
                 </div>
 
-                <div class="p-3 bg-light-subtle"><span class="fw-bold small text-uppercase text-secondary" data-i18n="checklist_title">Maintenance Checklist</span></div>
+                <div class="p-3 bg-light-subtle d-flex justify-content-between align-items-center">
+                    <span class="fw-bold small text-uppercase text-secondary" data-i18n="checklist_title">Maintenance Checklist</span>
+                    <button id="btnManageChecklist" class="btn btn-sm btn-outline-primary rounded-pill py-1 px-3" style="font-size: 0.75rem; display: none;" onclick="openChecklistManager()">
+                        <i class="bi bi-gear-fill me-1"></i> Quản lý
+                    </button>
+                </div>
                 <div id="dynamicChecklist">
                     <!-- Checklists will be rendered here dynamically based on device type -->
                 </div>
@@ -910,6 +998,211 @@
         });
     }
 
+    function openChecklistManager() {
+        const allChecklists = JSON.parse(localStorage.getItem('localChecklists') || '[]');
+        // Populate the Types dropdown filter dynamically
+        const types = new Set(['default', 'hvac']);
+        allChecklists.forEach(c => { if (c.type) types.add(c.type); });
+        
+        const filterDropdown = document.getElementById('checklistFilterType');
+        const selectedVal = filterDropdown.value || 'all';
+        filterDropdown.innerHTML = '<option value="all">Tất cả</option>' + 
+            Array.from(types).map(t => `<option value="${t}">${t.toUpperCase()}</option>`).join('');
+        filterDropdown.value = selectedVal;
+
+        renderChecklistManagerItems();
+        new bootstrap.Modal(document.getElementById('checklistManagerModal')).show();
+    }
+
+    function renderChecklistManagerItems() {
+        const allChecklists = JSON.parse(localStorage.getItem('localChecklists') || '[]');
+        const filterType = document.getElementById('checklistFilterType').value;
+        
+        let filtered = allChecklists;
+        if (filterType !== 'all') {
+            filtered = allChecklists.filter(c => c.type === filterType);
+        }
+
+        const tbody = document.getElementById('checklistManagerTableBody');
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">Không có hạng mục nào.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = filtered.map(c => {
+            return `
+                <tr>
+                    <td><span class="badge bg-secondary-subtle text-secondary rounded-pill px-2 py-1">${c.type}</span></td>
+                    <td><code>${c.id}</code></td>
+                    <td class="fw-bold">${c.title}</td>
+                    <td class="text-muted" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${c.desc}</td>
+                    <td class="text-end">
+                        <div class="d-flex gap-1 justify-content-end">
+                            <button class="btn btn-sm btn-outline-primary rounded-circle" style="width: 28px; height: 28px; padding: 0;" onclick="showEditChecklistItemModal('${c.type}', '${c.id}')"><i class="bi bi-pencil-fill" style="font-size: 0.75rem;"></i></button>
+                            <button class="btn btn-sm btn-outline-danger rounded-circle" style="width: 28px; height: 28px; padding: 0;" onclick="deleteChecklistItem('${c.type}', '${c.id}')"><i class="bi bi-trash-fill" style="font-size: 0.75rem;"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function showAddChecklistItemModal() {
+        document.getElementById('checklistItemModalTitle').innerText = 'Thêm hạng mục kiểm tra';
+        document.getElementById('editChecklistOriginalId').value = '';
+        document.getElementById('editChecklistOriginalType').value = '';
+        
+        document.getElementById('editChecklistType').value = 'default';
+        document.getElementById('editChecklistId').value = '';
+        document.getElementById('editChecklistTitle').value = '';
+        document.getElementById('editChecklistDesc').value = '';
+        
+        document.getElementById('editChecklistId').disabled = false;
+        
+        new bootstrap.Modal(document.getElementById('checklistItemEditModal')).show();
+    }
+
+    function showEditChecklistItemModal(type, id) {
+        const allChecklists = JSON.parse(localStorage.getItem('localChecklists') || '[]');
+        const item = allChecklists.find(c => c.type === type && c.id === id);
+        if (!item) return;
+
+        document.getElementById('checklistItemModalTitle').innerText = 'Sửa hạng mục kiểm tra';
+        document.getElementById('editChecklistOriginalId').value = id;
+        document.getElementById('editChecklistOriginalType').value = type;
+        
+        document.getElementById('editChecklistType').value = item.type;
+        document.getElementById('editChecklistId').value = item.id;
+        document.getElementById('editChecklistTitle').value = item.title;
+        document.getElementById('editChecklistDesc').value = item.desc;
+        
+        document.getElementById('editChecklistId').disabled = false;
+        
+        new bootstrap.Modal(document.getElementById('checklistItemEditModal')).show();
+    }
+
+    async function submitChecklistItem() {
+        const type = document.getElementById('editChecklistType').value.trim().toLowerCase();
+        const id = document.getElementById('editChecklistId').value.trim();
+        const title = document.getElementById('editChecklistTitle').value.trim();
+        const desc = document.getElementById('editChecklistDesc').value.trim();
+        
+        const origId = document.getElementById('editChecklistOriginalId').value;
+        const origType = document.getElementById('editChecklistOriginalType').value;
+        
+        if (!type || !id || !title || !desc) {
+            showToast('Vui lòng nhập đầy đủ thông tin', 'warning');
+            return;
+        }
+
+        const isEdit = origId && origType;
+        const userStr = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+        const user = JSON.parse(userStr || '{}');
+
+        const payload = {
+            action: isEdit ? 'updateChecklistItem' : 'createChecklistItem',
+            token: API_TOKEN,
+            user: user.name || 'Admin',
+            type: type,
+            id: id,
+            title: title,
+            desc: desc
+        };
+
+        if (isEdit) {
+            payload.originalId = origId;
+            payload.originalType = origType;
+        }
+
+        showToast('Đang lưu hạng mục...');
+        try {
+            const res = await fetch(gasUrl, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            if (result.status === 'success') {
+                showToast(isEdit ? 'Đã cập nhật hạng mục thành công!' : 'Đã thêm hạng mục mới thành công!', 'success');
+                
+                // Update local storage cache
+                let allChecklists = JSON.parse(localStorage.getItem('localChecklists') || '[]');
+                if (isEdit) {
+                    allChecklists = allChecklists.map(c => (c.type === origType && c.id === origId) ? { type, id, title, desc } : c);
+                } else {
+                    allChecklists.push({ type, id, title, desc });
+                }
+                localStorage.setItem('localChecklists', JSON.stringify(allChecklists));
+                
+                // Hide edit modal
+                bootstrap.Modal.getInstance(document.getElementById('checklistItemEditModal')).hide();
+                
+                // Rerender table
+                renderChecklistManagerItems();
+
+                // Refresh current rendered checklist if active
+                const activeUid = document.getElementById('disp_uid').innerText;
+                if (activeUid && activeUid !== '...') {
+                    const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+                    const device = deviceMap[activeUid];
+                    if (device) {
+                        renderChecklist(device.name.toLowerCase().includes('điều hòa') ? 'hvac' : 'default');
+                    }
+                }
+            } else {
+                showToast(result.message || 'Lỗi lưu dữ liệu', 'danger');
+            }
+        } catch (e) {
+            showToast('Lỗi kết nối máy chủ', 'danger');
+        }
+    }
+
+    async function deleteChecklistItem(type, id) {
+        if (!confirm(`Bạn có chắc chắn muốn xóa hạng mục "${id}" của loại "${type}" không?`)) return;
+
+        const userStr = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+        const user = JSON.parse(userStr || '{}');
+
+        showToast('Đang xóa hạng mục...');
+        try {
+            const res = await fetch(gasUrl, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'deleteChecklistItem',
+                    token: API_TOKEN,
+                    user: user.name || 'Admin',
+                    type: type,
+                    id: id
+                })
+            });
+            const result = await res.json();
+            if (result.status === 'success') {
+                showToast('Đã xóa hạng mục thành công!', 'success');
+                
+                // Update local cache
+                let allChecklists = JSON.parse(localStorage.getItem('localChecklists') || '[]');
+                allChecklists = allChecklists.filter(c => !(c.type === type && c.id === id));
+                localStorage.setItem('localChecklists', JSON.stringify(allChecklists));
+                
+                // Rerender
+                renderChecklistManagerItems();
+
+                // Refresh active list if any
+                const activeUid = document.getElementById('disp_uid').innerText;
+                if (activeUid && activeUid !== '...') {
+                    const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+                    const device = deviceMap[activeUid];
+                    if (device) {
+                        renderChecklist(device.name.toLowerCase().includes('điều hòa') ? 'hvac' : 'default');
+                    }
+                }
+            } else {
+                showToast(result.message || 'Lỗi xóa dữ liệu', 'danger');
+            }
+        } catch (e) {
+            showToast('Lỗi kết nối máy chủ', 'danger');
+        }
+    }
+
     function updateUI(user) {
         document.getElementById('loginOverlay').style.display = 'none';
         document.getElementById('appShell').style.display = 'block';
@@ -918,8 +1211,10 @@
         document.getElementById('userRoleDisplay').innerHTML = '<i class="bi bi-briefcase me-1"></i> ' + (user.role || 'User');
         if (user.role === 'Admin' || user.role === 'Manager') {
             document.getElementById('menuAddDevice').style.display = 'block';
+            document.getElementById('btnManageChecklist').style.display = 'inline-block';
         } else {
             document.getElementById('menuAddDevice').style.display = 'none';
+            document.getElementById('btnManageChecklist').style.display = 'none';
         }
         updateSyncStatus();
     }
