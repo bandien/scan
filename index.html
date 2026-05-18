@@ -150,7 +150,7 @@
             ĐĂNG NHẬP <i class="bi bi-box-arrow-in-right ms-2"></i>
         </button>
         <div id="loginSpinner" class="spinner-border text-primary mt-3" style="display: none;" role="status"></div>
-        <p class="mt-4 mb-0 text-muted" style="font-size: 0.75rem;"><span data-i18n="version">Phiên bản</span> v1.4.0</p>
+        <p class="mt-4 mb-0 text-muted" style="font-size: 0.75rem;"><span data-i18n="version">Phiên bản</span> v1.4.1</p>
     </div>
 </div>
 
@@ -506,7 +506,8 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted">Mã ID (Unique ID)</label>
-                            <input type="text" class="form-control rounded-pill px-3" id="editChecklistId" placeholder="Ví dụ: check_power" required>
+                            <input type="text" class="form-control rounded-pill px-3" id="editChecklistId" placeholder="Ví dụ: check_power" required oninput="validateChecklistId()">
+                            <div id="checklistIdValidationFeedback" class="form-text small mt-1" style="display: none;"></div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted">Tiêu đề (Title)</label>
@@ -1047,6 +1048,66 @@
         }).join('');
     }
 
+    function slugifyVietnamese(str) {
+        if (!str) return '';
+        str = str.toLowerCase();
+        str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+        str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+        str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+        str = str.replace(/ò|á|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+        str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+        str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+        str = str.replace(/đ/g, "d");
+        // Remove special characters
+        str = str.replace(/[^a-z0-9\s]/g, "");
+        // Replace spaces with underscores
+        str = str.replace(/\s+/g, "_");
+        return str;
+    }
+
+    function validateChecklistId() {
+        const idInput = document.getElementById('editChecklistId');
+        const feedback = document.getElementById('checklistIdValidationFeedback');
+        const idVal = idInput.value.trim();
+        const typeVal = document.getElementById('editChecklistType').value.trim().toLowerCase();
+        const origId = document.getElementById('editChecklistOriginalId').value;
+        const origType = document.getElementById('editChecklistOriginalType').value;
+        
+        if (!idVal) {
+            feedback.style.display = 'none';
+            idInput.classList.remove('is-invalid', 'is-valid');
+            return;
+        }
+
+        // Check if duplicate
+        const allChecklists = JSON.parse(localStorage.getItem('localChecklists') || '[]');
+        
+        // If it's edit mode and they kept the original Type & ID, it's valid
+        if (origId && origType && origId === idVal && origType === typeVal) {
+            feedback.style.display = 'block';
+            feedback.className = 'form-text text-success small mt-1';
+            feedback.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> ID hợp lệ (Trùng ID hiện tại đang sửa)';
+            idInput.classList.remove('is-invalid');
+            idInput.classList.add('is-valid');
+            return;
+        }
+
+        const isDuplicate = allChecklists.some(c => c.type === typeVal && c.id === idVal);
+        if (isDuplicate) {
+            feedback.style.display = 'block';
+            feedback.className = 'form-text text-danger small mt-1';
+            feedback.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i> ID này đã tồn tại trong nhóm này!';
+            idInput.classList.remove('is-valid');
+            idInput.classList.add('is-invalid');
+        } else {
+            feedback.style.display = 'block';
+            feedback.className = 'form-text text-success small mt-1';
+            feedback.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> ID này hợp lệ & chưa được dùng';
+            idInput.classList.remove('is-invalid');
+            idInput.classList.add('is-valid');
+        }
+    }
+
     function showAddChecklistItemModal() {
         document.getElementById('checklistItemModalTitle').innerText = 'Thêm hạng mục kiểm tra';
         document.getElementById('editChecklistOriginalId').value = '';
@@ -1058,6 +1119,12 @@
         document.getElementById('editChecklistDesc').value = '';
         
         document.getElementById('editChecklistId').disabled = false;
+        
+        // Reset validation UI
+        const feedback = document.getElementById('checklistIdValidationFeedback');
+        feedback.style.display = 'none';
+        const idInput = document.getElementById('editChecklistId');
+        idInput.classList.remove('is-invalid', 'is-valid');
         
         new bootstrap.Modal(document.getElementById('checklistItemEditModal')).show();
     }
@@ -1078,6 +1145,8 @@
         
         document.getElementById('editChecklistId').disabled = false;
         
+        validateChecklistId();
+        
         new bootstrap.Modal(document.getElementById('checklistItemEditModal')).show();
     }
 
@@ -1092,6 +1161,12 @@
         
         if (!type || !id || !title || !desc) {
             showToast('Vui lòng nhập đầy đủ thông tin', 'warning');
+            return;
+        }
+
+        const idInput = document.getElementById('editChecklistId');
+        if (idInput.classList.contains('is-invalid')) {
+            showToast('Mã ID đã tồn tại trong nhóm này! Vui lòng chọn ID khác.', 'danger');
             return;
         }
 
@@ -1324,7 +1399,6 @@
         }
     }
 
-    // Check if already logged in
     window.onload = () => {
         const userStr = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
         if (userStr) {
@@ -1336,6 +1410,42 @@
                 document.getElementById('rememberMe').checked = true;
             }
         }
+
+        // Auto-generate Checklist ID from Title and prevent duplicates
+        document.getElementById('editChecklistTitle').addEventListener('input', (e) => {
+            const isEdit = document.getElementById('editChecklistOriginalId').value;
+            if (isEdit) return; // Do not auto-generate if editing
+            
+            const title = e.target.value;
+            const slug = slugifyVietnamese(title);
+            if (!slug) {
+                document.getElementById('editChecklistId').value = '';
+                validateChecklistId();
+                return;
+            }
+
+            let baseId = 'check_' + slug;
+            if (baseId.length > 30) {
+                baseId = baseId.substring(0, 30);
+            }
+
+            const type = document.getElementById('editChecklistType').value.trim().toLowerCase();
+            const allChecklists = JSON.parse(localStorage.getItem('localChecklists') || '[]');
+            
+            let finalId = baseId;
+            let counter = 1;
+            while (allChecklists.some(c => c.type === type && c.id === finalId)) {
+                finalId = `${baseId}_${counter}`;
+                counter++;
+            }
+
+            document.getElementById('editChecklistId').value = finalId;
+            validateChecklistId();
+        });
+
+        document.getElementById('editChecklistType').addEventListener('input', () => {
+            validateChecklistId();
+        });
     };
 
     async function fetchData(uid) {
