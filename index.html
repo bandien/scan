@@ -150,7 +150,7 @@
             ĐĂNG NHẬP <i class="bi bi-box-arrow-in-right ms-2"></i>
         </button>
         <div id="loginSpinner" class="spinner-border text-primary mt-3" style="display: none;" role="status"></div>
-        <p class="mt-4 mb-0 text-muted" style="font-size: 0.75rem;"><span data-i18n="version">Phiên bản</span> v1.3.0</p>
+        <p class="mt-4 mb-0 text-muted" style="font-size: 0.75rem;"><span data-i18n="version">Phiên bản</span> v1.3.1</p>
     </div>
 </div>
 
@@ -548,6 +548,7 @@
 <script>
     const scanner = new Html5Qrcode("reader");
     const startBtn = document.getElementById('startScan');
+    let isScanProcessing = false;
     // ==========================================
     // APP CONFIGURATION (Cấu hình ứng dụng)
     // ==========================================
@@ -633,6 +634,7 @@
         const reader = document.getElementById('reader'); 
         const torchBtn = document.getElementById('torchBtn');
         reader.style.display = 'block';
+        isScanProcessing = false;
         
         scanner.start({ facingMode: "environment" }, 
         { 
@@ -641,12 +643,18 @@
             aspectRatio: 1.777778
         }, 
         (uid) => {
+            if (isScanProcessing) return;
+            isScanProcessing = true;
             playBeep();
             if (navigator.vibrate) navigator.vibrate(100); // Haptic feedback
             document.getElementById('disp_uid').innerText = uid;
             reader.style.display = 'none'; 
             torchBtn.style.display = 'none';
-            scanner.stop();
+            scanner.stop().then(() => {
+                isScanProcessing = false;
+            }).catch(e => {
+                isScanProcessing = false;
+            });
             fetchData(uid);
         }, (err) => {});
 
@@ -1407,6 +1415,7 @@
 
     function startScannerForNewDevice() {
         isScanningForNewDevice = true;
+        isScanProcessing = false;
         bootstrap.Modal.getInstance(document.getElementById('addDeviceModal')).hide();
         const reader = document.getElementById('reader'); 
         const torchBtn = document.getElementById('torchBtn');
@@ -1415,11 +1424,17 @@
         scanner.start({ facingMode: "environment" }, 
         { fps: 20, qrbox: {width: 280, height: 180}, aspectRatio: 1.777778 }, 
         (uid) => {
+            if (isScanProcessing) return;
+            isScanProcessing = true;
             playBeep();
             if (navigator.vibrate) navigator.vibrate(100);
             reader.style.display = 'none'; 
             torchBtn.style.display = 'none';
-            scanner.stop();
+            scanner.stop().then(() => {
+                isScanProcessing = false;
+            }).catch(e => {
+                isScanProcessing = false;
+            });
             
             document.getElementById('newDevUID').value = uid;
             new bootstrap.Modal(document.getElementById('addDeviceModal')).show();
