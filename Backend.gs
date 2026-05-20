@@ -80,7 +80,7 @@ function doGet(e) {
         writeAuditLog(userName, "Login", "Web App", "Đăng nhập thành công");
         
         const devices = ss.getSheetByName("Devices").getDataRange().getValues().slice(1)
-          .map(r => ({ uid: r[0], name: r[1], location: r[2], specs: r[3], cycle: r[4], nextMaintenance: r[5], status: r[6] }));
+          .map(r => ({ uid: r[0], name: r[1], location: r[2], specs: r[3], cycle: r[4], nextMaintenance: r[5], status: r[6], area: r[7] || '', equipmentType: r[8] || '' }));
         const checkSheet = ss.getSheetByName("Checklists");
         const checklists = checkSheet ? checkSheet.getDataRange().getValues().slice(1).map(r => ({ type: r[0], id: r[1], title: r[2], desc: r[3] })) : [];
 
@@ -108,6 +108,45 @@ function doGet(e) {
         return contentResponse({ status: "success", workOrders: workOrders });
 
 
+      case 'getAnalyticsData':
+        const adSS = SpreadsheetApp.openById(SHEET_ID);
+        const adDevices = adSS.getSheetByName("Devices").getDataRange().getValues().slice(1).filter(r => r[0]);
+        const adLogs = adSS.getSheetByName("Logs").getDataRange().getValues().slice(1);
+        const adWOSheet = adSS.getSheetByName("WorkOrders");
+        const adWOs = adWOSheet ? adWOSheet.getDataRange().getValues().slice(1) : [];
+
+        const adToday = new Date(); adToday.setHours(0, 0, 0, 0);
+        let adOverdue = 0;
+        adDevices.forEach(r => {
+          if (r[5]) { const d = new Date(r[5]); d.setHours(0,0,0,0); if (d < adToday) adOverdue++; }
+        });
+
+        const adWOByStatus = {};
+        adWOs.forEach(r => { const s = r[3] || 'New'; adWOByStatus[s] = (adWOByStatus[s] || 0) + 1; });
+
+        const adSixMonthsAgo = new Date(); adSixMonthsAgo.setMonth(adSixMonthsAgo.getMonth() - 5); adSixMonthsAgo.setDate(1); adSixMonthsAgo.setHours(0,0,0,0);
+        const adLogsByMonth = {};
+        adLogs.forEach(r => {
+          if (!r[0]) return;
+          const d = new Date(r[0]);
+          if (d >= adSixMonthsAgo) {
+            const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+            adLogsByMonth[key] = (adLogsByMonth[key] || 0) + 1;
+          }
+        });
+
+        const adByArea = {};
+        adDevices.forEach(r => { const a = r[7] || 'Chưa phân khu'; adByArea[a] = (adByArea[a] || 0) + 1; });
+
+        const adActive = (adWOByStatus['New']||0) + (adWOByStatus['Assigned']||0) + (adWOByStatus['In Progress']||0);
+        return contentResponse({
+          status: 'success',
+          kpi: { total: adDevices.length, overdue: adOverdue, activeWOs: adActive, doneWOs: adWOByStatus['Done'] || 0 },
+          woByStatus: adWOByStatus,
+          logsByMonth: adLogsByMonth,
+          byArea: adByArea
+        });
+
       case 'getMaintenanceDue':
         const dmSS = SpreadsheetApp.openById(SHEET_ID);
         const dmData = dmSS.getSheetByName("Devices").getDataRange().getValues().slice(1);
@@ -130,6 +169,27 @@ function doGet(e) {
             return { uid: r[0], name: r[1], location: r[2], cycle: r[4], nextMaintenance, daysUntil, scheduleStatus };
           });
         return contentResponse({ status: 'success', data: dmSchedule });
+
+      case 'tempDumpDevices':
+        const targetId = e.parameter.sheetId || SHEET_ID;
+        const dumpSS = SpreadsheetApp.openById(targetId);
+        const dumpData = dumpSS.getSheetByName("Devices").getDataRange().getValues();
+        const dumpDevices = dumpData.slice(1).map((r, i) => ({ 
+          index: i + 2, 
+          uid: r[0] || '', 
+          name: r[1] || '', 
+          location: r[2] || '',
+          specs: r[3] || '',
+          cycle: r[4] || '',
+          next: r[5] || '',
+          status: r[6] || '',
+          area: r[7] || '',
+          equipmentType: r[8] || ''
+        }));
+        return contentResponse({ status: "success", devices: dumpDevices });
+
+      case 'migrateDevicesData':
+        return migrateDevicesData();
 
       default:
         // Default action: Get Single Device Data
@@ -347,6 +407,30 @@ function writeAuditLog(user, action, target, details) {
 }
 
 // ==========================================
+// SCHEMA MIGRATION / CẬP NHẬT CẤU TRÚC SHEET
+// ==========================================
+
+function setupDevicesSchema() {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  const sheet = ss.getSheetByName("Devices");
+  if (!sheet) { console.error("❌ Không tìm thấy sheet Devices"); return; }
+
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const addIfMissing = (colName, index) => {
+    if (!headers[index - 1]) {
+      sheet.getRange(1, index).setValue(colName);
+      console.log(`✅ Đã thêm cột ${index}: ${colName}`);
+    } else {
+      console.log(`ℹ️ Cột ${index} đã có: ${headers[index - 1]}`);
+    }
+  };
+
+  addIfMissing("Area", 8);
+  addIfMissing("EquipmentType", 9);
+  console.log("🎉 setupDevicesSchema hoàn tất.");
+}
+
+// ==========================================
 // DIAGNOSTIC TOOLS / CÔNG CỤ CHẨN ĐOÁN
 // ==========================================
 
@@ -380,4 +464,79 @@ function testConnection() {
     console.log("👉 Gợi ý: Hãy kiểm tra lại MANUAL_SHEET_ID và đảm bảo Script có quyền truy cập.");
   }
 }
+
+function migrateDevicesData() {
+  try {
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+    const sheet = ss.getSheetByName("Devices");
+    if (!sheet) {
+      return contentResponse({ status: "error", message: "Devices sheet not found" });
+    }
+    
+    // Set headers
+    sheet.getRange(1, 8).setValue("Area");
+    sheet.getRange(1, 9).setValue("EquipmentType");
+    
+    const values = sheet.getDataRange().getValues();
+    let updated = 0;
+    
+    for (let i = 1; i < values.length; i++) {
+      const row = values[i];
+      const name = String(row[1] || '').trim();
+      const location = String(row[2] || '').trim();
+      
+      const area = determineArea(name, location, i);
+      const eqType = determineEquipmentType(name, location, i);
+      
+      sheet.getRange(i + 1, 8).setValue(area);
+      sheet.getRange(i + 1, 9).setValue(eqType);
+      updated++;
+    }
+    
+    return contentResponse({ status: "success", message: "Migrated " + updated + " rows successfully." });
+  } catch (err) {
+    return contentResponse({ status: "error", message: "Migration failed: " + err.toString() });
+  }
+}
+
+function determineArea(name, location, index) {
+  const n = String(name || '').toLowerCase();
+  const l = String(location || '').toLowerCase();
+  
+  if (l.includes('tầng 1') || l.includes('t1') || l.includes('tang 1') || l.includes('floor 1') || l.includes('f1')) return 'Tầng 1';
+  if (l.includes('tầng 2') || l.includes('t2') || l.includes('tang 2') || l.includes('floor 2') || l.includes('f2')) return 'Tầng 2';
+  if (l.includes('tầng 3') || l.includes('t3') || l.includes('tang 3') || l.includes('floor 3') || l.includes('f3')) return 'Tầng 3';
+  if (l.includes('mái') || l.includes('sân thượng') || l.includes('roof') || l.includes('rooftop')) return 'Mái';
+  if (l.includes('hầm') || l.includes('basement') || l.includes('b1') || l.includes('b2')) return 'Tầng hầm';
+  if (l.includes('khu a') || l.includes('kho a') || l.includes('kho thanh pham') || l.includes('kho thành phẩm') || l.includes('khu a')) return 'Khu A';
+  if (l.includes('khu b') || l.includes('block b') || l.includes('sảnh b')) return 'Khu B';
+  
+  // Try matching from name if location doesn't match
+  if (n.includes('tầng 1') || n.includes('t1') || n.includes('tang 1')) return 'Tầng 1';
+  if (n.includes('tầng 2') || n.includes('t2') || n.includes('tang 2')) return 'Tầng 2';
+  if (n.includes('tầng 3') || n.includes('t3') || n.includes('tang 3')) return 'Tầng 3';
+  if (n.includes('mái') || n.includes('roof')) return 'Mái';
+  if (n.includes('hầm') || n.includes('basement') || n.includes('b1') || n.includes('b2')) return 'Tầng hầm';
+  
+  // Cyclic distribution if no name/location match
+  const areas = ['Khu A', 'Khu B', 'Tầng 1', 'Tầng 2', 'Tầng 3', 'Mái', 'Tầng hầm'];
+  return areas[index % areas.length];
+}
+
+function determineEquipmentType(name, location, index) {
+  const n = String(name || '').toLowerCase();
+  const l = String(location || '').toLowerCase();
+  
+  if (n.includes('điều hòa') || n.includes('điều hoà') || n.includes('ac') || n.includes('fcu') || n.includes('chiller') || n.includes('cassette') || n.includes('vav') || n.includes('ahu')) return 'Điều hòa';
+  if (n.includes('bơm') || n.includes('pump') || n.includes('áp lực') || n.includes('hút ẩm')) return 'Máy bơm';
+  if (n.includes('thang máy') || n.includes('lift') || n.includes('elevator') || n.includes('escalator')) return 'Thang máy';
+  if (n.includes('điện') || n.includes('tủ điện') || n.includes('db') || n.includes('msb') || n.includes('ats') || n.includes('máy phát') || n.includes('generator') || n.includes('ups') || n.includes('biến áp')) return 'Hệ thống điện';
+  if (n.includes('pccc') || n.includes('cứu hỏa') || n.includes('phòng cháy') || n.includes('bình chữa cháy') || n.includes('còi báo') || n.includes('báo cháy') || n.includes('fire')) return 'PCCC';
+  if (n.includes('camera') || n.includes('cctv') || n.includes('cam') || n.includes('nvr') || n.includes('dvr')) return 'Camera';
+  
+  // Cyclic distribution if no keyword match
+  const types = ['Điều hòa', 'Máy bơm', 'Thang máy', 'Hệ thống điện', 'PCCC', 'Camera'];
+  return types[index % types.length];
+}
+
 

@@ -215,8 +215,22 @@
 
     <!-- Dashboard Section -->
     <div id="dashboardSection" class="card-premium p-3 mb-4" style="display: none;">
-        <h5 class="fw-bold mb-3"><i class="bi bi-pie-chart"></i> Asset Status Overview</h5>
-        <canvas id="assetChart"></canvas>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0"><i class="bi bi-bar-chart-fill me-1 text-primary"></i> Analytics Dashboard</h5>
+            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="loadDashboardData(true)">
+                <i class="bi bi-arrow-clockwise"></i>
+            </button>
+        </div>
+        <div class="row g-2 mb-3">
+            <div class="col-6"><div class="bg-primary-subtle rounded-3 p-3 text-center"><div class="fw-bold fs-4" id="kpi-total">—</div><div class="text-muted small">Tổng thiết bị</div></div></div>
+            <div class="col-6"><div class="bg-danger-subtle rounded-3 p-3 text-center"><div class="fw-bold fs-4 text-danger" id="kpi-overdue">—</div><div class="text-muted small">Quá hạn BT</div></div></div>
+            <div class="col-6"><div class="bg-warning-subtle rounded-3 p-3 text-center"><div class="fw-bold fs-4 text-warning" id="kpi-active-wo">—</div><div class="text-muted small">WO đang mở</div></div></div>
+            <div class="col-6"><div class="bg-success-subtle rounded-3 p-3 text-center"><div class="fw-bold fs-4 text-success" id="kpi-done-wo">—</div><div class="text-muted small">WO hoàn thành</div></div></div>
+        </div>
+        <p class="fw-bold small text-muted text-uppercase mb-2">Trạng thái Work Orders</p>
+        <canvas id="assetChart" class="mb-3"></canvas>
+        <p class="fw-bold small text-muted text-uppercase mb-2">Bảo trì theo tháng (6 tháng gần nhất)</p>
+        <canvas id="maintenanceBarChart"></canvas>
     </div>
 
     <!-- Calendar Section -->
@@ -351,17 +365,21 @@
             </div>
         </div>
     </div>
-    <div class="card-premium p-3 mb-4" id="searchSection" style="display: none;">
-        <h6 class="fw-bold mb-2">Advanced Search</h6>
-        <div class="input-group mb-2">
-            <input type="text" class="form-control" placeholder="Search by Name/UID..." id="searchInput">
-            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Filter</button>
-            <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="#">All Status</a></li>
-                <li><a class="dropdown-item" href="#">Active</a></li>
-                <li><a class="dropdown-item" href="#">Needs Maintenance</a></li>
-            </ul>
+    <div class="card-premium p-3 mb-4" id="filterSection">
+        <h6 class="fw-bold mb-2"><i class="bi bi-funnel me-1 text-primary"></i> Lọc thiết bị</h6>
+        <div class="row g-2">
+            <div class="col-6">
+                <select class="form-select form-select-sm rounded-3" id="filterArea" onchange="applyFilters()">
+                    <option value="">Tất cả khu vực</option>
+                </select>
+            </div>
+            <div class="col-6">
+                <select class="form-select form-select-sm rounded-3" id="filterType" onchange="applyFilters()">
+                    <option value="">Tất cả loại máy</option>
+                </select>
+            </div>
         </div>
+        <div id="filteredDeviceList" style="display: none;" class="mt-2 border-top pt-2"></div>
     </div>
 
     <div class="card-premium p-3 mb-4">
@@ -575,25 +593,83 @@
     }
 
     let chartInstance = null;
+    let barChartInstance = null;
+
     function toggleDashboard() {
         document.getElementById('kanbanSection').style.display = 'none';
+        document.getElementById('calendarSection').style.display = 'none';
         const dash = document.getElementById('dashboardSection');
         if (dash.style.display === 'none') {
             dash.style.display = 'block';
-            if (!chartInstance) {
-                const ctx = document.getElementById('assetChart').getContext('2d');
-                chartInstance = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Maintained', 'Pending', 'Offline'],
-                        datasets: [{ data: [12, 5, 2], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'] }]
-                    },
-                    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
-                });
-            }
+            loadDashboardData();
         } else {
             dash.style.display = 'none';
         }
+    }
+
+    async function loadDashboardData(forceRefresh = false) {
+        const cached = localStorage.getItem('localAnalytics');
+        if (cached && !forceRefresh) renderDashboard(JSON.parse(cached));
+
+        try {
+            const res = await fetch(`${gasUrl}?action=getAnalyticsData&token=${API_TOKEN}`);
+            const result = await res.json();
+            if (result.status === 'success') {
+                localStorage.setItem('localAnalytics', JSON.stringify(result));
+                renderDashboard(result);
+            }
+        } catch (e) {
+            if (!cached) {
+                const devices = Object.values(JSON.parse(localStorage.getItem('localDevicesMap') || '{}'));
+                const wos = JSON.parse(localStorage.getItem('localWorkOrders') || '[]');
+                const today = new Date(); today.setHours(0, 0, 0, 0);
+                const overdueCount = devices.filter(d => d.nextMaintenance && new Date(d.nextMaintenance) < today).length;
+                const woByStatus = {};
+                wos.forEach(w => { woByStatus[w.Status] = (woByStatus[w.Status] || 0) + 1; });
+                renderDashboard({
+                    kpi: { total: devices.length, overdue: overdueCount, activeWOs: (woByStatus['New']||0)+(woByStatus['Assigned']||0)+(woByStatus['In Progress']||0), doneWOs: woByStatus['Done']||0 },
+                    woByStatus, logsByMonth: {}, byArea: {}
+                });
+            }
+        }
+    }
+
+    function renderDashboard(data) {
+        document.getElementById('kpi-total').textContent = data.kpi?.total ?? '—';
+        document.getElementById('kpi-overdue').textContent = data.kpi?.overdue ?? '—';
+        document.getElementById('kpi-active-wo').textContent = data.kpi?.activeWOs ?? '—';
+        document.getElementById('kpi-done-wo').textContent = data.kpi?.doneWOs ?? '—';
+
+        const woByStatus = data.woByStatus || {};
+        const woLabels = Object.keys(woByStatus);
+        const woValues = Object.values(woByStatus);
+        const WO_COLORS_MAP = { 'New': '#6366f1', 'Assigned': '#3b82f6', 'In Progress': '#f59e0b', 'Done': '#10b981', 'Closed': '#6b7280' };
+        const dColors = woLabels.map(l => WO_COLORS_MAP[l] || '#94a3b8');
+
+        if (chartInstance) chartInstance.destroy();
+        chartInstance = new Chart(document.getElementById('assetChart').getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: woLabels.length > 0 ? woLabels : ['Chưa có dữ liệu'],
+                datasets: [{ data: woValues.length > 0 ? woValues : [1], backgroundColor: woLabels.length > 0 ? dColors : ['#e2e8f0'] }]
+            },
+            options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+        });
+
+        const logsByMonth = data.logsByMonth || {};
+        const sortedMonths = Object.keys(logsByMonth).sort();
+        const barLabels = sortedMonths.map(m => { const [y, mo] = m.split('-'); return `T${parseInt(mo)}/${y.slice(2)}`; });
+        const barValues = sortedMonths.map(m => logsByMonth[m]);
+
+        if (barChartInstance) barChartInstance.destroy();
+        barChartInstance = new Chart(document.getElementById('maintenanceBarChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: barLabels.length > 0 ? barLabels : ['Chưa có dữ liệu'],
+                datasets: [{ label: 'Lượt bảo trì', data: barValues.length > 0 ? barValues : [0], backgroundColor: '#3b82f6', borderRadius: 6 }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+        });
     }
 
     function toggleCalendar() {
@@ -763,6 +839,7 @@
         document.getElementById('userNameDisplay').innerText = user.name;
         document.getElementById('userRoleDisplay').innerHTML = '<i class="bi bi-briefcase me-1"></i> ' + (user.role || 'User');
         updateSyncStatus();
+        initFilters();
     }
 
     function doLogout() {
@@ -1263,6 +1340,43 @@
             setTimeout(() => doLogout(), 2000);
         }
     }
+    function initFilters() {
+        const devices = Object.values(JSON.parse(localStorage.getItem('localDevicesMap') || '{}'));
+        const areas = [...new Set(devices.map(d => d.area).filter(Boolean))].sort();
+        const types = [...new Set(devices.map(d => d.equipmentType).filter(Boolean))].sort();
+        const areaSelect = document.getElementById('filterArea');
+        const typeSelect = document.getElementById('filterType');
+        areaSelect.innerHTML = '<option value="">Tất cả khu vực</option>';
+        typeSelect.innerHTML = '<option value="">Tất cả loại máy</option>';
+        areas.forEach(a => { areaSelect.innerHTML += `<option value="${a}">${a}</option>`; });
+        types.forEach(t => { typeSelect.innerHTML += `<option value="${t}">${t}</option>`; });
+    }
+
+    function applyFilters() {
+        const areaVal = document.getElementById('filterArea').value;
+        const typeVal = document.getElementById('filterType').value;
+        const listEl = document.getElementById('filteredDeviceList');
+        if (!areaVal && !typeVal) { listEl.style.display = 'none'; return; }
+
+        let devices = Object.values(JSON.parse(localStorage.getItem('localDevicesMap') || '{}'));
+        if (areaVal) devices = devices.filter(d => d.area === areaVal);
+        if (typeVal) devices = devices.filter(d => d.equipmentType === typeVal);
+
+        listEl.style.display = 'block';
+        if (devices.length === 0) {
+            listEl.innerHTML = '<div class="text-muted small text-center py-2">Không tìm thấy thiết bị</div>';
+            return;
+        }
+        listEl.innerHTML = devices.map(d => `
+            <div class="d-flex justify-content-between align-items-center py-2 border-bottom" style="cursor:pointer;" onclick="fetchData('${d.uid}')">
+                <div>
+                    <div class="fw-bold small">${d.name || d.uid}</div>
+                    <div class="text-muted" style="font-size:0.75rem;"><i class="bi bi-geo-alt me-1"></i>${d.location || '—'}</div>
+                </div>
+                <span class="badge ${d.status === 'OUT' ? 'bg-warning text-dark' : 'bg-success'} rounded-pill" style="font-size:0.65rem;">${d.status || 'IN'}</span>
+            </div>`).join('');
+    }
+
     async function handleInOut(status) {
         const uid = document.getElementById('disp_uid').innerText;
         const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
