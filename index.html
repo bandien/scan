@@ -282,10 +282,10 @@
             </div>
         </div>
 
-        <div class="row g-2 mb-3">
+        <div class="row g-2 mb-2">
             <div class="col-6">
                 <label class="form-label fw-bold small">Loại thiết bị</label>
-                <select class="form-select rounded-3" id="batchTypeSelect">
+                <select class="form-select rounded-3" id="batchTypeSelect" onchange="renderBatchPresets()">
                     <option value="Bơm">Bơm (Pump)</option>
                     <option value="Tủ điện">Tủ điện (Electrical Panel)</option>
                     <option value="Cáp điện">Cáp điện (Cable)</option>
@@ -298,12 +298,19 @@
             </div>
         </div>
 
+        <div class="mb-3">
+            <label class="form-label fw-bold text-success small mb-1"><i class="bi bi-info-circle"></i> Gợi ý đặt mã & tên (Chuẩn M&E):</label>
+            <div id="batchPresetsContainer" class="d-flex flex-wrap gap-1 p-2 bg-light rounded-3 border">
+                <!-- Preset buttons are rendered here dynamically -->
+            </div>
+        </div>
+
         <!-- Quy tắc đặt mã UID -->
         <div class="p-3 bg-light rounded-4 mb-3 border">
             <label class="form-label fw-bold text-dark small mb-2"><i class="bi bi-hash"></i> Công thức sinh mã tuần tự (UID Pattern)</label>
             <div class="row g-1 mb-2">
                 <div class="col-4">
-                    <input type="text" class="form-control form-control-sm rounded-2" id="batchPrefix" placeholder="Tiền tố (e.g. HP-CAB-)" oninput="updateBatchPreview()">
+                    <input type="text" class="form-control form-control-sm rounded-2" id="batchPrefix" placeholder="Tiền tố (e.g. HP-CAB-)" oninput="this.value = sanitizeUidString(this.value); updateBatchPreview();">
                 </div>
                 <div class="col-2">
                     <input type="number" class="form-control form-control-sm rounded-2 px-1 text-center" id="batchStartNum" placeholder="Bắt đầu" value="1" min="1" oninput="updateBatchPreview()">
@@ -319,7 +326,7 @@
                     </select>
                 </div>
                 <div class="col-2">
-                    <input type="text" class="form-control form-control-sm rounded-2" id="batchSuffix" placeholder="Hậu tố (e.g. -A)" oninput="updateBatchPreview()">
+                    <input type="text" class="form-control form-control-sm rounded-2" id="batchSuffix" placeholder="Hậu tố (e.g. -A)" oninput="this.value = sanitizeUidString(this.value); updateBatchPreview();">
                 </div>
             </div>
             <div class="small text-muted" style="font-size: 0.72rem;">
@@ -633,7 +640,7 @@
                     <div class="mb-3">
                         <label class="form-label fw-bold small">Mã thiết bị (UID)</label>
                         <div class="input-group">
-                            <input type="text" class="form-control" id="newDevUID" placeholder="VD: HAPU-PUMP-01">
+                            <input type="text" class="form-control" id="newDevUID" placeholder="VD: HAPU-PUMP-01" oninput="this.value = sanitizeUidString(this.value)">
                             <button class="btn btn-outline-secondary" type="button" onclick="startScannerForNewDevice()"><i class="bi bi-qr-code-scan"></i></button>
                         </div>
                     </div>
@@ -1458,6 +1465,7 @@
             document.getElementById('batchShiftSelect').innerHTML = `<option value="">-- Mặc định --</option>` + makeOptions(shifts);
             
             updateBatchPreview();
+            renderBatchPresets();
         } else {
             section.style.display = 'none';
         }
@@ -3918,6 +3926,92 @@
             console.error(e);
             showToast('Lỗi kết nối máy chủ', 'danger');
         }
+    }
+
+    // === M&E NAMING SYSTEM PRESENTS & SANITIZATION ===
+
+    function sanitizeUidString(str) {
+        if (!str) return '';
+        // Remove accents (normalize and strip combining marks)
+        let cleaned = str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        // Map Vietnamese specific characters to standard letters
+        cleaned = cleaned.replace(/[đĐ]/g, "D");
+        // Convert to uppercase
+        cleaned = cleaned.toUpperCase();
+        // Replace spaces with hyphen '-'
+        cleaned = cleaned.replace(/\s+/g, "-");
+        // Keep only A-Z, 0-9, '-', and '_'
+        cleaned = cleaned.replace(/[^A-Z0-9\-_]/g, "");
+        return cleaned;
+    }
+
+    const ME_PRESETS = {
+        'Bơm': [
+            { label: 'Bơm nước sạch (BNS)', prefix: 'T1-BNS-', suffix: '', padding: 2, name: 'Bơm nước sạch số #', specs: 'Bơm cấp nước sạch', type: 'Bơm' },
+            { label: 'Bơm nước thải (BNT)', prefix: 'B1-BNT-', suffix: '', padding: 2, name: 'Bơm nước thải số #', specs: 'Bơm thoát nước thải', type: 'Bơm' },
+            { label: 'Bơm cứu hỏa (BCC)', prefix: 'TBA-BCC-', suffix: '', padding: 2, name: 'Bơm cứu hỏa số #', specs: 'Bơm chữa cháy', type: 'Bơm' },
+            { label: 'Bơm tuần hoàn (CP)', prefix: 'PME-CP-', suffix: '', padding: 2, name: 'Bơm tuần hoàn số #', specs: 'Bơm giải nhiệt tuần hoàn', type: 'Bơm' }
+        ],
+        'Tủ điện': [
+            { label: 'Tủ điện tổng (MSB)', prefix: 'TBA-MSB-', suffix: '', padding: 2, name: 'Tủ điện tổng MSB #', specs: 'Tủ điện tổng hạ thế', type: 'Tủ điện' },
+            { label: 'Tủ phân phối (DB)', prefix: 'T1-DB-', suffix: '', padding: 2, name: 'Tủ điện phân phối tầng DB-#', specs: 'Tủ điện phân phối', type: 'Tủ điện' },
+            { label: 'Tủ điều khiển (TĐK)', prefix: 'T1-TĐK-', suffix: '', padding: 2, name: 'Tủ điều khiển bơm số #', specs: 'Tủ điều khiển động cơ', type: 'Tủ điện' },
+            { label: 'Tủ nguồn ATS', prefix: 'TBA-ATS-', suffix: '', padding: 2, name: 'Tủ chuyển đổi nguồn ATS #', specs: 'Tủ chuyển đổi nguồn tự động', type: 'Tủ điện' }
+        ],
+        'Cáp điện': [
+            { label: 'Cáp nguồn Tủ tổng_Tủ nhánh', prefix: 'MSB1_DB-L', suffix: '', padding: 1, name: 'Cáp động lực cấp cho DB-L#', specs: 'Cáp động lực Cu/PVC/PVC', type: 'Cáp điện' },
+            { label: 'Cáp điều khiển TĐK_Bơm', prefix: 'TĐK-BOM1_PUMP', suffix: '', padding: 2, name: 'Cáp nguồn điều khiển PUMP#', specs: 'Cáp điều khiển chống nhiễu', type: 'Cáp điện' }
+        ],
+        'Khác': [
+            { label: 'Tuyến cáp mạng MDF', prefix: 'MDF-P', suffix: '', padding: 2, name: 'Cáp Patch Panel MDF-P#', specs: 'Cáp mạng Cat6 UTP', type: 'Khác' },
+            { label: 'Tuyến cáp mạng IDF', prefix: 'IDF1-P', suffix: '', padding: 2, name: 'Cáp Patch Panel IDF1-P#', specs: 'Cáp mạng Cat6 UTP', type: 'Khác' }
+        ]
+    };
+
+    function applyMePreset(presetIndex, typeKey) {
+        const list = ME_PRESETS[typeKey];
+        if (!list || !list[presetIndex]) return;
+        const p = list[presetIndex];
+        
+        document.getElementById('batchPrefix').value = p.prefix;
+        document.getElementById('batchSuffix').value = p.suffix;
+        document.getElementById('batchPadding').value = p.padding;
+        document.getElementById('batchNameTemplate').value = p.name;
+        document.getElementById('batchSpecsTemplate').value = p.specs;
+        
+        // Auto-fill location suggestion if empty
+        const locInp = document.getElementById('batchLocation');
+        if (!locInp.value.trim()) {
+            if (p.prefix.startsWith('T1-')) locInp.value = 'Tầng 1';
+            else if (p.prefix.startsWith('B1-')) locInp.value = 'Tầng hầm 1';
+            else if (p.prefix.startsWith('TBA-')) locInp.value = 'Trạm biến áp';
+            else if (p.prefix.startsWith('PME-')) locInp.value = 'Phòng kỹ thuật máy (PME)';
+            else if (p.prefix.startsWith('IDF1-')) locInp.value = 'Tầng 1';
+            else if (p.prefix.startsWith('K1-')) locInp.value = 'Khu 1';
+        }
+
+        updateBatchPreview();
+        showToast(`Đã áp dụng mẫu: ${p.label}`, 'success');
+    }
+
+    function renderBatchPresets() {
+        const typeSelect = document.getElementById('batchTypeSelect');
+        const container = document.getElementById('batchPresetsContainer');
+        if (!typeSelect || !container) return;
+
+        const val = typeSelect.value || 'Bơm';
+        const list = ME_PRESETS[val] || [];
+        
+        if (list.length === 0) {
+            container.innerHTML = '<span class="text-muted small">Không có gợi ý mẫu cho loại này.</span>';
+            return;
+        }
+
+        container.innerHTML = list.map((p, idx) => {
+            return `<button class="btn btn-xs btn-outline-success rounded-pill px-2 py-1 text-start fw-bold m-1 shadow-sm border-success-subtle anim-up" type="button" onclick="applyMePreset(${idx}, '${val}')" style="font-size: 0.72rem;">
+                <i class="bi bi-tag-fill me-1"></i> ${p.label}
+            </button>`;
+        }).join('');
     }
 </script>
 </body>
