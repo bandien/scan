@@ -54,12 +54,13 @@ function doGet(e) {
       devSheet.getRange(1, 10).setValue("Manufacture Date");
       devSheet.getRange(1, 11).setValue("Installation Date");
       devSheet.getRange(1, 12).setValue("Status");
+      devSheet.getRange(1, 13).setValue("Project");
     }
     const userSheet = ss.getSheetByName("Users");
     if (userSheet) {
       userSheet.getRange(1, 4).setValue("Teams");
     }
-    return contentResponse({ status: "success", message: "English headers set on columns J, K, L and Users column D." });
+    return contentResponse({ status: "success", message: "English headers set on columns J, K, L, M and Users column D." });
   }
 
   if (action === 'login') {
@@ -102,7 +103,8 @@ function doGet(e) {
         warningDays: devData[i][8] || 7,
         manufactureDate: devData[i][9] || "",
         installationDate: devData[i][10] || "",
-        status: devData[i][11] || "IN"
+        status: devData[i][11] || "IN",
+        project: devData[i][12] || ""
       });
     }
 
@@ -264,7 +266,8 @@ function doGet(e) {
         location: data[i][2],
         specs: data[i][3] || "N/A",
         cycle: data[i][4] || 30,
-        nextMaintenance: data[i][5] || ""
+        nextMaintenance: data[i][5] || "",
+        project: data[i][12] || ""
       };
       break;
     }
@@ -324,7 +327,8 @@ function doPost(e) {
         params.warningDays || 7,
         params.manufactureDate || '',
         params.installationDate || '',
-        'IN' // Column 12: Status
+        'IN', // Column 12: Status
+        params.project || '' // Column 13: Project
       ]);
 
       // Write audit log entry
@@ -364,6 +368,7 @@ function doPost(e) {
       devSheet.getRange(rowIdx, 9).setValue(params.warningDays || 7);
       devSheet.getRange(rowIdx, 10).setValue(params.manufactureDate || '');
       devSheet.getRange(rowIdx, 11).setValue(params.installationDate || '');
+      devSheet.getRange(rowIdx, 13).setValue(params.project || '');
 
       writeAuditLog(params.user || 'System', 'updateDevice', params.uid, 'Updated device details via Web App');
       return contentResponse({ status: "success", message: "Đã cập nhật thiết bị thành công" });
