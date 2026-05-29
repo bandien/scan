@@ -2287,7 +2287,20 @@
         // NO DELAY for Pro Speed
         try {
             const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
-            const device = deviceMap[uid];
+            let device = deviceMap[uid];
+            
+            if (!device) {
+                // Tìm kiếm thiết bị theo Số Seri nếu quét nhầm barcode của hãng
+                const allDevices = Object.values(deviceMap);
+                const matchBySerial = allDevices.find(d => 
+                    d.serialNumber && String(d.serialNumber).trim().toLowerCase() === String(uid).trim().toLowerCase()
+                );
+                if (matchBySerial) {
+                    device = matchBySerial;
+                    uid = device.uid;
+                    document.getElementById('disp_uid').innerText = uid;
+                }
+            }
             
             if (device) {
                 document.getElementById('disp_name').innerText = device.name;
