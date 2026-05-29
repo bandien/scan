@@ -150,7 +150,7 @@
             ĐĂNG NHẬP <i class="bi bi-box-arrow-in-right ms-2"></i>
         </button>
         <div id="loginSpinner" class="spinner-border text-primary mt-3" style="display: none;" role="status"></div>
-        <p class="mt-4 mb-0 text-muted" style="font-size: 0.75rem;"><span data-i18n="version">Phiên bản</span> v2.4.1</p>
+        <p class="mt-4 mb-0 text-muted" style="font-size: 0.75rem;"><span data-i18n="version">Phiên bản</span> v2.6.0</p>
     </div>
 </div>
 
@@ -196,6 +196,8 @@
                     <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleDashboard()" id="btn-dashboard"><i class="bi bi-bar-chart-fill me-2 text-primary"></i> Dashboard</a></li>
                     <li><hr class="dropdown-divider opacity-50"></li>
                     <li><a class="dropdown-item rounded-3 py-2" href="architecture.html" target="_blank"><i class="bi bi-diagram-3 me-2 text-secondary"></i> Sơ đồ Hệ thống</a></li>
+                    <li><hr class="dropdown-divider opacity-50"></li>
+                    <li class="px-3 py-1 text-center text-muted" style="font-size: 0.72rem; list-style-type: none;"><span data-i18n="version">Phiên bản</span> v2.6.0</li>
                 </ul>
             </div>
         </div>
@@ -2433,10 +2435,12 @@
                 if (document.getElementById('rememberMe').checked) {
                     localStorage.setItem('currentUser', JSON.stringify(result.user));
                     localStorage.setItem('savedUsername', username);
+                    localStorage.setItem('savedPassword', password);
                 } else {
                     sessionStorage.setItem('currentUser', JSON.stringify(result.user));
                     localStorage.removeItem('currentUser');
                     localStorage.removeItem('savedUsername');
+                    localStorage.removeItem('savedPassword');
                 }
                 
                 // OPTIMIZATION: Convert array to Object for O(1) Lookup
@@ -2488,6 +2492,10 @@
             if (savedUsername) {
                 document.getElementById('usernameInput').value = savedUsername;
                 document.getElementById('rememberMe').checked = true;
+            }
+            const savedPassword = localStorage.getItem('savedPassword');
+            if (savedPassword) {
+                document.getElementById('passwordInput').value = savedPassword;
             }
         }
 
