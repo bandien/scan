@@ -1,0 +1,6 @@
+# Ignore everything
+**/*
+
+# Except the Apps Script backend files
+!Backend.gs
+!appsscript.json
