@@ -592,7 +592,7 @@ function doPost(e) {
 
     // action=createProject
     if (params.action === "createProject") {
-      if (!params.name || !String(params.name).trim()) return contentResponse({ status: "error", message: "Ten du an khong duoc de trong" });
+      if (!params.name || !String(params.name).trim()) return contentResponse({ status: "error", message: "Tên dự án không được để trống" });
       const projSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Projects");
       if (!projSheet) return contentResponse({ status: "error", message: "Projects sheet not found" });
       const now = new Date();
@@ -603,6 +603,88 @@ function doPost(e) {
       writeAuditLog(params.user || "System", "createProject", projectId, "Created project: " + params.name);
       return contentResponse({ status: "success", projectId: projectId, name: params.name.trim() });
     }
+
+    // action=updateProject
+    if (params.action === "updateProject") {
+      if (!params.projectId) return contentResponse({ status: "error", message: "Thiếu mã dự án" });
+      if (!params.name || !String(params.name).trim()) return contentResponse({ status: "error", message: "Tên dự án không được để trống" });
+      const projSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Projects");
+      if (!projSheet) return contentResponse({ status: "error", message: "Projects sheet not found" });
+      
+      const projData = projSheet.getDataRange().getValues();
+      let rowIdx = -1;
+      for (let i = 1; i < projData.length; i++) {
+        if (String(projData[i][0]).trim() === String(params.projectId).trim()) {
+          rowIdx = i + 1;
+          break;
+        }
+      }
+      if (rowIdx === -1) {
+        return contentResponse({ status: "error", message: "Không tìm thấy dự án để cập nhật" });
+      }
+      
+      const oldName = projData[rowIdx-1][1];
+      const newName = params.name.trim();
+      
+      projSheet.getRange(rowIdx, 2).setValue(newName);
+      projSheet.getRange(rowIdx, 3).setValue(params.status || "Active");
+      projSheet.getRange(rowIdx, 4).setValue(params.startDate || "");
+      projSheet.getRange(rowIdx, 5).setValue(params.endDate || "");
+      
+      // If project name changed, we also rename the project string on all associated devices
+      if (oldName !== newName) {
+        const devSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Devices");
+        if (devSheet) {
+          const devData = devSheet.getDataRange().getValues();
+          for (let j = 1; j < devData.length; j++) {
+            if (String(devData[j][12]).trim() === String(oldName).trim()) { // Column 13: Project (Index 12)
+              devSheet.getRange(j + 1, 13).setValue(newName);
+            }
+          }
+        }
+      }
+      
+      writeAuditLog(params.user || "System", "updateProject", params.projectId, "Updated project: " + newName);
+      return contentResponse({ status: "success", projectId: params.projectId, name: newName });
+    }
+
+    // action=deleteProject
+    if (params.action === "deleteProject") {
+      if (!params.projectId) return contentResponse({ status: "error", message: "Thiếu mã dự án" });
+      const projSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Projects");
+      if (!projSheet) return contentResponse({ status: "error", message: "Projects sheet not found" });
+      
+      const projData = projSheet.getDataRange().getValues();
+      let rowIdx = -1;
+      for (let i = 1; i < projData.length; i++) {
+        if (String(projData[i][0]).trim() === String(params.projectId).trim()) {
+          rowIdx = i + 1;
+          break;
+        }
+      }
+      if (rowIdx === -1) {
+        return contentResponse({ status: "error", message: "Không tìm thấy dự án để xóa" });
+      }
+      
+      const projName = projData[rowIdx-1][1];
+      
+      projSheet.deleteRow(rowIdx);
+      
+      // Set Project column to empty for all devices associated with this project name
+      const devSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Devices");
+      if (devSheet) {
+        const devData = devSheet.getDataRange().getValues();
+        for (let j = 1; j < devData.length; j++) {
+          if (String(devData[j][12]).trim() === String(projName).trim()) { // Column 13: Project
+            devSheet.getRange(j + 1, 13).setValue("");
+          }
+        }
+      }
+      
+      writeAuditLog(params.user || "System", "deleteProject", params.projectId, "Deleted project: " + projName);
+      return contentResponse({ status: "success", message: "Đã xóa dự án thành công" });
+    }
+
 
     // action=changePassword — Change user PIN in Users sheet
     if (params.action === 'changePassword') {

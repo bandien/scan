@@ -187,6 +187,7 @@
                 <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 mt-2 p-2" style="min-width: 200px;">
                     <li id="menuAddDevice" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="showAddDeviceModal()"><i class="bi bi-plus-square-dotted me-2 text-success"></i> Thêm thiết bị mới</a></li>
                     <li id="menuBatchGen" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleBatchGenerator()"><i class="bi bi-magic me-2 text-success"></i> Tạo mã hàng loạt</a></li>
+                    <li id="menuProjMgr" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="openProjectManager()"><i class="bi bi-briefcase-fill me-2 text-success"></i> Quản lý Dự án</a></li>
                     <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleDeviceList()" id="btn-device-list"><i class="bi bi-cpu me-2 text-primary"></i> Thiết bị của tôi</a></li>
                     <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleCalendar()" id="btn-calendar"><i class="bi bi-calendar-event me-2 text-primary"></i> Lịch Bảo Trì</a></li>
                     <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleKanban()" id="btn-kanban"><i class="bi bi-kanban me-2 text-primary"></i> Kanban WO</a></li>
@@ -271,9 +272,14 @@
 
         <div class="mb-3">
             <label class="form-label fw-bold small">Dự án liên kết</label>
-            <select class="form-select rounded-3" id="batchProjectSelect">
-                <option value="">-- Chọn dự án --</option>
-            </select>
+            <div class="d-flex gap-2">
+                <select class="form-select rounded-3" id="batchProjectSelect">
+                    <option value="">-- Chọn dự án --</option>
+                </select>
+                <button class="btn btn-outline-secondary rounded-3 px-3" type="button" onclick="openProjectManager()" title="Quản lý dự án">
+                    <i class="bi bi-gear-fill"></i>
+                </button>
+            </div>
         </div>
 
         <div class="row g-2 mb-3">
@@ -708,9 +714,14 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold small">Dự án liên kết</label>
-                        <select class="form-select rounded-3" id="newDevProjectSelect">
-                            <option value="">-- Chọn dự án --</option>
-                        </select>
+                        <div class="d-flex gap-2">
+                            <select class="form-select rounded-3" id="newDevProjectSelect">
+                                <option value="">-- Chọn dự án --</option>
+                            </select>
+                            <button class="btn btn-outline-secondary rounded-3 px-3" type="button" onclick="openProjectManager()" title="Quản lý dự án">
+                                <i class="bi bi-gear-fill"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold small">Số Seri (S/N) hãng sản xuất</label>
@@ -799,9 +810,14 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold small">Dự án liên kết</label>
-                        <select class="form-select rounded-3" id="editDevProjectSelect">
-                            <option value="">-- Chọn dự án --</option>
-                        </select>
+                        <div class="d-flex gap-2">
+                            <select class="form-select rounded-3" id="editDevProjectSelect">
+                                <option value="">-- Chọn dự án --</option>
+                            </select>
+                            <button class="btn btn-outline-secondary rounded-3 px-3" type="button" onclick="openProjectManager()" title="Quản lý dự án">
+                                <i class="bi bi-gear-fill"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold small">Số Seri (S/N) hãng sản xuất</label>
@@ -875,6 +891,82 @@
                     <button type="button" class="btn btn-primary rounded-pill px-4" onclick="submitChangePassword()">
                         <i class="bi bi-check-lg me-1"></i> Lưu thay đổi
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Manager Modal -->
+    <div class="modal fade" id="projectManagerModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-briefcase-fill me-2 text-primary"></i>Quản lý Dự án</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Form thêm/sửa dự án -->
+                    <div id="projectFormContainer" class="p-3 bg-light rounded-4 mb-4 border" style="display: none;">
+                        <h6 class="fw-bold mb-3 text-primary" id="projectFormTitle"><i class="bi bi-plus-circle me-1"></i>Thêm dự án mới</h6>
+                        <input type="hidden" id="manageProjId">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Tên dự án</label>
+                            <input type="text" class="form-control rounded-3" id="manageProjName" placeholder="Ví dụ: Dự án Tòa nhà A">
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Trạng thái</label>
+                                <select class="form-select rounded-3" id="manageProjStatus">
+                                    <option value="Active">Hoạt động (Active)</option>
+                                    <option value="Inactive">Tạm ngưng (Inactive)</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Ngày bắt đầu</label>
+                                <input type="date" class="form-control rounded-3" id="manageProjStart">
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Ngày kết thúc</label>
+                                <input type="date" class="form-control rounded-3" id="manageProjEnd">
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2 justify-content-end">
+                            <button class="btn btn-light rounded-pill px-3" onclick="hideProjectForm()">Hủy</button>
+                            <button class="btn btn-primary rounded-pill px-3 text-white fw-bold" onclick="submitManageProject()">Lưu dự án</button>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-muted small">Danh sách các dự án hiện có trên hệ thống.</span>
+                        <button class="btn btn-sm btn-primary rounded-pill px-3" onclick="showAddProjectForm()">
+                            <i class="bi bi-plus-lg"></i> Thêm dự án
+                        </button>
+                    </div>
+
+                    <!-- Bảng danh sách dự án -->
+                    <div class="border rounded-4 overflow-hidden shadow-sm bg-white">
+                        <div class="table-responsive" style="max-height: 300px;">
+                            <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-3">Mã</th>
+                                        <th>Tên dự án</th>
+                                        <th>Trạng thái</th>
+                                        <th>Ngày BD - KT</th>
+                                        <th class="text-end pe-3">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="projectManagerTableBody">
+                                    <!-- Rendered dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
                 </div>
             </div>
         </div>
@@ -1352,12 +1444,7 @@
         if (section.style.display === 'none') {
             section.style.display = 'block';
             
-            const projects = JSON.parse(localStorage.getItem('localProjects') || '[]');
-            const projSel = document.getElementById('batchProjectSelect');
-            projSel.innerHTML = '<option value="">-- Chọn dự án --</option>';
-            projects.forEach(p => {
-                projSel.innerHTML += `<option value="${p.name}">${p.name}</option>`;
-            });
+            populateAllProjectSelects();
             
             const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
             const managers = new Set(), shifts = new Set();
@@ -2103,10 +2190,12 @@
         if (user.role === 'Admin' || user.role === 'Manager') {
             document.getElementById('menuAddDevice').style.display = 'block';
             document.getElementById('menuBatchGen').style.display = 'block';
+            document.getElementById('menuProjMgr').style.display = 'block';
             document.getElementById('btnManageChecklist').style.display = 'inline-block';
         } else {
             document.getElementById('menuAddDevice').style.display = 'none';
             document.getElementById('menuBatchGen').style.display = 'none';
+            document.getElementById('menuProjMgr').style.display = 'none';
             document.getElementById('btnManageChecklist').style.display = 'none';
         }
         updateSyncStatus();
@@ -3218,14 +3307,7 @@
         populateDropdownOrNew('newDevManagerSelect', 'newDevManagerTextContainer', 'newDevManagerText', managers, '');
         populateDropdownOrNew('newDevShiftSelect', 'newDevShiftTextContainer', 'newDevShiftText', shifts, '');
 
-        const projects = JSON.parse(localStorage.getItem('localProjects') || '[]');
-        const projSel = document.getElementById('newDevProjectSelect');
-        if (projSel) {
-            projSel.innerHTML = '<option value="">-- Chọn dự án --</option>';
-            projects.forEach(p => {
-                projSel.innerHTML += `<option value="${p.name}">${p.name}</option>`;
-            });
-        }
+        populateAllProjectSelects();
 
         new bootstrap.Modal(document.getElementById('addDeviceModal')).show();
     }
@@ -3405,13 +3487,9 @@
         document.getElementById('editDevInstall').value = device.installationDate || '';
         document.getElementById('editDevSN').value = device.serialNumber || '';
 
-        const projects = JSON.parse(localStorage.getItem('localProjects') || '[]');
+        populateAllProjectSelects();
         const projSel = document.getElementById('editDevProjectSelect');
         if (projSel) {
-            projSel.innerHTML = '<option value="">-- Chọn dự án --</option>';
-            projects.forEach(p => {
-                projSel.innerHTML += `<option value="${p.name}">${p.name}</option>`;
-            });
             projSel.value = device.project || '';
         }
 
@@ -3600,6 +3678,245 @@
             select.value = '';
             container.style.display = 'none';
             textInput.value = '';
+        }
+    }
+
+    // === PROJECT MANAGEMENT MODULE ===
+
+    function populateAllProjectSelects() {
+        const projects = JSON.parse(localStorage.getItem('localProjects') || '[]');
+        
+        // 1. Populate #newDevProjectSelect
+        const newDevProjSel = document.getElementById('newDevProjectSelect');
+        if (newDevProjSel) {
+            const currentVal = newDevProjSel.value;
+            newDevProjSel.innerHTML = '<option value="">-- Chọn dự án --</option>';
+            projects.forEach(p => {
+                newDevProjSel.innerHTML += `<option value="${p.name}">${p.name}</option>`;
+            });
+            newDevProjSel.value = currentVal;
+        }
+
+        // 2. Populate #editDevProjectSelect
+        const editDevProjSel = document.getElementById('editDevProjectSelect');
+        if (editDevProjSel) {
+            const currentVal = editDevProjSel.value;
+            editDevProjSel.innerHTML = '<option value="">-- Chọn dự án --</option>';
+            projects.forEach(p => {
+                editDevProjSel.innerHTML += `<option value="${p.name}">${p.name}</option>`;
+            });
+            editDevProjSel.value = currentVal;
+        }
+
+        // 3. Populate #batchProjectSelect
+        const batchProjSel = document.getElementById('batchProjectSelect');
+        if (batchProjSel) {
+            const currentVal = batchProjSel.value;
+            batchProjSel.innerHTML = '<option value="">-- Chọn dự án --</option>';
+            projects.forEach(p => {
+                batchProjSel.innerHTML += `<option value="${p.name}">${p.name}</option>`;
+            });
+            batchProjSel.value = currentVal;
+        }
+
+        // 4. Populate #woProjectSelect
+        const woProjSel = document.getElementById('woProjectSelect');
+        if (woProjSel) {
+            const currentVal = woProjSel.value;
+            woProjSel.innerHTML = '<option value="">-- Chọn dự án --</option>';
+            projects.filter(p => p.status === 'Active').forEach(p => {
+                woProjSel.innerHTML += `<option value="${p.name}">${p.name}</option>`;
+            });
+            woProjSel.value = currentVal;
+        }
+
+        // 5. Populate main filter #deviceProjectFilter
+        populateDeviceProjectFilter();
+    }
+
+    function openProjectManager() {
+        hideProjectForm();
+        renderProjectManagerList();
+        new bootstrap.Modal(document.getElementById('projectManagerModal')).show();
+    }
+
+    function renderProjectManagerList() {
+        const projects = JSON.parse(localStorage.getItem('localProjects') || '[]');
+        const listBody = document.getElementById('projectManagerTableBody');
+        listBody.innerHTML = '';
+
+        if (projects.length === 0) {
+            listBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">Không có dự án nào.</td></tr>';
+            return;
+        }
+
+        projects.forEach(p => {
+            const dateRange = (p.startDate || p.endDate) ? `${p.startDate || '...'} / ${p.endDate || '...'}` : '<span class="text-muted">N/A</span>';
+            const statusBadge = p.status === 'Active' ? '<span class="badge bg-success-subtle text-success">Active</span>' : '<span class="badge bg-secondary-subtle text-secondary">Inactive</span>';
+            
+            listBody.innerHTML += `
+                <tr>
+                    <td class="font-monospace fw-bold text-primary">${p.id}</td>
+                    <td><span class="fw-bold">${p.name}</span></td>
+                    <td>${statusBadge}</td>
+                    <td><span class="small">${dateRange}</span></td>
+                    <td class="text-end pe-3">
+                        <button class="btn btn-sm btn-outline-warning rounded-pill px-2 py-0" onclick="showEditProjectForm('${p.id}')" title="Sửa">
+                            <i class="bi bi-pencil" style="font-size: 0.75rem;"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger rounded-pill px-2 py-0 ms-1" onclick="deleteProject('${p.id}')" title="Xóa">
+                            <i class="bi bi-trash" style="font-size: 0.75rem;"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function showAddProjectForm() {
+        document.getElementById('projectFormContainer').style.display = 'block';
+        document.getElementById('projectFormTitle').innerHTML = '<i class="bi bi-plus-circle me-1"></i>Thêm dự án mới';
+        document.getElementById('manageProjId').value = '';
+        document.getElementById('manageProjName').value = '';
+        document.getElementById('manageProjStatus').value = 'Active';
+        document.getElementById('manageProjStart').value = '';
+        document.getElementById('manageProjEnd').value = '';
+        document.getElementById('manageProjName').focus();
+    }
+
+    function showEditProjectForm(id) {
+        const projects = JSON.parse(localStorage.getItem('localProjects') || '[]');
+        const p = projects.find(item => item.id === id);
+        if (!p) return;
+
+        document.getElementById('projectFormContainer').style.display = 'block';
+        document.getElementById('projectFormTitle').innerHTML = '<i class="bi bi-pencil-square me-1"></i>Chỉnh sửa dự án';
+        document.getElementById('manageProjId').value = p.id;
+        document.getElementById('manageProjName').value = p.name;
+        document.getElementById('manageProjStatus').value = p.status || 'Active';
+        document.getElementById('manageProjStart').value = p.startDate || '';
+        document.getElementById('manageProjEnd').value = p.endDate || '';
+        document.getElementById('manageProjName').focus();
+    }
+
+    function hideProjectForm() {
+        document.getElementById('projectFormContainer').style.display = 'none';
+        document.getElementById('manageProjId').value = '';
+        document.getElementById('manageProjName').value = '';
+        document.getElementById('manageProjStart').value = '';
+        document.getElementById('manageProjEnd').value = '';
+    }
+
+    async function submitManageProject() {
+        const id = document.getElementById('manageProjId').value.trim();
+        const name = document.getElementById('manageProjName').value.trim();
+        const status = document.getElementById('manageProjStatus').value;
+        const startDate = document.getElementById('manageProjStart').value;
+        const endDate = document.getElementById('manageProjEnd').value;
+
+        if (!name) {
+            showToast('Tên dự án không được để trống', 'warning');
+            return;
+        }
+
+        showToast('Đang lưu dự án...');
+        const userStr = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+        const user = JSON.parse(userStr);
+
+        const action = id ? 'updateProject' : 'createProject';
+        const payload = {
+            action: action,
+            token: API_TOKEN,
+            user: user.name,
+            projectId: id,
+            name: name,
+            status: status,
+            startDate: startDate,
+            endDate: endDate
+        };
+
+        try {
+            const res = await fetch(gasUrl, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+
+            if (result.status === 'success') {
+                showToast('Đã lưu dự án thành công!', 'success');
+                hideProjectForm();
+                
+                let cached = JSON.parse(localStorage.getItem('localProjects') || '[]');
+                if (action === 'createProject') {
+                    cached.push({ id: result.projectId, name: result.name, status: status, startDate: startDate, endDate: endDate });
+                } else {
+                    const idx = cached.findIndex(p => p.id === id);
+                    if (idx !== -1) {
+                        cached[idx] = { id: id, name: name, status: status, startDate: startDate, endDate: endDate };
+                    }
+                }
+                localStorage.setItem('localProjects', JSON.stringify(cached));
+                
+                populateAllProjectSelects();
+                renderProjectManagerList();
+            } else {
+                showToast(result.message || 'Lỗi lưu dự án', 'danger');
+            }
+        } catch (e) {
+            console.error(e);
+            showToast('Lỗi kết nối máy chủ', 'danger');
+        }
+    }
+
+    async function deleteProject(projectId) {
+        const projects = JSON.parse(localStorage.getItem('localProjects') || '[]');
+        const p = projects.find(item => item.id === projectId);
+        if (!p) return;
+
+        if (!confirm(`Bạn có chắc chắn muốn xóa dự án "${p.name}"?\nHành động này sẽ gỡ liên kết dự án cho toàn bộ thiết bị đang thuộc dự án này.`)) {
+            return;
+        }
+
+        showToast('Đang xóa dự án...');
+        const userStr = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+        const user = JSON.parse(userStr);
+
+        try {
+            const res = await fetch(gasUrl, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'deleteProject',
+                    token: API_TOKEN,
+                    projectId: projectId,
+                    user: user.name
+                })
+            });
+            const result = await res.json();
+
+            if (result.status === 'success') {
+                showToast('Đã xóa dự án thành công!', 'success');
+                
+                let cached = JSON.parse(localStorage.getItem('localProjects') || '[]');
+                cached = cached.filter(item => item.id !== projectId);
+                localStorage.setItem('localProjects', JSON.stringify(cached));
+
+                const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+                Object.values(deviceMap).forEach(d => {
+                    if (d.project === p.name) {
+                        d.project = '';
+                    }
+                });
+                localStorage.setItem('localDevicesMap', JSON.stringify(deviceMap));
+                
+                populateAllProjectSelects();
+                renderProjectManagerList();
+                renderDeviceList();
+            } else {
+                showToast(result.message || 'Lỗi xóa dự án', 'danger');
+            }
+        } catch (e) {
+            console.error(e);
+            showToast('Lỗi kết nối máy chủ', 'danger');
         }
     }
 </script>
