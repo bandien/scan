@@ -790,7 +790,23 @@
 
 <script>
     let scanner = null;
-    function getScanner() { if (!scanner) scanner = new Html5Qrcode("reader"); return scanner; }
+    function getScanner() {
+        if (!scanner) {
+            scanner = new Html5Qrcode("reader", {
+                formatsToSupport: [
+                    Html5QrcodeSupportedFormats.QR_CODE,
+                    Html5QrcodeSupportedFormats.CODE_128,
+                    Html5QrcodeSupportedFormats.CODE_39,
+                    Html5QrcodeSupportedFormats.EAN_13,
+                    Html5QrcodeSupportedFormats.EAN_8,
+                    Html5QrcodeSupportedFormats.UPC_A,
+                    Html5QrcodeSupportedFormats.UPC_E,
+                    Html5QrcodeSupportedFormats.ITF
+                ]
+            });
+        }
+        return scanner;
+    }
     const startBtn = document.getElementById('startScan');
     let isScanProcessing = false;
     // ==========================================
@@ -885,7 +901,10 @@
         { 
             fps: 20, 
             qrbox: {width: 280, height: 180},
-            aspectRatio: 1.777778
+            aspectRatio: 1.777778,
+            experimentalFeatures: {
+                useBarCodeDetectorIfSupported: true
+            }
         }, 
         (uid) => {
             if (isScanProcessing) return;
@@ -2476,7 +2495,14 @@
         
         const s = getScanner();
         s.start({ facingMode: "environment" }, 
-        { fps: 20, qrbox: {width: 280, height: 180}, aspectRatio: 1.777778 }, 
+        { 
+            fps: 20, 
+            qrbox: {width: 280, height: 180}, 
+            aspectRatio: 1.777778,
+            experimentalFeatures: {
+                useBarCodeDetectorIfSupported: true
+            }
+        }, 
         (uid) => {
             if (isScanProcessing) return;
             isScanProcessing = true;
