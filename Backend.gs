@@ -68,6 +68,13 @@ function doGet(e) {
       projSheet.getRange(1, 1, 1, 5).setValues([["ProjectID", "Name", "Status", "StartDate", "EndDate"]]);
       projSheet.getRange(1, 1, 1, 5).setFontWeight("bold");
     }
+    // Auto-create Shifts sheet if it doesn't exist
+    let shiftSheet = ss.getSheetByName("Shifts");
+    if (!shiftSheet) {
+      shiftSheet = ss.insertSheet("Shifts");
+      shiftSheet.getRange(1, 1, 1, 4).setValues([["ShiftID", "Name", "Description", "Status"]]);
+      shiftSheet.getRange(1, 1, 1, 4).setFontWeight("bold");
+    }
     // Auto-create AuditLog sheet if it doesn't exist
     let auditSheet = ss.getSheetByName("AuditLog");
     if (!auditSheet) {
@@ -75,7 +82,7 @@ function doGet(e) {
       auditSheet.getRange(1, 1, 1, 5).setValues([["Timestamp", "User", "Action", "Target", "Details"]]);
       auditSheet.getRange(1, 1, 1, 5).setFontWeight("bold");
     }
-    return contentResponse({ status: "success", message: "Headers configured. Projects & AuditLog sheets ensured." });
+    return contentResponse({ status: "success", message: "Headers configured. Projects, Shifts & AuditLog sheets ensured." });
   }
 
   if (action === 'login') {
@@ -266,6 +273,19 @@ function doGet(e) {
       projects.push({ id: projData[i][0], name: projData[i][1], status: projData[i][2] || "Active", startDate: projData[i][3] || "", endDate: projData[i][4] || "" });
     }
     return contentResponse({ status: "success", projects: projects });
+  }
+
+  // action=getShifts
+  if (action === "getShifts") {
+    const shiftSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Shifts");
+    if (!shiftSheet) return contentResponse({ status: "error", message: "Shifts sheet not found" });
+    const shiftData = shiftSheet.getDataRange().getValues();
+    const shifts = [];
+    for (let i = 1; i < shiftData.length; i++) {
+      if (!shiftData[i][0]) continue;
+      shifts.push({ id: shiftData[i][0], name: shiftData[i][1], description: shiftData[i][2] || "", status: shiftData[i][3] || "Active" });
+    }
+    return contentResponse({ status: "success", shifts: shifts });
   }
 
   if (!uid) return contentResponse({ status: "error", message: "Missing UID" });
@@ -699,6 +719,100 @@ function doPost(e) {
       return contentResponse({ status: "success", message: "Đã xóa dự án thành công" });
     }
 
+    // action=createShift
+    if (params.action === "createShift") {
+      if (!params.name || !String(params.name).trim()) return contentResponse({ status: "error", message: "Tên ca trực không được để trống" });
+      const shiftSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Shifts");
+      if (!shiftSheet) return contentResponse({ status: "error", message: "Shifts sheet not found" });
+      const now = new Date();
+      const yyyymm = now.getFullYear().toString() + String(now.getMonth() + 1).padStart(2, "0");
+      const seq = String(shiftSheet.getLastRow()).padStart(3, "0");
+      const shiftId = "SHF-" + yyyymm + "-" + seq;
+      shiftSheet.appendRow([shiftId, params.name.trim(), params.description || "", params.status || "Active"]);
+      writeAuditLog(params.user || "System", "createShift", shiftId, "Created shift: " + params.name);
+      return contentResponse({ status: "success", shiftId: shiftId, name: params.name.trim() });
+    }
+
+    // action=updateShift
+    if (params.action === "updateShift") {
+      if (!params.shiftId) return contentResponse({ status: "error", message: "Thiếu mã ca trực" });
+      if (!params.name || !String(params.name).trim()) return contentResponse({ status: "error", message: "Tên ca trực không được để trống" });
+      const shiftSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Shifts");
+      if (!shiftSheet) return contentResponse({ status: "error", message: "Shifts sheet not found" });
+      
+      const shiftData = shiftSheet.getDataRange().getValues();
+      let rowIdx = -1;
+      for (let i = 1; i < shiftData.length; i++) {
+        if (String(shiftData[i][0]).trim() === String(params.shiftId).trim()) {
+          rowIdx = i + 1;
+          break;
+        }
+      }
+      if (rowIdx === -1) {
+        return contentResponse({ status: "error", message: "Không tìm thấy ca trực để cập nhật" });
+      }
+      
+      const oldName = shiftData[rowIdx-1][1];
+      const newName = params.name.trim();
+      
+      shiftSheet.getRange(rowIdx, 2).setValue(newName);
+      shiftSheet.getRange(rowIdx, 3).setValue(params.description || "");
+      shiftSheet.getRange(rowIdx, 4).setValue(params.status || "Active");
+      
+      // If shift name changed, we also rename the shift string on all associated devices
+      if (oldName !== newName) {
+        const devSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Devices");
+        if (devSheet) {
+          const devData = devSheet.getDataRange().getValues();
+          for (let j = 1; j < devData.length; j++) {
+            if (String(devData[j][7]).trim() === String(oldName).trim()) { // Column 8: Shift (Index 7)
+              devSheet.getRange(j + 1, 8).setValue(newName);
+            }
+          }
+        }
+      }
+      
+      writeAuditLog(params.user || "System", "updateShift", params.shiftId, "Updated shift: " + newName);
+      return contentResponse({ status: "success", shiftId: params.shiftId, name: newName });
+    }
+
+    // action=deleteShift
+    if (params.action === "deleteShift") {
+      if (!params.shiftId) return contentResponse({ status: "error", message: "Thiếu mã ca trực" });
+      const shiftSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Shifts");
+      if (!shiftSheet) return contentResponse({ status: "error", message: "Shifts sheet not found" });
+      
+      const shiftData = shiftSheet.getDataRange().getValues();
+      let rowIdx = -1;
+      for (let i = 1; i < shiftData.length; i++) {
+        if (String(shiftData[i][0]).trim() === String(params.shiftId).trim()) {
+          rowIdx = i + 1;
+          break;
+        }
+      }
+      if (rowIdx === -1) {
+        return contentResponse({ status: "error", message: "Không tìm thấy ca trực để xóa" });
+      }
+      
+      const shiftName = shiftData[rowIdx-1][1];
+      
+      shiftSheet.deleteRow(rowIdx);
+      
+      // Set Shift column to "Chưa phân công" for all devices associated with this shift name
+      const devSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Devices");
+      if (devSheet) {
+        const devData = devSheet.getDataRange().getValues();
+        for (let j = 1; j < devData.length; j++) {
+          if (String(devData[j][7]).trim() === String(shiftName).trim()) { // Column 8: Shift
+            devSheet.getRange(j + 1, 8).setValue("Chưa phân công");
+          }
+        }
+      }
+      
+      writeAuditLog(params.user || "System", "deleteShift", params.shiftId, "Deleted shift: " + shiftName);
+      return contentResponse({ status: "success", message: "Đã xóa ca trực thành công" });
+    }
+
 
     // action=changePassword — Change user PIN in Users sheet
     if (params.action === 'changePassword') {
@@ -1030,7 +1144,7 @@ function testAuthorization() {
     const ss = SpreadsheetApp.openById(SHEET_ID);
     console.log("Kết nối Spreadsheet thành công: " + ss.getName());
     
-    const sheets = ["Users", "Devices", "Logs", "Checklists", "WorkOrders", "AuditLog", "Projects"];
+    const sheets = ["Users", "Devices", "Logs", "Checklists", "WorkOrders", "AuditLog", "Projects", "Shifts"];
     sheets.forEach(name => {
       const s = ss.getSheetByName(name);
       if (s) {

@@ -188,6 +188,7 @@
                     <li id="menuAddDevice" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="showAddDeviceModal()"><i class="bi bi-plus-square-dotted me-2 text-success"></i> Thêm thiết bị mới</a></li>
                     <li id="menuBatchGen" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleBatchGenerator()"><i class="bi bi-magic me-2 text-success"></i> Tạo mã hàng loạt</a></li>
                     <li id="menuProjMgr" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="openProjectManager()"><i class="bi bi-briefcase-fill me-2 text-success"></i> Quản lý Dự án</a></li>
+                    <li id="menuShiftMgr" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="openShiftManager()"><i class="bi bi-clock-history me-2 text-success"></i> Quản lý Ca trực</a></li>
                     <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleDeviceList()" id="btn-device-list"><i class="bi bi-cpu me-2 text-primary"></i> Thiết bị của tôi</a></li>
                     <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleCalendar()" id="btn-calendar"><i class="bi bi-calendar-event me-2 text-primary"></i> Lịch Bảo Trì</a></li>
                     <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleKanban()" id="btn-kanban"><i class="bi bi-kanban me-2 text-primary"></i> Kanban WO</a></li>
@@ -353,9 +354,14 @@
             </div>
             <div class="col-6">
                 <label class="form-label fw-bold small">Ca trực</label>
-                <select class="form-select rounded-3" id="batchShiftSelect">
-                    <!-- Populated dynamically -->
-                </select>
+                <div class="d-flex gap-2">
+                    <select class="form-select rounded-3" id="batchShiftSelect">
+                        <!-- Populated dynamically -->
+                    </select>
+                    <button class="btn btn-outline-secondary rounded-3 px-3" type="button" onclick="openShiftManager()" title="Quản lý ca trực">
+                        <i class="bi bi-gear-fill"></i>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -673,11 +679,13 @@
                         </div>
                         <div class="col-6">
                             <label class="form-label fw-bold small">Ca trực</label>
-                            <select class="form-select rounded-3 mb-2" id="newDevShiftSelect" onchange="toggleDropdownOrNew('newDevShiftSelect', 'newDevShiftTextContainer')">
-                                <!-- Populated dynamically -->
-                            </select>
-                            <div id="newDevShiftTextContainer" style="display: none;">
-                                <input type="text" class="form-control rounded-3 mt-1" id="newDevShiftText" placeholder="Nhập ca trực mới...">
+                            <div class="d-flex gap-2 mb-2">
+                                <select class="form-select rounded-3" id="newDevShiftSelect">
+                                    <!-- Populated dynamically -->
+                                </select>
+                                <button class="btn btn-outline-secondary rounded-3 px-3" type="button" onclick="openShiftManager()" title="Quản lý ca trực">
+                                    <i class="bi bi-gear-fill"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -783,11 +791,13 @@
                         </div>
                         <div class="col-6">
                             <label class="form-label fw-bold small">Ca trực</label>
-                            <select class="form-select rounded-3 mb-2" id="editDevShiftSelect" onchange="toggleDropdownOrNew('editDevShiftSelect', 'editDevShiftTextContainer')">
-                                <!-- Populated dynamically -->
-                            </select>
-                            <div id="editDevShiftTextContainer" style="display: none;">
-                                <input type="text" class="form-control rounded-3 mt-1" id="editDevShiftText" placeholder="Nhập ca trực mới...">
+                            <div class="d-flex gap-2 mb-2">
+                                <select class="form-select rounded-3" id="editDevShiftSelect">
+                                    <!-- Populated dynamically -->
+                                </select>
+                                <button class="btn btn-outline-secondary rounded-3 px-3" type="button" onclick="openShiftManager()" title="Quản lý ca trực">
+                                    <i class="bi bi-gear-fill"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -966,6 +976,76 @@
                                     </tr>
                                 </thead>
                                 <tbody id="projectManagerTableBody">
+                                    <!-- Rendered dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shift Manager Modal -->
+    <div class="modal fade" id="shiftManagerModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-clock-history me-2 text-primary"></i>Quản lý Ca trực</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Form thêm/sửa ca trực -->
+                    <div id="shiftFormContainer" class="p-3 bg-light rounded-4 mb-4 border" style="display: none;">
+                        <h6 class="fw-bold mb-3 text-primary" id="shiftFormTitle"><i class="bi bi-plus-circle me-1"></i>Thêm ca trực mới</h6>
+                        <input type="hidden" id="manageShiftId">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Tên ca trực</label>
+                            <input type="text" class="form-control rounded-3" id="manageShiftName" placeholder="Ví dụ: Ca Sáng, Ca Chiều, Ca Hành Chính">
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Trạng thái</label>
+                                <select class="form-select rounded-3" id="manageShiftStatus">
+                                    <option value="Active">Hoạt động (Active)</option>
+                                    <option value="Inactive">Tạm ngưng (Inactive)</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Mô tả / Giờ làm việc</label>
+                                <input type="text" class="form-control rounded-3" id="manageShiftDesc" placeholder="Ví dụ: 06:00 - 14:00">
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2 justify-content-end">
+                            <button class="btn btn-light rounded-pill px-3" onclick="hideShiftForm()">Hủy</button>
+                            <button class="btn btn-primary rounded-pill px-3 text-white fw-bold" onclick="submitManageShift()">Lưu ca trực</button>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-muted small">Danh sách các ca trực hiện có trên hệ thống.</span>
+                        <button class="btn btn-sm btn-primary rounded-pill px-3" onclick="showAddShiftForm()">
+                            <i class="bi bi-plus-lg"></i> Thêm ca trực
+                        </button>
+                    </div>
+
+                    <!-- Bảng danh sách ca trực -->
+                    <div class="border rounded-4 overflow-hidden shadow-sm bg-white">
+                        <div class="table-responsive" style="max-height: 300px;">
+                            <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-3">Mã</th>
+                                        <th>Tên ca trực</th>
+                                        <th>Mô tả / Giờ làm việc</th>
+                                        <th>Trạng thái</th>
+                                        <th class="text-end pe-3">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="shiftManagerTableBody">
                                     <!-- Rendered dynamically -->
                                 </tbody>
                             </table>
@@ -1452,17 +1532,16 @@
             section.style.display = 'block';
             
             populateAllProjectSelects();
+            populateAllShiftSelects();
             
             const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
-            const managers = new Set(), shifts = new Set();
+            const managers = new Set();
             Object.values(deviceMap).forEach(d => {
                 if (d.manager && d.manager !== 'Chưa phân công') managers.add(d.manager);
-                if (d.shift && d.shift !== 'Chưa phân công') shifts.add(d.shift);
             });
             
             const makeOptions = (set) => Array.from(set).map(v => `<option value="${v}">${v}</option>`).join('');
             document.getElementById('batchManagerSelect').innerHTML = `<option value="">-- Mặc định --</option>` + makeOptions(managers);
-            document.getElementById('batchShiftSelect').innerHTML = `<option value="">-- Mặc định --</option>` + makeOptions(shifts);
             
             updateBatchPreview();
             renderBatchPresets();
@@ -2199,11 +2278,13 @@
             document.getElementById('menuAddDevice').style.display = 'block';
             document.getElementById('menuBatchGen').style.display = 'block';
             document.getElementById('menuProjMgr').style.display = 'block';
+            document.getElementById('menuShiftMgr').style.display = 'block';
             document.getElementById('btnManageChecklist').style.display = 'inline-block';
         } else {
             document.getElementById('menuAddDevice').style.display = 'none';
             document.getElementById('menuBatchGen').style.display = 'none';
             document.getElementById('menuProjMgr').style.display = 'none';
+            document.getElementById('menuShiftMgr').style.display = 'none';
             document.getElementById('btnManageChecklist').style.display = 'none';
         }
         updateSyncStatus();
@@ -2217,6 +2298,8 @@
         localStorage.removeItem('localChecklists');
         localStorage.removeItem('localWorkOrders');
         localStorage.removeItem('localUsers');
+        localStorage.removeItem('localShifts');
+        localStorage.removeItem('localProjects');
         localStorage.removeItem('offline_logs');
         location.reload();
     }
@@ -2311,6 +2394,11 @@
                 fetch(`${gasUrl}?action=getProjects&token=${API_TOKEN}`)
                     .then(r => r.json())
                     .then(d => { if (d.status === 'success') localStorage.setItem('localProjects', JSON.stringify(d.projects || [])); })
+                    .catch(() => {});
+                // Preload shifts list for Shift dropdown
+                fetch(`${gasUrl}?action=getShifts&token=${API_TOKEN}`)
+                    .then(r => r.json())
+                    .then(d => { if (d.status === 'success') localStorage.setItem('localShifts', JSON.stringify(d.shifts || [])); })
                     .catch(() => {});
                 updateUI(result.user);
                 showToast(`Xin chào ${result.user.name} (${result.user.role})`);
@@ -3283,7 +3371,7 @@
 
     function showAddDeviceModal() {
         const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
-        const names = new Set(), locs = new Set(), managers = new Set(), shifts = new Set();
+        const names = new Set(), locs = new Set(), managers = new Set();
         Object.values(deviceMap).forEach(d => {
             if (d.name) names.add(d.name);
             if (d.location) locs.add(d.location);
@@ -3295,7 +3383,6 @@
                 locs.add(d.name);
             }
             if (d.manager && d.manager !== 'Chưa phân công') managers.add(d.manager);
-            if (d.shift && d.shift !== 'Chưa phân công') shifts.add(d.shift);
         });
         const makeOptions = (set) => Array.from(set).map(v => `<option value="${v}">`).join('');
         document.getElementById('dlName').innerHTML = makeOptions(names);
@@ -3313,8 +3400,8 @@
 
         populateDropdownOrNew('newDevLocSelect', 'newDevLocTextContainer', 'newDevLocText', locs, '');
         populateDropdownOrNew('newDevManagerSelect', 'newDevManagerTextContainer', 'newDevManagerText', managers, '');
-        populateDropdownOrNew('newDevShiftSelect', 'newDevShiftTextContainer', 'newDevShiftText', shifts, '');
-
+        
+        populateAllShiftSelects();
         populateAllProjectSelects();
 
         new bootstrap.Modal(document.getElementById('addDeviceModal')).show();
@@ -3331,8 +3418,7 @@
         const managerVal = document.getElementById('newDevManagerSelect').value;
         const manager = managerVal === '__NEW__' ? document.getElementById('newDevManagerText').value.trim() : managerVal;
 
-        const shiftVal = document.getElementById('newDevShiftSelect').value;
-        const shift = shiftVal === '__NEW__' ? document.getElementById('newDevShiftText').value.trim() : shiftVal;
+        const shift = document.getElementById('newDevShiftSelect').value || 'Chưa phân công';
 
         showToast('Đang thêm thiết bị...');
         
@@ -3467,7 +3553,7 @@
         const device = deviceMap[uid];
         if (!device) return;
 
-        const locs = new Set(), managers = new Set(), shifts = new Set();
+        const locs = new Set(), managers = new Set();
         Object.values(deviceMap).forEach(d => {
             if (d.location) locs.add(d.location);
             const isLocDevice = (d.specs || '').toLowerCase().includes('địa điểm') || 
@@ -3478,7 +3564,6 @@
                 locs.add(d.name);
             }
             if (d.manager && d.manager !== 'Chưa phân công') managers.add(d.manager);
-            if (d.shift && d.shift !== 'Chưa phân công') shifts.add(d.shift);
         });
 
         document.getElementById('editDevUID').value = device.uid;
@@ -3486,7 +3571,12 @@
 
         populateDropdownOrNew('editDevLocSelect', 'editDevLocTextContainer', 'editDevLocText', locs, device.location || '');
         populateDropdownOrNew('editDevManagerSelect', 'editDevManagerTextContainer', 'editDevManagerText', managers, device.manager || '');
-        populateDropdownOrNew('editDevShiftSelect', 'editDevShiftTextContainer', 'editDevShiftText', shifts, device.shift || '');
+        
+        populateAllShiftSelects();
+        const editDevShiftSel = document.getElementById('editDevShiftSelect');
+        if (editDevShiftSel) {
+            editDevShiftSel.value = device.shift || '';
+        }
 
         document.getElementById('editDevCycle').value = device.cycle || 30;
         document.getElementById('editDevNextMaint').value = device.nextMaintenance ? device.nextMaintenance.split('T')[0] : '';
@@ -3515,8 +3605,7 @@
         const managerVal = document.getElementById('editDevManagerSelect').value;
         const manager = managerVal === '__NEW__' ? document.getElementById('editDevManagerText').value.trim() : managerVal;
 
-        const shiftVal = document.getElementById('editDevShiftSelect').value;
-        const shift = shiftVal === '__NEW__' ? document.getElementById('editDevShiftText').value.trim() : shiftVal;
+        const shift = document.getElementById('editDevShiftSelect').value || 'Chưa phân công';
 
         showToast('Đang cập nhật thiết bị...');
         
@@ -3921,6 +4010,226 @@
                 renderDeviceList();
             } else {
                 showToast(result.message || 'Lỗi xóa dự án', 'danger');
+            }
+        } catch (e) {
+            console.error(e);
+            showToast('Lỗi kết nối máy chủ', 'danger');
+        }
+    }
+
+    // === SHIFT MANAGEMENT MODULE ===
+
+    function populateAllShiftSelects() {
+        const shifts = JSON.parse(localStorage.getItem('localShifts') || '[]');
+        
+        // 1. Populate #newDevShiftSelect
+        const newDevShiftSel = document.getElementById('newDevShiftSelect');
+        if (newDevShiftSel) {
+            const currentVal = newDevShiftSel.value;
+            newDevShiftSel.innerHTML = '<option value="">-- Chọn ca trực --</option>';
+            shifts.forEach(s => {
+                newDevShiftSel.innerHTML += `<option value="${s.name}">${s.name}</option>`;
+            });
+            newDevShiftSel.value = currentVal;
+        }
+
+        // 2. Populate #editDevShiftSelect
+        const editDevShiftSel = document.getElementById('editDevShiftSelect');
+        if (editDevShiftSel) {
+            const currentVal = editDevShiftSel.value;
+            editDevShiftSel.innerHTML = '<option value="">-- Chọn ca trực --</option>';
+            shifts.forEach(s => {
+                editDevShiftSel.innerHTML += `<option value="${s.name}">${s.name}</option>`;
+            });
+            editDevShiftSel.value = currentVal;
+        }
+
+        // 3. Populate #batchShiftSelect
+        const batchShiftSel = document.getElementById('batchShiftSelect');
+        if (batchShiftSel) {
+            const currentVal = batchShiftSel.value;
+            batchShiftSel.innerHTML = '<option value="">-- Mặc định --</option>';
+            shifts.forEach(s => {
+                batchShiftSel.innerHTML += `<option value="${s.name}">${s.name}</option>`;
+            });
+            batchShiftSel.value = currentVal;
+        }
+    }
+
+    function openShiftManager() {
+        hideShiftForm();
+        renderShiftManagerList();
+        new bootstrap.Modal(document.getElementById('shiftManagerModal')).show();
+    }
+
+    function renderShiftManagerList() {
+        const shifts = JSON.parse(localStorage.getItem('localShifts') || '[]');
+        const listBody = document.getElementById('shiftManagerTableBody');
+        if (!listBody) return;
+        listBody.innerHTML = '';
+
+        if (shifts.length === 0) {
+            listBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">Không có ca trực nào.</td></tr>';
+            return;
+        }
+
+        shifts.forEach(s => {
+            const statusBadge = s.status === 'Active' ? '<span class="badge bg-success-subtle text-success">Active</span>' : '<span class="badge bg-secondary-subtle text-secondary">Inactive</span>';
+            
+            listBody.innerHTML += `
+                <tr>
+                    <td class="font-monospace fw-bold text-primary">${s.id}</td>
+                    <td><span class="fw-bold">${s.name}</span></td>
+                    <td><span class="small">${s.description || '<span class="text-muted">N/A</span>'}</span></td>
+                    <td>${statusBadge}</td>
+                    <td class="text-end pe-3">
+                        <button class="btn btn-sm btn-outline-warning rounded-pill px-2 py-0" onclick="showEditShiftForm('${s.id}')" title="Sửa">
+                            <i class="bi bi-pencil" style="font-size: 0.75rem;"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger rounded-pill px-2 py-0 ms-1" onclick="deleteShift('${s.id}')" title="Xóa">
+                            <i class="bi bi-trash" style="font-size: 0.75rem;"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function showAddShiftForm() {
+        document.getElementById('shiftFormContainer').style.display = 'block';
+        document.getElementById('shiftFormTitle').innerHTML = '<i class="bi bi-plus-circle me-1"></i>Thêm ca trực mới';
+        document.getElementById('manageShiftId').value = '';
+        document.getElementById('manageShiftName').value = '';
+        document.getElementById('manageShiftStatus').value = 'Active';
+        document.getElementById('manageShiftDesc').value = '';
+        document.getElementById('manageShiftName').focus();
+    }
+
+    function showEditShiftForm(id) {
+        const shifts = JSON.parse(localStorage.getItem('localShifts') || '[]');
+        const s = shifts.find(item => item.id === id);
+        if (!s) return;
+
+        document.getElementById('shiftFormContainer').style.display = 'block';
+        document.getElementById('shiftFormTitle').innerHTML = '<i class="bi bi-pencil-square me-1"></i>Chỉnh sửa ca trực';
+        document.getElementById('manageShiftId').value = s.id;
+        document.getElementById('manageShiftName').value = s.name;
+        document.getElementById('manageShiftStatus').value = s.status || 'Active';
+        document.getElementById('manageShiftDesc').value = s.description || '';
+        document.getElementById('manageShiftName').focus();
+    }
+
+    function hideShiftForm() {
+        document.getElementById('shiftFormContainer').style.display = 'none';
+        document.getElementById('manageShiftId').value = '';
+        document.getElementById('manageShiftName').value = '';
+        document.getElementById('manageShiftDesc').value = '';
+    }
+
+    async function submitManageShift() {
+        const id = document.getElementById('manageShiftId').value.trim();
+        const name = document.getElementById('manageShiftName').value.trim();
+        const status = document.getElementById('manageShiftStatus').value;
+        const description = document.getElementById('manageShiftDesc').value.trim();
+
+        if (!name) {
+            showToast('Tên ca trực không được để trống', 'warning');
+            return;
+        }
+
+        showToast('Đang lưu ca trực...');
+        const userStr = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+        const user = JSON.parse(userStr);
+
+        const action = id ? 'updateShift' : 'createShift';
+        const payload = {
+            action: action,
+            token: API_TOKEN,
+            user: user.name,
+            shiftId: id,
+            name: name,
+            status: status,
+            description: description
+        };
+
+        try {
+            const res = await fetch(gasUrl, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+
+            if (result.status === 'success') {
+                showToast('Đã lưu ca trực thành công!', 'success');
+                hideShiftForm();
+                
+                let cached = JSON.parse(localStorage.getItem('localShifts') || '[]');
+                if (action === 'createShift') {
+                    cached.push({ id: result.shiftId, name: result.name, status: status, description: description });
+                } else {
+                    const idx = cached.findIndex(s => s.id === id);
+                    if (idx !== -1) {
+                        cached[idx] = { id: id, name: name, status: status, description: description };
+                    }
+                }
+                localStorage.setItem('localShifts', JSON.stringify(cached));
+                
+                populateAllShiftSelects();
+                renderShiftManagerList();
+            } else {
+                showToast(result.message || 'Lỗi lưu ca trực', 'danger');
+            }
+        } catch (e) {
+            console.error(e);
+            showToast('Lỗi kết nối máy chủ', 'danger');
+        }
+    }
+
+    async function deleteShift(shiftId) {
+        const shifts = JSON.parse(localStorage.getItem('localShifts') || '[]');
+        const s = shifts.find(item => item.id === shiftId);
+        if (!s) return;
+
+        if (!confirm(`Bạn có chắc chắn muốn xóa ca trực "${s.name}"?\nHành động này sẽ cập nhật ca trực cho toàn bộ thiết bị đang thuộc ca này thành "Chưa phân công".`)) {
+            return;
+        }
+
+        showToast('Đang xóa ca trực...');
+        const userStr = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+        const user = JSON.parse(userStr);
+
+        try {
+            const res = await fetch(gasUrl, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'deleteShift',
+                    token: API_TOKEN,
+                    shiftId: shiftId,
+                    user: user.name
+                })
+            });
+            const result = await res.json();
+
+            if (result.status === 'success') {
+                showToast('Đã xóa ca trực thành công!', 'success');
+                
+                let cached = JSON.parse(localStorage.getItem('localShifts') || '[]');
+                cached = cached.filter(item => item.id !== shiftId);
+                localStorage.setItem('localShifts', JSON.stringify(cached));
+
+                const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+                Object.values(deviceMap).forEach(d => {
+                    if (d.shift === s.name) {
+                        d.shift = 'Chưa phân công';
+                    }
+                });
+                localStorage.setItem('localDevicesMap', JSON.stringify(deviceMap));
+                
+                populateAllShiftSelects();
+                renderShiftManagerList();
+                renderDeviceList();
+            } else {
+                showToast(result.message || 'Lỗi xóa ca trực', 'danger');
             }
         } catch (e) {
             console.error(e);
