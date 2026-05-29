@@ -189,6 +189,7 @@
                     <li id="menuBatchGen" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleBatchGenerator()"><i class="bi bi-magic me-2 text-success"></i> Tạo mã hàng loạt</a></li>
                     <li id="menuProjMgr" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="openProjectManager()"><i class="bi bi-briefcase-fill me-2 text-success"></i> Quản lý Dự án</a></li>
                     <li id="menuShiftMgr" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="openShiftManager()"><i class="bi bi-clock-history me-2 text-success"></i> Quản lý Ca trực</a></li>
+                    <li id="menuLocMgr" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="openLocationManager()"><i class="bi bi-geo-fill me-2 text-success"></i> Quản lý Địa điểm</a></li>
                     <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleDeviceList()" id="btn-device-list"><i class="bi bi-cpu me-2 text-primary"></i> Thiết bị của tôi</a></li>
                     <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleCalendar()" id="btn-calendar"><i class="bi bi-calendar-event me-2 text-primary"></i> Lịch Bảo Trì</a></li>
                     <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleKanban()" id="btn-kanban"><i class="bi bi-kanban me-2 text-primary"></i> Kanban WO</a></li>
@@ -862,9 +863,14 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label fw-bold small">Chọn Địa điểm lắp đặt</label>
-                        <select class="form-select rounded-3" id="installLocSelect">
-                            <!-- Populated dynamically -->
-                        </select>
+                        <div class="d-flex gap-2">
+                            <select class="form-select rounded-3" id="installLocSelect">
+                                <!-- Populated dynamically -->
+                            </select>
+                            <button class="btn btn-outline-secondary rounded-3 px-3" type="button" onclick="openLocationManager()" title="Quản lý địa điểm">
+                                <i class="bi bi-gear-fill"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold small">Ghi chú lắp đặt (Tùy chọn)</label>
@@ -1046,6 +1052,61 @@
                                     </tr>
                                 </thead>
                                 <tbody id="shiftManagerTableBody">
+                                    <!-- Rendered dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Location Manager Modal -->
+    <div class="modal fade" id="locationManagerModal" tabindex="-1" aria-hidden="true" style="z-index: 1070;">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-geo-fill me-2 text-info"></i>Quản lý Địa điểm lắp đặt</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Form thêm/sửa địa điểm -->
+                    <div id="locationFormContainer" class="p-3 bg-light rounded-4 mb-4 border" style="display: none;">
+                        <h6 class="fw-bold mb-3 text-info" id="locationFormTitle"><i class="bi bi-plus-circle me-1"></i>Thêm địa điểm mới</h6>
+                        <input type="hidden" id="manageLocUid">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Tên địa điểm</label>
+                            <input type="text" class="form-control rounded-3" id="manageLocName" placeholder="Ví dụ: Phòng Bơm Tầng Hầm 2, Phòng Kỹ Thuật Tầng 3">
+                        </div>
+                        <div class="d-flex gap-2 justify-content-end">
+                            <button class="btn btn-light rounded-pill px-3" onclick="hideLocationForm()">Hủy</button>
+                            <button class="btn btn-info rounded-pill px-3 text-white fw-bold" onclick="submitManageLocation()">Lưu địa điểm</button>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-muted small">Danh sách các địa điểm lắp đặt hiện có (loại LOC-/KV-).</span>
+                        <button class="btn btn-sm btn-info rounded-pill px-3 text-white" onclick="showAddLocationForm()">
+                            <i class="bi bi-plus-lg"></i> Thêm địa điểm
+                        </button>
+                    </div>
+
+                    <!-- Bảng danh sách địa điểm -->
+                    <div class="border rounded-4 overflow-hidden shadow-sm bg-white">
+                        <div class="table-responsive" style="max-height: 300px;">
+                            <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-3">Mã UID</th>
+                                        <th>Tên địa điểm</th>
+                                        <th class="text-end pe-3">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="locationManagerTableBody">
                                     <!-- Rendered dynamically -->
                                 </tbody>
                             </table>
@@ -2279,12 +2340,14 @@
             document.getElementById('menuBatchGen').style.display = 'block';
             document.getElementById('menuProjMgr').style.display = 'block';
             document.getElementById('menuShiftMgr').style.display = 'block';
+            document.getElementById('menuLocMgr').style.display = 'block';
             document.getElementById('btnManageChecklist').style.display = 'inline-block';
         } else {
             document.getElementById('menuAddDevice').style.display = 'none';
             document.getElementById('menuBatchGen').style.display = 'none';
             document.getElementById('menuProjMgr').style.display = 'none';
             document.getElementById('menuShiftMgr').style.display = 'none';
+            document.getElementById('menuLocMgr').style.display = 'none';
             document.getElementById('btnManageChecklist').style.display = 'none';
         }
         updateSyncStatus();
@@ -3663,27 +3726,7 @@
     }
 
     function showInstallLocationModal() {
-        const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
-        const allDevices = Object.values(deviceMap);
-        
-        const locations = allDevices.filter(d => 
-            (d.specs || '').toLowerCase().includes('địa điểm') || 
-            (d.specs || '').toLowerCase().includes('phòng máy') || 
-            (d.uid || '').startsWith('LOC-') || 
-            (d.uid || '').startsWith('KV-')
-        );
-
-        const select = document.getElementById('installLocSelect');
-        select.innerHTML = '';
-        if (locations.length === 0) {
-            select.innerHTML = '<option value="">-- Không tìm thấy địa điểm nào --</option>';
-        } else {
-            locations.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-            locations.forEach(loc => {
-                select.innerHTML += `<option value="${escapeDropdownHtml(loc.name)}">${loc.uid} - ${loc.name}</option>`;
-            });
-        }
-        
+        populateInstallLocSelect();
         document.getElementById('installLocNotes').value = '';
         new bootstrap.Modal(document.getElementById('installLocationModal')).show();
     }
@@ -4230,6 +4273,238 @@
                 renderDeviceList();
             } else {
                 showToast(result.message || 'Lỗi xóa ca trực', 'danger');
+            }
+        } catch (e) {
+            console.error(e);
+            showToast('Lỗi kết nối máy chủ', 'danger');
+        }
+    }
+
+    // === LOCATION MANAGEMENT MODULE ===
+
+    function populateInstallLocSelect() {
+        const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+        const allDevices = Object.values(deviceMap);
+        
+        const locations = allDevices.filter(d => 
+            (d.specs || '').toLowerCase().includes('địa điểm') || 
+            (d.specs || '').toLowerCase().includes('phòng máy') || 
+            (d.uid || '').startsWith('LOC-') || 
+            (d.uid || '').startsWith('KV-')
+        );
+
+        const select = document.getElementById('installLocSelect');
+        if (!select) return;
+        select.innerHTML = '';
+        if (locations.length === 0) {
+            select.innerHTML = '<option value="">-- Không tìm thấy địa điểm nào --</option>';
+        } else {
+            locations.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            locations.forEach(loc => {
+                select.innerHTML += `<option value="${escapeDropdownHtml(loc.name)}">${loc.uid} - ${loc.name}</option>`;
+            });
+        }
+    }
+
+    function openLocationManager() {
+        hideLocationForm();
+        renderLocationManagerList();
+        new bootstrap.Modal(document.getElementById('locationManagerModal')).show();
+    }
+
+    function renderLocationManagerList() {
+        const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+        const allDevices = Object.values(deviceMap);
+        
+        const locations = allDevices.filter(d => 
+            (d.specs || '').toLowerCase().includes('địa điểm') || 
+            (d.specs || '').toLowerCase().includes('phòng máy') || 
+            (d.uid || '').startsWith('LOC-') || 
+            (d.uid || '').startsWith('KV-')
+        );
+
+        const listBody = document.getElementById('locationManagerTableBody');
+        if (!listBody) return;
+        listBody.innerHTML = '';
+
+        if (locations.length === 0) {
+            listBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted py-3">Không có địa điểm nào.</td></tr>';
+            return;
+        }
+
+        locations.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        locations.forEach(loc => {
+            listBody.innerHTML += `
+                <tr>
+                    <td class="font-monospace fw-bold text-primary">${loc.uid}</td>
+                    <td><span class="fw-bold">${loc.name}</span></td>
+                    <td class="text-end pe-3">
+                        <button class="btn btn-sm btn-outline-warning rounded-pill px-2 py-0" onclick="showEditLocationForm('${loc.uid}')" title="Sửa">
+                            <i class="bi bi-pencil" style="font-size: 0.75rem;"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger rounded-pill px-2 py-0 ms-1" onclick="deleteLocationDevice('${loc.uid}')" title="Xóa">
+                            <i class="bi bi-trash" style="font-size: 0.75rem;"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function showAddLocationForm() {
+        document.getElementById('locationFormContainer').style.display = 'block';
+        document.getElementById('locationFormTitle').innerHTML = '<i class="bi bi-plus-circle me-1"></i>Thêm địa điểm mới';
+        document.getElementById('manageLocUid').value = '';
+        document.getElementById('manageLocName').value = '';
+        document.getElementById('manageLocName').focus();
+    }
+
+    function showEditLocationForm(uid) {
+        const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+        const loc = deviceMap[uid];
+        if (!loc) return;
+
+        document.getElementById('locationFormContainer').style.display = 'block';
+        document.getElementById('locationFormTitle').innerHTML = '<i class="bi bi-pencil-square me-1"></i>Chỉnh sửa địa điểm';
+        document.getElementById('manageLocUid').value = loc.uid;
+        document.getElementById('manageLocName').value = loc.name;
+        document.getElementById('manageLocName').focus();
+    }
+
+    function hideLocationForm() {
+        document.getElementById('locationFormContainer').style.display = 'none';
+        document.getElementById('manageLocUid').value = '';
+        document.getElementById('manageLocName').value = '';
+    }
+
+    async function submitManageLocation() {
+        const uid = document.getElementById('manageLocUid').value.trim();
+        const name = document.getElementById('manageLocName').value.trim();
+
+        if (!name) {
+            showToast('Tên địa điểm không được để trống', 'warning');
+            return;
+        }
+
+        showToast('Đang lưu địa điểm...');
+        const userStr = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+        const user = JSON.parse(userStr);
+
+        const action = uid ? 'updateLocation' : 'createLocation';
+        const payload = {
+            action: action,
+            token: API_TOKEN,
+            user: user.name,
+            uid: uid,
+            name: name
+        };
+
+        try {
+            const res = await fetch(gasUrl, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+
+            if (result.status === 'success') {
+                showToast('Đã lưu địa điểm thành công!', 'success');
+                hideLocationForm();
+                
+                const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+                if (action === 'createLocation') {
+                    deviceMap[result.uid] = {
+                        uid: result.uid,
+                        name: result.name,
+                        location: result.name,
+                        specs: "Địa điểm lắp đặt",
+                        cycle: 30,
+                        nextMaintenance: "",
+                        manager: "Chưa phân công",
+                        shift: "Chưa phân công",
+                        warningDays: 7,
+                        manufactureDate: "",
+                        installationDate: "",
+                        status: "IN",
+                        project: "",
+                        serialNumber: ""
+                    };
+                } else {
+                    const oldLoc = deviceMap[uid];
+                    const oldName = oldLoc ? oldLoc.name : '';
+                    if (oldLoc) {
+                        oldLoc.name = name;
+                        oldLoc.location = name;
+                    }
+                    // Update location string on all devices at this old location name
+                    if (oldName && oldName !== name) {
+                        Object.values(deviceMap).forEach(d => {
+                            if (d.location === oldName && d.uid !== uid) {
+                                d.location = name;
+                            }
+                        });
+                    }
+                }
+                localStorage.setItem('localDevicesMap', JSON.stringify(deviceMap));
+                
+                populateInstallLocSelect();
+                renderLocationManagerList();
+                renderDeviceList();
+            } else {
+                showToast(result.message || 'Lỗi lưu địa điểm', 'danger');
+            }
+        } catch (e) {
+            console.error(e);
+            showToast('Lỗi kết nối máy chủ', 'danger');
+        }
+    }
+
+    async function deleteLocationDevice(uid) {
+        const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+        const loc = deviceMap[uid];
+        if (!loc) return;
+
+        if (!confirm(`Bạn có chắc chắn muốn xóa địa điểm "${loc.name}"?\nHành động này sẽ cập nhật vị trí lắp đặt của toàn bộ thiết bị tại đây thành "Chưa phân công".`)) {
+            return;
+        }
+
+        showToast('Đang xóa địa điểm...');
+        const userStr = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+        const user = JSON.parse(userStr);
+
+        try {
+            const res = await fetch(gasUrl, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'deleteLocation',
+                    token: API_TOKEN,
+                    uid: uid,
+                    user: user.name
+                })
+            });
+            const result = await res.json();
+
+            if (result.status === 'success') {
+                showToast('Đã xóa địa điểm thành công!', 'success');
+                
+                const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+                const locName = deviceMap[uid] ? deviceMap[uid].name : '';
+                delete deviceMap[uid];
+                
+                // Clear location on affected devices
+                if (locName) {
+                    Object.values(deviceMap).forEach(d => {
+                        if (d.location === locName) {
+                            d.location = 'Chưa phân công';
+                        }
+                    });
+                }
+                localStorage.setItem('localDevicesMap', JSON.stringify(deviceMap));
+                
+                populateInstallLocSelect();
+                renderLocationManagerList();
+                renderDeviceList();
+            } else {
+                showToast(result.message || 'Lỗi xóa địa điểm', 'danger');
             }
         } catch (e) {
             console.error(e);

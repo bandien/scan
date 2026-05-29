@@ -813,6 +813,113 @@ function doPost(e) {
       return contentResponse({ status: "success", message: "Đã xóa ca trực thành công" });
     }
 
+    // action=createLocation
+    if (params.action === "createLocation") {
+      if (!params.name || !String(params.name).trim()) return contentResponse({ status: "error", message: "Tên địa điểm không được để trống" });
+      const devSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Devices");
+      if (!devSheet) return contentResponse({ status: "error", message: "Devices sheet not found" });
+      
+      const now = new Date();
+      const yyyymm = now.getFullYear().toString() + String(now.getMonth() + 1).padStart(2, "0");
+      const seq = String(devSheet.getLastRow()).padStart(3, "0");
+      const locUid = "LOC-" + yyyymm + "-" + seq;
+      
+      devSheet.appendRow([
+        locUid,
+        params.name.trim(),
+        params.name.trim(), // Location = Name
+        "Địa điểm lắp đặt", // Specs = "Địa điểm lắp đặt"
+        30, // Cycle = 30
+        "", // Next Maintenance
+        "Chưa phân công", // Manager
+        "Chưa phân công", // Shift
+        7, // Warning days
+        "", // Mfg date
+        "", // Install date
+        "IN", // Status
+        "", // Project
+        ""  // Serial number
+      ]);
+      
+      writeAuditLog(params.user || "System", "createLocation", locUid, "Created location device: " + params.name);
+      return contentResponse({ status: "success", uid: locUid, name: params.name.trim() });
+    }
+
+    // action=updateLocation
+    if (params.action === "updateLocation") {
+      if (!params.uid) return contentResponse({ status: "error", message: "Thiếu mã địa điểm (UID)" });
+      if (!params.name || !String(params.name).trim()) return contentResponse({ status: "error", message: "Tên địa điểm không được để trống" });
+      
+      const devSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Devices");
+      if (!devSheet) return contentResponse({ status: "error", message: "Devices sheet not found" });
+      
+      const devData = devSheet.getDataRange().getValues();
+      let rowIdx = -1;
+      for (let i = 1; i < devData.length; i++) {
+        if (String(devData[i][0]).trim() === String(params.uid).trim()) {
+          rowIdx = i + 1;
+          break;
+        }
+      }
+      if (rowIdx === -1) {
+        return contentResponse({ status: "error", message: "Không tìm thấy địa điểm để cập nhật" });
+      }
+      
+      const oldName = devData[rowIdx-1][1];
+      const newName = params.name.trim();
+      
+      // Update the location device row: Name (Col B) and Location (Col C)
+      devSheet.getRange(rowIdx, 2).setValue(newName);
+      devSheet.getRange(rowIdx, 3).setValue(newName);
+      
+      // Update all devices installed at this oldLocation name to the new name (Col C)
+      if (oldName !== newName) {
+        for (let j = 1; j < devData.length; j++) {
+          if (String(devData[j][2]).trim() === String(oldName).trim() && j + 1 !== rowIdx) {
+            devSheet.getRange(j + 1, 3).setValue(newName);
+          }
+        }
+      }
+      
+      writeAuditLog(params.user || "System", "updateLocation", params.uid, "Updated location name from " + oldName + " to " + newName);
+      return contentResponse({ status: "success", uid: params.uid, name: newName });
+    }
+
+    // action=deleteLocation
+    if (params.action === "deleteLocation") {
+      if (!params.uid) return contentResponse({ status: "error", message: "Thiếu mã địa điểm (UID)" });
+      
+      const devSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Devices");
+      if (!devSheet) return contentResponse({ status: "error", message: "Devices sheet not found" });
+      
+      const devData = devSheet.getDataRange().getValues();
+      let rowIdx = -1;
+      for (let i = 1; i < devData.length; i++) {
+        if (String(devData[i][0]).trim() === String(params.uid).trim()) {
+          rowIdx = i + 1;
+          break;
+        }
+      }
+      if (rowIdx === -1) {
+        return contentResponse({ status: "error", message: "Không tìm thấy địa điểm để xóa" });
+      }
+      
+      const locName = devData[rowIdx-1][1];
+      
+      // Update all other devices installed at this deleted location to "Chưa phân công" (Col C)
+      for (let j = 1; j < devData.length; j++) {
+        if (j + 1 !== rowIdx && String(devData[j][2]).trim() === String(locName).trim()) {
+          devSheet.getRange(j + 1, 3).setValue("Chưa phân công");
+        }
+      }
+      
+      // Delete the location device row
+      devSheet.deleteRow(rowIdx);
+      
+      writeAuditLog(params.user || "System", "deleteLocation", params.uid, "Deleted location: " + locName);
+      return contentResponse({ status: "success", message: "Đã xóa địa điểm thành công" });
+    }
+
 
     // action=changePassword — Change user PIN in Users sheet
     if (params.action === 'changePassword') {
