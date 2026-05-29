@@ -69,6 +69,7 @@
 - [x] Tích hợp in nhãn chuyên dụng cho Fluke LinkWare Live và máy in Brother PT-E560BT.
 - [x] Chuẩn hóa trường nhập liệu: Chuyển đổi Vị trí, Tổ quản lý, Ca trực thành Dropdown linh hoạt + Thêm mới.
 - [x] Mô hình phân cấp quản lý & Nhiều tổ trực thuộc (Hierarchical Multi-team Filtering).
+- [x] Hỗ trợ trường Số Seri (Serial Number) của hãng sản xuất, hoạt động độc lập với UID bảo trì.
 - [ ] Cây phân cấp vị trí thiết bị chi tiết: Khu vực → Tòa nhà → Tầng → Phòng → Thiết bị.
 - [ ] Tự động sinh mã QR (QR Generator).
 - [ ] Quản lý Work Orders nâng cao (giao WO, mức độ ưu tiên, hạn xử lý).

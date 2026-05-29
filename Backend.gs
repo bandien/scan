@@ -55,12 +55,13 @@ function doGet(e) {
       devSheet.getRange(1, 11).setValue("Installation Date");
       devSheet.getRange(1, 12).setValue("Status");
       devSheet.getRange(1, 13).setValue("Project");
+      devSheet.getRange(1, 14).setValue("Serial Number");
     }
     const userSheet = ss.getSheetByName("Users");
     if (userSheet) {
       userSheet.getRange(1, 4).setValue("Teams");
     }
-    return contentResponse({ status: "success", message: "English headers set on columns J, K, L, M and Users column D." });
+    return contentResponse({ status: "success", message: "English headers set on columns J, K, L, M, N and Users column D." });
   }
 
   if (action === 'login') {
@@ -104,7 +105,8 @@ function doGet(e) {
         manufactureDate: devData[i][9] || "",
         installationDate: devData[i][10] || "",
         status: devData[i][11] || "IN",
-        project: devData[i][12] || ""
+        project: devData[i][12] || "",
+        serialNumber: devData[i][13] || ""
       });
     }
 
@@ -267,7 +269,8 @@ function doGet(e) {
         specs: data[i][3] || "N/A",
         cycle: data[i][4] || 30,
         nextMaintenance: data[i][5] || "",
-        project: data[i][12] || ""
+        project: data[i][12] || "",
+        serialNumber: data[i][13] || ""
       };
       break;
     }
@@ -328,7 +331,8 @@ function doPost(e) {
         params.manufactureDate || '',
         params.installationDate || '',
         'IN', // Column 12: Status
-        params.project || '' // Column 13: Project
+        params.project || '', // Column 13: Project
+        params.serialNumber || '' // Column 14: Serial Number
       ]);
 
       // Write audit log entry
@@ -373,7 +377,8 @@ function doPost(e) {
             d.manufactureDate || '',
             d.installationDate || '',
             'IN', // Status
-            d.project || '' // Project
+            d.project || '', // Project
+            d.serialNumber || '' // Serial Number
           ]);
           existingUids.add(uid);
         }
@@ -381,7 +386,7 @@ function doPost(e) {
 
       if (rowsToAppend.length > 0) {
         const lastRow = devSheet.getLastRow();
-        devSheet.getRange(lastRow + 1, 1, rowsToAppend.length, 13).setValues(rowsToAppend);
+        devSheet.getRange(lastRow + 1, 1, rowsToAppend.length, 14).setValues(rowsToAppend);
         writeAuditLog(params.user || 'System', 'createDevicesBatch', `${rowsToAppend.length} devices`, `Batch created ${rowsToAppend.length} devices via Web App`);
         sendAlert(`⚡ **Tạo hàng loạt:** Đã tạo thành công ${rowsToAppend.length} thiết bị mới cho dự án "${params.project || 'Chưa phân công'}".`);
       }
@@ -422,6 +427,7 @@ function doPost(e) {
       devSheet.getRange(rowIdx, 10).setValue(params.manufactureDate || '');
       devSheet.getRange(rowIdx, 11).setValue(params.installationDate || '');
       devSheet.getRange(rowIdx, 13).setValue(params.project || '');
+      devSheet.getRange(rowIdx, 14).setValue(params.serialNumber || '');
 
       writeAuditLog(params.user || 'System', 'updateDevice', params.uid, 'Updated device details via Web App');
       return contentResponse({ status: "success", message: "Đã cập nhật thiết bị thành công" });

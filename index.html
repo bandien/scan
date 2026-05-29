@@ -150,7 +150,7 @@
             ĐĂNG NHẬP <i class="bi bi-box-arrow-in-right ms-2"></i>
         </button>
         <div id="loginSpinner" class="spinner-border text-primary mt-3" style="display: none;" role="status"></div>
-        <p class="mt-4 mb-0 text-muted" style="font-size: 0.75rem;"><span data-i18n="version">Phiên bản</span> v2.3.0</p>
+        <p class="mt-4 mb-0 text-muted" style="font-size: 0.75rem;"><span data-i18n="version">Phiên bản</span> v2.3.1</p>
     </div>
 </div>
 
@@ -712,6 +712,10 @@
                             <option value="">-- Chọn dự án --</option>
                         </select>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Số Seri (S/N) hãng sản xuất</label>
+                        <input type="text" class="form-control rounded-3" id="newDevSN" placeholder="Nhập số Seri của hãng (nếu có)...">
+                    </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
                     <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
@@ -798,6 +802,10 @@
                         <select class="form-select rounded-3" id="editDevProjectSelect">
                             <option value="">-- Chọn dự án --</option>
                         </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Số Seri (S/N) hãng sản xuất</label>
+                        <input type="text" class="form-control rounded-3" id="editDevSN" placeholder="Nhập số Seri của hãng (nếu có)...">
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
@@ -1009,6 +1017,7 @@
                     <span class="small text-muted"><i class="bi bi-calendar-event me-1"></i>NSX: <span id="disp_mfg">---</span></span>
                     <span class="small text-muted"><i class="bi bi-calendar-plus me-1"></i>Lắp đặt: <span id="disp_install">---</span></span>
                     <span class="small text-muted"><i class="bi bi-briefcase me-1"></i>Dự án: <span id="disp_project">---</span></span>
+                    <span class="small text-muted"><i class="bi bi-barcode me-1"></i>Số Seri (S/N): <span id="disp_sn">---</span></span>
                 </div>
             </div>
             <div class="card-body p-0">
@@ -1698,7 +1707,7 @@
             return;
         }
 
-        const headers = ["UID", "Tên thiết bị (Name)", "Vị trí (Location)", "Chu kỳ bảo trì (Cycle)", "Thông số (Specs)", "Tổ quản lý (Manager)", "Ca trực (Shift)", "Dự án (Project)"];
+        const headers = ["UID", "Tên thiết bị (Name)", "Vị trí (Location)", "Chu kỳ bảo trì (Cycle)", "Thông số (Specs)", "Tổ quản lý (Manager)", "Ca trực (Shift)", "Dự án (Project)", "Số Seri (Serial Number)"];
         let csvContent = headers.join(",") + "\r\n";
         
         filtered.forEach(d => {
@@ -1710,7 +1719,8 @@
                 d.specs || '',
                 d.manager || '',
                 d.shift || '',
-                d.project || ''
+                d.project || '',
+                d.serialNumber || ''
             ];
             const escapedRow = row.map(val => {
                 let s = String(val).replace(/"/g, '""');
@@ -2287,6 +2297,7 @@
                 document.getElementById('disp_mfg').innerText = device.manufactureDate || 'Chưa rõ';
                 document.getElementById('disp_install').innerText = device.installationDate || 'Chưa rõ';
                 document.getElementById('disp_project').innerText = device.project || 'Không có';
+                document.getElementById('disp_sn').innerText = device.serialNumber || 'Không có';
                 
                 // Phân quyền hiển thị nút sửa thiết bị
                 const currentUserStr = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
@@ -3186,6 +3197,7 @@
             document.getElementById('newDevWarning').value = '7';
             document.getElementById('newDevMfg').value = '';
             document.getElementById('newDevInstall').value = '';
+            document.getElementById('newDevSN').value = '';
             suggestNextMaintenance();
         }
 
@@ -3239,6 +3251,7 @@
                 manufactureDate: document.getElementById('newDevMfg').value,
                 installationDate: document.getElementById('newDevInstall').value,
                 project: document.getElementById('newDevProjectSelect').value,
+                serialNumber: document.getElementById('newDevSN').value.trim(),
                 status: 'IN'
             };
 
@@ -3377,6 +3390,7 @@
         document.getElementById('editDevWarning').value = device.warningDays || 7;
         document.getElementById('editDevMfg').value = device.manufactureDate || '';
         document.getElementById('editDevInstall').value = device.installationDate || '';
+        document.getElementById('editDevSN').value = device.serialNumber || '';
 
         const projects = JSON.parse(localStorage.getItem('localProjects') || '[]');
         const projSel = document.getElementById('editDevProjectSelect');
@@ -3424,7 +3438,8 @@
                 warningDays: document.getElementById('editDevWarning').value.trim() || 7,
                 manufactureDate: document.getElementById('editDevMfg').value,
                 installationDate: document.getElementById('editDevInstall').value,
-                project: document.getElementById('editDevProjectSelect').value
+                project: document.getElementById('editDevProjectSelect').value,
+                serialNumber: document.getElementById('editDevSN').value.trim()
             };
 
             const res = await fetch(gasUrl, {
