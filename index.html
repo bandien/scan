@@ -4472,7 +4472,7 @@
         const userStr = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
         const user = JSON.parse(userStr);
 
-        const action = uid ? 'updateLocation' : 'createLocation';
+        const action = editUid ? 'updateLocation' : 'createLocation';
         const payload = {
             action: action,
             token: API_TOKEN,
