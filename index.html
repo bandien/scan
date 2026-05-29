@@ -238,6 +238,9 @@
         </div>
 
         <div class="mb-3 d-flex gap-2">
+            <select class="form-select bg-light border-0 rounded-3 text-muted small shadow-sm" id="deviceProjectFilter" onchange="renderDeviceList()" style="max-width: 150px; font-size: 0.8rem;">
+                <option value="" data-i18n="filter_project_all">-- Dự án: Tất cả --</option>
+            </select>
             <div class="input-group flex-grow-1">
                 <span class="input-group-text bg-light border-0"><i class="bi bi-search"></i></span>
                 <input type="text" class="form-control bg-light border-0" placeholder="Tìm nhanh thiết bị..." id="deviceSearchInput" oninput="renderDeviceList()" data-i18n-placeholder="search_devices_placeholder">
@@ -581,6 +584,12 @@
                             <input type="date" class="form-control rounded-3" id="newDevInstall">
                         </div>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Dự án liên kết</label>
+                        <select class="form-select rounded-3" id="newDevProjectSelect">
+                            <option value="">-- Chọn dự án --</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
                     <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
@@ -661,6 +670,12 @@
                             <label class="form-label fw-bold small">Ngày lắp đặt</label>
                             <input type="date" class="form-control rounded-3" id="editDevInstall">
                         </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Dự án liên kết</label>
+                        <select class="form-select rounded-3" id="editDevProjectSelect">
+                            <option value="">-- Chọn dự án --</option>
+                        </select>
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
@@ -871,6 +886,7 @@
                     <span class="small text-muted"><i class="bi bi-clock-history me-1"></i><span id="disp_shift">---</span></span>
                     <span class="small text-muted"><i class="bi bi-calendar-event me-1"></i>NSX: <span id="disp_mfg">---</span></span>
                     <span class="small text-muted"><i class="bi bi-calendar-plus me-1"></i>Lắp đặt: <span id="disp_install">---</span></span>
+                    <span class="small text-muted"><i class="bi bi-briefcase me-1"></i>Dự án: <span id="disp_project">---</span></span>
                 </div>
             </div>
             <div class="card-body p-0">
@@ -990,7 +1006,8 @@
             remember_me: "Ghi nhớ đăng nhập", version: "Phiên bản",
             search_devices_placeholder: "Tìm nhanh thiết bị...",
             export_lwl: "Xuất cho LinkWare Live (Fluke)",
-            export_brother: "Xuất cho máy in Brother (CSV)"
+            export_brother: "Xuất cho máy in Brother (CSV)",
+            filter_project_all: "-- Dự án: Tất cả --"
         },
         en: {
             app_title: "UID QR Master", app_subtitle: "Smart Maintenance Management",
@@ -1006,7 +1023,8 @@
             remember_me: "Remember me", version: "Version",
             search_devices_placeholder: "Quick search devices...",
             export_lwl: "Export for LinkWare Live (Fluke)",
-            export_brother: "Export for Brother Printer (CSV)"
+            export_brother: "Export for Brother Printer (CSV)",
+            filter_project_all: "-- All Projects --"
         }
     };
 
@@ -1152,6 +1170,33 @@
         renderDeviceList();
     }
 
+    function populateDeviceProjectFilter() {
+        const projects = JSON.parse(localStorage.getItem('localProjects') || '[]');
+        const filterSel = document.getElementById('deviceProjectFilter');
+        if (!filterSel) return;
+        
+        const currentSel = filterSel.value;
+        filterSel.innerHTML = `<option value="">${currentLang === 'vi' ? '-- Dự án: Tất cả --' : '-- All Projects --'}</option>`;
+        
+        const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+        const devProjects = new Set();
+        Object.values(deviceMap).forEach(d => {
+            if (d.project) devProjects.add(d.project);
+        });
+        
+        const allProjNames = new Set();
+        projects.forEach(p => allProjNames.add(p.name));
+        devProjects.forEach(p => allProjNames.add(p));
+        
+        Array.from(allProjNames).sort().forEach(name => {
+            if (name) {
+                filterSel.innerHTML += `<option value="${name}">${name}</option>`;
+            }
+        });
+        
+        filterSel.value = currentSel;
+    }
+
     function toggleDeviceList() {
         document.getElementById('dashboardSection').style.display = 'none';
         document.getElementById('kanbanSection').style.display = 'none';
@@ -1159,6 +1204,7 @@
         const section = document.getElementById('deviceListSection');
         if (section.style.display === 'none') {
             section.style.display = 'block';
+            populateDeviceProjectFilter();
             renderDeviceList();
         } else {
             section.style.display = 'none';
@@ -1207,7 +1253,14 @@
 
         const userTeams = (user.teams || '').split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
 
+        const projectFilter = document.getElementById('deviceProjectFilter') ? document.getElementById('deviceProjectFilter').value : '';
+
         let filtered = devices.filter(d => {
+            // Apply Project filter
+            if (projectFilter && d.project !== projectFilter) {
+                return false;
+            }
+
             // Apply Search filter
             const matchesSearch = String(d.name || '').toLowerCase().includes(searchInput) || 
                                   String(d.uid || '').toLowerCase().includes(searchInput) ||
@@ -1286,7 +1339,11 @@
         
         const userTeams = (user.teams || '').split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
 
+        const projectFilter = document.getElementById('deviceProjectFilter') ? document.getElementById('deviceProjectFilter').value : '';
+
         let filtered = devices.filter(d => {
+            if (projectFilter && d.project !== projectFilter) return false;
+
             const matchesSearch = String(d.name || '').toLowerCase().includes(searchInput) || 
                                   String(d.uid || '').toLowerCase().includes(searchInput) ||
                                   String(d.location || '').toLowerCase().includes(searchInput);
@@ -1333,7 +1390,11 @@
         
         const userTeams = (user.teams || '').split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
 
+        const projectFilter = document.getElementById('deviceProjectFilter') ? document.getElementById('deviceProjectFilter').value : '';
+
         let filtered = devices.filter(d => {
+            if (projectFilter && d.project !== projectFilter) return false;
+
             const matchesSearch = String(d.name || '').toLowerCase().includes(searchInput) || 
                                   String(d.uid || '').toLowerCase().includes(searchInput) ||
                                   String(d.location || '').toLowerCase().includes(searchInput);
@@ -1347,7 +1408,7 @@
             return;
         }
 
-        const headers = ["UID", "Tên thiết bị (Name)", "Vị trí (Location)", "Chu kỳ bảo trì (Cycle)", "Thông số (Specs)", "Tổ quản lý (Manager)", "Ca trực (Shift)"];
+        const headers = ["UID", "Tên thiết bị (Name)", "Vị trí (Location)", "Chu kỳ bảo trì (Cycle)", "Thông số (Specs)", "Tổ quản lý (Manager)", "Ca trực (Shift)", "Dự án (Project)"];
         let csvContent = headers.join(",") + "\r\n";
         
         filtered.forEach(d => {
@@ -1358,7 +1419,8 @@
                 d.cycle || '',
                 d.specs || '',
                 d.manager || '',
-                d.shift || ''
+                d.shift || '',
+                d.project || ''
             ];
             const escapedRow = row.map(val => {
                 let s = String(val).replace(/"/g, '""');
@@ -1932,6 +1994,7 @@
                 document.getElementById('disp_shift').innerText = device.shift || 'Chưa phân công';
                 document.getElementById('disp_mfg').innerText = device.manufactureDate || 'Chưa rõ';
                 document.getElementById('disp_install').innerText = device.installationDate || 'Chưa rõ';
+                document.getElementById('disp_project').innerText = device.project || 'Không có';
                 
                 // Phân quyền hiển thị nút sửa thiết bị
                 const currentUserStr = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
@@ -2838,6 +2901,15 @@
         populateDropdownOrNew('newDevManagerSelect', 'newDevManagerTextContainer', 'newDevManagerText', managers, '');
         populateDropdownOrNew('newDevShiftSelect', 'newDevShiftTextContainer', 'newDevShiftText', shifts, '');
 
+        const projects = JSON.parse(localStorage.getItem('localProjects') || '[]');
+        const projSel = document.getElementById('newDevProjectSelect');
+        if (projSel) {
+            projSel.innerHTML = '<option value="">-- Chọn dự án --</option>';
+            projects.forEach(p => {
+                projSel.innerHTML += `<option value="${p.name}">${p.name}</option>`;
+            });
+        }
+
         new bootstrap.Modal(document.getElementById('addDeviceModal')).show();
     }
 
@@ -2873,7 +2945,9 @@
                 nextMaintenance: document.getElementById('newDevNextMaint').value,
                 warningDays: document.getElementById('newDevWarning').value.trim() || 7,
                 manufactureDate: document.getElementById('newDevMfg').value,
-                installationDate: document.getElementById('newDevInstall').value
+                installationDate: document.getElementById('newDevInstall').value,
+                project: document.getElementById('newDevProjectSelect').value,
+                status: 'IN'
             };
 
             const res = await fetch(gasUrl, {
@@ -3012,6 +3086,16 @@
         document.getElementById('editDevMfg').value = device.manufactureDate || '';
         document.getElementById('editDevInstall').value = device.installationDate || '';
 
+        const projects = JSON.parse(localStorage.getItem('localProjects') || '[]');
+        const projSel = document.getElementById('editDevProjectSelect');
+        if (projSel) {
+            projSel.innerHTML = '<option value="">-- Chọn dự án --</option>';
+            projects.forEach(p => {
+                projSel.innerHTML += `<option value="${p.name}">${p.name}</option>`;
+            });
+            projSel.value = device.project || '';
+        }
+
         new bootstrap.Modal(document.getElementById('editDeviceModal')).show();
     }
 
@@ -3047,7 +3131,8 @@
                 nextMaintenance: document.getElementById('editDevNextMaint').value,
                 warningDays: document.getElementById('editDevWarning').value.trim() || 7,
                 manufactureDate: document.getElementById('editDevMfg').value,
-                installationDate: document.getElementById('editDevInstall').value
+                installationDate: document.getElementById('editDevInstall').value,
+                project: document.getElementById('editDevProjectSelect').value
             };
 
             const res = await fetch(gasUrl, {
