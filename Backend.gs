@@ -102,11 +102,21 @@ function doGet(e) {
       }
     }
 
+    // Preload users list for AssignedTo dropdown
+    let usersList = [];
+    for (let i = 1; i < users.length; i++) {
+      usersList.push({
+        name: users[i][0],
+        role: users[i][2]
+      });
+    }
+
     return contentResponse({ 
       status: "success", 
       user: { name: userName, role: userRole },
       devices: devices,
-      checklists: checklists
+      checklists: checklists,
+      users: usersList
     });
   }
 
@@ -158,7 +168,11 @@ function doGet(e) {
         dueDate:     woData[i][6],
         description: woData[i][7],
         partsUsed:   woData[i][8],
-        createdAt:   woData[i][9]
+        createdAt:   woData[i][9],
+        cost:        woData[i][10] || 0,
+        subTasks:    woData[i][11] || '',
+        project:     woData[i][12] || ''
+        , requestSource: woData[i][13] || "Noi bo"
       };
       // Technicians only see their own assigned work orders
       if (role === 'Technician' && username) {
@@ -188,6 +202,32 @@ function doGet(e) {
       inventory.push(item);
     }
     return contentResponse({ status: "success", inventory: inventory });
+  }
+
+  // action=getStaff
+  if (action === "getStaff") {
+    const staffSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Staff");
+    if (!staffSheet) return contentResponse({ status: "error", message: "Staff sheet not found" });
+    const staffData = staffSheet.getDataRange().getValues();
+    const staff = [];
+    for (let i = 1; i < staffData.length; i++) {
+      if (!staffData[i][0]) continue;
+      staff.push({ id: staffData[i][0], name: staffData[i][1], position: staffData[i][2], dept: staffData[i][3], phone: staffData[i][4] || "" });
+    }
+    return contentResponse({ status: "success", staff: staff });
+  }
+
+  // action=getProjects
+  if (action === "getProjects") {
+    const projSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Projects");
+    if (!projSheet) return contentResponse({ status: "error", message: "Projects sheet not found" });
+    const projData = projSheet.getDataRange().getValues();
+    const projects = [];
+    for (let i = 1; i < projData.length; i++) {
+      if (!projData[i][0]) continue;
+      projects.push({ id: projData[i][0], name: projData[i][1], status: projData[i][2] || "Active", startDate: projData[i][3] || "", endDate: projData[i][4] || "" });
+    }
+    return contentResponse({ status: "success", projects: projects });
   }
 
   if (!uid) return contentResponse({ status: "error", message: "Missing UID" });
@@ -275,6 +315,13 @@ function doPost(e) {
 
     // action=createWO — Create a new Work Order with auto-generated WO_ID (WO-YYYYMM-NNNNN)
     if (params.action === 'createWO') {
+      if (!params.description || !String(params.description).trim()) {
+        return contentResponse({ status: "error", message: "Mô tả công việc không được để trống" });
+      }
+
+      const validationError = validateWOPayload(params);
+      if (validationError) return contentResponse({ status: "error", message: validationError });
+
       const woSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("WorkOrders");
       if (!woSheet) return contentResponse({ status: "error", message: "WorkOrders sheet not found" });
 
@@ -283,8 +330,25 @@ function doPost(e) {
       const yyyymm = now.getFullYear().toString() +
         String(now.getMonth() + 1).padStart(2, '0');
       const lastRow = woSheet.getLastRow();
-      const seq = String(lastRow).padStart(5, '0'); // sequential based on total rows
+      const seq = String(lastRow).padStart(5, '0');
       const woId = 'WO-' + yyyymm + '-' + seq;
+
+      // Parse cost as number (default 0)
+      const cost = params.cost ? Number(params.cost) : 0;
+
+      // SubTasks: accept JSON string or plain text (each line = 1 subtask)
+      let subTasks = '';
+      if (params.subTasks) {
+        try {
+          // If already JSON array, keep as-is
+          const parsed = JSON.parse(params.subTasks);
+          subTasks = JSON.stringify(parsed);
+        } catch (e) {
+          // Convert plain text lines to JSON array
+          const lines = String(params.subTasks).split('\n').filter(l => l.trim());
+          subTasks = JSON.stringify(lines.map(l => ({ title: l.trim(), done: false })));
+        }
+      }
 
       woSheet.appendRow([
         woId,
@@ -296,7 +360,11 @@ function doPost(e) {
         params.dueDate     || '',
         params.description || '',
         params.partsUsed   || '',
-        now
+        now,
+        cost,
+        subTasks,
+        params.project     || ''
+        , params.requestSource || "Noi bo"
       ]);
 
       // Write audit log entry
@@ -331,6 +399,89 @@ function doPost(e) {
       writeAuditLog(params.user || 'System', 'updateWOStatus', params.woId, details);
 
       return contentResponse({ status: "success" });
+    }
+
+    // action=updateWO — Full update of a Work Order (all fields)
+    if (params.action === 'updateWO') {
+      if (!params.woId) {
+        return contentResponse({ status: "error", message: "Missing woId" });
+      }
+
+      const validationError = validateWOPayload(params);
+      if (validationError) return contentResponse({ status: "error", message: validationError });
+
+      const woSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("WorkOrders");
+      if (!woSheet) return contentResponse({ status: "error", message: "WorkOrders sheet not found" });
+
+      const woData = woSheet.getDataRange().getValues();
+      let updated = false;
+      for (let i = 1; i < woData.length; i++) {
+        if (String(woData[i][0]).trim() === String(params.woId).trim()) {
+          const row = i + 1;
+          // Update each field if provided (columns B-M, indices 2-13)
+          if (params.type !== undefined)        woSheet.getRange(row, 2).setValue(params.type);
+          if (params.priority !== undefined)    woSheet.getRange(row, 3).setValue(params.priority);
+          if (params.status !== undefined)      woSheet.getRange(row, 4).setValue(params.status);
+          if (params.assetUID !== undefined)    woSheet.getRange(row, 5).setValue(params.assetUID);
+          if (params.assignedTo !== undefined)  woSheet.getRange(row, 6).setValue(params.assignedTo);
+          if (params.dueDate !== undefined)     woSheet.getRange(row, 7).setValue(params.dueDate);
+          if (params.description !== undefined) woSheet.getRange(row, 8).setValue(params.description);
+          if (params.partsUsed !== undefined)   woSheet.getRange(row, 9).setValue(params.partsUsed);
+          if (params.cost !== undefined)        woSheet.getRange(row, 11).setValue(Number(params.cost) || 0);
+          if (params.subTasks !== undefined) {
+            let subTasks = params.subTasks;
+            if (typeof subTasks !== 'string') subTasks = JSON.stringify(subTasks);
+            woSheet.getRange(row, 12).setValue(subTasks);
+          }
+          if (params.project !== undefined)     woSheet.getRange(row, 13).setValue(params.project);
+          updated = true;
+          break;
+        }
+      }
+
+      if (!updated) return contentResponse({ status: "error", message: "Work Order not found" });
+
+      writeAuditLog(params.user || 'System', 'updateWO', params.woId, 'Updated Work Order fields');
+      return contentResponse({ status: "success" });
+    }
+
+    // action=deleteWO — Delete a Work Order (Admin only, enforced by frontend)
+    if (params.action === 'deleteWO') {
+      if (!params.woId) {
+        return contentResponse({ status: "error", message: "Missing woId" });
+      }
+
+      const woSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("WorkOrders");
+      if (!woSheet) return contentResponse({ status: "error", message: "WorkOrders sheet not found" });
+
+      const woData = woSheet.getDataRange().getValues();
+      let deleted = false;
+      for (let i = 1; i < woData.length; i++) {
+        if (String(woData[i][0]).trim() === String(params.woId).trim()) {
+          woSheet.deleteRow(i + 1);
+          deleted = true;
+          break;
+        }
+      }
+
+      if (!deleted) return contentResponse({ status: "error", message: "Work Order not found" });
+
+      writeAuditLog(params.user || 'System', 'deleteWO', params.woId, 'Deleted Work Order');
+      return contentResponse({ status: "success" });
+    }
+
+    // action=createProject
+    if (params.action === "createProject") {
+      if (!params.name || !String(params.name).trim()) return contentResponse({ status: "error", message: "Ten du an khong duoc de trong" });
+      const projSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Projects");
+      if (!projSheet) return contentResponse({ status: "error", message: "Projects sheet not found" });
+      const now = new Date();
+      const yyyymm = now.getFullYear().toString() + String(now.getMonth() + 1).padStart(2, "0");
+      const seq = String(projSheet.getLastRow()).padStart(3, "0");
+      const projectId = "PRJ-" + yyyymm + "-" + seq;
+      projSheet.appendRow([projectId, params.name.trim(), params.status || "Active", params.startDate || "", params.endDate || ""]);
+      writeAuditLog(params.user || "System", "createProject", projectId, "Created project: " + params.name);
+      return contentResponse({ status: "success", projectId: projectId, name: params.name.trim() });
     }
 
     // action=changePassword — Change user PIN in Users sheet
@@ -595,6 +746,46 @@ function checkMaintenanceDue() {
 
   if (msgLines.length > 0) {
     sendAlert(msgLines.join("\n"));
+  }
+}
+
+// Validate Work Order payload — returns error message or null
+function validateWOPayload(params) {
+  const validPriorities = ['Low', 'Medium', 'High', 'Urgent'];
+  const validTypes = ['Corrective', 'Preventive', 'Emergency', 'Inspection'];
+  const validStatuses = ['New', 'Assigned', 'In Progress', 'Done', 'Closed', 'Cancelled'];
+
+  if (params.priority && validPriorities.indexOf(params.priority) === -1) {
+    return 'Priority phải là: ' + validPriorities.join(', ');
+  }
+  if (params.type && validTypes.indexOf(params.type) === -1) {
+    return 'Type phải là: ' + validTypes.join(', ');
+  }
+  if (params.status && validStatuses.indexOf(params.status) === -1) {
+    return 'Status phải là: ' + validStatuses.join(', ');
+  }
+  if (params.cost !== undefined && params.cost !== '' && isNaN(Number(params.cost))) {
+    return 'Cost phải là số hợp lệ';
+  }
+  return null;
+}
+
+// Ensure WorkOrders sheet has all required headers (A-M)
+function setupWorkOrderHeaders() {
+  const woSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("WorkOrders");
+  if (!woSheet) {
+    console.error('WorkOrders sheet not found');
+    return;
+  }
+  const headers = ['WO_ID', 'Type', 'Priority', 'Status', 'AssetUID', 'AssignedTo', 'DueDate', 'Description', 'PartsUsed', 'CreatedAt', 'Cost', 'SubTasks', 'Project'];
+  const currentHeaders = woSheet.getRange(1, 1, 1, woSheet.getLastColumn()).getValues()[0];
+  
+  // Only set headers if they don't match
+  if (currentHeaders.length < headers.length || String(currentHeaders[10]) !== 'Cost') {
+    woSheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    console.log('WorkOrders headers updated: ' + headers.join(', '));
+  } else {
+    console.log('WorkOrders headers already correct.');
   }
 }
 

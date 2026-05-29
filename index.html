@@ -3,19 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
+
     <title>BanDienScan | Quản lý Ban điện thông minh</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
     
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script src="https://unpkg.com/html5-qrcode" defer></script>
 
     <style>
         :root {
@@ -27,7 +24,7 @@
 
         body {
             background: #f0f2f5;
-            font-family: 'Inter', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             color: #2d3436;
             min-height: 100vh;
         }
@@ -120,6 +117,9 @@
         }
 
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .anim-up { animation: fadeInUp 0.4s ease-out; }
+        .anim-in { animation: fadeIn 0.3s ease-out; }
     </style>
 </head>
 <body>
@@ -150,7 +150,7 @@
             ĐĂNG NHẬP <i class="bi bi-box-arrow-in-right ms-2"></i>
         </button>
         <div id="loginSpinner" class="spinner-border text-primary mt-3" style="display: none;" role="status"></div>
-        <p class="mt-4 mb-0 text-muted" style="font-size: 0.75rem;"><span data-i18n="version">Phiên bản</span> v1.4.1</p>
+        <p class="mt-4 mb-0 text-muted" style="font-size: 0.75rem;"><span data-i18n="version">Phiên bản</span> v2.1.0</p>
     </div>
 </div>
 
@@ -256,6 +256,12 @@
             <button class="btn btn-sm btn-primary rounded-pill px-3" onclick="showCreateWOModal()">
                 <i class="bi bi-plus-lg"></i> Tạo WO
             </button>
+            <div class="d-flex gap-1 mt-2 flex-wrap">
+                <button class="btn btn-sm btn-outline-secondary rounded-pill px-2" onclick="showCreateWOModal('Noi bo phong ban')" title="Noi bo phong ban"><i class="bi bi-building"></i></button>
+                <button class="btn btn-sm btn-outline-warning rounded-pill px-2" onclick="showCreateWOModal('Lanh dao')" title="Tu lanh dao"><i class="bi bi-person-badge"></i></button>
+                <button class="btn btn-sm btn-outline-info rounded-pill px-2" onclick="showCreateWOModal('Bo phan khac')" title="Bo phan khac"><i class="bi bi-people"></i></button>
+                <button class="btn btn-sm btn-outline-danger rounded-pill px-2" onclick="showCreateWOModal('Tong dai')" title="Tong dai tiep nhan"><i class="bi bi-telephone-inbound"></i></button>
+            </div>
         </div>
         <div id="kanbanBoard" class="d-flex gap-3 pb-2" style="overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;">
             <div class="text-center text-muted p-4 w-100">
@@ -273,10 +279,17 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" id="woDetailBody"></div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary rounded-pill px-4" id="woNextStatusBtn" onclick="advanceWOStatus()">
-                        <i class="bi bi-arrow-right-circle me-1"></i> Chuyển trạng thái
+                <div class="modal-footer border-0 pt-0 d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-outline-danger rounded-pill px-3" id="woDeleteBtn" onclick="submitDeleteWO()" style="display:none;">
+                        <i class="bi bi-trash me-1"></i> Xóa
+                    </button>
+                    <div class="flex-grow-1"></div>
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-warning rounded-pill px-3" id="woEditBtn" onclick="openEditWOModal()">
+                        <i class="bi bi-pencil me-1"></i> Sửa
+                    </button>
+                    <button type="button" class="btn btn-primary rounded-pill px-3" id="woNextStatusBtn" onclick="advanceWOStatus()">
+                        <i class="bi bi-arrow-right-circle me-1"></i> Next
                     </button>
                 </div>
             </div>
@@ -285,13 +298,14 @@
 
     <!-- Create WO Modal -->
     <div class="modal fade" id="createWOModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content rounded-4 border-0 shadow">
                 <div class="modal-header border-0 pb-0">
                     <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle me-2 text-primary"></i>Tạo Work Order mới</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
+                    <input type="hidden" id="woRequestSource" value="Noi bo">
                     <div class="mb-3">
                         <label class="form-label fw-bold small">Loại WO (Type)</label>
                         <select class="form-select rounded-3" id="woType">
@@ -317,18 +331,150 @@
                         </select>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label fw-bold small">Giao cho (Assigned To)</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <select class="form-select rounded-3" id="woAssignedDept" onchange="filterAssignedToByDept('woAssignedDept', 'woAssignedTo')">
+                                    <option value="">-- Tất cả tổ --</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <div id="woAssignedToContainer" class="dropdown w-100">
+                                    <input type="text" class="form-select rounded-3 text-start bg-white" id="woAssignedToInput" placeholder="-- Chọn/Tìm --" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" readonly style="cursor: pointer;">
+                                    <input type="hidden" id="woAssignedTo" value="">
+                                    <div class="dropdown-menu p-2 shadow w-100 border-0 rounded-3 mt-1" style="max-height: 300px; overflow-y: auto;">
+                                        <input type="text" class="form-control form-control-sm mb-2 rounded-2" id="woAssignedToSearch" placeholder="Tìm kiếm nhanh..." oninput="searchStaffList('woAssignedToSearch', 'woAssignedTo')">
+                                        <div id="woAssignedToMenu" class="d-flex flex-column gap-1"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label fw-bold small">Mô tả công việc</label>
                         <textarea class="form-control rounded-3" id="woDescription" rows="3" placeholder="Mô tả chi tiết công việc cần làm..."></textarea>
                     </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold small">Hạn hoàn thành</label>
+                            <input type="date" class="form-control rounded-3" id="woDueDate">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold small">Chi phí (VND)</label>
+                            <input type="number" class="form-control rounded-3" id="woCost" placeholder="0" min="0" step="1000">
+                        </div>
+                    </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold small">Hạn hoàn thành (Due Date)</label>
-                        <input type="date" class="form-control rounded-3" id="woDueDate">
+                        <label class="form-label fw-bold small">Dự án liên kết</label>
+                        <select class="form-select rounded-3" id="woProjectSelect">
+                            <option value="">-- Chon du an --</option>
+                        </select>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="woProjectNew" onchange="toggleNewProject()">
+                            <label class="form-check-label small">Tao du an moi</label>
+                        </div>
+                        <input type="text" class="form-control rounded-3 mt-2 d-none" id="woProject" placeholder="Nhap ten du an moi...">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Công việc con (mỗi dòng = 1 mục)</label>
+                        <textarea class="form-control rounded-3" id="woSubTasks" rows="3" placeholder="Kiểm tra nguồn điện&#10;Thay lọc gió&#10;Vệ sinh dàn nóng"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
                     <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
                     <button type="button" class="btn btn-primary rounded-pill px-4" onclick="submitCreateWO()">
                         <i class="bi bi-check-lg me-1"></i> Tạo WO
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit WO Modal -->
+    <div class="modal fade" id="editWOModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2 text-warning"></i>Chỉnh sửa Work Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editWoId">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Trạng thái</label>
+                        <select class="form-select rounded-3" id="editWoStatus">
+                            <option value="New">New</option>
+                            <option value="Assigned">Assigned</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Done">Done</option>
+                            <option value="Closed">Closed</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Loại WO</label>
+                        <select class="form-select rounded-3" id="editWoType">
+                            <option value="Corrective">Corrective</option>
+                            <option value="Preventive">Preventive</option>
+                            <option value="Emergency">Emergency</option>
+                            <option value="Inspection">Inspection</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Mức độ ưu tiên</label>
+                        <select class="form-select rounded-3" id="editWoPriority">
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                            <option value="Urgent">Urgent</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Giao cho</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <select class="form-select rounded-3" id="editWoAssignedDept" onchange="filterAssignedToByDept('editWoAssignedDept', 'editWoAssignedTo')">
+                                    <option value="">-- Tất cả tổ --</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <div id="editWoAssignedToContainer" class="dropdown w-100">
+                                    <input type="text" class="form-select rounded-3 text-start bg-white" id="editWoAssignedToInput" placeholder="-- Chọn/Tìm --" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" readonly style="cursor: pointer;">
+                                    <input type="hidden" id="editWoAssignedTo" value="">
+                                    <div class="dropdown-menu p-2 shadow w-100 border-0 rounded-3 mt-1" style="max-height: 300px; overflow-y: auto;">
+                                        <input type="text" class="form-control form-control-sm mb-2 rounded-2" id="editWoAssignedToSearch" placeholder="Tìm kiếm nhanh..." oninput="searchStaffList('editWoAssignedToSearch', 'editWoAssignedTo')">
+                                        <div id="editWoAssignedToMenu" class="d-flex flex-column gap-1"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Mô tả</label>
+                        <textarea class="form-control rounded-3" id="editWoDescription" rows="3"></textarea>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold small">Hạn hoàn thành</label>
+                            <input type="date" class="form-control rounded-3" id="editWoDueDate">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold small">Chi phí (VND)</label>
+                            <input type="number" class="form-control rounded-3" id="editWoCost" min="0" step="1000">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Dự án</label>
+                        <input type="text" class="form-control rounded-3" id="editWoProject">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Công việc con (mỗi dòng = 1 mục)</label>
+                        <textarea class="form-control rounded-3" id="editWoSubTasks" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-warning rounded-pill px-4" onclick="submitUpdateWO()">
+                        <i class="bi bi-save me-1"></i> Lưu thay đổi
                     </button>
                 </div>
             </div>
@@ -563,7 +709,7 @@
     </div>
 
     <div id="infoSection" style="display: none;">
-        <div class="card-premium animate__animated animate__fadeInUp">
+        <div class="card-premium anim-up">
             <div class="info-header">
                 <div class="d-flex justify-content-between">
                     <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill" id="disp_status_badge" data-i18n="badge_active">Active</span>
@@ -602,6 +748,14 @@
                     <!-- Checklists will be rendered here dynamically based on device type -->
                 </div>
 
+                <!-- Location Devices Section (Hybrid Option) -->
+                <div id="locationDevicesSection" class="p-3 border-top" style="display: none;">
+                    <span class="fw-bold small text-uppercase text-secondary d-block mb-2" style="letter-spacing: 1px;">Thiết bị tại địa điểm này</span>
+                    <div id="locationDevicesList" class="d-grid gap-2">
+                        <!-- Related devices will be rendered here dynamically -->
+                    </div>
+                </div>
+
                 <!-- New Section: Inventory & Installation -->
                 <div class="p-3 bg-light-subtle border-top" style="background: rgba(0,0,0,0.02) !important;">
                     <span class="fw-bold small text-uppercase text-secondary" style="letter-spacing: 1px;">Lịch sử lắp đặt & Quản lý kho</span>
@@ -616,7 +770,7 @@
                             <button class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold" data-bs-toggle="dropdown" style="font-size: 0.75rem;">
                                 THAY ĐỔI
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 animate__animated animate__fadeIn">
+                            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 anim-in">
                                 <li><a class="dropdown-item py-2" href="#" onclick="handleInOut('IN')"><i class="bi bi-box-arrow-in-right me-2 text-success"></i> Nhập kho (IN)</a></li>
                                 <li><a class="dropdown-item py-2" href="#" onclick="handleInOut('OUT')"><i class="bi bi-box-arrow-right me-2 text-warning"></i> Xuất kho / Lắp đặt (OUT)</a></li>
                             </ul>
@@ -635,7 +789,8 @@
 </div>
 
 <script>
-    const scanner = new Html5Qrcode("reader");
+    let scanner = null;
+    function getScanner() { if (!scanner) scanner = new Html5Qrcode("reader"); return scanner; }
     const startBtn = document.getElementById('startScan');
     let isScanProcessing = false;
     // ==========================================
@@ -687,7 +842,7 @@
     function showToast(msg, type='success') {
         const box = document.getElementById('toastBox');
         const toast = document.createElement('div');
-        toast.className = `custom-toast animate__animated animate__fadeInUp`;
+        toast.className = `custom-toast anim-up`;
         toast.style.background = type === 'success' ? '#10b981' : '#ef4444';
         toast.innerHTML = `<i class="bi ${type === 'success' ? 'bi-check-circle' : 'bi-exclamation-triangle'}"></i> ${msg}`;
         box.appendChild(toast);
@@ -725,7 +880,8 @@
         reader.style.display = 'block';
         isScanProcessing = false;
         
-        scanner.start({ facingMode: "environment" }, 
+        const s = getScanner();
+        s.start({ facingMode: "environment" }, 
         { 
             fps: 20, 
             qrbox: {width: 280, height: 180},
@@ -739,7 +895,7 @@
             document.getElementById('disp_uid').innerText = uid;
             reader.style.display = 'none'; 
             torchBtn.style.display = 'none';
-            scanner.stop().then(() => {
+            s.stop().then(() => {
                 isScanProcessing = false;
             }).catch(e => {
                 isScanProcessing = false;
@@ -749,7 +905,7 @@
 
         // Enable Torch Button if supported
         setTimeout(() => {
-            const track = scanner.getVideoTracks()[0];
+            const track = s.getVideoTracks()[0];
             const capabilities = track.getCapabilities ? track.getCapabilities() : {};
             if (capabilities.torch) {
                 torchBtn.style.display = 'block';
@@ -767,13 +923,23 @@
     }
 
     let chartInstance = null;
-    function toggleDashboard() {
+    async function toggleDashboard() {
         document.getElementById('kanbanSection').style.display = 'none';
         document.getElementById('calendarSection').style.display = 'none';
         document.getElementById('deviceListSection').style.display = 'none';
         const dash = document.getElementById('dashboardSection');
         if (dash.style.display === 'none') {
             dash.style.display = 'block';
+            // Lazy-load Chart.js on first use
+            if (!window.Chart) {
+                const s = document.createElement('script');
+                s.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+                await new Promise((resolve, reject) => {
+                    s.onload = resolve;
+                    s.onerror = reject;
+                    document.head.appendChild(s);
+                });
+            }
             if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
             const ctx = document.getElementById('assetChart').getContext('2d');
             const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
@@ -907,7 +1073,7 @@
             }
 
             return `
-                <div class="card p-3 border-light shadow-sm device-card animate__animated animate__fadeInUp" onclick="selectDevice('${d.uid}')" style="cursor: pointer; border-radius: 16px; transition: transform 0.2s, box-shadow 0.2s; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); margin-bottom: 8px;">
+                <div class="card p-3 border-light shadow-sm device-card anim-up" onclick="selectDevice('${d.uid}')" style="cursor: pointer; border-radius: 16px; transition: transform 0.2s, box-shadow 0.2s; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); margin-bottom: 8px;">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <div class="fw-bold text-dark d-flex align-items-center" style="font-size: 0.95rem;">
                             ${d.name || d.uid}
@@ -1301,6 +1467,7 @@
         localStorage.removeItem('localDevicesMap');
         localStorage.removeItem('localChecklists');
         localStorage.removeItem('localWorkOrders');
+        localStorage.removeItem('localUsers');
         localStorage.removeItem('offline_logs');
         location.reload();
     }
@@ -1383,6 +1550,19 @@
                 localStorage.setItem('localDevicesMap', JSON.stringify(deviceMap));
                 
                 localStorage.setItem('localChecklists', JSON.stringify(result.checklists || []));
+                localStorage.setItem('localUsers', JSON.stringify(result.users || []));
+                // Preload staff list for AssignedTo dropdown
+                if (result.users && result.users.length > 0) {
+                    fetch(`${gasUrl}?action=getStaff&token=${API_TOKEN}`)
+                        .then(r => r.json())
+                        .then(d => { if (d.status === 'success') localStorage.setItem('localStaff', JSON.stringify(d.staff || [])); })
+                        .catch(() => {});
+                }
+                // Preload projects list for Project dropdown
+                fetch(`${gasUrl}?action=getProjects&token=${API_TOKEN}`)
+                    .then(r => r.json())
+                    .then(d => { if (d.status === 'success') localStorage.setItem('localProjects', JSON.stringify(d.projects || [])); })
+                    .catch(() => {});
                 updateUI(result.user);
                 showToast(`Xin chào ${result.user.name} (${result.user.role})`);
             } else {
@@ -1477,7 +1657,46 @@
                     statusText.innerText = 'Đang có sẵn trong kho';
                 }
 
-                renderChecklist(device.name.toLowerCase().includes('điều hòa') ? 'hvac' : 'default');
+                // Kiểm tra xem đây có phải là một Địa điểm hay không (Hybrid Option)
+                const isLocation = (device.specs || '').toLowerCase().includes('địa điểm') || 
+                                   (device.specs || '').toLowerCase().includes('phòng máy') || 
+                                   uid.startsWith('LOC-') || 
+                                   uid.startsWith('KV-');
+                
+                const locSection = document.getElementById('locationDevicesSection');
+                if (isLocation) {
+                    const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+                    const allDevices = Object.values(deviceMap);
+                    const relatedDevices = allDevices.filter(d => 
+                        ((d.location || '').toLowerCase() === (device.name || '').toLowerCase() || 
+                         (d.location || '').toLowerCase() === (device.location || '').toLowerCase()) && 
+                        d.uid !== device.uid
+                    );
+                    
+                    const listContainer = document.getElementById('locationDevicesList');
+                    listContainer.innerHTML = '';
+                    if (relatedDevices.length > 0) {
+                        relatedDevices.forEach(d => {
+                            listContainer.innerHTML += `
+                                <button class="btn btn-sm bg-white border shadow-sm rounded-3 text-start py-2 px-3 d-flex align-items-center justify-content-between anim-in" onclick="fetchData('${d.uid}')">
+                                    <div>
+                                        <div class="fw-bold text-dark" style="font-size: 0.85rem;">${d.name}</div>
+                                        <div class="text-muted" style="font-size: 0.72rem;">UID: ${d.uid} | Tổ: ${d.manager || 'Chưa phân công'}</div>
+                                    </div>
+                                    <i class="bi bi-arrow-right-circle text-primary" style="font-size: 1.1rem;"></i>
+                                </button>
+                            `;
+                        });
+                        locSection.style.display = 'block';
+                    } else {
+                        listContainer.innerHTML = '<div class="text-muted small text-center py-2">Không có thiết bị nào tại địa điểm này</div>';
+                        locSection.style.display = 'block';
+                    }
+                } else {
+                    locSection.style.display = 'none';
+                }
+
+                renderChecklist(isLocation ? 'location' : (device.name.toLowerCase().includes('điều hòa') ? 'hvac' : 'default'));
                 fetchHistory(uid); // Fetch Mini Log
                 
                 document.getElementById('curr_time').innerText = new Date().toLocaleTimeString();
@@ -1568,7 +1787,7 @@
                 const actionLabel = isMove ? log.action : 'Bảo trì';
                 
                 html += `
-                    <li class="mb-2 d-flex gap-2 animate__animated animate__fadeIn">
+                    <li class="mb-2 d-flex gap-2 anim-in">
                         <i class="bi ${icon}"></i>
                         <div class="flex-fill">
                             <div class="d-flex justify-content-between">
@@ -1671,9 +1890,9 @@
         try {
             const res = await fetch(`${gasUrl}?action=getWorkOrders&token=${API_TOKEN}`);
             const result = await res.json();
-            if (result.status === 'success' && result.data) {
-                localStorage.setItem('localWorkOrders', JSON.stringify(result.data));
-                renderKanban(result.data);
+            if (result.status === 'success' && result.workOrders) {
+                localStorage.setItem('localWorkOrders', JSON.stringify(result.workOrders));
+                renderKanban(result.workOrders);
             } else if (!cached) {
                 board.innerHTML = '<div class="text-center text-muted p-4 w-100"><i class="bi bi-inbox me-2"></i>Không có dữ liệu</div>';
             }
@@ -1686,26 +1905,48 @@
         const board = document.getElementById('kanbanBoard');
         board.innerHTML = '';
         WO_STATUSES.forEach(status => {
-            const cards = (workOrders || []).filter(wo => wo.Status === status);
+            const cards = (workOrders || []).filter(wo => wo.status === status);
             const col = document.createElement('div');
-            col.style.cssText = 'min-width: 210px; scroll-snap-align: start; background: #f8fafc; border-radius: 12px; padding: 10px; flex-shrink: 0;';
+            col.style.cssText = 'min-width: 220px; scroll-snap-align: start; background: #f8fafc; border-radius: 12px; padding: 10px; flex-shrink: 0;';
             const hColor = WO_STATUS_COLORS[status] || '#6b7280';
-            col.innerHTML = `<h6 class="fw-bold mb-3" style="color:${hColor}; font-size:0.82rem;">${WO_STATUS_LABELS[status]}</h6>${cards.length === 0 ? '<div class="text-muted small text-center py-2">Trống</div>' : ''}`;
+            col.innerHTML = `<h6 class="fw-bold mb-3" style="color:${hColor}; font-size:0.82rem;">${WO_STATUS_LABELS[status]} <span class="badge bg-dark bg-opacity-10 text-dark rounded-pill" style="font-size:0.7rem;">${cards.length}</span></h6>${cards.length === 0 ? '<div class="text-muted small text-center py-2">Trống</div>' : ''}`;
             cards.forEach(wo => {
-                const pbClass = PRIORITY_BS[wo.Priority] || 'secondary';
+                const pbClass = PRIORITY_BS[wo.priority] || 'secondary';
                 const card = document.createElement('div');
                 card.className = 'card p-2 mb-2 border-0 shadow-sm';
                 card.style.cssText = `border-left: 4px solid ${hColor} !important; cursor: pointer;`;
+
+                // SubTasks progress
+                let stProgress = '';
+                if (wo.subTasks) {
+                    try {
+                        const st = JSON.parse(wo.subTasks);
+                        if (Array.isArray(st) && st.length > 0) {
+                            const done = st.filter(s => s.done).length;
+                            const pct = Math.round(done / st.length * 100);
+                            stProgress = `<div class="progress mt-1" style="height:4px;"><div class="progress-bar bg-success" style="width:${pct}%"></div></div>
+                                <div class="text-muted" style="font-size:0.65rem;">${done}/${st.length} hoàn thành</div>`;
+                        }
+                    } catch(e) {}
+                }
+
+                // Cost display
+                const costStr = wo.cost && Number(wo.cost) > 0
+                    ? `<span class="text-muted" style="font-size:0.68rem;"><i class="bi bi-cash-coin me-1"></i>${Number(wo.cost).toLocaleString('vi-VN')}₫</span>` : '';
+
                 card.innerHTML = `
                     <div class="d-flex justify-content-between align-items-start mb-1">
-                        <span class="fw-bold small text-primary">#${wo.WO_ID || '—'}</span>
-                        <span class="badge bg-${pbClass} rounded-pill" style="font-size:0.65rem;">${wo.Priority || 'N/A'}</span>
+                        <span class="fw-bold small text-primary">#${wo.woId || '—'}</span>
+                        <span class="badge bg-${pbClass} rounded-pill" style="font-size:0.65rem;">${wo.priority || 'N/A'}</span>
                     </div>
-                    <div class="fw-semibold small mb-1" style="line-height:1.3;">${wo.AssetName || wo.AssetUID || '—'}</div>
-                    <div class="text-muted" style="font-size:0.72rem;"><i class="bi bi-person me-1"></i>${wo.AssignedTo || 'Chưa giao'}</div>
-                    <div class="text-muted" style="font-size:0.72rem;"><i class="bi bi-calendar me-1"></i>${wo.DueDate || '—'}</div>
+                    <div class="fw-semibold small mb-1" style="line-height:1.3;">${wo.description ? wo.description.substring(0, 50) : '—'}</div>
+                    ${wo.project ? `<div class="text-info" style="font-size:0.7rem;"><i class="bi bi-folder me-1"></i>${wo.project}</div>` : ''}
+                    <div class="text-muted" style="font-size:0.72rem;"><i class="bi bi-person me-1"></i>${wo.assignedTo || 'Chưa giao'}</div>
+                    <div class="text-muted" style="font-size:0.72rem;"><i class="bi bi-calendar me-1"></i>${wo.dueDate || '—'}</div>
+                    ${costStr}
+                    ${stProgress}
                     <button class="btn btn-outline-secondary btn-sm w-100 mt-2 rounded-pill" style="font-size:0.7rem;"
-                        onclick="event.stopPropagation(); quickAdvanceStatus('${wo.WO_ID}','${wo.Status}')">
+                        onclick="event.stopPropagation(); quickAdvanceStatus('${wo.woId}','${wo.status}')">
                         <i class="bi bi-arrow-right-circle me-1"></i>Next Status
                     </button>`;
                 card.addEventListener('click', () => openWODetail(wo));
@@ -1717,23 +1958,54 @@
 
     function openWODetail(wo) {
         currentWO = wo;
-        const pbClass = PRIORITY_BS[wo.Priority] || 'secondary';
-        const sColor = WO_STATUS_COLORS[wo.Status] || '#6b7280';
+        const pbClass = PRIORITY_BS[wo.priority] || 'secondary';
+        const sColor = WO_STATUS_COLORS[wo.status] || '#6b7280';
+
+        // Parse subtasks
+        let subTasksHtml = '';
+        if (wo.subTasks) {
+            try {
+                const st = JSON.parse(wo.subTasks);
+                if (Array.isArray(st) && st.length > 0) {
+                    subTasksHtml = '<div class="col-12"><div class="p-3 bg-light rounded-3"><div class="text-muted small mb-2">Công việc con</div>';
+                    st.forEach((s, idx) => {
+                        subTasksHtml += `<div class="form-check mb-1">
+                            <input class="form-check-input" type="checkbox" ${s.done ? 'checked' : ''}
+                                onchange="toggleSubTask('${wo.woId}', ${idx}, this.checked)">
+                            <label class="form-check-label small ${s.done ? 'text-decoration-line-through text-muted' : ''}">${s.title}</label>
+                        </div>`;
+                    });
+                    subTasksHtml += '</div></div>';
+                }
+            } catch(e) {}
+        }
+
+        const costDisplay = wo.cost && Number(wo.cost) > 0 ? Number(wo.cost).toLocaleString('vi-VN') + '₫' : '0₫';
+
         document.getElementById('woDetailBody').innerHTML = `
             <div class="row g-2">
-                <div class="col-6"><div class="p-3 bg-light rounded-3"><div class="text-muted small">WO ID</div><div class="fw-bold">#${wo.WO_ID || '—'}</div></div></div>
-                <div class="col-6"><div class="p-3 bg-light rounded-3"><div class="text-muted small">Loại</div><div class="fw-bold">${wo.Type || '—'}</div></div></div>
+                <div class="col-6"><div class="p-3 bg-light rounded-3"><div class="text-muted small">WO ID</div><div class="fw-bold">#${wo.woId || '—'}</div></div></div>
+                <div class="col-6"><div class="p-3 bg-light rounded-3"><div class="text-muted small">Loại</div><div class="fw-bold">${wo.type || '—'}</div></div></div>
                 <div class="col-12"><div class="p-3 bg-light rounded-3">
-                    <div class="text-muted small mb-1">Trạng thái &amp; Ưu tiên</div>
-                    <span class="badge rounded-pill me-2" style="background:${sColor};">${wo.Status}</span>
-                    <span class="badge bg-${pbClass} rounded-pill">${wo.Priority || 'N/A'}</span>
+                    <div class="text-muted small mb-1">Trạng thái & Ưu tiên</div>
+                    <span class="badge rounded-pill me-2" style="background:${sColor};">${wo.status}</span>
+                    <span class="badge bg-${pbClass} rounded-pill">${wo.priority || 'N/A'}</span>
                 </div></div>
-                <div class="col-12"><div class="p-3 bg-light rounded-3"><div class="text-muted small">Thiết bị</div><div class="fw-bold">${wo.AssetName || wo.AssetUID || '—'}</div></div></div>
-                <div class="col-6"><div class="p-3 bg-light rounded-3"><div class="text-muted small">Giao cho</div><div class="fw-bold">${wo.AssignedTo || 'Chưa giao'}</div></div></div>
-                <div class="col-6"><div class="p-3 bg-light rounded-3"><div class="text-muted small">Hạn hoàn thành</div><div class="fw-bold">${wo.DueDate || '—'}</div></div></div>
-                ${wo.Description ? `<div class="col-12"><div class="p-3 bg-light rounded-3"><div class="text-muted small">Mô tả</div><div>${wo.Description}</div></div></div>` : ''}
+                <div class="col-12"><div class="p-3 bg-light rounded-3"><div class="text-muted small">Thiết bị</div><div class="fw-bold">${wo.assetUID || '—'}</div></div></div>
+                <div class="col-6"><div class="p-3 bg-light rounded-3"><div class="text-muted small">Giao cho</div><div class="fw-bold">${wo.assignedTo || 'Chưa giao'}</div></div></div>
+                <div class="col-6"><div class="p-3 bg-light rounded-3"><div class="text-muted small">Hạn hoàn thành</div><div class="fw-bold">${wo.dueDate || '—'}</div></div></div>
+                <div class="col-6"><div class="p-3 bg-light rounded-3"><div class="text-muted small">Chi phí</div><div class="fw-bold text-success">${costDisplay}</div></div></div>
+                <div class="col-6"><div class="p-3 bg-light rounded-3"><div class="text-muted small">Dự án</div><div class="fw-bold">${wo.project || '—'}</div></div></div>
+                ${wo.description ? `<div class="col-12"><div class="p-3 bg-light rounded-3"><div class="text-muted small">Mô tả</div><div>${wo.description}</div></div></div>` : ''}
+                ${subTasksHtml}
             </div>`;
-        const nextStatus = WO_STATUSES[WO_STATUSES.indexOf(wo.Status) + 1];
+
+        // Show/hide buttons based on role
+        const user = JSON.parse(localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser') || '{}');
+        const isAdmin = user.role === 'Admin' || user.role === 'Manager';
+        document.getElementById('woDeleteBtn').style.display = isAdmin ? 'inline-block' : 'none';
+
+        const nextStatus = WO_STATUSES[WO_STATUSES.indexOf(wo.status) + 1];
         const btn = document.getElementById('woNextStatusBtn');
         if (nextStatus) {
             btn.style.display = 'inline-block';
@@ -1746,10 +2018,10 @@
 
     async function advanceWOStatus() {
         if (!currentWO) return;
-        const nextStatus = WO_STATUSES[WO_STATUSES.indexOf(currentWO.Status) + 1];
+        const nextStatus = WO_STATUSES[WO_STATUSES.indexOf(currentWO.status) + 1];
         if (!nextStatus) return;
         bootstrap.Modal.getInstance(document.getElementById('woDetailModal')).hide();
-        await updateWOStatus(currentWO.WO_ID, nextStatus);
+        await updateWOStatus(currentWO.woId, nextStatus);
     }
 
     async function quickAdvanceStatus(woId, currentStatus) {
@@ -1763,10 +2035,10 @@
         try {
             await fetch(gasUrl, {
                 method: 'POST', mode: 'no-cors',
-                body: JSON.stringify({ action: 'updateWOStatus', token: API_TOKEN, wo_id: woId, status: newStatus })
+                body: JSON.stringify({ action: 'updateWOStatus', token: API_TOKEN, woId: woId, status: newStatus })
             });
             const cached = JSON.parse(localStorage.getItem('localWorkOrders') || '[]');
-            const updated = cached.map(wo => wo.WO_ID === woId ? { ...wo, Status: newStatus } : wo);
+            const updated = cached.map(wo => wo.woId === woId ? { ...wo, status: newStatus } : wo);
             localStorage.setItem('localWorkOrders', JSON.stringify(updated));
             renderKanban(updated);
             showToast(`WO #${woId} → ${newStatus}`);
@@ -1775,36 +2047,412 @@
         }
     }
 
-    function showCreateWOModal() {
+    function populateUserDropdown(selectId) {
+        const staff = JSON.parse(localStorage.getItem('localStaff') || '[]');
+        const users = JSON.parse(localStorage.getItem('localUsers') || '[]');
+        const sel = document.getElementById(selectId);
+        sel.innerHTML = '<option value="">-- Chon ky thuat vien --</option>';
+        if (staff.length > 0) {
+            staff.forEach(s => {
+                sel.innerHTML += `<option value="${s.name}">${s.name} (${s.position} - ${s.dept})</option>`;
+            });
+        } else {
+            users.forEach(u => {
+                sel.innerHTML += `<option value="${u.name}">${u.name} (${u.role})</option>`;
+            });
+        }
+    }
+
+    function getAssignedDeptSelect(prefix) {
+        return document.getElementById(prefix.replace('AssignedTo', 'AssignedDept'));
+    }
+
+    function escapeDropdownHtml(value) {
+        const div = document.createElement('div');
+        div.textContent = value == null ? '' : String(value);
+        return div.innerHTML;
+    }
+
+    function escapeDropdownAttr(value) {
+        return String(value == null ? '' : value)
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    function populateDeptDropdowns() {
+        const staff = JSON.parse(localStorage.getItem('localStaff') || '[]');
+        const depts = [...new Set(staff.map(s => s.dept).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'vi'));
+        const woDeptSelect = document.getElementById('woAssignedDept');
+        const editWoDeptSelect = document.getElementById('editWoAssignedDept');
+
+        [woDeptSelect, editWoDeptSelect].forEach(sel => {
+            if (!sel) return;
+            sel.innerHTML = '';
+            sel.appendChild(new Option('-- Tất cả tổ --', ''));
+            depts.forEach(d => sel.appendChild(new Option(d, d)));
+        });
+    }
+
+    function renderStaffDropdown(prefix, selectedDept = '', searchQuery = '') {
+        const staff = JSON.parse(localStorage.getItem('localStaff') || '[]');
+        const users = JSON.parse(localStorage.getItem('localUsers') || '[]');
+        const menu = document.getElementById(prefix + 'Menu');
+        if (!menu) return;
+
+        const query = (searchQuery || '').trim().toLowerCase();
+        let itemsHtml = '';
+
+        if (staff.length > 0) {
+            let filteredStaff = staff.filter(s => s && s.name);
+            if (selectedDept) {
+                filteredStaff = filteredStaff.filter(s => s.dept === selectedDept);
+            }
+            if (query) {
+                filteredStaff = filteredStaff.filter(s =>
+                    (s.name || '').toLowerCase().includes(query) ||
+                    (s.position || '').toLowerCase().includes(query) ||
+                    (s.dept || '').toLowerCase().includes(query)
+                );
+            }
+
+            if (filteredStaff.length === 0) {
+                itemsHtml = '<div class="text-muted small p-2 text-center">Không tìm thấy nhân viên</div>';
+            } else {
+                filteredStaff.forEach(s => {
+                    const detail = [s.position, s.dept].filter(Boolean).join(' - ') || 'Nhân viên';
+                    itemsHtml += `
+                        <button type="button" class="dropdown-item rounded-2 py-2 text-start border-0 bg-transparent"
+                            data-prefix="${escapeDropdownAttr(prefix)}" data-name="${escapeDropdownAttr(s.name)}"
+                            onclick="selectStaff(this.dataset.prefix, this.dataset.name)">
+                            <div class="fw-semibold">${escapeDropdownHtml(s.name)}</div>
+                            <div class="text-muted" style="font-size: 0.72rem;">${escapeDropdownHtml(detail)}</div>
+                        </button>
+                    `;
+                });
+            }
+        } else {
+            let filteredUsers = users.filter(u => u && u.name);
+            if (query) {
+                filteredUsers = filteredUsers.filter(u => (u.name || '').toLowerCase().includes(query));
+            }
+
+            if (filteredUsers.length === 0) {
+                itemsHtml = '<div class="text-muted small p-2 text-center">Không tìm thấy tài khoản</div>';
+            } else {
+                filteredUsers.forEach(u => {
+                    itemsHtml += `
+                        <button type="button" class="dropdown-item rounded-2 py-2 text-start border-0 bg-transparent"
+                            data-prefix="${escapeDropdownAttr(prefix)}" data-name="${escapeDropdownAttr(u.name)}"
+                            onclick="selectStaff(this.dataset.prefix, this.dataset.name)">
+                            <div class="fw-semibold">${escapeDropdownHtml(u.name)}</div>
+                            <div class="text-muted" style="font-size: 0.72rem;">${escapeDropdownHtml(u.role || 'User')}</div>
+                        </button>
+                    `;
+                });
+            }
+        }
+
+        menu.innerHTML = itemsHtml;
+    }
+
+    function selectStaff(prefix, name) {
+        const hiddenInput = document.getElementById(prefix);
+        const textInput = document.getElementById(prefix + 'Input');
+        const searchInput = document.getElementById(prefix + 'Search');
+        if (hiddenInput) hiddenInput.value = name || '';
+        if (textInput) textInput.value = name || '-- Chọn/Tìm --';
+        if (searchInput) searchInput.value = '';
+
+        let selectedDept = '';
+        if (name) {
+            const staff = JSON.parse(localStorage.getItem('localStaff') || '[]');
+            const s = staff.find(x => x.name === name);
+            if (s && s.dept) {
+                const deptSelect = getAssignedDeptSelect(prefix);
+                if (deptSelect) {
+                    deptSelect.value = s.dept;
+                    selectedDept = s.dept;
+                }
+            }
+            renderStaffDropdown(prefix, selectedDept, '');
+        }
+
+        if (textInput && typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
+            bootstrap.Dropdown.getOrCreateInstance(textInput).hide();
+        }
+    }
+
+    function filterAssignedToByDept(deptSelectId, prefix) {
+        const deptSelect = document.getElementById(deptSelectId);
+        const dept = deptSelect ? deptSelect.value : '';
+        const searchInput = document.getElementById(prefix + 'Search');
+        if (searchInput) searchInput.value = '';
+        renderStaffDropdown(prefix, dept, '');
+
+        const hiddenInput = document.getElementById(prefix);
+        if (hiddenInput && hiddenInput.value && dept !== '') {
+            const staff = JSON.parse(localStorage.getItem('localStaff') || '[]');
+            const s = staff.find(x => x.name === hiddenInput.value);
+            if (staff.length > 0 && (!s || s.dept !== dept)) {
+                selectStaff(prefix, '');
+            }
+        }
+    }
+
+    function searchStaffList(searchId, prefix) {
+        const searchInput = document.getElementById(searchId);
+        const deptSelect = getAssignedDeptSelect(prefix);
+        const query = searchInput ? searchInput.value : '';
+        const dept = deptSelect ? deptSelect.value : '';
+        renderStaffDropdown(prefix, dept, query);
+    }
+
+    function toggleNewProject() {
+        const isNew = document.getElementById('woProjectNew').checked;
+        const inp = document.getElementById('woProject');
+        if (isNew) {
+            inp.classList.remove('d-none');
+            inp.focus();
+        } else {
+            inp.classList.add('d-none');
+            inp.value = '';
+        }
+    }
+
+    async function createProjectIfNew(name, user) {
+        if (!name) return null;
+        const gasUrl = localStorage.getItem('gasUrl');
+        const API_TOKEN = localStorage.getItem('API_TOKEN');
+        try {
+            const res = await fetch(gasUrl, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'createProject', token: API_TOKEN, name: name, user: user || 'System' })
+            });
+            const data = await res.json();
+            if (data.status === 'success') {
+                // Add to local cache
+                const cached = JSON.parse(localStorage.getItem('localProjects') || '[]');
+                cached.push({ id: data.projectId, name: data.name, status: 'Active', startDate: '', endDate: '' });
+                localStorage.setItem('localProjects', JSON.stringify(cached));
+                return data.name;
+            }
+        } catch(e) {}
+        return name;
+    }
+
+    function showCreateWOModal(requestSource) {
         const devices = JSON.parse(localStorage.getItem('localDevices') || '[]');
+        const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+        const allDevices = devices.length > 0 ? devices : Object.values(deviceMap);
         const sel = document.getElementById('woAsset');
         sel.innerHTML = '<option value="">-- Chọn thiết bị --</option>';
-        devices.forEach(d => { sel.innerHTML += `<option value="${d.uid}">${d.name} (${d.uid})</option>`; });
+        allDevices.forEach(d => { sel.innerHTML += `<option value="${d.uid}">${d.name} (${d.uid})</option>`; });
+
+        populateDeptDropdowns();
+        selectStaff('woAssignedTo', '');
+        renderStaffDropdown('woAssignedTo', '', '');
+
         const due = new Date(); due.setDate(due.getDate() + 7);
         document.getElementById('woDueDate').value = due.toISOString().split('T')[0];
+        document.getElementById('woCost').value = '';
+        document.getElementById('woProject').value = '';
+        document.getElementById('woSubTasks').value = '';
+        document.getElementById('woRequestSource').value = requestSource || 'Noi bo';
+        document.getElementById('woDescription').value = '';
+
+        // Populate projects dropdown
+        const projects = JSON.parse(localStorage.getItem('localProjects') || '[]');
+        const projSel = document.getElementById('woProjectSelect');
+        projSel.innerHTML = '<option value="">-- Chon du an --</option>';
+        projects.filter(p => p.status === 'Active').forEach(p => {
+            projSel.innerHTML += `<option value="${p.name}">${p.name}</option>`;
+        });
+        document.getElementById('woProject').value = '';
+        document.getElementById('woProject').classList.add('d-none');
+        document.getElementById('woProjectNew').checked = false;
         new bootstrap.Modal(document.getElementById('createWOModal')).show();
+        document.getElementById('woRequestSource').value = requestSource || 'Noi bo';
     }
 
     async function submitCreateWO() {
         const desc = document.getElementById('woDescription').value.trim();
         if (!desc) { showToast('Vui lòng nhập mô tả công việc', 'warning'); return; }
+
+        // Convert subtask lines to JSON array
+        const subTaskLines = document.getElementById('woSubTasks').value.trim();
+        let subTasksJson = '';
+        if (subTaskLines) {
+            const tasks = subTaskLines.split('\n').filter(l => l.trim()).map(l => ({ title: l.trim(), done: false }));
+            subTasksJson = JSON.stringify(tasks);
+        }
+
+        const user = JSON.parse(localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser') || '{}');
+        // If creating new project, call createProject API first
+        let finalProject = '';
+        const isNewProject = document.getElementById('woProjectNew') && document.getElementById('woProjectNew').checked;
+        if (isNewProject) {
+            const newProjName = document.getElementById('woProject').value.trim();
+            if (newProjName) {
+                finalProject = await createProjectIfNew(newProjName, user.name);
+            }
+        } else {
+            finalProject = document.getElementById('woProjectSelect') ? document.getElementById('woProjectSelect').value : '';
+        }
+
         const payload = {
             action: 'createWO', token: API_TOKEN,
+            user: user.name || 'System',
             type: document.getElementById('woType').value,
             priority: document.getElementById('woPriority').value,
             assetUID: document.getElementById('woAsset').value,
+            assignedTo: document.getElementById('woAssignedTo').value,
             description: desc,
-            dueDate: document.getElementById('woDueDate').value
+            dueDate: document.getElementById('woDueDate').value,
+            cost: document.getElementById('woCost').value || 0,
+            project: finalProject,
+            subTasks: subTasksJson,
+            requestSource: document.getElementById('woRequestSource').value || 'Noi bo'
         };
         try {
             await fetch(gasUrl, { method: 'POST', body: JSON.stringify(payload) });
             bootstrap.Modal.getInstance(document.getElementById('createWOModal')).hide();
-            document.getElementById('woDescription').value = '';
             showToast('Đã tạo Work Order mới!');
             setTimeout(() => loadKanban(), 1500);
         } catch (e) {
             showToast('Lỗi tạo WO, kiểm tra kết nối', 'danger');
         }
+    }
+
+    function openEditWOModal() {
+        if (!currentWO) return;
+        bootstrap.Modal.getInstance(document.getElementById('woDetailModal')).hide();
+
+        document.getElementById('editWoId').value = currentWO.woId;
+        document.getElementById('editWoStatus').value = currentWO.status || 'New';
+        document.getElementById('editWoType').value = currentWO.type || 'Corrective';
+        document.getElementById('editWoPriority').value = currentWO.priority || 'Medium';
+        document.getElementById('editWoDescription').value = currentWO.description || '';
+        document.getElementById('editWoDueDate').value = currentWO.dueDate || '';
+        document.getElementById('editWoCost').value = currentWO.cost || '';
+        document.getElementById('editWoProject').value = currentWO.project || '';
+
+        // Parse subtasks back to text lines
+        let subText = '';
+        if (currentWO.subTasks) {
+            try {
+                const st = JSON.parse(currentWO.subTasks);
+                if (Array.isArray(st)) subText = st.map(s => s.title).join('\n');
+            } catch(e) { subText = currentWO.subTasks; }
+        }
+        document.getElementById('editWoSubTasks').value = subText;
+
+        populateDeptDropdowns();
+        const assigned = currentWO.assignedTo || '';
+        selectStaff('editWoAssignedTo', assigned);
+        const staff = JSON.parse(localStorage.getItem('localStaff') || '[]');
+        const s = staff.find(x => x.name === assigned);
+        const dept = s ? s.dept : '';
+        renderStaffDropdown('editWoAssignedTo', dept, '');
+
+        new bootstrap.Modal(document.getElementById('editWOModal')).show();
+    }
+
+    async function submitUpdateWO() {
+        const woId = document.getElementById('editWoId').value;
+        if (!woId) return;
+
+        const subTaskLines = document.getElementById('editWoSubTasks').value.trim();
+        let subTasksJson = '';
+        if (subTaskLines) {
+            // Preserve done state from currentWO if titles match
+            let oldTasks = [];
+            try { oldTasks = JSON.parse(currentWO.subTasks || '[]'); } catch(e) {}
+            const oldMap = {};
+            oldTasks.forEach(t => { oldMap[t.title] = t.done; });
+
+            const tasks = subTaskLines.split('\n').filter(l => l.trim()).map(l => {
+                const title = l.trim();
+                return { title, done: oldMap[title] || false };
+            });
+            subTasksJson = JSON.stringify(tasks);
+        }
+
+        const user = JSON.parse(localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser') || '{}');
+        const payload = {
+            action: 'updateWO', token: API_TOKEN,
+            user: user.name || 'System',
+            woId: woId,
+            status: document.getElementById('editWoStatus').value,
+            type: document.getElementById('editWoType').value,
+            priority: document.getElementById('editWoPriority').value,
+            assignedTo: document.getElementById('editWoAssignedTo').value,
+            description: document.getElementById('editWoDescription').value.trim(),
+            dueDate: document.getElementById('editWoDueDate').value,
+            cost: document.getElementById('editWoCost').value || 0,
+            project: document.getElementById('editWoProject').value.trim(),
+            subTasks: subTasksJson
+        };
+
+        showToast('Đang lưu thay đổi...');
+        try {
+            await fetch(gasUrl, { method: 'POST', body: JSON.stringify(payload) });
+            bootstrap.Modal.getInstance(document.getElementById('editWOModal')).hide();
+
+            // Update local cache
+            const cached = JSON.parse(localStorage.getItem('localWorkOrders') || '[]');
+            const updated = cached.map(wo => wo.woId === woId ? { ...wo, ...payload, cost: Number(payload.cost) } : wo);
+            localStorage.setItem('localWorkOrders', JSON.stringify(updated));
+            renderKanban(updated);
+            showToast('Đã lưu thay đổi!');
+        } catch (e) {
+            showToast('Lỗi lưu, thử lại sau', 'danger');
+        }
+    }
+
+    async function submitDeleteWO() {
+        if (!currentWO) return;
+        if (!confirm(`Bạn có chắc chắn muốn XÓA Work Order #${currentWO.woId}?`)) return;
+
+        const user = JSON.parse(localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser') || '{}');
+        showToast('Đang xóa WO...');
+        try {
+            await fetch(gasUrl, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'deleteWO', token: API_TOKEN, woId: currentWO.woId, user: user.name || 'System' })
+            });
+            bootstrap.Modal.getInstance(document.getElementById('woDetailModal')).hide();
+
+            const cached = JSON.parse(localStorage.getItem('localWorkOrders') || '[]');
+            const updated = cached.filter(wo => wo.woId !== currentWO.woId);
+            localStorage.setItem('localWorkOrders', JSON.stringify(updated));
+            renderKanban(updated);
+            currentWO = null;
+            showToast('Đã xóa Work Order!');
+        } catch (e) {
+            showToast('Lỗi xóa WO', 'danger');
+        }
+    }
+
+    async function toggleSubTask(woId, index, checked) {
+        const cached = JSON.parse(localStorage.getItem('localWorkOrders') || '[]');
+        const wo = cached.find(w => w.woId === woId);
+        if (!wo || !wo.subTasks) return;
+
+        try {
+            const st = JSON.parse(wo.subTasks);
+            if (st[index]) st[index].done = checked;
+            wo.subTasks = JSON.stringify(st);
+            localStorage.setItem('localWorkOrders', JSON.stringify(cached));
+
+            // Sync to server
+            const user = JSON.parse(localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser') || '{}');
+            fetch(gasUrl, {
+                method: 'POST', mode: 'no-cors',
+                body: JSON.stringify({ action: 'updateWO', token: API_TOKEN, woId: woId, subTasks: wo.subTasks, user: user.name || 'System' })
+            });
+        } catch(e) {}
     }
 
     let isScanningForNewDevice = false;
@@ -1826,7 +2474,8 @@
         const torchBtn = document.getElementById('torchBtn');
         reader.style.display = 'block';
         
-        scanner.start({ facingMode: "environment" }, 
+        const s = getScanner();
+        s.start({ facingMode: "environment" }, 
         { fps: 20, qrbox: {width: 280, height: 180}, aspectRatio: 1.777778 }, 
         (uid) => {
             if (isScanProcessing) return;
@@ -1835,7 +2484,7 @@
             if (navigator.vibrate) navigator.vibrate(100);
             reader.style.display = 'none'; 
             torchBtn.style.display = 'none';
-            scanner.stop().then(() => {
+            s.stop().then(() => {
                 isScanProcessing = false;
             }).catch(e => {
                 isScanProcessing = false;
