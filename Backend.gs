@@ -47,6 +47,17 @@ function doGet(e) {
     return contentResponse({ status: "error", message: "Unauthorized access" });
   }
 
+  if (action === 'setupHeaders') {
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+    const devSheet = ss.getSheetByName("Devices");
+    if (devSheet) {
+      devSheet.getRange(1, 10).setValue("Manufacture Date");
+      devSheet.getRange(1, 11).setValue("Installation Date");
+      return contentResponse({ status: "success", message: "English headers set on columns J & K." });
+    }
+    return contentResponse({ status: "error", message: "Devices sheet not found" });
+  }
+
   if (action === 'login') {
     const pin = e.parameter.pin;
     const username = e.parameter.username;
