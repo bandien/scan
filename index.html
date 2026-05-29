@@ -150,7 +150,7 @@
             ĐĂNG NHẬP <i class="bi bi-box-arrow-in-right ms-2"></i>
         </button>
         <div id="loginSpinner" class="spinner-border text-primary mt-3" style="display: none;" role="status"></div>
-        <p class="mt-4 mb-0 text-muted" style="font-size: 0.75rem;"><span data-i18n="version">Phiên bản</span> v2.6.0</p>
+        <p class="mt-4 mb-0 text-muted" style="font-size: 0.75rem;"><span data-i18n="version">Phiên bản</span> v2.7.0</p>
     </div>
 </div>
 
@@ -197,7 +197,7 @@
                     <li><hr class="dropdown-divider opacity-50"></li>
                     <li><a class="dropdown-item rounded-3 py-2" href="architecture.html" target="_blank"><i class="bi bi-diagram-3 me-2 text-secondary"></i> Sơ đồ Hệ thống</a></li>
                     <li><hr class="dropdown-divider opacity-50"></li>
-                    <li class="px-3 py-1 text-center text-muted" style="font-size: 0.72rem; list-style-type: none;"><span data-i18n="version">Phiên bản</span> v2.6.0</li>
+                    <li class="px-3 py-1 text-center text-muted" style="font-size: 0.72rem; list-style-type: none;"><span data-i18n="version">Phiên bản</span> v2.7.0</li>
                 </ul>
             </div>
         </div>
@@ -1080,9 +1080,40 @@
                     <div id="locationFormContainer" class="p-3 bg-light rounded-4 mb-4 border" style="display: none;">
                         <h6 class="fw-bold mb-3 text-info" id="locationFormTitle"><i class="bi bi-plus-circle me-1"></i>Thêm địa điểm mới</h6>
                         <input type="hidden" id="manageLocUid">
+                        
+                        <!-- Interactive UID Builder -->
+                        <div class="mb-3 border p-3 rounded-4 bg-white shadow-sm">
+                            <label class="form-label fw-bold small text-secondary mb-2"><i class="bi bi-cpu me-1"></i>Trình tạo mã địa điểm (UID Builder)</label>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6 col-sm-3">
+                                    <label class="form-label small text-muted mb-1">Tiền tố</label>
+                                    <select class="form-select form-select-sm rounded-3 fw-bold" id="locBuilderPrefix" onchange="updateLocUidPreview()">
+                                        <option value="LOC">LOC (Địa điểm)</option>
+                                        <option value="KV">KV (Khu vực)</option>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-sm-3">
+                                    <label class="form-label small text-muted mb-1">Phân khu chính</label>
+                                    <input type="text" class="form-control form-control-sm rounded-3 text-uppercase fw-bold" id="locBuilderZone" placeholder="T1, SG, CH..." value="T1" oninput="updateLocUidPreview()">
+                                </div>
+                                <div class="col-6 col-sm-3">
+                                    <label class="form-label small text-muted mb-1">Phân khu con / Tầng</label>
+                                    <input type="text" class="form-control form-control-sm rounded-3 text-uppercase fw-bold" id="locBuilderSubZone" placeholder="01, B1, H05..." value="01" oninput="updateLocUidPreview()">
+                                </div>
+                                <div class="col-6 col-sm-3">
+                                    <label class="form-label small text-muted mb-1">Số thứ tự</label>
+                                    <input type="text" class="form-control form-control-sm rounded-3 text-uppercase fw-bold" id="locBuilderSeq" placeholder="01, 02..." value="01" oninput="updateLocUidPreview()">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="form-label small text-muted mb-1 fw-bold text-info">Mã địa điểm xem trước (Preview UID)</label>
+                                <input type="text" class="form-control rounded-3 font-monospace fw-bold text-primary bg-light" id="locUidPreview" readonly value="LOC.T1.01.01">
+                            </div>
+                        </div>
+
                         <div class="mb-3">
-                            <label class="form-label fw-bold small">Tên địa điểm</label>
-                            <input type="text" class="form-control rounded-3" id="manageLocName" placeholder="Ví dụ: Phòng Bơm Tầng Hầm 2, Phòng Kỹ Thuật Tầng 3">
+                            <label class="form-label fw-bold small text-secondary">Tên địa điểm (Tên mô tả)</label>
+                            <input type="text" class="form-control rounded-3" id="manageLocName" placeholder="Ví dụ: Phòng bơm hố số 5, Phòng Kỹ Thuật Tầng Hầm 1">
                         </div>
                         <div class="d-flex gap-2 justify-content-end">
                             <button class="btn btn-light rounded-pill px-3" onclick="hideLocationForm()">Hủy</button>
@@ -2595,10 +2626,7 @@
                 }
 
                 // Kiểm tra xem đây có phải là một Địa điểm hay không (Hybrid Option)
-                const isLocation = (device.specs || '').toLowerCase().includes('địa điểm') || 
-                                   (device.specs || '').toLowerCase().includes('phòng máy') || 
-                                   uid.startsWith('LOC-') || 
-                                   uid.startsWith('KV-');
+                const isLocation = isLocationDevice(device);
                 
                 const locSection = document.getElementById('locationDevicesSection');
                 if (isLocation) {
@@ -3446,10 +3474,7 @@
         Object.values(deviceMap).forEach(d => {
             if (d.name) names.add(d.name);
             if (d.location) locs.add(d.location);
-            const isLocDevice = (d.specs || '').toLowerCase().includes('địa điểm') || 
-                               (d.specs || '').toLowerCase().includes('phòng máy') || 
-                               (d.uid || '').startsWith('LOC-') || 
-                               (d.uid || '').startsWith('KV-');
+            const isLocDevice = isLocationDevice(d);
             if (isLocDevice && d.name) {
                 locs.add(d.name);
             }
@@ -3627,10 +3652,7 @@
         const locs = new Set(), managers = new Set();
         Object.values(deviceMap).forEach(d => {
             if (d.location) locs.add(d.location);
-            const isLocDevice = (d.specs || '').toLowerCase().includes('địa điểm') || 
-                               (d.specs || '').toLowerCase().includes('phòng máy') || 
-                               (d.uid || '').startsWith('LOC-') || 
-                               (d.uid || '').startsWith('KV-');
+            const isLocDevice = isLocationDevice(d);
             if (isLocDevice && d.name) {
                 locs.add(d.name);
             }
@@ -4290,16 +4312,33 @@
 
     // === LOCATION MANAGEMENT MODULE ===
 
+    function isLocationDevice(d) {
+        if (!d) return false;
+        const specs = (d.specs || '').toLowerCase();
+        const uid = (d.uid || '').toUpperCase();
+        return specs.includes('địa điểm') || 
+               specs.includes('phòng máy') || 
+               uid.startsWith('LOC-') || 
+               uid.startsWith('KV-') || 
+               uid.startsWith('LOC.') || 
+               uid.startsWith('KV.');
+    }
+
+    function updateLocUidPreview() {
+        const prefix = document.getElementById('locBuilderPrefix').value.trim().toUpperCase();
+        const zone = document.getElementById('locBuilderZone').value.trim().replace(/\s+/g, '-').toUpperCase();
+        const subzone = document.getElementById('locBuilderSubZone').value.trim().replace(/\s+/g, '-').toUpperCase();
+        const seq = document.getElementById('locBuilderSeq').value.trim().replace(/\s+/g, '-').toUpperCase();
+        
+        const preview = [prefix, zone, subzone, seq].filter(Boolean).join('.');
+        document.getElementById('locUidPreview').value = preview;
+    }
+
     function populateInstallLocSelect() {
         const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
         const allDevices = Object.values(deviceMap);
         
-        const locations = allDevices.filter(d => 
-            (d.specs || '').toLowerCase().includes('địa điểm') || 
-            (d.specs || '').toLowerCase().includes('phòng máy') || 
-            (d.uid || '').startsWith('LOC-') || 
-            (d.uid || '').startsWith('KV-')
-        );
+        const locations = allDevices.filter(isLocationDevice);
 
         const select = document.getElementById('installLocSelect');
         if (!select) return;
@@ -4324,12 +4363,7 @@
         const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
         const allDevices = Object.values(deviceMap);
         
-        const locations = allDevices.filter(d => 
-            (d.specs || '').toLowerCase().includes('địa điểm') || 
-            (d.specs || '').toLowerCase().includes('phòng máy') || 
-            (d.uid || '').startsWith('LOC-') || 
-            (d.uid || '').startsWith('KV-')
-        );
+        const locations = allDevices.filter(isLocationDevice);
 
         const listBody = document.getElementById('locationManagerTableBody');
         if (!listBody) return;
@@ -4363,7 +4397,20 @@
         document.getElementById('locationFormContainer').style.display = 'block';
         document.getElementById('locationFormTitle').innerHTML = '<i class="bi bi-plus-circle me-1"></i>Thêm địa điểm mới';
         document.getElementById('manageLocUid').value = '';
+        
+        document.getElementById('locBuilderPrefix').disabled = false;
+        document.getElementById('locBuilderZone').disabled = false;
+        document.getElementById('locBuilderSubZone').disabled = false;
+        document.getElementById('locBuilderSeq').disabled = false;
+        
+        document.getElementById('locBuilderPrefix').value = 'LOC';
+        document.getElementById('locBuilderZone').value = 'T1';
+        document.getElementById('locBuilderSubZone').value = '01';
+        document.getElementById('locBuilderSeq').value = '01';
+        updateLocUidPreview();
+        
         document.getElementById('manageLocName').value = '';
+        document.getElementById('manageLocName').placeholder = 'Ví dụ: Phòng Bơm Tầng Hầm 1, Phòng Kỹ Thuật Tầng 3';
         document.getElementById('manageLocName').focus();
     }
 
@@ -4376,6 +4423,32 @@
         document.getElementById('locationFormTitle').innerHTML = '<i class="bi bi-pencil-square me-1"></i>Chỉnh sửa địa điểm';
         document.getElementById('manageLocUid').value = loc.uid;
         document.getElementById('manageLocName').value = loc.name;
+
+        const parts = loc.uid.split('.');
+        if (parts.length >= 4) {
+            document.getElementById('locBuilderPrefix').value = ['LOC', 'KV'].includes(parts[0].toUpperCase()) ? parts[0].toUpperCase() : 'LOC';
+            document.getElementById('locBuilderZone').value = parts[1];
+            document.getElementById('locBuilderSubZone').value = parts[2];
+            document.getElementById('locBuilderSeq').value = parts[3];
+        } else {
+            if (loc.uid.toUpperCase().startsWith('KV')) {
+                document.getElementById('locBuilderPrefix').value = 'KV';
+            } else {
+                document.getElementById('locBuilderPrefix').value = 'LOC';
+            }
+            document.getElementById('locBuilderZone').value = '';
+            document.getElementById('locBuilderSubZone').value = '';
+            document.getElementById('locBuilderSeq').value = '';
+        }
+        
+        document.getElementById('locBuilderPrefix').disabled = true;
+        document.getElementById('locBuilderZone').disabled = true;
+        document.getElementById('locBuilderSubZone').disabled = true;
+        document.getElementById('locBuilderSeq').disabled = true;
+        
+        updateLocUidPreview();
+        document.getElementById('locUidPreview').value = loc.uid;
+        
         document.getElementById('manageLocName').focus();
     }
 
@@ -4386,7 +4459,8 @@
     }
 
     async function submitManageLocation() {
-        const uid = document.getElementById('manageLocUid').value.trim();
+        const editUid = document.getElementById('manageLocUid').value.trim();
+        const uid = editUid ? editUid : document.getElementById('locUidPreview').value.trim();
         const name = document.getElementById('manageLocName').value.trim();
 
         if (!name) {

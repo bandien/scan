@@ -816,13 +816,19 @@ function doPost(e) {
     // action=createLocation
     if (params.action === "createLocation") {
       if (!params.name || !String(params.name).trim()) return contentResponse({ status: "error", message: "Tên địa điểm không được để trống" });
+      const locUid = String(params.uid || "").trim().toUpperCase();
+      if (!locUid) return contentResponse({ status: "error", message: "Mã địa điểm (UID) không được để trống" });
+      
       const devSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Devices");
       if (!devSheet) return contentResponse({ status: "error", message: "Devices sheet not found" });
       
-      const now = new Date();
-      const yyyymm = now.getFullYear().toString() + String(now.getMonth() + 1).padStart(2, "0");
-      const seq = String(devSheet.getLastRow()).padStart(3, "0");
-      const locUid = "LOC-" + yyyymm + "-" + seq;
+      // Check if UID already exists
+      const devData = devSheet.getDataRange().getValues();
+      for (let i = 1; i < devData.length; i++) {
+        if (String(devData[i][0]).trim().toUpperCase() === locUid) {
+          return contentResponse({ status: "error", message: "Mã địa điểm (UID) đã tồn tại!" });
+        }
+      }
       
       devSheet.appendRow([
         locUid,
@@ -844,6 +850,7 @@ function doPost(e) {
       writeAuditLog(params.user || "System", "createLocation", locUid, "Created location device: " + params.name);
       return contentResponse({ status: "success", uid: locUid, name: params.name.trim() });
     }
+
 
     // action=updateLocation
     if (params.action === "updateLocation") {

@@ -63,7 +63,24 @@ Tuân thủ nguyên tắc phân cấp từ Phòng máy trung tâm $ightarrow$ T
   - `IDF3-P1-05`: Sợi cáp nối từ cổng số 05, thuộc thanh Patch Panel số 1, nằm trong tủ mạng IDF Tầng 3.
   - `MDF-P2-001`: Cáp mạng kết nối cổng số 001 trên thanh Patch Panel 2 tại tủ trung tâm MDF (sử dụng 3 chữ số).
 
+### 2.5. Hệ thống Địa điểm lắp đặt & Khu vực (Locations & Areas)
+Tất cả các mã địa điểm/khu vực lắp đặt thiết bị được mã hóa thống nhất theo định dạng phân cấp ngăn cách bởi dấu chấm (`.`), chuyển mã loại địa điểm thành tiền tố để hỗ trợ nhận diện và đồng bộ tối đa.
+- **Cấu trúc:** `[Tiền tố].[Phân khu chính].[Phân khu con/Tầng/Hố].[Số thứ tự]`
+- **Quy định thành phần:**
+  - `[Tiền tố]`: `LOC` (Địa điểm cụ thể, ví dụ phòng máy, phòng bơm, vị trí tủ) hoặc `KV` (Khu vực chung, ví dụ khu sân tập, khu sân cỏ).
+  - `[Phân khu chính]`: `T1` (Toà 1), `T2` (Toà 2), `SG` (Sân Golf), `CH` (Clubhouse), `DR` (Driving Range), `VIL` (Biệt thự)...
+  - `[Phân khu con/Tầng/Hố]`: 
+    - Đối với toà nhà cao tầng: `B1` (Hầm 1), `B2` (Hầm 2), `01` (Tầng 1), `02` (Tầng 2)...
+    - Đối với sân golf (mặt đất): `H01` - `H18` (Hố số 1 đến 18), `TB` (Trạm bơm), `KT` (Khu kỹ thuật), `OD` (Outdoors / ngoài trời)...
+  - `[Số thứ tự]`: Cố định 2 chữ số (`01`, `02`, `03`...) để định vị chính xác vị trí trong phân khu con.
+- **Ví dụ thực tế:**
+  - `LOC.T1.B1.01`: Địa điểm phòng kỹ thuật số 01 đặt tại Tầng hầm 1, Toà nhà 1.
+  - `LOC.SG.H05.01`: Địa điểm hố số 5, vị trí số 01 trên Sân Golf.
+  - `KV.SG.TB.02`: Khu vực trạm bơm tưới tiêu cỏ số 02 trên Sân Golf.
+  - `LOC.CH.01.03`: Địa điểm vị trí lắp đặt số 03 tại Tầng 1 Nhà câu lạc bộ (Clubhouse).
+
 ---
+
 
 ## 3. DANH MỤC TỪ VIẾT TẮT CHUẨN HÓA (REFERENCE TABLE)
 
