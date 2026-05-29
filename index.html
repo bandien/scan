@@ -507,16 +507,31 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold small">Vị trí lắp đặt</label>
-                        <input type="text" class="form-control rounded-3" id="newDevLoc" list="dlLoc" placeholder="VD: Tầng hầm B1">
+                        <select class="form-select rounded-3 mb-2" id="newDevLocSelect" onchange="toggleDropdownOrNew('newDevLocSelect', 'newDevLocTextContainer')">
+                            <!-- Populated dynamically -->
+                        </select>
+                        <div id="newDevLocTextContainer" style="display: none;">
+                            <input type="text" class="form-control rounded-3 mt-1" id="newDevLocText" placeholder="Nhập vị trí mới...">
+                        </div>
                     </div>
                     <div class="row g-2 mb-3">
                         <div class="col-6">
                             <label class="form-label fw-bold small">Tổ quản lý</label>
-                            <input type="text" class="form-control rounded-3" id="newDevManager" list="dlManager" placeholder="VD: Cơ Điện">
+                            <select class="form-select rounded-3 mb-2" id="newDevManagerSelect" onchange="toggleDropdownOrNew('newDevManagerSelect', 'newDevManagerTextContainer')">
+                                <!-- Populated dynamically -->
+                            </select>
+                            <div id="newDevManagerTextContainer" style="display: none;">
+                                <input type="text" class="form-control rounded-3 mt-1" id="newDevManagerText" placeholder="Nhập tổ quản lý mới...">
+                            </div>
                         </div>
                         <div class="col-6">
                             <label class="form-label fw-bold small">Ca trực</label>
-                            <input type="text" class="form-control rounded-3" id="newDevShift" list="dlShift" placeholder="VD: Ca sáng">
+                            <select class="form-select rounded-3 mb-2" id="newDevShiftSelect" onchange="toggleDropdownOrNew('newDevShiftSelect', 'newDevShiftTextContainer')">
+                                <!-- Populated dynamically -->
+                            </select>
+                            <div id="newDevShiftTextContainer" style="display: none;">
+                                <input type="text" class="form-control rounded-3 mt-1" id="newDevShiftText" placeholder="Nhập ca trực mới...">
+                            </div>
                         </div>
                     </div>
                     <div class="row g-2 mb-3">
@@ -587,16 +602,31 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold small">Vị trí lắp đặt</label>
-                        <input type="text" class="form-control rounded-3" id="editDevLoc" list="dlLoc" placeholder="VD: Tầng hầm B1">
+                        <select class="form-select rounded-3 mb-2" id="editDevLocSelect" onchange="toggleDropdownOrNew('editDevLocSelect', 'editDevLocTextContainer')">
+                            <!-- Populated dynamically -->
+                        </select>
+                        <div id="editDevLocTextContainer" style="display: none;">
+                            <input type="text" class="form-control rounded-3 mt-1" id="editDevLocText" placeholder="Nhập vị trí mới...">
+                        </div>
                     </div>
                     <div class="row g-2 mb-3">
                         <div class="col-6">
                             <label class="form-label fw-bold small">Tổ quản lý</label>
-                            <input type="text" class="form-control rounded-3" id="editDevManager" list="dlManager" placeholder="VD: Cơ Điện">
+                            <select class="form-select rounded-3 mb-2" id="editDevManagerSelect" onchange="toggleDropdownOrNew('editDevManagerSelect', 'editDevManagerTextContainer')">
+                                <!-- Populated dynamically -->
+                            </select>
+                            <div id="editDevManagerTextContainer" style="display: none;">
+                                <input type="text" class="form-control rounded-3 mt-1" id="editDevManagerText" placeholder="Nhập tổ quản lý mới...">
+                            </div>
                         </div>
                         <div class="col-6">
                             <label class="form-label fw-bold small">Ca trực</label>
-                            <input type="text" class="form-control rounded-3" id="editDevShift" list="dlShift" placeholder="VD: Ca sáng">
+                            <select class="form-select rounded-3 mb-2" id="editDevShiftSelect" onchange="toggleDropdownOrNew('editDevShiftSelect', 'editDevShiftTextContainer')">
+                                <!-- Populated dynamically -->
+                            </select>
+                            <div id="editDevShiftTextContainer" style="display: none;">
+                                <input type="text" class="form-control rounded-3 mt-1" id="editDevShiftText" placeholder="Nhập ca trực mới...">
+                            </div>
                         </div>
                     </div>
                     <div class="row g-2 mb-3">
@@ -2654,27 +2684,33 @@
         Object.values(deviceMap).forEach(d => {
             if (d.name) names.add(d.name);
             if (d.location) locs.add(d.location);
+            const isLocDevice = (d.specs || '').toLowerCase().includes('địa điểm') || 
+                               (d.specs || '').toLowerCase().includes('phòng máy') || 
+                               (d.uid || '').startsWith('LOC-') || 
+                               (d.uid || '').startsWith('KV-');
+            if (isLocDevice && d.name) {
+                locs.add(d.name);
+            }
             if (d.manager && d.manager !== 'Chưa phân công') managers.add(d.manager);
             if (d.shift && d.shift !== 'Chưa phân công') shifts.add(d.shift);
         });
         const makeOptions = (set) => Array.from(set).map(v => `<option value="${v}">`).join('');
         document.getElementById('dlName').innerHTML = makeOptions(names);
-        document.getElementById('dlLoc').innerHTML = makeOptions(locs);
-        document.getElementById('dlManager').innerHTML = makeOptions(managers);
-        document.getElementById('dlShift').innerHTML = makeOptions(shifts);
 
         if (!isScanningForNewDevice) {
             document.getElementById('newDevUID').value = '';
             document.getElementById('newDevName').value = '';
-            document.getElementById('newDevLoc').value = '';
-            document.getElementById('newDevManager').value = '';
-            document.getElementById('newDevShift').value = '';
             document.getElementById('newDevCycle').value = '30';
             document.getElementById('newDevWarning').value = '7';
             document.getElementById('newDevMfg').value = '';
             document.getElementById('newDevInstall').value = '';
             suggestNextMaintenance();
         }
+
+        populateDropdownOrNew('newDevLocSelect', 'newDevLocTextContainer', 'newDevLocText', locs, '');
+        populateDropdownOrNew('newDevManagerSelect', 'newDevManagerTextContainer', 'newDevManagerText', managers, '');
+        populateDropdownOrNew('newDevShiftSelect', 'newDevShiftTextContainer', 'newDevShiftText', shifts, '');
+
         new bootstrap.Modal(document.getElementById('addDeviceModal')).show();
     }
 
@@ -2682,6 +2718,15 @@
         const uid = document.getElementById('newDevUID').value.trim();
         const name = document.getElementById('newDevName').value.trim();
         if (!uid || !name) { showToast('UID và Tên thiết bị không được để trống', 'warning'); return; }
+
+        const locVal = document.getElementById('newDevLocSelect').value;
+        const location = locVal === '__NEW__' ? document.getElementById('newDevLocText').value.trim() : locVal;
+
+        const managerVal = document.getElementById('newDevManagerSelect').value;
+        const manager = managerVal === '__NEW__' ? document.getElementById('newDevManagerText').value.trim() : managerVal;
+
+        const shiftVal = document.getElementById('newDevShiftSelect').value;
+        const shift = shiftVal === '__NEW__' ? document.getElementById('newDevShiftText').value.trim() : shiftVal;
 
         showToast('Đang thêm thiết bị...');
         
@@ -2694,9 +2739,9 @@
                 user: user.name,
                 uid: uid,
                 name: name,
-                location: document.getElementById('newDevLoc').value.trim(),
-                manager: document.getElementById('newDevManager').value.trim(),
-                shift: document.getElementById('newDevShift').value.trim(),
+                location: location,
+                manager: manager || 'Chưa phân công',
+                shift: shift || 'Chưa phân công',
                 cycle: document.getElementById('newDevCycle').value.trim() || 30,
                 nextMaintenance: document.getElementById('newDevNextMaint').value,
                 warningDays: document.getElementById('newDevWarning').value.trim() || 7,
@@ -2813,23 +2858,27 @@
         const device = deviceMap[uid];
         if (!device) return;
 
-        const names = new Set(), locs = new Set(), managers = new Set(), shifts = new Set();
+        const locs = new Set(), managers = new Set(), shifts = new Set();
         Object.values(deviceMap).forEach(d => {
-            if (d.name) names.add(d.name);
             if (d.location) locs.add(d.location);
+            const isLocDevice = (d.specs || '').toLowerCase().includes('địa điểm') || 
+                               (d.specs || '').toLowerCase().includes('phòng máy') || 
+                               (d.uid || '').startsWith('LOC-') || 
+                               (d.uid || '').startsWith('KV-');
+            if (isLocDevice && d.name) {
+                locs.add(d.name);
+            }
             if (d.manager && d.manager !== 'Chưa phân công') managers.add(d.manager);
             if (d.shift && d.shift !== 'Chưa phân công') shifts.add(d.shift);
         });
-        const makeOptions = (set) => Array.from(set).map(v => `<option value="${v}">`).join('');
-        document.getElementById('dlLoc').innerHTML = makeOptions(locs);
-        document.getElementById('dlManager').innerHTML = makeOptions(managers);
-        document.getElementById('dlShift').innerHTML = makeOptions(shifts);
 
         document.getElementById('editDevUID').value = device.uid;
         document.getElementById('editDevName').value = device.name || '';
-        document.getElementById('editDevLoc').value = device.location || '';
-        document.getElementById('editDevManager').value = device.manager || '';
-        document.getElementById('editDevShift').value = device.shift || '';
+
+        populateDropdownOrNew('editDevLocSelect', 'editDevLocTextContainer', 'editDevLocText', locs, device.location || '');
+        populateDropdownOrNew('editDevManagerSelect', 'editDevManagerTextContainer', 'editDevManagerText', managers, device.manager || '');
+        populateDropdownOrNew('editDevShiftSelect', 'editDevShiftTextContainer', 'editDevShiftText', shifts, device.shift || '');
+
         document.getElementById('editDevCycle').value = device.cycle || 30;
         document.getElementById('editDevNextMaint').value = device.nextMaintenance ? device.nextMaintenance.split('T')[0] : '';
         document.getElementById('editDevWarning').value = device.warningDays || 7;
@@ -2844,6 +2893,15 @@
         const name = document.getElementById('editDevName').value.trim();
         if (!uid || !name) { showToast('UID và Tên thiết bị không được để trống', 'warning'); return; }
 
+        const locVal = document.getElementById('editDevLocSelect').value;
+        const location = locVal === '__NEW__' ? document.getElementById('editDevLocText').value.trim() : locVal;
+
+        const managerVal = document.getElementById('editDevManagerSelect').value;
+        const manager = managerVal === '__NEW__' ? document.getElementById('editDevManagerText').value.trim() : managerVal;
+
+        const shiftVal = document.getElementById('editDevShiftSelect').value;
+        const shift = shiftVal === '__NEW__' ? document.getElementById('editDevShiftText').value.trim() : shiftVal;
+
         showToast('Đang cập nhật thiết bị...');
         
         try {
@@ -2855,9 +2913,9 @@
                 user: user.name,
                 uid: uid,
                 name: name,
-                location: document.getElementById('editDevLoc').value.trim(),
-                manager: document.getElementById('editDevManager').value.trim(),
-                shift: document.getElementById('editDevShift').value.trim(),
+                location: location,
+                manager: manager || 'Chưa phân công',
+                shift: shift || 'Chưa phân công',
                 cycle: document.getElementById('editDevCycle').value.trim() || 30,
                 nextMaintenance: document.getElementById('editDevNextMaint').value,
                 warningDays: document.getElementById('editDevWarning').value.trim() || 7,
@@ -2971,6 +3029,45 @@
             }
         } catch (e) {
             showToast('Lỗi kết nối, thử lại sau', 'danger');
+        }
+    }
+
+    function toggleDropdownOrNew(selectId, textContainerId) {
+        const select = document.getElementById(selectId);
+        const container = document.getElementById(textContainerId);
+        if (select.value === '__NEW__') {
+            container.style.display = 'block';
+        } else {
+            container.style.display = 'none';
+        }
+    }
+
+    function populateDropdownOrNew(selectId, textContainerId, textInputId, dataset, selectedValue) {
+        const select = document.getElementById(selectId);
+        const container = document.getElementById(textContainerId);
+        const textInput = document.getElementById(textInputId);
+
+        select.innerHTML = '<option value="">-- Chọn --</option>';
+        
+        const sortedItems = Array.from(dataset).filter(Boolean).sort((a, b) => a.localeCompare(b));
+        sortedItems.forEach(item => {
+            select.innerHTML += `<option value="${escapeDropdownHtml(item)}">${item}</option>`;
+        });
+        
+        select.innerHTML += `<option value="__NEW__">-- Thêm mới --</option>`;
+
+        if (selectedValue && dataset.has(selectedValue)) {
+            select.value = selectedValue;
+            container.style.display = 'none';
+            textInput.value = '';
+        } else if (selectedValue) {
+            select.value = '__NEW__';
+            container.style.display = 'block';
+            textInput.value = selectedValue;
+        } else {
+            select.value = '';
+            container.style.display = 'none';
+            textInput.value = '';
         }
     }
 </script>
