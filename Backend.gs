@@ -23,7 +23,7 @@ const TELEGRAM_BOT_TOKEN = "8123778511:AAFofqkL1DBCgl41GVXPWaq6keNG2HDfj1I";
 const TELEGRAM_CHAT_ID = "-4279433930";
 
 // Tự động xác định SHEET_ID
-const SHEET_ID = (function() {
+const SHEET_ID = MANUAL_SHEET_ID ? MANUAL_SHEET_ID : (function() {
   try {
     return SpreadsheetApp.getActiveSpreadsheet().getId();
   } catch (e) {
