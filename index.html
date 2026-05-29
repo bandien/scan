@@ -547,6 +547,16 @@
                             </datalist>
                         </div>
                     </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold small">Ngày sản xuất</label>
+                            <input type="date" class="form-control rounded-3" id="newDevMfg">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold small">Ngày lắp đặt</label>
+                            <input type="date" class="form-control rounded-3" id="newDevInstall">
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
                     <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
@@ -721,6 +731,8 @@
                     <span class="small text-muted"><i class="bi bi-geo-alt me-1"></i><span id="disp_loc">---</span></span>
                     <span class="small text-muted"><i class="bi bi-person-badge me-1"></i><span id="disp_manager">---</span></span>
                     <span class="small text-muted"><i class="bi bi-clock-history me-1"></i><span id="disp_shift">---</span></span>
+                    <span class="small text-muted"><i class="bi bi-calendar-event me-1"></i>NSX: <span id="disp_mfg">---</span></span>
+                    <span class="small text-muted"><i class="bi bi-calendar-plus me-1"></i>Lắp đặt: <span id="disp_install">---</span></span>
                 </div>
             </div>
             <div class="card-body p-0">
@@ -1507,8 +1519,8 @@
     function enterDemoMode() {
         const demoUser = { name: "Demo User", role: "Admin" };
         const demoDevices = [
-            { uid: "TB001", name: "Máy nén khí Demo", location: "Khu A", specs: "10HP", cycle: 30, status: "IN" },
-            { uid: "TB002", name: "Điều hòa LG Demo", location: "Phòng Server", specs: "24k BTU", cycle: 90, status: "IN" }
+            { uid: "TB001", name: "Máy nén khí Demo", location: "Khu A", specs: "10HP", cycle: 30, status: "IN", manufactureDate: "2024-01-01", installationDate: "2024-01-15" },
+            { uid: "TB002", name: "Điều hòa LG Demo", location: "Phòng Server", specs: "24k BTU", cycle: 90, status: "IN", manufactureDate: "2023-06-10", installationDate: "2023-06-20" }
         ];
         const demoChecklists = [
             { type: "default", id: "c1", title: "Kiểm tra nguồn", desc: "Nguồn điện ổn định" },
@@ -1661,6 +1673,8 @@
                 document.getElementById('disp_loc').innerText = device.location;
                 document.getElementById('disp_manager').innerText = device.manager || 'Chưa phân công';
                 document.getElementById('disp_shift').innerText = device.shift || 'Chưa phân công';
+                document.getElementById('disp_mfg').innerText = device.manufactureDate || 'Chưa rõ';
+                document.getElementById('disp_install').innerText = device.installationDate || 'Chưa rõ';
                 
                 // Show current In/Out status
                 const badge = document.getElementById('disp_status_badge');
@@ -2545,6 +2559,8 @@
             document.getElementById('newDevShift').value = '';
             document.getElementById('newDevCycle').value = '30';
             document.getElementById('newDevWarning').value = '7';
+            document.getElementById('newDevMfg').value = '';
+            document.getElementById('newDevInstall').value = '';
             suggestNextMaintenance();
         }
         new bootstrap.Modal(document.getElementById('addDeviceModal')).show();
@@ -2571,7 +2587,9 @@
                 shift: document.getElementById('newDevShift').value.trim(),
                 cycle: document.getElementById('newDevCycle').value.trim() || 30,
                 nextMaintenance: document.getElementById('newDevNextMaint').value,
-                warningDays: document.getElementById('newDevWarning').value.trim() || 7
+                warningDays: document.getElementById('newDevWarning').value.trim() || 7,
+                manufactureDate: document.getElementById('newDevMfg').value,
+                installationDate: document.getElementById('newDevInstall').value
             };
 
             const res = await fetch(gasUrl, {

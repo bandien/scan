@@ -83,7 +83,9 @@ function doGet(e) {
         nextMaintenance: devData[i][5] || "",
         manager: devData[i][6] || "Chưa phân công",
         shift: devData[i][7] || "Chưa phân công",
-        warningDays: devData[i][8] || 7
+        warningDays: devData[i][8] || 7,
+        manufactureDate: devData[i][9] || "",
+        installationDate: devData[i][10] || ""
       });
     }
 
@@ -301,7 +303,9 @@ function doPost(e) {
         params.nextMaintenance || '',
         params.manager || 'Chưa phân công',
         params.shift || 'Chưa phân công',
-        params.warningDays || 7
+        params.warningDays || 7,
+        params.manufactureDate || '',
+        params.installationDate || ''
       ]);
 
       // Write audit log entry

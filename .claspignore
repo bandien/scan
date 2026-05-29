@@ -1,6 +1,10 @@
-# Ignore everything
-**/*
-
-# Except the Apps Script backend files
-!Backend.gs
-!appsscript.json
+# Ignore sync-service and dependency folders
+sync-service/**
+node_modules/**
+.git/**
+brain/**
+docs/**
+*.bak
+*.url
+*.md
+*.ps1
