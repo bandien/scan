@@ -54,9 +54,12 @@ function doGet(e) {
       devSheet.getRange(1, 10).setValue("Manufacture Date");
       devSheet.getRange(1, 11).setValue("Installation Date");
       devSheet.getRange(1, 12).setValue("Status");
-      return contentResponse({ status: "success", message: "English headers set on columns J, K, and L." });
     }
-    return contentResponse({ status: "error", message: "Devices sheet not found" });
+    const userSheet = ss.getSheetByName("Users");
+    if (userSheet) {
+      userSheet.getRange(1, 4).setValue("Teams");
+    }
+    return contentResponse({ status: "success", message: "English headers set on columns J, K, L and Users column D." });
   }
 
   if (action === 'login') {
@@ -67,14 +70,15 @@ function doGet(e) {
     const userSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Users");
     if (!userSheet) return contentResponse({ status: "error", message: "Users sheet not found" });
     const users = userSheet.getDataRange().getValues();
-    let userRole = null; let userName = null;
+    let userRole = null; let userName = null; let userTeams = "";
     
-    // Check Username + PIN (Users sheet: A=Username, B=PIN, C=Role)
+    // Check Username + PIN (Users sheet: A=Username, B=PIN, C=Role, D=Teams)
     for (let i = 1; i < users.length; i++) {
       if (String(users[i][0]).trim().toLowerCase() === String(username).trim().toLowerCase() 
           && String(users[i][1]) == String(pin)) {
         userName = users[i][0];
         userRole = users[i][2];
+        userTeams = users[i][3] || "";
         break;
       }
     }
@@ -122,13 +126,14 @@ function doGet(e) {
     for (let i = 1; i < users.length; i++) {
       usersList.push({
         name: users[i][0],
-        role: users[i][2]
+        role: users[i][2],
+        teams: users[i][3] || ""
       });
     }
 
     return contentResponse({ 
       status: "success", 
-      user: { name: userName, role: userRole },
+      user: { name: userName, role: userRole, teams: userTeams },
       devices: devices,
       checklists: checklists,
       users: usersList

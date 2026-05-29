@@ -150,7 +150,7 @@
             ĐĂNG NHẬP <i class="bi bi-box-arrow-in-right ms-2"></i>
         </button>
         <div id="loginSpinner" class="spinner-border text-primary mt-3" style="display: none;" role="status"></div>
-        <p class="mt-4 mb-0 text-muted" style="font-size: 0.75rem;"><span data-i18n="version">Phiên bản</span> v2.1.0</p>
+        <p class="mt-4 mb-0 text-muted" style="font-size: 0.75rem;"><span data-i18n="version">Phiên bản</span> v2.3.0</p>
     </div>
 </div>
 
@@ -237,10 +237,19 @@
             <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" id="tabAllDevices" onclick="setDeviceListFilter('all')">Tất cả thiết bị</button>
         </div>
 
-        <div class="mb-3">
-            <div class="input-group">
+        <div class="mb-3 d-flex gap-2">
+            <div class="input-group flex-grow-1">
                 <span class="input-group-text bg-light border-0"><i class="bi bi-search"></i></span>
-                <input type="text" class="form-control bg-light border-0" placeholder="Tìm nhanh thiết bị..." id="deviceSearchInput" oninput="renderDeviceList()">
+                <input type="text" class="form-control bg-light border-0" placeholder="Tìm nhanh thiết bị..." id="deviceSearchInput" oninput="renderDeviceList()" data-i18n-placeholder="search_devices_placeholder">
+            </div>
+            <div class="dropdown">
+                <button class="btn btn-outline-primary border-0 bg-light rounded-3 px-3 shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Xuất dữ liệu in nhãn">
+                    <i class="bi bi-download"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-1">
+                    <li><a class="dropdown-item py-2" href="#" onclick="exportLinkWareLiveCSV()"><i class="bi bi-cloud-arrow-up text-primary me-2"></i> <span data-i18n="export_lwl">Xuất cho LinkWare Live</span></a></li>
+                    <li><a class="dropdown-item py-2" href="#" onclick="exportBrotherPrinterCSV()"><i class="bi bi-printer text-success me-2"></i> <span data-i18n="export_brother">Xuất cho máy in Brother</span></a></li>
+                </ul>
             </div>
         </div>
 
@@ -978,7 +987,10 @@
             btn_complete: "XÁC NHẬN HOÀN TẤT", alert_success: "Đã lưu nhật ký cho {uid}",
             alert_offline: "Mất mạng! Dữ liệu đã được lưu offline.",
             alert_sync: "Đã đồng bộ {count} bản ghi offline!",
-            remember_me: "Ghi nhớ đăng nhập", version: "Phiên bản"
+            remember_me: "Ghi nhớ đăng nhập", version: "Phiên bản",
+            search_devices_placeholder: "Tìm nhanh thiết bị...",
+            export_lwl: "Xuất cho LinkWare Live (Fluke)",
+            export_brother: "Xuất cho máy in Brother (CSV)"
         },
         en: {
             app_title: "UID QR Master", app_subtitle: "Smart Maintenance Management",
@@ -991,7 +1003,10 @@
             btn_complete: "COMPLETE", alert_success: "Log saved for {uid}",
             alert_offline: "Offline! Data saved locally.",
             alert_sync: "Synced {count} offline records!",
-            remember_me: "Remember me", version: "Version"
+            remember_me: "Remember me", version: "Version",
+            search_devices_placeholder: "Quick search devices...",
+            export_lwl: "Export for LinkWare Live (Fluke)",
+            export_brother: "Export for Brother Printer (CSV)"
         }
     };
 
@@ -1150,6 +1165,26 @@
         }
     }
 
+    function filterDeviceByRoleAndTeams(d, user, role, username, userTeams, filterMode) {
+        const devManager = String(d.manager || '').toLowerCase().trim();
+        const devShift = String(d.shift || '').toLowerCase().trim();
+        const matchesTeams = userTeams.some(team => devManager.includes(team));
+
+        if (role === 'Admin') {
+            if (filterMode === 'my') {
+                return devManager.includes(username) || matchesTeams;
+            }
+            return true;
+        } else if (role === 'Manager') {
+            if (filterMode === 'my') {
+                return devManager.includes(username) || matchesTeams || devManager.includes('quản lý') || devManager.includes('cơ điện');
+            }
+            return true;
+        } else {
+            return devManager.includes(username) || devShift.includes(username) || matchesTeams || devManager.includes('vận hành');
+        }
+    }
+
     function renderDeviceList() {
         const userStr = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
         if (!userStr) return;
@@ -1170,6 +1205,8 @@
             deviceListFilterMode = 'my'; // Force Operator to only see assigned
         }
 
+        const userTeams = (user.teams || '').split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+
         let filtered = devices.filter(d => {
             // Apply Search filter
             const matchesSearch = String(d.name || '').toLowerCase().includes(searchInput) || 
@@ -1178,26 +1215,7 @@
             if (!matchesSearch) return false;
 
             // Apply Role-based access control
-            if (role === 'Admin') {
-                if (deviceListFilterMode === 'my') {
-                    // Admin's "my" shows devices managed by user "admin"
-                    const devManager = String(d.manager || '').toLowerCase().trim();
-                    return devManager.includes(username);
-                }
-                return true; // Admin "all" shows everything
-            } else if (role === 'Manager') {
-                if (deviceListFilterMode === 'my') {
-                    // Manager's "my" shows devices managed by their team
-                    const devManager = String(d.manager || '').toLowerCase().trim();
-                    return devManager.includes(username) || devManager.includes('quản lý') || devManager.includes('cơ điện');
-                }
-                return true; // Manager "all" shows everything
-            } else {
-                // Operator (Vận hành / Kỹ thuật) can ONLY see assigned
-                const devManager = String(d.manager || '').toLowerCase().trim();
-                const devShift = String(d.shift || '').toLowerCase().trim();
-                return devManager.includes(username) || devShift.includes(username) || devManager.includes('vận hành');
-            }
+            return filterDeviceByRoleAndTeams(d, user, role, username, userTeams, deviceListFilterMode);
         });
 
         // Sort: Overdue PM first, then active
@@ -1253,6 +1271,115 @@
                 </div>
             `;
         }).join('');
+    }
+
+    function exportLinkWareLiveCSV() {
+        const userStr = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+        if (!userStr) return;
+        const user = JSON.parse(userStr);
+        const role = user.role || 'Vận hành';
+        const username = String(user.name).toLowerCase().trim();
+        
+        const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+        const devices = Object.values(deviceMap);
+        const searchInput = document.getElementById('deviceSearchInput').value.toLowerCase().trim();
+        
+        const userTeams = (user.teams || '').split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+
+        let filtered = devices.filter(d => {
+            const matchesSearch = String(d.name || '').toLowerCase().includes(searchInput) || 
+                                  String(d.uid || '').toLowerCase().includes(searchInput) ||
+                                  String(d.location || '').toLowerCase().includes(searchInput);
+            if (!matchesSearch) return false;
+
+            return filterDeviceByRoleAndTeams(d, user, role, username, userTeams, deviceListFilterMode);
+        });
+
+        if (filtered.length === 0) {
+            showToast(currentLang === 'vi' ? 'Không có thiết bị nào để xuất!' : 'No devices to export!', 'error');
+            return;
+        }
+
+        let csvContent = "";
+        filtered.forEach(d => {
+            if (d.uid) {
+                csvContent += `${d.uid}\r\n`;
+            }
+        });
+        csvContent += "\r\n";
+
+        const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", `LinkWareLive_CableIDs_${new Date().toISOString().slice(0,10)}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast(currentLang === 'vi' ? 'Đã xuất file CSV cho LinkWare Live!' : 'Exported CSV for LinkWare Live!');
+    }
+
+    function exportBrotherPrinterCSV() {
+        const userStr = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+        if (!userStr) return;
+        const user = JSON.parse(userStr);
+        const role = user.role || 'Vận hành';
+        const username = String(user.name).toLowerCase().trim();
+        
+        const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+        const devices = Object.values(deviceMap);
+        const searchInput = document.getElementById('deviceSearchInput').value.toLowerCase().trim();
+        
+        const userTeams = (user.teams || '').split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+
+        let filtered = devices.filter(d => {
+            const matchesSearch = String(d.name || '').toLowerCase().includes(searchInput) || 
+                                  String(d.uid || '').toLowerCase().includes(searchInput) ||
+                                  String(d.location || '').toLowerCase().includes(searchInput);
+            if (!matchesSearch) return false;
+
+            return filterDeviceByRoleAndTeams(d, user, role, username, userTeams, deviceListFilterMode);
+        });
+
+        if (filtered.length === 0) {
+            showToast(currentLang === 'vi' ? 'Không có thiết bị nào để xuất!' : 'No devices to export!', 'error');
+            return;
+        }
+
+        const headers = ["UID", "Tên thiết bị (Name)", "Vị trí (Location)", "Chu kỳ bảo trì (Cycle)", "Thông số (Specs)", "Tổ quản lý (Manager)", "Ca trực (Shift)"];
+        let csvContent = headers.join(",") + "\r\n";
+        
+        filtered.forEach(d => {
+            const row = [
+                d.uid || '',
+                d.name || '',
+                d.location || '',
+                d.cycle || '',
+                d.specs || '',
+                d.manager || '',
+                d.shift || ''
+            ];
+            const escapedRow = row.map(val => {
+                let s = String(val).replace(/"/g, '""');
+                if (s.includes(",") || s.includes("\n") || s.includes("\r") || s.includes('"')) {
+                    s = `"${s}"`;
+                }
+                return s;
+            });
+            csvContent += escapedRow.join(",") + "\r\n";
+        });
+
+        const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", `BrotherPrinter_DeviceDB_${new Date().toISOString().slice(0,10)}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast(currentLang === 'vi' ? 'Đã xuất file CSV cho máy in Brother!' : 'Exported CSV for Brother printer!');
     }
 
     function selectDevice(uid) {
