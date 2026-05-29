@@ -61,7 +61,21 @@ function doGet(e) {
     if (userSheet) {
       userSheet.getRange(1, 4).setValue("Teams");
     }
-    return contentResponse({ status: "success", message: "English headers set on columns J, K, L, M, N and Users column D." });
+    // Auto-create Projects sheet if it doesn't exist
+    let projSheet = ss.getSheetByName("Projects");
+    if (!projSheet) {
+      projSheet = ss.insertSheet("Projects");
+      projSheet.getRange(1, 1, 1, 5).setValues([["ProjectID", "Name", "Status", "StartDate", "EndDate"]]);
+      projSheet.getRange(1, 1, 1, 5).setFontWeight("bold");
+    }
+    // Auto-create AuditLog sheet if it doesn't exist
+    let auditSheet = ss.getSheetByName("AuditLog");
+    if (!auditSheet) {
+      auditSheet = ss.insertSheet("AuditLog");
+      auditSheet.getRange(1, 1, 1, 5).setValues([["Timestamp", "User", "Action", "Target", "Details"]]);
+      auditSheet.getRange(1, 1, 1, 5).setFontWeight("bold");
+    }
+    return contentResponse({ status: "success", message: "Headers configured. Projects & AuditLog sheets ensured." });
   }
 
   if (action === 'login') {
@@ -1016,7 +1030,7 @@ function testAuthorization() {
     const ss = SpreadsheetApp.openById(SHEET_ID);
     console.log("Kết nối Spreadsheet thành công: " + ss.getName());
     
-    const sheets = ["Users", "Devices", "Logs", "Checklists", "WorkOrders", "AuditLog"];
+    const sheets = ["Users", "Devices", "Logs", "Checklists", "WorkOrders", "AuditLog", "Projects"];
     sheets.forEach(name => {
       const s = ss.getSheetByName(name);
       if (s) {
