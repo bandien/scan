@@ -568,6 +568,102 @@
         </div>
     </div>
 
+    <!-- Edit Device Modal -->
+    <div class="modal fade" id="editDeviceModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2 text-warning"></i>Chỉnh sửa thiết bị</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Mã thiết bị (UID)</label>
+                        <input type="text" class="form-control rounded-3 bg-light" id="editDevUID" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Tên thiết bị</label>
+                        <input type="text" class="form-control rounded-3" id="editDevName" placeholder="VD: Bơm tăng áp">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Vị trí lắp đặt</label>
+                        <input type="text" class="form-control rounded-3" id="editDevLoc" list="dlLoc" placeholder="VD: Tầng hầm B1">
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold small">Tổ quản lý</label>
+                            <input type="text" class="form-control rounded-3" id="editDevManager" list="dlManager" placeholder="VD: Cơ Điện">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold small">Ca trực</label>
+                            <input type="text" class="form-control rounded-3" id="editDevShift" list="dlShift" placeholder="VD: Ca sáng">
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-4">
+                            <label class="form-label fw-bold small">Chu kỳ (Ngày)</label>
+                            <input type="number" class="form-control rounded-3 px-2" id="editDevCycle" placeholder="VD: 30" onchange="suggestEditNextMaintenance()">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label fw-bold small">Ngày kế tiếp</label>
+                            <input type="date" class="form-control rounded-3 px-2" id="editDevNextMaint">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label fw-bold small">Báo trước</label>
+                            <input type="number" class="form-control rounded-3 px-2" id="editDevWarning" placeholder="VD: 7">
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold small">Ngày sản xuất</label>
+                            <input type="date" class="form-control rounded-3" id="editDevMfg">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold small">Ngày lắp đặt</label>
+                            <input type="date" class="form-control rounded-3" id="editDevInstall">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-warning rounded-pill px-4 text-dark fw-bold" onclick="submitEditDevice()">
+                        <i class="bi bi-check-lg me-1"></i> Lưu thay đổi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Install Location Modal -->
+    <div class="modal fade" id="installLocationModal" tabindex="-1" aria-hidden="true" style="z-index: 1065;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-geo-fill me-2 text-info"></i>Lắp đặt tại địa điểm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Chọn Địa điểm lắp đặt</label>
+                        <select class="form-select rounded-3" id="installLocSelect">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Ghi chú lắp đặt (Tùy chọn)</label>
+                        <textarea class="form-control rounded-3" id="installLocNotes" rows="2" placeholder="Ví dụ: Lắp đặt thay thế bơm cũ..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-info rounded-pill px-4 text-white fw-bold" onclick="submitInstallLocation()">
+                        <i class="bi bi-check-lg me-1"></i> Xác nhận lắp đặt
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Change Password Modal -->
     <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -721,8 +817,11 @@
     <div id="infoSection" style="display: none;">
         <div class="card-premium anim-up">
             <div class="info-header">
-                <div class="d-flex justify-content-between">
-                    <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill" id="disp_status_badge" data-i18n="badge_active">Active</span>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill" id="disp_status_badge" data-i18n="badge_active">Active</span>
+                        <button class="btn btn-sm btn-outline-warning rounded-pill px-2 py-0 ms-2" id="editDeviceBtn" style="display: none; font-size: 0.72rem; border-width: 1px; line-height: 1.2;" onclick="showEditDeviceModal()"><i class="bi bi-pencil-fill me-1"></i>Sửa</button>
+                    </div>
                     <span class="text-muted small" id="curr_time"></span>
                 </div>
                 <h4 class="fw-bold mt-3 mb-1" id="disp_name">---</h4>
@@ -784,7 +883,8 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 anim-in">
                                 <li><a class="dropdown-item py-2" href="#" onclick="handleInOut('IN')"><i class="bi bi-box-arrow-in-right me-2 text-success"></i> Nhập kho (IN)</a></li>
-                                <li><a class="dropdown-item py-2" href="#" onclick="handleInOut('OUT')"><i class="bi bi-box-arrow-right me-2 text-warning"></i> Xuất kho / Lắp đặt (OUT)</a></li>
+                                <li><a class="dropdown-item py-2" href="#" onclick="handleInOut('OUT')"><i class="bi bi-box-arrow-right me-2 text-warning"></i> Xuất kho (OUT)</a></li>
+                                <li><a class="dropdown-item py-2" href="#" onclick="showInstallLocationModal()"><i class="bi bi-geo-fill me-2 text-info"></i> Lắp đặt tại địa điểm...</a></li>
                             </ul>
                         </div>
                     </div>
@@ -1675,6 +1775,18 @@
                 document.getElementById('disp_shift').innerText = device.shift || 'Chưa phân công';
                 document.getElementById('disp_mfg').innerText = device.manufactureDate || 'Chưa rõ';
                 document.getElementById('disp_install').innerText = device.installationDate || 'Chưa rõ';
+                
+                // Phân quyền hiển thị nút sửa thiết bị
+                const currentUserStr = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+                const currentUser = currentUserStr ? JSON.parse(currentUserStr) : null;
+                const editBtn = document.getElementById('editDeviceBtn');
+                if (editBtn) {
+                    if (currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Manager')) {
+                        editBtn.style.display = 'inline-block';
+                    } else {
+                        editBtn.style.display = 'none';
+                    }
+                }
                 
                 // Show current In/Out status
                 const badge = document.getElementById('disp_status_badge');
@@ -2683,6 +2795,182 @@
             setTimeout(() => fetchData(uid), 1000);
         } catch (e) {
             showToast('Lỗi ghi nhận, thử lại sau', 'danger');
+        }
+    }
+
+    function suggestEditNextMaintenance() {
+        const cycle = parseInt(document.getElementById('editDevCycle').value) || 0;
+        if (cycle > 0) {
+            const date = new Date();
+            date.setDate(date.getDate() + cycle);
+            document.getElementById('editDevNextMaint').value = date.toISOString().split('T')[0];
+        }
+    }
+
+    function showEditDeviceModal() {
+        const uid = document.getElementById('disp_uid').innerText;
+        const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+        const device = deviceMap[uid];
+        if (!device) return;
+
+        const names = new Set(), locs = new Set(), managers = new Set(), shifts = new Set();
+        Object.values(deviceMap).forEach(d => {
+            if (d.name) names.add(d.name);
+            if (d.location) locs.add(d.location);
+            if (d.manager && d.manager !== 'Chưa phân công') managers.add(d.manager);
+            if (d.shift && d.shift !== 'Chưa phân công') shifts.add(d.shift);
+        });
+        const makeOptions = (set) => Array.from(set).map(v => `<option value="${v}">`).join('');
+        document.getElementById('dlLoc').innerHTML = makeOptions(locs);
+        document.getElementById('dlManager').innerHTML = makeOptions(managers);
+        document.getElementById('dlShift').innerHTML = makeOptions(shifts);
+
+        document.getElementById('editDevUID').value = device.uid;
+        document.getElementById('editDevName').value = device.name || '';
+        document.getElementById('editDevLoc').value = device.location || '';
+        document.getElementById('editDevManager').value = device.manager || '';
+        document.getElementById('editDevShift').value = device.shift || '';
+        document.getElementById('editDevCycle').value = device.cycle || 30;
+        document.getElementById('editDevNextMaint').value = device.nextMaintenance ? device.nextMaintenance.split('T')[0] : '';
+        document.getElementById('editDevWarning').value = device.warningDays || 7;
+        document.getElementById('editDevMfg').value = device.manufactureDate || '';
+        document.getElementById('editDevInstall').value = device.installationDate || '';
+
+        new bootstrap.Modal(document.getElementById('editDeviceModal')).show();
+    }
+
+    async function submitEditDevice() {
+        const uid = document.getElementById('editDevUID').value.trim();
+        const name = document.getElementById('editDevName').value.trim();
+        if (!uid || !name) { showToast('UID và Tên thiết bị không được để trống', 'warning'); return; }
+
+        showToast('Đang cập nhật thiết bị...');
+        
+        try {
+            const userStr = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+            const user = JSON.parse(userStr);
+            const payload = {
+                action: 'updateDevice',
+                token: API_TOKEN,
+                user: user.name,
+                uid: uid,
+                name: name,
+                location: document.getElementById('editDevLoc').value.trim(),
+                manager: document.getElementById('editDevManager').value.trim(),
+                shift: document.getElementById('editDevShift').value.trim(),
+                cycle: document.getElementById('editDevCycle').value.trim() || 30,
+                nextMaintenance: document.getElementById('editDevNextMaint').value,
+                warningDays: document.getElementById('editDevWarning').value.trim() || 7,
+                manufactureDate: document.getElementById('editDevMfg').value,
+                installationDate: document.getElementById('editDevInstall').value
+            };
+
+            const res = await fetch(gasUrl, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            if (result.status === 'success') {
+                showToast('Đã cập nhật thiết bị thành công!', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('editDeviceModal')).hide();
+                
+                const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+                const oldDevice = deviceMap[uid] || {};
+                deviceMap[uid] = {
+                    ...oldDevice,
+                    ...payload
+                };
+                localStorage.setItem('localDevicesMap', JSON.stringify(deviceMap));
+                
+                if (document.getElementById('deviceListSection').style.display !== 'none') {
+                    renderDeviceList();
+                }
+                if (document.getElementById('calendarSection').style.display !== 'none') {
+                    renderCalendar();
+                }
+                fetchData(uid);
+            } else {
+                showToast(result.message || 'Lỗi từ máy chủ', 'danger');
+            }
+        } catch (e) {
+            showToast('Lỗi khi cập nhật thiết bị', 'danger');
+        }
+    }
+
+    function showInstallLocationModal() {
+        const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+        const allDevices = Object.values(deviceMap);
+        
+        const locations = allDevices.filter(d => 
+            (d.specs || '').toLowerCase().includes('địa điểm') || 
+            (d.specs || '').toLowerCase().includes('phòng máy') || 
+            (d.uid || '').startsWith('LOC-') || 
+            (d.uid || '').startsWith('KV-')
+        );
+
+        const select = document.getElementById('installLocSelect');
+        select.innerHTML = '';
+        if (locations.length === 0) {
+            select.innerHTML = '<option value="">-- Không tìm thấy địa điểm nào --</option>';
+        } else {
+            locations.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            locations.forEach(loc => {
+                select.innerHTML += `<option value="${escapeDropdownHtml(loc.name)}">${loc.uid} - ${loc.name}</option>`;
+            });
+        }
+        
+        document.getElementById('installLocNotes').value = '';
+        new bootstrap.Modal(document.getElementById('installLocationModal')).show();
+    }
+
+    async function submitInstallLocation() {
+        const uid = document.getElementById('disp_uid').innerText;
+        const select = document.getElementById('installLocSelect');
+        const newLocation = select.value;
+        if (!newLocation) { showToast('Vui lòng chọn địa điểm lắp đặt', 'warning'); return; }
+        
+        const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        const notesInput = document.getElementById('installLocNotes').value.trim();
+        const finalNotes = `Lắp đặt tại địa điểm: ${newLocation}` + (notesInput ? ` (${notesInput})` : '');
+
+        showToast('Đang thực hiện lắp đặt...');
+        try {
+            const payload = {
+                action: 'logInOut',
+                token: API_TOKEN,
+                uid: uid,
+                status: 'OUT',
+                newLocation: newLocation,
+                notes: finalNotes,
+                user: user.name
+            };
+
+            const response = await fetch(gasUrl, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                showToast(`Đã lắp đặt thiết bị tại ${newLocation} thành công!`, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('installLocationModal')).hide();
+                
+                const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+                if (deviceMap[uid]) {
+                    deviceMap[uid].status = 'OUT';
+                    deviceMap[uid].location = newLocation;
+                    localStorage.setItem('localDevicesMap', JSON.stringify(deviceMap));
+                }
+                
+                if (document.getElementById('deviceListSection').style.display !== 'none') {
+                    renderDeviceList();
+                }
+                setTimeout(() => fetchData(uid), 1000);
+            } else {
+                showToast(result.message || 'Lỗi từ máy chủ', 'danger');
+            }
+        } catch (e) {
+            showToast('Lỗi kết nối, thử lại sau', 'danger');
         }
     }
 </script>

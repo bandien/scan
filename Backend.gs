@@ -53,7 +53,8 @@ function doGet(e) {
     if (devSheet) {
       devSheet.getRange(1, 10).setValue("Manufacture Date");
       devSheet.getRange(1, 11).setValue("Installation Date");
-      return contentResponse({ status: "success", message: "English headers set on columns J & K." });
+      devSheet.getRange(1, 12).setValue("Status");
+      return contentResponse({ status: "success", message: "English headers set on columns J, K, and L." });
     }
     return contentResponse({ status: "error", message: "Devices sheet not found" });
   }
@@ -96,7 +97,8 @@ function doGet(e) {
         shift: devData[i][7] || "Chưa phân công",
         warningDays: devData[i][8] || 7,
         manufactureDate: devData[i][9] || "",
-        installationDate: devData[i][10] || ""
+        installationDate: devData[i][10] || "",
+        status: devData[i][11] || "IN"
       });
     }
 
@@ -316,7 +318,8 @@ function doPost(e) {
         params.shift || 'Chưa phân công',
         params.warningDays || 7,
         params.manufactureDate || '',
-        params.installationDate || ''
+        params.installationDate || '',
+        'IN' // Column 12: Status
       ]);
 
       // Write audit log entry
@@ -326,6 +329,39 @@ function doPost(e) {
       sendAlert(msg);
 
       return contentResponse({ status: "success", message: "Đã thêm thiết bị mới" });
+    }
+
+    // action=updateDevice — Update an existing device details
+    if (params.action === 'updateDevice') {
+      const devSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Devices");
+      if (!devSheet) return contentResponse({ status: "error", message: "Devices sheet not found" });
+
+      const devData = devSheet.getDataRange().getValues();
+      let rowIdx = -1;
+      for (let i = 1; i < devData.length; i++) {
+        if (String(devData[i][0]).trim() === String(params.uid).trim()) {
+          rowIdx = i + 1;
+          break;
+        }
+      }
+
+      if (rowIdx === -1) {
+        return contentResponse({ status: "error", message: "Không tìm thấy thiết bị để cập nhật" });
+      }
+
+      // Update cells
+      devSheet.getRange(rowIdx, 2).setValue(params.name || '');
+      devSheet.getRange(rowIdx, 3).setValue(params.location || '');
+      devSheet.getRange(rowIdx, 5).setValue(params.cycle || 30);
+      devSheet.getRange(rowIdx, 6).setValue(params.nextMaintenance || '');
+      devSheet.getRange(rowIdx, 7).setValue(params.manager || 'Chưa phân công');
+      devSheet.getRange(rowIdx, 8).setValue(params.shift || 'Chưa phân công');
+      devSheet.getRange(rowIdx, 9).setValue(params.warningDays || 7);
+      devSheet.getRange(rowIdx, 10).setValue(params.manufactureDate || '');
+      devSheet.getRange(rowIdx, 11).setValue(params.installationDate || '');
+
+      writeAuditLog(params.user || 'System', 'updateDevice', params.uid, 'Updated device details via Web App');
+      return contentResponse({ status: "success", message: "Đã cập nhật thiết bị thành công" });
     }
 
     // action=createWO — Create a new Work Order with auto-generated WO_ID (WO-YYYYMM-NNNNN)
@@ -610,8 +646,12 @@ function doPost(e) {
       let updated = false;
       for (let i = 1; i < devData.length; i++) {
         if (String(devData[i][0]) === String(params.uid)) {
-          // Update Status in a new column (assuming Column G / 7 for Status)
-          devSheet.getRange(i + 1, 7).setValue(params.status); 
+          // Update Status in Column L (12)
+          devSheet.getRange(i + 1, 12).setValue(params.status); 
+          // If a new location is specified, update it too in Column C (3)
+          if (params.newLocation) {
+            devSheet.getRange(i + 1, 3).setValue(params.newLocation);
+          }
           updated = true;
           break;
         }
