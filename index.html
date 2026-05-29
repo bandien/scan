@@ -186,6 +186,7 @@
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 mt-2 p-2" style="min-width: 200px;">
                     <li id="menuAddDevice" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="showAddDeviceModal()"><i class="bi bi-plus-square-dotted me-2 text-success"></i> Thêm thiết bị mới</a></li>
+                    <li id="menuBatchGen" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleBatchGenerator()"><i class="bi bi-magic me-2 text-success"></i> Tạo mã hàng loạt</a></li>
                     <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleDeviceList()" id="btn-device-list"><i class="bi bi-cpu me-2 text-primary"></i> Thiết bị của tôi</a></li>
                     <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleCalendar()" id="btn-calendar"><i class="bi bi-calendar-event me-2 text-primary"></i> Lịch Bảo Trì</a></li>
                     <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleKanban()" id="btn-kanban"><i class="bi bi-kanban me-2 text-primary"></i> Kanban WO</a></li>
@@ -258,6 +259,127 @@
 
         <div id="deviceListContainer" class="d-flex flex-column gap-2" style="max-height: 400px; overflow-y: auto;">
             <!-- Devices rendered here dynamically -->
+        </div>
+    </div>
+
+    <!-- Batch Generator Section (LinkWare Live Style) -->
+    <div id="batchGeneratorSection" class="card-premium p-3 mb-4" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0 text-gradient"><i class="bi bi-magic text-success"></i> Tạo thiết bị hàng loạt</h5>
+            <button class="btn-close" onclick="toggleBatchGenerator()"></button>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold small">Dự án liên kết</label>
+            <select class="form-select rounded-3" id="batchProjectSelect">
+                <option value="">-- Chọn dự án --</option>
+            </select>
+        </div>
+
+        <div class="row g-2 mb-3">
+            <div class="col-6">
+                <label class="form-label fw-bold small">Loại thiết bị</label>
+                <select class="form-select rounded-3" id="batchTypeSelect">
+                    <option value="Bơm">Bơm (Pump)</option>
+                    <option value="Tủ điện">Tủ điện (Electrical Panel)</option>
+                    <option value="Cáp điện">Cáp điện (Cable)</option>
+                    <option value="Khác">Khác (Other)</option>
+                </select>
+            </div>
+            <div class="col-6">
+                <label class="form-label fw-bold small">Vị trí lắp đặt mẫu</label>
+                <input type="text" class="form-control rounded-3" id="batchLocation" placeholder="VD: Tầng hầm 1">
+            </div>
+        </div>
+
+        <!-- Quy tắc đặt mã UID -->
+        <div class="p-3 bg-light rounded-4 mb-3 border">
+            <label class="form-label fw-bold text-dark small mb-2"><i class="bi bi-hash"></i> Công thức sinh mã tuần tự (UID Pattern)</label>
+            <div class="row g-1 mb-2">
+                <div class="col-4">
+                    <input type="text" class="form-control form-control-sm rounded-2" id="batchPrefix" placeholder="Tiền tố (e.g. HP-CAB-)" oninput="updateBatchPreview()">
+                </div>
+                <div class="col-2">
+                    <input type="number" class="form-control form-control-sm rounded-2 px-1 text-center" id="batchStartNum" placeholder="Bắt đầu" value="1" min="1" oninput="updateBatchPreview()">
+                </div>
+                <div class="col-2">
+                    <input type="number" class="form-control form-control-sm rounded-2 px-1 text-center" id="batchEndNum" placeholder="Kết thúc" value="10" min="1" oninput="updateBatchPreview()">
+                </div>
+                <div class="col-2">
+                    <select class="form-select form-select-sm rounded-2 px-1 text-center" id="batchPadding" onchange="updateBatchPreview()">
+                        <option value="1">Ko đệm (1)</option>
+                        <option value="2" selected>Đệm 2 (01)</option>
+                        <option value="3">Đệm 3 (001)</option>
+                    </select>
+                </div>
+                <div class="col-2">
+                    <input type="text" class="form-control form-control-sm rounded-2" id="batchSuffix" placeholder="Hậu tố (e.g. -A)" oninput="updateBatchPreview()">
+                </div>
+            </div>
+            <div class="small text-muted" style="font-size: 0.72rem;">
+                Mã sinh thử: <code class="text-primary font-monospace" id="batchPreviewUid">...</code>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold small">Tên thiết bị mẫu (Dùng # để chèn số)</label>
+            <input type="text" class="form-control rounded-3" id="batchNameTemplate" placeholder="VD: Cáp nguồn tủ phân phối #" value="Cáp #" oninput="updateBatchPreview()">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold small">Thông số mẫu (Dùng # để chèn số)</label>
+            <input type="text" class="form-control rounded-3" id="batchSpecsTemplate" placeholder="VD: Cu/PVC/PVC 4x16mm2">
+        </div>
+
+        <div class="row g-2 mb-3">
+            <div class="col-6">
+                <label class="form-label fw-bold small">Tổ quản lý</label>
+                <select class="form-select rounded-3" id="batchManagerSelect">
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+            <div class="col-6">
+                <label class="form-label fw-bold small">Ca trực</label>
+                <select class="form-select rounded-3" id="batchShiftSelect">
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+        </div>
+
+        <div class="row g-2 mb-3">
+            <div class="col-6">
+                <label class="form-label fw-bold small">Chu kỳ (Ngày)</label>
+                <input type="number" class="form-control rounded-3" id="batchCycle" value="90">
+            </div>
+            <div class="col-6">
+                <label class="form-label fw-bold small">Báo trước (Ngày)</label>
+                <input type="number" class="form-control rounded-3" id="batchWarning" value="7">
+            </div>
+        </div>
+
+        <button class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow mb-3" onclick="previewBatchDevices()">
+            <i class="bi bi-eye me-1"></i> Xem trước danh sách mã
+        </button>
+
+        <!-- Preview Table -->
+        <div id="batchPreviewTableContainer" style="display: none;">
+            <label class="form-label fw-bold text-success small mb-2"><i class="bi bi-list-check"></i> Xác nhận danh sách mã hàng loạt (<span id="batchPreviewCount">0</span> mã)</label>
+            <div class="border rounded-3 overflow-hidden mb-3" style="max-height: 250px; overflow-y: auto;">
+                <table class="table table-sm table-striped mb-0 text-start" style="font-size: 0.75rem;">
+                    <thead class="table-light">
+                        <tr>
+                            <th>UID</th>
+                            <th>Tên thiết bị</th>
+                            <th>Thông số</th>
+                        </tr>
+                    </thead>
+                    <tbody id="batchPreviewTableBody">
+                    </tbody>
+                </table>
+            </div>
+            <button class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-sm" onclick="submitBatchDevices()">
+                <i class="bi bi-cloud-upload me-1"></i> Tạo & Lưu lên Google Sheets
+            </button>
         </div>
     </div>
 
@@ -1211,6 +1333,174 @@
         }
     }
 
+    function toggleBatchGenerator() {
+        document.getElementById('dashboardSection').style.display = 'none';
+        document.getElementById('kanbanSection').style.display = 'none';
+        document.getElementById('calendarSection').style.display = 'none';
+        document.getElementById('deviceListSection').style.display = 'none';
+        
+        const section = document.getElementById('batchGeneratorSection');
+        if (section.style.display === 'none') {
+            section.style.display = 'block';
+            
+            const projects = JSON.parse(localStorage.getItem('localProjects') || '[]');
+            const projSel = document.getElementById('batchProjectSelect');
+            projSel.innerHTML = '<option value="">-- Chọn dự án --</option>';
+            projects.forEach(p => {
+                projSel.innerHTML += `<option value="${p.name}">${p.name}</option>`;
+            });
+            
+            const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+            const managers = new Set(), shifts = new Set();
+            Object.values(deviceMap).forEach(d => {
+                if (d.manager && d.manager !== 'Chưa phân công') managers.add(d.manager);
+                if (d.shift && d.shift !== 'Chưa phân công') shifts.add(d.shift);
+            });
+            
+            const makeOptions = (set) => Array.from(set).map(v => `<option value="${v}">${v}</option>`).join('');
+            document.getElementById('batchManagerSelect').innerHTML = `<option value="">-- Mặc định --</option>` + makeOptions(managers);
+            document.getElementById('batchShiftSelect').innerHTML = `<option value="">-- Mặc định --</option>` + makeOptions(shifts);
+            
+            updateBatchPreview();
+        } else {
+            section.style.display = 'none';
+        }
+    }
+
+    function updateBatchPreview() {
+        const prefix = document.getElementById('batchPrefix').value.trim();
+        const suffix = document.getElementById('batchSuffix').value.trim();
+        const start = parseInt(document.getElementById('batchStartNum').value) || 1;
+        const padding = parseInt(document.getElementById('batchPadding').value) || 2;
+        const nameTemplate = document.getElementById('batchNameTemplate').value.trim();
+        
+        const numStr = String(start).padStart(padding, '0');
+        const previewUid = prefix + numStr + suffix;
+        const previewName = nameTemplate.replace(/#/g, numStr);
+        
+        document.getElementById('batchPreviewUid').innerText = `${previewUid} (${previewName})`;
+    }
+
+    let generatedBatchDevicesList = [];
+
+    function previewBatchDevices() {
+        const project = document.getElementById('batchProjectSelect').value;
+        const type = document.getElementById('batchTypeSelect').value;
+        const location = document.getElementById('batchLocation').value.trim();
+        const prefix = document.getElementById('batchPrefix').value.trim();
+        const suffix = document.getElementById('batchSuffix').value.trim();
+        const start = parseInt(document.getElementById('batchStartNum').value) || 1;
+        const end = parseInt(document.getElementById('batchEndNum').value) || 1;
+        const padding = parseInt(document.getElementById('batchPadding').value) || 2;
+        const nameTemplate = document.getElementById('batchNameTemplate').value.trim() || 'Thiết bị #';
+        const specsTemplate = document.getElementById('batchSpecsTemplate').value.trim();
+        const manager = document.getElementById('batchManagerSelect').value || 'Chưa phân công';
+        const shift = document.getElementById('batchShiftSelect').value || 'Chưa phân công';
+        const cycle = parseInt(document.getElementById('batchCycle').value) || 90;
+        const warningDays = parseInt(document.getElementById('batchWarning').value) || 7;
+
+        if (start > end) {
+            showToast('Số bắt đầu không được lớn hơn số kết thúc!', 'warning');
+            return;
+        }
+        
+        const listBody = document.getElementById('batchPreviewTableBody');
+        listBody.innerHTML = '';
+        generatedBatchDevicesList = [];
+
+        const nextDate = new Date();
+        nextDate.setDate(nextDate.getDate() + cycle);
+        const nextMaintenance = nextDate.toISOString().split('T')[0];
+
+        for (let i = start; i <= end; i++) {
+            const numStr = String(i).padStart(padding, '0');
+            const uid = prefix + numStr + suffix;
+            const name = nameTemplate.replace(/#/g, numStr);
+            const specs = specsTemplate.replace(/#/g, numStr);
+
+            generatedBatchDevicesList.push({
+                uid, name, location, specs, cycle, warningDays, nextMaintenance, manager, shift, project,
+                manufactureDate: '', installationDate: '', status: 'IN'
+            });
+
+            listBody.innerHTML += `
+                <tr>
+                    <td class="font-monospace fw-bold text-primary">${uid}</td>
+                    <td>${name}</td>
+                    <td>${specs || '<span class="text-muted">N/A</span>'}</td>
+                </tr>
+            `;
+        }
+
+        document.getElementById('batchPreviewCount').innerText = generatedBatchDevicesList.length;
+        document.getElementById('batchPreviewTableContainer').style.display = 'block';
+        document.getElementById('batchPreviewTableContainer').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    async function submitBatchDevices() {
+        if (generatedBatchDevicesList.length === 0) return;
+        
+        showToast(`Đang tạo ${generatedBatchDevicesList.length} thiết bị...`);
+        const userStr = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+        const user = JSON.parse(userStr);
+
+        try {
+            const payload = {
+                action: 'createDevicesBatch',
+                token: API_TOKEN,
+                user: user.name,
+                project: document.getElementById('batchProjectSelect').value,
+                devices: generatedBatchDevicesList
+            };
+
+            const res = await fetch(gasUrl, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+
+            if (result.status === 'success') {
+                const added = result.addedCount || 0;
+                const skipped = result.skipped || [];
+                
+                if (added > 0) {
+                    showToast(`Tạo thành công ${added} thiết bị!`, 'success');
+                    
+                    const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+                    generatedBatchDevicesList.forEach(d => {
+                        if (!skipped.includes(d.uid)) {
+                            deviceMap[d.uid] = d;
+                        }
+                    });
+                    localStorage.setItem('localDevicesMap', JSON.stringify(deviceMap));
+                }
+
+                if (skipped.length > 0) {
+                    showToast(`Bỏ qua ${skipped.length} mã đã tồn tại!`, 'warning');
+                }
+
+                document.getElementById('batchPreviewTableContainer').style.display = 'none';
+                toggleBatchGenerator();
+                
+                const devSection = document.getElementById('deviceListSection');
+                devSection.style.display = 'block';
+                
+                const projFilter = document.getElementById('deviceProjectFilter');
+                if (projFilter && payload.project) {
+                    populateDeviceProjectFilter();
+                    projFilter.value = payload.project;
+                }
+                
+                renderDeviceList();
+            } else {
+                showToast(result.message || 'Lỗi lưu dữ liệu hàng loạt', 'danger');
+            }
+        } catch (e) {
+            console.error(e);
+            showToast('Lỗi kết nối máy chủ', 'danger');
+        }
+    }
+
     function filterDeviceByRoleAndTeams(d, user, role, username, userTeams, filterMode) {
         const devManager = String(d.manager || '').toLowerCase().trim();
         const devShift = String(d.shift || '').toLowerCase().trim();
@@ -1802,9 +2092,11 @@
         document.getElementById('userRoleDisplay').innerHTML = '<i class="bi bi-briefcase me-1"></i> ' + (user.role || 'User');
         if (user.role === 'Admin' || user.role === 'Manager') {
             document.getElementById('menuAddDevice').style.display = 'block';
+            document.getElementById('menuBatchGen').style.display = 'block';
             document.getElementById('btnManageChecklist').style.display = 'inline-block';
         } else {
             document.getElementById('menuAddDevice').style.display = 'none';
+            document.getElementById('menuBatchGen').style.display = 'none';
             document.getElementById('btnManageChecklist').style.display = 'none';
         }
         updateSyncStatus();

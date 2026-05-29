@@ -340,6 +340,59 @@ function doPost(e) {
       return contentResponse({ status: "success", message: "Đã thêm thiết bị mới" });
     }
 
+    // action=createDevicesBatch - Admin/Manager can add multiple devices at once
+    if (params.action === 'createDevicesBatch') {
+      const devSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Devices");
+      if (!devSheet) return contentResponse({ status: "error", message: "Devices sheet not found" });
+
+      const devData = devSheet.getDataRange().getValues();
+      const existingUids = new Set();
+      for (let i = 1; i < devData.length; i++) {
+        existingUids.add(String(devData[i][0]).trim());
+      }
+
+      const newDevices = params.devices || [];
+      const rowsToAppend = [];
+      const skippedUids = [];
+
+      newDevices.forEach(d => {
+        const uid = String(d.uid).trim();
+        if (existingUids.has(uid)) {
+          skippedUids.push(uid);
+        } else {
+          rowsToAppend.push([
+            uid,
+            d.name || '',
+            d.location || '',
+            d.specs || '',
+            d.cycle || 30,
+            d.nextMaintenance || '',
+            d.manager || 'Chưa phân công',
+            d.shift || 'Chưa phân công',
+            d.warningDays || 7,
+            d.manufactureDate || '',
+            d.installationDate || '',
+            'IN', // Status
+            d.project || '' // Project
+          ]);
+          existingUids.add(uid);
+        }
+      });
+
+      if (rowsToAppend.length > 0) {
+        const lastRow = devSheet.getLastRow();
+        devSheet.getRange(lastRow + 1, 1, rowsToAppend.length, 13).setValues(rowsToAppend);
+        writeAuditLog(params.user || 'System', 'createDevicesBatch', `${rowsToAppend.length} devices`, `Batch created ${rowsToAppend.length} devices via Web App`);
+        sendAlert(`⚡ **Tạo hàng loạt:** Đã tạo thành công ${rowsToAppend.length} thiết bị mới cho dự án "${params.project || 'Chưa phân công'}".`);
+      }
+
+      return contentResponse({ 
+        status: "success", 
+        addedCount: rowsToAppend.length, 
+        skipped: skippedUids 
+      });
+    }
+
     // action=updateDevice — Update an existing device details
     if (params.action === 'updateDevice') {
       const devSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Devices");
