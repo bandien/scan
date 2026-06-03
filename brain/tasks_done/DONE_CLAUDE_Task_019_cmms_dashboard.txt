@@ -1,0 +1,34 @@
+[TASK_ID: Task_019_cmms_dashboard]
+[ROLE: @backend & @frontend]
+[CONTEXT: Module 4 - CMMS Core (NAS Native) Next.js 15/16 + Tailwind v4 + Prisma PostgreSQL]
+
+Yêu cầu chi tiết xây dựng giao diện Dashboard tối giản (Minimalist Dashboard) cho lõi quản lý bảo trì CMMS Core tại `03_cmms`:
+
+1. Đọc và lấy dữ liệu trực tiếp từ Prisma PostgreSQL Database trong Next.js App Router (Server Component) tại file:
+   - `03_cmms/src/app/page.tsx`
+
+2. Các nguồn dữ liệu cần hiển thị (Sử dụng Prisma Client):
+   - `prisma.workOrder.findMany({ orderBy: { createdAt: 'desc' } })` -> Danh sách phiếu bảo trì (Work Orders).
+   - `prisma.device.findMany()` -> Danh sách các thiết bị/tài sản bảo trì (Devices).
+   - `prisma.assetLog.findMany({ orderBy: { timestamp: 'desc' }, take: 10 })` -> Nhật ký hoạt động gần nhất từ Mobile QR (Logs).
+
+3. Thiết kế giao diện (Sử dụng Tailwind CSS v4):
+   - Phong cách tối giản (Minimalist/Glassmorphism Dashboard), hỗ trợ Dark/Light mode tự nhiên (theo hệ điều hành).
+   - Thống kê nhanh (Stats Cards):
+     - Tổng số phiếu bảo trì đang chạy/đã hoàn thành.
+     - Số thiết bị đang quản lý.
+     - Số lượng nhật ký quét thiết bị gần nhất.
+   - Bảng/Thẻ danh sách Work Orders:
+     - Hiển thị đầy đủ thông tin: Tên WO, Mức độ ưu tiên (High - Đỏ, Medium - Vàng, Low - Xanh), Trạng thái (TODO, WIP, DONE), Người thực hiện (Assignee), Hạn hoàn thành.
+   - Bảng/Thẻ danh sách Thiết bị (Devices):
+     - Hiển thị: UID thiết bị, Tên thiết bị, Vị trí (Location), Chu kỳ bảo trì (Cycle), Ngày bảo trì tiếp theo.
+   - Nhật ký hoạt động gần đây (Logs):
+     - Hiển thị danh sách log quét QR từ Mobile QR bao gồm: Thời gian quét, UID thiết bị, Người quét, và ghi chú nếu có.
+
+4. Yêu cầu kỹ thuật:
+   - File `page.tsx` là React Server Component, khởi tạo Prisma Client bên trong một cách tối ưu.
+   - Đảm bảo thiết kế Responsive (hoạt động xuất sắc trên cả Mobile và Desktop).
+   - Xử lý UI Fallback nếu cơ sở dữ liệu trống hoặc chưa có bản ghi nào.
+   - Chạy kiểm tra biên dịch (`npm run build` hoặc `next build`) đảm bảo không bị lỗi TypeScript hoặc compile error.
+
+Hãy thực hiện chỉnh sửa trực tiếp vào file: `03_cmms/src/app/page.tsx` và tạo/chỉnh sửa các CSS hoặc layout cần thiết.

@@ -149,6 +149,9 @@
         <button id="btnLogin" class="btn btn-primary w-100 py-3 rounded-pill fw-bold" onclick="doLogin()">
             ĐĂNG NHẬP <i class="bi bi-box-arrow-in-right ms-2"></i>
         </button>
+        <div class="mt-3">
+            <small class="text-muted" style="font-size: 0.7rem;">Phiên bản v2.1.0</small>
+        </div>
         <div id="loginSpinner" class="spinner-border text-primary mt-3" style="display: none;" role="status"></div>
         <p class="mt-4 mb-0 text-muted" style="font-size: 0.75rem;"><span data-i18n="version">Phiên bản</span> v2.7.0</p>
     </div>
@@ -220,14 +223,37 @@
 
     <!-- Dashboard Section -->
     <div id="dashboardSection" class="card-premium p-3 mb-4" style="display: none;">
-        <h5 class="fw-bold mb-3"><i class="bi bi-pie-chart"></i> Asset Status Overview</h5>
-        <canvas id="assetChart"></canvas>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0"><i class="bi bi-bar-chart-fill me-1 text-primary"></i> Analytics Dashboard</h5>
+            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="loadDashboardData(true)">
+                <i class="bi bi-arrow-clockwise"></i>
+            </button>
+        </div>
+        <div class="row g-2 mb-3">
+            <div class="col-6"><div class="bg-primary-subtle rounded-3 p-3 text-center"><div class="fw-bold fs-4" id="kpi-total">—</div><div class="text-muted small">Tổng thiết bị</div></div></div>
+            <div class="col-6"><div class="bg-danger-subtle rounded-3 p-3 text-center"><div class="fw-bold fs-4 text-danger" id="kpi-overdue">—</div><div class="text-muted small">Quá hạn BT</div></div></div>
+            <div class="col-6"><div class="bg-warning-subtle rounded-3 p-3 text-center"><div class="fw-bold fs-4 text-warning" id="kpi-active-wo">—</div><div class="text-muted small">WO đang mở</div></div></div>
+            <div class="col-6"><div class="bg-success-subtle rounded-3 p-3 text-center"><div class="fw-bold fs-4 text-success" id="kpi-done-wo">—</div><div class="text-muted small">WO hoàn thành</div></div></div>
+        </div>
+        <p class="fw-bold small text-muted text-uppercase mb-2">Trạng thái Work Orders</p>
+        <canvas id="assetChart" class="mb-3"></canvas>
+        <p class="fw-bold small text-muted text-uppercase mb-2">Bảo trì theo tháng (6 tháng gần nhất)</p>
+        <canvas id="maintenanceBarChart"></canvas>
     </div>
 
     <!-- Calendar Section -->
     <div id="calendarSection" class="card-premium p-3 mb-4" style="display: none;">
-        <h5 class="fw-bold mb-3"><i class="bi bi-calendar-check"></i> Lịch Bảo Trì (PM)</h5>
-        <div id="calendarList" class="list-group"></div>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0"><i class="bi bi-calendar-check"></i> Lịch Bảo Trì (PM)</h5>
+            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="loadMaintenanceSchedule(true)">
+                <i class="bi bi-arrow-clockwise"></i>
+            </button>
+        </div>
+        <div id="maintenanceList" class="list-group">
+            <div class="text-center text-muted small py-3">
+                <div class="spinner-border spinner-border-sm me-2 text-primary"></div> Đang tải...
+            </div>
+        </div>
     </div>
 
     <!-- Device List Section -->
@@ -1235,18 +1261,21 @@
             </div>
         </div>
     </div>
-
-    <div class="card-premium p-3 mb-4" id="searchSection" style="display: none;">
-        <h6 class="fw-bold mb-2">Advanced Search</h6>
-        <div class="input-group mb-2">
-            <input type="text" class="form-control" placeholder="Search by Name/UID..." id="searchInput">
-            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Filter</button>
-            <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="#">All Status</a></li>
-                <li><a class="dropdown-item" href="#">Active</a></li>
-                <li><a class="dropdown-item" href="#">Needs Maintenance</a></li>
-            </ul>
+    <div class="card-premium p-3 mb-4" id="filterSection">
+        <h6 class="fw-bold mb-2"><i class="bi bi-funnel me-1 text-primary"></i> Lọc thiết bị</h6>
+        <div class="row g-2">
+            <div class="col-6">
+                <select class="form-select form-select-sm rounded-3" id="filterArea" onchange="applyFilters()">
+                    <option value="">Tất cả khu vực</option>
+                </select>
+            </div>
+            <div class="col-6">
+                <select class="form-select form-select-sm rounded-3" id="filterType" onchange="applyFilters()">
+                    <option value="">Tất cả loại máy</option>
+                </select>
+            </div>
         </div>
+        <div id="filteredDeviceList" style="display: none;" class="mt-2 border-top pt-2"></div>
     </div>
 
     <div class="card-premium p-3 mb-4">
@@ -1387,7 +1416,8 @@
         gasUrl: 'https://script.google.com/macros/s/AKfycbzW4TxDarLBOpZvO8hnE0R65IsCd95a5l-XPASjUmZNuefH5MiWMs8lCpLpggzFwyXK/exec',
         apiToken: 'HAPU_QR_SECRET_2026',
         appTitle: 'BanDienScan',
-        companyName: 'HAPU Complex'
+        companyName: 'HAPU Complex',
+        version: 'v2.7.0'
     };
     
     // Legacy variables (pointing to CONFIG for compatibility)
@@ -1521,6 +1551,8 @@
     }
 
     let chartInstance = null;
+    let barChartInstance = null;
+
     async function toggleDashboard() {
         document.getElementById('kanbanSection').style.display = 'none';
         document.getElementById('calendarSection').style.display = 'none';
@@ -1538,26 +1570,11 @@
                     document.head.appendChild(s);
                 });
             }
-            if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
-            const ctx = document.getElementById('assetChart').getContext('2d');
-            const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
-            const devices = Object.values(deviceMap);
-            const countIN = devices.filter(d => !d.status || d.status === 'IN').length;
-            const countOUT = devices.filter(d => d.status === 'OUT').length;
-            const countUnknown = devices.filter(d => d.status && d.status !== 'IN' && d.status !== 'OUT').length;
-            chartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Trong kho (IN)', 'Đang lắp đặt (OUT)', 'Không xác định'],
-                    datasets: [{ data: [countIN, countOUT, countUnknown], backgroundColor: ['#10b981', '#f59e0b', '#94a3b8'] }]
-                },
-                options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
-            });
+            loadDashboardData();
         } else {
             dash.style.display = 'none';
         }
     }
-
     let deviceListFilterMode = 'my';
 
     function setDeviceListFilter(mode) {
@@ -2047,6 +2064,71 @@
             </div>`;
         }).join('');
     }
+    
+    async function loadDashboardData(forceRefresh = false) {
+        const cached = localStorage.getItem('localAnalytics');
+        if (cached && !forceRefresh) renderDashboard(JSON.parse(cached));
+
+        try {
+            const res = await fetch(`${gasUrl}?action=getAnalyticsData&token=${API_TOKEN}`);
+            const result = await res.json();
+            if (result.status === 'success') {
+                localStorage.setItem('localAnalytics', JSON.stringify(result));
+                renderDashboard(result);
+            }
+        } catch (e) {
+            if (!cached) {
+                const devices = Object.values(JSON.parse(localStorage.getItem('localDevicesMap') || '{}'));
+                const wos = JSON.parse(localStorage.getItem('localWorkOrders') || '[]');
+                const today = new Date(); today.setHours(0, 0, 0, 0);
+                const overdueCount = devices.filter(d => d.nextMaintenance && new Date(d.nextMaintenance) < today).length;
+                const woByStatus = {};
+                wos.forEach(w => { woByStatus[w.Status] = (woByStatus[w.Status] || 0) + 1; });
+                renderDashboard({
+                    kpi: { total: devices.length, overdue: overdueCount, activeWOs: (woByStatus['New']||0)+(woByStatus['Assigned']||0)+(woByStatus['In Progress']||0), doneWOs: woByStatus['Done']||0 },
+                    woByStatus, logsByMonth: {}, byArea: {}
+                });
+            }
+        }
+    }
+
+    function renderDashboard(data) {
+        document.getElementById('kpi-total').textContent = data.kpi?.total ?? '—';
+        document.getElementById('kpi-overdue').textContent = data.kpi?.overdue ?? '—';
+        document.getElementById('kpi-active-wo').textContent = data.kpi?.activeWOs ?? '—';
+        document.getElementById('kpi-done-wo').textContent = data.kpi?.doneWOs ?? '—';
+
+        const woByStatus = data.woByStatus || {};
+        const woLabels = Object.keys(woByStatus);
+        const woValues = Object.values(woByStatus);
+        const WO_COLORS_MAP = { 'New': '#6366f1', 'Assigned': '#3b82f6', 'In Progress': '#f59e0b', 'Done': '#10b981', 'Closed': '#6b7280' };
+        const dColors = woLabels.map(l => WO_COLORS_MAP[l] || '#94a3b8');
+
+        if (chartInstance) chartInstance.destroy();
+        chartInstance = new Chart(document.getElementById('assetChart').getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: woLabels.length > 0 ? woLabels : ['Chưa có dữ liệu'],
+                datasets: [{ data: woValues.length > 0 ? woValues : [1], backgroundColor: woLabels.length > 0 ? dColors : ['#e2e8f0'] }]
+            },
+            options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+        });
+
+        const logsByMonth = data.logsByMonth || {};
+        const sortedMonths = Object.keys(logsByMonth).sort();
+        const barLabels = sortedMonths.map(m => { const [y, mo] = m.split('-'); return `T${parseInt(mo)}/${y.slice(2)}`; });
+        const barValues = sortedMonths.map(m => logsByMonth[m]);
+
+        if (barChartInstance) barChartInstance.destroy();
+        barChartInstance = new Chart(document.getElementById('maintenanceBarChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: barLabels.length > 0 ? barLabels : ['Chưa có dữ liệu'],
+                datasets: [{ label: 'Lượt bảo trì', data: barValues.length > 0 ? barValues : [0], backgroundColor: '#3b82f6', borderRadius: 6 }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+        });
+    }
 
     function toggleCalendar() {
         document.getElementById('dashboardSection').style.display = 'none';
@@ -2055,10 +2137,136 @@
         const cal = document.getElementById('calendarSection');
         if (cal.style.display === 'none') {
             cal.style.display = 'block';
-            renderCalendar();
+            loadMaintenanceSchedule();
         } else {
             cal.style.display = 'none';
         }
+    }
+
+    async function loadMaintenanceSchedule(forceRefresh = false) {
+        const container = document.getElementById('maintenanceList');
+        const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+        const cached = Object.values(deviceMap);
+
+        if (cached.length > 0 && !forceRefresh) {
+            renderMaintenanceList(cached);
+        } else {
+            container.innerHTML = '<div class="text-center text-muted small py-3"><div class="spinner-border spinner-border-sm me-2 text-primary"></div> Đang tải...</div>';
+        }
+
+        try {
+            const res = await fetch(`${gasUrl}?action=getMaintenanceDue&token=${API_TOKEN}`);
+            const result = await res.json();
+            if (result.status === 'success' && result.data) {
+                const updatedMap = {};
+                result.data.forEach(d => { updatedMap[d.uid] = { ...(deviceMap[d.uid] || {}), ...d }; });
+                localStorage.setItem('localDevicesMap', JSON.stringify(updatedMap));
+                renderMaintenanceList(result.data);
+            }
+        } catch (e) {
+            if (cached.length === 0) {
+                container.innerHTML = '<div class="text-center text-warning small py-3"><i class="bi bi-wifi-off me-2"></i>Offline — không có cache</div>';
+            }
+        }
+    }
+
+    function renderMaintenanceList(devices) {
+        const container = document.getElementById('maintenanceList');
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+
+        const withStatus = devices
+            .filter(d => d.uid)
+            .map(d => {
+                const rawNext = d.nextMaintenance;
+                let daysUntil = null, scheduleStatus = 'never';
+                if (rawNext) {
+                    const nextDate = new Date(rawNext);
+                    if (!isNaN(nextDate)) {
+                        nextDate.setHours(0, 0, 0, 0);
+                        daysUntil = Math.round((nextDate - today) / (1000 * 60 * 60 * 24));
+                        scheduleStatus = daysUntil < 0 ? 'overdue' : (daysUntil <= 3 ? 'due_soon' : 'scheduled');
+                    }
+                }
+                // use pre-computed values from backend if available
+                return { ...d, daysUntil: d.daysUntil ?? daysUntil, scheduleStatus: d.scheduleStatus ?? scheduleStatus };
+            })
+            .sort((a, b) => {
+                const order = { overdue: 0, due_soon: 1, never: 2, scheduled: 3 };
+                return (order[a.scheduleStatus] ?? 4) - (order[b.scheduleStatus] ?? 4);
+            });
+
+        if (withStatus.length === 0) {
+            container.innerHTML = '<div class="text-center text-muted small py-3"><i class="bi bi-inbox me-2"></i>Không có dữ liệu thiết bị</div>';
+            return;
+        }
+
+        const overdueCount = withStatus.filter(d => d.scheduleStatus === 'overdue').length;
+        const dueSoonCount = withStatus.filter(d => d.scheduleStatus === 'due_soon').length;
+
+        let html = '';
+        if (overdueCount > 0 || dueSoonCount > 0) {
+            html += '<div class="d-flex gap-2 mb-3 flex-wrap">';
+            if (overdueCount > 0) html += `<span class="badge bg-danger rounded-pill px-3 py-2"><i class="bi bi-exclamation-circle me-1"></i>${overdueCount} Quá hạn</span>`;
+            if (dueSoonCount > 0) html += `<span class="badge bg-warning text-dark rounded-pill px-3 py-2"><i class="bi bi-clock me-1"></i>${dueSoonCount} Sắp đến hạn</span>`;
+            html += '</div>';
+        }
+
+        html += '<div class="list-group">';
+        withStatus.forEach(d => {
+            let badgeClass, badgeText, dateText;
+            const cycle = d.cycle || 30;
+            switch (d.scheduleStatus) {
+                case 'overdue':
+                    badgeClass = 'bg-danger';
+                    badgeText = `Quá ${Math.abs(d.daysUntil)}n`;
+                    dateText = `Hạn: ${new Date(d.nextMaintenance).toLocaleDateString('vi-VN')}`;
+                    break;
+                case 'due_soon':
+                    badgeClass = 'bg-warning text-dark';
+                    badgeText = d.daysUntil === 0 ? 'Hôm nay' : `Còn ${d.daysUntil}n`;
+                    dateText = `Hạn: ${new Date(d.nextMaintenance).toLocaleDateString('vi-VN')}`;
+                    break;
+                case 'scheduled':
+                    badgeClass = 'bg-success';
+                    badgeText = `Còn ${d.daysUntil}n`;
+                    dateText = `Hạn: ${new Date(d.nextMaintenance).toLocaleDateString('vi-VN')}`;
+                    break;
+                default:
+                    badgeClass = 'bg-secondary';
+                    badgeText = 'Chưa BT';
+                    dateText = `Chu kỳ: ${cycle}n`;
+            }
+            const canCreateWO = d.scheduleStatus === 'overdue' || d.scheduleStatus === 'due_soon';
+            const safeName = (d.name || d.uid).replace(/'/g, "\\'");
+            html += `
+                <div class="list-group-item p-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-fill me-2">
+                            <h6 class="mb-0 fw-bold" style="font-size:0.88rem;">${d.name || d.uid} <span class="text-muted fw-normal">(${d.uid})</span></h6>
+                            <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>${d.location || '—'} · ${dateText}</small>
+                        </div>
+                        <span class="badge ${badgeClass} rounded-pill" style="font-size:0.68rem;white-space:nowrap;">${badgeText}</span>
+                    </div>
+                    ${canCreateWO ? `<div class="mt-2"><button class="btn btn-outline-danger btn-sm rounded-pill px-3" style="font-size:0.75rem;" onclick="createWOFromSchedule('${d.uid}','${safeName}')"><i class="bi bi-wrench me-1"></i>Tạo WO bảo trì</button></div>` : ''}
+                </div>`;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    function createWOFromSchedule(uid, deviceName) {
+        const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+        const allDevices = Object.values(deviceMap);
+        const sel = document.getElementById('woAsset');
+        sel.innerHTML = '<option value="">-- Chọn thiết bị --</option>';
+        allDevices.forEach(d => { sel.innerHTML += `<option value="${d.uid}">${d.name || d.uid} (${d.uid})</option>`; });
+        sel.value = uid;
+        document.getElementById('woType').value = 'Preventive';
+        document.getElementById('woPriority').value = 'High';
+        document.getElementById('woDescription').value = `Bảo trì định kỳ thiết bị ${deviceName} (${uid}) theo lịch PM.`;
+        const due = new Date(); due.setDate(due.getDate() + 2);
+        document.getElementById('woDueDate').value = due.toISOString().split('T')[0];
+        new bootstrap.Modal(document.getElementById('createWOModal')).show();
     }
 
     function renderChecklist(type) {
@@ -2384,6 +2592,7 @@
             document.getElementById('btnManageChecklist').style.display = 'none';
         }
         updateSyncStatus();
+        initFilters();
     }
 
     function doLogout() {
@@ -2435,7 +2644,6 @@
         showToast("Đang vào chế độ Demo...", "info");
         setTimeout(() => location.reload(), 1000);
     }
-
     async function doLogin() {
         const username = document.getElementById('usernameInput').value.trim();
         const password = document.getElementById('passwordInput').value;
@@ -2474,7 +2682,6 @@
                     localStorage.removeItem('savedPassword');
                 }
                 
-                // OPTIMIZATION: Convert array to Object for O(1) Lookup
                 const deviceMap = {};
                 (result.devices || []).forEach(d => { deviceMap[d.uid] = d; });
                 localStorage.setItem('localDevicesMap', JSON.stringify(deviceMap));
@@ -2499,7 +2706,7 @@
                     .then(d => { if (d.status === 'success') localStorage.setItem('localShifts', JSON.stringify(d.shifts || [])); })
                     .catch(() => {});
                 updateUI(result.user);
-                showToast(`Xin chào ${result.user.name} (${result.user.role})`);
+                showToast(`Xin chào ${result.user.name}`);
             } else {
                 console.warn(`[DEBUG] Login failed: ${result.message}`);
                 showToast(result.message || "Sai tên hoặc mật khẩu", "danger");
@@ -2722,22 +2929,17 @@
         const cacheKey = `history_${uid}`;
         const cachedData = localStorage.getItem(cacheKey);
 
-        // Hiển thị dữ liệu từ cache ngay lập tức nếu có
-        if (cachedData) {
-            renderHistoryUI(JSON.parse(cachedData));
-        }
+        if (cachedData) renderHistoryUI(JSON.parse(cachedData));
 
         try {
-            const resp = await fetch(`${gasUrl}?action=getDeviceHistory&uid=${uid}&token=${API_TOKEN}`);
-            const data = await resp.json();
+            const response = await fetch(`${gasUrl}?action=getDeviceHistory&uid=${uid}&token=${API_TOKEN}`);
+            const data = await response.json();
             if (data.status === 'success') {
                 localStorage.setItem(cacheKey, JSON.stringify(data.history));
                 renderHistoryUI(data.history);
             }
         } catch (e) {
-            if (!cachedData) {
-                container.innerHTML = '<p class="text-danger small text-center mb-0">Không thể tải lịch sử</p>';
-            }
+            if (!cachedData) container.innerHTML = '<p class="text-danger small text-center mb-0">Lỗi tải lịch sử</p>';
         }
     }
 
@@ -2829,8 +3031,33 @@
         'In Progress': '#f59e0b', 'Done': '#10b981', 'Closed': '#6b7280'
     };
     const PRIORITY_BS = { 'Low': 'success', 'Medium': 'primary', 'High': 'warning text-dark', 'Urgent': 'danger' };
+    const WO_STATUS_ALIASES = { 'InProgress': 'In Progress', 'In progress': 'In Progress' };
 
     let currentWO = null;
+
+    function normalizeWOStatus(status) {
+        return WO_STATUS_ALIASES[status] || status || 'New';
+    }
+
+    function normalizeWorkOrder(wo) {
+        const assetUID = wo.AssetUID || wo.assetUID || '';
+        const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
+        return {
+            WO_ID: wo.WO_ID || wo.woId || wo.wo_id || '',
+            Type: wo.Type || wo.type || '',
+            Priority: wo.Priority || wo.priority || 'Medium',
+            Status: normalizeWOStatus(wo.Status || wo.status),
+            AssetUID: assetUID,
+            AssetName: wo.AssetName || wo.assetName || (deviceMap[assetUID] && deviceMap[assetUID].name) || '',
+            AssignedTo: wo.AssignedTo || wo.assignedTo || '',
+            DueDate: wo.DueDate || wo.dueDate || '',
+            Description: wo.Description || wo.description || ''
+        };
+    }
+
+    function normalizeWorkOrders(workOrders) {
+        return (workOrders || []).map(normalizeWorkOrder);
+    }
 
     function toggleKanban() {
         document.getElementById('dashboardSection').style.display = 'none';
@@ -2850,14 +3077,16 @@
         board.innerHTML = '<div class="text-center text-muted p-4 w-100"><div class="spinner-border spinner-border-sm me-2"></div> Đang tải...</div>';
 
         const cached = localStorage.getItem('localWorkOrders');
-        if (cached) renderKanban(JSON.parse(cached));
+        if (cached) renderKanban(normalizeWorkOrders(JSON.parse(cached)));
 
         try {
             const res = await fetch(`${gasUrl}?action=getWorkOrders&token=${API_TOKEN}`);
             const result = await res.json();
-            if (result.status === 'success' && result.workOrders) {
-                localStorage.setItem('localWorkOrders', JSON.stringify(result.workOrders));
-                renderKanban(result.workOrders);
+            const workOrders = result.data || result.workOrders;
+            if (result.status === 'success' && workOrders) {
+                const normalized = normalizeWorkOrders(workOrders);
+                localStorage.setItem('localWorkOrders', JSON.stringify(normalized));
+                renderKanban(normalized);
             } else if (!cached) {
                 board.innerHTML = '<div class="text-center text-muted p-4 w-100"><i class="bi bi-inbox me-2"></i>Không có dữ liệu</div>';
             }
@@ -3000,7 +3229,7 @@
         try {
             await fetch(gasUrl, {
                 method: 'POST', mode: 'no-cors',
-                body: JSON.stringify({ action: 'updateWOStatus', token: API_TOKEN, woId: woId, status: newStatus })
+                body: JSON.stringify({ action: 'updateWOStatus', token: API_TOKEN, woId: woId, wo_id: woId, status: newStatus })
             });
             const cached = JSON.parse(localStorage.getItem('localWorkOrders') || '[]');
             const updated = cached.map(wo => wo.woId === woId ? { ...wo, status: newStatus } : wo);
@@ -3606,6 +3835,43 @@
             setTimeout(() => doLogout(), 2000);
         }
     }
+    function initFilters() {
+        const devices = Object.values(JSON.parse(localStorage.getItem('localDevicesMap') || '{}'));
+        const areas = [...new Set(devices.map(d => d.area).filter(Boolean))].sort();
+        const types = [...new Set(devices.map(d => d.equipmentType).filter(Boolean))].sort();
+        const areaSelect = document.getElementById('filterArea');
+        const typeSelect = document.getElementById('filterType');
+        areaSelect.innerHTML = '<option value="">Tất cả khu vực</option>';
+        typeSelect.innerHTML = '<option value="">Tất cả loại máy</option>';
+        areas.forEach(a => { areaSelect.innerHTML += `<option value="${a}">${a}</option>`; });
+        types.forEach(t => { typeSelect.innerHTML += `<option value="${t}">${t}</option>`; });
+    }
+
+    function applyFilters() {
+        const areaVal = document.getElementById('filterArea').value;
+        const typeVal = document.getElementById('filterType').value;
+        const listEl = document.getElementById('filteredDeviceList');
+        if (!areaVal && !typeVal) { listEl.style.display = 'none'; return; }
+
+        let devices = Object.values(JSON.parse(localStorage.getItem('localDevicesMap') || '{}'));
+        if (areaVal) devices = devices.filter(d => d.area === areaVal);
+        if (typeVal) devices = devices.filter(d => d.equipmentType === typeVal);
+
+        listEl.style.display = 'block';
+        if (devices.length === 0) {
+            listEl.innerHTML = '<div class="text-muted small text-center py-2">Không tìm thấy thiết bị</div>';
+            return;
+        }
+        listEl.innerHTML = devices.map(d => `
+            <div class="d-flex justify-content-between align-items-center py-2 border-bottom" style="cursor:pointer;" onclick="fetchData('${d.uid}')">
+                <div>
+                    <div class="fw-bold small">${d.name || d.uid}</div>
+                    <div class="text-muted" style="font-size:0.75rem;"><i class="bi bi-geo-alt me-1"></i>${d.location || '—'}</div>
+                </div>
+                <span class="badge ${d.status === 'OUT' ? 'bg-warning text-dark' : 'bg-success'} rounded-pill" style="font-size:0.65rem;">${d.status || 'IN'}</span>
+            </div>`).join('');
+    }
+
     async function handleInOut(status) {
         const uid = document.getElementById('disp_uid').innerText;
         const user = JSON.parse(localStorage.getItem('currentUser') || '{}');

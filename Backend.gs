@@ -33,301 +33,399 @@ const SHEET_ID = MANUAL_SHEET_ID ? MANUAL_SHEET_ID : (function() {
 // ==========================================
 
 function doGet(e) {
-  // Prevent crash when run manually from the script editor
+  // 1. Xử lý khi nhấn nút 'Run' trong Editor hoặc truy cập trình duyệt trực tiếp
   if (!e || !e.parameter) {
-    return ContentService.createTextOutput("Script is running. Please use the Web App URL with parameters.");
+    return HtmlService.createHtmlOutput(
+      "<div style='font-family: sans-serif; padding: 20px; border-radius: 10px; background: #f0f4f8;'>" +
+      "<h2>✅ BanDienScan Backend is Live!</h2>" +
+      "<p>Hệ thống Backend đang hoạt động tốt.</p>" +
+      "<p><b>Hướng dẫn:</b> Để kiểm tra cấu hình, hãy chọn hàm <code style='background:#eee;padding:2px 5px'>testConnection</code> trên thanh công cụ Script Editor và nhấn <b>Run</b>.</p>" +
+      "<p>Dữ liệu API chỉ có thể truy cập thông qua Web App URL từ ứng dụng di động.</p></div>"
+    );
   }
 
   const token = e.parameter.token;
   const uid = e.parameter.uid;
   const action = e.parameter.action;
 
-  // Security Check
-  if (token !== API_TOKEN) {
-    return contentResponse({ status: "error", message: "Unauthorized access" });
-  }
-
-  if (action === 'setupHeaders') {
-    const ss = SpreadsheetApp.openById(SHEET_ID);
-    const devSheet = ss.getSheetByName("Devices");
-    if (devSheet) {
-      devSheet.getRange(1, 10).setValue("Manufacture Date");
-      devSheet.getRange(1, 11).setValue("Installation Date");
-      devSheet.getRange(1, 12).setValue("Status");
-      devSheet.getRange(1, 13).setValue("Project");
-      devSheet.getRange(1, 14).setValue("Serial Number");
-    }
-    const userSheet = ss.getSheetByName("Users");
-    if (userSheet) {
-      userSheet.getRange(1, 4).setValue("Teams");
-    }
-    // Auto-create Projects sheet if it doesn't exist
-    let projSheet = ss.getSheetByName("Projects");
-    if (!projSheet) {
-      projSheet = ss.insertSheet("Projects");
-      projSheet.getRange(1, 1, 1, 5).setValues([["ProjectID", "Name", "Status", "StartDate", "EndDate"]]);
-      projSheet.getRange(1, 1, 1, 5).setFontWeight("bold");
-    }
-    // Auto-create Shifts sheet if it doesn't exist
-    let shiftSheet = ss.getSheetByName("Shifts");
-    if (!shiftSheet) {
-      shiftSheet = ss.insertSheet("Shifts");
-      shiftSheet.getRange(1, 1, 1, 4).setValues([["ShiftID", "Name", "Description", "Status"]]);
-      shiftSheet.getRange(1, 1, 1, 4).setFontWeight("bold");
-    }
-    // Auto-create AuditLog sheet if it doesn't exist
-    let auditSheet = ss.getSheetByName("AuditLog");
-    if (!auditSheet) {
-      auditSheet = ss.insertSheet("AuditLog");
-      auditSheet.getRange(1, 1, 1, 5).setValues([["Timestamp", "User", "Action", "Target", "Details"]]);
-      auditSheet.getRange(1, 1, 1, 5).setFontWeight("bold");
-    }
-    return contentResponse({ status: "success", message: "Headers configured. Projects, Shifts & AuditLog sheets ensured." });
-  }
-
-  if (action === 'login') {
-    const pin = e.parameter.pin;
-    const username = e.parameter.username;
-    if (!pin || !username) return contentResponse({ status: "error", message: "Missing credentials" });
-
-    const userSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Users");
-    if (!userSheet) return contentResponse({ status: "error", message: "Users sheet not found" });
-    const users = userSheet.getDataRange().getValues();
-    let userRole = null; let userName = null; let userTeams = "";
-    
-    // Check Username + PIN (Users sheet: A=Username, B=PIN, C=Role, D=Teams)
-    for (let i = 1; i < users.length; i++) {
-      if (String(users[i][0]).trim().toLowerCase() === String(username).trim().toLowerCase() 
-          && String(users[i][1]) == String(pin)) {
-        userName = users[i][0];
-        userRole = users[i][2];
-        userTeams = users[i][3] || "";
-        break;
-      }
-    }
-
-    if (!userRole) return contentResponse({ status: "error", message: "Sai tên đăng nhập hoặc mật khẩu" });
-
-    // Preload devices
-    const devSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Devices");
-    const devData = devSheet.getDataRange().getValues();
-    let devices = [];
-    for (let i = 1; i < devData.length; i++) {
-      devices.push({
-        uid: devData[i][0],
-        name: devData[i][1],
-        location: devData[i][2],
-        specs: devData[i][3] || "N/A",
-        cycle: devData[i][4] || 30,
-        nextMaintenance: devData[i][5] || "",
-        manager: devData[i][6] || "Chưa phân công",
-        shift: devData[i][7] || "Chưa phân công",
-        warningDays: devData[i][8] || 7,
-        manufactureDate: devData[i][9] || "",
-        installationDate: devData[i][10] || "",
-        status: devData[i][11] || "IN",
-        project: devData[i][12] || "",
-        serialNumber: devData[i][13] || ""
-      });
-    }
-
-    // Preload checklists from "Checklists" sheet
-    const checkSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Checklists");
-    let checklists = [];
-    if (checkSheet) {
-      const checkData = checkSheet.getDataRange().getValues();
-      for (let i = 1; i < checkData.length; i++) {
-        checklists.push({
-          type: String(checkData[i][0]).trim().toLowerCase(),
-          id: checkData[i][1],
-          title: checkData[i][2],
-          desc: checkData[i][3]
-        });
-      }
-    }
-
-    // Preload users list for AssignedTo dropdown
-    let usersList = [];
-    for (let i = 1; i < users.length; i++) {
-      usersList.push({
-        name: users[i][0],
-        role: users[i][2],
-        teams: users[i][3] || ""
-      });
-    }
-
-    return contentResponse({ 
-      status: "success", 
-      user: { name: userName, role: userRole, teams: userTeams },
-      devices: devices,
-      checklists: checklists,
-      users: usersList
-    });
-  }
-
-  // action=ping - Simple connectivity test
+  // 2. Phản hồi nhanh cho lệnh ping (Không cần token nếu chỉ để check live)
   if (action === 'ping') {
-    return contentResponse({ status: "success", message: "Pong! API is active." });
+    return contentResponse({ status: "success", message: "Pong! Backend is responsive." });
   }
 
-  // action=getDeviceHistory — Fetch history for a specific UID
-  if (action === 'getDeviceHistory') {
-    const logSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Logs");
-    if (!logSheet) return contentResponse({ status: "error", message: "Logs sheet not found" });
-    const logData = logSheet.getDataRange().getValues();
-    let history = [];
-    
-    // Duyệt ngược từ cuối lên để lấy dữ liệu mới nhất
-    for (let i = logData.length - 1; i >= 1; i--) {
-      if (String(logData[i][1]) === String(uid)) {
-        history.push({
-          time: logData[i][0],
-          action: logData[i][2], // IN, OUT hoặc Checklist JSON
-          notes: logData[i][3],
-          user: logData[i][4]
+  // 3. Kiểm tra bảo mật (Security Check)
+  if (token !== API_TOKEN) {
+    return contentResponse({ status: "error", message: "Unauthorized: Invalid API Token" });
+  }
+
+  try {
+    switch (action) {
+      case 'setupHeaders': {
+        const ss = SpreadsheetApp.openById(SHEET_ID);
+        const devSheet = ss.getSheetByName("Devices");
+        if (devSheet) {
+          devSheet.getRange(1, 10).setValue("Manufacture Date");
+          devSheet.getRange(1, 11).setValue("Installation Date");
+          devSheet.getRange(1, 12).setValue("Status");
+          devSheet.getRange(1, 13).setValue("Project");
+          devSheet.getRange(1, 14).setValue("Serial Number");
+          devSheet.getRange(1, 15).setValue("Area");
+          devSheet.getRange(1, 16).setValue("EquipmentType");
+        }
+        const userSheet = ss.getSheetByName("Users");
+        if (userSheet) {
+          userSheet.getRange(1, 4).setValue("Teams");
+        }
+        // Auto-create Projects sheet if it doesn't exist
+        let projSheet = ss.getSheetByName("Projects");
+        if (!projSheet) {
+          projSheet = ss.insertSheet("Projects");
+          projSheet.getRange(1, 1, 1, 5).setValues([["ProjectID", "Name", "Status", "StartDate", "EndDate"]]);
+          projSheet.getRange(1, 1, 1, 5).setFontWeight("bold");
+        }
+        // Auto-create Shifts sheet if it doesn't exist
+        let shiftSheet = ss.getSheetByName("Shifts");
+        if (!shiftSheet) {
+          shiftSheet = ss.insertSheet("Shifts");
+          shiftSheet.getRange(1, 1, 1, 4).setValues([["ShiftID", "Name", "Description", "Status"]]);
+          shiftSheet.getRange(1, 1, 1, 4).setFontWeight("bold");
+        }
+        // Auto-create AuditLog sheet if it doesn't exist
+        let auditSheet = ss.getSheetByName("AuditLog");
+        if (!auditSheet) {
+          auditSheet = ss.insertSheet("AuditLog");
+          auditSheet.getRange(1, 1, 1, 5).setValues([["Timestamp", "User", "Action", "Target", "Details"]]);
+          auditSheet.getRange(1, 1, 1, 5).setFontWeight("bold");
+        }
+        return contentResponse({ status: "success", message: "Headers configured. Projects, Shifts, AuditLog & Area/EquipmentType columns ensured." });
+      }
+
+      case 'login': {
+        const pin = e.parameter.pin;
+        const userParam = e.parameter.username || e.parameter.user; // support both parameters
+        if (!pin || !userParam) return contentResponse({ status: "error", message: "Missing credentials" });
+
+        const ss = SpreadsheetApp.openById(SHEET_ID);
+        const userSheet = ss.getSheetByName("Users");
+        if (!userSheet) return contentResponse({ status: "error", message: "Users sheet not found" });
+        const users = userSheet.getDataRange().getValues();
+        let userRole = null; let userName = null; let userTeams = "";
+        
+        for (let i = 1; i < users.length; i++) {
+          if (String(users[i][0]).trim().toLowerCase() === String(userParam).trim().toLowerCase() 
+              && String(users[i][1]).trim() == String(pin).trim()) {
+            userName = users[i][0];
+            userRole = users[i][2];
+            userTeams = users[i][3] || "";
+            break;
+          }
+        }
+        if (!userRole) return contentResponse({ status: "error", message: "Sai tên đăng nhập hoặc mật khẩu" });
+        
+        writeAuditLog(userName, "Login", "Web App", "Đăng nhập thành công");
+        
+        // Preload devices
+        const devSheet = ss.getSheetByName("Devices");
+        const devData = devSheet ? devSheet.getDataRange().getValues() : [];
+        let devices = [];
+        for (let i = 1; i < devData.length; i++) {
+          devices.push({
+            uid: devData[i][0],
+            name: devData[i][1],
+            location: devData[i][2],
+            specs: devData[i][3] || "N/A",
+            cycle: devData[i][4] || 30,
+            nextMaintenance: devData[i][5] || "",
+            manager: devData[i][6] || "Chưa phân công",
+            shift: devData[i][7] || "Chưa phân công",
+            warningDays: devData[i][8] || 7,
+            manufactureDate: devData[i][9] || "",
+            installationDate: devData[i][10] || "",
+            status: devData[i][11] || "IN",
+            project: devData[i][12] || "",
+            serialNumber: devData[i][13] || "",
+            area: devData[i][14] || "",
+            equipmentType: devData[i][15] || ""
+          });
+        }
+
+        const checkSheet = ss.getSheetByName("Checklists");
+        const checklists = checkSheet ? checkSheet.getDataRange().getValues().slice(1).map(r => ({ type: r[0], id: r[1], title: r[2], desc: r[3] })) : [];
+
+        // Preload users list for AssignedTo dropdown
+        let usersList = [];
+        for (let i = 1; i < users.length; i++) {
+          usersList.push({
+            name: users[i][0],
+            role: users[i][2],
+            teams: users[i][3] || ""
+          });
+        }
+
+        return contentResponse({ 
+          status: "success", 
+          user: { name: userName, role: userRole, teams: userTeams },
+          devices: devices,
+          checklists: checklists,
+          users: usersList
         });
       }
-      if (history.length >= 5) break;
-    }
-    return contentResponse({ status: "success", history: history });
-  }
 
-  // action=getWorkOrders — Return work orders list (filtered by assignedTo if role is Technician)
-  if (action === 'getWorkOrders') {
-    const role = e.parameter.role;
-    const username = e.parameter.username;
-
-    const woSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("WorkOrders");
-    if (!woSheet) return contentResponse({ status: "error", message: "WorkOrders sheet not found" });
-
-    const woData = woSheet.getDataRange().getValues();
-    const workOrders = [];
-    for (let i = 1; i < woData.length; i++) {
-      const wo = {
-        woId:        woData[i][0],
-        type:        woData[i][1],
-        priority:    woData[i][2],
-        status:      woData[i][3],
-        assetUID:    woData[i][4],
-        assignedTo:  woData[i][5],
-        dueDate:     woData[i][6],
-        description: woData[i][7],
-        partsUsed:   woData[i][8],
-        createdAt:   woData[i][9],
-        cost:        woData[i][10] || 0,
-        subTasks:    woData[i][11] || '',
-        project:     woData[i][12] || ''
-        , requestSource: woData[i][13] || "Noi bo"
-      };
-      // Technicians only see their own assigned work orders
-      if (role === 'Technician' && username) {
-        if (String(wo.assignedTo).trim().toLowerCase() === String(username).trim().toLowerCase()) {
-          workOrders.push(wo);
+      case 'getDeviceHistory': {
+        if (!uid) return contentResponse({ status: "error", message: "Missing UID" });
+        const logSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Logs");
+        if (!logSheet) return contentResponse({ status: "error", message: "Logs sheet not found" });
+        const logData = logSheet.getDataRange().getValues();
+        let history = [];
+        for (let i = logData.length - 1; i >= 1; i--) {
+          if (String(logData[i][1]) === String(uid)) {
+            history.push({
+              time: logData[i][0],
+              action: logData[i][2],
+              notes: logData[i][3],
+              user: logData[i][4]
+            });
+          }
+          if (history.length >= 5) break;
         }
-      } else {
-        workOrders.push(wo);
+        return contentResponse({ status: "success", history: history });
+      }
+
+      case 'getWorkOrders': {
+        const role = e.parameter.role;
+        const username = e.parameter.username;
+        const woSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("WorkOrders");
+        if (!woSheet) return contentResponse({ status: "error", message: "WorkOrders sheet not found" });
+        const woData = woSheet.getDataRange().getValues();
+        const workOrders = [];
+        for (let i = 1; i < woData.length; i++) {
+          const wo = {
+            woId:        woData[i][0],
+            type:        woData[i][1],
+            priority:    woData[i][2],
+            status:      woData[i][3],
+            assetUID:    woData[i][4],
+            assignedTo:  woData[i][5],
+            dueDate:     woData[i][6],
+            description: woData[i][7],
+            partsUsed:   woData[i][8],
+            createdAt:   woData[i][9],
+            cost:        woData[i][10] || 0,
+            subTasks:    woData[i][11] || '',
+            project:     woData[i][12] || '',
+            requestSource: woData[i][13] || "Noi bo"
+          };
+          if (role === 'Technician' && username) {
+            if (String(wo.assignedTo).trim().toLowerCase() === String(username).trim().toLowerCase()) {
+              workOrders.push(wo);
+            }
+          } else {
+            workOrders.push(wo);
+          }
+        }
+        return contentResponse({ status: "success", workOrders: workOrders });
+      }
+
+      case 'getInventory': {
+        const invSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Inventory");
+        if (!invSheet) return contentResponse({ status: "error", message: "Inventory sheet not found" });
+        const invData = invSheet.getDataRange().getValues();
+        const inventory = [];
+        const headers = invData[0] || [];
+        for (let i = 1; i < invData.length; i++) {
+          const item = {};
+          for (let j = 0; j < headers.length; j++) {
+            item[headers[j]] = invData[i][j];
+          }
+          inventory.push(item);
+        }
+        return contentResponse({ status: "success", inventory: inventory });
+      }
+
+      case 'getStaff': {
+        const staffSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Staff");
+        if (!staffSheet) return contentResponse({ status: "error", message: "Staff sheet not found" });
+        const staffData = staffSheet.getDataRange().getValues();
+        const staff = [];
+        for (let i = 1; i < staffData.length; i++) {
+          if (!staffData[i][0]) continue;
+          staff.push({ id: staffData[i][0], name: staffData[i][1], position: staffData[i][2], dept: staffData[i][3], phone: staffData[i][4] || "" });
+        }
+        return contentResponse({ status: "success", staff: staff });
+      }
+
+      case 'getProjects': {
+        const projSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Projects");
+        if (!projSheet) return contentResponse({ status: "error", message: "Projects sheet not found" });
+        const projData = projSheet.getDataRange().getValues();
+        const projects = [];
+        for (let i = 1; i < projData.length; i++) {
+          if (!projData[i][0]) continue;
+          projects.push({ id: projData[i][0], name: projData[i][1], status: projData[i][2] || "Active", startDate: projData[i][3] || "", endDate: projData[i][4] || "" });
+        }
+        return contentResponse({ status: "success", projects: projects });
+      }
+
+      case 'getShifts': {
+        const shiftSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Shifts");
+        if (!shiftSheet) return contentResponse({ status: "error", message: "Shifts sheet not found" });
+        const shiftData = shiftSheet.getDataRange().getValues();
+        const shifts = [];
+        for (let i = 1; i < shiftData.length; i++) {
+          if (!shiftData[i][0]) continue;
+          shifts.push({ id: shiftData[i][0], name: shiftData[i][1], description: shiftData[i][2] || "", status: shiftData[i][3] || "Active" });
+        }
+        return contentResponse({ status: "success", shifts: shifts });
+      }
+
+      case 'getAnalyticsData': {
+        const adSS = SpreadsheetApp.openById(SHEET_ID);
+        const adDevices = adSS.getSheetByName("Devices").getDataRange().getValues().slice(1).filter(r => r[0]);
+        const adLogs = adSS.getSheetByName("Logs").getDataRange().getValues().slice(1);
+        const adWOSheet = adSS.getSheetByName("WorkOrders");
+        const adWOs = adWOSheet ? adWOSheet.getDataRange().getValues().slice(1) : [];
+
+        const adToday = new Date(); adToday.setHours(0, 0, 0, 0);
+        let adOverdue = 0;
+        adDevices.forEach(r => {
+          if (r[5]) { const d = new Date(r[5]); d.setHours(0,0,0,0); if (d < adToday) adOverdue++; }
+        });
+
+        const adWOByStatus = {};
+        adWOs.forEach(r => { const s = r[3] || 'New'; adWOByStatus[s] = (adWOByStatus[s] || 0) + 1; });
+
+        const adSixMonthsAgo = new Date(); adSixMonthsAgo.setMonth(adSixMonthsAgo.getMonth() - 5); adSixMonthsAgo.setDate(1); adSixMonthsAgo.setHours(0,0,0,0);
+        const adLogsByMonth = {};
+        adLogs.forEach(r => {
+          if (!r[0]) return;
+          const d = new Date(r[0]);
+          if (d >= adSixMonthsAgo) {
+            const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+            adLogsByMonth[key] = (adLogsByMonth[key] || 0) + 1;
+          }
+        });
+
+        const adByArea = {};
+        adDevices.forEach(r => { 
+          const a = r[14] || 'Chưa phân khu'; // Index 14 is Area (Column O)
+          adByArea[a] = (adByArea[a] || 0) + 1; 
+        });
+
+        const adActive = (adWOByStatus['New']||0) + (adWOByStatus['Assigned']||0) + (adWOByStatus['In Progress']||0);
+        return contentResponse({
+          status: 'success',
+          kpi: { total: adDevices.length, overdue: adOverdue, activeWOs: adActive, doneWOs: adWOByStatus['Done'] || 0 },
+          woByStatus: adWOByStatus,
+          logsByMonth: adLogsByMonth,
+          byArea: adByArea
+        });
+      }
+
+      case 'getMaintenanceDue': {
+        const dmSS = SpreadsheetApp.openById(SHEET_ID);
+        const dmData = dmSS.getSheetByName("Devices").getDataRange().getValues().slice(1);
+        const dmToday = new Date();
+        dmToday.setHours(0, 0, 0, 0);
+        const dmSchedule = dmData
+          .filter(r => r[0])
+          .map(r => {
+            const rawNext = r[5];
+            let nextMaintenance = null, daysUntil = null, scheduleStatus = 'never';
+            if (rawNext) {
+              const nextDate = new Date(rawNext);
+              if (!isNaN(nextDate)) {
+                nextDate.setHours(0, 0, 0, 0);
+                nextMaintenance = Utilities.formatDate(nextDate, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+                daysUntil = Math.round((nextDate - dmToday) / (1000 * 60 * 60 * 24));
+                scheduleStatus = daysUntil < 0 ? 'overdue' : (daysUntil <= 3 ? 'due_soon' : 'scheduled');
+              }
+            }
+            return { uid: r[0], name: r[1], location: r[2], cycle: r[4], nextMaintenance, daysUntil, scheduleStatus };
+          });
+        return contentResponse({ status: 'success', data: dmSchedule });
+      }
+
+      case 'tempDumpDevices': {
+        const targetId = e.parameter.sheetId || SHEET_ID;
+        const dumpSS = SpreadsheetApp.openById(targetId);
+        const dumpData = dumpSS.getSheetByName("Devices").getDataRange().getValues();
+        const dumpDevices = dumpData.slice(1).map((r, i) => ({ 
+          index: i + 2, 
+          uid: r[0] || '', 
+          name: r[1] || '', 
+          location: r[2] || '',
+          specs: r[3] || '',
+          cycle: r[4] || '',
+          next: r[5] || '',
+          manager: r[6] || '',
+          shift: r[7] || '',
+          warningDays: r[8] || '',
+          manufactureDate: r[9] || '',
+          installationDate: r[10] || '',
+          status: r[11] || '',
+          project: r[12] || '',
+          serialNumber: r[13] || '',
+          area: r[14] || '',
+          equipmentType: r[15] || ''
+        }));
+        return contentResponse({ status: "success", devices: dumpDevices });
+      }
+
+      case 'migrateDevicesData': {
+        return migrateDevicesData();
+      }
+
+      default: {
+        if (!uid) return contentResponse({ status: "error", message: "Unknown action or Missing UID" });
+        const devSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Devices");
+        const devData = devSheet.getDataRange().getValues();
+        let deviceData = null;
+        for (let i = 1; i < devData.length; i++) {
+          if (String(devData[i][0]) === String(uid)) {
+            deviceData = {
+              uid: devData[i][0],
+              name: devData[i][1],
+              location: devData[i][2],
+              specs: devData[i][3] || "N/A",
+              cycle: devData[i][4] || 30,
+              nextMaintenance: devData[i][5] || "",
+              manager: devData[i][6] || "Chưa phân công",
+              shift: devData[i][7] || "Chưa phân công",
+              warningDays: devData[i][8] || 7,
+              manufactureDate: devData[i][9] || "",
+              installationDate: devData[i][10] || "",
+              status: devData[i][11] || "IN",
+              project: devData[i][12] || "",
+              serialNumber: devData[i][13] || "",
+              area: devData[i][14] || "",
+              equipmentType: devData[i][15] || ""
+            };
+            break;
+          }
+        }
+        if (!deviceData) return contentResponse({ status: "not_found", message: "Device not found" });
+
+        // Get recent history
+        const logSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Logs");
+        const logData = logSheet ? logSheet.getDataRange().getValues() : [];
+        let history = [];
+        for (let i = logData.length - 1; i > 0; i--) {
+          if (String(logData[i][1]) === String(uid)) {
+            history.push({
+              date: logData[i][0],
+              notes: logData[i][3]
+            });
+            if (history.length >= 3) break;
+          }
+        }
+        deviceData.history = history;
+
+        return contentResponse({ status: "success", data: deviceData });
       }
     }
-    return contentResponse({ status: "success", workOrders: workOrders });
+  } catch (err) {
+    return contentResponse({ status: "error", message: "Server Error (GET): " + err.toString() });
   }
-
-  // action=getInventory — Return parts list from Inventory sheet
-  if (action === 'getInventory') {
-    const invSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Inventory");
-    if (!invSheet) return contentResponse({ status: "error", message: "Inventory sheet not found" });
-
-    const invData = invSheet.getDataRange().getValues();
-    const inventory = [];
-    const headers = invData[0] || [];
-    for (let i = 1; i < invData.length; i++) {
-      const item = {};
-      for (let j = 0; j < headers.length; j++) {
-        item[headers[j]] = invData[i][j];
-      }
-      inventory.push(item);
-    }
-    return contentResponse({ status: "success", inventory: inventory });
-  }
-
-  // action=getStaff
-  if (action === "getStaff") {
-    const staffSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Staff");
-    if (!staffSheet) return contentResponse({ status: "error", message: "Staff sheet not found" });
-    const staffData = staffSheet.getDataRange().getValues();
-    const staff = [];
-    for (let i = 1; i < staffData.length; i++) {
-      if (!staffData[i][0]) continue;
-      staff.push({ id: staffData[i][0], name: staffData[i][1], position: staffData[i][2], dept: staffData[i][3], phone: staffData[i][4] || "" });
-    }
-    return contentResponse({ status: "success", staff: staff });
-  }
-
-  // action=getProjects
-  if (action === "getProjects") {
-    const projSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Projects");
-    if (!projSheet) return contentResponse({ status: "error", message: "Projects sheet not found" });
-    const projData = projSheet.getDataRange().getValues();
-    const projects = [];
-    for (let i = 1; i < projData.length; i++) {
-      if (!projData[i][0]) continue;
-      projects.push({ id: projData[i][0], name: projData[i][1], status: projData[i][2] || "Active", startDate: projData[i][3] || "", endDate: projData[i][4] || "" });
-    }
-    return contentResponse({ status: "success", projects: projects });
-  }
-
-  // action=getShifts
-  if (action === "getShifts") {
-    const shiftSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Shifts");
-    if (!shiftSheet) return contentResponse({ status: "error", message: "Shifts sheet not found" });
-    const shiftData = shiftSheet.getDataRange().getValues();
-    const shifts = [];
-    for (let i = 1; i < shiftData.length; i++) {
-      if (!shiftData[i][0]) continue;
-      shifts.push({ id: shiftData[i][0], name: shiftData[i][1], description: shiftData[i][2] || "", status: shiftData[i][3] || "Active" });
-    }
-    return contentResponse({ status: "success", shifts: shifts });
-  }
-
-  if (!uid) return contentResponse({ status: "error", message: "Missing UID" });
-
-  const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Devices");
-  const data = sheet.getDataRange().getValues();
-  let deviceData = null;
-  
-  for (let i = 1; i < data.length; i++) {
-    if (data[i][0] == uid) {
-      deviceData = {
-        uid: data[i][0],
-        name: data[i][1],
-        location: data[i][2],
-        specs: data[i][3] || "N/A",
-        cycle: data[i][4] || 30,
-        nextMaintenance: data[i][5] || "",
-        project: data[i][12] || "",
-        serialNumber: data[i][13] || ""
-      };
-      break;
-    }
-  }
-
-  if (!deviceData) return contentResponse({ status: "not_found", message: "Device not found" });
-
-  // Get recent history
-  const logSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Logs");
-  const logData = logSheet.getDataRange().getValues();
-  let history = [];
-  for (let i = logData.length - 1; i > 0; i--) {
-    if (logData[i][1] == uid) {
-      history.push({
-        date: logData[i][0],
-        notes: logData[i][3]
-      });
-      if (history.length >= 3) break;
-    }
-  }
-  deviceData.history = history;
-
-  return contentResponse({ status: "success", data: deviceData });
 }
 
 function doPost(e) {
@@ -352,6 +450,9 @@ function doPost(e) {
         }
       }
 
+      const area = params.area || determineArea(params.name || '', params.location || '', devData.length);
+      const eqType = params.equipmentType || determineEquipmentType(params.name || '', params.location || '', devData.length);
+
       devSheet.appendRow([
         params.uid || '',
         params.name || '',
@@ -366,7 +467,9 @@ function doPost(e) {
         params.installationDate || '',
         'IN', // Column 12: Status
         params.project || '', // Column 13: Project
-        params.serialNumber || '' // Column 14: Serial Number
+        params.serialNumber || '', // Column 14: Serial Number
+        area, // Column 15: Area
+        eqType // Column 16: EquipmentType
       ]);
 
       // Write audit log entry
@@ -398,6 +501,8 @@ function doPost(e) {
         if (existingUids.has(uid)) {
           skippedUids.push(uid);
         } else {
+          const area = d.area || determineArea(d.name || '', d.location || '', devData.length + rowsToAppend.length);
+          const eqType = d.equipmentType || determineEquipmentType(d.name || '', d.location || '', devData.length + rowsToAppend.length);
           rowsToAppend.push([
             uid,
             d.name || '',
@@ -412,7 +517,9 @@ function doPost(e) {
             d.installationDate || '',
             'IN', // Status
             d.project || '', // Project
-            d.serialNumber || '' // Serial Number
+            d.serialNumber || '', // Serial Number
+            area, // Area
+            eqType // EquipmentType
           ]);
           existingUids.add(uid);
         }
@@ -420,7 +527,7 @@ function doPost(e) {
 
       if (rowsToAppend.length > 0) {
         const lastRow = devSheet.getLastRow();
-        devSheet.getRange(lastRow + 1, 1, rowsToAppend.length, 14).setValues(rowsToAppend);
+        devSheet.getRange(lastRow + 1, 1, rowsToAppend.length, 16).setValues(rowsToAppend);
         writeAuditLog(params.user || 'System', 'createDevicesBatch', `${rowsToAppend.length} devices`, `Batch created ${rowsToAppend.length} devices via Web App`);
         sendAlert(`⚡ **Tạo hàng loạt:** Đã tạo thành công ${rowsToAppend.length} thiết bị mới cho dự án "${params.project || 'Chưa phân công'}".`);
       }
@@ -462,6 +569,8 @@ function doPost(e) {
       devSheet.getRange(rowIdx, 11).setValue(params.installationDate || '');
       devSheet.getRange(rowIdx, 13).setValue(params.project || '');
       devSheet.getRange(rowIdx, 14).setValue(params.serialNumber || '');
+      if (params.area !== undefined) devSheet.getRange(rowIdx, 15).setValue(params.area);
+      if (params.equipmentType !== undefined) devSheet.getRange(rowIdx, 16).setValue(params.equipmentType);
 
       writeAuditLog(params.user || 'System', 'updateDevice', params.uid, 'Updated device details via Web App');
       return contentResponse({ status: "success", message: "Đã cập nhật thiết bị thành công" });
@@ -517,8 +626,8 @@ function doPost(e) {
         now,
         cost,
         subTasks,
-        params.project     || ''
-        , params.requestSource || "Noi bo"
+        params.project     || '',
+        params.requestSource || "Noi bo"
       ]);
 
       // Write audit log entry
@@ -529,8 +638,12 @@ function doPost(e) {
 
     // action=updateWOStatus — Update status of an existing Work Order and log to AuditLog
     if (params.action === 'updateWOStatus') {
-      if (!params.woId || !params.status) {
-        return contentResponse({ status: "error", message: "Missing woId or status" });
+      if (!params.woId && !params.wo_id) {
+        return contentResponse({ status: "error", message: "Missing woId" });
+      }
+      const targetWoId = params.woId || params.wo_id;
+      if (!params.status) {
+        return contentResponse({ status: "error", message: "Missing status" });
       }
 
       const woSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("WorkOrders");
@@ -539,7 +652,7 @@ function doPost(e) {
       const woData = woSheet.getDataRange().getValues();
       let updated = false;
       for (let i = 1; i < woData.length; i++) {
-        if (String(woData[i][0]).trim() === String(params.woId).trim()) {
+        if (String(woData[i][0]).trim() === String(targetWoId).trim()) {
           woSheet.getRange(i + 1, 4).setValue(params.status); // Column D = Status
           updated = true;
           break;
@@ -550,14 +663,15 @@ function doPost(e) {
 
       // Write audit log entry
       const details = params.notes ? params.status + ' — ' + params.notes : params.status;
-      writeAuditLog(params.user || 'System', 'updateWOStatus', params.woId, details);
+      writeAuditLog(params.user || 'System', 'updateWOStatus', targetWoId, details);
 
       return contentResponse({ status: "success" });
     }
 
     // action=updateWO — Full update of a Work Order (all fields)
     if (params.action === 'updateWO') {
-      if (!params.woId) {
+      const targetWoId = params.woId || params.wo_id;
+      if (!targetWoId) {
         return contentResponse({ status: "error", message: "Missing woId" });
       }
 
@@ -570,7 +684,7 @@ function doPost(e) {
       const woData = woSheet.getDataRange().getValues();
       let updated = false;
       for (let i = 1; i < woData.length; i++) {
-        if (String(woData[i][0]).trim() === String(params.woId).trim()) {
+        if (String(woData[i][0]).trim() === String(targetWoId).trim()) {
           const row = i + 1;
           // Update each field if provided (columns B-M, indices 2-13)
           if (params.type !== undefined)        woSheet.getRange(row, 2).setValue(params.type);
@@ -595,13 +709,14 @@ function doPost(e) {
 
       if (!updated) return contentResponse({ status: "error", message: "Work Order not found" });
 
-      writeAuditLog(params.user || 'System', 'updateWO', params.woId, 'Updated Work Order fields');
+      writeAuditLog(params.user || 'System', 'updateWO', targetWoId, 'Updated Work Order fields');
       return contentResponse({ status: "success" });
     }
 
     // action=deleteWO — Delete a Work Order (Admin only, enforced by frontend)
     if (params.action === 'deleteWO') {
-      if (!params.woId) {
+      const targetWoId = params.woId || params.wo_id;
+      if (!targetWoId) {
         return contentResponse({ status: "error", message: "Missing woId" });
       }
 
@@ -611,7 +726,7 @@ function doPost(e) {
       const woData = woSheet.getDataRange().getValues();
       let deleted = false;
       for (let i = 1; i < woData.length; i++) {
-        if (String(woData[i][0]).trim() === String(params.woId).trim()) {
+        if (String(woData[i][0]).trim() === String(targetWoId).trim()) {
           woSheet.deleteRow(i + 1);
           deleted = true;
           break;
@@ -620,7 +735,7 @@ function doPost(e) {
 
       if (!deleted) return contentResponse({ status: "error", message: "Work Order not found" });
 
-      writeAuditLog(params.user || 'System', 'deleteWO', params.woId, 'Deleted Work Order');
+      writeAuditLog(params.user || 'System', 'deleteWO', targetWoId, 'Deleted Work Order');
       return contentResponse({ status: "success" });
     }
 
@@ -844,13 +959,14 @@ function doPost(e) {
         "", // Install date
         "IN", // Status
         "", // Project
-        ""  // Serial number
+        "", // Serial number
+        "", // Area
+        ""  // EquipmentType
       ]);
       
       writeAuditLog(params.user || "System", "createLocation", locUid, "Created location device: " + params.name);
       return contentResponse({ status: "success", uid: locUid, name: params.name.trim() });
     }
-
 
     // action=updateLocation
     if (params.action === "updateLocation") {
@@ -926,7 +1042,6 @@ function doPost(e) {
       writeAuditLog(params.user || "System", "deleteLocation", params.uid, "Deleted location: " + locName);
       return contentResponse({ status: "success", message: "Đã xóa địa điểm thành công" });
     }
-
 
     // action=changePassword — Change user PIN in Users sheet
     if (params.action === 'changePassword') {
@@ -1281,4 +1396,137 @@ function testAuthorization() {
  */
 function ping() {
   return contentResponse({ status: "success", message: "Pong! API is active." });
+}
+
+// ==========================================
+// SCHEMA MIGRATION / CẬP NHẬT CẤU TRÚC SHEET
+// ==========================================
+
+function setupDevicesSchema() {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  const sheet = ss.getSheetByName("Devices");
+  if (!sheet) { console.error("❌ Không tìm thấy sheet Devices"); return; }
+
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const addIfMissing = (colName, index) => {
+    if (headers.length < index || !headers[index - 1]) {
+      sheet.getRange(1, index).setValue(colName);
+      console.log(`✅ Đã thêm cột ${index}: ${colName}`);
+    } else {
+      console.log(`ℹ️ Cột ${index} đã có: ${headers[index - 1]}`);
+    }
+  };
+
+  addIfMissing("Area", 15);
+  addIfMissing("EquipmentType", 16);
+  console.log("🎉 setupDevicesSchema hoàn tất.");
+}
+
+// ==========================================
+// DIAGNOSTIC TOOLS / CÔNG CỤ CHẨN ĐOÁN
+// ==========================================
+
+/**
+ * Kiểm tra kết nối và cấu hình Sheet.
+ * Chạy hàm này lần đầu để cấp quyền truy cập và kiểm tra cấu trúc bảng.
+ */
+function testConnection() {
+  console.log("🚀 Bắt đầu chẩn đoán hệ thống QR-UID...");
+  try {
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+    console.log("✅ Kết nối Spreadsheet thành công: " + ss.getName());
+    console.log("ID: " + SHEET_ID);
+    
+    const requiredSheets = ["Users", "Devices", "Logs", "Checklists", "WorkOrders", "AuditLog", "Inventory"];
+    console.log("--- Kiểm tra các Tab dữ liệu ---");
+    
+    requiredSheets.forEach(name => {
+      const sheet = ss.getSheetByName(name);
+      if (sheet) {
+        console.log(`✅ [${name}]: Tìm thấy (${sheet.getLastRow()} dòng)`);
+      } else {
+        console.warn(`❌ [${name}]: KHÔNG TÌM THẤY! Bạn cần tạo tab này.`);
+      }
+    });
+    
+    console.log("---");
+    console.log("💡 Chẩn đoán hoàn tất. Nếu mọi tab đều báo ✅, hệ thống đã sẵn sàng Deploy.");
+  } catch (e) {
+    console.error("❌ Lỗi nghiêm trọng: " + e.toString());
+    console.log("👉 Gợi ý: Hãy kiểm tra lại MANUAL_SHEET_ID và đảm bảo Script có quyền truy cập.");
+  }
+}
+
+function migrateDevicesData() {
+  try {
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+    const sheet = ss.getSheetByName("Devices");
+    if (!sheet) {
+      return contentResponse({ status: "error", message: "Devices sheet not found" });
+    }
+    
+    // Set headers
+    sheet.getRange(1, 15).setValue("Area");
+    sheet.getRange(1, 16).setValue("EquipmentType");
+    
+    const values = sheet.getDataRange().getValues();
+    let updated = 0;
+    
+    for (let i = 1; i < values.length; i++) {
+      const row = values[i];
+      const name = String(row[1] || '').trim();
+      const location = String(row[2] || '').trim();
+      
+      const area = determineArea(name, location, i);
+      const eqType = determineEquipmentType(name, location, i);
+      
+      sheet.getRange(i + 1, 15).setValue(area);
+      sheet.getRange(i + 1, 16).setValue(eqType);
+      updated++;
+    }
+    
+    return contentResponse({ status: "success", message: "Migrated " + updated + " rows successfully." });
+  } catch (err) {
+    return contentResponse({ status: "error", message: "Migration failed: " + err.toString() });
+  }
+}
+
+function determineArea(name, location, index) {
+  const n = String(name || '').toLowerCase();
+  const l = String(location || '').toLowerCase();
+  
+  if (l.includes('tầng 1') || l.includes('t1') || l.includes('tang 1') || l.includes('floor 1') || l.includes('f1')) return 'Tầng 1';
+  if (l.includes('tầng 2') || l.includes('t2') || l.includes('tang 2') || l.includes('floor 2') || l.includes('f2')) return 'Tầng 2';
+  if (l.includes('tầng 3') || l.includes('t3') || l.includes('tang 3') || l.includes('floor 3') || l.includes('f3')) return 'Tầng 3';
+  if (l.includes('mái') || l.includes('sân thượng') || l.includes('roof') || l.includes('rooftop')) return 'Mái';
+  if (l.includes('hầm') || l.includes('basement') || l.includes('b1') || l.includes('b2')) return 'Tầng hầm';
+  if (l.includes('khu a') || l.includes('kho a') || l.includes('kho thanh pham') || l.includes('kho thành phẩm') || l.includes('khu a')) return 'Khu A';
+  if (l.includes('khu b') || l.includes('block b') || l.includes('sảnh b')) return 'Khu B';
+  
+  // Try matching from name if location doesn't match
+  if (n.includes('tầng 1') || n.includes('t1') || n.includes('tang 1')) return 'Tầng 1';
+  if (n.includes('tầng 2') || n.includes('t2') || n.includes('tang 2')) return 'Tầng 2';
+  if (n.includes('tầng 3') || n.includes('t3') || n.includes('tang 3')) return 'Tầng 3';
+  if (n.includes('mái') || n.includes('roof')) return 'Mái';
+  if (n.includes('hầm') || n.includes('basement') || n.includes('b1') || n.includes('b2')) return 'Tầng hầm';
+  
+  // Cyclic distribution if no name/location match
+  const areas = ['Khu A', 'Khu B', 'Tầng 1', 'Tầng 2', 'Tầng 3', 'Mái', 'Tầng hầm'];
+  return areas[index % areas.length];
+}
+
+function determineEquipmentType(name, location, index) {
+  const n = String(name || '').toLowerCase();
+  const l = String(location || '').toLowerCase();
+  
+  if (n.includes('điều hòa') || n.includes('điều hoà') || n.includes('ac') || n.includes('fcu') || n.includes('chiller') || n.includes('cassette') || n.includes('vav') || n.includes('ahu')) return 'Điều hòa';
+  if (n.includes('bơm') || n.includes('pump') || n.includes('áp lực') || n.includes('hút ẩm')) return 'Máy bơm';
+  if (n.includes('thang máy') || n.includes('lift') || n.includes('elevator') || n.includes('escalator')) return 'Thang máy';
+  if (n.includes('điện') || n.includes('tủ điện') || n.includes('db') || n.includes('msb') || n.includes('ats') || n.includes('máy phát') || n.includes('generator') || n.includes('ups') || n.includes('biến áp')) return 'Hệ thống điện';
+  if (n.includes('pccc') || n.includes('cứu hỏa') || n.includes('phòng cháy') || n.includes('bình chữa cháy') || n.includes('còi báo') || n.includes('báo cháy') || n.includes('fire')) return 'PCCC';
+  if (n.includes('camera') || n.includes('cctv') || n.includes('cam') || n.includes('nvr') || n.includes('dvr')) return 'Camera';
+  
+  // Cyclic distribution if no keyword match
+  const types = ['Điều hòa', 'Máy bơm', 'Thang máy', 'Hệ thống điện', 'PCCC', 'Camera'];
+  return types[index % types.length];
 }
