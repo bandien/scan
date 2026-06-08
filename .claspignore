@@ -8,3 +8,10 @@ docs/**
 *.url
 *.md
 *.ps1
+Backend.gs
+Backend.gs.bak
+
+# Frontend JS modules (GitHub Pages only — không push lên GAS)
+js/**
+style.css
+*.jsx
