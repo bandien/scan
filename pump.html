@@ -157,6 +157,11 @@
                 <label class="info-label">Họ và tên người vận hành <span class="text-danger">*</span></label>
                 <input type="text" id="operatorInput" class="form-control form-control-custom" placeholder="Nhập tên nhân viên (VD: Nguyễn Văn A)">
             </div>
+
+            <div class="mb-3">
+                <label class="info-label">Thời gian thực hiện thao tác <span class="text-primary fw-normal text-xs">(Đổi nếu quét mã bù)</span></label>
+                <input type="datetime-local" id="eventTimeInput" class="form-control form-control-custom">
+            </div>
             
             <div class="mb-4">
                 <label class="info-label">Ghi chú kiểm tra (Không bắt buộc)</label>
@@ -210,6 +215,12 @@
     let lastEvent = null;
     let timerInterval = null;
 
+    function resetToCurrentTime() {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('eventTimeInput').value = now.toISOString().slice(0, 16);
+    }
+
     window.onload = function() {
         const urlParams = new URLSearchParams(window.location.search);
         currentPumpId = urlParams.get('pumpId') || urlParams.get('id') || "1";
@@ -218,6 +229,7 @@
         const savedOp = localStorage.getItem('cmms_op_name');
         if (savedOp) document.getElementById('operatorInput').value = savedOp;
 
+        resetToCurrentTime();
         loadPumpData();
     };
 
@@ -318,6 +330,7 @@
     async function submitAction(action) {
         const operator = document.getElementById('operatorInput').value.trim();
         const notes = document.getElementById('notesInput').value.trim();
+        const customTimeVal = document.getElementById('eventTimeInput').value;
 
         if (!operator) {
             alert('Vui lòng nhập tên người vận hành!');
@@ -327,10 +340,12 @@
         localStorage.setItem('cmms_op_name', operator);
         showLoading(true);
 
-        const now = new Date();
+        const selectedDate = customTimeVal ? new Date(customTimeVal) : new Date();
+        const timestampIso = selectedDate.toISOString();
+
         const eventData = {
             action: action,
-            timestamp: now.toISOString(),
+            timestamp: timestampIso,
             operator: operator,
             notes: notes
         };
@@ -351,7 +366,7 @@
                 eventAction: action,
                 operator: operator,
                 notes: notes,
-                timestamp: now.toISOString()
+                timestamp: timestampIso
             };
 
             fetch(GAS_URL, {
@@ -364,12 +379,14 @@
             currentStatus = nextStatus;
             lastEvent = eventData;
 
+            const formattedTime = selectedDate.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
             const msg = action === 'START' 
-                ? `🚀 Đã ghi nhận BẬT máy bơm ${currentPump.name} thành công!` 
-                : `🛑 Đã TẮT máy bơm thành công và lưu nhật ký!`;
+                ? `🚀 Đã ghi nhận BẬT máy bơm ${currentPump.name} lúc ${formattedTime} thành công!` 
+                : `🛑 Đã TẮT máy bơm lúc ${formattedTime} thành công và lưu nhật ký!`;
 
             showAlert('success', msg);
             document.getElementById('notesInput').value = '';
+            resetToCurrentTime();
         } catch (err) {
             showAlert('warning', 'Đã lưu thao tác trên thiết bị.');
         } finally {
