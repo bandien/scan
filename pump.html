@@ -8,83 +8,92 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
         :root {
-            --bg-color: #0b1329;
-            --card-bg: rgba(23, 32, 60, 0.9);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --accent-green: #10b981;
-            --accent-red: #ef4444;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-sub: #475569;
+            --border-color: #e2e8f0;
+            --accent-green: #059669;
+            --accent-red: #dc2626;
         }
         body {
             background-color: var(--bg-color);
-            color: #f8fafc;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             min-height: 100vh;
             padding-bottom: 40px;
         }
         .app-shell { max-width: 440px; margin: 0 auto; padding: 16px; }
+        
         .header-bar {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 12px 16px; background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid var(--border-color);
-            margin-bottom: 20px;
+            padding: 14px 18px; background: #ffffff;
+            border-radius: 20px; border: 2px solid var(--border-color);
+            margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);
         }
+        
         .card-custom {
             background: var(--card-bg); border-radius: 24px;
-            border: 1px solid var(--border-color); padding: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3); margin-bottom: 20px;
-            backdrop-filter: blur(12px);
+            border: 2px solid var(--border-color); padding: 22px;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05); margin-bottom: 20px;
         }
+        
         .badge-status {
-            padding: 6px 14px; border-radius: 50px; font-weight: 700; font-size: 0.75rem;
-            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 16px; border-radius: 50px; font-weight: 800; font-size: 0.85rem;
+            display: inline-flex; align-items: center; gap: 8px; letter-spacing: 0.5px;
         }
-        .badge-running { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
-        .badge-stopped { background: rgba(100, 116, 139, 0.2); color: #94a3b8; border: 1px solid rgba(100, 116, 139, 0.4); }
+        .badge-running { background: #dcfce7; color: #166534; border: 2px solid #86efac; }
+        .badge-stopped { background: #f1f5f9; color: #475569; border: 2px solid #cbd5e1; }
         
         .btn-action-start {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white; font-weight: 900; padding: 18px; border-radius: 20px; border: none;
-            width: 100%; font-size: 1.1rem; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
-            transition: all 0.2s;
+            background: #059669; color: white; font-weight: 900; padding: 20px;
+            border-radius: 22px; border: none; width: 100%; font-size: 1.2rem;
+            box-shadow: 0 10px 20px rgba(5, 150, 105, 0.25); transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
         }
         .btn-action-stop {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: white; font-weight: 900; padding: 18px; border-radius: 20px; border: none;
-            width: 100%; font-size: 1.1rem; box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
-            transition: all 0.2s;
+            background: #dc2626; color: white; font-weight: 900; padding: 20px;
+            border-radius: 22px; border: none; width: 100%; font-size: 1.2rem;
+            box-shadow: 0 10px 20px rgba(220, 38, 38, 0.25); transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
         }
         .btn-action-start:active, .btn-action-stop:active { transform: scale(0.96); }
         
         .timer-box {
-            background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 16px; padding: 12px; text-align: center; margin-top: 15px;
+            background: #ecfdf5; border: 2px solid #a7f3d0;
+            border-radius: 18px; padding: 16px; text-align: center; margin-top: 18px;
         }
-        .timer-val { font-family: monospace; font-size: 1.5rem; font-weight: 800; color: #6ee7b7; }
+        .timer-val { font-family: monospace; font-size: 1.8rem; font-weight: 900; color: #047857; }
         
         .form-control-custom {
-            background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-color);
-            color: white; border-radius: 14px; padding: 12px 16px; font-size: 0.9rem;
+            background: #f8fafc; border: 2px solid #cbd5e1;
+            color: #0f172a; border-radius: 16px; padding: 14px 18px; font-size: 1rem;
+            font-weight: 600;
         }
         .form-control-custom:focus {
-            background: rgba(15, 23, 42, 0.95); border-color: #10b981; color: white; box-shadow: none;
+            background: #ffffff; border-color: #059669; color: #0f172a; box-shadow: none;
         }
+        .form-control-custom::placeholder { color: #94a3b8; font-weight: 400; }
+        
+        .info-label { font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 6px; }
+        .stat-card { background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0; padding: 12px; text-align: center; }
     </style>
 </head>
 <body>
 
 <div class="app-shell">
-    <!-- Header -->
+    <!-- Header Bar -->
     <div class="header-bar">
-        <div class="d-flex align-items-center gap-2">
-            <div class="bg-primary text-white rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+        <div class="d-flex align-items-center gap-2.5">
+            <div class="bg-primary text-white rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; font-size: 1.2rem;">
                 <i class="bi bi-water"></i>
             </div>
             <div>
-                <div class="fw-bold text-uppercase text-muted" style="font-size: 0.65rem; tracking-wider: 1px;">BanDienScan x CMMS Cloud</div>
-                <div class="fw-bold text-light" style="font-size: 0.85rem;">Giám Sát Bơm 1-Touch</div>
+                <div class="fw-bold text-uppercase text-primary" style="font-size: 0.7rem; letter-spacing: 1px;">BanDienScan x CMMS</div>
+                <div class="fw-black text-dark" style="font-size: 0.95rem;">Giám Sát Bơm 1-Touch</div>
             </div>
         </div>
-        <button class="btn btn-sm btn-outline-light rounded-circle" onclick="loadPumpData()"><i class="bi bi-arrow-clockwise"></i></button>
+        <button class="btn btn-light border-2 rounded-circle shadow-sm" onclick="loadPumpData()"><i class="bi bi-arrow-clockwise text-dark fw-bold"></i></button>
     </div>
 
     <!-- Alert Box -->
@@ -92,58 +101,66 @@
 
     <!-- Main Loading -->
     <div id="loadingState" class="text-center py-5">
-        <div class="spinner-border text-success mb-3" role="status"></div>
-        <div class="text-muted small">Đang kết nối dữ liệu máy bơm...</div>
+        <div class="spinner-border text-success mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+        <div class="fw-bold text-slate-700">Đang nhận diện máy bơm...</div>
     </div>
 
     <!-- Main App Content -->
     <div id="appContent" style="display: none;">
         <!-- Pump Details Card -->
         <div class="card-custom">
-            <div class="d-flex justify-content-between align-items-start mb-2">
+            <div class="d-flex justify-content-between align-items-start mb-3">
                 <div>
-                    <span class="badge bg-secondary mb-2" id="pumpIdBadge">ID: #--</span>
-                    <h3 class="fw-bold text-white mb-1" id="pumpName">--</h3>
-                    <div class="text-muted small" id="pumpSource"><i class="bi bi-droplet-fill text-info me-1"></i> Nguồn: --</div>
+                    <span class="badge bg-dark px-2.5 py-1.5 rounded-2 font-mono fw-bold mb-2" style="font-size: 0.75rem;" id="pumpIdBadge">ID: #--</span>
+                    <h2 class="fw-extrabold text-dark mb-1" style="font-size: 1.45rem; leading-trim: both;" id="pumpName">--</h2>
+                    <div class="fw-bold text-secondary mt-1" style="font-size: 0.9rem;" id="pumpSource">
+                        <i class="bi bi-droplet-fill text-primary me-1"></i> Nguồn: --
+                    </div>
                 </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="text-uppercase fw-bold text-muted small">Trạng thái hiện tại:</span>
                 <div id="statusBadgeContainer">
                     <!-- Dynamic Badge -->
                 </div>
             </div>
 
-            <div class="row g-2 mt-3 pt-3 border-top border-secondary border-opacity-25">
+            <div class="row g-2 mt-2 pt-3 border-top border-2 border-slate-100">
                 <div class="col-6">
-                    <div class="bg-dark bg-opacity-50 p-2 rounded-3 text-center border border-secondary border-opacity-10">
-                        <div class="text-muted" style="font-size: 0.7rem;"><i class="bi bi-lightning-charge-fill text-warning me-1"></i> Công Suất</div>
-                        <div class="fw-bold text-light fs-5" id="pumpFlowRate">-- <span class="fs-6 fw-normal text-muted">m³/h</span></div>
+                    <div class="stat-card">
+                        <div class="info-label"><i class="bi bi-lightning-charge-fill text-warning me-1"></i> Công Suất</div>
+                        <div class="fw-extrabold text-dark fs-4" id="pumpFlowRate">-- <span class="fs-6 font-normal text-muted">m³/h</span></div>
                     </div>
                 </div>
                 <div class="col-6">
-                    <div class="bg-dark bg-opacity-50 p-2 rounded-3 text-center border border-secondary border-opacity-10">
-                        <div class="text-muted" style="font-size: 0.7rem;"><i class="bi bi-clock-history text-info me-1"></i> Thao Tác Cuối</div>
-                        <div class="fw-bold text-light" style="font-size: 0.85rem;" id="lastEventTime">--</div>
+                    <div class="stat-card">
+                        <div class="info-label"><i class="bi bi-clock-history text-info me-1"></i> Thao Tác Cuối</div>
+                        <div class="fw-bold text-dark" style="font-size: 0.9rem;" id="lastEventTime">--</div>
                     </div>
                 </div>
             </div>
 
             <!-- Live Timer (Shown when Running) -->
             <div id="timerContainer" style="display: none;" class="timer-box">
-                <div class="text-uppercase font-bold text-success small mb-1">⏱️ Máy Đang Chạy Liên Tục</div>
+                <div class="text-uppercase font-black text-emerald-700 fw-bold small mb-1">⏱️ MÁY ĐANG CHẠY LIÊN TỤC</div>
                 <div class="timer-val" id="timerDisplay">00:00:00</div>
-                <div class="text-muted mt-1" style="font-size: 0.75rem;">Ước tính: <strong text-light id="estVolume">0 m³</strong></div>
+                <div class="fw-bold text-emerald-800 mt-1" style="font-size: 0.85rem;">Ước tính sản lượng: <strong text-dark id="estVolume">0 m³</strong></div>
             </div>
         </div>
 
         <!-- Operator Action Card -->
         <div class="card-custom">
-            <h6 class="fw-bold text-light mb-3"><i class="bi bi-person-badge text-success me-2"></i>Thông Tin Người Vận Hành</h6>
+            <h5 class="fw-extrabold text-dark mb-3.5 flex items-center gap-2"><i class="bi bi-person-badge-fill text-success me-2"></i>Thao Tác Vận Hành</h5>
+            
             <div class="mb-3">
-                <label class="form-label text-muted small">Họ và tên nhân viên <span class="text-danger">*</span></label>
-                <input type="text" id="operatorInput" class="form-control form-control-custom" placeholder="Ví dụ: Nguyễn Văn A">
+                <label class="info-label">Họ và tên người vận hành <span class="text-danger">*</span></label>
+                <input type="text" id="operatorInput" class="form-control form-control-custom" placeholder="Nhập tên nhân viên (VD: Nguyễn Văn A)">
             </div>
+            
             <div class="mb-4">
-                <label class="form-label text-muted small">Ghi chú thêm</label>
-                <input type="text" id="notesInput" class="form-control form-control-custom" placeholder="Áp suất, tiếng động máy...">
+                <label class="info-label">Ghi chú kiểm tra (Không bắt buộc)</label>
+                <input type="text" id="notesInput" class="form-control form-control-custom" placeholder="Nhập áp suất, tiếng động máy...">
             </div>
 
             <!-- Big Action Button Container -->
@@ -159,7 +176,7 @@
     const GAS_URL = "https://script.google.com/macros/s/AKfycbzW4TxDarLBOpZvO8hnE0R65IsCd95a5l-XPASjUmZNuefH5MiWMs8lCpLpggzFwyXK/exec";
     const API_TOKEN = "HAPU_QR_SECRET_2026";
 
-    // Danh mục máy bơm mặc định (Fallback)
+    // Danh mục máy bơm mặc định
     const PUMP_DICT = {
         "1": { id: 1, name: "Bơm 160kW hút từ hồ lán trại", flowRate: 244, source: "Hồ lán trại" },
         "2": { id: 2, name: "Bơm 45kW cấp nước tưới cỏ", flowRate: 110, source: "Hồ trung tâm" },
@@ -189,7 +206,6 @@
         currentPump = PUMP_DICT[currentPumpId] || { id: currentPumpId, name: `Máy Bơm #${currentPumpId}`, flowRate: 100, source: "Trạm Nước" };
         
         try {
-            // Đọc trạng thái từ Google Sheet Backend
             const res = await fetch(`${GAS_URL}?action=getMeterStatus&token=${API_TOKEN}&pumpId=${currentPumpId}`);
             if (res.ok) {
                 const data = await res.json();
@@ -197,7 +213,6 @@
                     lastEvent = data.lastEvent;
                     currentStatus = lastEvent.action === 'START' ? 'RUNNING' : 'STOPPED';
                 } else {
-                    // Check local state cache for this pump
                     const localState = localStorage.getItem(`pump_state_${currentPumpId}`);
                     if (localState) {
                         const parsed = JSON.parse(localState);
@@ -207,7 +222,6 @@
                 }
             }
         } catch (err) {
-            console.log("Dùng trạng thái bộ nhớ đệm local:", err);
             const localState = localStorage.getItem(`pump_state_${currentPumpId}`);
             if (localState) {
                 const parsed = JSON.parse(localState);
@@ -223,8 +237,8 @@
         showLoading(false);
         document.getElementById('pumpIdBadge').innerText = `ID: #${currentPump.id}`;
         document.getElementById('pumpName').innerText = currentPump.name;
-        document.getElementById('pumpSource').innerHTML = `<i class="bi bi-droplet-fill text-info me-1"></i> Nguồn: ${currentPump.source}`;
-        document.getElementById('pumpFlowRate').innerHTML = `${currentPump.flowRate} <span class="fs-6 fw-normal text-muted">m³/h</span>`;
+        document.getElementById('pumpSource').innerHTML = `<i class="bi bi-droplet-fill text-primary me-1"></i> Nguồn: ${currentPump.source}`;
+        document.getElementById('pumpFlowRate').innerHTML = `${currentPump.flowRate} <span class="fs-6 font-normal text-muted">m³/h</span>`;
 
         if (lastEvent) {
             const dateStr = new Date(lastEvent.timestamp).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
@@ -241,7 +255,7 @@
             statusContainer.innerHTML = `<span class="badge-status badge-running"><span class="spinner-grow spinner-grow-sm text-success" role="status"></span> ĐANG CHẠY</span>`;
             btnContainer.innerHTML = `
                 <button class="btn-action-stop" onclick="submitAction('STOP')">
-                    <i class="bi bi-power me-2"></i> 🛑 TẮT MÁY BƠM (XÁC NHẬN)
+                    <i class="bi bi-power fs-3"></i> 🛑 TẮT MÁY BƠM (XÁC NHẬN)
                 </button>`;
             
             timerContainer.style.display = 'block';
@@ -250,7 +264,7 @@
             statusContainer.innerHTML = `<span class="badge-status badge-stopped"><i class="bi bi-pause-circle-fill"></i> ĐANG DỪNG</span>`;
             btnContainer.innerHTML = `
                 <button class="btn-action-start" onclick="submitAction('START')">
-                    <i class="bi bi-rocket-takeoff me-2"></i> 🚀 BẮT ĐẦU BẬT MÁY BƠM
+                    <i class="bi bi-rocket-takeoff-fill fs-3"></i> 🚀 BẮT ĐẦU BẬT MÁY BƠM
                 </button>`;
             
             timerContainer.style.display = 'none';
@@ -301,7 +315,6 @@
             notes: notes
         };
 
-        // Lưu trạng thái ngay lập tức trên máy điện thoại
         const nextStatus = action === 'START' ? 'RUNNING' : 'STOPPED';
         localStorage.setItem(`pump_state_${currentPumpId}`, JSON.stringify({
             status: nextStatus,
@@ -309,7 +322,6 @@
         }));
 
         try {
-            // Gửi dữ liệu về Google Sheet Backend (Chạy công cộng 100% không cần IP máy chủ)
             const payload = {
                 token: API_TOKEN,
                 action: "submitMeterReading",
@@ -353,7 +365,7 @@
     function showAlert(type, msg) {
         const box = document.getElementById('alertBox');
         box.innerHTML = `
-            <div class="alert alert-${type} alert-dismissible fade show rounded-4 shadow-sm" role="alert">
+            <div class="alert alert-${type} alert-dismissible fade show rounded-4 shadow-sm font-bold" role="alert">
                 ${msg}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>`;
