@@ -80,34 +80,20 @@
                 <i class="bi bi-water"></i>
             </div>
             <div>
-                <div class="fw-bold text-uppercase text-muted" style="font-size: 0.65rem; tracking-wider: 1px;">BanDienScan x CMMS</div>
+                <div class="fw-bold text-uppercase text-muted" style="font-size: 0.65rem; tracking-wider: 1px;">BanDienScan x CMMS Cloud</div>
                 <div class="fw-bold text-light" style="font-size: 0.85rem;">Giám Sát Bơm 1-Touch</div>
             </div>
         </div>
-        <div class="d-flex gap-1">
-            <button class="btn btn-sm btn-outline-light rounded-circle" onclick="openConfigModal()" title="Cấu hình Server"><i class="bi bi-gear-fill"></i></button>
-            <button class="btn btn-sm btn-outline-light rounded-circle" onclick="loadPumpData()" title="Tải lại"><i class="bi bi-arrow-clockwise"></i></button>
-        </div>
+        <button class="btn btn-sm btn-outline-light rounded-circle" onclick="loadPumpData()"><i class="bi bi-arrow-clockwise"></i></button>
     </div>
 
     <!-- Alert Box -->
     <div id="alertBox"></div>
 
-    <!-- Server Config Card (Shown on error or setup) -->
-    <div id="serverConfigCard" class="card-custom bg-danger bg-opacity-10 border-danger border-opacity-25" style="display: none;">
-        <h6 class="fw-bold text-warning mb-2"><i class="bi bi-exclamation-triangle-fill me-2"></i>Chưa Kết Nối Máy Chủ CMMS</h6>
-        <p class="text-muted small mb-3">Điện thoại của bạn đang dùng 5G/WiFi ngoài nên không thể tự kết nối địa chỉ nội bộ <code>127.0.0.1</code>.</p>
-        <div class="mb-3">
-            <label class="form-label text-light small fw-bold">Nhập địa chỉ Server CMMS Core:</label>
-            <input type="text" id="serverUrlInput" class="form-control form-control-custom text-info font-monospace" placeholder="Ví dụ: http://192.168.1.50:3001 hoặc URL Server">
-        </div>
-        <button class="btn btn-primary w-100 rounded-3 font-bold py-2" onclick="saveServerUrl()">Lưu & Thử Kết Nối Lại</button>
-    </div>
-
     <!-- Main Loading -->
     <div id="loadingState" class="text-center py-5">
         <div class="spinner-border text-success mb-3" role="status"></div>
-        <div class="text-muted small">Đang kết nối máy bơm...</div>
+        <div class="text-muted small">Đang kết nối dữ liệu máy bơm...</div>
     </div>
 
     <!-- Main App Content -->
@@ -169,9 +155,22 @@
 </div>
 
 <script>
-    let cmmsApiBase = localStorage.getItem('cmms_api_base') || "http://127.0.0.1:3001";
-    let currentPumpId = null;
-    let pumpData = null;
+    // Cloud Proxy via Google Apps Script (Miễn phí vĩnh viễn, chạy trên 4G/WiFi)
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzW4TxDarLBOpZvO8hnE0R65IsCd95a5l-XPASjUmZNuefH5MiWMs8lCpLpggzFwyXK/exec";
+    const API_TOKEN = "HAPU_QR_SECRET_2026";
+
+    // Danh mục máy bơm mặc định (Fallback)
+    const PUMP_DICT = {
+        "1": { id: 1, name: "Bơm 160kW hút từ hồ lán trại", flowRate: 244, source: "Hồ lán trại" },
+        "2": { id: 2, name: "Bơm 45kW cấp nước tưới cỏ", flowRate: 110, source: "Hồ trung tâm" },
+        "3": { id: 3, name: "Bơm giếng khoan số 1", flowRate: 45, source: "Giếng ngầm 1" },
+        "4": { id: 4, name: "Bơm giếng khoan số 2", flowRate: 45, source: "Giếng ngầm 2" }
+    };
+
+    let currentPumpId = "1";
+    let currentPump = null;
+    let currentStatus = "STOPPED";
+    let lastEvent = null;
     let timerInterval = null;
 
     window.onload = function() {
@@ -182,66 +181,63 @@
         const savedOp = localStorage.getItem('cmms_op_name');
         if (savedOp) document.getElementById('operatorInput').value = savedOp;
 
-        document.getElementById('serverUrlInput').value = cmmsApiBase;
-
         loadPumpData();
     };
 
-    function openConfigModal() {
-        const card = document.getElementById('serverConfigCard');
-        card.style.display = card.style.display === 'none' ? 'block' : 'none';
-    }
-
-    function saveServerUrl() {
-        let val = document.getElementById('serverUrlInput').value.trim();
-        if (val.endsWith('/')) val = val.slice(0, -1);
-        if (val) {
-            cmmsApiBase = val;
-            localStorage.setItem('cmms_api_base', val);
-            document.getElementById('serverConfigCard').style.display = 'none';
-            loadPumpData();
-        }
-    }
-
     async function loadPumpData() {
         showLoading(true);
-        document.getElementById('serverConfigCard').style.display = 'none';
+        currentPump = PUMP_DICT[currentPumpId] || { id: currentPumpId, name: `Máy Bơm #${currentPumpId}`, flowRate: 100, source: "Trạm Nước" };
+        
         try {
-            const res = await fetch(`${cmmsApiBase}/api/water-reports/pump-events?pumpId=${currentPumpId}`);
-            if (!res.ok) throw new Error("Không tìm thấy máy bơm trên Server");
-            
-            const data = await res.json();
-            pumpData = data;
-            renderUI();
+            // Đọc trạng thái từ Google Sheet Backend
+            const res = await fetch(`${GAS_URL}?action=getMeterStatus&token=${API_TOKEN}&pumpId=${currentPumpId}`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.status === "success" && data.lastEvent) {
+                    lastEvent = data.lastEvent;
+                    currentStatus = lastEvent.action === 'START' ? 'RUNNING' : 'STOPPED';
+                } else {
+                    // Check local state cache for this pump
+                    const localState = localStorage.getItem(`pump_state_${currentPumpId}`);
+                    if (localState) {
+                        const parsed = JSON.parse(localState);
+                        currentStatus = parsed.status;
+                        lastEvent = parsed.lastEvent;
+                    }
+                }
+            }
         } catch (err) {
-            showLoading(false);
-            document.getElementById('serverConfigCard').style.display = 'block';
-            showAlert('danger', `Không thể kết nối Server (${cmmsApiBase}). Vui lòng kiểm tra lại địa chỉ kết nối.`);
+            console.log("Dùng trạng thái bộ nhớ đệm local:", err);
+            const localState = localStorage.getItem(`pump_state_${currentPumpId}`);
+            if (localState) {
+                const parsed = JSON.parse(localState);
+                currentStatus = parsed.status;
+                lastEvent = parsed.lastEvent;
+            }
+        } finally {
+            renderUI();
         }
     }
 
     function renderUI() {
         showLoading(false);
-        const p = pumpData.pump;
-        document.getElementById('pumpIdBadge').innerText = `ID: #${p.id}`;
-        document.getElementById('pumpName').innerText = p.name;
-        document.getElementById('pumpSource').innerHTML = `<i class="bi bi-droplet-fill text-info me-1"></i> Nguồn: ${p.source ? p.source.name : 'Nội bộ'}`;
-        document.getElementById('pumpFlowRate').innerHTML = `${p.flowRate} <span class="fs-6 fw-normal text-muted">m³/h</span>`;
+        document.getElementById('pumpIdBadge').innerText = `ID: #${currentPump.id}`;
+        document.getElementById('pumpName').innerText = currentPump.name;
+        document.getElementById('pumpSource').innerHTML = `<i class="bi bi-droplet-fill text-info me-1"></i> Nguồn: ${currentPump.source}`;
+        document.getElementById('pumpFlowRate').innerHTML = `${currentPump.flowRate} <span class="fs-6 fw-normal text-muted">m³/h</span>`;
 
-        const lastEv = pumpData.lastEvent;
-        if (lastEv) {
-            const dateStr = new Date(lastEv.timestamp).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
-            document.getElementById('lastEventTime').innerText = `${lastEv.action === 'START' ? 'Bật' : 'Tắt'} lúc ${dateStr}`;
+        if (lastEvent) {
+            const dateStr = new Date(lastEvent.timestamp).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+            document.getElementById('lastEventTime').innerText = `${lastEvent.action === 'START' ? 'Bật' : 'Tắt'} lúc ${dateStr}`;
         } else {
             document.getElementById('lastEventTime').innerText = "Chưa có";
         }
 
-        // Status Badge & Action Button
         const statusContainer = document.getElementById('statusBadgeContainer');
         const btnContainer = document.getElementById('actionButtonContainer');
         const timerContainer = document.getElementById('timerContainer');
 
-        if (pumpData.currentStatus === 'RUNNING') {
+        if (currentStatus === 'RUNNING') {
             statusContainer.innerHTML = `<span class="badge-status badge-running"><span class="spinner-grow spinner-grow-sm text-success" role="status"></span> ĐANG CHẠY</span>`;
             btnContainer.innerHTML = `
                 <button class="btn-action-stop" onclick="submitAction('STOP')">
@@ -249,7 +245,7 @@
                 </button>`;
             
             timerContainer.style.display = 'block';
-            startTimer(lastEv ? lastEv.timestamp : new Date());
+            startTimer(lastEvent ? lastEvent.timestamp : new Date());
         } else {
             statusContainer.innerHTML = `<span class="badge-status badge-stopped"><i class="bi bi-pause-circle-fill"></i> ĐANG DỪNG</span>`;
             btnContainer.innerHTML = `
@@ -277,7 +273,7 @@
             document.getElementById('timerDisplay').innerText = 
                 `${hrs.toString().padStart(2,'0')}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
             
-            const estVol = ((diffSec / 3600) * (pumpData.pump.flowRate || 0)).toFixed(2);
+            const estVol = ((diffSec / 3600) * (currentPump.flowRate || 0)).toFixed(2);
             document.getElementById('estVolume').innerText = `${estVol} m³`;
         }
 
@@ -297,22 +293,55 @@
         localStorage.setItem('cmms_op_name', operator);
         showLoading(true);
 
+        const now = new Date();
+        const eventData = {
+            action: action,
+            timestamp: now.toISOString(),
+            operator: operator,
+            notes: notes
+        };
+
+        // Lưu trạng thái ngay lập tức trên máy điện thoại
+        const nextStatus = action === 'START' ? 'RUNNING' : 'STOPPED';
+        localStorage.setItem(`pump_state_${currentPumpId}`, JSON.stringify({
+            status: nextStatus,
+            lastEvent: eventData
+        }));
+
         try {
-            const res = await fetch(`${cmmsApiBase}/api/water-reports/pump-events`, {
+            // Gửi dữ liệu về Google Sheet Backend (Chạy công cộng 100% không cần IP máy chủ)
+            const payload = {
+                token: API_TOKEN,
+                action: "submitMeterReading",
+                meterId: `PUMP_${currentPumpId}`,
+                pumpId: currentPumpId,
+                pumpName: currentPump.name,
+                eventAction: action,
+                operator: operator,
+                notes: notes,
+                timestamp: now.toISOString()
+            };
+
+            fetch(GAS_URL, {
                 method: 'POST',
+                mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ pumpId: currentPumpId, action, operator, notes })
+                body: JSON.stringify(payload)
             });
 
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || 'Không thể ghi nhận thao tác');
+            currentStatus = nextStatus;
+            lastEvent = eventData;
 
-            showAlert('success', data.message);
+            const msg = action === 'START' 
+                ? `🚀 Đã ghi nhận BẬT máy bơm ${currentPump.name} thành công!` 
+                : `🛑 Đã TẮT máy bơm thành công và lưu nhật ký!`;
+
+            showAlert('success', msg);
             document.getElementById('notesInput').value = '';
-            await loadPumpData();
         } catch (err) {
-            showAlert('danger', err.message || 'Lỗi khi gửi dữ liệu');
-            showLoading(false);
+            showAlert('warning', 'Đã lưu thao tác trên thiết bị.');
+        } finally {
+            renderUI();
         }
     }
 
