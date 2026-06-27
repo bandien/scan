@@ -176,12 +176,32 @@
     const GAS_URL = "https://script.google.com/macros/s/AKfycbzW4TxDarLBOpZvO8hnE0R65IsCd95a5l-XPASjUmZNuefH5MiWMs8lCpLpggzFwyXK/exec";
     const API_TOKEN = "HAPU_QR_SECRET_2026";
 
-    // Danh mục máy bơm mặc định
+    // Danh mục toàn bộ máy bơm trong cơ sở dữ liệu CMMS Core
     const PUMP_DICT = {
         "1": { id: 1, name: "Bơm 160kW hút từ hồ lán trại", flowRate: 244, source: "Hồ lán trại" },
-        "2": { id: 2, name: "Bơm 45kW cấp nước tưới cỏ", flowRate: 110, source: "Hồ trung tâm" },
-        "3": { id: 3, name: "Bơm giếng khoan số 1", flowRate: 45, source: "Giếng ngầm 1" },
-        "4": { id: 4, name: "Bơm giếng khoan số 2", flowRate: 45, source: "Giếng ngầm 2" }
+        "2": { id: 2, name: "Bơm hoả tiễn 18,5kW", flowRate: 27.95, source: "Hồ lán trại" },
+        "3": { id: 3, name: "Bơm hoả tiễn 30kW", flowRate: 45.33, source: "Hồ lán trại" },
+        "4": { id: 4, name: "Bơm hoả tiễn 22kW", flowRate: 45.33, source: "Hồ lán trại" },
+        "5": { id: 5, name: "Bơm LK1", flowRate: 1, source: "Giếng khoan LK1" },
+        "6": { id: 6, name: "Bơm LK2", flowRate: 2, source: "Giếng khoan LK2" },
+        "7": { id: 7, name: "Bơm LK3", flowRate: 3, source: "Giếng khoan LK3" },
+        "8": { id: 8, name: "Bơm LK4", flowRate: 4, source: "Giếng khoan LK4" },
+        "9": { id: 9, name: "Bơm LK5", flowRate: 5, source: "Giếng khoan LK5" },
+        "10": { id: 10, name: "Bơm LK6", flowRate: 6, source: "Giếng khoan LK6" },
+        "11": { id: 11, name: "Bơm LK7", flowRate: 7, source: "Giếng khoan LK7" },
+        "12": { id: 12, name: "Bơm LK8", flowRate: 8, source: "Giếng khoan LK8" },
+        "13": { id: 13, name: "Bơm LK9", flowRate: 9, source: "Giếng khoan LK9" },
+        "14": { id: 14, name: "Bơm LK10", flowRate: 10, source: "Giếng khoan LK10" },
+        "15": { id: 15, name: "Bơm LK11", flowRate: 11, source: "Giếng khoan LK11" },
+        "16": { id: 16, name: "Bơm LK12", flowRate: 12, source: "Giếng khoan LK12" },
+        "17": { id: 17, name: "Bơm LK13", flowRate: 1, source: "Giếng khoan LK13" },
+        "18": { id: 18, name: "Bơm LK14", flowRate: 1, source: "Giếng khoan LK14" },
+        "19": { id: 19, name: "Bơm LK15", flowRate: 1, source: "Giếng khoan LK15" },
+        "20": { id: 20, name: "Bơm hoả tiễn 30kW số 01", flowRate: 86, source: "Hồ trung tâm" },
+        "21": { id: 21, name: "Bơm hoả tiễn 30kW số 02", flowRate: 86, source: "Hồ trung tâm" },
+        "24": { id: 24, name: "Bơm 160kW số 01 hút từ hồ nước mặt ngoài sân", flowRate: 154, source: "Hồ ngoài sân (nước suối)" },
+        "25": { id: 25, name: "Bơm tưới cỏ hồ trung tâm (rainbird)", flowRate: 0, source: "Hồ trung tâm" },
+        "26": { id: 26, name: "Bơm tưới cỏ hồ 16-17 (rainbird)", flowRate: 0, source: "Hồ 16-17" }
     };
 
     let currentPumpId = "1";
@@ -203,7 +223,7 @@
 
     async function loadPumpData() {
         showLoading(true);
-        currentPump = PUMP_DICT[currentPumpId] || { id: currentPumpId, name: `Máy Bơm #${currentPumpId}`, flowRate: 100, source: "Trạm Nước" };
+        currentPump = PUMP_DICT[currentPumpId] || { id: currentPumpId, name: `Máy Bơm #${currentPumpId}`, flowRate: 1, source: "Giếng khoan / Nguồn nước" };
         
         try {
             const res = await fetch(`${GAS_URL}?action=getMeterStatus&token=${API_TOKEN}&pumpId=${currentPumpId}`);
