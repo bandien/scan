@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chốt Chỉ Số Đồng Hồ | BanDienScan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --border-color: #e2e8f0;
+            --accent-blue: #2563eb;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+        .app-shell { max-width: 440px; margin: 0 auto; padding: 16px; }
+        
+        .header-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 18px; background: #ffffff;
+            border-radius: 20px; border: 2px solid var(--border-color);
+            margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+        
+        .card-custom {
+            background: var(--card-bg); border-radius: 24px;
+            border: 2px solid var(--border-color); padding: 22px;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05); margin-bottom: 20px;
+        }
+        
+        .btn-submit-main {
+            background: #2563eb; color: white; font-weight: 900; padding: 20px;
+            border-radius: 22px; border: none; width: 100%; font-size: 1.2rem;
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.25); transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-submit-main:active { transform: scale(0.96); }
+        
+        .form-control-custom {
+            background: #f8fafc; border: 2px solid #cbd5e1;
+            color: #0f172a; border-radius: 16px; padding: 14px 18px; font-size: 1.1rem;
+            font-weight: 700;
+        }
+        .form-control-custom:focus {
+            background: #ffffff; border-color: #2563eb; color: #0f172a; box-shadow: none;
+        }
+        .form-control-custom::placeholder { color: #94a3b8; font-weight: 400; }
+        
+        .info-label { font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 6px; }
+        .stat-card { background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0; padding: 12px; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="app-shell">
+    <!-- Header Bar -->
+    <div class="header-bar">
+        <div class="d-flex align-items-center gap-2.5">
+            <div class="bg-primary text-white rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; font-size: 1.2rem;" id="headerIcon">
+                <i class="bi bi-lightning-charge-fill"></i>
+            </div>
+            <div>
+                <div class="fw-bold text-uppercase text-primary" style="font-size: 0.7rem; letter-spacing: 1px;">BanDienScan x CMMS</div>
+                <div class="fw-black text-dark" style="font-size: 0.95rem;" id="headerTitle">Chốt Chỉ Số Đồng Hồ</div>
+            </div>
+        </div>
+        <button class="btn btn-light border-2 rounded-circle shadow-sm" onclick="loadMeterData()"><i class="bi bi-arrow-clockwise text-dark fw-bold"></i></button>
+    </div>
+
+    <!-- Alert Box -->
+    <div id="alertBox"></div>
+
+    <!-- Main Loading -->
+    <div id="loadingState" class="text-center py-5">
+        <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+        <div class="fw-bold text-slate-700">Đang nhận diện thiết bị đo...</div>
+    </div>
+
+    <!-- Main App Content -->
+    <div id="appContent" style="display: none;">
+        <!-- Device Info Card -->
+        <div class="card-custom">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                    <span class="badge bg-dark px-2.5 py-1.5 rounded-2 font-mono fw-bold mb-2" style="font-size: 0.75rem;" id="meterUidBadge">UID: #--</span>
+                    <h2 class="fw-extrabold text-dark mb-1" style="font-size: 1.4rem;" id="meterName">--</h2>
+                    <div class="fw-bold text-secondary mt-1" style="font-size: 0.85rem;" id="meterLocation"><i class="bi bi-geo-alt-fill text-danger me-1"></i> --</div>
+                </div>
+            </div>
+
+            <div class="row g-2 mt-2 pt-3 border-top border-2 border-slate-100">
+                <div class="col-6">
+                    <div class="stat-card">
+                        <div class="info-label"><i class="bi bi-hash text-warning me-1"></i> Mã Sản Xuất</div>
+                        <div class="fw-bold text-dark" style="font-size: 0.9rem;" id="meterSerial">--</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="stat-card">
+                        <div class="info-label"><i class="bi bi-speedometer2 text-info me-1"></i> Đơn Vị Đọc</div>
+                        <div class="fw-extrabold text-primary fs-5" id="meterUnit">kWh</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Action Card -->
+        <div class="card-custom">
+            <h5 class="fw-extrabold text-dark mb-3.5"><i class="bi bi-pencil-square text-primary me-2"></i>Nhập Chỉ Số & Thao Tác</h5>
+            
+            <div class="mb-3">
+                <label class="info-label">Chỉ số đọc được hiện tại (<span id="inputUnitLabel">kWh</span>) <span class="text-danger">*</span></label>
+                <input type="number" step="0.01" id="meterValueInput" class="form-control form-control-custom" placeholder="Nhập chỉ số hiển thị">
+            </div>
+
+            <div class="mb-3">
+                <label class="info-label">Họ và tên người chốt chỉ số <span class="text-danger">*</span></label>
+                <input type="text" id="operatorInput" class="form-control form-control-custom" style="font-size: 1rem;" placeholder="Nhập tên nhân viên (VD: Nguyễn Văn A)">
+            </div>
+
+            <div class="mb-3">
+                <label class="info-label">Thời gian thực hiện <span class="text-primary fw-normal text-xs">(Đổi nếu ghi bù)</span></label>
+                <input type="datetime-local" id="eventTimeInput" class="form-control form-control-custom" style="font-size: 0.95rem;">
+            </div>
+            
+            <div class="mb-4">
+                <label class="info-label">Ghi chú kiểm tra (Không bắt buộc)</label>
+                <input type="text" id="notesInput" class="form-control form-control-custom" style="font-size: 0.95rem;" placeholder="Ghi chú hỏng hóc, chỉ số bất thường...">
+            </div>
+
+            <button class="btn-submit-main" onclick="submitMeterReading()">
+                <i class="bi bi-check-circle-fill fs-3"></i> 🚀 XÁC NHẬN CHỐT CHỈ SỐ
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzW4TxDarLBOpZvO8hnE0R65IsCd95a5l-XPASjUmZNuefH5MiWMs8lCpLpggzFwyXK/exec";
+    const API_TOKEN = "HAPU_QR_SECRET_2026";
+
+    // Danh mục 22 Đồng hồ Điện & Nước trích xuất trực tiếp từ file DanhSachDongHo.ods
+    const METER_DICT = {
+        // --- ĐỒNG HỒ ĐIỆN ---
+        "NHA.DIEN.NO.01": { uid: "NHA.DIEN.NO.01", name: "Caddie nữ 01", location: "Khu phòng nghỉ caddie", serial: "26011158", unit: "kWh", type: "Đồng hồ điện" },
+        "NHA.DIEN.NO.02": { uid: "NHA.DIEN.NO.02", name: "Caddie nữ 02", location: "Khu phòng nghỉ caddie", serial: "26010356", unit: "kWh", type: "Đồng hồ điện" },
+        "NHA.DIEN.NO.03": { uid: "NHA.DIEN.NO.03", name: "Caddie nữ 03", location: "Khu phòng nghỉ caddie", serial: "26010350", unit: "kWh", type: "Đồng hồ điện" },
+        "NHA.DIEN.NO.04": { uid: "NHA.DIEN.NO.04", name: "Caddie nữ 04", location: "Khu phòng nghỉ caddie", serial: "Chưa có", unit: "kWh", type: "Đồng hồ điện" },
+        "NHA.DIEN.NO.05": { uid: "NHA.DIEN.NO.05", name: "Caddie nữ 05", location: "Khu phòng nghỉ caddie", serial: "Chưa có", unit: "kWh", type: "Đồng hồ điện" },
+        "NHA.DIEN.NO.06": { uid: "NHA.DIEN.NO.06", name: "Caddie nữ 06", location: "Khu phòng nghỉ caddie", serial: "Chưa có", unit: "kWh", type: "Đồng hồ điện" },
+        "NHA.DIEN.NO.07": { uid: "NHA.DIEN.NO.07", name: "Caddie nữ 07", location: "Khu phòng nghỉ caddie", serial: "Chưa có", unit: "kWh", type: "Đồng hồ điện" },
+        "NHA.DIEN.NO.08": { uid: "NHA.DIEN.NO.08", name: "Caddie nữ 08", location: "Khu phòng nghỉ caddie", serial: "Chưa có", unit: "kWh", type: "Đồng hồ điện" },
+        "NHA.DIEN.NO.09": { uid: "NHA.DIEN.NO.09", name: "Caddie nữ 09", location: "Khu phòng nghỉ caddie", serial: "Chưa có", unit: "kWh", type: "Đồng hồ điện" },
+        "NHA.DIEN.NO.10": { uid: "NHA.DIEN.NO.10", name: "Bếp nam", location: "Khu phòng nghỉ caddie", serial: "26010290", unit: "kWh", type: "Đồng hồ điện" },
+        "NHA.DIEN.NO.11": { uid: "NHA.DIEN.NO.11", name: "Chiếu sáng, bơm", location: "Khu phòng nghỉ caddie", serial: "26010315", unit: "kWh", type: "Đồng hồ điện" },
+        "NHA.DIEN.NO.12": { uid: "NHA.DIEN.NO.12", name: "Bình nóng lạnh", location: "Khu phòng nghỉ caddie", serial: "26011284", unit: "kWh", type: "Đồng hồ điện" },
+        "CLH.DIEN.KICHSONG": { uid: "CLH.DIEN.KICHSONG", name: "Kích sóng VNPT", location: "Khu CLH", serial: "Chưa có", unit: "kWh", type: "Đồng hồ điện" },
+        "CLH.DIEN.ATM": { uid: "CLH.DIEN.ATM", name: "ATM VCB", location: "Khu CLH", serial: "Chưa có", unit: "kWh", type: "Đồng hồ điện" },
+
+        // --- ĐỒNG HỒ NƯỚC ---
+        "CLH.NUOC.MAI.01": { uid: "CLH.NUOC.MAI.01", name: "Đồng hồ nước mái CLH 01/03", location: "Khu CLH", serial: "6013775", unit: "M3", type: "Đồng hồ nước" },
+        "CLH.NUOC.MAI.02": { uid: "CLH.NUOC.MAI.02", name: "Đồng hồ nước mái CLH 02/03", location: "Khu CLH", serial: "6013840", unit: "M3", type: "Đồng hồ nước" },
+        "CLH.NUOC.MAI.03": { uid: "CLH.NUOC.MAI.03", name: "Đồng hồ nước mái CLH 03/03", location: "Khu CLH", serial: "6013949", unit: "M3", type: "Đồng hồ nước" },
+        "DH_HMI_GK": { uid: "DH_HMI_GK", name: "ĐH HMI Giếng khoan", location: "Trạm Giếng Khoan", serial: "HMI", unit: "GALLON_US", type: "Đồng hồ nước" },
+        "DH_LAN_TRAI": { uid: "DH_LAN_TRAI", name: "ĐH Hồ lán trại", location: "Hồ lán trại", serial: "Cơ học", unit: "M3", type: "Đồng hồ nước" },
+        "DH_NUOC_MAT": { uid: "DH_NUOC_MAT", name: "Đồng hồ nước mặt ngoài sân", location: "Ngoài sân golf", serial: "Cơ học", unit: "M3", type: "Đồng hồ nước" },
+        "HMI_HO_1617": { uid: "HMI_HO_1617", name: "Bảng HMI đọc chỉ số nước tưới hồ 16-17", location: "Hồ 16-17", serial: "HMI Digital", unit: "GALLON_US", type: "Đồng hồ nước" },
+        "HMI_HO_TRUNG_TAM": { uid: "HMI_HO_TRUNG_TAM", name: "Bảng HMI đọc chỉ số nước tưới hồ trung tâm", location: "Hồ trung tâm", serial: "HMI Digital", unit: "GALLON_US", type: "Đồng hồ nước" }
+    };
+
+    let currentUid = "NHA.DIEN.NO.01";
+    let currentMeter = null;
+
+    function resetToCurrentTime() {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('eventTimeInput').value = now.toISOString().slice(0, 16);
+    }
+
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        currentUid = urlParams.get('uid') || urlParams.get('id') || "NHA.DIEN.NO.01";
+        
+        const savedOp = localStorage.getItem('cmms_op_name');
+        if (savedOp) document.getElementById('operatorInput').value = savedOp;
+
+        resetToCurrentTime();
+        loadMeterData();
+    };
+
+    function loadMeterData() {
+        document.getElementById('loadingState').style.display = 'none';
+        currentMeter = METER_DICT[currentUid] || { uid: currentUid, name: `Đồng Hồ #${currentUid}`, location: "Khu Vực Thiết Bị", serial: "N/A", unit: "kWh", type: "Đồng hồ" };
+
+        document.getElementById('meterUidBadge').innerText = `UID: #${currentMeter.uid}`;
+        document.getElementById('meterName').innerText = currentMeter.name;
+        document.getElementById('meterLocation').innerHTML = `<i class="bi bi-geo-alt-fill text-danger me-1"></i> ${currentMeter.location}`;
+        document.getElementById('meterSerial').innerText = currentMeter.serial;
+        document.getElementById('meterUnit').innerText = currentMeter.unit;
+        document.getElementById('inputUnitLabel').innerText = currentMeter.unit;
+
+        if (currentMeter.type === "Đồng hồ nước") {
+            document.getElementById('headerIcon').className = "bg-info text-white rounded-3 p-2 d-flex align-items-center justify-content-center";
+            document.getElementById('headerIcon').innerHTML = `<i class="bi bi-droplet-fill"></i>`;
+            document.getElementById('headerTitle').innerText = "Chốt Chỉ Số Đồng Hồ Nước";
+        }
+
+        document.getElementById('appContent').style.display = 'block';
+    }
+
+    async function submitMeterReading() {
+        const val = document.getElementById('meterValueInput').value.trim();
+        const operator = document.getElementById('operatorInput').value.trim();
+        const notes = document.getElementById('notesInput').value.trim();
+        const customTimeVal = document.getElementById('eventTimeInput').value;
+
+        if (!val || isNaN(val)) { alert('Vui lòng nhập chỉ số đọc được hợp lệ!'); return; }
+        if (!operator) { alert('Vui lòng nhập tên người thực hiện!'); return; }
+
+        localStorage.setItem('cmms_op_name', operator);
+        document.getElementById('loadingState').style.display = 'block';
+        document.getElementById('appContent').style.display = 'none';
+
+        const selectedDate = customTimeVal ? new Date(customTimeVal) : new Date();
+
+        try {
+            const payload = {
+                token: API_TOKEN,
+                action: "submitMeterReading",
+                meterId: currentUid,
+                value: Number(val),
+                user: operator,
+                notes: notes,
+                timestamp: selectedDate.toISOString()
+            };
+
+            fetch(GAS_URL, {
+                method: 'POST', mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            showAlert('success', `✅ Đã chốt chỉ số ${val} ${currentMeter.unit} cho thiết bị ${currentMeter.name} thành công!`);
+            document.getElementById('meterValueInput').value = '';
+            document.getElementById('notesInput').value = '';
+            resetToCurrentTime();
+        } catch (err) {
+            showAlert('warning', 'Đã lưu thao tác trên thiết bị.');
+        } finally {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('appContent').style.display = 'block';
+        }
+    }
+
+    function showAlert(type, msg) {
+        document.getElementById('alertBox').innerHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show rounded-4 shadow-sm font-bold" role="alert">
+                ${msg}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>`;
+    }
+</script>
+</body>
+</html>
