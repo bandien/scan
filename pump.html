@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CMMS Water Scan | BanDienScan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --bg-color: #0b1329;
+            --card-bg: rgba(23, 32, 60, 0.9);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+        .app-shell { max-width: 440px; margin: 0 auto; padding: 16px; }
+        .header-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px; background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+        .card-custom {
+            background: var(--card-bg); border-radius: 24px;
+            border: 1px solid var(--border-color); padding: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3); margin-bottom: 20px;
+            backdrop-filter: blur(12px);
+        }
+        .badge-status {
+            padding: 6px 14px; border-radius: 50px; font-weight: 700; font-size: 0.75rem;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .badge-running { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+        .badge-stopped { background: rgba(100, 116, 139, 0.2); color: #94a3b8; border: 1px solid rgba(100, 116, 139, 0.4); }
+        
+        .btn-action-start {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white; font-weight: 900; padding: 18px; border-radius: 20px; border: none;
+            width: 100%; font-size: 1.1rem; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+            transition: all 0.2s;
+        }
+        .btn-action-stop {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white; font-weight: 900; padding: 18px; border-radius: 20px; border: none;
+            width: 100%; font-size: 1.1rem; box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+            transition: all 0.2s;
+        }
+        .btn-action-start:active, .btn-action-stop:active { transform: scale(0.96); }
+        
+        .timer-box {
+            background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 16px; padding: 12px; text-align: center; margin-top: 15px;
+        }
+        .timer-val { font-family: monospace; font-size: 1.5rem; font-weight: 800; color: #6ee7b7; }
+        
+        .form-control-custom {
+            background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-color);
+            color: white; border-radius: 14px; padding: 12px 16px; font-size: 0.9rem;
+        }
+        .form-control-custom:focus {
+            background: rgba(15, 23, 42, 0.95); border-color: #10b981; color: white; box-shadow: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-shell">
+    <!-- Header -->
+    <div class="header-bar">
+        <div class="d-flex align-items-center gap-2">
+            <div class="bg-primary text-white rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                <i class="bi bi-water"></i>
+            </div>
+            <div>
+                <div class="fw-bold text-uppercase text-muted" style="font-size: 0.65rem; tracking-wider: 1px;">BanDienScan x CMMS</div>
+                <div class="fw-bold text-light" style="font-size: 0.85rem;">Giám Sát Bơm 1-Touch</div>
+            </div>
+        </div>
+        <button class="btn btn-sm btn-outline-light rounded-circle" onclick="loadPumpData()"><i class="bi bi-arrow-clockwise"></i></button>
+    </div>
+
+    <!-- Alert Box -->
+    <div id="alertBox"></div>
+
+    <!-- Main Loading -->
+    <div id="loadingState" class="text-center py-5">
+        <div class="spinner-border text-success mb-3" role="status"></div>
+        <div class="text-muted small">Đang kết nối máy bơm...</div>
+    </div>
+
+    <!-- Main App Content -->
+    <div id="appContent" style="display: none;">
+        <!-- Pump Details Card -->
+        <div class="card-custom">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                    <span class="badge bg-secondary mb-2" id="pumpIdBadge">ID: #--</span>
+                    <h3 class="fw-bold text-white mb-1" id="pumpName">--</h3>
+                    <div class="text-muted small" id="pumpSource"><i class="bi bi-droplet-fill text-info me-1"></i> Nguồn: --</div>
+                </div>
+                <div id="statusBadgeContainer">
+                    <!-- Dynamic Badge -->
+                </div>
+            </div>
+
+            <div class="row g-2 mt-3 pt-3 border-top border-secondary border-opacity-25">
+                <div class="col-6">
+                    <div class="bg-dark bg-opacity-50 p-2 rounded-3 text-center border border-secondary border-opacity-10">
+                        <div class="text-muted" style="font-size: 0.7rem;"><i class="bi bi-lightning-charge-fill text-warning me-1"></i> Công Suất</div>
+                        <div class="fw-bold text-light fs-5" id="pumpFlowRate">-- <span class="fs-6 fw-normal text-muted">m³/h</span></div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="bg-dark bg-opacity-50 p-2 rounded-3 text-center border border-secondary border-opacity-10">
+                        <div class="text-muted" style="font-size: 0.7rem;"><i class="bi bi-clock-history text-info me-1"></i> Thao Tác Cuối</div>
+                        <div class="fw-bold text-light" style="font-size: 0.85rem;" id="lastEventTime">--</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Timer (Shown when Running) -->
+            <div id="timerContainer" style="display: none;" class="timer-box">
+                <div class="text-uppercase font-bold text-success small mb-1">⏱️ Máy Đang Chạy Liên Tục</div>
+                <div class="timer-val" id="timerDisplay">00:00:00</div>
+                <div class="text-muted mt-1" style="font-size: 0.75rem;">Ước tính: <strong text-light id="estVolume">0 m³</strong></div>
+            </div>
+        </div>
+
+        <!-- Operator Action Card -->
+        <div class="card-custom">
+            <h6 class="fw-bold text-light mb-3"><i class="bi bi-person-badge text-success me-2"></i>Thông Tin Người Vận Hành</h6>
+            <div class="mb-3">
+                <label class="form-label text-muted small">Họ và tên nhân viên <span class="text-danger">*</span></label>
+                <input type="text" id="operatorInput" class="form-control form-control-custom" placeholder="Ví dụ: Nguyễn Văn A">
+            </div>
+            <div class="mb-4">
+                <label class="form-label text-muted small">Ghi chú thêm</label>
+                <input type="text" id="notesInput" class="form-control form-control-custom" placeholder="Áp suất, tiếng động máy...">
+            </div>
+
+            <!-- Big Action Button Container -->
+            <div id="actionButtonContainer">
+                <!-- Action Button injected here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // System Config - Update this to match your public CMMS bridge / server endpoint
+    const CMMS_API_BASE = "http://127.0.0.1:3001"; 
+    let currentPumpId = null;
+    let pumpData = null;
+    let timerInterval = null;
+
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        currentPumpId = urlParams.get('pumpId') || urlParams.get('id') || "1";
+        
+        // Restore saved operator name
+        const savedOp = localStorage.getItem('cmms_op_name');
+        if (savedOp) document.getElementById('operatorInput').value = savedOp;
+
+        loadPumpData();
+    };
+
+    async function loadPumpData() {
+        showLoading(true);
+        try {
+            const res = await fetch(`${CMMS_API_BASE}/api/water-reports/pump-events?pumpId=${currentPumpId}`);
+            if (!res.ok) throw new Error("Không tìm thấy máy bơm");
+            
+            const data = await res.json();
+            pumpData = data;
+            renderUI();
+        } catch (err) {
+            showAlert('danger', err.message || 'Lỗi kết nối tới CMMS Core');
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    function renderUI() {
+        const p = pumpData.pump;
+        document.getElementById('pumpIdBadge').innerText = `ID: #${p.id}`;
+        document.getElementById('pumpName').innerText = p.name;
+        document.getElementById('pumpSource').innerHTML = `<i class="bi bi-droplet-fill text-info me-1"></i> Nguồn: ${p.source ? p.source.name : 'Nội bộ'}`;
+        document.getElementById('pumpFlowRate').innerHTML = `${p.flowRate} <span class="fs-6 fw-normal text-muted">m³/h</span>`;
+
+        const lastEv = pumpData.lastEvent;
+        if (lastEv) {
+            const dateStr = new Date(lastEv.timestamp).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+            document.getElementById('lastEventTime').innerText = `${lastEv.action === 'START' ? 'Bật' : 'Tắt'} lúc ${dateStr}`;
+        } else {
+            document.getElementById('lastEventTime').innerText = "Chưa có";
+        }
+
+        // Status Badge & Action Button
+        const statusContainer = document.getElementById('statusBadgeContainer');
+        const btnContainer = document.getElementById('actionButtonContainer');
+        const timerContainer = document.getElementById('timerContainer');
+
+        if (pumpData.currentStatus === 'RUNNING') {
+            statusContainer.innerHTML = `<span class="badge-status badge-running"><span class="spinner-grow spinner-grow-sm text-success" role="status"></span> ĐANG CHẠY</span>`;
+            btnContainer.innerHTML = `
+                <button class="btn-action-stop" onclick="submitAction('STOP')">
+                    <i class="bi bi-power me-2"></i> 🛑 TẮT MÁY BƠM (XÁC NHẬN)
+                </button>`;
+            
+            timerContainer.style.display = 'block';
+            startTimer(lastEv ? lastEv.timestamp : new Date());
+        } else {
+            statusContainer.innerHTML = `<span class="badge-status badge-stopped"><i class="bi bi-pause-circle-fill"></i> ĐANG DỪNG</span>`;
+            btnContainer.innerHTML = `
+                <button class="btn-action-start" onclick="submitAction('START')">
+                    <i class="bi bi-rocket-takeoff me-2"></i> 🚀 BẮT ĐẦU BẬT MÁY BƠM
+                </button>`;
+            
+            timerContainer.style.display = 'none';
+            if (timerInterval) clearInterval(timerInterval);
+        }
+
+        document.getElementById('appContent').style.display = 'block';
+    }
+
+    function startTimer(startTimeStr) {
+        if (timerInterval) clearInterval(timerInterval);
+        const startMs = new Date(startTimeStr).getTime();
+
+        function tick() {
+            const diffSec = Math.max(0, Math.floor((Date.now() - startMs) / 1000));
+            const hrs = Math.floor(diffSec / 3600);
+            const mins = Math.floor((diffSec % 3600) / 60);
+            const secs = diffSec % 60;
+            
+            document.getElementById('timerDisplay').innerText = 
+                `${hrs.toString().padStart(2,'0')}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+            
+            const estVol = ((diffSec / 3600) * (pumpData.pump.flowRate || 0)).toFixed(2);
+            document.getElementById('estVolume').innerText = `${estVol} m³`;
+        }
+
+        tick();
+        timerInterval = setInterval(tick, 1000);
+    }
+
+    async function submitAction(action) {
+        const operator = document.getElementById('operatorInput').value.trim();
+        const notes = document.getElementById('notesInput').value.trim();
+
+        if (!operator) {
+            alert('Vui lòng nhập tên người vận hành!');
+            return;
+        }
+
+        localStorage.setItem('cmms_op_name', operator);
+        showLoading(true);
+
+        try {
+            const res = await fetch(`${CMMS_API_BASE}/api/water-reports/pump-events`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pumpId: currentPumpId, action, operator, notes })
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Không thể ghi nhận thao tác');
+
+            showAlert('success', data.message);
+            document.getElementById('notesInput').value = '';
+            await loadPumpData();
+        } catch (err) {
+            showAlert('danger', err.message || 'Lỗi khi gửi dữ liệu');
+            showLoading(false);
+        }
+    }
+
+    function showLoading(show) {
+        document.getElementById('loadingState').style.display = show ? 'block' : 'none';
+        if (show) document.getElementById('appContent').style.display = 'none';
+    }
+
+    function showAlert(type, msg) {
+        const box = document.getElementById('alertBox');
+        box.innerHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show rounded-4 shadow-sm" role="alert">
+                ${msg}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>`;
+    }
+</script>
+</body>
+</html>
