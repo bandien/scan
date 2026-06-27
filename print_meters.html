@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>In Tem Mã QR Code 22 Đồng Hồ Điện & Nước | BanDienScan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; padding: 0 !important; }
+            .qr-card { page-break-inside: avoid; }
+        }
+        body { background-color: #f1f5f9; padding: 20px; font-family: sans-serif; }
+        .qr-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .qr-card {
+            background: white; border: 2px solid #0f172a; border-radius: 16px;
+            padding: 16px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            position: relative; overflow: hidden;
+        }
+        .qr-header {
+            background: #0f172a; color: white; margin: -16px -16px 12px -16px;
+            padding: 8px; font-weight: bold; font-size: 0.85rem; text-transform: uppercase;
+        }
+        .qr-img { width: 170px; height: 170px; margin: 10px 0; border: 1px solid #ddd; padding: 6px; border-radius: 12px; }
+        .uid-badge { background: #e2e8f0; color: #0f172a; font-weight: bold; font-family: monospace; padding: 4px 8px; border-radius: 6px; }
+    </style>
+</head>
+<body>
+
+<div class="container no-print mb-4">
+    <div class="d-flex justify-content-between align-items-center bg-white p-3 rounded-4 shadow-sm">
+        <div>
+            <h4 class="fw-bold mb-1">🖨️ Trang In Tem Mã QR Code (22 Đồng Hồ Điện & Nước)</h4>
+            <p class="text-muted mb-0 small">Bấm nút In tem để in danh sách tem dán thẳng lên thiết bị ngoài hiện trường</p>
+        </div>
+        <button class="btn btn-primary btn-lg fw-bold px-4 rounded-3" onclick="window.print()"><i class="bi bi-printer me-2"></i> In Tem Ngay</button>
+    </div>
+</div>
+
+<div class="container">
+    <div class="qr-grid" id="qrContainer">
+        <!-- JS renders cards here -->
+    </div>
+</div>
+
+<script>
+    const METERS = [
+        // --- ĐỒNG HỒ ĐIỆN ---
+        { uid: "NHA.DIEN.NO.01", name: "Caddie nữ 01", location: "Khu phòng nghỉ caddie", serial: "26011158", type: "Đồng hồ điện" },
+        { uid: "NHA.DIEN.NO.02", name: "Caddie nữ 02", location: "Khu phòng nghỉ caddie", serial: "26010356", type: "Đồng hồ điện" },
+        { uid: "NHA.DIEN.NO.03", name: "Caddie nữ 03", location: "Khu phòng nghỉ caddie", serial: "26010350", type: "Đồng hồ điện" },
+        { uid: "NHA.DIEN.NO.04", name: "Caddie nữ 04", location: "Khu phòng nghỉ caddie", serial: "Chưa có", type: "Đồng hồ điện" },
+        { uid: "NHA.DIEN.NO.05", name: "Caddie nữ 05", location: "Khu phòng nghỉ caddie", serial: "Chưa có", type: "Đồng hồ điện" },
+        { uid: "NHA.DIEN.NO.06", name: "Caddie nữ 06", location: "Khu phòng nghỉ caddie", serial: "Chưa có", type: "Đồng hồ điện" },
+        { uid: "NHA.DIEN.NO.07", name: "Caddie nữ 07", location: "Khu phòng nghỉ caddie", serial: "Chưa có", type: "Đồng hồ điện" },
+        { uid: "NHA.DIEN.NO.08", name: "Caddie nữ 08", location: "Khu phòng nghỉ caddie", serial: "Chưa có", type: "Đồng hồ điện" },
+        { uid: "NHA.DIEN.NO.09", name: "Caddie nữ 09", location: "Khu phòng nghỉ caddie", serial: "Chưa có", type: "Đồng hồ điện" },
+        { uid: "NHA.DIEN.NO.10", name: "Bếp nam", location: "Khu phòng nghỉ caddie", serial: "26010290", type: "Đồng hồ điện" },
+        { uid: "NHA.DIEN.NO.11", name: "Chiếu sáng, bơm", location: "Khu phòng nghỉ caddie", serial: "26010315", type: "Đồng hồ điện" },
+        { uid: "NHA.DIEN.NO.12", name: "Bình nóng lạnh", location: "Khu phòng nghỉ caddie", serial: "26011284", type: "Đồng hồ điện" },
+        { uid: "CLH.DIEN.KICHSONG", name: "Kích sóng VNPT", location: "Khu CLH", serial: "Chưa có", type: "Đồng hồ điện" },
+        { uid: "CLH.DIEN.ATM", name: "ATM VCB", location: "Khu CLH", serial: "Chưa có", type: "Đồng hồ điện" },
+
+        // --- ĐỒNG HỒ NƯỚC ---
+        { uid: "CLH.NUOC.MAI.01", name: "ĐH nước mái CLH 01/03", location: "Khu CLH", serial: "6013775", type: "Đồng hồ nước" },
+        { uid: "CLH.NUOC.MAI.02", name: "ĐH nước mái CLH 02/03", location: "Khu CLH", serial: "6013840", type: "Đồng hồ nước" },
+        { uid: "CLH.NUOC.MAI.03", name: "ĐH nước mái CLH 03/03", location: "Khu CLH", serial: "6013949", type: "Đồng hồ nước" },
+        { uid: "DH_HMI_GK", name: "ĐH HMI Giếng khoan", location: "Trạm Giếng Khoan", serial: "HMI", type: "Đồng hồ nước" },
+        { uid: "DH_LAN_TRAI", name: "ĐH Hồ lán trại", location: "Hồ lán trại", serial: "Cơ học", type: "Đồng hồ nước" },
+        { uid: "DH_NUOC_MAT", name: "ĐH nước mặt ngoài sân", location: "Ngoài sân golf", serial: "Cơ học", type: "Đồng hồ nước" },
+        { uid: "HMI_HO_1617", name: "HMI nước tưới hồ 16-17", location: "Hồ 16-17", serial: "HMI Digital", type: "Đồng hồ nước" },
+        { uid: "HMI_HO_TRUNG_TAM", name: "HMI nước tưới hồ trung tâm", location: "Hồ trung tâm", serial: "HMI Digital", type: "Đồng hồ nước" }
+    ];
+
+    const container = document.getElementById('qrContainer');
+    METERS.forEach(m => {
+        const targetUrl = `https://bandien.github.io/scan/meter.html?uid=${m.uid}`;
+        const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(targetUrl)}`;
+        
+        const card = document.createElement('div');
+        card.className = 'qr-card';
+        card.innerHTML = `
+            <div class="qr-header">${m.type} - BANDIENSCAN</div>
+            <h6 class="fw-extrabold text-dark mb-1">${m.name}</h6>
+            <div class="text-muted small mb-2">${m.location}</div>
+            <div><span class="uid-badge">UID: ${m.uid}</span></div>
+            <img src="${qrApi}" class="qr-img" alt="QR Code">
+            <div class="small text-muted font-monospace" style="font-size: 0.7rem;">${targetUrl}</div>
+        `;
+        container.appendChild(card);
+    });
+</script>
+</body>
+</html>
