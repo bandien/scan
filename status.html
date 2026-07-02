@@ -130,7 +130,7 @@
                 </p>
             </div>
             <div class="col-md-4 text-md-end">
-                <button class="btn btn-success btn-custom w-100 w-md-auto" data-bs-toggle="modal" data-bs-target="#addServerModal">
+                <button class="btn btn-success btn-custom w-100 w-md-auto" onclick="openAddModal()">
                     <i class="bi bi-plus-lg me-1"></i> Thêm Server giám sát
                 </button>
             </div>
@@ -153,19 +153,20 @@
         </div>
     </div>
 
-    <!-- Add Server Modal -->
-    <div class="modal fade" id="addServerModal" tabindex="-1" aria-labelledby="addServerModalLabel" aria-hidden="true">
+    <!-- Server Modal (Add / Edit) -->
+    <div class="modal fade" id="serverModal" tabindex="-1" aria-labelledby="serverModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content" style="background-color: var(--card-bg); border: 2px solid var(--border-color); border-radius: 20px; color: var(--text-main);">
                 <div class="modal-header border-bottom-0 pb-0">
-                    <h5 class="modal-title fw-bold" id="addServerModalLabel">Thêm máy chủ cần giám sát</h5>
+                    <h5 class="modal-title fw-bold" id="serverModalLabel">Thêm máy chủ</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="addServerForm">
+                    <form id="serverForm">
+                        <input type="hidden" id="serverIdInput">
                         <div class="mb-3">
                             <label class="form-label small fw-bold">Tên gợi nhớ máy chủ</label>
-                            <input type="text" id="serverNameInput" class="form-control rounded-3" placeholder="Ví dụ: Hệ thống Chi chiếu sáng" required>
+                            <input type="text" id="serverNameInput" class="form-control rounded-3" placeholder="Ví dụ: Hệ thống chiếu sáng" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label small fw-bold">Đường dẫn kiểm tra (URL)</label>
@@ -174,7 +175,7 @@
                         </div>
                         <div class="d-flex justify-content-end gap-2 pt-2">
                             <button type="button" class="btn btn-secondary btn-custom" data-bs-dismiss="modal">Hủy</button>
-                            <button type="submit" class="btn btn-primary btn-custom">Lưu Server</button>
+                            <button type="submit" class="btn btn-primary btn-custom" id="submitBtn">Lưu Server</button>
                         </div>
                     </form>
                 </div>
@@ -206,8 +207,12 @@
 
         let servers = JSON.parse(localStorage.getItem("monitored_servers")) || DEFAULT_SERVERS;
         let logs = JSON.parse(localStorage.getItem("server_logs")) || [];
+        let serverModalObj = null;
 
         window.onload = function() {
+            // Initialize Bootstrap Modal
+            serverModalObj = new bootstrap.Modal(document.getElementById('serverModal'));
+
             // Apply theme
             const currentTheme = localStorage.getItem("theme") || "light";
             document.documentElement.setAttribute("data-theme", currentTheme);
@@ -254,18 +259,18 @@
 
                 grid.innerHTML += `
                     <div class="col-md-6 col-lg-4">
-                        <div class="card-custom">
+                        <div class="card-custom text-start">
                             <div class="d-flex justify-content-between align-items-start mb-3">
-                                <div>
-                                    <h6 class="fw-bold m-0 text-truncate" style="max-width: 180px;">${s.name}</h6>
-                                    <span class="text-muted font-mono" style="font-size: 0.75rem; word-break: break-all;">${s.url}</span>
+                                <div style="max-width: 65%;">
+                                    <h6 class="fw-bold m-0 text-truncate" title="${s.name}">${s.name}</h6>
+                                    <span class="text-muted font-mono text-truncate d-block" style="font-size: 0.75rem;" title="${s.url}">${s.url}</span>
                                 </div>
                                 ${statusBadge}
                             </div>
                             <div class="row g-2 mt-2 pt-2 border-top border-secondary border-opacity-10 text-center">
                                 <div class="col-6 border-end border-secondary border-opacity-10">
                                     <span class="text-secondary small d-block">Phản hồi</span>
-                                    <span class="fw-bold font-mono">${latencyText}</span>
+                                    <span class="fw-bold font-mono text-primary">${latencyText}</span>
                                 </div>
                                 <div class="col-6">
                                     <span class="text-secondary small d-block">Check cuối</span>
@@ -273,11 +278,14 @@
                                 </div>
                             </div>
                             <div class="d-flex justify-content-end gap-2 mt-3 pt-2">
-                                <button class="btn btn-sm btn-outline-primary btn-custom py-1" onclick="pingServer('${s.id}')">
+                                <button class="btn btn-sm btn-outline-primary btn-custom py-1 px-3.5" onclick="pingServer('${s.id}')">
                                     <i class="bi bi-play-fill"></i> Test
                                 </button>
-                                <button class="btn btn-sm btn-outline-danger btn-custom py-1" onclick="deleteServer('${s.id}')">
-                                    <i class="bi bi-trash"></i>
+                                <button class="btn btn-sm btn-outline-warning btn-custom py-1 px-3.5" onclick="openEditModal('${s.id}')">
+                                    <i class="bi bi-pencil"></i> Sửa
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger btn-custom py-1 px-3.5" onclick="deleteServer('${s.id}')">
+                                    <i class="bi bi-trash"></i> Xóa
                                 </button>
                             </div>
                         </div>
@@ -298,7 +306,6 @@
             let latency = 0;
 
             try {
-                // Using no-cors handles mixed content / non-CORS configurations
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 6000);
 
@@ -313,7 +320,6 @@
                 online = true;
                 latency = Date.now() - startTime;
             } catch (err) {
-                // Fetch failed or timed out
                 online = false;
             }
 
@@ -342,7 +348,6 @@
                 latency
             };
             logs.unshift(logItem);
-            // Cap at 100 logs
             if (logs.length > 100) logs.pop();
             localStorage.setItem("server_logs", JSON.stringify(logs));
             renderLogs();
@@ -372,6 +377,26 @@
             }
         }
 
+        function openAddModal() {
+            document.getElementById("serverModalLabel").innerText = "Thêm máy chủ giám sát";
+            document.getElementById("submitBtn").innerText = "Thêm mới";
+            document.getElementById("serverIdInput").value = "";
+            document.getElementById("serverForm").reset();
+            serverModalObj.show();
+        }
+
+        function openEditModal(id) {
+            const s = servers.find(item => item.id === id);
+            if (!s) return;
+
+            document.getElementById("serverModalLabel").innerText = "Chỉnh sửa máy chủ";
+            document.getElementById("submitBtn").innerText = "Lưu thay đổi";
+            document.getElementById("serverIdInput").value = s.id;
+            document.getElementById("serverNameInput").value = s.name;
+            document.getElementById("serverUrlInput").value = s.url;
+            serverModalObj.show();
+        }
+
         function deleteServer(id) {
             const server = servers.find(s => s.id === id);
             if (confirm(`Bạn có muốn xóa server "${server.name}" khỏi danh sách giám sát?`)) {
@@ -381,9 +406,10 @@
             }
         }
 
-        // Add Server Form Handler
-        document.getElementById("addServerForm").onsubmit = function(e) {
+        // Form Submit Handler (Handles both Add and Edit)
+        document.getElementById("serverForm").onsubmit = function(e) {
             e.preventDefault();
+            const id = document.getElementById("serverIdInput").value;
             const name = document.getElementById("serverNameInput").value.trim();
             let url = document.getElementById("serverUrlInput").value.trim();
 
@@ -391,26 +417,35 @@
                 url = "http://" + url;
             }
 
-            const newServer = {
-                id: "server-" + Date.now(),
-                name,
-                url,
-                status: "UNKNOWN",
-                lastChecked: null,
-                latency: null
-            };
+            if (id) {
+                // Edit existing server
+                const server = servers.find(s => s.id === id);
+                if (server) {
+                    server.name = name;
+                    server.url = url;
+                    server.status = "UNKNOWN";
+                    server.latency = null;
+                }
+            } else {
+                // Add new server
+                const newServer = {
+                    id: "server-" + Date.now(),
+                    name,
+                    url,
+                    status: "UNKNOWN",
+                    lastChecked: null,
+                    latency: null
+                };
+                servers.push(newServer);
+            }
 
-            servers.push(newServer);
             localStorage.setItem("monitored_servers", JSON.stringify(servers));
-
-            // Reset Form and Modal
-            document.getElementById("addServerForm").reset();
-            const modalElement = document.getElementById("addServerModal");
-            const modal = bootstrap.Modal.getInstance(modalElement);
-            modal.hide();
-
+            serverModalObj.hide();
             renderServers();
-            pingServer(newServer.id);
+            
+            // Ping the added/edited server
+            const targetId = id || servers[servers.length - 1].id;
+            pingServer(targetId);
         };
     </script>
 </body>
