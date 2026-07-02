@@ -1,6 +1,37 @@
+---
+title: Nhật ký thay đổi (Changelog) - BanDienScan
+aliases:
+  - changelog
+  - nhật ký thay đổi (changelog) - bandienscan
+tags:
+  - khac
+  - scan-cmms
+  - dang-thuc-hien
+date: 2026-06-08
+updated: 2026-06-08
+---
 # Nhật ký thay đổi (Changelog) - BanDienScan
 
 Tất cả các thay đổi và cải tiến của hệ thống Quản lý & Bảo trì Ban điện thông minh (CMMS Mini WebApp) được ghi nhận tại đây theo từng phiên bản.
+
+## [v2.8.0] - 2026-07-03
+### Thêm mới (Added)
+- **Module Giám sát Server Uptime (`status.html`):**
+  - Công cụ giám sát thời gian phản hồi (latency) và trạng thái kết nối mạng của các server nội bộ và internet (Ví dụ: `chieusang.montanagc.com.vn:8383`).
+  - Tích hợp bộ tính năng quản lý Thêm mới, Chỉnh sửa thông tin (Edit) và Xóa bỏ (Delete) các máy chủ cần giám sát ngay từ giao diện người dùng. Lưu cấu hình cục bộ (`localStorage`).
+  - Ghi nhật ký lịch sử Uptime (Log History) tối đa 100 dòng kiểm tra gần nhất.
+- **Liên kết điều hướng hai chiều:**
+  - Tích hợp liên kết **Giám sát Server Uptime** vào Menu chính của trang chủ `index.html`.
+  - Bổ sung nút bấm **Trang chủ** trên thanh tiêu đề của `status.html` để quay lại dễ dàng.
+- **Trang phụ trợ chốt chỉ số 1-Touch công cộng (`meter.html`):**
+  - WebApp di động độc lập giúp nhân viên vận hành chốt nhanh số điện, nước qua 4G ngoài hiện trường mà không bị chặn mạng/VPN.
+  - Hỗ trợ nhập thời gian thao tác tùy chỉnh phục vụ kịch bản chốt chỉ số bù.
+- **Trang in tem mã QR hàng loạt (`print_meters.html`):**
+  - Tạo trang xuất bản và in nhãn dán QR hàng loạt cho 22 đồng hồ điện & nước.
+
+### Cập nhật (Updated)
+- **Kiến trúc & Sơ đồ Hệ thống (`architecture.html` & `ui_architecture.md`):**
+  - Cập nhật sơ đồ Mermaid biểu diễn luồng dữ liệu (Data Flow) và bảng từ điển Mapping ánh xạ mã nguồn cho các trang vệ tinh phụ trợ mới.
 
 ---
 
