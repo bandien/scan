@@ -22,12 +22,18 @@ graph TD
     App --> Dash[Dashboard Section<br/>#dashboardSection]
     App --> Kanban[Kanban Section<br/>#kanbanSection]
     App --> Cal[Calendar Section<br/>#calendarSection]
+    App --> Metering[Metering Section<br/>#meteringSection]
     App --> Info[Device Info Section<br/>#infoSection]
+
+    %% Independent Satellite WebApps (GitHub Pages)
+    Root -.-> LinkStatus[status.html<br/>Uptime Monitor]
+    Root -.-> LinkMeter[meter.html<br/>Public 1-Touch Meter]
+    LinkMeter -.-> LinkPrint[print_meters.html<br/>QR Print Sheet]
 
     %% Header Elements
     Header --> UserBadge[User Profile Badge<br/>#userBadge]
     Header --> SyncBadge[Sync Status Badge<br/>#syncBadge]
-    Header --> NavBtns[Navigation Buttons<br/>Calendar, Kanban, Dash]
+    Header --> NavBtns[Navigation Buttons<br/>Metering, Calendar, Kanban, Dash]
 
     %% Info Section Elements
     Info --> DevDetails[Device Profile<br/>#disp_name, #disp_uid]
@@ -43,6 +49,16 @@ graph TD
     submitData -.-> GAS_POST[GAS POST Endpoint]
     OfflineSync -.-> updateSyncStatus((updateSyncStatus))
 
+    %% Uptime Monitor Logic (status.html)
+    LinkStatus --> pingServer((pingServer function))
+    pingServer -.-> fetchNoCors[fetch mode=no-cors]
+    pingServer -.-> LocalStorageStatus[(localStorage server_logs)]
+
+    %% Public Meter Logic (meter.html)
+    LinkMeter --> submitMeterReadingPub((submitMeterReading function))
+    submitMeterReadingPub -.-> GAS_POST_METER[GAS POST action=submitMeterReading]
+    submitMeterReadingPub -.-> LocalStorageMeterState[(localStorage pump_state_X)]
+
     %% Kanban / Work Orders
     Kanban --> loadKanban((loadKanban function))
     Kanban --> WOModal[WO Detail Modal<br/>#woDetailModal]
@@ -54,13 +70,27 @@ graph TD
     updateWOStatus -.-> LocalStorage
     CreateWO --> submitCreateWO((submitCreateWO))
     submitCreateWO -.-> GAS_POST
+
+    %% Metering / Electric & Water Meters
+    Metering --> MeterList[Meter List<br/>#meterList]
+    Metering --> MeterModal[Meter Reading Modal<br/>#meterReadingModal]
+    Metering --> toggleMetering((toggleMetering function))
+    toggleMetering --> loadMeterPoints((loadMeterPoints function))
+    loadMeterPoints -.-> LocalStorageMeters[(localStorage localMeterPoints)]
+    loadMeterPoints -.-> GAS_GET_METERS[GAS GET action=getMeterPoints]
+    MeterList --> renderMeterDashboard((renderMeterDashboard function))
+    MeterModal --> submitMeterReading((submitMeterReading function))
+    MeterModal --> loadMeterHistoryInline((loadMeterHistoryInline function))
+    loadMeterHistoryInline -.-> GAS_GET_HISTORY[GAS GET action=getMeterHistory]
+    submitMeterReading -.-> GAS_POST_READING[GAS POST action=submitMeterReading]
+    submitMeterReading -.-> LocalStorageMeters
 ```
 
 ## 2. Từ điển Mapping (UI to Code)
 
-Để sửa chữa hoặc nâng cấp một tính năng, hãy tìm kiếm các ID/Function sau trong file `index.html`:
+Để sửa chữa hoặc nâng cấp một tính năng, hãy tìm kiếm các ID/Function sau trong mã nguồn:
 
-| Khu vực UI (Giao diện) | HTML ID / Class | JS Function liên quan | Nguồn Dữ liệu (Nơi cấp data) | Mã Vị trí (Copy to Prompt) |
+| Khu vực UI (Giao diện) | HTML ID / Class / File | JS Function liên quan | Nguồn Dữ liệu (Nơi cấp data) | Mã Vị trí (Copy to Prompt) |
 | :--- | :--- | :--- | :--- | :--- |
 | **Màn hình Đăng nhập** | `#loginOverlay`, `#usernameInput`, `#passwordInput` | `doLogin()` | Google Sheets (`Users`) -> `localStorage` | `[index.html#loginOverlay]` |
 | **Chuyển ngôn ngữ (Login)** | `#loginLangToggle` | `setLanguage()` | Tĩnh (Static) | `[index.html#loginLangToggle]` |
@@ -76,6 +106,11 @@ graph TD
 | **WO Detail Modal** | `#woDetailModal`, `#woDetailBody`, `#woNextStatusBtn` | `openWODetail(wo)`, `advanceWOStatus()`, `updateWOStatus()`, `quickAdvanceStatus()` | `localWorkOrders` → GAS POST `action=updateWOStatus` | `[index.html#woDetailModal]` |
 | **Form Tạo WO** | `#createWOModal`, `#woType`, `#woPriority`, `#woAsset`, `#woDescription`, `#woDueDate` | `showCreateWOModal()`, `submitCreateWO()` | `localDevices` (dropdown) → GAS POST `action=createWO` | `[index.html#createWOModal]` |
 | **Bảng Lịch (Calendar)** | `#calendarSection` | `toggleCalendar()` | (Đang là Mock Data) | `[index.html#calendarSection]` |
+| **Danh mục Đồng hồ (Điện & Nước)** | `#meteringSection`, `#meterList`, `#btn-metering` | `toggleMetering()`, `loadMeterPoints()`, `renderMeterDashboard()` | GAS GET `action=getMeterPoints` → `localStorage('localMeterPoints')`; dữ liệu gốc sheet `MeterPoints` | `[index.html#meteringSection]`, `[js/metering.js:toggleMetering]` |
+| **Chốt chỉ số Đồng hồ** | `#meterReadingModal`, `#meterValueInput`, `#meterPhotoPreview`, `#meterHistoryInline` | `openMeterReadingModal(meterId)`, `captureMeterPhoto()`, `loadMeterHistoryInline()`, `submitMeterReading()` | GAS GET `action=getMeterHistory`; GAS POST `action=submitMeterReading`; sheet `MeterReadings` | `[index.html#meterReadingModal]`, `[js/metering.js:submitMeterReading]` |
+| **Giám sát Server Uptime** | `status.html` | `pingServer()`, `checkAllServers()`, `addLog()` | Trình duyệt Client-side (`fetch no-cors`) -> Lưu log vào `localStorage('server_logs')` | `[status.html]` |
+| **Chốt 1-Touch Công cộng** | `meter.html` | `loadMeterData()`, `submitMeterReading()` | Cloud Proxy GAS -> `localStorage('pump_state_X')` | `[meter.html]` |
+| **In tem QR 22 Đồng hồ** | `print_meters.html` | JS array rendering | Tĩnh + QRServer API | `[print_meters.html]` |
 
 ## 3. Kiến trúc Luồng Dữ liệu (Data Flow)
 
