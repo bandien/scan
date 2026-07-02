@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Status Monitor | BanDienScan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-sub: #475569;
+            --border-color: #e2e8f0;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-orange: #f97316;
+        }
+        [data-theme="dark"] {
+            --bg-color: #0b1329;
+            --card-bg: #131a30;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --border-color: #1e293b;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+        .navbar-custom {
+            background-color: var(--card-bg);
+            border-bottom: 2px solid var(--border-color);
+            padding: 15px 20px;
+        }
+        .card-custom {
+            background-color: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+            margin-bottom: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+        }
+        .btn-custom {
+            border-radius: 12px;
+            font-weight: 700;
+            padding: 10px 18px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .status-online {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: var(--accent-green);
+            border: 2px solid rgba(16, 185, 129, 0.3);
+        }
+        .status-offline {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: var(--accent-red);
+            border: 2px solid rgba(239, 68, 68, 0.3);
+        }
+        .status-checking {
+            background-color: rgba(249, 115, 22, 0.15);
+            color: var(--accent-orange);
+            border: 2px solid rgba(249, 115, 22, 0.3);
+        }
+        .font-mono {
+            font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+        .log-container {
+            max-height: 250px;
+            overflow-y: auto;
+            background-color: rgba(0, 0, 0, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 10px;
+            font-size: 0.8rem;
+        }
+        [data-theme="dark"] .log-container {
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-custom">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                <div class="bg-primary text-white rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                    <i class="bi bi-cpu-fill fs-5"></i>
+                </div>
+                <div>
+                    <span class="fw-bold text-uppercase text-primary block" style="font-size: 0.7rem; letter-spacing: 1px;">BanDienScan Tools</span>
+                    <h5 class="m-0 fw-black text-light-dark" style="font-size: 1.1rem; line-height: 1;">Giám sát Trạng thái Server</h5>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-secondary btn-custom" onclick="toggleTheme()" id="themeBtn">
+                    <i class="bi bi-moon-fill"></i>
+                </button>
+                <button class="btn btn-primary btn-custom" onclick="checkAllServers()">
+                    <i class="bi bi-arrow-clockwise me-1"></i> Kiểm tra tất cả
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <!-- Add New Server Modal Trigger & Info -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <p class="text-secondary small">
+                    Trang web chạy trực tiếp tại trình duyệt của bạn (Client-side) để kiểm tra kết nối tới các hệ thống máy chủ nội bộ hoặc công cộng. Nhật ký kiểm tra (Uptime Log) được ghi nhận và lưu trữ trong bộ nhớ đệm trình duyệt của bạn.
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <button class="btn btn-success btn-custom w-100 w-md-auto" data-bs-toggle="modal" data-bs-target="#addServerModal">
+                    <i class="bi bi-plus-lg me-1"></i> Thêm Server giám sát
+                </button>
+            </div>
+        </div>
+
+        <!-- Servers Grid -->
+        <div class="row" id="serversGrid">
+            <!-- Dynamic Server Cards Rendered Here -->
+        </div>
+
+        <!-- Log History Section -->
+        <div class="card-custom">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold m-0"><i class="bi bi-journal-text text-primary me-2"></i>Nhật ký Giám sát (Log History)</h5>
+                <button class="btn btn-sm btn-outline-danger btn-custom py-1 px-2" onclick="clearLogs()">Xóa Nhật ký</button>
+            </div>
+            <div class="log-container font-mono" id="logsBox">
+                <!-- Status Logs Here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Server Modal -->
+    <div class="modal fade" id="addServerModal" tabindex="-1" aria-labelledby="addServerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background-color: var(--card-bg); border: 2px solid var(--border-color); border-radius: 20px; color: var(--text-main);">
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="addServerModalLabel">Thêm máy chủ cần giám sát</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addServerForm">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Tên gợi nhớ máy chủ</label>
+                            <input type="text" id="serverNameInput" class="form-control rounded-3" placeholder="Ví dụ: Hệ thống Chi chiếu sáng" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Đường dẫn kiểm tra (URL)</label>
+                            <input type="url" id="serverUrlInput" class="form-control rounded-3 font-mono" placeholder="http://domain-or-ip:port/" required>
+                            <div class="form-text small text-muted">Có thể nhập địa chỉ LAN (192.168.x.x) hoặc Internet công cộng.</div>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2 pt-2">
+                            <button type="button" class="btn btn-secondary btn-custom" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary btn-custom">Lưu Server</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Default Monitored Servers List
+        const DEFAULT_SERVERS = [
+            {
+                id: "chieusang-montana",
+                name: "Hệ thống chiếu sáng Montana",
+                url: "http://chieusang.montanagc.com.vn:8383/",
+                status: "UNKNOWN",
+                lastChecked: null,
+                latency: null
+            },
+            {
+                id: "cmms-local",
+                name: "CMMS Core Local",
+                url: "http://127.0.0.1:3001/api/water-reports/pump-events",
+                status: "UNKNOWN",
+                lastChecked: null,
+                latency: null
+            }
+        ];
+
+        let servers = JSON.parse(localStorage.getItem("monitored_servers")) || DEFAULT_SERVERS;
+        let logs = JSON.parse(localStorage.getItem("server_logs")) || [];
+
+        window.onload = function() {
+            // Apply theme
+            const currentTheme = localStorage.getItem("theme") || "light";
+            document.documentElement.setAttribute("data-theme", currentTheme);
+            updateThemeButton(currentTheme);
+
+            renderServers();
+            renderLogs();
+            checkAllServers();
+        };
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const newTheme = html.getAttribute("data-theme") === "dark" ? "light" : "dark";
+            html.setAttribute("data-theme", newTheme);
+            localStorage.setItem("theme", newTheme);
+            updateThemeButton(newTheme);
+        }
+
+        function updateThemeButton(theme) {
+            const btn = document.getElementById("themeBtn");
+            if (theme === "dark") {
+                btn.innerHTML = '<i class="bi bi-sun-fill text-warning"></i>';
+            } else {
+                btn.innerHTML = '<i class="bi bi-moon-fill"></i>';
+            }
+        }
+
+        function renderServers() {
+            const grid = document.getElementById("serversGrid");
+            grid.innerHTML = "";
+
+            servers.forEach(s => {
+                let statusBadge = "";
+                let latencyText = s.latency ? `${s.latency} ms` : "—";
+                let lastCheckedText = s.lastChecked ? new Date(s.lastChecked).toLocaleTimeString("vi-VN") : "Chưa kiểm tra";
+
+                if (s.status === "ONLINE") {
+                    statusBadge = `<span class="status-badge status-online"><i class="bi bi-check-circle-fill"></i> ONLINE</span>`;
+                } else if (s.status === "OFFLINE") {
+                    statusBadge = `<span class="status-badge status-offline"><i class="bi bi-exclamation-triangle-fill"></i> OFFLINE</span>`;
+                } else {
+                    statusBadge = `<span class="status-badge status-checking"><span class="spinner-grow spinner-grow-sm" role="status"></span> ĐANG CHECK</span>`;
+                }
+
+                grid.innerHTML += `
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card-custom">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h6 class="fw-bold m-0 text-truncate" style="max-width: 180px;">${s.name}</h6>
+                                    <span class="text-muted font-mono" style="font-size: 0.75rem; word-break: break-all;">${s.url}</span>
+                                </div>
+                                ${statusBadge}
+                            </div>
+                            <div class="row g-2 mt-2 pt-2 border-top border-secondary border-opacity-10 text-center">
+                                <div class="col-6 border-end border-secondary border-opacity-10">
+                                    <span class="text-secondary small d-block">Phản hồi</span>
+                                    <span class="fw-bold font-mono">${latencyText}</span>
+                                </div>
+                                <div class="col-6">
+                                    <span class="text-secondary small d-block">Check cuối</span>
+                                    <span class="fw-bold text-muted small">${lastCheckedText}</span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-end gap-2 mt-3 pt-2">
+                                <button class="btn btn-sm btn-outline-primary btn-custom py-1" onclick="pingServer('${s.id}')">
+                                    <i class="bi bi-play-fill"></i> Test
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger btn-custom py-1" onclick="deleteServer('${s.id}')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function pingServer(id) {
+            const server = servers.find(s => s.id === id);
+            if (!server) return;
+
+            server.status = "CHECKING";
+            renderServers();
+
+            const startTime = Date.now();
+            let online = false;
+            let latency = 0;
+
+            try {
+                // Using no-cors handles mixed content / non-CORS configurations
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+                await fetch(server.url, {
+                    method: 'GET',
+                    mode: 'no-cors',
+                    cache: 'no-cache',
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+                online = true;
+                latency = Date.now() - startTime;
+            } catch (err) {
+                // Fetch failed or timed out
+                online = false;
+            }
+
+            server.status = online ? "ONLINE" : "OFFLINE";
+            server.latency = online ? latency : null;
+            server.lastChecked = new Date().toISOString();
+
+            // Save state
+            localStorage.setItem("monitored_servers", JSON.stringify(servers));
+            
+            // Add Log
+            addLog(server.name, server.url, server.status, server.latency);
+            renderServers();
+        }
+
+        function checkAllServers() {
+            servers.forEach(s => pingServer(s.id));
+        }
+
+        function addLog(name, url, status, latency) {
+            const logItem = {
+                timestamp: new Date().toISOString(),
+                name,
+                url,
+                status,
+                latency
+            };
+            logs.unshift(logItem);
+            // Cap at 100 logs
+            if (logs.length > 100) logs.pop();
+            localStorage.setItem("server_logs", JSON.stringify(logs));
+            renderLogs();
+        }
+
+        function renderLogs() {
+            const box = document.getElementById("logsBox");
+            if (logs.length === 0) {
+                box.innerHTML = `<span class="text-secondary">Chưa có nhật ký hoạt động.</span>`;
+                return;
+            }
+
+            box.innerHTML = logs.map(l => {
+                const timeStr = new Date(l.timestamp).toLocaleTimeString("vi-VN");
+                const dateStr = new Date(l.timestamp).toLocaleDateString("vi-VN");
+                const badgeClass = l.status === "ONLINE" ? "text-success" : "text-danger";
+                const latencyStr = l.latency ? ` [${l.latency}ms]` : "";
+                return `[${dateStr} ${timeStr}] <span class="fw-bold">${l.name}</span> (${l.url}) -> <span class="${badgeClass} fw-bold">${l.status}</span>${latencyStr}`;
+            }).join("<br>");
+        }
+
+        function clearLogs() {
+            if (confirm("Bạn có chắc chắn muốn xóa toàn bộ nhật ký kiểm tra?")) {
+                logs = [];
+                localStorage.removeItem("server_logs");
+                renderLogs();
+            }
+        }
+
+        function deleteServer(id) {
+            const server = servers.find(s => s.id === id);
+            if (confirm(`Bạn có muốn xóa server "${server.name}" khỏi danh sách giám sát?`)) {
+                servers = servers.filter(s => s.id !== id);
+                localStorage.setItem("monitored_servers", JSON.stringify(servers));
+                renderServers();
+            }
+        }
+
+        // Add Server Form Handler
+        document.getElementById("addServerForm").onsubmit = function(e) {
+            e.preventDefault();
+            const name = document.getElementById("serverNameInput").value.trim();
+            let url = document.getElementById("serverUrlInput").value.trim();
+
+            if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                url = "http://" + url;
+            }
+
+            const newServer = {
+                id: "server-" + Date.now(),
+                name,
+                url,
+                status: "UNKNOWN",
+                lastChecked: null,
+                latency: null
+            };
+
+            servers.push(newServer);
+            localStorage.setItem("monitored_servers", JSON.stringify(servers));
+
+            // Reset Form and Modal
+            document.getElementById("addServerForm").reset();
+            const modalElement = document.getElementById("addServerModal");
+            const modal = bootstrap.Modal.getInstance(modalElement);
+            modal.hide();
+
+            renderServers();
+            pingServer(newServer.id);
+        };
+    </script>
+</body>
+</html>
