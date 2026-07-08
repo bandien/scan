@@ -324,7 +324,11 @@
         <div class="d-flex toolbar-grid align-items-end gap-2">
           <div>
             <label class="form-label" for="filterDate">Ngày kế hoạch</label>
-            <input class="form-control" id="filterDate" type="date">
+            <div class="d-flex align-items-center gap-1">
+              <button class="btn btn-outline-secondary btn-icon" type="button" id="btnPrevDay" title="Ngày trước"><i class="bi bi-chevron-left"></i></button>
+              <input class="form-control" id="filterDate" type="date">
+              <button class="btn btn-outline-secondary btn-icon" type="button" id="btnNextDay" title="Ngày sau"><i class="bi bi-chevron-right"></i></button>
+            </div>
           </div>
           <div>
             <label class="form-label" for="filterTeam">Tổ/ca</label>
@@ -536,38 +540,6 @@
       }
     ];
 
-    function buildSampleLogs() {
-      const base = [
-        ["07:30", "08:05", "Nguyễn Văn An", "Ca sáng", "Hoàn thành", "Tầng hầm B1 | Tủ MSB-B1: Kiểm tra nhiệt độ đầu cốt và vệ sinh mặt tủ.", "Nhiệt độ đầu cốt bình thường, không có mùi khét, đã vệ sinh bụi mặt tủ.", "", "Theo dõi lại trong ca chiều."],
-        ["08:10", "08:35", "Trần Minh Đức", "Ca sáng", "Hoàn thành", "Phòng bơm | Tủ điều khiển bơm nước sạch: Kiểm tra Auto/Manual.", "Chế độ Auto/Manual hoạt động ổn định, đèn báo đầy đủ, contactor đóng cắt bình thường.", "", ""],
-        ["08:40", "09:15", "Lê Quốc Huy", "Ca sáng", "Cần hỗ trợ", "Sân vườn | Chiếu sáng cảnh quan: Kiểm tra đèn lỗi khu lối đi.", "Ghi nhận 3 bóng không sáng tại lối đi hồ cảnh quan.", "Cần thay bóng và kiểm tra lại hộp nối chống nước.", "Đề xuất cấp 3 bóng LED và băng keo chống thấm."],
-        ["09:20", "09:50", "Nguyễn Văn An", "Ca sáng", "Hoàn thành", "Trạm biến áp | Máy phát dự phòng: Kiểm tra mức dầu, nước làm mát, ắc quy.", "Mức dầu và nước làm mát đạt, điện áp ắc quy 25.6V.", "", "Chạy thử theo lịch tuần."],
-        ["10:00", "10:25", "Phạm Tuấn Anh", "Ca sáng", "Hoàn thành", "Tầng 1 | Tủ DB-L1: Kiểm tra CB nhánh khu văn phòng.", "CB nhánh không nhảy, tải ổn định, đã siết nhẹ lại nhãn cảnh báo.", "", ""],
-        ["10:30", "11:00", "Trần Minh Đức", "Ca sáng", "Đang làm", "Phòng kỹ thuật | Quạt thông gió: Kiểm tra tiếng ồn và rung.", "Quạt chạy được nhưng có tiếng ồn nhẹ khi khởi động.", "Cần vệ sinh cánh và kiểm tra bạc đạn.", "Theo dõi thêm sau khi vệ sinh."],
-        ["13:30", "14:05", "Lê Quốc Huy", "Ca chiều", "Hoàn thành", "Khu A | Công tơ điện tổng: Ghi nhận chỉ số và ảnh hiện trạng.", "Đã ghi chỉ số, niêm phong còn nguyên, mặt kính sạch.", "", ""],
-        ["14:10", "14:45", "Phạm Tuấn Anh", "Ca chiều", "Hoàn thành", "Tầng 2 | Tủ điện hành lang: Kiểm tra đèn báo và vệ sinh.", "Đèn báo pha sáng đủ, bên trong tủ khô ráo, đã vệ sinh bụi.", "", ""],
-        ["15:00", "15:35", "Nguyễn Văn An", "Ca chiều", "Cần hỗ trợ", "Bãi xe | Chiếu sáng: Kiểm tra tuyến đèn gần cổng phụ.", "Một nhánh đèn chập chờn khi bật tải.", "Nghi tiếp xúc kém tại hộp nối.", "Cần mở hộp nối kiểm tra khi có đủ dụng cụ."],
-        ["16:00", "16:25", "Trần Minh Đức", "Ca chiều", "Hoàn thành", "Phòng bơm | Bơm nước thải: Kiểm tra phao mức và chạy thử.", "Phao mức tác động bình thường, bơm chạy không rung bất thường.", "", "Vệ sinh hố gom theo lịch định kỳ."]
-      ];
-
-      return base.map((item, index) => ({
-        id: "LOG-DEMO-" + String(index + 1).padStart(2, "0"),
-        planId: "",
-        workDate: today,
-        startTime: item[0],
-        endTime: item[1],
-        employee: item[2],
-        shift: item[3],
-        progress: item[4],
-        selectedTask: item[5],
-        result: item[6],
-        issue: item[7],
-        nextAction: item[8],
-        createdAt: `${today}T${item[1]}:00.000+07:00`,
-        syncStatus: "local"
-      })).reverse();
-    }
-
     document.addEventListener("DOMContentLoaded", async () => {
       toast = new bootstrap.Toast(document.getElementById("toast"), { delay: 2200 });
       planModal = new bootstrap.Modal(document.getElementById("planModal"));
@@ -580,17 +552,29 @@
       renderEmployeeSuggestions();
       bindEvents();
       render();
+      retryPendingLogs();
     });
 
     function bindEvents() {
       ["filterDate", "filterTeam", "searchBox"].forEach(id => {
         document.getElementById(id).addEventListener("input", renderPlans);
       });
+      document.getElementById("btnPrevDay").addEventListener("click", () => shiftFilterDate(-1));
+      document.getElementById("btnNextDay").addEventListener("click", () => shiftFilterDate(1));
       document.getElementById("btnReload").addEventListener("click", async () => {
-        localStorage.removeItem(STORAGE_KEYS.plans);
-        await loadPlans(true);
-        render();
-        showToast("Đã nạp lại kế hoạch");
+        const btn = document.getElementById("btnReload");
+        const original = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Đang nạp...';
+        try {
+          localStorage.removeItem(STORAGE_KEYS.plans);
+          await loadPlans(true);
+          render();
+          showToast("Đã nạp lại kế hoạch");
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = original;
+        }
       });
       document.getElementById("logForm").addEventListener("submit", submitLog);
       document.getElementById("btnAddPlan").addEventListener("click", () => openPlanModal(null));
@@ -613,26 +597,43 @@
       };
     }
 
+    function shiftFilterDate(deltaDays) {
+      const input = document.getElementById("filterDate");
+      const parsed = input.value ? new Date(input.value + "T00:00:00") : new Date();
+      parsed.setDate(parsed.getDate() + deltaDays);
+      input.value = parsed.getFullYear() + "-" +
+        String(parsed.getMonth() + 1).padStart(2, "0") + "-" +
+        String(parsed.getDate()).padStart(2, "0");
+      renderPlans();
+    }
+
+    async function fetchPlansFromBackend() {
+      const sync = getSync();
+      if (!sync.url) return null;
+      try {
+        const response = await fetch(`${sync.url}?action=getPlans&token=${encodeURIComponent(sync.token)}`, { cache: "no-cache", signal: AbortSignal.timeout(10000) });
+        const data = await response.json();
+        if (data.status === "success" && Array.isArray(data.plans)) return data.plans;
+      } catch (error) { /* backend lỗi → dùng cache/plan.json */ }
+      return null;
+    }
+
     // Kế hoạch lấy từ Google Sheets (action=getPlans); plan.json chỉ là
     // fallback khi không gọi được backend
     async function loadPlans(force) {
       const cached = localStorage.getItem(STORAGE_KEYS.plans);
       if (cached && !force) {
+        // Hiện cache ngay cho nhanh, đồng thời lấy bản mới từ Sheets phía sau
         plans = JSON.parse(cached);
+        refreshPlansInBackground();
         return;
       }
 
-      const sync = getSync();
-      if (sync.url) {
-        try {
-          const response = await fetch(`${sync.url}?action=getPlans&token=${encodeURIComponent(sync.token)}`, { cache: "no-cache" });
-          const data = await response.json();
-          if (data.status === "success" && Array.isArray(data.plans)) {
-            plans = data.plans;
-            localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
-            return;
-          }
-        } catch (error) { /* backend lỗi → dùng plan.json */ }
+      const fresh = await fetchPlansFromBackend();
+      if (fresh) {
+        plans = fresh;
+        localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
+        return;
       }
 
       try {
@@ -646,11 +647,22 @@
       localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
     }
 
+    async function refreshPlansInBackground() {
+      const fresh = await fetchPlansFromBackend();
+      if (!fresh) return;
+      const serialized = JSON.stringify(fresh);
+      if (serialized === JSON.stringify(plans)) return;
+      plans = fresh;
+      localStorage.setItem(STORAGE_KEYS.plans, serialized);
+      render();
+    }
+
     async function postPlanAction(action, payload) {
       const sync = getSync();
       if (!sync.url) throw new Error("Chưa cấu hình URL đồng bộ");
       const response = await fetch(sync.url, {
         method: "POST",
+        signal: AbortSignal.timeout(15000),
         body: JSON.stringify({ action: action, token: sync.token, payload: payload })
       });
       const data = await response.json().catch(() => ({}));
@@ -741,9 +753,27 @@
 
     function loadLogs() {
       logs = JSON.parse(localStorage.getItem(STORAGE_KEYS.logs) || "[]");
-      if (logs.length === 0) {
-        logs = buildSampleLogs();
+      // Dọn nhật ký mẫu (demo) từng được chèn tự động ở phiên bản trước
+      const cleaned = logs.filter(log => !String(log.id || "").startsWith("LOG-DEMO-"));
+      if (cleaned.length !== logs.length) {
+        logs = cleaned;
         localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
+      }
+    }
+
+    // Gửi lại các nhật ký chưa đồng bộ được (mất mạng, backend lỗi...)
+    async function retryPendingLogs() {
+      const pending = logs.filter(log => log.syncStatus === "pending");
+      if (pending.length === 0) return;
+      let syncedCount = 0;
+      for (const log of pending) {
+        await trySync(log);
+        if (log.syncStatus === "synced") syncedCount++;
+      }
+      if (syncedCount > 0) {
+        localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
+        renderLogs();
+        showToast(`Đã đồng bộ lại ${syncedCount} nhật ký chờ`);
       }
     }
 
@@ -901,7 +931,7 @@
           <div class="d-flex justify-content-between gap-2">
             <div>
               <div class="fw-bold">${escapeHtml(log.employee)} <span class="text-secondary fw-normal">- ${escapeHtml(log.shift)}</span></div>
-              <div class="small text-secondary">${escapeHtml(log.workDate)} ${escapeHtml(log.startTime || "")}${log.endTime ? " - " + escapeHtml(log.endTime) : ""}</div>
+              <div class="small text-secondary">${formatDateVn(log.workDate)} ${escapeHtml(log.startTime || "")}${log.endTime ? " - " + escapeHtml(log.endTime) : ""}${syncLabel(log)}</div>
             </div>
             ${statusBadge(log.progress)}
           </div>
@@ -960,15 +990,21 @@
         syncStatus: "local"
       };
 
-      rememberEmployee(log.employee);
-      await trySync(log);
-      logs.unshift(log);
-      localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
-      showAllLogs = false;
-      updatePlanStatus(log.planId, log.progress);
-      clearForm(false);
-      render();
-      showToast(log.syncStatus === "synced" ? "Đã lưu và đồng bộ" : "Đã lưu cục bộ");
+      const submitBtn = document.querySelector("#logForm button[type=submit]");
+      submitBtn.disabled = true;
+      try {
+        rememberEmployee(log.employee);
+        await trySync(log);
+        logs.unshift(log);
+        localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
+        showAllLogs = false;
+        updatePlanStatus(log.planId, log.progress);
+        clearForm(false);
+        render();
+        showToast(log.syncStatus === "synced" ? "Đã lưu và đồng bộ" : "Đã lưu cục bộ, sẽ đồng bộ lại sau");
+      } finally {
+        submitBtn.disabled = false;
+      }
     }
 
     async function trySync(log) {
@@ -980,6 +1016,7 @@
       try {
         const response = await fetch(syncUrl, {
           method: "POST",
+          signal: AbortSignal.timeout(12000),
           body: JSON.stringify({
             action: "createWorkLog",
             token: syncToken,
@@ -1050,6 +1087,22 @@
       const normalized = value || "Chưa làm";
       const cls = normalized === "Hoàn thành" ? "badge-done" : normalized === "Đang làm" ? "badge-doing" : "badge-open";
       return `<span class="badge-soft ${cls}">${escapeHtml(normalized)}</span>`;
+    }
+
+    function formatDateVn(isoDate) {
+      const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(isoDate || ""));
+      if (!match) return escapeHtml(isoDate || "");
+      return `${match[3]}/${match[2]}/${match[1]}`;
+    }
+
+    function syncLabel(log) {
+      if (log.syncStatus === "synced") {
+        return ' <span class="text-success text-nowrap"><i class="bi bi-cloud-check"></i> Đã đồng bộ</span>';
+      }
+      if (log.syncStatus === "pending") {
+        return ' <span class="text-warning text-nowrap"><i class="bi bi-cloud-slash"></i> Chờ đồng bộ</span>';
+      }
+      return "";
     }
 
     function currentTime() {
