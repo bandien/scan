@@ -297,6 +297,49 @@
             });
         }
 
+        // Trang này chạy trên HTTPS (GitHub Pages) nên trình duyệt chặn fetch
+        // trực tiếp tới server http:// (Mixed Content) → luôn báo OFFLINE sai.
+        // Với các URL đó phải nhờ proxy HTTPS kiểm tra hộ; localhost/LAN được
+        // trình duyệt miễn trừ nên vẫn gọi thẳng.
+        const GAS_PING_PROXY = "https://script.google.com/macros/s/AKfycbzW4TxDarLBOpZvO8hnE0R65IsCd95a5l-XPASjUmZNuefH5MiWMs8lCpLpggzFwyXK/exec?action=pingUrl&url=";
+
+        function isMixedContentBlocked(url) {
+            const isPlainHttp = /^http:\/\//i.test(url);
+            const isLocal = /^http:\/\/(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/i.test(url);
+            return window.location.protocol === "https:" && isPlainHttp && !isLocal;
+        }
+
+        function fetchWithTimeout(url, opts, ms) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), ms);
+            return fetch(url, { ...opts, signal: controller.signal })
+                .finally(() => clearTimeout(timeoutId));
+        }
+
+        // GAS proxy trả JSON {online, httpCode, latencyMs}; trả lỗi → thử proxy công cộng
+        async function pingViaProxy(url) {
+            try {
+                const res = await fetchWithTimeout(GAS_PING_PROXY + encodeURIComponent(url), { cache: 'no-cache' }, 20000);
+                const data = await res.json();
+                if (data.status === "success") {
+                    return { online: data.online, latency: data.latencyMs };
+                }
+            } catch (err) { /* GAS lỗi/timeout → fallback */ }
+
+            const publicProxies = [
+                u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u),
+                u => "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(u)
+            ];
+            for (const build of publicProxies) {
+                try {
+                    const t0 = Date.now();
+                    const res = await fetchWithTimeout(build(url), { cache: 'no-cache' }, 12000);
+                    if (res.ok) return { online: true, latency: Date.now() - t0 };
+                } catch (err) { /* proxy chết → thử proxy kế tiếp */ }
+            }
+            return { online: false, latency: null };
+        }
+
         async function pingServer(id) {
             const server = servers.find(s => s.id === id);
             if (!server) return;
@@ -309,19 +352,19 @@
             let latency = 0;
 
             try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 6000);
-
-                await fetch(server.url, {
-                    method: 'GET',
-                    mode: 'no-cors',
-                    cache: 'no-cache',
-                    signal: controller.signal
-                });
-
-                clearTimeout(timeoutId);
-                online = true;
-                latency = Date.now() - startTime;
+                if (isMixedContentBlocked(server.url)) {
+                    const result = await pingViaProxy(server.url);
+                    online = result.online;
+                    latency = result.latency || 0;
+                } else {
+                    await fetchWithTimeout(server.url, {
+                        method: 'GET',
+                        mode: 'no-cors',
+                        cache: 'no-cache'
+                    }, 6000);
+                    online = true;
+                    latency = Date.now() - startTime;
+                }
             } catch (err) {
                 online = false;
             }

@@ -15,3 +15,5 @@ Backend.gs.bak
 js/**
 style.css
 *.jsx
+status.html
+data/**

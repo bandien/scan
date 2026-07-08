@@ -26,6 +26,9 @@ function doGet(e) {
   // Ping không cần token
   if (action === 'ping') return contentResponse({ status: "success", message: "Pong! Backend v3 is live." });
 
+  // Ping hộ status.html (giới hạn host trong 13_UptimeProxy.gs, không cần token)
+  if (action === 'pingUrl') return handlePingUrl(e);
+
   // Auth check
   if (token !== API_TOKEN) return contentResponse({ status: "error", message: "Unauthorized: Invalid API Token" });
 
