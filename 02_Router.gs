@@ -48,6 +48,7 @@ function doGet(e) {
       case 'getMeterHistory':   return handleGetMeterHistory(e);    // Phase 11
       case 'getMeterStats':     return handleGetMeterStats(e);      // Phase 11
       case 'getPumpTimerSettings': return handleGetPumpTimerSettings(e);
+      case 'getPlans':          return handleGetPlans(e);           // Kế hoạch trang nhatky
       case 'tempDumpDevices':   return handleTempDumpDevices(e);
       case 'migrateDevicesData':return handleMigrateDevicesData(e);
       default:                  return handleGetDevice(e);          // UID lookup
@@ -92,6 +93,8 @@ function doPost(e) {
       // Daily work logs
       createWorkLog:        handleCreateWorkLog,
       seedWorkLogsDemo:     handleSeedWorkLogsDemo,
+      savePlan:             handleSavePlan,
+      deletePlan:           handleDeletePlan,
       savePumpTimerSetting: handleSavePumpTimerSetting,
       seedPumpTimerSettings: handleSeedPumpTimerSettings,
       // Masters

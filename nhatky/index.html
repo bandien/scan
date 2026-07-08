@@ -337,6 +337,7 @@
             <input class="form-control" id="searchBox" type="search" placeholder="Khu vực, thiết bị, nội dung việc...">
           </div>
           <button class="btn btn-primary" type="button" id="btnReload"><i class="bi bi-arrow-clockwise me-1"></i>Nạp lại</button>
+          <button class="btn btn-success" type="button" id="btnAddPlan"><i class="bi bi-plus-lg me-1"></i>Thêm kế hoạch</button>
         </div>
       </div>
       <div class="table-wrap">
@@ -402,6 +403,77 @@
     </div>
   </div>
 
+  <div class="modal fade" id="planModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title h5" id="planModalTitle">Thêm kế hoạch</h3>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <form id="planForm">
+          <div class="modal-body">
+            <input type="hidden" id="planFormId">
+            <div class="row g-2">
+              <div class="col-6">
+                <label class="form-label" for="planDate">Ngày</label>
+                <input class="form-control" id="planDate" type="date" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label" for="planTime">Khung giờ</label>
+                <input class="form-control" id="planTime" placeholder="07:30-09:30">
+              </div>
+              <div class="col-6">
+                <label class="form-label" for="planTeam">Tổ/ca</label>
+                <input class="form-control" id="planTeam" list="planTeamSuggestions" placeholder="Tổ điện">
+                <datalist id="planTeamSuggestions"></datalist>
+              </div>
+              <div class="col-6">
+                <label class="form-label" for="planAssignee">Người thực hiện</label>
+                <input class="form-control" id="planAssignee" placeholder="Ca trực sáng">
+              </div>
+              <div class="col-6">
+                <label class="form-label" for="planArea">Khu vực</label>
+                <input class="form-control" id="planArea" placeholder="Tầng hầm B1">
+              </div>
+              <div class="col-6">
+                <label class="form-label" for="planAsset">Thiết bị</label>
+                <input class="form-control" id="planAsset" placeholder="Tủ MSB-B1">
+              </div>
+              <div class="col-12">
+                <label class="form-label" for="planTask">Nội dung công việc</label>
+                <textarea class="form-control" id="planTask" rows="3" placeholder="Việc cần làm, tiêu chí hoàn thành..." required></textarea>
+              </div>
+              <div class="col-6">
+                <label class="form-label" for="planPriority">Mức ưu tiên</label>
+                <select class="form-select" id="planPriority">
+                  <option>Cao</option>
+                  <option selected>Trung bình</option>
+                  <option>Thấp</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label" for="planStatus">Trạng thái</label>
+                <select class="form-select" id="planStatus">
+                  <option selected>Chưa làm</option>
+                  <option>Đang làm</option>
+                  <option>Hoàn thành</option>
+                  <option>Cần hỗ trợ</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer justify-content-between">
+            <button class="btn btn-outline-danger" type="button" id="btnDeletePlan" style="display:none;"><i class="bi bi-trash me-1"></i>Xóa</button>
+            <div class="d-flex gap-2 ms-auto">
+              <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Đóng</button>
+              <button class="btn btn-primary" type="submit" id="btnSavePlan"><i class="bi bi-check2-circle me-1"></i>Lưu kế hoạch</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <div class="position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 50">
     <div class="toast align-items-center border-0" id="toast" role="status" aria-live="polite" aria-atomic="true">
       <div class="d-flex">
@@ -431,6 +503,7 @@
     let logs = [];
     let showAllLogs = false;
     let toast;
+    let planModal;
 
     const fallbackPlans = [
       {
@@ -493,6 +566,7 @@
 
     document.addEventListener("DOMContentLoaded", async () => {
       toast = new bootstrap.Toast(document.getElementById("toast"), { delay: 2200 });
+      planModal = new bootstrap.Modal(document.getElementById("planModal"));
       document.getElementById("filterDate").value = today;
       document.getElementById("workDate").value = today;
       document.getElementById("employee").value = localStorage.getItem(STORAGE_KEYS.employee) || "";
@@ -515,6 +589,9 @@
         showToast("Đã nạp lại kế hoạch");
       });
       document.getElementById("logForm").addEventListener("submit", submitLog);
+      document.getElementById("btnAddPlan").addEventListener("click", () => openPlanModal(null));
+      document.getElementById("planForm").addEventListener("submit", submitPlanForm);
+      document.getElementById("btnDeletePlan").addEventListener("click", deletePlanFromModal);
       document.getElementById("btnClearForm").addEventListener("click", clearForm);
       document.getElementById("btnExport").addEventListener("click", exportCsv);
       document.getElementById("btnClearLogs").addEventListener("click", clearLogs);
@@ -524,11 +601,34 @@
       document.getElementById("employee").addEventListener("change", rememberEmployeeFromInput);
     }
 
+    function getSync() {
+      const settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.settings) || "{}");
+      return {
+        url: settings.url || DEFAULT_SYNC.url,
+        token: settings.token || DEFAULT_SYNC.token
+      };
+    }
+
+    // Kế hoạch lấy từ Google Sheets (action=getPlans); plan.json chỉ là
+    // fallback khi không gọi được backend
     async function loadPlans(force) {
       const cached = localStorage.getItem(STORAGE_KEYS.plans);
       if (cached && !force) {
         plans = JSON.parse(cached);
         return;
+      }
+
+      const sync = getSync();
+      if (sync.url) {
+        try {
+          const response = await fetch(`${sync.url}?action=getPlans&token=${encodeURIComponent(sync.token)}`, { cache: "no-cache" });
+          const data = await response.json();
+          if (data.status === "success" && Array.isArray(data.plans)) {
+            plans = data.plans;
+            localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
+            return;
+          }
+        } catch (error) { /* backend lỗi → dùng plan.json */ }
       }
 
       try {
@@ -540,6 +640,96 @@
       }
 
       localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
+    }
+
+    async function postPlanAction(action, payload) {
+      const sync = getSync();
+      if (!sync.url) throw new Error("Chưa cấu hình URL đồng bộ");
+      const response = await fetch(sync.url, {
+        method: "POST",
+        body: JSON.stringify({ action: action, token: sync.token, payload: payload })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.status !== "success") {
+        throw new Error(data.message || "Backend từ chối yêu cầu");
+      }
+      return data;
+    }
+
+    function openPlanModal(id) {
+      const plan = id ? plans.find(item => item.id === id) : null;
+      document.getElementById("planModalTitle").textContent = plan ? "Sửa kế hoạch" : "Thêm kế hoạch";
+      document.getElementById("btnDeletePlan").style.display = plan ? "inline-block" : "none";
+      document.getElementById("planFormId").value = plan ? plan.id : "";
+      document.getElementById("planDate").value = plan ? (plan.date || today) : (document.getElementById("filterDate").value || today);
+      document.getElementById("planTime").value = plan ? (plan.time || "") : "";
+      document.getElementById("planTeam").value = plan ? (plan.team || "") : "";
+      document.getElementById("planAssignee").value = plan ? (plan.assignee || "") : "";
+      document.getElementById("planArea").value = plan ? (plan.area || "") : "";
+      document.getElementById("planAsset").value = plan ? (plan.asset || "") : "";
+      document.getElementById("planTask").value = plan ? (plan.task || "") : "";
+      document.getElementById("planPriority").value = plan ? (plan.priority || "Trung bình") : "Trung bình";
+      document.getElementById("planStatus").value = plan ? (plan.status || "Chưa làm") : "Chưa làm";
+
+      const teams = [...new Set(plans.map(p => p.team).filter(Boolean))].sort();
+      document.getElementById("planTeamSuggestions").innerHTML = teams.map(team => `<option value="${escapeAttr(team)}">`).join("");
+
+      planModal.show();
+    }
+
+    async function submitPlanForm(event) {
+      event.preventDefault();
+      const payload = {
+        id: document.getElementById("planFormId").value.trim(),
+        date: document.getElementById("planDate").value,
+        time: document.getElementById("planTime").value.trim(),
+        team: document.getElementById("planTeam").value.trim(),
+        assignee: document.getElementById("planAssignee").value.trim(),
+        area: document.getElementById("planArea").value.trim(),
+        asset: document.getElementById("planAsset").value.trim(),
+        task: document.getElementById("planTask").value.trim(),
+        priority: document.getElementById("planPriority").value,
+        status: document.getElementById("planStatus").value,
+        updatedBy: localStorage.getItem(STORAGE_KEYS.employee) || ""
+      };
+
+      const saveBtn = document.getElementById("btnSavePlan");
+      saveBtn.disabled = true;
+      try {
+        const data = await postPlanAction("savePlan", payload);
+        payload.id = data.planId;
+        const index = plans.findIndex(item => item.id === payload.id);
+        if (index >= 0) plans[index] = payload; else plans.push(payload);
+        localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
+        planModal.hide();
+        render();
+        showToast("Đã lưu kế hoạch");
+      } catch (error) {
+        showToast("Lỗi lưu kế hoạch: " + error.message);
+      } finally {
+        saveBtn.disabled = false;
+      }
+    }
+
+    async function deletePlanFromModal() {
+      const id = document.getElementById("planFormId").value.trim();
+      if (!id) return;
+      if (!confirm("Xóa kế hoạch này?")) return;
+
+      const deleteBtn = document.getElementById("btnDeletePlan");
+      deleteBtn.disabled = true;
+      try {
+        await postPlanAction("deletePlan", { id: id, updatedBy: localStorage.getItem(STORAGE_KEYS.employee) || "" });
+        plans = plans.filter(item => item.id !== id);
+        localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
+        planModal.hide();
+        render();
+        showToast("Đã xóa kế hoạch");
+      } catch (error) {
+        showToast("Lỗi xóa kế hoạch: " + error.message);
+      } finally {
+        deleteBtn.disabled = false;
+      }
     }
 
     function loadLogs() {
@@ -644,9 +834,12 @@
           <td class="task-text">${escapeHtml(plan.task || "")}</td>
           <td>${priorityBadge(plan.priority)}</td>
           <td>${statusBadge(plan.status)}</td>
-          <td class="text-end">
-            <button class="btn btn-sm btn-primary" type="button" onclick="selectPlan('${escapeAttr(plan.id)}')">
+          <td class="text-end text-nowrap">
+            <button class="btn btn-sm btn-outline-secondary" type="button" title="Sửa kế hoạch" onclick="openPlanModal('${escapeAttr(plan.id)}')">
               <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn btn-sm btn-primary" type="button" title="Ghi nhật ký" onclick="selectPlan('${escapeAttr(plan.id)}')">
+              <i class="bi bi-journal-plus"></i>
             </button>
           </td>
         </tr>
@@ -660,9 +853,14 @@
               <div class="plan-card-title">${escapeHtml(plan.asset || plan.area || "")}</div>
               <div class="small text-secondary">${escapeHtml(plan.area || "")}${plan.assignee ? " - " + escapeHtml(plan.assignee) : ""}</div>
             </div>
-            <button class="btn btn-sm btn-success text-nowrap" type="button" onclick="selectPlan('${escapeAttr(plan.id)}')">
-              <i class="bi bi-pencil-square me-1"></i>Ghi
-            </button>
+            <div class="d-flex flex-column gap-1">
+              <button class="btn btn-sm btn-success text-nowrap" type="button" onclick="selectPlan('${escapeAttr(plan.id)}')">
+                <i class="bi bi-journal-plus me-1"></i>Ghi
+              </button>
+              <button class="btn btn-sm btn-outline-secondary text-nowrap" type="button" onclick="openPlanModal('${escapeAttr(plan.id)}')">
+                <i class="bi bi-pencil me-1"></i>Sửa
+              </button>
+            </div>
           </div>
           <div class="plan-card-task mt-2">${escapeHtml(plan.task || "")}</div>
           <div class="d-flex gap-2 mt-2">${priorityBadge(plan.priority)} ${statusBadge(plan.status)}</div>
@@ -798,6 +996,8 @@
       if (!plan) return;
       plan.status = progress;
       localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
+      // Đồng bộ trạng thái mới lên Sheets, lỗi thì thôi (log đã lưu riêng)
+      postPlanAction("savePlan", plan).catch(() => {});
     }
 
     function clearForm(keepEmployee = true) {
