@@ -44,6 +44,7 @@ function doGet(e) {
       case 'getMeterPoints':    return handleGetMeterPoints(e);     // Phase 11
       case 'getMeterHistory':   return handleGetMeterHistory(e);    // Phase 11
       case 'getMeterStats':     return handleGetMeterStats(e);      // Phase 11
+      case 'getPumpTimerSettings': return handleGetPumpTimerSettings(e);
       case 'tempDumpDevices':   return handleTempDumpDevices(e);
       case 'migrateDevicesData':return handleMigrateDevicesData(e);
       default:                  return handleGetDevice(e);          // UID lookup
@@ -88,6 +89,8 @@ function doPost(e) {
       // Daily work logs
       createWorkLog:        handleCreateWorkLog,
       seedWorkLogsDemo:     handleSeedWorkLogsDemo,
+      savePumpTimerSetting: handleSavePumpTimerSetting,
+      seedPumpTimerSettings: handleSeedPumpTimerSettings,
       // Masters
       createProject:        handleCreateProject,
       updateProject:        handleUpdateProject,
@@ -209,4 +212,161 @@ function seedWorkLogsDemo() {
 function handleSeedWorkLogsDemo(params) {
   const message = seedWorkLogsDemo();
   return contentResponse({ status: "success", message: message });
+}
+
+function ensurePumpTimerSettingsSheet_() {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  let sheet = ss.getSheetByName("PumpTimerSettings");
+  const headers = [
+    "SettingID","PumpName","Location","On1","Off1","On2","Off2",
+    "Notes","UpdatedAt","UpdatedBy"
+  ];
+
+  if (!sheet) sheet = ss.insertSheet("PumpTimerSettings");
+  if (sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight("bold");
+  }
+  sheet.getRange("D:G").setNumberFormat("@");
+  return sheet;
+}
+
+function pumpTimerDefaults_() {
+  return [
+    {
+      settingId: "PUMP-SUOI-CUN-160KW",
+      pumpName: "Bơm 160kW Suối Cun",
+      location: "Suối Cun",
+      on1: "12:20",
+      off1: "16:00",
+      on2: "22:00",
+      off2: "08:30",
+      notes: "Thời gian chạy bơm 160kW Suối Cun"
+    },
+    {
+      settingId: "PUMP-HO-NHA-BAO-DUONG-1",
+      pumpName: "Bơm hồ Nhà Bảo Dưỡng 1",
+      location: "Hồ Nhà Bảo Dưỡng 1",
+      on1: "12:00",
+      off1: "16:30",
+      on2: "20:30",
+      off2: "09:00",
+      notes: "Thời gian chạy bơm hồ Nhà Bảo Dưỡng 1"
+    }
+  ];
+}
+
+function readPumpTimerSettings_() {
+  const sheet = ensurePumpTimerSettingsSheet_();
+  const values = sheet.getDataRange().getValues();
+  const rows = [];
+  for (let i = 1; i < values.length; i++) {
+    if (!values[i][0]) continue;
+    rows.push({
+      settingId: values[i][0],
+      pumpName: values[i][1],
+      location: values[i][2],
+      on1: pumpTimerText_(values[i][3]),
+      off1: pumpTimerText_(values[i][4]),
+      on2: pumpTimerText_(values[i][5]),
+      off2: pumpTimerText_(values[i][6]),
+      notes: values[i][7],
+      updatedAt: values[i][8],
+      updatedBy: values[i][9]
+    });
+  }
+  return rows;
+}
+
+function pumpTimerText_(value) {
+  if (value === null || value === undefined || value === "") return "";
+  if (Object.prototype.toString.call(value) === "[object Date]") {
+    return Utilities.formatDate(value, Session.getScriptTimeZone(), "HH:mm");
+  }
+  return String(value).replace("h", ":").replace("-", ":").trim();
+}
+
+function handleGetPumpTimerSettings(e) {
+  let rows = readPumpTimerSettings_();
+  if (rows.length === 0) {
+    seedPumpTimerSettings_();
+    rows = readPumpTimerSettings_();
+  }
+  return contentResponse({ status: "success", data: rows });
+}
+
+function seedPumpTimerSettings_() {
+  const sheet = ensurePumpTimerSettingsSheet_();
+  const values = sheet.getDataRange().getValues();
+  pumpTimerDefaults_().forEach(item => {
+    const row = [
+      item.settingId,
+      item.pumpName,
+      item.location,
+      item.on1,
+      item.off1,
+      item.on2,
+      item.off2,
+      item.notes,
+      new Date(),
+      "Seed"
+    ];
+    let targetRow = -1;
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][0]) === item.settingId) {
+        targetRow = i + 1;
+        break;
+      }
+    }
+    if (targetRow > 0) {
+      sheet.getRange(targetRow, 1, 1, row.length).setValues([row]);
+    } else {
+      sheet.appendRow(row);
+    }
+  });
+}
+
+function handleSeedPumpTimerSettings(params) {
+  seedPumpTimerSettings_();
+  return contentResponse({ status: "success", data: readPumpTimerSettings_() });
+}
+
+function handleSavePumpTimerSetting(params) {
+  const item = params.payload || params;
+  const settingId = String(item.settingId || "").trim();
+  if (!settingId) return contentResponse({ status: "error", message: "Thiếu SettingID" });
+  if (!item.pumpName) return contentResponse({ status: "error", message: "Thiếu tên bơm" });
+
+  const sheet = ensurePumpTimerSettingsSheet_();
+  const values = sheet.getDataRange().getValues();
+  const row = [
+    settingId,
+    item.pumpName || "",
+    item.location || "",
+    item.on1 || "",
+    item.off1 || "",
+    item.on2 || "",
+    item.off2 || "",
+    item.notes || "",
+    new Date(),
+    item.updatedBy || "Web"
+  ];
+
+  let targetRow = -1;
+  for (let i = 1; i < values.length; i++) {
+    if (String(values[i][0]) === settingId) {
+      targetRow = i + 1;
+      break;
+    }
+  }
+
+  if (targetRow > 0) {
+    sheet.getRange(targetRow, 4, 1, 4).setNumberFormat("@");
+    sheet.getRange(targetRow, 1, 1, row.length).setValues([row]);
+  } else {
+    sheet.appendRow(row);
+    sheet.getRange(sheet.getLastRow(), 4, 1, 4).setNumberFormat("@");
+  }
+
+  writeAuditLog(item.updatedBy || "Web", "savePumpTimerSetting", settingId, "Cập nhật giờ cài đặt đồng hồ bơm");
+  return contentResponse({ status: "success", settingId: settingId });
 }
