@@ -253,7 +253,7 @@
               <label class="form-label" for="workDate">Ngày</label>
               <input class="form-control" id="workDate" type="date" required>
             </div>
-            <div class="col-6">
+            <div class="col-12">
               <label class="form-label" for="employee">Nhân viên</label>
               <input class="form-control" id="employee" list="employeeSuggestions" placeholder="Tên người ghi" autocomplete="name" required>
               <datalist id="employeeSuggestions"></datalist>
@@ -267,22 +267,22 @@
                 <option>Hành chính</option>
               </select>
             </div>
-            <div class="col-6">
+            <div class="col-6 d-none extra-field">
               <label class="form-label" for="progress">Tiến độ</label>
               <select class="form-select" id="progress">
                 <option>Chưa làm</option>
                 <option>Đang làm</option>
-                <option>Hoàn thành</option>
+                <option selected>Hoàn thành</option>
                 <option>Cần hỗ trợ</option>
               </select>
             </div>
             <div class="col-6">
               <label class="form-label" for="startTime">Từ giờ</label>
-              <input class="form-control" id="startTime" type="time">
+              <input class="form-control" id="startTime" type="time" step="60" inputmode="numeric">
             </div>
             <div class="col-6">
               <label class="form-label" for="endTime">Đến giờ</label>
-              <input class="form-control" id="endTime" type="time">
+              <input class="form-control" id="endTime" type="time" step="60" inputmode="numeric">
             </div>
             <div class="col-12">
               <label class="form-label" for="selectedTask">Việc/kế hoạch</label>
@@ -730,7 +730,7 @@
       document.getElementById("planId").value = plan.id;
       document.getElementById("workDate").value = plan.date || today;
       document.getElementById("selectedTask").value = `${plan.time || ""} | ${plan.area || ""} | ${plan.asset || ""}: ${plan.task || ""}`.trim();
-      document.getElementById("progress").value = plan.status === "Hoàn thành" ? "Hoàn thành" : "Đang làm";
+      document.getElementById("progress").value = "Hoàn thành";
       document.getElementById("startTime").value = currentTime();
       document.getElementById("quickFormPanel").scrollIntoView({ behavior: "smooth", block: "start" });
       document.getElementById("result").focus();
@@ -804,7 +804,7 @@
       const employee = document.getElementById("employee").value;
       document.getElementById("logForm").reset();
       document.getElementById("workDate").value = document.getElementById("filterDate").value || today;
-      document.getElementById("progress").value = "Chưa làm";
+      document.getElementById("progress").value = "Hoàn thành";
       if (keepEmployee) document.getElementById("employee").value = employee;
       document.getElementById("planId").value = "";
     }
