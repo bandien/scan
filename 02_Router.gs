@@ -85,6 +85,8 @@ function doPost(e) {
       updateWOStatus:       handleUpdateWOStatus,
       updateWO:             handleUpdateWO,
       deleteWO:             handleDeleteWO,
+      // Daily work logs
+      createWorkLog:        handleCreateWorkLog,
       // Masters
       createProject:        handleCreateProject,
       updateProject:        handleUpdateProject,
@@ -116,4 +118,52 @@ function doPost(e) {
   } catch (err) {
     return contentResponse({ status: "error", message: "Server Error (POST): " + err.toString() });
   }
+}
+
+function ensureWorkLogsSheet_() {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  let sheet = ss.getSheetByName("WorkLogs");
+  const headers = [
+    "LogID","CreatedAt","WorkDate","Employee","Shift","Progress",
+    "StartTime","EndTime","Task","Result","Issue","NextAction","PlanID","SyncStatus"
+  ];
+
+  if (!sheet) sheet = ss.insertSheet("WorkLogs");
+  if (sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight("bold");
+  }
+  return sheet;
+}
+
+function handleCreateWorkLog(params) {
+  const payload = params.payload || params;
+  const employee = String(payload.employee || "").trim();
+  const task = String(payload.selectedTask || payload.task || "").trim();
+  const result = String(payload.result || "").trim();
+
+  if (!employee) return contentResponse({ status: "error", message: "Thiếu tên nhân viên" });
+  if (!task) return contentResponse({ status: "error", message: "Thiếu đầu việc" });
+  if (!result) return contentResponse({ status: "error", message: "Thiếu kết quả thực hiện" });
+
+  const logId = payload.id || ("LOG-" + new Date().getTime());
+  const sheet = ensureWorkLogsSheet_();
+  sheet.appendRow([
+    logId,
+    payload.createdAt || new Date(),
+    payload.workDate || "",
+    employee,
+    payload.shift || "",
+    payload.progress || "",
+    payload.startTime || "",
+    payload.endTime || "",
+    task,
+    result,
+    payload.issue || "",
+    payload.nextAction || "",
+    payload.planId || "",
+    "synced"
+  ]);
+
+  writeAuditLog(employee, "createWorkLog", logId, "Ghi nhật ký công việc từ trang nhatky");
+  return contentResponse({ status: "success", logId: logId });
 }

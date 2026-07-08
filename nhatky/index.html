@@ -419,6 +419,10 @@
     };
 
     const today = new Date().toISOString().slice(0, 10);
+    const DEFAULT_SYNC = {
+      url: "https://script.google.com/macros/s/AKfycbzW4TxDarLBOpZvO8hnE0R65IsCd95a5l-XPASjUmZNuefH5MiWMs8lCpLpggzFwyXK/exec",
+      token: "HAPU_QR_SECRET_2026"
+    };
     let plans = [];
     let logs = [];
     let toast;
@@ -540,8 +544,8 @@
 
     function loadSettings() {
       const settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.settings) || "{}");
-      document.getElementById("syncUrl").value = settings.url || "";
-      document.getElementById("syncToken").value = settings.token || "";
+      document.getElementById("syncUrl").value = settings.url || DEFAULT_SYNC.url;
+      document.getElementById("syncToken").value = settings.token || DEFAULT_SYNC.token;
     }
 
     function saveSettings() {
@@ -716,14 +720,16 @@
 
     async function trySync(log) {
       const settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.settings) || "{}");
-      if (!settings.url) return;
+      const syncUrl = settings.url || DEFAULT_SYNC.url;
+      const syncToken = settings.token || DEFAULT_SYNC.token;
+      if (!syncUrl) return;
 
       try {
-        const response = await fetch(settings.url, {
+        const response = await fetch(syncUrl, {
           method: "POST",
           body: JSON.stringify({
             action: "createWorkLog",
-            token: settings.token || "",
+            token: syncToken,
             payload: log
           })
         });
