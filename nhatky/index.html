@@ -1,0 +1,823 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nhật ký công việc | BanDienScan</title>
+  <meta name="description" content="Bảng xem nhanh kế hoạch và ghi nhật ký công việc hằng ngày cho nhân viên Ban Điện.">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <style>
+    :root {
+      --page-bg: #f6f7fb;
+      --surface: #ffffff;
+      --surface-soft: #eef6f4;
+      --ink: #17212f;
+      --muted: #667085;
+      --line: #d9e1e8;
+      --brand: #176b87;
+      --brand-2: #2d8a5f;
+      --warn: #b7791f;
+      --danger: #c2413b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      background: var(--page-bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    .app-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: var(--brand);
+      color: #fff;
+    }
+
+    .shell {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 8px 22px rgba(23, 33, 47, 0.05);
+    }
+
+    .panel-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .metric {
+      min-height: 76px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 1.45rem;
+      line-height: 1.1;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: .82rem;
+    }
+
+    .table thead th {
+      background: #edf3f6;
+      color: #2f3b4a;
+      font-size: .76rem;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+
+    .table td {
+      vertical-align: middle;
+      font-size: .92rem;
+    }
+
+    .task-text {
+      min-width: 280px;
+      max-width: 460px;
+    }
+
+    .badge-soft {
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-weight: 700;
+      font-size: .75rem;
+      white-space: nowrap;
+    }
+
+    .badge-high { background: #fff1f0; color: var(--danger); border-color: #ffd0cc; }
+    .badge-mid { background: #fff7df; color: var(--warn); border-color: #ffe5a3; }
+    .badge-low { background: var(--surface-soft); color: var(--brand-2); border-color: #cbe7db; }
+    .badge-open { background: #edf3f6; color: #475467; border-color: #d9e1e8; }
+    .badge-doing { background: #e8f3ff; color: #155ea8; border-color: #bddcff; }
+    .badge-done { background: #e8f6ef; color: #1f7a4d; border-color: #bfe4cf; }
+
+    .btn-icon {
+      width: 38px;
+      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .form-label {
+      font-size: .78rem;
+      font-weight: 700;
+      color: #475467;
+    }
+
+    .form-control, .form-select {
+      border-radius: 8px;
+      border-color: #cfd8e3;
+    }
+
+    .log-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fbfcfe;
+    }
+
+    .empty-state {
+      border: 1px dashed #b7c3cf;
+      border-radius: 8px;
+      padding: 28px 16px;
+      text-align: center;
+      color: var(--muted);
+      background: #fbfcfe;
+    }
+
+    .mobile-plan-list { display: none; }
+
+    .plan-card {
+      border-bottom: 1px solid var(--line);
+      padding: 12px;
+      background: var(--surface);
+    }
+
+    .plan-card:last-child { border-bottom: 0; }
+
+    .plan-card-title {
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .plan-card-task {
+      color: #344054;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.35;
+    }
+
+    .quick-form-note {
+      background: #eef6f4;
+      border: 1px solid #cbe7db;
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #24624a;
+      font-size: .88rem;
+    }
+
+    @media (max-width: 760px) {
+      .shell { padding: 12px; }
+      .app-title { font-size: 1rem; }
+      .brand-mark { width: 38px; height: 38px; }
+      .row.g-3.mb-3 { --bs-gutter-x: .5rem; --bs-gutter-y: .5rem; }
+      .metric { min-height: 58px; padding: 9px 10px; }
+      .metric strong { font-size: 1.1rem; }
+      .metric span { font-size: .72rem; }
+      .toolbar-grid { display: grid !important; grid-template-columns: 1fr 1fr; }
+      .toolbar-grid .flex-grow-1 { grid-column: 1 / -1; }
+      #btnReload { grid-column: 1 / -1; }
+      .table-wrap { display: none; }
+      .mobile-plan-list { display: block; }
+      .panel-header { padding: 12px; }
+      #quickFormPanel {
+        position: sticky;
+        bottom: 0;
+        z-index: 15;
+        box-shadow: 0 -8px 24px rgba(23, 33, 47, 0.08);
+      }
+      #quickFormPanel .panel-header { padding: 10px 12px; }
+      #quickFormPanel form { padding: 12px !important; }
+      #logList { max-height: 48vh; overflow: auto; }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="shell py-3">
+      <div class="d-flex align-items-center justify-content-between gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="brand-mark"><i class="bi bi-journal-check fs-4"></i></div>
+          <div>
+            <div class="text-uppercase fw-bold text-primary" style="font-size:.72rem;">BanDienScan</div>
+            <h1 class="app-title m-0 fw-bold">Nhật ký công việc</h1>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-outline-secondary btn-icon" type="button" title="Cấu hình đồng bộ" data-bs-toggle="modal" data-bs-target="#settingsModal">
+            <i class="bi bi-gear"></i>
+          </button>
+          <a class="btn btn-outline-primary btn-icon" href="../index.html" title="Về BanDienScan">
+            <i class="bi bi-house"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="mb-3">
+      <div class="panel" id="quickFormPanel">
+        <div class="panel-header">
+          <h2 class="h5 m-0 fw-bold"><i class="bi bi-pencil-square text-primary me-2"></i>Ghi nhanh</h2>
+        </div>
+        <form class="p-3" id="logForm">
+          <input type="hidden" id="planId">
+          <div class="row g-2">
+            <div class="col-6 d-none extra-field">
+              <label class="form-label" for="workDate">Ngày</label>
+              <input class="form-control" id="workDate" type="date" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label" for="employee">Nhân viên</label>
+              <input class="form-control" id="employee" placeholder="Tên người ghi" required>
+            </div>
+            <div class="col-6 d-none extra-field">
+              <label class="form-label" for="shift">Ca</label>
+              <select class="form-select" id="shift">
+                <option>Ca sáng</option>
+                <option>Ca chiều</option>
+                <option>Ca đêm</option>
+                <option>Hành chính</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="form-label" for="progress">Tiến độ</label>
+              <select class="form-select" id="progress">
+                <option>Chưa làm</option>
+                <option>Đang làm</option>
+                <option>Hoàn thành</option>
+                <option>Cần hỗ trợ</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="form-label" for="startTime">Từ giờ</label>
+              <input class="form-control" id="startTime" type="time">
+            </div>
+            <div class="col-6">
+              <label class="form-label" for="endTime">Đến giờ</label>
+              <input class="form-control" id="endTime" type="time">
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="selectedTask">Việc/kế hoạch</label>
+              <textarea class="form-control" id="selectedTask" rows="2" placeholder="Chọn đầu việc hoặc nhập việc phát sinh" required></textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="result">Kết quả</label>
+              <textarea class="form-control" id="result" rows="3" placeholder="Nhập ngắn gọn: đã làm, tình trạng, số đo nếu có..." required></textarea>
+            </div>
+            <div class="col-12 d-none extra-field">
+              <label class="form-label" for="issue">Tồn tại / cần xử lý tiếp</label>
+              <textarea class="form-control" id="issue" rows="2" placeholder="Bỏ trống nếu không có"></textarea>
+            </div>
+            <div class="col-12 d-none extra-field">
+              <label class="form-label" for="nextAction">Đề xuất / kế hoạch tiếp theo</label>
+              <input class="form-control" id="nextAction" placeholder="Ví dụ: thay bóng, đặt vật tư, kiểm tra lại sau mưa...">
+            </div>
+          </div>
+          <button class="btn btn-link px-0 mt-2 text-decoration-none" type="button" id="btnToggleExtra">
+            <i class="bi bi-chevron-down me-1"></i>Chi tiết thêm
+          </button>
+          <div class="d-grid gap-2 mt-3">
+            <button class="btn btn-success btn-lg" type="submit"><i class="bi bi-check2-circle me-1"></i>Lưu</button>
+            <button class="btn btn-outline-secondary" type="button" id="btnClearForm"><i class="bi bi-eraser me-1"></i>Làm trống form</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section class="row g-3 mb-3">
+      <div class="col-6 col-lg-3"><div class="metric"><strong id="metricTotal">0</strong><span>Kế hoạch hôm nay</span></div></div>
+      <div class="col-6 col-lg-3"><div class="metric"><strong id="metricDoing">0</strong><span>Đang làm</span></div></div>
+      <div class="col-6 col-lg-3"><div class="metric"><strong id="metricDone">0</strong><span>Đã hoàn thành</span></div></div>
+      <div class="col-6 col-lg-3"><div class="metric"><strong id="metricLogs">0</strong><span>Nhật ký đã ghi</span></div></div>
+    </section>
+
+    <section class="panel mb-3">
+      <div class="panel-header">
+        <div class="d-flex toolbar-grid align-items-end gap-2">
+          <div>
+            <label class="form-label" for="filterDate">Ngày kế hoạch</label>
+            <input class="form-control" id="filterDate" type="date">
+          </div>
+          <div>
+            <label class="form-label" for="filterTeam">Tổ/ca</label>
+            <select class="form-select" id="filterTeam">
+              <option value="">Tất cả</option>
+            </select>
+          </div>
+          <div class="flex-grow-1">
+            <label class="form-label" for="searchBox">Tìm nhanh</label>
+            <input class="form-control" id="searchBox" type="search" placeholder="Khu vực, thiết bị, nội dung việc...">
+          </div>
+          <button class="btn btn-primary" type="button" id="btnReload"><i class="bi bi-arrow-clockwise me-1"></i>Nạp lại</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Giờ</th>
+              <th>Tổ/ca</th>
+              <th>Khu vực</th>
+              <th>Thiết bị</th>
+              <th>Nội dung</th>
+              <th>Mức</th>
+              <th>Trạng thái</th>
+              <th class="text-end">Ghi</th>
+            </tr>
+          </thead>
+          <tbody id="planRows"></tbody>
+        </table>
+      </div>
+      <div class="mobile-plan-list" id="planCards"></div>
+    </section>
+
+    <section class="row g-3">
+      <div class="col-12">
+        <div class="panel h-100">
+          <div class="panel-header">
+            <div class="d-flex align-items-center justify-content-between gap-2">
+              <h2 class="h5 m-0 fw-bold"><i class="bi bi-clock-history text-primary me-2"></i>Nhật ký gần đây</h2>
+              <div class="d-flex gap-2">
+                <button class="btn btn-outline-primary btn-sm" type="button" id="btnExport"><i class="bi bi-download me-1"></i>CSV</button>
+                <button class="btn btn-outline-danger btn-sm" type="button" id="btnClearLogs"><i class="bi bi-trash me-1"></i>Xóa</button>
+              </div>
+            </div>
+          </div>
+          <div class="p-3">
+            <div class="d-flex flex-column gap-2" id="logList"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal fade" id="settingsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title h5">Cấu hình đồng bộ</h3>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-secondary small mb-3">Nếu chưa có Google Apps Script cho nhật ký, trang sẽ lưu cục bộ trên máy và cho xuất CSV.</p>
+          <label class="form-label" for="syncUrl">Google Apps Script Web App URL</label>
+          <input class="form-control mb-2" id="syncUrl" placeholder="https://script.google.com/macros/s/.../exec">
+          <label class="form-label" for="syncToken">Token</label>
+          <input class="form-control" id="syncToken" placeholder="Tùy chọn">
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Đóng</button>
+          <button class="btn btn-primary" type="button" id="btnSaveSettings">Lưu cấu hình</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 50">
+    <div class="toast align-items-center border-0" id="toast" role="status" aria-live="polite" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body" id="toastText">Đã lưu</div>
+        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Đóng"></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const STORAGE_KEYS = {
+      plans: "bandien_nhatky_plans",
+      logs: "bandien_nhatky_logs",
+      settings: "bandien_nhatky_settings",
+      employee: "bandien_nhatky_employee"
+    };
+
+    const today = new Date().toISOString().slice(0, 10);
+    let plans = [];
+    let logs = [];
+    let toast;
+
+    const fallbackPlans = [
+      {
+        id: "PLAN-DEMO-01",
+        date: today,
+        time: "07:30-09:30",
+        team: "Tổ điện",
+        area: "Tầng hầm B1",
+        asset: "Tủ MSB-B1",
+        task: "Kiểm tra nhanh nhiệt độ đầu cốt, vệ sinh mặt tủ, ghi nhận bất thường.",
+        assignee: "Ca trực sáng",
+        priority: "Cao",
+        status: "Chưa làm"
+      },
+      {
+        id: "PLAN-DEMO-02",
+        date: today,
+        time: "13:30-15:00",
+        team: "Tổ vận hành",
+        area: "Sân vườn",
+        asset: "Chiếu sáng cảnh quan",
+        task: "Kiểm tra đèn lỗi, CB nhánh và danh sách vị trí cần thay.",
+        assignee: "Ca trực chiều",
+        priority: "Trung bình",
+        status: "Chưa làm"
+      }
+    ];
+
+    function buildSampleLogs() {
+      const base = [
+        ["07:30", "08:05", "Nguyễn Văn An", "Ca sáng", "Hoàn thành", "Tầng hầm B1 | Tủ MSB-B1: Kiểm tra nhiệt độ đầu cốt và vệ sinh mặt tủ.", "Nhiệt độ đầu cốt bình thường, không có mùi khét, đã vệ sinh bụi mặt tủ.", "", "Theo dõi lại trong ca chiều."],
+        ["08:10", "08:35", "Trần Minh Đức", "Ca sáng", "Hoàn thành", "Phòng bơm | Tủ điều khiển bơm nước sạch: Kiểm tra Auto/Manual.", "Chế độ Auto/Manual hoạt động ổn định, đèn báo đầy đủ, contactor đóng cắt bình thường.", "", ""],
+        ["08:40", "09:15", "Lê Quốc Huy", "Ca sáng", "Cần hỗ trợ", "Sân vườn | Chiếu sáng cảnh quan: Kiểm tra đèn lỗi khu lối đi.", "Ghi nhận 3 bóng không sáng tại lối đi hồ cảnh quan.", "Cần thay bóng và kiểm tra lại hộp nối chống nước.", "Đề xuất cấp 3 bóng LED và băng keo chống thấm."],
+        ["09:20", "09:50", "Nguyễn Văn An", "Ca sáng", "Hoàn thành", "Trạm biến áp | Máy phát dự phòng: Kiểm tra mức dầu, nước làm mát, ắc quy.", "Mức dầu và nước làm mát đạt, điện áp ắc quy 25.6V.", "", "Chạy thử theo lịch tuần."],
+        ["10:00", "10:25", "Phạm Tuấn Anh", "Ca sáng", "Hoàn thành", "Tầng 1 | Tủ DB-L1: Kiểm tra CB nhánh khu văn phòng.", "CB nhánh không nhảy, tải ổn định, đã siết nhẹ lại nhãn cảnh báo.", "", ""],
+        ["10:30", "11:00", "Trần Minh Đức", "Ca sáng", "Đang làm", "Phòng kỹ thuật | Quạt thông gió: Kiểm tra tiếng ồn và rung.", "Quạt chạy được nhưng có tiếng ồn nhẹ khi khởi động.", "Cần vệ sinh cánh và kiểm tra bạc đạn.", "Theo dõi thêm sau khi vệ sinh."],
+        ["13:30", "14:05", "Lê Quốc Huy", "Ca chiều", "Hoàn thành", "Khu A | Công tơ điện tổng: Ghi nhận chỉ số và ảnh hiện trạng.", "Đã ghi chỉ số, niêm phong còn nguyên, mặt kính sạch.", "", ""],
+        ["14:10", "14:45", "Phạm Tuấn Anh", "Ca chiều", "Hoàn thành", "Tầng 2 | Tủ điện hành lang: Kiểm tra đèn báo và vệ sinh.", "Đèn báo pha sáng đủ, bên trong tủ khô ráo, đã vệ sinh bụi.", "", ""],
+        ["15:00", "15:35", "Nguyễn Văn An", "Ca chiều", "Cần hỗ trợ", "Bãi xe | Chiếu sáng: Kiểm tra tuyến đèn gần cổng phụ.", "Một nhánh đèn chập chờn khi bật tải.", "Nghi tiếp xúc kém tại hộp nối.", "Cần mở hộp nối kiểm tra khi có đủ dụng cụ."],
+        ["16:00", "16:25", "Trần Minh Đức", "Ca chiều", "Hoàn thành", "Phòng bơm | Bơm nước thải: Kiểm tra phao mức và chạy thử.", "Phao mức tác động bình thường, bơm chạy không rung bất thường.", "", "Vệ sinh hố gom theo lịch định kỳ."]
+      ];
+
+      return base.map((item, index) => ({
+        id: "LOG-DEMO-" + String(index + 1).padStart(2, "0"),
+        planId: "",
+        workDate: today,
+        startTime: item[0],
+        endTime: item[1],
+        employee: item[2],
+        shift: item[3],
+        progress: item[4],
+        selectedTask: item[5],
+        result: item[6],
+        issue: item[7],
+        nextAction: item[8],
+        createdAt: `${today}T${item[1]}:00.000+07:00`,
+        syncStatus: "local"
+      })).reverse();
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      toast = new bootstrap.Toast(document.getElementById("toast"), { delay: 2200 });
+      document.getElementById("filterDate").value = today;
+      document.getElementById("workDate").value = today;
+      document.getElementById("employee").value = localStorage.getItem(STORAGE_KEYS.employee) || "";
+      loadSettings();
+      await loadPlans();
+      loadLogs();
+      bindEvents();
+      render();
+    });
+
+    function bindEvents() {
+      ["filterDate", "filterTeam", "searchBox"].forEach(id => {
+        document.getElementById(id).addEventListener("input", renderPlans);
+      });
+      document.getElementById("btnReload").addEventListener("click", async () => {
+        localStorage.removeItem(STORAGE_KEYS.plans);
+        await loadPlans(true);
+        render();
+        showToast("Đã nạp lại kế hoạch");
+      });
+      document.getElementById("logForm").addEventListener("submit", submitLog);
+      document.getElementById("btnClearForm").addEventListener("click", clearForm);
+      document.getElementById("btnExport").addEventListener("click", exportCsv);
+      document.getElementById("btnClearLogs").addEventListener("click", clearLogs);
+      document.getElementById("btnSaveSettings").addEventListener("click", saveSettings);
+      document.getElementById("btnToggleExtra").addEventListener("click", toggleExtraFields);
+    }
+
+    async function loadPlans(force) {
+      const cached = localStorage.getItem(STORAGE_KEYS.plans);
+      if (cached && !force) {
+        plans = JSON.parse(cached);
+        return;
+      }
+
+      try {
+        const response = await fetch("plan.json", { cache: "no-cache" });
+        if (!response.ok) throw new Error("Cannot load plan.json");
+        plans = await response.json();
+      } catch (error) {
+        plans = fallbackPlans;
+      }
+
+      localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
+    }
+
+    function loadLogs() {
+      logs = JSON.parse(localStorage.getItem(STORAGE_KEYS.logs) || "[]");
+      if (logs.length === 0) {
+        logs = buildSampleLogs();
+        localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
+      }
+    }
+
+    function loadSettings() {
+      const settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.settings) || "{}");
+      document.getElementById("syncUrl").value = settings.url || "";
+      document.getElementById("syncToken").value = settings.token || "";
+    }
+
+    function saveSettings() {
+      const settings = {
+        url: document.getElementById("syncUrl").value.trim(),
+        token: document.getElementById("syncToken").value.trim()
+      };
+      localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(settings));
+      showToast("Đã lưu cấu hình đồng bộ");
+    }
+
+    function render() {
+      renderTeamOptions();
+      renderPlans();
+      renderLogs();
+      renderMetrics();
+    }
+
+    function renderTeamOptions() {
+      const select = document.getElementById("filterTeam");
+      const current = select.value;
+      const teams = [...new Set(plans.map(p => p.team).filter(Boolean))].sort();
+      select.innerHTML = '<option value="">Tất cả</option>' + teams.map(team => `<option>${escapeHtml(team)}</option>`).join("");
+      select.value = current;
+    }
+
+    function getVisiblePlans() {
+      const date = document.getElementById("filterDate").value;
+      const team = document.getElementById("filterTeam").value;
+      const query = document.getElementById("searchBox").value.trim().toLowerCase();
+
+      return plans.filter(plan => {
+        const byDate = !date || plan.date === date;
+        const byTeam = !team || plan.team === team;
+        const haystack = [plan.area, plan.asset, plan.task, plan.assignee, plan.priority, plan.status].join(" ").toLowerCase();
+        const bySearch = !query || haystack.includes(query);
+        return byDate && byTeam && bySearch;
+      });
+    }
+
+    function renderPlans() {
+      const rows = document.getElementById("planRows");
+      const cards = document.getElementById("planCards");
+      const visible = getVisiblePlans();
+
+      if (visible.length === 0) {
+        rows.innerHTML = '<tr><td colspan="8"><div class="empty-state">Không có kế hoạch phù hợp bộ lọc.</div></td></tr>';
+        cards.innerHTML = '<div class="empty-state m-2">Không có kế hoạch phù hợp bộ lọc.</div>';
+        renderMetrics();
+        return;
+      }
+
+      rows.innerHTML = visible.map(plan => `
+        <tr>
+          <td class="fw-bold text-nowrap">${escapeHtml(plan.time || "")}</td>
+          <td>${escapeHtml(plan.team || "")}<div class="small text-secondary">${escapeHtml(plan.assignee || "")}</div></td>
+          <td>${escapeHtml(plan.area || "")}</td>
+          <td class="fw-semibold">${escapeHtml(plan.asset || "")}</td>
+          <td class="task-text">${escapeHtml(plan.task || "")}</td>
+          <td>${priorityBadge(plan.priority)}</td>
+          <td>${statusBadge(plan.status)}</td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-primary" type="button" onclick="selectPlan('${escapeAttr(plan.id)}')">
+              <i class="bi bi-pencil"></i>
+            </button>
+          </td>
+        </tr>
+      `).join("");
+
+      cards.innerHTML = visible.map(plan => `
+        <article class="plan-card">
+          <div class="d-flex justify-content-between gap-2">
+            <div class="min-w-0">
+              <div class="small fw-bold text-primary">${escapeHtml(plan.time || "")} - ${escapeHtml(plan.team || "")}</div>
+              <div class="plan-card-title">${escapeHtml(plan.asset || plan.area || "")}</div>
+              <div class="small text-secondary">${escapeHtml(plan.area || "")}${plan.assignee ? " - " + escapeHtml(plan.assignee) : ""}</div>
+            </div>
+            <button class="btn btn-sm btn-success text-nowrap" type="button" onclick="selectPlan('${escapeAttr(plan.id)}')">
+              <i class="bi bi-pencil-square me-1"></i>Ghi
+            </button>
+          </div>
+          <div class="plan-card-task mt-2">${escapeHtml(plan.task || "")}</div>
+          <div class="d-flex gap-2 mt-2">${priorityBadge(plan.priority)} ${statusBadge(plan.status)}</div>
+        </article>
+      `).join("");
+      renderMetrics();
+    }
+
+    function toggleExtraFields() {
+      const fields = document.querySelectorAll(".extra-field");
+      const shouldShow = [...fields].some(field => field.classList.contains("d-none"));
+      fields.forEach(field => field.classList.toggle("d-none", !shouldShow));
+      document.getElementById("btnToggleExtra").innerHTML = shouldShow
+        ? '<i class="bi bi-chevron-up me-1"></i>Ẩn chi tiết'
+        : '<i class="bi bi-chevron-down me-1"></i>Chi tiết thêm';
+    }
+
+    function renderLogs() {
+      const list = document.getElementById("logList");
+      if (logs.length === 0) {
+        list.innerHTML = '<div class="empty-state">Chưa có nhật ký nào trên trình duyệt này.</div>';
+        renderMetrics();
+        return;
+      }
+
+      list.innerHTML = logs.slice(0, 20).map(log => `
+        <article class="log-card">
+          <div class="d-flex justify-content-between gap-2">
+            <div>
+              <div class="fw-bold">${escapeHtml(log.employee)} <span class="text-secondary fw-normal">- ${escapeHtml(log.shift)}</span></div>
+              <div class="small text-secondary">${escapeHtml(log.workDate)} ${escapeHtml(log.startTime || "")}${log.endTime ? " - " + escapeHtml(log.endTime) : ""}</div>
+            </div>
+            ${statusBadge(log.progress)}
+          </div>
+          <div class="mt-2 fw-semibold">${escapeHtml(log.selectedTask)}</div>
+          <div class="mt-1">${escapeHtml(log.result)}</div>
+          ${log.issue ? `<div class="mt-2 small text-danger"><i class="bi bi-exclamation-triangle me-1"></i>${escapeHtml(log.issue)}</div>` : ""}
+          ${log.nextAction ? `<div class="mt-1 small text-secondary"><i class="bi bi-arrow-return-right me-1"></i>${escapeHtml(log.nextAction)}</div>` : ""}
+        </article>
+      `).join("");
+      renderMetrics();
+    }
+
+    function renderMetrics() {
+      const visible = getVisiblePlans();
+      document.getElementById("metricTotal").textContent = visible.length;
+      document.getElementById("metricDoing").textContent = visible.filter(p => p.status === "Đang làm").length;
+      document.getElementById("metricDone").textContent = visible.filter(p => p.status === "Hoàn thành").length;
+      document.getElementById("metricLogs").textContent = logs.length;
+    }
+
+    function selectPlan(id) {
+      const plan = plans.find(item => item.id === id);
+      if (!plan) return;
+      document.getElementById("planId").value = plan.id;
+      document.getElementById("workDate").value = plan.date || today;
+      document.getElementById("selectedTask").value = `${plan.time || ""} | ${plan.area || ""} | ${plan.asset || ""}: ${plan.task || ""}`.trim();
+      document.getElementById("progress").value = plan.status === "Hoàn thành" ? "Hoàn thành" : "Đang làm";
+      document.getElementById("startTime").value = currentTime();
+      document.getElementById("quickFormPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+      document.getElementById("result").focus();
+    }
+
+    async function submitLog(event) {
+      event.preventDefault();
+      const log = {
+        id: "LOG-" + Date.now(),
+        planId: document.getElementById("planId").value,
+        workDate: document.getElementById("workDate").value,
+        employee: document.getElementById("employee").value.trim(),
+        shift: document.getElementById("shift").value,
+        progress: document.getElementById("progress").value,
+        startTime: document.getElementById("startTime").value,
+        endTime: document.getElementById("endTime").value,
+        selectedTask: document.getElementById("selectedTask").value.trim(),
+        result: document.getElementById("result").value.trim(),
+        issue: document.getElementById("issue").value.trim(),
+        nextAction: document.getElementById("nextAction").value.trim(),
+        createdAt: new Date().toISOString(),
+        syncStatus: "local"
+      };
+
+      localStorage.setItem(STORAGE_KEYS.employee, log.employee);
+      await trySync(log);
+      logs.unshift(log);
+      localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
+      updatePlanStatus(log.planId, log.progress);
+      clearForm(false);
+      render();
+      showToast(log.syncStatus === "synced" ? "Đã lưu và đồng bộ" : "Đã lưu cục bộ");
+    }
+
+    async function trySync(log) {
+      const settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.settings) || "{}");
+      if (!settings.url) return;
+
+      try {
+        const response = await fetch(settings.url, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "createWorkLog",
+            token: settings.token || "",
+            payload: log
+          })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (response.ok && (data.status === "success" || data.ok === true)) {
+          log.syncStatus = "synced";
+        } else {
+          log.syncStatus = "pending";
+        }
+      } catch (error) {
+        log.syncStatus = "pending";
+      }
+    }
+
+    function updatePlanStatus(planId, progress) {
+      if (!planId) return;
+      const plan = plans.find(item => item.id === planId);
+      if (!plan) return;
+      plan.status = progress;
+      localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
+    }
+
+    function clearForm(keepEmployee = true) {
+      const employee = document.getElementById("employee").value;
+      document.getElementById("logForm").reset();
+      document.getElementById("workDate").value = document.getElementById("filterDate").value || today;
+      document.getElementById("progress").value = "Chưa làm";
+      if (keepEmployee) document.getElementById("employee").value = employee;
+      document.getElementById("planId").value = "";
+    }
+
+    function clearLogs() {
+      if (!confirm("Xóa toàn bộ nhật ký cục bộ trên trình duyệt này?")) return;
+      logs = [];
+      localStorage.removeItem(STORAGE_KEYS.logs);
+      renderLogs();
+      showToast("Đã xóa nhật ký cục bộ");
+    }
+
+    function exportCsv() {
+      if (logs.length === 0) {
+        showToast("Chưa có dữ liệu để xuất");
+        return;
+      }
+      const headers = ["createdAt", "workDate", "employee", "shift", "progress", "startTime", "endTime", "selectedTask", "result", "issue", "nextAction", "syncStatus"];
+      const lines = [headers.join(",")].concat(logs.map(log => headers.map(key => csvCell(log[key] || "")).join(",")));
+      const blob = new Blob(["\ufeff" + lines.join("\n")], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `nhat-ky-cong-viec-${today}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function priorityBadge(value) {
+      const normalized = value || "Thấp";
+      const cls = normalized === "Cao" ? "badge-high" : normalized === "Trung bình" ? "badge-mid" : "badge-low";
+      return `<span class="badge-soft ${cls}">${escapeHtml(normalized)}</span>`;
+    }
+
+    function statusBadge(value) {
+      const normalized = value || "Chưa làm";
+      const cls = normalized === "Hoàn thành" ? "badge-done" : normalized === "Đang làm" ? "badge-doing" : "badge-open";
+      return `<span class="badge-soft ${cls}">${escapeHtml(normalized)}</span>`;
+    }
+
+    function currentTime() {
+      const d = new Date();
+      return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+    }
+
+    function showToast(message) {
+      document.getElementById("toastText").textContent = message;
+      toast.show();
+    }
+
+    function csvCell(value) {
+      return '"' + String(value).replace(/"/g, '""') + '"';
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[char]));
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value).replace(/`/g, "&#096;");
+    }
+  </script>
+</body>
+</html>

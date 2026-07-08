@@ -1,0 +1,50 @@
+[
+  {
+    "id": "PLAN-20260707-01",
+    "date": "2026-07-07",
+    "time": "07:30-09:30",
+    "team": "Tổ điện",
+    "area": "Tầng hầm B1",
+    "asset": "Tủ MSB-B1",
+    "task": "Kiểm tra nhiệt độ đầu cốt, vệ sinh khoang tủ, ghi nhận bất thường.",
+    "assignee": "Ca trực sáng",
+    "priority": "Cao",
+    "status": "Chưa làm"
+  },
+  {
+    "id": "PLAN-20260707-02",
+    "date": "2026-07-07",
+    "time": "09:30-11:30",
+    "team": "Tổ điện",
+    "area": "Phòng bơm",
+    "asset": "Tủ điều khiển bơm nước sạch",
+    "task": "Kiểm tra đèn báo, contactor, chế độ Auto/Manual và vệ sinh mặt tủ.",
+    "assignee": "Ca trực sáng",
+    "priority": "Trung bình",
+    "status": "Chưa làm"
+  },
+  {
+    "id": "PLAN-20260707-03",
+    "date": "2026-07-07",
+    "time": "13:30-15:00",
+    "team": "Tổ điện",
+    "area": "Sân vườn",
+    "asset": "Chiếu sáng cảnh quan",
+    "task": "Kiểm tra đèn lỗi, CB nhánh, hẹn giờ và ghi danh sách vị trí cần thay thế.",
+    "assignee": "Ca trực chiều",
+    "priority": "Trung bình",
+    "status": "Chưa làm"
+  },
+  {
+    "id": "PLAN-20260707-04",
+    "date": "2026-07-07",
+    "time": "15:00-16:30",
+    "team": "Tổ vận hành",
+    "area": "Trạm biến áp",
+    "asset": "Máy phát dự phòng",
+    "task": "Kiểm tra mức dầu, nước làm mát, điện áp ắc quy và tình trạng sẵn sàng.",
+    "assignee": "Ca trực chiều",
+    "priority": "Cao",
+    "status": "Chưa làm"
+  }
+]
