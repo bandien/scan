@@ -425,9 +425,9 @@
               <div class="col-6">
                 <label class="form-label" for="planTimeFrom">Khung giờ</label>
                 <div class="d-flex align-items-center gap-1">
-                  <input class="form-control" id="planTimeFrom" type="time" step="60" inputmode="numeric" title="Từ giờ">
+                  <select class="form-select" id="planTimeFrom" title="Từ giờ"></select>
                   <span class="text-secondary">-</span>
-                  <input class="form-control" id="planTimeTo" type="time" step="60" inputmode="numeric" title="Đến giờ">
+                  <select class="form-select" id="planTimeTo" title="Đến giờ"></select>
                 </div>
               </div>
               <div class="col-6">
@@ -437,15 +437,18 @@
               </div>
               <div class="col-6">
                 <label class="form-label" for="planAssignee">Người thực hiện</label>
-                <input class="form-control" id="planAssignee" placeholder="Ca trực sáng">
+                <input class="form-control" id="planAssignee" list="planAssigneeSuggestions" placeholder="Ca trực sáng">
+                <datalist id="planAssigneeSuggestions"></datalist>
               </div>
               <div class="col-6">
                 <label class="form-label" for="planArea">Khu vực</label>
-                <input class="form-control" id="planArea" placeholder="Tầng hầm B1">
+                <input class="form-control" id="planArea" list="planAreaSuggestions" placeholder="Tầng hầm B1">
+                <datalist id="planAreaSuggestions"></datalist>
               </div>
               <div class="col-6">
                 <label class="form-label" for="planAsset">Thiết bị</label>
-                <input class="form-control" id="planAsset" placeholder="Tủ MSB-B1">
+                <input class="form-control" id="planAsset" list="planAssetSuggestions" placeholder="Tủ MSB-B1">
+                <datalist id="planAssetSuggestions"></datalist>
               </div>
               <div class="col-12">
                 <label class="form-label" for="planTask">Nội dung công việc</label>
@@ -678,10 +681,10 @@
       document.getElementById("btnDeletePlan").style.display = plan ? "inline-block" : "none";
       document.getElementById("planFormId").value = plan ? plan.id : "";
       document.getElementById("planDate").value = plan ? (plan.date || today) : (document.getElementById("filterDate").value || today);
-      // Khung giờ lưu dạng "07:30-09:30" → tách vào 2 ô time
+      // Khung giờ lưu dạng "07:30-09:30" → tách vào 2 ô chọn giờ tròn 15'
       const timeParts = plan && plan.time ? plan.time.split("-").map(part => part.trim()) : [];
-      document.getElementById("planTimeFrom").value = timeParts[0] || "";
-      document.getElementById("planTimeTo").value = timeParts[1] || "";
+      fillTimeSelect("planTimeFrom", timeParts[0] || "");
+      fillTimeSelect("planTimeTo", timeParts[1] || "");
       document.getElementById("planTeam").value = plan ? (plan.team || "") : "";
       document.getElementById("planAssignee").value = plan ? (plan.assignee || "") : "";
       document.getElementById("planArea").value = plan ? (plan.area || "") : "";
@@ -690,10 +693,41 @@
       document.getElementById("planPriority").value = plan ? (plan.priority || "Trung bình") : "Trung bình";
       document.getElementById("planStatus").value = plan ? (plan.status || "Chưa làm") : "Chưa làm";
 
-      const teams = [...new Set(plans.map(p => p.team).filter(Boolean))].sort();
-      document.getElementById("planTeamSuggestions").innerHTML = teams.map(team => `<option value="${escapeAttr(team)}">`).join("");
+      // Gợi ý chọn nhanh từ các giá trị đã nhập ở những kế hoạch trước
+      fillSuggestions("planTeamSuggestions", plans.map(p => p.team));
+      fillSuggestions("planAssigneeSuggestions", plans.map(p => p.assignee));
+      fillSuggestions("planAreaSuggestions", plans.map(p => p.area));
+      fillSuggestions("planAssetSuggestions", plans.map(p => p.asset));
 
       planModal.show();
+    }
+
+    const QUARTER_TIMES = (() => {
+      const list = [];
+      for (let hour = 0; hour < 24; hour++) {
+        ["00", "15", "30", "45"].forEach(minute => {
+          list.push(String(hour).padStart(2, "0") + ":" + minute);
+        });
+      }
+      return list;
+    })();
+
+    function fillTimeSelect(id, value) {
+      const select = document.getElementById(id);
+      const cleaned = String(value || "").trim();
+      const options = ['<option value="">--:--</option>']
+        .concat(QUARTER_TIMES.map(time => `<option>${time}</option>`));
+      // Giữ được giờ lẻ (vd 07:20) của kế hoạch cũ khi mở lại để sửa
+      if (cleaned && !QUARTER_TIMES.includes(cleaned)) {
+        options.push(`<option>${escapeHtml(cleaned)}</option>`);
+      }
+      select.innerHTML = options.join("");
+      select.value = cleaned;
+    }
+
+    function fillSuggestions(datalistId, values) {
+      const unique = [...new Set(values.map(v => String(v || "").trim()).filter(Boolean))].sort();
+      document.getElementById(datalistId).innerHTML = unique.map(v => `<option value="${escapeAttr(v)}">`).join("");
     }
 
     async function submitPlanForm(event) {
