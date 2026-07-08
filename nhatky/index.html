@@ -255,7 +255,8 @@
             </div>
             <div class="col-6">
               <label class="form-label" for="employee">Nhân viên</label>
-              <input class="form-control" id="employee" placeholder="Tên người ghi" required>
+              <input class="form-control" id="employee" list="employeeSuggestions" placeholder="Tên người ghi" autocomplete="name" required>
+              <datalist id="employeeSuggestions"></datalist>
             </div>
             <div class="col-6 d-none extra-field">
               <label class="form-label" for="shift">Ca</label>
@@ -372,6 +373,7 @@
           </div>
           <div class="p-3">
             <div class="d-flex flex-column gap-2" id="logList"></div>
+            <button class="btn btn-outline-primary w-100 mt-3" type="button" id="btnToggleLogs" style="display:none;">Xem thêm</button>
           </div>
         </div>
       </div>
@@ -415,16 +417,19 @@
       plans: "bandien_nhatky_plans",
       logs: "bandien_nhatky_logs",
       settings: "bandien_nhatky_settings",
-      employee: "bandien_nhatky_employee"
+      employee: "bandien_nhatky_employee",
+      employees: "bandien_nhatky_employees"
     };
 
     const today = new Date().toISOString().slice(0, 10);
+    const RECENT_LOG_LIMIT = 5;
     const DEFAULT_SYNC = {
       url: "https://script.google.com/macros/s/AKfycbzW4TxDarLBOpZvO8hnE0R65IsCd95a5l-XPASjUmZNuefH5MiWMs8lCpLpggzFwyXK/exec",
       token: "HAPU_QR_SECRET_2026"
     };
     let plans = [];
     let logs = [];
+    let showAllLogs = false;
     let toast;
 
     const fallbackPlans = [
@@ -494,6 +499,7 @@
       loadSettings();
       await loadPlans();
       loadLogs();
+      renderEmployeeSuggestions();
       bindEvents();
       render();
     });
@@ -514,6 +520,8 @@
       document.getElementById("btnClearLogs").addEventListener("click", clearLogs);
       document.getElementById("btnSaveSettings").addEventListener("click", saveSettings);
       document.getElementById("btnToggleExtra").addEventListener("click", toggleExtraFields);
+      document.getElementById("btnToggleLogs").addEventListener("click", toggleLogs);
+      document.getElementById("employee").addEventListener("change", rememberEmployeeFromInput);
     }
 
     async function loadPlans(force) {
@@ -540,6 +548,35 @@
         logs = buildSampleLogs();
         localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
       }
+    }
+
+    function getStoredEmployees() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.employees) || "[]");
+    }
+
+    function rememberEmployee(name) {
+      const cleaned = String(name || "").trim();
+      if (!cleaned) return;
+      const names = [cleaned].concat(getStoredEmployees().filter(item => item !== cleaned)).slice(0, 12);
+      localStorage.setItem(STORAGE_KEYS.employee, cleaned);
+      localStorage.setItem(STORAGE_KEYS.employees, JSON.stringify(names));
+      renderEmployeeSuggestions();
+    }
+
+    function rememberEmployeeFromInput() {
+      rememberEmployee(document.getElementById("employee").value);
+    }
+
+    function renderEmployeeSuggestions() {
+      const names = new Set(getStoredEmployees());
+      logs.forEach(log => {
+        if (log.employee) names.add(log.employee);
+      });
+      document.getElementById("employeeSuggestions").innerHTML = [...names]
+        .filter(Boolean)
+        .slice(0, 12)
+        .map(name => `<option value="${escapeAttr(name)}"></option>`)
+        .join("");
     }
 
     function loadSettings() {
@@ -645,13 +682,16 @@
 
     function renderLogs() {
       const list = document.getElementById("logList");
+      const toggleBtn = document.getElementById("btnToggleLogs");
       if (logs.length === 0) {
         list.innerHTML = '<div class="empty-state">Chưa có nhật ký nào trên trình duyệt này.</div>';
+        toggleBtn.style.display = "none";
         renderMetrics();
         return;
       }
 
-      list.innerHTML = logs.slice(0, 20).map(log => `
+      const visibleLogs = showAllLogs ? logs : logs.slice(0, RECENT_LOG_LIMIT);
+      list.innerHTML = visibleLogs.map(log => `
         <article class="log-card">
           <div class="d-flex justify-content-between gap-2">
             <div>
@@ -666,7 +706,14 @@
           ${log.nextAction ? `<div class="mt-1 small text-secondary"><i class="bi bi-arrow-return-right me-1"></i>${escapeHtml(log.nextAction)}</div>` : ""}
         </article>
       `).join("");
+      toggleBtn.style.display = logs.length > RECENT_LOG_LIMIT ? "block" : "none";
+      toggleBtn.textContent = showAllLogs ? "Thu gọn" : `Xem thêm (${logs.length - RECENT_LOG_LIMIT})`;
       renderMetrics();
+    }
+
+    function toggleLogs() {
+      showAllLogs = !showAllLogs;
+      renderLogs();
     }
 
     function renderMetrics() {
@@ -708,10 +755,11 @@
         syncStatus: "local"
       };
 
-      localStorage.setItem(STORAGE_KEYS.employee, log.employee);
+      rememberEmployee(log.employee);
       await trySync(log);
       logs.unshift(log);
       localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
+      showAllLogs = false;
       updatePlanStatus(log.planId, log.progress);
       clearForm(false);
       render();
