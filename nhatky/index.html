@@ -419,8 +419,12 @@
                 <input class="form-control" id="planDate" type="date" required>
               </div>
               <div class="col-6">
-                <label class="form-label" for="planTime">Khung giờ</label>
-                <input class="form-control" id="planTime" placeholder="07:30-09:30">
+                <label class="form-label" for="planTimeFrom">Khung giờ</label>
+                <div class="d-flex align-items-center gap-1">
+                  <input class="form-control" id="planTimeFrom" type="time" step="60" inputmode="numeric" title="Từ giờ">
+                  <span class="text-secondary">-</span>
+                  <input class="form-control" id="planTimeTo" type="time" step="60" inputmode="numeric" title="Đến giờ">
+                </div>
               </div>
               <div class="col-6">
                 <label class="form-label" for="planTeam">Tổ/ca</label>
@@ -662,7 +666,10 @@
       document.getElementById("btnDeletePlan").style.display = plan ? "inline-block" : "none";
       document.getElementById("planFormId").value = plan ? plan.id : "";
       document.getElementById("planDate").value = plan ? (plan.date || today) : (document.getElementById("filterDate").value || today);
-      document.getElementById("planTime").value = plan ? (plan.time || "") : "";
+      // Khung giờ lưu dạng "07:30-09:30" → tách vào 2 ô time
+      const timeParts = plan && plan.time ? plan.time.split("-").map(part => part.trim()) : [];
+      document.getElementById("planTimeFrom").value = timeParts[0] || "";
+      document.getElementById("planTimeTo").value = timeParts[1] || "";
       document.getElementById("planTeam").value = plan ? (plan.team || "") : "";
       document.getElementById("planAssignee").value = plan ? (plan.assignee || "") : "";
       document.getElementById("planArea").value = plan ? (plan.area || "") : "";
@@ -682,7 +689,7 @@
       const payload = {
         id: document.getElementById("planFormId").value.trim(),
         date: document.getElementById("planDate").value,
-        time: document.getElementById("planTime").value.trim(),
+        time: [document.getElementById("planTimeFrom").value, document.getElementById("planTimeTo").value].filter(Boolean).join("-"),
         team: document.getElementById("planTeam").value.trim(),
         assignee: document.getElementById("planAssignee").value.trim(),
         area: document.getElementById("planArea").value.trim(),
