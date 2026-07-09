@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Câu hỏi phỏng vấn cơ điện sân golf | BanDienScan</title>
+  <meta name="description" content="Bộ câu hỏi gợi ý phỏng vấn tuyển dụng tổ cơ điện sân golf.">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <style>
+    :root {
+      --bg: #f5f7fa;
+      --surface: #ffffff;
+      --ink: #17212f;
+      --muted: #667085;
+      --line: #d9e1e8;
+      --brand: #176b87;
+      --green: #2d8a5f;
+      --warn: #b7791f;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .shell { max-width: 1180px; margin: 0 auto; padding: 14px; }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      background: var(--brand);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 8px 22px rgba(23, 33, 47, .05);
+    }
+
+    .panel-head {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 10px 12px;
+      min-height: 66px;
+    }
+
+    .metric strong { display: block; font-size: 1.25rem; line-height: 1.1; }
+    .metric span { color: var(--muted); font-size: .78rem; }
+
+    .question-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 12px;
+    }
+
+    .question-text {
+      font-size: 1rem;
+      line-height: 1.38;
+      font-weight: 750;
+    }
+
+    .answer-cue {
+      color: #475467;
+      font-size: .9rem;
+      line-height: 1.4;
+    }
+
+    .tag {
+      border: 1px solid #d1dbe5;
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: .74rem;
+      color: #344054;
+      background: #f8fafc;
+      white-space: nowrap;
+    }
+
+    .tag-hard { border-color: #ffd7a8; background: #fff7e8; color: var(--warn); }
+    .tag-field { border-color: #bfe4cf; background: #ecf8f1; color: var(--green); }
+
+    .form-label { font-size: .78rem; font-weight: 700; color: #475467; }
+    .form-control, .form-select { border-radius: 8px; border-color: #cfd8e3; }
+
+    .rubric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .rubric-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      background: #fbfcfe;
+    }
+
+    @media (max-width: 780px) {
+      .shell { padding: 10px; }
+      h1 { font-size: 1.05rem; }
+      .rubric-grid { grid-template-columns: 1fr 1fr; }
+      .question-text { font-size: .96rem; }
+    }
+
+    @media print {
+      .topbar, .filters, .copy-btn, .no-print { display: none !important; }
+      body { background: #fff; }
+      .panel, .question-card, .metric { box-shadow: none; }
+      .question-card { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell py-3">
+      <div class="d-flex justify-content-between align-items-center gap-2">
+        <div class="d-flex align-items-center gap-3">
+          <div class="brand-mark"><i class="bi bi-person-workspace fs-4"></i></div>
+          <div>
+            <div class="text-uppercase fw-bold text-primary" style="font-size:.72rem;">BanDienScan</div>
+            <h1 class="m-0 fw-bold">Phỏng vấn tổ cơ điện sân golf</h1>
+          </div>
+        </div>
+        <div class="d-flex gap-2 no-print">
+          <button class="btn btn-outline-secondary btn-sm" type="button" onclick="window.print()">
+            <i class="bi bi-printer me-1"></i>In
+          </button>
+          <a class="btn btn-outline-primary btn-sm" href="../index.html">
+            <i class="bi bi-house me-1"></i>Trang chính
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="row g-2 mb-3">
+      <div class="col-6 col-lg-3"><div class="metric"><strong id="metricTotal">0</strong><span>Câu hỏi phù hợp</span></div></div>
+      <div class="col-6 col-lg-3"><div class="metric"><strong>30-45'</strong><span>Thời lượng gợi ý</span></div></div>
+      <div class="col-6 col-lg-3"><div class="metric"><strong>4</strong><span>Nhóm chấm điểm</span></div></div>
+      <div class="col-6 col-lg-3"><div class="metric"><strong>8</strong><span>Câu nên hỏi chính</span></div></div>
+    </section>
+
+    <section class="panel filters mb-3">
+      <div class="panel-head">
+        <h2 class="h5 fw-bold m-0">Bộ lọc nhanh</h2>
+      </div>
+      <div class="p-3">
+        <div class="row g-2 align-items-end">
+          <div class="col-12 col-md-4">
+            <label class="form-label" for="searchBox">Tìm câu hỏi</label>
+            <input class="form-control" id="searchBox" type="search" placeholder="Ví dụ: bơm, điện, an toàn, sự cố...">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label" for="topicFilter">Chủ đề</label>
+            <select class="form-select" id="topicFilter">
+              <option value="">Tất cả</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label" for="levelFilter">Mức</label>
+            <select class="form-select" id="levelFilter">
+              <option value="">Tất cả</option>
+              <option>Cơ bản</option>
+              <option>Thực hành</option>
+              <option>Tình huống</option>
+            </select>
+          </div>
+          <div class="col-12 col-md-2 d-grid">
+            <button class="btn btn-primary" type="button" id="btnCore"><i class="bi bi-stars me-1"></i>8 câu chính</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel mb-3">
+      <div class="panel-head">
+        <div class="d-flex justify-content-between align-items-center gap-2">
+          <h2 class="h5 fw-bold m-0">Câu hỏi gợi ý</h2>
+          <button class="btn btn-outline-secondary btn-sm no-print" type="button" id="btnCopyAll">
+            <i class="bi bi-clipboard me-1"></i>Copy danh sách
+          </button>
+        </div>
+      </div>
+      <div class="p-3">
+        <div class="d-flex flex-column gap-2" id="questionList"></div>
+      </div>
+    </section>
+
+    <section class="panel mb-3">
+      <div class="panel-head">
+        <h2 class="h5 fw-bold m-0">Khung chấm điểm nhanh</h2>
+      </div>
+      <div class="p-3">
+        <div class="rubric-grid">
+          <div class="rubric-box"><b>Kỹ thuật</b><div class="small text-secondary">Điện, bơm, tủ, máy phát, đọc sơ đồ.</div></div>
+          <div class="rubric-box"><b>An toàn</b><div class="small text-secondary">Lockout/tagout, PPE, điện 3 pha, làm ngoài trời.</div></div>
+          <div class="rubric-box"><b>Xử lý sự cố</b><div class="small text-secondary">Tư duy khoanh vùng, báo cáo, ưu tiên vận hành.</div></div>
+          <div class="rubric-box"><b>Thái độ ca trực</b><div class="small text-secondary">Kỷ luật, ghi chép, phối hợp sân golf, sẵn sàng ca kíp.</div></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="position-fixed bottom-0 start-50 translate-middle-x p-3 no-print" style="z-index: 50">
+    <div class="toast align-items-center border-0" id="toast" role="status" aria-live="polite" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body" id="toastText">Đã copy</div>
+        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Đóng"></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const questions = [
+      { topic: "Điện", level: "Cơ bản", core: true, q: "Anh/chị hãy mô tả các bước kiểm tra an toàn trước khi thao tác với tủ điện 3 pha ngoài hiện trường.", cue: "Mong đợi: cắt nguồn, treo cảnh báo, thử hết điện, PPE, kiểm tra môi trường ẩm ướt." },
+      { topic: "Điện", level: "Thực hành", core: true, q: "Nếu một nhánh chiếu sáng sân golf bị nhảy CB liên tục sau mưa, anh/chị khoanh vùng nguyên nhân thế nào?", cue: "Mong đợi: tách tải, kiểm tra rò, hộp nối, đèn/ngầm cáp, đo cách điện, ưu tiên an toàn." },
+      { topic: "Bơm tưới", level: "Thực hành", core: true, q: "Khi bơm tưới không lên áp dù motor vẫn chạy, anh/chị kiểm tra theo thứ tự nào?", cue: "Mong đợi: mực nước, van, chiều quay, lọc rác, mồi bơm, rò đường ống, cánh bơm, cảm biến áp." },
+      { topic: "Bơm tưới", level: "Tình huống", core: true, q: "Đêm trước giải đấu, hệ thống tưới khu green không chạy theo lịch. Anh/chị xử lý và báo cáo ra sao?", cue: "Mong đợi: kiểm tra nguồn/tủ/timer, chạy tay vùng ưu tiên, báo quản lý sân, ghi log, phương án tạm." },
+      { topic: "Máy phát", level: "Cơ bản", core: false, q: "Trước khi chạy máy phát dự phòng, cần kiểm tra những hạng mục nào?", cue: "Mong đợi: dầu, nước làm mát, nhiên liệu, ắc quy, ATS, tải, thông gió, cảnh báo." },
+      { topic: "Máy phát", level: "Tình huống", core: true, q: "Mất điện lưới, máy phát không tự khởi động. Anh/chị làm gì trong 10 phút đầu?", cue: "Mong đợi: báo ca, kiểm ATS/ắc quy/nhiên liệu/lỗi, chạy tay nếu an toàn, ưu tiên tải quan trọng." },
+      { topic: "Cơ khí", level: "Thực hành", core: false, q: "Dấu hiệu nào cho thấy bạc đạn motor/bơm có vấn đề? Cần ghi nhận gì vào nhật ký?", cue: "Mong đợi: tiếng ồn, rung, nhiệt, mùi, dòng tăng, thời gian, vị trí, khuyến nghị dừng/kiểm tra." },
+      { topic: "An toàn", level: "Cơ bản", core: true, q: "Khi làm việc gần nước, hố bơm hoặc khu vực ẩm, các rủi ro điện chính là gì và phòng tránh thế nào?", cue: "Mong đợi: rò điện, trượt ngã, thiết bị ẩm, ELCB/RCD, PPE cách điện, làm 2 người." },
+      { topic: "Vận hành sân golf", level: "Cơ bản", core: false, q: "Theo anh/chị, công việc cơ điện sân golf khác gì so với cơ điện tòa nhà?", cue: "Mong đợi: ngoài trời, tưới tiêu, chiếu sáng cảnh quan, ảnh hưởng khách/giải đấu, thời tiết." },
+      { topic: "Vận hành sân golf", level: "Tình huống", core: true, q: "Nếu có sự cố điện tại khu vực đang có khách chơi, anh/chị tổ chức hiện trường thế nào?", cue: "Mong đợi: cô lập nguy hiểm, cảnh báo, phối hợp vận hành sân, không tự ý gây gián đoạn lớn, báo cáo." },
+      { topic: "Đọc hiểu", level: "Thực hành", core: false, q: "Anh/chị đã từng đọc sơ đồ điện/tủ điều khiển chưa? Hãy giải thích cách tìm một contactor hoặc relay trên sơ đồ.", cue: "Mong đợi: biết ký hiệu, đánh số dây, terminal, liên hệ thực tế trong tủ." },
+      { topic: "Đọc hiểu", level: "Cơ bản", core: false, q: "Các thông số trên nameplate motor 3 pha cần chú ý là gì?", cue: "Mong đợi: điện áp, dòng, công suất, cos phi, tốc độ, cấp bảo vệ, đấu sao/tam giác." },
+      { topic: "Bảo trì", level: "Cơ bản", core: false, q: "Một nhật ký bảo trì tốt cần ghi những thông tin gì để ca sau hiểu được?", cue: "Mong đợi: thời gian, thiết bị, hiện trạng, việc đã làm, số đo, tồn tại, vật tư, người thực hiện." },
+      { topic: "Bảo trì", level: "Thực hành", core: true, q: "Nếu phát hiện thiết bị chưa hỏng nhưng có dấu hiệu bất thường, anh/chị quyết định sửa ngay hay theo dõi? Vì sao?", cue: "Mong đợi: đánh giá mức độ rủi ro, ảnh hưởng vận hành, báo cáo, đề xuất vật tư/lịch dừng." },
+      { topic: "Ca trực", level: "Cơ bản", core: false, q: "Anh/chị có sẵn sàng làm ca sớm, ca tối hoặc xử lý sự cố mưa bão không? Cách bàn giao ca của anh/chị?", cue: "Mong đợi: thái độ rõ ràng, kỷ luật, ghi sổ/log, nhắn nhóm, ưu tiên việc còn dang dở." },
+      { topic: "Thái độ", level: "Tình huống", core: false, q: "Khi quản lý sân yêu cầu xử lý ngay nhưng anh/chị thấy chưa an toàn, anh/chị trao đổi thế nào?", cue: "Mong đợi: giữ nguyên tắc an toàn, giải thích rủi ro, đề xuất phương án tạm, báo cấp trên." }
+    ];
+
+    let coreOnly = false;
+    let toast;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      toast = new bootstrap.Toast(document.getElementById("toast"), { delay: 1800 });
+      populateTopics();
+      bindEvents();
+      renderQuestions();
+    });
+
+    function bindEvents() {
+      ["searchBox", "topicFilter", "levelFilter"].forEach(id => {
+        document.getElementById(id).addEventListener("input", renderQuestions);
+      });
+      document.getElementById("btnCore").addEventListener("click", () => {
+        coreOnly = !coreOnly;
+        document.getElementById("btnCore").classList.toggle("btn-primary", !coreOnly);
+        document.getElementById("btnCore").classList.toggle("btn-success", coreOnly);
+        renderQuestions();
+      });
+      document.getElementById("btnCopyAll").addEventListener("click", copyVisibleQuestions);
+    }
+
+    function populateTopics() {
+      const select = document.getElementById("topicFilter");
+      const topics = [...new Set(questions.map(item => item.topic))].sort();
+      select.innerHTML = '<option value="">Tất cả</option>' + topics.map(topic => `<option>${escapeHtml(topic)}</option>`).join("");
+    }
+
+    function getVisibleQuestions() {
+      const query = document.getElementById("searchBox").value.trim().toLowerCase();
+      const topic = document.getElementById("topicFilter").value;
+      const level = document.getElementById("levelFilter").value;
+      return questions.filter(item => {
+        const haystack = [item.topic, item.level, item.q, item.cue].join(" ").toLowerCase();
+        return (!query || haystack.includes(query))
+          && (!topic || item.topic === topic)
+          && (!level || item.level === level)
+          && (!coreOnly || item.core);
+      });
+    }
+
+    function renderQuestions() {
+      const visible = getVisibleQuestions();
+      document.getElementById("metricTotal").textContent = visible.length;
+      const list = document.getElementById("questionList");
+      if (!visible.length) {
+        list.innerHTML = '<div class="text-center text-secondary py-4">Không có câu hỏi phù hợp bộ lọc.</div>';
+        return;
+      }
+      list.innerHTML = visible.map((item, index) => `
+        <article class="question-card">
+          <div class="d-flex justify-content-between align-items-start gap-2">
+            <div class="flex-grow-1">
+              <div class="d-flex gap-1 flex-wrap mb-2">
+                <span class="tag tag-field">${escapeHtml(item.topic)}</span>
+                <span class="tag ${item.level === "Tình huống" ? "tag-hard" : ""}">${escapeHtml(item.level)}</span>
+                ${item.core ? '<span class="tag">Câu chính</span>' : ""}
+              </div>
+              <div class="question-text">${index + 1}. ${escapeHtml(item.q)}</div>
+              <div class="answer-cue mt-2"><i class="bi bi-check2-circle text-success me-1"></i>${escapeHtml(item.cue)}</div>
+            </div>
+            <button class="btn btn-outline-primary btn-sm copy-btn" type="button" onclick="copyQuestion(${questions.indexOf(item)})">
+              <i class="bi bi-clipboard"></i>
+            </button>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    async function copyQuestion(index) {
+      const item = questions[index];
+      await navigator.clipboard.writeText(`${item.q}\nGợi ý đánh giá: ${item.cue}`);
+      showToast("Đã copy câu hỏi");
+    }
+
+    async function copyVisibleQuestions() {
+      const text = getVisibleQuestions()
+        .map((item, index) => `${index + 1}. ${item.q}\nGợi ý: ${item.cue}`)
+        .join("\n\n");
+      await navigator.clipboard.writeText(text);
+      showToast("Đã copy danh sách");
+    }
+
+    function showToast(message) {
+      document.getElementById("toastText").textContent = message;
+      toast.show();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[char]));
+    }
+  </script>
+</body>
+</html>
