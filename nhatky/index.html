@@ -115,6 +115,36 @@
       white-space: nowrap;
     }
 
+    .badge-carry { background: #fff7df; color: #9a6b16; border-color: #ffe5a3; }
+    .carry-row td { background: #fffaeb; }
+    .plan-card.carry { background: #fffaeb; }
+
+    .week-table td { vertical-align: top; }
+    .week-table .day-cell { width: 110px; white-space: nowrap; }
+    .week-today td { background: #eef6f4; }
+    .week-items { display: flex; flex-direction: column; gap: 6px; }
+
+    .week-item {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      width: 100%;
+      text-align: left;
+      border: 1px solid var(--line);
+      border-left-width: 4px;
+      border-radius: 6px;
+      padding: 6px 8px;
+      background: #fff;
+      font-size: .85rem;
+      color: var(--ink);
+    }
+
+    .week-item .badge-soft { margin-left: auto; }
+    .week-item.st-done { border-left-color: #2d8a5f; }
+    .week-item.st-doing { border-left-color: #155ea8; }
+    .week-item.st-help { border-left-color: #c2413b; }
+    .week-item.st-open { border-left-color: #94a3b8; }
+
     .badge-high { background: #fff1f0; color: var(--danger); border-color: #ffd0cc; }
     .badge-mid { background: #fff7df; color: var(--warn); border-color: #ffe5a3; }
     .badge-low { background: var(--surface-soft); color: var(--brand-2); border-color: #cbe7db; }
@@ -378,7 +408,7 @@
     </section>
 
     <section class="row g-3 mb-3">
-      <div class="col-6 col-lg-3"><div class="metric"><strong id="metricTotal">0</strong><span>Kế hoạch hôm nay</span></div></div>
+      <div class="col-6 col-lg-3"><div class="metric"><strong id="metricTotal">0</strong><span id="metricTotalLabel">Kế hoạch trong ngày</span></div></div>
       <div class="col-6 col-lg-3"><div class="metric"><strong id="metricDoing">0</strong><span>Đang làm</span></div></div>
       <div class="col-6 col-lg-3"><div class="metric"><strong id="metricDone">0</strong><span>Đã hoàn thành</span><div class="mini-bar"><i id="metricDoneBar"></i></div></div></div>
       <div class="col-6 col-lg-3"><div class="metric"><strong id="metricLogs">0</strong><span>Nhật ký đã ghi</span></div></div>
@@ -393,6 +423,13 @@
               <button class="btn btn-outline-secondary btn-icon" type="button" id="btnPrevDay" title="Ngày trước"><i class="bi bi-chevron-left"></i></button>
               <input class="form-control" id="filterDate" type="date">
               <button class="btn btn-outline-secondary btn-icon" type="button" id="btnNextDay" title="Ngày sau"><i class="bi bi-chevron-right"></i></button>
+            </div>
+          </div>
+          <div>
+            <label class="form-label d-block">Kiểu xem</label>
+            <div class="btn-group" role="group" aria-label="Kiểu xem kế hoạch">
+              <button class="btn btn-outline-primary active" type="button" id="btnViewDay">Ngày</button>
+              <button class="btn btn-outline-primary" type="button" id="btnViewWeek">Tuần</button>
             </div>
           </div>
           <div>
@@ -427,6 +464,7 @@
         </table>
       </div>
       <div class="mobile-plan-list" id="planCards"></div>
+      <div id="weekView" style="display:none;"></div>
     </section>
 
     <section class="row g-3">
@@ -506,6 +544,16 @@
                 <datalist id="planAssigneeSuggestions"></datalist>
               </div>
               <div class="col-6">
+                <label class="form-label" for="planWatcher">Người theo dõi</label>
+                <input class="form-control" id="planWatcher" list="planWatcherSuggestions" placeholder="1 người giám sát">
+                <datalist id="planWatcherSuggestions"></datalist>
+              </div>
+              <div class="col-6">
+                <label class="form-label" for="planCollab">Người phối hợp</label>
+                <input class="form-control" id="planCollab" list="planCollabSuggestions" placeholder="Cách nhau dấu phẩy">
+                <datalist id="planCollabSuggestions"></datalist>
+              </div>
+              <div class="col-6">
                 <label class="form-label" for="planArea">Khu vực</label>
                 <input class="form-control" id="planArea" list="planAreaSuggestions" placeholder="Tầng hầm B1">
                 <datalist id="planAreaSuggestions"></datalist>
@@ -569,13 +617,14 @@
       employees: "bandien_nhatky_employees"
     };
 
-    // Lấy ngày theo giờ địa phương (toISOString là UTC → sai ngày lúc 0h-7h sáng VN)
-    const today = (() => {
-      const d = new Date();
+    function toIsoDate(d) {
       return d.getFullYear() + "-" +
         String(d.getMonth() + 1).padStart(2, "0") + "-" +
         String(d.getDate()).padStart(2, "0");
-    })();
+    }
+
+    // Lấy ngày theo giờ địa phương (toISOString là UTC → sai ngày lúc 0h-7h sáng VN)
+    const today = toIsoDate(new Date());
     const RECENT_LOG_LIMIT = 5;
     const DEFAULT_SYNC = {
       url: "https://script.google.com/macros/s/AKfycbzW4TxDarLBOpZvO8hnE0R65IsCd95a5l-XPASjUmZNuefH5MiWMs8lCpLpggzFwyXK/exec",
@@ -587,6 +636,7 @@
     let toast;
     let planModal;
     let lastAddedLogId = null;
+    let viewMode = "day";
 
     const fallbackPlans = [
       {
@@ -639,8 +689,10 @@
       ["filterDate", "filterTeam", "searchBox"].forEach(id => {
         document.getElementById(id).addEventListener("input", renderPlans);
       });
-      document.getElementById("btnPrevDay").addEventListener("click", () => shiftFilterDate(-1));
-      document.getElementById("btnNextDay").addEventListener("click", () => shiftFilterDate(1));
+      document.getElementById("btnPrevDay").addEventListener("click", () => shiftFilterDate(viewMode === "week" ? -7 : -1));
+      document.getElementById("btnNextDay").addEventListener("click", () => shiftFilterDate(viewMode === "week" ? 7 : 1));
+      document.getElementById("btnViewDay").addEventListener("click", () => setViewMode("day"));
+      document.getElementById("btnViewWeek").addEventListener("click", () => setViewMode("week"));
       document.getElementById("btnReload").addEventListener("click", async () => {
         const btn = document.getElementById("btnReload");
         const original = btn.innerHTML;
@@ -738,10 +790,26 @@
       const input = document.getElementById("filterDate");
       const parsed = input.value ? new Date(input.value + "T00:00:00") : new Date();
       parsed.setDate(parsed.getDate() + deltaDays);
-      input.value = parsed.getFullYear() + "-" +
-        String(parsed.getMonth() + 1).padStart(2, "0") + "-" +
-        String(parsed.getDate()).padStart(2, "0");
+      input.value = toIsoDate(parsed);
       renderPlans();
+    }
+
+    function setViewMode(mode) {
+      viewMode = mode;
+      document.getElementById("btnViewDay").classList.toggle("active", mode === "day");
+      document.getElementById("btnViewWeek").classList.toggle("active", mode === "week");
+      renderPlans();
+    }
+
+    // 7 ngày (Thứ 2 → Chủ nhật) của tuần chứa ngày đang chọn
+    function weekDates(dateStr) {
+      const d = new Date((dateStr || today) + "T00:00:00");
+      d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+      return [...Array(7)].map((_, i) => {
+        const day = new Date(d);
+        day.setDate(d.getDate() + i);
+        return toIsoDate(day);
+      });
     }
 
     async function fetchPlansFromBackend() {
@@ -821,6 +889,8 @@
       fillTimeSelect("planTimeTo", timeParts[1] || "");
       document.getElementById("planTeam").value = plan ? (plan.team || "") : "";
       document.getElementById("planAssignee").value = plan ? (plan.assignee || "") : "";
+      document.getElementById("planWatcher").value = plan ? (plan.watcher || "") : "";
+      document.getElementById("planCollab").value = plan ? (plan.collaborators || "") : "";
       document.getElementById("planArea").value = plan ? (plan.area || "") : "";
       document.getElementById("planAsset").value = plan ? (plan.asset || "") : "";
       document.getElementById("planTask").value = plan ? (plan.task || "") : "";
@@ -828,8 +898,14 @@
       document.getElementById("planStatus").value = plan ? (plan.status || "Chưa làm") : "Chưa làm";
 
       // Gợi ý chọn nhanh từ các giá trị đã nhập ở những kế hoạch trước
+      const knownPeople = plans.map(p => p.assignee)
+        .concat(plans.map(p => p.watcher))
+        .concat(plans.flatMap(p => String(p.collaborators || "").split(",")))
+        .concat(getStoredEmployees());
       fillSuggestions("planTeamSuggestions", plans.map(p => p.team));
-      fillSuggestions("planAssigneeSuggestions", plans.map(p => p.assignee));
+      fillSuggestions("planAssigneeSuggestions", knownPeople);
+      fillSuggestions("planWatcherSuggestions", knownPeople);
+      fillSuggestions("planCollabSuggestions", knownPeople);
       fillSuggestions("planAreaSuggestions", plans.map(p => p.area));
       fillSuggestions("planAssetSuggestions", plans.map(p => p.asset));
 
@@ -872,6 +948,8 @@
         time: [document.getElementById("planTimeFrom").value, document.getElementById("planTimeTo").value].filter(Boolean).join("-"),
         team: document.getElementById("planTeam").value.trim(),
         assignee: document.getElementById("planAssignee").value.trim(),
+        watcher: document.getElementById("planWatcher").value.trim(),
+        collaborators: document.getElementById("planCollab").value.trim(),
         area: document.getElementById("planArea").value.trim(),
         asset: document.getElementById("planAsset").value.trim(),
         task: document.getElementById("planTask").value.trim(),
@@ -1004,24 +1082,59 @@
       select.value = current;
     }
 
+    function isCarryOver(plan, selectedDate) {
+      return Boolean(selectedDate && plan.date && plan.date < selectedDate && plan.status !== "Hoàn thành");
+    }
+
     function getVisiblePlans() {
       const date = document.getElementById("filterDate").value;
       const team = document.getElementById("filterTeam").value;
       const query = document.getElementById("searchBox").value.trim().toLowerCase();
 
+      const matchesFilters = plan => {
+        const byTeam = !team || plan.team === team;
+        const haystack = [plan.area, plan.asset, plan.task, plan.assignee, plan.watcher, plan.collaborators, plan.priority, plan.status].join(" ").toLowerCase();
+        return byTeam && (!query || haystack.includes(query));
+      };
+
+      if (viewMode === "week") {
+        const days = weekDates(date);
+        return plans.filter(plan => days.includes(plan.date) && matchesFilters(plan));
+      }
+
       return plans.filter(plan => {
         const byDate = !date || plan.date === date;
-        const byTeam = !team || plan.team === team;
-        const haystack = [plan.area, plan.asset, plan.task, plan.assignee, plan.priority, plan.status].join(" ").toLowerCase();
-        const bySearch = !query || haystack.includes(query);
-        return byDate && byTeam && bySearch;
+        // Kế hoạch ngày trước chưa hoàn thành → vẫn hiện ở ngày đang xem (tồn cũ)
+        return (byDate || isCarryOver(plan, date)) && matchesFilters(plan);
       });
     }
 
+    function peopleLines(plan) {
+      let html = "";
+      if (plan.watcher) html += `<div class="small text-secondary text-nowrap"><i class="bi bi-eye me-1"></i>${escapeHtml(plan.watcher)}</div>`;
+      if (plan.collaborators) html += `<div class="small text-secondary"><i class="bi bi-people me-1"></i>${escapeHtml(plan.collaborators)}</div>`;
+      return html;
+    }
+
     function renderPlans() {
+      const tableWrap = document.querySelector(".table-wrap");
       const rows = document.getElementById("planRows");
       const cards = document.getElementById("planCards");
+      const weekView = document.getElementById("weekView");
+      const selectedDate = document.getElementById("filterDate").value;
       const visible = getVisiblePlans();
+
+      if (viewMode === "week") {
+        tableWrap.style.display = "none";
+        cards.style.display = "none";
+        weekView.style.display = "block";
+        renderWeek(visible);
+        renderMetrics();
+        return;
+      }
+      weekView.style.display = "none";
+      tableWrap.style.display = "";
+      cards.style.display = "";
 
       if (visible.length === 0) {
         rows.innerHTML = '<tr><td colspan="8"><div class="empty-state">Không có kế hoạch phù hợp bộ lọc.</div></td></tr>';
@@ -1030,10 +1143,20 @@
         return;
       }
 
-      rows.innerHTML = visible.map(plan => `
-        <tr>
-          <td class="fw-bold text-nowrap">${escapeHtml(plan.time || "")}</td>
-          <td>${escapeHtml(plan.team || "")}<div class="small text-secondary">${escapeHtml(plan.assignee || "")}</div></td>
+      // Kế hoạch tồn cũ đưa lên đầu (cũ nhất trước), còn lại xếp theo giờ
+      visible.sort((a, b) => {
+        const carryA = isCarryOver(a, selectedDate);
+        const carryB = isCarryOver(b, selectedDate);
+        if (carryA !== carryB) return carryA ? -1 : 1;
+        return ((a.date || "") + (a.time || "")).localeCompare((b.date || "") + (b.time || ""));
+      });
+
+      rows.innerHTML = visible.map(plan => {
+        const carry = isCarryOver(plan, selectedDate);
+        return `
+        <tr${carry ? ' class="carry-row"' : ""}>
+          <td class="fw-bold text-nowrap">${escapeHtml(plan.time || "")}${carry ? `<div><span class="badge-soft badge-carry">Tồn ${shortDateVn(plan.date)}</span></div>` : ""}</td>
+          <td>${escapeHtml(plan.team || "")}<div class="small text-secondary">${escapeHtml(plan.assignee || "")}</div>${peopleLines(plan)}</td>
           <td>${escapeHtml(plan.area || "")}</td>
           <td class="fw-semibold">${escapeHtml(plan.asset || "")}</td>
           <td class="task-text">${escapeHtml(plan.task || "")}</td>
@@ -1048,15 +1171,18 @@
             </button>
           </td>
         </tr>
-      `).join("");
+      `; }).join("");
 
-      cards.innerHTML = visible.map(plan => `
-        <article class="plan-card">
+      cards.innerHTML = visible.map(plan => {
+        const carry = isCarryOver(plan, selectedDate);
+        return `
+        <article class="plan-card${carry ? " carry" : ""}">
           <div class="d-flex justify-content-between gap-2">
             <div class="min-w-0">
-              <div class="small fw-bold text-primary">${escapeHtml(plan.time || "")} - ${escapeHtml(plan.team || "")}</div>
+              <div class="small fw-bold text-primary">${escapeHtml(plan.time || "")} - ${escapeHtml(plan.team || "")}${carry ? ` <span class="badge-soft badge-carry">Tồn ${shortDateVn(plan.date)}</span>` : ""}</div>
               <div class="plan-card-title">${escapeHtml(plan.asset || plan.area || "")}</div>
               <div class="small text-secondary">${escapeHtml(plan.area || "")}${plan.assignee ? " - " + escapeHtml(plan.assignee) : ""}</div>
+              ${peopleLines(plan)}
             </div>
             <div class="d-flex flex-column gap-1">
               <button class="btn btn-sm btn-success text-nowrap" type="button" onclick="selectPlan('${escapeAttr(plan.id)}')">
@@ -1070,8 +1196,50 @@
           <div class="plan-card-task mt-2">${escapeHtml(plan.task || "")}</div>
           <div class="d-flex gap-2 mt-2">${priorityBadge(plan.priority)} ${statusBadge(plan.status)}</div>
         </article>
-      `).join("");
+      `; }).join("");
       renderMetrics();
+    }
+
+    const WEEK_DAY_NAMES = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật"];
+
+    function weekItemClass(status) {
+      if (status === "Hoàn thành") return "st-done";
+      if (status === "Đang làm") return "st-doing";
+      if (status === "Cần hỗ trợ") return "st-help";
+      return "st-open";
+    }
+
+    function renderWeek(visible) {
+      const days = weekDates(document.getElementById("filterDate").value);
+      const label = `Tuần ${shortDateVn(days[0])} - ${shortDateVn(days[6])}`;
+      const body = days.map((iso, index) => {
+        const dayPlans = visible
+          .filter(plan => plan.date === iso)
+          .sort((a, b) => (a.time || "").localeCompare(b.time || ""));
+        const items = dayPlans.map(plan => `
+          <button class="week-item ${weekItemClass(plan.status)}" type="button" onclick="openPlanModal('${escapeAttr(plan.id)}')" title="Bấm để sửa kế hoạch">
+            <span class="fw-bold text-nowrap">${escapeHtml(plan.time || "--")}</span>
+            <span class="text-truncate">${escapeHtml(plan.asset || plan.area || plan.task || "")}</span>
+            ${statusBadge(plan.status)}
+          </button>
+        `).join("");
+        return `
+          <tr${iso === today ? ' class="week-today"' : ""}>
+            <td class="day-cell">
+              <div class="fw-bold">${WEEK_DAY_NAMES[index]}</div>
+              <div class="small text-secondary">${shortDateVn(iso)}${iso === today ? " · Hôm nay" : ""}</div>
+            </td>
+            <td><div class="week-items">${items || '<span class="text-secondary small">Không có kế hoạch</span>'}</div></td>
+          </tr>
+        `;
+      }).join("");
+
+      document.getElementById("weekView").innerHTML = `
+        <div class="px-3 pt-2 pb-1 small fw-bold text-secondary">${label}</div>
+        <table class="table table-hover align-middle mb-0 week-table">
+          <tbody>${body}</tbody>
+        </table>
+      `;
     }
 
     function toggleExtraFields() {
@@ -1129,6 +1297,7 @@
     function renderMetrics() {
       const visible = getVisiblePlans();
       const done = visible.filter(p => p.status === "Hoàn thành").length;
+      document.getElementById("metricTotalLabel").textContent = viewMode === "week" ? "Kế hoạch trong tuần" : "Kế hoạch trong ngày";
       document.getElementById("metricTotal").textContent = visible.length;
       document.getElementById("metricDoing").textContent = visible.filter(p => p.status === "Đang làm").length;
       document.getElementById("metricDone").textContent = visible.length ? `${done}/${visible.length}` : "0";
@@ -1269,6 +1438,11 @@
       const normalized = value || "Chưa làm";
       const cls = normalized === "Hoàn thành" ? "badge-done" : normalized === "Đang làm" ? "badge-doing" : "badge-open";
       return `<span class="badge-soft ${cls}">${escapeHtml(normalized)}</span>`;
+    }
+
+    function shortDateVn(isoDate) {
+      const match = /^\d{4}-(\d{2})-(\d{2})$/.exec(String(isoDate || ""));
+      return match ? `${match[2]}/${match[1]}` : escapeHtml(isoDate || "");
     }
 
     function formatDateVn(isoDate) {
