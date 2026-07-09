@@ -13,12 +13,16 @@ function ensurePlansSheet_() {
   let sheet = ss.getSheetByName("NhatKyPlans");
   const headers = [
     "PlanID","Date","Time","Team","Area","Asset","Task",
-    "Assignee","Priority","Status","UpdatedAt","UpdatedBy"
+    "Assignee","Priority","Status","UpdatedAt","UpdatedBy",
+    "Watcher","Collaborators"
   ];
 
   if (!sheet) sheet = ss.insertSheet("NhatKyPlans");
   if (sheet.getLastRow() === 0) {
     sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight("bold");
+  } else if (String(sheet.getRange(1, 13).getValue()).trim() === "") {
+    // Sheet cũ chưa có 2 cột Watcher/Collaborators → bổ sung tiêu đề
+    sheet.getRange(1, 13, 1, 2).setValues([["Watcher", "Collaborators"]]).setFontWeight("bold");
   }
   // Date/Time lưu dạng text để trả về đúng chuỗi yyyy-MM-dd / HH:mm-HH:mm
   sheet.getRange("B:C").setNumberFormat("@");
@@ -37,7 +41,7 @@ function handleGetPlans(e) {
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return contentResponse({ status: "success", plans: [] });
 
-  const rows = sheet.getRange(2, 1, lastRow - 1, 12).getValues();
+  const rows = sheet.getRange(2, 1, lastRow - 1, 14).getValues();
   const plans = rows
     .filter(function(r) { return String(r[0]).trim() !== ""; })
     .map(function(r) {
@@ -51,7 +55,9 @@ function handleGetPlans(e) {
         task: String(r[6] || ""),
         assignee: String(r[7] || ""),
         priority: String(r[8] || ""),
-        status: String(r[9] || "")
+        status: String(r[9] || ""),
+        watcher: String(r[12] || ""),
+        collaborators: String(r[13] || "")
       };
     });
 
@@ -80,7 +86,9 @@ function handleSavePlan(params) {
     String(payload.priority || ""),
     String(payload.status || "Chưa làm"),
     new Date(),
-    String(payload.updatedBy || "")
+    String(payload.updatedBy || ""),
+    String(payload.watcher || ""),
+    String(payload.collaborators || "")
   ];
 
   const rowIndex = findPlanRow_(sheet, planId);
