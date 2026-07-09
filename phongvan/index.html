@@ -118,6 +118,20 @@
       background: #fbfcfe;
     }
 
+    .score-select {
+      min-width: 86px;
+      font-weight: 700;
+    }
+
+    .candidate-summary {
+      background: #eef6f4;
+      border: 1px solid #cbe7db;
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .note-input { min-height: 42px; }
+
     @media (max-width: 780px) {
       .shell { padding: 10px; }
       h1 { font-size: 1.05rem; }
@@ -130,6 +144,7 @@
       body { background: #fff; }
       .panel, .question-card, .metric { box-shadow: none; }
       .question-card { break-inside: avoid; }
+      textarea, input, select { border: 0 !important; padding-left: 0 !important; }
     }
   </style>
 </head>
@@ -157,6 +172,44 @@
   </header>
 
   <main class="shell">
+    <section class="panel mb-3">
+      <div class="panel-head">
+        <h2 class="h5 fw-bold m-0">Thông tin ứng viên</h2>
+      </div>
+      <div class="p-3">
+        <div class="row g-2">
+          <div class="col-12 col-md-4">
+            <label class="form-label" for="candidateName">Tên nhân sự phỏng vấn</label>
+            <input class="form-control" id="candidateName" placeholder="Nhập họ tên ứng viên">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label" for="candidateRole">Vị trí</label>
+            <input class="form-control" id="candidateRole" value="Nhân viên cơ điện sân golf">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label" for="interviewer">Người phỏng vấn</label>
+            <input class="form-control" id="interviewer" placeholder="Tên người phỏng vấn">
+          </div>
+          <div class="col-12 col-md-2">
+            <label class="form-label" for="interviewDate">Ngày</label>
+            <input class="form-control" id="interviewDate" type="date">
+          </div>
+          <div class="col-12">
+            <div class="candidate-summary d-flex flex-wrap justify-content-between gap-2 mt-2">
+              <div><b>Tổng điểm:</b> <span id="scoreTotal">0</span>/<span id="scoreMax">0</span></div>
+              <div><b>Tỷ lệ:</b> <span id="scorePercent">0%</span></div>
+              <div><b>Đánh giá sơ bộ:</b> <span id="scoreLabel">Chưa chấm</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex flex-wrap gap-2 mt-3 no-print">
+          <button class="btn btn-success" type="button" id="btnSaveLocal"><i class="bi bi-save me-1"></i>Lưu cục bộ</button>
+          <button class="btn btn-outline-primary" type="button" id="btnExportCsv"><i class="bi bi-download me-1"></i>Xuất CSV</button>
+          <button class="btn btn-outline-secondary" type="button" id="btnResetScores"><i class="bi bi-eraser me-1"></i>Xóa điểm</button>
+        </div>
+      </div>
+    </section>
+
     <section class="row g-2 mb-3">
       <div class="col-6 col-lg-3"><div class="metric"><strong id="metricTotal">0</strong><span>Câu hỏi phù hợp</span></div></div>
       <div class="col-6 col-lg-3"><div class="metric"><strong>30-45'</strong><span>Thời lượng gợi ý</span></div></div>
@@ -199,7 +252,7 @@
     <section class="panel mb-3">
       <div class="panel-head">
         <div class="d-flex justify-content-between align-items-center gap-2">
-          <h2 class="h5 fw-bold m-0">Câu hỏi gợi ý</h2>
+          <h2 class="h5 fw-bold m-0">Form câu hỏi và chấm điểm</h2>
           <button class="btn btn-outline-secondary btn-sm no-print" type="button" id="btnCopyAll">
             <i class="bi bi-clipboard me-1"></i>Copy danh sách
           </button>
@@ -255,13 +308,16 @@
       { topic: "Thái độ", level: "Tình huống", core: false, q: "Khi quản lý sân yêu cầu xử lý ngay nhưng anh/chị thấy chưa an toàn, anh/chị trao đổi thế nào?", cue: "Mong đợi: giữ nguyên tắc an toàn, giải thích rủi ro, đề xuất phương án tạm, báo cấp trên." }
     ];
 
+    const STORAGE_KEY = "bandien_interview_form";
     let coreOnly = false;
     let toast;
 
     document.addEventListener("DOMContentLoaded", () => {
       toast = new bootstrap.Toast(document.getElementById("toast"), { delay: 1800 });
+      document.getElementById("interviewDate").value = new Date().toISOString().slice(0, 10);
       populateTopics();
       bindEvents();
+      loadLocalForm();
       renderQuestions();
     });
 
@@ -276,6 +332,12 @@
         renderQuestions();
       });
       document.getElementById("btnCopyAll").addEventListener("click", copyVisibleQuestions);
+      document.getElementById("btnSaveLocal").addEventListener("click", saveLocalForm);
+      document.getElementById("btnExportCsv").addEventListener("click", exportCsv);
+      document.getElementById("btnResetScores").addEventListener("click", resetScores);
+      ["candidateName", "candidateRole", "interviewer", "interviewDate"].forEach(id => {
+        document.getElementById(id).addEventListener("input", saveLocalFormQuiet);
+      });
     }
 
     function populateTopics() {
@@ -306,7 +368,7 @@
         return;
       }
       list.innerHTML = visible.map((item, index) => `
-        <article class="question-card">
+        <article class="question-card" data-question-index="${questions.indexOf(item)}">
           <div class="d-flex justify-content-between align-items-start gap-2">
             <div class="flex-grow-1">
               <div class="d-flex gap-1 flex-wrap mb-2">
@@ -315,14 +377,168 @@
                 ${item.core ? '<span class="tag">Câu chính</span>' : ""}
               </div>
               <div class="question-text">${index + 1}. ${escapeHtml(item.q)}</div>
-              <div class="answer-cue mt-2"><i class="bi bi-check2-circle text-success me-1"></i>${escapeHtml(item.cue)}</div>
+              <div class="answer-cue mt-2"><i class="bi bi-check2-circle text-success me-1"></i><b>Gợi ý trả lời:</b> ${escapeHtml(shortCue(item.cue))}</div>
             </div>
             <button class="btn btn-outline-primary btn-sm copy-btn" type="button" onclick="copyQuestion(${questions.indexOf(item)})">
               <i class="bi bi-clipboard"></i>
             </button>
           </div>
+          <div class="row g-2 mt-2 align-items-end">
+            <div class="col-5 col-md-2">
+              <label class="form-label">Điểm</label>
+              <select class="form-select score-select score-input" data-index="${questions.indexOf(item)}">
+                <option value="">--</option>
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+            </div>
+            <div class="col-7 col-md-3">
+              <label class="form-label">Kết luận nhanh</label>
+              <select class="form-select verdict-input" data-index="${questions.indexOf(item)}">
+                <option value="">Chưa đánh giá</option>
+                <option>Đạt</option>
+                <option>Cần đào tạo</option>
+                <option>Không đạt</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-7">
+              <label class="form-label">Ghi chú câu trả lời</label>
+              <textarea class="form-control note-input note-input-field" data-index="${questions.indexOf(item)}" rows="1" placeholder="Ghi ý chính ứng viên trả lời..."></textarea>
+            </div>
+          </div>
         </article>
       `).join("");
+      restoreScoresToVisible();
+      document.querySelectorAll(".score-input, .verdict-input, .note-input-field").forEach(el => {
+        el.addEventListener("input", () => {
+          saveLocalFormQuiet();
+          updateScoreSummary();
+        });
+      });
+      updateScoreSummary();
+    }
+
+    function shortCue(text) {
+      return String(text || "").replace(/^Mong đợi:\s*/i, "");
+    }
+
+    function collectFormData() {
+      const answers = {};
+      document.querySelectorAll(".question-card").forEach(card => {
+        const index = card.getAttribute("data-question-index");
+        answers[index] = {
+          score: card.querySelector(".score-input")?.value || "",
+          verdict: card.querySelector(".verdict-input")?.value || "",
+          note: card.querySelector(".note-input-field")?.value || ""
+        };
+      });
+      const previous = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      return {
+        candidateName: document.getElementById("candidateName").value.trim(),
+        candidateRole: document.getElementById("candidateRole").value.trim(),
+        interviewer: document.getElementById("interviewer").value.trim(),
+        interviewDate: document.getElementById("interviewDate").value,
+        answers: { ...(previous.answers || {}), ...answers }
+      };
+    }
+
+    function loadLocalForm() {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      if (!saved || !Object.keys(saved).length) return;
+      document.getElementById("candidateName").value = saved.candidateName || "";
+      document.getElementById("candidateRole").value = saved.candidateRole || "Nhân viên cơ điện sân golf";
+      document.getElementById("interviewer").value = saved.interviewer || "";
+      document.getElementById("interviewDate").value = saved.interviewDate || document.getElementById("interviewDate").value;
+    }
+
+    function restoreScoresToVisible() {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      const answers = saved.answers || {};
+      document.querySelectorAll(".question-card").forEach(card => {
+        const index = card.getAttribute("data-question-index");
+        if (!answers[index]) return;
+        const score = card.querySelector(".score-input");
+        const verdict = card.querySelector(".verdict-input");
+        const note = card.querySelector(".note-input-field");
+        if (score) score.value = answers[index].score || "";
+        if (verdict) verdict.value = answers[index].verdict || "";
+        if (note) note.value = answers[index].note || "";
+      });
+    }
+
+    function saveLocalFormQuiet() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(collectFormData()));
+    }
+
+    function saveLocalForm() {
+      saveLocalFormQuiet();
+      showToast("Đã lưu form cục bộ");
+    }
+
+    function updateScoreSummary() {
+      const data = collectFormData();
+      const scores = Object.values(data.answers || {})
+        .map(item => Number(item.score))
+        .filter(value => !Number.isNaN(value));
+      const total = scores.reduce((sum, value) => sum + value, 0);
+      const max = scores.length * 5;
+      const percent = max ? Math.round(total / max * 100) : 0;
+      document.getElementById("scoreTotal").textContent = total;
+      document.getElementById("scoreMax").textContent = max;
+      document.getElementById("scorePercent").textContent = percent + "%";
+      document.getElementById("scoreLabel").textContent = !max
+        ? "Chưa chấm"
+        : percent >= 80 ? "Nên tuyển / phù hợp"
+        : percent >= 60 ? "Cân nhắc, cần đào tạo"
+        : "Chưa phù hợp";
+    }
+
+    function resetScores() {
+      if (!confirm("Xóa toàn bộ điểm và ghi chú đang lưu cục bộ?")) return;
+      const saved = collectFormData();
+      saved.answers = {};
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+      renderQuestions();
+      showToast("Đã xóa điểm");
+    }
+
+    function exportCsv() {
+      const data = collectFormData();
+      const headers = ["candidateName","candidateRole","interviewer","interviewDate","topic","level","question","expectedAnswer","score","verdict","note"];
+      const rows = getVisibleQuestions().map(item => {
+        const index = questions.indexOf(item);
+        const answer = (data.answers || {})[index] || {};
+        return [
+          data.candidateName,
+          data.candidateRole,
+          data.interviewer,
+          data.interviewDate,
+          item.topic,
+          item.level,
+          item.q,
+          shortCue(item.cue),
+          answer.score || "",
+          answer.verdict || "",
+          answer.note || ""
+        ];
+      });
+      const csv = [headers, ...rows].map(row => row.map(csvCell).join(",")).join("\n");
+      const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const name = data.candidateName ? data.candidateName.replace(/\s+/g, "-") : "ung-vien";
+      a.href = url;
+      a.download = `phong-van-co-dien-${name}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function csvCell(value) {
+      return '"' + String(value ?? "").replace(/"/g, '""') + '"';
     }
 
     async function copyQuestion(index) {
