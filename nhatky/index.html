@@ -182,6 +182,57 @@
       line-height: 1.35;
     }
 
+    .chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .chip {
+      border: 1px solid #cfd8e3;
+      background: #fff;
+      color: #475467;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: .85rem;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .chip:active { transform: scale(.96); }
+    .chip-active { border-width: 2px; padding: 5px 11px; }
+    .chip-active.chip-done { background: #e8f6ef; border-color: #1f7a4d; color: #1f7a4d; }
+    .chip-active.chip-doing { background: #e8f3ff; border-color: #155ea8; color: #155ea8; }
+    .chip-active.chip-help { background: #fff1f0; border-color: #c2413b; color: #c2413b; }
+    .chip-active.chip-open { background: #edf3f6; border-color: #475467; color: #344054; }
+
+    .log-card { border-left: 4px solid #cbd5e1; }
+    .log-card.log-done { border-left-color: #2d8a5f; }
+    .log-card.log-doing { border-left-color: #155ea8; }
+    .log-card.log-help { border-left-color: #c2413b; }
+
+    @keyframes flash-in {
+      from { background: #fff3c4; }
+      to { background: #fbfcfe; }
+    }
+
+    .log-card.just-added { animation: flash-in 1.5s ease-out; }
+
+    .mini-bar {
+      height: 4px;
+      border-radius: 2px;
+      background: #e2e8f0;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .mini-bar i {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: var(--brand-2);
+      border-radius: 2px;
+      transition: width .3s;
+    }
+
+    #quickFormHeader { cursor: pointer; }
+
     .quick-form-note {
       background: #eef6f4;
       border: 1px solid #cbe7db;
@@ -214,6 +265,8 @@
       #quickFormPanel .panel-header { padding: 10px 12px; }
       #quickFormPanel form { padding: 12px !important; }
       #logList { max-height: 48vh; overflow: auto; }
+      .chip { padding: 8px 14px; font-size: .9rem; }
+      .chip-active { padding: 7px 13px; }
     }
   </style>
 </head>
@@ -243,9 +296,13 @@
   <main class="shell">
     <section class="mb-3">
       <div class="panel" id="quickFormPanel">
-        <div class="panel-header">
-          <h2 class="h5 m-0 fw-bold"><i class="bi bi-pencil-square text-primary me-2"></i>Ghi nhanh</h2>
+        <div class="panel-header" id="quickFormHeader" role="button" aria-controls="logFormBody" aria-expanded="true">
+          <div class="d-flex align-items-center justify-content-between">
+            <h2 class="h5 m-0 fw-bold"><i class="bi bi-pencil-square text-primary me-2"></i>Ghi nhanh</h2>
+            <i class="bi bi-chevron-up" id="quickFormChevron"></i>
+          </div>
         </div>
+        <div class="collapse show" id="logFormBody">
         <form class="p-3" id="logForm">
           <input type="hidden" id="planId">
           <div class="row g-2">
@@ -267,22 +324,23 @@
                 <option>Hành chính</option>
               </select>
             </div>
-            <div class="col-6 d-none extra-field">
-              <label class="form-label" for="progress">Tiến độ</label>
-              <select class="form-select" id="progress">
-                <option>Chưa làm</option>
-                <option>Đang làm</option>
-                <option selected>Hoàn thành</option>
-                <option>Cần hỗ trợ</option>
-              </select>
-            </div>
             <div class="col-6">
               <label class="form-label" for="startTime">Từ giờ</label>
-              <input class="form-control" id="startTime" type="time" step="60" inputmode="numeric">
+              <select class="form-select" id="startTime"></select>
             </div>
             <div class="col-6">
               <label class="form-label" for="endTime">Đến giờ</label>
-              <input class="form-control" id="endTime" type="time" step="60" inputmode="numeric">
+              <select class="form-select" id="endTime"></select>
+            </div>
+            <div class="col-12">
+              <span class="form-label d-block">Tiến độ</span>
+              <input type="hidden" id="progress" value="Hoàn thành">
+              <div class="chip-row" id="progressChips">
+                <button class="chip chip-done" type="button" data-value="Hoàn thành"><i class="bi bi-check2-circle me-1"></i>Hoàn thành</button>
+                <button class="chip chip-doing" type="button" data-value="Đang làm">Đang làm</button>
+                <button class="chip chip-help" type="button" data-value="Cần hỗ trợ">Cần hỗ trợ</button>
+                <button class="chip chip-open" type="button" data-value="Chưa làm">Chưa làm</button>
+              </div>
             </div>
             <div class="col-12">
               <label class="form-label" for="selectedTask">Việc/kế hoạch</label>
@@ -290,6 +348,12 @@
             </div>
             <div class="col-12">
               <label class="form-label" for="result">Kết quả</label>
+              <div class="chip-row mb-2" id="resultChips">
+                <button class="chip" type="button">Hoạt động bình thường</button>
+                <button class="chip" type="button">Đã vệ sinh, kiểm tra xong</button>
+                <button class="chip" type="button">Không phát hiện bất thường</button>
+                <button class="chip" type="button">Có bất thường, cần theo dõi</button>
+              </div>
               <textarea class="form-control" id="result" rows="3" placeholder="Nhập ngắn gọn: đã làm, tình trạng, số đo nếu có..." required></textarea>
             </div>
             <div class="col-12 d-none extra-field">
@@ -309,13 +373,14 @@
             <button class="btn btn-outline-secondary" type="button" id="btnClearForm"><i class="bi bi-eraser me-1"></i>Làm trống form</button>
           </div>
         </form>
+        </div>
       </div>
     </section>
 
     <section class="row g-3 mb-3">
       <div class="col-6 col-lg-3"><div class="metric"><strong id="metricTotal">0</strong><span>Kế hoạch hôm nay</span></div></div>
       <div class="col-6 col-lg-3"><div class="metric"><strong id="metricDoing">0</strong><span>Đang làm</span></div></div>
-      <div class="col-6 col-lg-3"><div class="metric"><strong id="metricDone">0</strong><span>Đã hoàn thành</span></div></div>
+      <div class="col-6 col-lg-3"><div class="metric"><strong id="metricDone">0</strong><span>Đã hoàn thành</span><div class="mini-bar"><i id="metricDoneBar"></i></div></div></div>
       <div class="col-6 col-lg-3"><div class="metric"><strong id="metricLogs">0</strong><span>Nhật ký đã ghi</span></div></div>
     </section>
 
@@ -504,7 +569,13 @@
       employees: "bandien_nhatky_employees"
     };
 
-    const today = new Date().toISOString().slice(0, 10);
+    // Lấy ngày theo giờ địa phương (toISOString là UTC → sai ngày lúc 0h-7h sáng VN)
+    const today = (() => {
+      const d = new Date();
+      return d.getFullYear() + "-" +
+        String(d.getMonth() + 1).padStart(2, "0") + "-" +
+        String(d.getDate()).padStart(2, "0");
+    })();
     const RECENT_LOG_LIMIT = 5;
     const DEFAULT_SYNC = {
       url: "https://script.google.com/macros/s/AKfycbzW4TxDarLBOpZvO8hnE0R65IsCd95a5l-XPASjUmZNuefH5MiWMs8lCpLpggzFwyXK/exec",
@@ -515,6 +586,7 @@
     let showAllLogs = false;
     let toast;
     let planModal;
+    let lastAddedLogId = null;
 
     const fallbackPlans = [
       {
@@ -549,6 +621,11 @@
       document.getElementById("filterDate").value = today;
       document.getElementById("workDate").value = today;
       document.getElementById("employee").value = localStorage.getItem(STORAGE_KEYS.employee) || "";
+      fillTimeSelect("startTime", "");
+      fillTimeSelect("endTime", "");
+      document.getElementById("shift").value = defaultShift();
+      setProgress("Hoàn thành");
+      initQuickFormCollapse();
       loadSettings();
       await loadPlans();
       loadLogs();
@@ -590,6 +667,63 @@
       document.getElementById("btnToggleExtra").addEventListener("click", toggleExtraFields);
       document.getElementById("btnToggleLogs").addEventListener("click", toggleLogs);
       document.getElementById("employee").addEventListener("change", rememberEmployeeFromInput);
+      document.getElementById("progressChips").addEventListener("click", event => {
+        const btn = event.target.closest("button[data-value]");
+        if (btn) setProgress(btn.dataset.value);
+      });
+      document.getElementById("resultChips").addEventListener("click", event => {
+        const btn = event.target.closest("button");
+        if (!btn) return;
+        const box = document.getElementById("result");
+        const text = btn.textContent.trim();
+        box.value = box.value.trim() ? box.value.trim() + "; " + text : text;
+        box.focus();
+      });
+    }
+
+    // Ca mặc định theo giờ hiện tại: 6-14h sáng, 14-22h chiều, còn lại đêm
+    function defaultShift() {
+      const hour = new Date().getHours();
+      if (hour >= 6 && hour < 14) return "Ca sáng";
+      if (hour >= 14 && hour < 22) return "Ca chiều";
+      return "Ca đêm";
+    }
+
+    function setProgress(value) {
+      document.getElementById("progress").value = value;
+      document.querySelectorAll("#progressChips .chip").forEach(btn => {
+        btn.classList.toggle("chip-active", btn.dataset.value === value);
+      });
+    }
+
+    let quickFormCollapse;
+
+    function initQuickFormCollapse() {
+      const body = document.getElementById("logFormBody");
+      const chevron = document.getElementById("quickFormChevron");
+      const header = document.getElementById("quickFormHeader");
+      quickFormCollapse = bootstrap.Collapse.getOrCreateInstance(body, { toggle: false });
+      header.addEventListener("click", () => quickFormCollapse.toggle());
+      body.addEventListener("shown.bs.collapse", () => {
+        chevron.className = "bi bi-chevron-up";
+        header.setAttribute("aria-expanded", "true");
+      });
+      body.addEventListener("hidden.bs.collapse", () => {
+        chevron.className = "bi bi-chevron-down";
+        header.setAttribute("aria-expanded", "false");
+      });
+      // Điện thoại: thu gọn form lúc mở trang để thấy ngay kế hoạch trong ngày
+      if (window.matchMedia("(max-width: 760px)").matches) quickFormCollapse.hide();
+    }
+
+    function openQuickForm(afterShown) {
+      const body = document.getElementById("logFormBody");
+      if (body.classList.contains("show")) {
+        afterShown();
+        return;
+      }
+      body.addEventListener("shown.bs.collapse", afterShown, { once: true });
+      quickFormCollapse.show();
     }
 
     function getSync() {
@@ -961,11 +1095,11 @@
 
       const visibleLogs = showAllLogs ? logs : logs.slice(0, RECENT_LOG_LIMIT);
       list.innerHTML = visibleLogs.map(log => `
-        <article class="log-card">
+        <article class="log-card ${logProgressClass(log.progress)}${log.id === lastAddedLogId ? " just-added" : ""}">
           <div class="d-flex justify-content-between gap-2">
             <div>
               <div class="fw-bold">${escapeHtml(log.employee)} <span class="text-secondary fw-normal">- ${escapeHtml(log.shift)}</span></div>
-              <div class="small text-secondary">${formatDateVn(log.workDate)} ${escapeHtml(log.startTime || "")}${log.endTime ? " - " + escapeHtml(log.endTime) : ""}${syncLabel(log)}</div>
+              <div class="small text-secondary">${friendlyDate(log.workDate)} ${escapeHtml(log.startTime || "")}${log.endTime ? " - " + escapeHtml(log.endTime) : ""}${syncLabel(log)}</div>
             </div>
             ${statusBadge(log.progress)}
           </div>
@@ -985,11 +1119,20 @@
       renderLogs();
     }
 
+    function logProgressClass(progress) {
+      if (progress === "Hoàn thành") return "log-done";
+      if (progress === "Đang làm") return "log-doing";
+      if (progress === "Cần hỗ trợ") return "log-help";
+      return "";
+    }
+
     function renderMetrics() {
       const visible = getVisiblePlans();
+      const done = visible.filter(p => p.status === "Hoàn thành").length;
       document.getElementById("metricTotal").textContent = visible.length;
       document.getElementById("metricDoing").textContent = visible.filter(p => p.status === "Đang làm").length;
-      document.getElementById("metricDone").textContent = visible.filter(p => p.status === "Hoàn thành").length;
+      document.getElementById("metricDone").textContent = visible.length ? `${done}/${visible.length}` : "0";
+      document.getElementById("metricDoneBar").style.width = visible.length ? Math.round(done / visible.length * 100) + "%" : "0%";
       document.getElementById("metricLogs").textContent = logs.length;
     }
 
@@ -999,10 +1142,12 @@
       document.getElementById("planId").value = plan.id;
       document.getElementById("workDate").value = plan.date || today;
       document.getElementById("selectedTask").value = `${plan.time || ""} | ${plan.area || ""} | ${plan.asset || ""}: ${plan.task || ""}`.trim();
-      document.getElementById("progress").value = "Hoàn thành";
-      document.getElementById("startTime").value = currentTime();
-      document.getElementById("quickFormPanel").scrollIntoView({ behavior: "smooth", block: "start" });
-      document.getElementById("result").focus();
+      setProgress("Hoàn thành");
+      document.getElementById("startTime").value = roundQuarter(currentTime());
+      openQuickForm(() => {
+        document.getElementById("quickFormPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+        document.getElementById("result").focus();
+      });
     }
 
     async function submitLog(event) {
@@ -1034,7 +1179,9 @@
         showAllLogs = false;
         updatePlanStatus(log.planId, log.progress);
         clearForm(false);
+        lastAddedLogId = log.id;
         render();
+        lastAddedLogId = null;
         showToast(log.syncStatus === "synced" ? "Đã lưu và đồng bộ" : "Đã lưu cục bộ, sẽ đồng bộ lại sau");
       } finally {
         submitBtn.disabled = false;
@@ -1082,7 +1229,8 @@
       const employee = document.getElementById("employee").value;
       document.getElementById("logForm").reset();
       document.getElementById("workDate").value = document.getElementById("filterDate").value || today;
-      document.getElementById("progress").value = "Hoàn thành";
+      document.getElementById("shift").value = defaultShift();
+      setProgress("Hoàn thành");
       if (keepEmployee) document.getElementById("employee").value = employee;
       document.getElementById("planId").value = "";
     }
@@ -1142,6 +1290,25 @@
     function currentTime() {
       const d = new Date();
       return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+    }
+
+    // Làm tròn giờ về mốc 15' gần nhất để khớp danh sách chọn nhanh
+    function roundQuarter(hhmm) {
+      const parts = String(hhmm || "").split(":").map(Number);
+      if (parts.length !== 2 || parts.some(isNaN)) return "";
+      const total = ((Math.round((parts[0] * 60 + parts[1]) / 15) * 15) % 1440 + 1440) % 1440;
+      return String(Math.floor(total / 60)).padStart(2, "0") + ":" + String(total % 60).padStart(2, "0");
+    }
+
+    function friendlyDate(isoDate) {
+      if (isoDate === today) return "Hôm nay";
+      const d = new Date(today + "T00:00:00");
+      d.setDate(d.getDate() - 1);
+      const yesterday = d.getFullYear() + "-" +
+        String(d.getMonth() + 1).padStart(2, "0") + "-" +
+        String(d.getDate()).padStart(2, "0");
+      if (isoDate === yesterday) return "Hôm qua";
+      return formatDateVn(isoDate);
     }
 
     function showToast(message) {
