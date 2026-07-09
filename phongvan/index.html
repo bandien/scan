@@ -132,6 +132,13 @@
 
     .note-input { min-height: 42px; }
 
+    .manage-panel {
+      background: #fbfcfe;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
     @media (max-width: 780px) {
       .shell { padding: 10px; }
       h1 { font-size: 1.05rem; }
@@ -253,12 +260,56 @@
       <div class="panel-head">
         <div class="d-flex justify-content-between align-items-center gap-2">
           <h2 class="h5 fw-bold m-0">Form câu hỏi và chấm điểm</h2>
-          <button class="btn btn-outline-secondary btn-sm no-print" type="button" id="btnCopyAll">
-            <i class="bi bi-clipboard me-1"></i>Copy danh sách
-          </button>
+          <div class="d-flex gap-2 no-print">
+            <button class="btn btn-outline-success btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#questionManager" aria-expanded="false" aria-controls="questionManager">
+              <i class="bi bi-pencil-square me-1"></i>Quản lý câu hỏi
+            </button>
+            <button class="btn btn-outline-secondary btn-sm" type="button" id="btnCopyAll">
+              <i class="bi bi-clipboard me-1"></i>Copy danh sách
+            </button>
+          </div>
         </div>
       </div>
       <div class="p-3">
+        <div class="collapse mb-3 no-print" id="questionManager">
+          <form class="manage-panel" id="questionForm">
+            <input type="hidden" id="questionEditIndex">
+            <div class="row g-2">
+              <div class="col-6 col-md-3">
+                <label class="form-label" for="questionTopic">Chủ đề</label>
+                <input class="form-control" id="questionTopic" list="topicOptions" placeholder="VD: Điện" required>
+                <datalist id="topicOptions"></datalist>
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label" for="questionLevel">Mức</label>
+                <select class="form-select" id="questionLevel">
+                  <option>Cơ bản</option>
+                  <option>Thực hành</option>
+                  <option>Tình huống</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-6 d-flex align-items-end">
+                <div class="form-check mb-2">
+                  <input class="form-check-input" type="checkbox" id="questionCore">
+                  <label class="form-check-label" for="questionCore">Câu chính nên hỏi</label>
+                </div>
+              </div>
+              <div class="col-12">
+                <label class="form-label" for="questionText">Câu hỏi</label>
+                <textarea class="form-control" id="questionText" rows="2" required></textarea>
+              </div>
+              <div class="col-12">
+                <label class="form-label" for="questionCue">Gợi ý trả lời ngắn gọn</label>
+                <textarea class="form-control" id="questionCue" rows="2" placeholder="VD: Cắt nguồn, treo cảnh báo, thử hết điện, PPE..." required></textarea>
+              </div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-success" type="submit"><i class="bi bi-save me-1"></i>Lưu câu hỏi</button>
+              <button class="btn btn-outline-secondary" type="button" id="btnClearQuestionForm">Làm trống</button>
+              <button class="btn btn-outline-danger ms-auto" type="button" id="btnResetQuestions">Khôi phục mặc định</button>
+            </div>
+          </form>
+        </div>
         <div class="d-flex flex-column gap-2" id="questionList"></div>
       </div>
     </section>
@@ -289,7 +340,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    const questions = [
+    const defaultQuestions = [
       { topic: "Điện", level: "Cơ bản", core: true, q: "Anh/chị hãy mô tả các bước kiểm tra an toàn trước khi thao tác với tủ điện 3 pha ngoài hiện trường.", cue: "Mong đợi: cắt nguồn, treo cảnh báo, thử hết điện, PPE, kiểm tra môi trường ẩm ướt." },
       { topic: "Điện", level: "Thực hành", core: true, q: "Nếu một nhánh chiếu sáng sân golf bị nhảy CB liên tục sau mưa, anh/chị khoanh vùng nguyên nhân thế nào?", cue: "Mong đợi: tách tải, kiểm tra rò, hộp nối, đèn/ngầm cáp, đo cách điện, ưu tiên an toàn." },
       { topic: "Bơm tưới", level: "Thực hành", core: true, q: "Khi bơm tưới không lên áp dù motor vẫn chạy, anh/chị kiểm tra theo thứ tự nào?", cue: "Mong đợi: mực nước, van, chiều quay, lọc rác, mồi bơm, rò đường ống, cánh bơm, cảm biến áp." },
@@ -309,12 +360,15 @@
     ];
 
     const STORAGE_KEY = "bandien_interview_form";
+    const QUESTIONS_KEY = "bandien_interview_questions";
+    let questions = [];
     let coreOnly = false;
     let toast;
 
     document.addEventListener("DOMContentLoaded", () => {
       toast = new bootstrap.Toast(document.getElementById("toast"), { delay: 1800 });
       document.getElementById("interviewDate").value = new Date().toISOString().slice(0, 10);
+      loadQuestions();
       populateTopics();
       bindEvents();
       loadLocalForm();
@@ -335,15 +389,33 @@
       document.getElementById("btnSaveLocal").addEventListener("click", saveLocalForm);
       document.getElementById("btnExportCsv").addEventListener("click", exportCsv);
       document.getElementById("btnResetScores").addEventListener("click", resetScores);
+      document.getElementById("questionForm").addEventListener("submit", saveQuestion);
+      document.getElementById("btnClearQuestionForm").addEventListener("click", clearQuestionForm);
+      document.getElementById("btnResetQuestions").addEventListener("click", resetQuestions);
       ["candidateName", "candidateRole", "interviewer", "interviewDate"].forEach(id => {
         document.getElementById(id).addEventListener("input", saveLocalFormQuiet);
       });
+    }
+
+    function loadQuestions() {
+      try {
+        questions = JSON.parse(localStorage.getItem(QUESTIONS_KEY) || "null") || defaultQuestions.map(item => ({ ...item }));
+      } catch (error) {
+        questions = defaultQuestions.map(item => ({ ...item }));
+      }
+    }
+
+    function saveQuestions() {
+      localStorage.setItem(QUESTIONS_KEY, JSON.stringify(questions));
+      populateTopics();
+      renderQuestions();
     }
 
     function populateTopics() {
       const select = document.getElementById("topicFilter");
       const topics = [...new Set(questions.map(item => item.topic))].sort();
       select.innerHTML = '<option value="">Tất cả</option>' + topics.map(topic => `<option>${escapeHtml(topic)}</option>`).join("");
+      document.getElementById("topicOptions").innerHTML = topics.map(topic => `<option value="${escapeAttr(topic)}"></option>`).join("");
     }
 
     function getVisibleQuestions() {
@@ -379,9 +451,17 @@
               <div class="question-text">${index + 1}. ${escapeHtml(item.q)}</div>
               <div class="answer-cue mt-2"><i class="bi bi-check2-circle text-success me-1"></i><b>Gợi ý trả lời:</b> ${escapeHtml(shortCue(item.cue))}</div>
             </div>
-            <button class="btn btn-outline-primary btn-sm copy-btn" type="button" onclick="copyQuestion(${questions.indexOf(item)})">
-              <i class="bi bi-clipboard"></i>
-            </button>
+            <div class="d-flex gap-1 copy-btn">
+              <button class="btn btn-outline-primary btn-sm" type="button" onclick="copyQuestion(${questions.indexOf(item)})" title="Copy">
+                <i class="bi bi-clipboard"></i>
+              </button>
+              <button class="btn btn-outline-secondary btn-sm" type="button" onclick="editQuestion(${questions.indexOf(item)})" title="Sửa">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn btn-outline-danger btn-sm" type="button" onclick="deleteQuestion(${questions.indexOf(item)})" title="Xóa">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
           </div>
           <div class="row g-2 mt-2 align-items-end">
             <div class="col-5 col-md-2">
@@ -424,6 +504,69 @@
 
     function shortCue(text) {
       return String(text || "").replace(/^Mong đợi:\s*/i, "");
+    }
+
+    function saveQuestion(event) {
+      event.preventDefault();
+      const editIndex = document.getElementById("questionEditIndex").value;
+      const item = {
+        topic: document.getElementById("questionTopic").value.trim(),
+        level: document.getElementById("questionLevel").value,
+        core: document.getElementById("questionCore").checked,
+        q: document.getElementById("questionText").value.trim(),
+        cue: document.getElementById("questionCue").value.trim()
+      };
+      if (!item.topic || !item.q || !item.cue) {
+        showToast("Thiếu chủ đề, câu hỏi hoặc gợi ý");
+        return;
+      }
+      if (editIndex !== "") {
+        questions[Number(editIndex)] = item;
+      } else {
+        questions.unshift(item);
+      }
+      clearQuestionForm();
+      saveQuestions();
+      showToast("Đã lưu câu hỏi");
+    }
+
+    function editQuestion(index) {
+      const item = questions[index];
+      if (!item) return;
+      document.getElementById("questionEditIndex").value = index;
+      document.getElementById("questionTopic").value = item.topic || "";
+      document.getElementById("questionLevel").value = item.level || "Cơ bản";
+      document.getElementById("questionCore").checked = !!item.core;
+      document.getElementById("questionText").value = item.q || "";
+      document.getElementById("questionCue").value = shortCue(item.cue || "");
+      const manager = document.getElementById("questionManager");
+      bootstrap.Collapse.getOrCreateInstance(manager, { toggle: false }).show();
+      document.getElementById("questionText").focus();
+    }
+
+    function deleteQuestion(index) {
+      const item = questions[index];
+      if (!item) return;
+      if (!confirm("Xóa câu hỏi này?")) return;
+      questions.splice(index, 1);
+      saveQuestions();
+      showToast("Đã xóa câu hỏi");
+    }
+
+    function clearQuestionForm() {
+      document.getElementById("questionEditIndex").value = "";
+      document.getElementById("questionForm").reset();
+      document.getElementById("questionLevel").value = "Cơ bản";
+    }
+
+    function resetQuestions() {
+      if (!confirm("Khôi phục bộ câu hỏi mặc định? Các câu hỏi đã thêm/sửa/xóa trên máy này sẽ mất.")) return;
+      questions = defaultQuestions.map(item => ({ ...item }));
+      localStorage.setItem(QUESTIONS_KEY, JSON.stringify(questions));
+      clearQuestionForm();
+      populateTopics();
+      renderQuestions();
+      showToast("Đã khôi phục mặc định");
     }
 
     function collectFormData() {
@@ -568,6 +711,10 @@
         '"': "&quot;",
         "'": "&#039;"
       }[char]));
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value).replace(/`/g, "&#096;");
     }
   </script>
 </body>
