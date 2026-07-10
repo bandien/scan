@@ -395,9 +395,13 @@
       .metric { min-height: 58px; padding: 9px 10px; }
       .metric strong { font-size: 1.1rem; }
       .metric span { font-size: .72rem; }
-      .toolbar-grid { display: grid !important; grid-template-columns: 1fr 1fr; }
+      
+      /* Cân bằng các nút bấm trên Toolbar */
+      .toolbar-grid { display: grid !important; grid-template-columns: 1fr 1fr; gap: 8px; }
       .toolbar-grid .flex-grow-1 { grid-column: 1 / -1; }
-      #btnReload { grid-column: 1 / -1; }
+      #btnReload { grid-column: 1 / 2; }
+      #btnAddPlan { grid-column: 2 / 3; }
+      
       .table-wrap { display: none; }
       .mobile-plan-list { display: block; }
       .panel-header { padding: 12px; }
@@ -416,6 +420,49 @@
       #progressChips .chip { padding: 8px 4px; font-size: .82rem; }
       /* Ô Việc/kế hoạch cao hơn trên điện thoại để nhìn được nhiều dòng hơn */
       #selectedTask { min-height: 130px; }
+    }
+
+    /* Tối ưu hóa cho màn hình cực hẹp hoặc điện thoại cỡ nhỏ */
+    @media (max-width: 576px) {
+      /* Chuyển các nút bấm kế hoạch sang hàng ngang bên dưới phần text để tránh bị bó hẹp chiều ngang */
+      .plan-card .d-flex.justify-content-between {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+      }
+      .plan-card .d-flex.flex-column {
+        flex-direction: row !important;
+        gap: 8px !important;
+        width: 100% !important;
+      }
+      .plan-card .d-flex.flex-column button {
+        flex: 1 !important;
+        padding: 10px 8px !important;
+        font-size: 0.92rem !important;
+      }
+      .plan-card-title {
+        font-size: 1.2rem;
+      }
+    }
+
+    @media (max-width: 400px) {
+      /* Ẩn chữ "Đăng nhập" chỉ hiển thị biểu tượng người dùng trên điện thoại quá nhỏ */
+      .user-name-label { display: none !important; }
+      #btnUser i { margin-right: 0 !important; }
+      #btnUser {
+        width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+      }
+    }
+
+    @media (max-width: 380px) {
+      /* Xếp dọc các chip trạng thái khi màn hình quá hẹp */
+      #progressChips { grid-template-columns: 1fr !important; }
+      #progressChips .chip { text-align: left; padding: 10px 14px; }
     }
   </style>
 </head>
