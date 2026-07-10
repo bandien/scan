@@ -50,6 +50,7 @@ function doGet(e) {
       case 'getPumpTimerSettings': return handleGetPumpTimerSettings(e);
       case 'getPlans':          return handleGetPlans(e);           // Kế hoạch trang nhatky
       case 'getWorkLogs':       return handleGetWorkLogs(e);        // Nhật ký cả tổ (trang nhatky)
+      case 'nhatkyAccounts':    return handleListAccounts(e);       // Danh sách tài khoản trang nhatky
       case 'tempDumpDevices':   return handleTempDumpDevices(e);
       case 'migrateDevicesData':return handleMigrateDevicesData(e);
       default:                  return handleGetDevice(e);          // UID lookup
@@ -96,6 +97,8 @@ function doPost(e) {
       seedWorkLogsDemo:     handleSeedWorkLogsDemo,
       savePlan:             handleSavePlan,
       deletePlan:           handleDeletePlan,
+      nhatkyRegister:       handleNhatKyRegister,
+      nhatkyLogin:          handleNhatKyLogin,
       savePumpTimerSetting: handleSavePumpTimerSetting,
       seedPumpTimerSettings: handleSeedPumpTimerSettings,
       // Masters
@@ -240,6 +243,13 @@ function handleCreateWorkLog(params) {
     payload.quantity === 0 || payload.quantity ? payload.quantity : "",
     payload.unit || ""
   ]);
+
+  // Cập nhật tăng dần lũy kế vào dòng kế hoạch (Incremental Update)
+  const planId = String(payload.planId || "").trim();
+  const qty = parseFloat(String(payload.quantity || "").replace(",", "."));
+  if (planId && !isNaN(qty) && qty > 0) {
+    incrementPlanDoneQty_(planId, qty);
+  }
 
   writeAuditLog(employee, "createWorkLog", logId, "Ghi nhật ký công việc từ trang nhatky");
   return contentResponse({ status: "success", logId: logId });

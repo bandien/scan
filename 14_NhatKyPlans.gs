@@ -14,7 +14,8 @@ function ensurePlansSheet_() {
   const headers = [
     "PlanID","Date","Time","Team","Area","Asset","Task",
     "Assignee","Priority","Status","UpdatedAt","UpdatedBy",
-    "Watcher","Collaborators","DateEnd","Type","PlanQty","Unit"
+    "Watcher","Collaborators","DateEnd","Type","PlanQty","Unit",
+    "DoneQty"
   ];
 
   if (!sheet) sheet = ss.insertSheet("NhatKyPlans");
@@ -36,6 +37,10 @@ function ensurePlansSheet_() {
     if (String(sheet.getRange(1, 17).getValue()).trim() === "") {
       // Khối lượng kế hoạch + đơn vị (đối chiếu với lũy kế đã ghi)
       sheet.getRange(1, 17, 1, 2).setValues([["PlanQty", "Unit"]]).setFontWeight("bold");
+    }
+    if (String(sheet.getRange(1, 19).getValue()).trim() === "") {
+      // DoneQty: Lũy kế đã hoàn thành (cộng dồn từ work logs)
+      sheet.getRange(1, 19).setValue("DoneQty").setFontWeight("bold");
     }
   }
   // Date/Time/DateEnd lưu dạng text để trả về đúng chuỗi yyyy-MM-dd / HH:mm-HH:mm
@@ -71,12 +76,21 @@ function handleGetPlans(e) {
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return contentResponse({ status: "success", plans: [] });
 
-  const totals = planQuantityTotals_();
-  const rows = sheet.getRange(2, 1, lastRow - 1, 18).getValues();
+  let totals = null; // Lazy-load only when some plan rows have empty DoneQty
+  const rows = sheet.getRange(2, 1, lastRow - 1, 19).getValues();
   const plans = rows
     .filter(function(r) { return String(r[0]).trim() !== ""; })
     .map(function(r) {
       const id = String(r[0]);
+      let doneQtyVal = r[18];
+      if (doneQtyVal === "" || doneQtyVal === null) {
+        if (totals === null) {
+          totals = planQuantityTotals_();
+        }
+        doneQtyVal = totals[id] || 0;
+      } else {
+        doneQtyVal = Number(doneQtyVal);
+      }
       return {
         id: id,
         date: formatPlanDate_(r[1]),
@@ -94,7 +108,7 @@ function handleGetPlans(e) {
         type: String(r[15] || ""),
         planQty: r[16] === "" || r[16] === null ? "" : Number(r[16]),
         unit: String(r[17] || ""),
-        doneQty: totals[id] || 0
+        doneQty: doneQtyVal
       };
     });
 
@@ -111,6 +125,15 @@ function handleSavePlan(params) {
 
   const sheet = ensurePlansSheet_();
   const planId = String(payload.id || "").trim() || ("PLAN-" + date.replace(/-/g, "") + "-" + new Date().getTime());
+  
+  const rowIndex = findPlanRow_(sheet, planId);
+  // Preserve current DoneQty in the sheet or set to 0 for new plans
+  let doneQty = 0;
+  if (rowIndex > 0) {
+    doneQty = sheet.getRange(rowIndex, 19).getValue();
+    if (doneQty === "" || doneQty === null) doneQty = 0;
+  }
+
   const row = [
     planId,
     date,
@@ -129,10 +152,10 @@ function handleSavePlan(params) {
     formatPlanDate_(payload.dateEnd),
     String(payload.type || "Kế hoạch"),
     payload.planQty === 0 || payload.planQty ? payload.planQty : "",
-    String(payload.unit || "")
+    String(payload.unit || ""),
+    Number(doneQty)
   ];
 
-  const rowIndex = findPlanRow_(sheet, planId);
   if (rowIndex > 0) {
     sheet.getRange(rowIndex, 1, 1, row.length).setValues([row]);
   } else {
@@ -141,6 +164,22 @@ function handleSavePlan(params) {
 
   writeAuditLog(payload.updatedBy || "nhatky", "savePlan", planId, rowIndex > 0 ? "Cập nhật kế hoạch" : "Thêm kế hoạch mới");
   return contentResponse({ status: "success", planId: planId });
+}
+
+// Cộng dồn lũy kế DoneQty trực tiếp trên dòng kế hoạch
+function incrementPlanDoneQty_(planId, qty) {
+  if (!planId || isNaN(qty) || qty <= 0) return;
+  try {
+    const sheet = ensurePlansSheet_();
+    const rowIndex = findPlanRow_(sheet, planId);
+    if (rowIndex > 0) {
+      const cell = sheet.getRange(rowIndex, 19);
+      const currentVal = Number(cell.getValue() || 0);
+      cell.setValue(currentVal + qty);
+    }
+  } catch (e) {
+    console.error("Error in incrementPlanDoneQty_: " + e.toString());
+  }
 }
 
 function handleDeletePlan(params) {
