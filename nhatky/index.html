@@ -124,10 +124,32 @@
     .week-today td { background: #eef6f4; }
     .week-items { display: flex; flex-direction: column; gap: 6px; }
 
+    .week-item-main {
+      min-width: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .week-item-place {
+      color: var(--brand);
+      font-weight: 600;
+    }
+
+    .week-item-task {
+      color: #344054;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      white-space: normal;
+    }
+
     .week-item {
       display: flex;
       gap: 8px;
-      align-items: center;
+      align-items: flex-start;
       width: 100%;
       text-align: left;
       border: 1px solid var(--line);
@@ -371,8 +393,7 @@
             </div>
             <div class="col-12">
               <label class="form-label" for="employee">Nhân viên</label>
-              <input class="form-control" id="employee" list="employeeSuggestions" placeholder="Tên người ghi" autocomplete="name" required>
-              <datalist id="employeeSuggestions"></datalist>
+              <select class="form-select" id="employee" required></select>
             </div>
             <div class="col-6 d-none extra-field">
               <label class="form-label" for="shift">Ca</label>
@@ -698,7 +719,6 @@
       planModal = new bootstrap.Modal(document.getElementById("planModal"));
       document.getElementById("filterDate").value = today;
       document.getElementById("workDate").value = today;
-      document.getElementById("employee").value = localStorage.getItem(STORAGE_KEYS.employee) || "";
       fillTimeSelect("startTime", "");
       fillTimeSelect("endTime", "");
       document.getElementById("shift").value = defaultShift();
@@ -927,6 +947,7 @@
         if (data.status === "success" && Array.isArray(data.staff)) {
           staffList = data.staff.map(person => String(person.name || "").trim()).filter(Boolean).sort();
           localStorage.setItem(STORAGE_KEYS.staff, JSON.stringify(staffList));
+          renderEmployeeSuggestions();
         }
       } catch (error) { /* giữ cache cũ */ }
     }
@@ -1121,19 +1142,33 @@
     }
 
     function rememberEmployeeFromInput() {
-      rememberEmployee(document.getElementById("employee").value);
+      const select = document.getElementById("employee");
+      if (select.value === "__other__") {
+        const name = String(prompt("Tên người ghi:") || "").trim();
+        if (!name) {
+          select.value = localStorage.getItem(STORAGE_KEYS.employee) || "";
+          return;
+        }
+        rememberEmployee(name);
+        select.value = name;
+        return;
+      }
+      if (select.value) rememberEmployee(select.value);
     }
 
+    // Dropdown người ghi: nhân viên (getStaff) + tên đã từng dùng
     function renderEmployeeSuggestions() {
-      const names = new Set(getStoredEmployees());
+      const select = document.getElementById("employee");
+      const current = localStorage.getItem(STORAGE_KEYS.employee) || select.value || "";
+      const names = new Set(knownPeopleNames());
       logs.forEach(log => {
         if (log.employee) names.add(log.employee);
       });
-      document.getElementById("employeeSuggestions").innerHTML = [...names]
-        .filter(Boolean)
-        .slice(0, 12)
-        .map(name => `<option value="${escapeAttr(name)}"></option>`)
-        .join("");
+      if (current && current !== "__other__") names.add(current);
+      select.innerHTML = '<option value="">-- Chọn tên người ghi --</option>' +
+        [...names].filter(Boolean).sort()
+          .map(name => `<option${name === current ? " selected" : ""}>${escapeHtml(name)}</option>`).join("") +
+        '<option value="__other__">➕ Nhập tên khác...</option>';
     }
 
     function loadSettings() {
@@ -1295,8 +1330,13 @@
           .sort((a, b) => (a.time || "").localeCompare(b.time || ""));
         const items = dayPlans.map(plan => `
           <button class="week-item ${weekItemClass(plan.status)}" type="button" onclick="openPlanModal('${escapeAttr(plan.id)}')" title="Bấm để sửa kế hoạch">
-            <span class="fw-bold text-nowrap">${escapeHtml(plan.time || "--")}</span>
-            <span class="text-truncate">${escapeHtml(plan.asset || plan.area || plan.task || "")}</span>
+            <div class="week-item-main">
+              <div class="d-flex align-items-center gap-2">
+                <span class="fw-bold text-nowrap">${escapeHtml(plan.time || "--")}</span>
+                <span class="week-item-place text-truncate">${[plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ")}</span>
+              </div>
+              <div class="week-item-task">${escapeHtml(plan.task || "")}</div>
+            </div>
             ${statusBadge(plan.status)}
           </button>
         `).join("");
