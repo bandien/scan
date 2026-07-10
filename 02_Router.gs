@@ -136,7 +136,7 @@ function ensureWorkLogsSheet_() {
   const headers = [
     "LogID","CreatedAt","WorkDate","Employee","Shift","Progress",
     "StartTime","EndTime","Task","Result","Issue","NextAction","PlanID","SyncStatus",
-    "Rating","RecordedBy","Quantity"
+    "Rating","RecordedBy","Quantity","Unit"
   ];
 
   if (!sheet) sheet = ss.insertSheet("WorkLogs");
@@ -150,6 +150,9 @@ function ensureWorkLogsSheet_() {
     if (String(sheet.getRange(1, 17).getValue()).trim() === "") {
       // Cột số lượng để tính lũy kế theo kế hoạch
       sheet.getRange(1, 17).setValue("Quantity").setFontWeight("bold");
+    }
+    if (String(sheet.getRange(1, 18).getValue()).trim() === "") {
+      sheet.getRange(1, 18).setValue("Unit").setFontWeight("bold");
     }
   }
   return sheet;
@@ -184,7 +187,8 @@ function handleCreateWorkLog(params) {
     "synced",
     payload.rating || "",
     payload.recordedBy || "",
-    payload.quantity === 0 || payload.quantity ? payload.quantity : ""
+    payload.quantity === 0 || payload.quantity ? payload.quantity : "",
+    payload.unit || ""
   ]);
 
   writeAuditLog(employee, "createWorkLog", logId, "Ghi nhật ký công việc từ trang nhatky");

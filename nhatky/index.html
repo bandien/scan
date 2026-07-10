@@ -382,9 +382,6 @@
           </div>
         </div>
         <div class="d-flex align-items-center gap-2">
-          <button class="btn btn-outline-secondary btn-icon" type="button" title="Cấu hình đồng bộ" data-bs-toggle="modal" data-bs-target="#settingsModal">
-            <i class="bi bi-gear"></i>
-          </button>
           <a class="btn btn-outline-primary btn-icon" href="../index.html" title="Về BanDienScan">
             <i class="bi bi-house"></i>
           </a>
@@ -434,6 +431,10 @@
             <div class="col-6" id="quantityField">
               <label class="form-label" for="quantity">Số lượng <span class="fw-normal text-secondary">(nếu có)</span></label>
               <input class="form-control" id="quantity" type="number" inputmode="decimal" step="any" min="0" placeholder="vd: 12">
+            </div>
+            <div class="col-6" id="unitField">
+              <label class="form-label" for="quantityUnit">Đơn vị</label>
+              <input class="form-control" id="quantityUnit" placeholder="vd: m, cái, bộ...">
             </div>
             <div class="col-12">
               <span class="form-label d-block">Tiến độ</span>
@@ -546,10 +547,6 @@
           <div class="panel-header">
             <div class="d-flex align-items-center justify-content-between gap-2">
               <h2 class="h5 m-0 fw-bold"><i class="bi bi-clock-history text-primary me-2"></i>3. Nhật ký gần đây</h2>
-              <div class="d-flex gap-2">
-                <button class="btn btn-outline-primary btn-sm" type="button" id="btnExport"><i class="bi bi-download me-1"></i>CSV</button>
-                <button class="btn btn-outline-danger btn-sm" type="button" id="btnClearLogs"><i class="bi bi-trash me-1"></i>Xóa</button>
-              </div>
             </div>
           </div>
           <div class="p-3">
@@ -803,8 +800,6 @@
       });
       document.getElementById("btnDeletePlan").addEventListener("click", deletePlanFromModal);
       document.getElementById("btnClearForm").addEventListener("click", clearForm);
-      document.getElementById("btnExport").addEventListener("click", exportCsv);
-      document.getElementById("btnClearLogs").addEventListener("click", clearLogs);
       document.getElementById("btnSaveSettings").addEventListener("click", saveSettings);
       document.getElementById("btnToggleExtra").addEventListener("click", toggleExtraFields);
       document.getElementById("btnToggleLogs").addEventListener("click", toggleLogs);
@@ -1498,7 +1493,7 @@
               <div class="small text-secondary">${friendlyDate(log.workDate)} ${escapeHtml(log.startTime || "")}${log.endTime ? " - " + escapeHtml(log.endTime) : ""}${syncLabel(log)}</div>
               ${log.recordedBy && log.recordedBy !== log.employee ? `<div class="small text-secondary"><i class="bi bi-person-check me-1"></i>Ghi bởi ${escapeHtml(log.recordedBy)}</div>` : ""}
             </div>
-            <div class="d-flex flex-column align-items-end gap-1">${statusBadge(log.progress)}${ratingBadge(log.rating)}${typeof log.quantity === "number" ? `<span class="badge-soft badge-low">SL ${escapeHtml(log.quantity)}</span>` : ""}</div>
+            <div class="d-flex flex-column align-items-end gap-1">${statusBadge(log.progress)}${ratingBadge(log.rating)}${typeof log.quantity === "number" ? `<span class="badge-soft badge-low">SL ${escapeHtml(log.quantity)}${log.unit ? " " + escapeHtml(log.unit) : ""}</span>` : ""}</div>
           </div>
           <div class="mt-2 fw-semibold">${escapeHtml(log.selectedTask)}</div>
           <div class="mt-1">${escapeHtml(log.result)}</div>
@@ -1624,6 +1619,7 @@
         nextAction: document.getElementById("nextAction").value.trim(),
         createdAt: new Date().toISOString(),
         recordedBy: recordedBy,
+        unit: document.getElementById("quantityUnit").value.trim(),
         syncStatus: "local"
       };
 
@@ -1723,30 +1719,6 @@
       document.getElementById("planCumNote").classList.add("d-none");
     }
 
-    function clearLogs() {
-      if (!confirm("Xóa toàn bộ nhật ký cục bộ trên trình duyệt này?")) return;
-      logs = [];
-      localStorage.removeItem(STORAGE_KEYS.logs);
-      renderLogs();
-      showToast("Đã xóa nhật ký cục bộ");
-    }
-
-    function exportCsv() {
-      if (logs.length === 0) {
-        showToast("Chưa có dữ liệu để xuất");
-        return;
-      }
-      const headers = ["createdAt", "workDate", "employee", "rating", "quantity", "recordedBy", "shift", "progress", "startTime", "endTime", "selectedTask", "result", "issue", "nextAction", "syncStatus"];
-      const lines = [headers.join(",")].concat(logs.map(log => headers.map(key => csvCell(log[key] || "")).join(",")));
-      const blob = new Blob(["\ufeff" + lines.join("\n")], { type: "text/csv;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `nhat-ky-cong-viec-${today}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
     function priorityBadge(value) {
       const normalized = value || "Thấp";
       const cls = normalized === "Cao" ? "badge-high" : normalized === "Trung bình" ? "badge-mid" : "badge-low";
@@ -1819,10 +1791,6 @@
     function showToast(message) {
       document.getElementById("toastText").textContent = message;
       toast.show();
-    }
-
-    function csvCell(value) {
-      return '"' + String(value).replace(/"/g, '""') + '"';
     }
 
     function escapeHtml(value) {
