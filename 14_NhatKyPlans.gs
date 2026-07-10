@@ -14,19 +14,41 @@ function ensurePlansSheet_() {
   const headers = [
     "PlanID","Date","Time","Team","Area","Asset","Task",
     "Assignee","Priority","Status","UpdatedAt","UpdatedBy",
-    "Watcher","Collaborators"
+    "Watcher","Collaborators","DateEnd"
   ];
 
   if (!sheet) sheet = ss.insertSheet("NhatKyPlans");
   if (sheet.getLastRow() === 0) {
     sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight("bold");
-  } else if (String(sheet.getRange(1, 13).getValue()).trim() === "") {
-    // Sheet cũ chưa có 2 cột Watcher/Collaborators → bổ sung tiêu đề
-    sheet.getRange(1, 13, 1, 2).setValues([["Watcher", "Collaborators"]]).setFontWeight("bold");
+  } else {
+    if (String(sheet.getRange(1, 13).getValue()).trim() === "") {
+      // Sheet cũ chưa có 2 cột Watcher/Collaborators → bổ sung tiêu đề
+      sheet.getRange(1, 13, 1, 2).setValues([["Watcher", "Collaborators"]]).setFontWeight("bold");
+    }
+    if (String(sheet.getRange(1, 15).getValue()).trim() === "") {
+      // Sheet cũ chưa có cột DateEnd (việc kéo dài nhiều ngày)
+      sheet.getRange(1, 15).setValue("DateEnd").setFontWeight("bold");
+    }
   }
-  // Date/Time lưu dạng text để trả về đúng chuỗi yyyy-MM-dd / HH:mm-HH:mm
+  // Date/Time/DateEnd lưu dạng text để trả về đúng chuỗi yyyy-MM-dd / HH:mm-HH:mm
   sheet.getRange("B:C").setNumberFormat("@");
+  sheet.getRange("O:O").setNumberFormat("@");
   return sheet;
+}
+
+// Lũy kế số lượng đã ghi theo từng kế hoạch (cộng cột Quantity của WorkLogs)
+function planQuantityTotals_() {
+  const totals = {};
+  const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("WorkLogs");
+  if (!sheet || sheet.getLastRow() < 2) return totals;
+  // Cột M..Q: PlanID, SyncStatus, Rating, RecordedBy, Quantity
+  const rows = sheet.getRange(2, 13, sheet.getLastRow() - 1, 5).getValues();
+  rows.forEach(function(r) {
+    const planId = String(r[0]).trim();
+    const qty = parseFloat(String(r[4]).replace(",", "."));
+    if (planId && !isNaN(qty)) totals[planId] = (totals[planId] || 0) + qty;
+  });
+  return totals;
 }
 
 function formatPlanDate_(value) {
@@ -41,12 +63,14 @@ function handleGetPlans(e) {
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return contentResponse({ status: "success", plans: [] });
 
-  const rows = sheet.getRange(2, 1, lastRow - 1, 14).getValues();
+  const totals = planQuantityTotals_();
+  const rows = sheet.getRange(2, 1, lastRow - 1, 15).getValues();
   const plans = rows
     .filter(function(r) { return String(r[0]).trim() !== ""; })
     .map(function(r) {
+      const id = String(r[0]);
       return {
-        id: String(r[0]),
+        id: id,
         date: formatPlanDate_(r[1]),
         time: String(r[2] || ""),
         team: String(r[3] || ""),
@@ -57,7 +81,9 @@ function handleGetPlans(e) {
         priority: String(r[8] || ""),
         status: String(r[9] || ""),
         watcher: String(r[12] || ""),
-        collaborators: String(r[13] || "")
+        collaborators: String(r[13] || ""),
+        dateEnd: formatPlanDate_(r[14]),
+        doneQty: totals[id] || 0
       };
     });
 
@@ -88,7 +114,8 @@ function handleSavePlan(params) {
     new Date(),
     String(payload.updatedBy || ""),
     String(payload.watcher || ""),
-    String(payload.collaborators || "")
+    String(payload.collaborators || ""),
+    formatPlanDate_(payload.dateEnd)
   ];
 
   const rowIndex = findPlanRow_(sheet, planId);
