@@ -86,6 +86,7 @@
 
     .stt-col { width: 46px; }
     .name-col { width: 180px; text-align: left !important; }
+    .code-col { width: 150px; min-width: 150px; }
     .shift-col { width: 40px; min-width: 40px; }
     .name-cell { text-align: left !important; }
     .name-cell input {
@@ -148,7 +149,7 @@
       border: 1px solid #d9e1ec;
       display: grid;
       gap: 6px;
-      grid-template-columns: minmax(112px, 1fr) 72px 94px 94px 92px 36px;
+      grid-template-columns: minmax(104px, 1fr) 78px 72px 94px 94px 92px 36px;
       padding: 6px 8px;
     }
 
@@ -160,6 +161,20 @@
     }
 
     .skill-list { overflow-x: auto; }
+
+    .rule-box,
+    .share-card {
+      background: #f7f9fc;
+      border: 1px solid #d9e1ec;
+      padding: 10px;
+    }
+
+    .share-card textarea {
+      font-size: .88rem;
+      min-height: 150px;
+      resize: vertical;
+      white-space: pre-wrap;
+    }
 
     .skill-table {
       border-collapse: collapse;
@@ -194,6 +209,7 @@
       .shell { padding: 8px; }
       .toolbar .btn, .toolbar .form-control { font-size: .86rem; }
       .name-col { width: 170px; }
+      .code-col { width: 120px; min-width: 120px; }
       .shift-col { width: 38px; min-width: 38px; }
       .rule-grid { grid-template-columns: repeat(3, minmax(70px, 1fr)); }
       .skill-table { min-width: 430px; }
@@ -210,6 +226,7 @@
       table.roster { width: 100%; font-size: 12px; }
       .shift-col { width: 33px; }
       .name-col { width: 155px; }
+      .code-col { width: 115px; }
     }
   </style>
 </head>
@@ -256,30 +273,38 @@
       </div>
       <div class="collapse rule-panel" id="rulePanel">
         <div class="row g-2">
-          <div class="col-12 col-lg-5">
+          <div class="col-12 col-xl-7">
             <div class="d-flex justify-content-between align-items-center gap-2 mb-1">
               <label class="form-label fw-bold small m-0">Ca và số người cần</label>
               <button class="btn btn-outline-success btn-sm" id="btnAddShift" type="button"><i class="bi bi-plus-lg me-1"></i>Thêm ca</button>
             </div>
             <div class="shift-rule-list" id="shiftRuleList"></div>
           </div>
-          <div class="col-12 col-lg-4">
-            <label class="form-label fw-bold small">Luật xoay ca</label>
-            <div class="form-check">
-              <input class="form-check-input" id="rotateEvenly" type="checkbox">
-              <label class="form-check-label" for="rotateEvenly">Đảo đều ca theo tuần</label>
+          <div class="col-12 col-xl-5">
+            <div class="rule-box">
+              <label class="form-label fw-bold small">Luật xoay ca</label>
+              <div class="form-check">
+                <input class="form-check-input" id="rotateEvenly" type="checkbox">
+                <label class="form-check-label" for="rotateEvenly">Đảo đều ca theo tuần</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" id="pairSkill" type="checkbox">
+                <label class="form-check-label" for="pairSkill">Ưu tiên thợ cứng kèm thợ mới</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" id="prioritizeOfficeWork" type="checkbox">
+                <label class="form-check-label" for="prioritizeOfficeWork">Ưu tiên giờ hành chính theo tính chất việc</label>
+              </div>
+              <button class="btn btn-primary w-100 mt-3" id="btnGenerateRules" type="button"><i class="bi bi-arrow-repeat me-1"></i>Tạo phân ca theo quy tắc</button>
             </div>
-            <div class="form-check">
-              <input class="form-check-input" id="pairSkill" type="checkbox">
-              <label class="form-check-label" for="pairSkill">Ưu tiên thợ cứng kèm thợ mới</label>
+            <div class="share-card mt-2">
+              <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                <label class="form-label fw-bold small m-0" for="shareSummary">Mẫu tin nhắn tóm tắt</label>
+                <button class="btn btn-outline-primary btn-sm" id="btnCopySummary" type="button"><i class="bi bi-clipboard me-1"></i>Copy</button>
+              </div>
+              <textarea class="form-control" id="shareSummary" readonly></textarea>
+              <div class="small text-secondary mt-1">Có thể copy nội dung hoặc chụp màn hình khung này để gửi nhóm.</div>
             </div>
-            <div class="form-check">
-              <input class="form-check-input" id="prioritizeOfficeWork" type="checkbox">
-              <label class="form-check-label" for="prioritizeOfficeWork">Ưu tiên giờ hành chính theo tính chất việc</label>
-            </div>
-          </div>
-          <div class="col-12 col-lg-3 d-flex align-items-end">
-            <button class="btn btn-primary w-100" id="btnGenerateRules" type="button"><i class="bi bi-arrow-repeat me-1"></i>Tạo phân ca theo quy tắc</button>
           </div>
           <div class="col-12">
             <label class="form-label fw-bold small">Phân loại tay nghề</label>
@@ -315,10 +340,11 @@
     const STORAGE_KEY = "bandien_shift_roster_v1";
     const cycle = ["", "x", "hc", "CN"];
     const dayNames = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật"];
+    const dayCodes = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
     const defaultShifts = [
-      { name: "Ca.1", needed: 2, start1: "06:00", end1: "14:00", split: false, start2: "", end2: "", mealNote: "Nghỉ ăn luân phiên" },
-      { name: "Ca.2", needed: 2, start1: "14:00", end1: "22:00", split: false, start2: "", end2: "", mealNote: "Nghỉ ăn luân phiên" },
-      { name: "Ca.3", needed: 1, start1: "22:00", end1: "06:00", split: false, start2: "", end2: "", mealNote: "Ăn ca theo thực tế" }
+      { name: "Ca.1", code: "C1", needed: 2, start1: "06:00", end1: "14:00", split: false, start2: "", end2: "", mealNote: "Nghỉ ăn luân phiên" },
+      { name: "Ca.2", code: "C2", needed: 2, start1: "14:00", end1: "22:00", split: false, start2: "", end2: "", mealNote: "Nghỉ ăn luân phiên" },
+      { name: "Ca.3", code: "C3", needed: 1, start1: "22:00", end1: "06:00", split: false, start2: "", end2: "", mealNote: "Ăn ca theo thực tế" }
     ];
     const workTypes = {
       operation: "Vận hành",
@@ -404,6 +430,7 @@
         : defaultShifts.map((shift, index) => ({ ...shift, needed: rules.needed?.[index] ?? shift.needed }));
       return source.map((shift, index) => ({
         name: String(shift.name || `Ca.${index + 1}`).trim() || `Ca.${index + 1}`,
+        code: String(shift.code || defaultShifts[index]?.code || `C${index + 1}`).trim() || `C${index + 1}`,
         needed: clampNumber(shift.needed, 0, staffCount),
         start1: normalizeTime(shift.start1, defaultShifts[index]?.start1 || "08:00"),
         end1: normalizeTime(shift.end1, defaultShifts[index]?.end1 || "17:00"),
@@ -435,17 +462,21 @@
       document.getElementById("btnExport").addEventListener("click", exportCsv);
       document.getElementById("btnReset").addEventListener("click", resetTemplate);
       document.getElementById("btnGenerateRules").addEventListener("click", generateRosterByRules);
+      document.getElementById("btnCopySummary").addEventListener("click", copyShareSummary);
       document.getElementById("btnAddShift").addEventListener("click", addShift);
       document.getElementById("rotateEvenly").addEventListener("change", e => {
         state.rules.rotateEvenly = e.target.checked;
+        renderShareSummary();
         saveState(false);
       });
       document.getElementById("pairSkill").addEventListener("change", e => {
         state.rules.pairSkill = e.target.checked;
+        renderShareSummary();
         saveState(false);
       });
       document.getElementById("prioritizeOfficeWork").addEventListener("change", e => {
         state.rules.prioritizeOfficeWork = e.target.checked;
+        renderShareSummary();
         saveState(false);
       });
     }
@@ -458,6 +489,7 @@
       document.getElementById("prioritizeOfficeWork").checked = !!state.rules.prioritizeOfficeWork;
       renderShiftRules();
       renderSkillList();
+      renderShareSummary();
     }
 
     function renderShiftRules() {
@@ -467,6 +499,10 @@
           <div>
             <label class="form-label small mb-1" for="shiftName${index}">Tên ca</label>
             <input class="form-control form-control-sm" id="shiftName${index}" value="${escapeAttr(shift.name)}" onchange="setShiftName(${index}, this.value)">
+          </div>
+          <div>
+            <label class="form-label small mb-1" for="shiftCode${index}">Ký hiệu</label>
+            <input class="form-control form-control-sm" id="shiftCode${index}" value="${escapeAttr(shift.code)}" onchange="setShiftCode(${index}, this.value)">
           </div>
           <div>
             <label class="form-label small mb-1" for="shiftNeed${index}">Người</label>
@@ -550,13 +586,14 @@
       const to = formatDate(dates[6]);
       let html = `
         <colgroup>
-          <col class="stt-col"><col class="name-col">
+          <col class="stt-col"><col class="name-col"><col class="code-col">
           ${Array.from({ length: totalShiftCols }).map(() => '<col class="shift-col">').join("")}
         </colgroup>
         <thead>
           <tr>
             <th></th>
             <th class="title-cell">BẢNG PHÂN CA</th>
+            <th></th>
             <th colspan="${weekSpan}" class="week-label">Tuần:</th>
             <th colspan="${valueSpan}" class="week-value">${escapeHtml(state.weekNo)}</th>
             <th colspan="${fromSpan}">Từ: &nbsp;&nbsp; ${from}</th>
@@ -565,14 +602,15 @@
           <tr>
             <th rowspan="2">STT</th>
             <th rowspan="2">HỌ &amp; TÊN</th>
+            <th rowspan="2">KÝ HIỆU CA</th>
             ${dates.map((date, idx) => `<th colspan="${shifts.length}" class="${idx === 6 ? "date-red" : ""}">${dayNames[idx]} ${formatShortDate(date)}</th>`).join("")}
           </tr>
           <tr>
-            ${dates.map(() => shifts.map(shift => `<th>${escapeHtml(shift.name)}</th>`).join("")).join("")}
+            ${dates.map(() => shifts.map(shift => `<th title="${escapeAttr(shift.name)}">${escapeHtml(shift.code || shift.name)}</th>`).join("")).join("")}
           </tr>
         </thead>
         <tbody>
-          <tr class="team-row"><td colspan="2">Tổ cơ điện Sân Golf</td><td colspan="${totalShiftCols}"></td></tr>
+          <tr class="team-row"><td colspan="3">Tổ cơ điện Sân Golf</td><td colspan="${totalShiftCols}"></td></tr>
           ${state.staff.map((person, rowIndex) => renderStaffRow(person, rowIndex)).join("")}
         </tbody>`;
       table.innerHTML = html;
@@ -580,7 +618,7 @@
 
     function renderStaffRow(person, rowIndex) {
       const shifts = getShifts();
-      let row = `<tr><td>${rowIndex + 1}</td><td class="name-cell"><input value="${escapeAttr(person.name)}" onchange="renameStaff(${rowIndex}, this.value)"></td>`;
+      let row = `<tr><td>${rowIndex + 1}</td><td class="name-cell"><input value="${escapeAttr(person.name)}" onchange="renameStaff(${rowIndex}, this.value)"></td><td class="small">${escapeHtml(weeklyCodeSummary(rowIndex, shifts))}</td>`;
       for (let d = 0; d < 7; d++) {
         for (let s = 0; s < shifts.length; s++) {
           const key = `${rowIndex}-${d}-${s}`;
@@ -650,7 +688,7 @@
 
     function addShift() {
       const shifts = getShifts();
-      shifts.push({ name: `Ca.${shifts.length + 1}`, needed: 1, start1: "08:00", end1: "17:00", split: false, start2: "", end2: "", mealNote: "Nghỉ ăn luân phiên" });
+      shifts.push({ name: `Ca.${shifts.length + 1}`, code: `C${shifts.length + 1}`, needed: 1, start1: "08:00", end1: "17:00", split: false, start2: "", end2: "", mealNote: "Nghỉ ăn luân phiên" });
       state.rules.shifts = shifts;
       syncControls();
       renderTable();
@@ -677,6 +715,16 @@
       shifts[index].name = value.trim() || `Ca.${index + 1}`;
       state.rules.shifts = shifts;
       renderTable();
+      renderShareSummary();
+      saveState(false);
+    }
+
+    function setShiftCode(index, value) {
+      const shifts = getShifts();
+      shifts[index].code = value.trim() || `C${index + 1}`;
+      state.rules.shifts = shifts;
+      renderTable();
+      renderShareSummary();
       saveState(false);
     }
 
@@ -684,6 +732,7 @@
       const shifts = getShifts();
       shifts[index].needed = clampNumber(value, 0, state.staff.length);
       state.rules.shifts = shifts;
+      renderShareSummary();
       saveState(false);
     }
 
@@ -693,6 +742,7 @@
       shifts[index][field] = normalizeTime(value, "");
       state.rules.shifts = shifts;
       renderShiftRules();
+      renderShareSummary();
       saveState(false);
     }
 
@@ -705,6 +755,7 @@
       }
       state.rules.shifts = shifts;
       renderShiftRules();
+      renderShareSummary();
       saveState(false);
     }
 
@@ -712,6 +763,7 @@
       const shifts = getShifts();
       shifts[index].mealNote = value.trim();
       state.rules.shifts = shifts;
+      renderShareSummary();
       saveState(false);
     }
 
@@ -838,10 +890,10 @@
     function exportCsv() {
       const dates = weekDates(state.weekStart);
       const shifts = getShifts();
-      const headers = ["STT", "Họ tên"].concat(dates.flatMap(date => shifts.map(shift => `${formatShortDate(date)} ${shift.name}`)));
-      const shiftInfo = ["Thông tin ca", ""].concat(dates.flatMap(() => shifts.map(shiftSummary)));
+      const headers = ["STT", "Họ tên", "Ký hiệu ca"].concat(dates.flatMap(date => shifts.map(shift => `${formatShortDate(date)} ${shift.code || shift.name}`)));
+      const shiftInfo = ["Thông tin ca", "", ""].concat(dates.flatMap(() => shifts.map(shiftSummary)));
       const rows = state.staff.map((person, r) => {
-        const values = [r + 1, person.name];
+        const values = [r + 1, person.name, weeklyCodeSummary(r, shifts)];
         for (let d = 0; d < 7; d++) {
           for (let s = 0; s < shifts.length; s++) values.push(state.cells[`${r}-${d}-${s}`] || "");
         }
@@ -882,6 +934,18 @@
       return `${date.getDate()}/ ${date.getMonth() + 1}`;
     }
 
+    function weeklyCodeSummary(rowIndex, shifts) {
+      const items = [];
+      for (let d = 0; d < 7; d++) {
+        for (let s = 0; s < shifts.length; s++) {
+          if (state.cells[`${rowIndex}-${d}-${s}`] === "x") {
+            items.push(`${dayCodes[d]}:${shifts[s].code || shifts[s].name}`);
+          }
+        }
+      }
+      return items.join(", ");
+    }
+
     function normalizeTime(value, fallback) {
       const text = String(value || "").trim();
       return /^\d{2}:\d{2}$/.test(text) ? text : fallback;
@@ -891,7 +955,51 @@
       const first = `${shift.start1 || "?"}-${shift.end1 || "?"}`;
       const second = shift.split ? `; ${shift.start2 || "?"}-${shift.end2 || "?"}` : "";
       const meal = shift.mealNote ? `; nghỉ ăn: ${shift.mealNote}` : "";
-      return `${first}${second}${meal}`;
+      return `${shift.code || shift.name}: ${first}${second}${meal}`;
+    }
+
+    function renderShareSummary() {
+      const textarea = document.getElementById("shareSummary");
+      if (textarea) textarea.value = buildShareSummary();
+    }
+
+    function buildShareSummary() {
+      const dates = weekDates(state.weekStart);
+      const lines = [
+        `PHÂN CA TỔ CƠ ĐIỆN SÂN GOLF - TUẦN ${state.weekNo}`,
+        `Từ ${formatDate(dates[0])} đến ${formatDate(dates[6])}`,
+        "",
+        "KÝ HIỆU CA:"
+      ];
+
+      getShifts().forEach(shift => {
+        lines.push(`- ${shift.code || shift.name}: ${shift.name}, ${shift.needed} người, ${shiftSummary(shift).replace(`${shift.code || shift.name}: `, "")}`);
+      });
+
+      lines.push("");
+      lines.push("QUY ĐỊNH XẾP CA:");
+      lines.push(`- Đảo đều ca theo tuần: ${state.rules.rotateEvenly ? "Có" : "Không"}`);
+      lines.push(`- Thợ cứng kèm thợ mới: ${state.rules.pairSkill ? "Ưu tiên" : "Không bắt buộc"}`);
+      lines.push(`- Ưu tiên giờ hành chính theo tính chất việc: ${state.rules.prioritizeOfficeWork ? "Có" : "Không"}`);
+      lines.push("- Người được ký hiệu x là trực/đi ca; hc là hành chính; CN là nghỉ/chủ nhật.");
+
+      return lines.join("\n");
+    }
+
+    function copyShareSummary() {
+      const textarea = document.getElementById("shareSummary");
+      textarea.select();
+      textarea.setSelectionRange(0, textarea.value.length);
+      const done = () => notify("Đã copy mẫu tin nhắn");
+      if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(textarea.value).then(done).catch(() => {
+          document.execCommand("copy");
+          done();
+        });
+      } else {
+        document.execCommand("copy");
+        done();
+      }
     }
 
     function csvCell(value) {
