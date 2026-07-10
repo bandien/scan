@@ -307,6 +307,7 @@
             <label class="form-label fw-bold small">Phân loại tay nghề</label>
             <div class="skill-list" id="skillList"></div>
             <p class="rule-note">Nhóm bảo trì, dự án, hỗ trợ được ưu tiên giữ giờ hành chính khi bật luật HC. Hệ thống vẫn đảm bảo đủ người từng ca trước, tránh một người bị xếp 2 ca trong cùng ngày, và cố gắng có thợ cứng kèm thợ mới.</p>
+            <p class="rule-note"><strong>Quy định bàn giao:</strong> Ca đang làm nếu không có phát sinh thì trước khi hết ca chuẩn bị kế hoạch và vật tư cho buổi làm việc tiếp theo. Các ca đến trước 15 phút để thực hiện giao ca.</p>
           </div>
         </div>
       </div>
@@ -998,6 +999,10 @@
       lines.push(`- Thợ cứng kèm thợ mới: ${state.rules.pairSkill ? "Ưu tiên" : "Không bắt buộc"}`);
       lines.push(`- Ưu tiên giờ hành chính theo tính chất việc: ${state.rules.prioritizeOfficeWork ? "Có" : "Không"}`);
       lines.push("- Người được ký hiệu x là trực/đi ca; hc là hành chính; CN là nghỉ/chủ nhật.");
+      lines.push("");
+      lines.push("QUY ĐỊNH BÀN GIAO:");
+      lines.push("- Ca đang làm nếu không có phát sinh thì trước khi hết ca chuẩn bị kế hoạch và vật tư cho buổi làm việc tiếp theo.");
+      lines.push("- Các ca đến trước 15 phút để thực hiện giao ca.");
 
       return lines.join("\n");
     }
