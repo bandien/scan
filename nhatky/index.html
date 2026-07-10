@@ -266,6 +266,12 @@
       border-bottom: 1px solid var(--line);
       padding: 14px 12px;
       background: var(--surface);
+      border-left: 4px solid transparent;
+      transition: border-color .15s;
+    }
+    .plan-card.priority-high {
+      border-left-color: var(--bs-danger, #dc3545);
+      background: linear-gradient(90deg, #fff5f5 0%, var(--surface) 20%);
     }
 
     .plan-card:last-child { border-bottom: 0; }
@@ -275,16 +281,50 @@
     /* Bootstrap 5 không có sẵn utility này; cần cho text-truncate trong flex */
     .min-w-0 { min-width: 0; }
 
+    /* Tiêu đề khu vực + thiết bị (Context First) */
+    .plan-card-context {
+      font-weight: 700;
+      font-size: 0.88rem;
+      color: var(--brand);
+      letter-spacing: .01em;
+      margin-bottom: 4px;
+    }
+
     /* Tên công việc cỡ lớn cho dễ đọc (nhân viên lớn tuổi) */
     .plan-card-title {
       font-weight: 800;
-      font-size: 1.3rem;
+      font-size: 1.25rem;
       line-height: 1.3;
-      color: var(--brand);
+      color: #1a2332;
       display: -webkit-box;
       -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
+    }
+
+    /* Hộp cảnh báo tồn tại trong thẻ nhật ký */
+    .log-issue-alert {
+      background: #fff1f0;
+      border: 1px solid #ffccc7;
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin-top: 8px;
+    }
+    .log-issue-alert .issue-title {
+      font-weight: 700;
+      color: #cf1322;
+      font-size: 0.82rem;
+      margin-bottom: 2px;
+    }
+    .log-issue-alert .issue-body {
+      color: #a8071a;
+      font-size: 0.88rem;
+      line-height: 1.4;
+    }
+    .log-suggest-row {
+      color: var(--warn, #d97706);
+      font-size: 0.84rem;
+      margin-top: 4px;
     }
 
     .plan-task-title {
@@ -1733,13 +1773,26 @@
 
       cards.innerHTML = visible.map(plan => {
         const carry = isCarryOver(plan, selectedDate);
+        const isHigh = String(plan.priority || "").toLowerCase() === "cao";
+        const teamVisible = plan.team && plan.team.toLowerCase() !== "tổ cơ điện" && plan.team.toLowerCase() !== "tổ điện";
         return `
-        <article class="plan-card${carry ? " carry" : ""}">
+        <article class="plan-card${carry ? " carry" : ""}${isHigh ? " priority-high" : ""}">
+          <!-- Context First: Khu vực · Thiết bị -->
+          <div class="plan-card-context">
+            <i class="bi bi-geo-alt-fill me-1"></i>${[plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ") || "Chưa xác định"}
+          </div>
           <div class="d-flex justify-content-between gap-2">
             <div class="min-w-0">
+              ${isHigh ? '<span class="badge bg-danger text-white mb-1" style="font-size:.7rem;">⚠ QUAN TRỌNG</span>' : ''}
               <div class="plan-card-title">${escapeHtml(plan.task || "")}</div>
-              <div class="small text-brand fw-semibold">${[plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ")}</div>
-              <div class="small text-secondary">${escapeHtml(plan.time || "")}${plan.team && plan.team.toLowerCase() !== "tổ cơ điện" && plan.team.toLowerCase() !== "tổ điện" ? " - " + escapeHtml(plan.team) : ""}${plan.assignee ? " - " + escapeHtml(plan.assignee) : ""}${planSyncIcon(plan)}${carry ? ` <span class="badge-soft badge-carry">Tồn ${shortDateVn(planEnd(plan))}</span>` : ""} ${multiDayBadge(plan, selectedDate)}</div>
+              <div class="small text-secondary" style="margin-top: 4px;">
+                <i class="bi bi-clock me-1"></i>${escapeHtml(plan.time || "Chưa xếp giờ")}
+                ${teamVisible ? ' <span class="mx-1">·</span> ' + escapeHtml(plan.team) : ''}
+                ${plan.assignee ? ' <span class="mx-1">·</span> <i class="bi bi-person-fill me-1"></i>' + escapeHtml(plan.assignee) : ''}
+                ${planSyncIcon(plan)}
+                ${carry ? ' <span class="badge-soft badge-carry">Tồn ' + shortDateVn(planEnd(plan)) + '</span>' : ''}
+                ${multiDayBadge(plan, selectedDate)}
+              </div>
             </div>
             <div class="d-flex flex-column gap-1">
               <button class="btn btn-success text-nowrap fw-bold" type="button" onclick="selectPlan('${escapeAttr(plan.id)}')">
@@ -1750,7 +1803,7 @@
               </button>
             </div>
           </div>
-          <div class="d-flex flex-wrap gap-2 mt-2">${typeBadge(plan)} ${priorityBadge(plan.priority)} ${statusBadge(plan.status)} ${doneQtyBadge(plan)}</div>
+          <div class="d-flex flex-wrap gap-2 mt-2">${typeBadge(plan)} ${statusBadge(plan.status)} ${doneQtyBadge(plan)}</div>
         </article>
       `; }).join("");
       renderMetrics();
@@ -1872,40 +1925,41 @@
             <div class="min-w-0">
               <span class="fw-bold" style="font-size: 0.95rem;">${escapeHtml(log.employee)}</span>
               <span class="text-secondary small">(${escapeHtml(log.shift)})</span>
-              ${log.recordedBy && log.recordedBy !== log.employee ? `<span class="text-muted" style="font-size: 0.78rem;" title="Người ghi hồ sơ"> (Ghi bởi ${escapeHtml(log.recordedBy)})</span>` : ""}
+              ${log.recordedBy && log.recordedBy !== log.employee ? `<span class="text-muted" style="font-size: 0.78rem;"> (Ghi bởi ${escapeHtml(log.recordedBy)})</span>` : ""}
             </div>
           </div>
           
-          <!-- Hàng 2: Thời gian làm việc và trạng thái đồng bộ, số lượng nếu có -->
+          <!-- Hàng 2: Thời gian làm việc -->
           <div class="text-muted mb-1" style="font-size: 0.8rem; margin-top: 2px;">
             <i class="bi bi-clock me-1"></i>${friendlyDate(log.workDate)} ${escapeHtml(log.startTime || "")}${log.endTime ? " - " + escapeHtml(log.endTime) : ""}${syncLabel(log)}
             ${typeof log.quantity === "number" ? `<span class="badge-soft badge-low ms-1" style="font-size: 0.72rem; padding: 2px 6px;">SL: ${escapeHtml(log.quantity)}${log.unit ? " " + escapeHtml(log.unit) : ""}</span>` : ""}
           </div>
 
-          <!-- Hàng 3: Tên công việc -->
-          <div class="fw-semibold text-brand" style="font-size: 0.92rem; line-height: 1.35; margin-top: 4px;">
-            ${escapeHtml(log.selectedTask)}
+          <!-- Hàng 3: Công việc kế hoạch -->
+          <div style="font-size: 0.92rem; line-height: 1.35; margin-top: 4px;">
+            <i class="bi bi-clipboard-check me-1 text-brand"></i><span class="fw-semibold">${escapeHtml(log.selectedTask)}</span>
           </div>
 
           <!-- Hàng 4: Kết quả thực tế -->
           <div class="text-secondary" style="font-size: 0.9rem; line-height: 1.35; margin-top: 2px;">
-            ${escapeHtml(log.result)}
+            <i class="bi bi-pencil-square me-1"></i>${escapeHtml(log.result)}
           </div>
 
-          <!-- Hàng 5: Tồn tại / Đề xuất & Nút Xử lý tiếp -->
-          ${log.issue || log.nextAction || hasFollowup(log) ? `
-            <div class="mt-2 pt-2" style="border-top: 1px dashed #e2e8f0;">
-              ${log.issue ? `<div class="small text-danger d-flex align-items-start gap-1"><i class="bi bi-exclamation-triangle-fill mt-0.5" style="font-size: 0.8rem;"></i><span>Tồn: ${escapeHtml(log.issue)}</span></div>` : ""}
-              ${log.nextAction ? `<div class="small d-flex align-items-start gap-1" style="color: var(--warn)"><i class="bi bi-arrow-right-short mt-0.5" style="font-size: 1rem; line-height: 1;"></i><span>Đề xuất: ${escapeHtml(log.nextAction)}</span></div>` : ""}
+          <!-- Hàng 5: Hộp cảnh báo Tồn tại / Đề xuất -->
+          ${log.issue ? `
+            <div class="log-issue-alert">
+              <div class="issue-title"><i class="bi bi-exclamation-triangle-fill me-1"></i>Tồn tại chưa xử lý xong</div>
+              <div class="issue-body">${escapeHtml(log.issue)}</div>
+              ${log.nextAction ? `<div class="log-suggest-row"><i class="bi bi-lightbulb me-1"></i>Đề xuất: ${escapeHtml(log.nextAction)}</div>` : ""}
               ${hasFollowup(log) ? `
-                <div class="d-flex justify-content-end mt-1">
-                  <button class="btn btn-sm btn-warning fw-bold py-1 px-2" style="font-size: 0.78rem;" type="button" onclick="continueLog('${escapeAttr(log.id)}')">
+                <div class="d-flex justify-content-end mt-2">
+                  <button class="btn btn-sm btn-warning fw-bold py-1 px-2" style="font-size: 0.82rem;" type="button" onclick="continueLog('${escapeAttr(log.id)}')">
                     <i class="bi bi-arrow-right-circle me-1"></i>Tiếp tục xử lý
                   </button>
                 </div>
               ` : ""}
             </div>
-          ` : ""}
+          ` : `${log.nextAction ? `<div class="log-suggest-row mt-2"><i class="bi bi-lightbulb me-1"></i>Đề xuất: ${escapeHtml(log.nextAction)}</div>` : ""}`}
         </article>
       `;
     }
