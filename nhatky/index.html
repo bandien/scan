@@ -321,6 +321,7 @@
     #resultChips .chip-active { background: var(--surface-soft); border-color: var(--brand-2); color: #24624a; }
 
     .log-card { border-left: 4px solid #cbd5e1; }
+    .log-card.log-followup { border-left-color: var(--warn); background: #fffaf0; }
     .log-card.log-done { border-left-color: #2d8a5f; }
     .log-card.log-doing { border-left-color: #155ea8; }
     .log-card.log-help { border-left-color: #c2413b; }
@@ -594,6 +595,25 @@
         <div class="col-6 col-lg-3"><div class="metric"><strong id="metricDoing">0</strong><span>Đang làm</span></div></div>
         <div class="col-6 col-lg-3"><div class="metric"><strong id="metricDone">0</strong><span>Đã hoàn thành</span><div class="mini-bar"><i id="metricDoneBar"></i></div></div></div>
         <div class="col-6 col-lg-3"><div class="metric"><strong id="metricLogs">0</strong><span>Nhật ký đã ghi</span></div></div>
+      </div>
+      <div class="panel mt-3">
+        <div class="panel-header">
+          <h3 class="h6 m-0 fw-bold"><i class="bi bi-people text-primary me-2"></i>Theo từng nhân viên <span class="fw-normal text-secondary small">(bấm tên để lọc kế hoạch)</span></h3>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Nhân viên</th>
+                <th class="text-center">Số việc</th>
+                <th class="text-center">Hoàn thành</th>
+                <th class="text-center">Đang làm</th>
+                <th class="text-center">Cần hỗ trợ / Tồn</th>
+              </tr>
+            </thead>
+            <tbody id="personStats"></tbody>
+          </table>
+        </div>
       </div>
     </section>
   </main>
@@ -1670,7 +1690,7 @@
 
       const visibleLogs = showAllLogs ? logs : logs.slice(0, RECENT_LOG_LIMIT);
       list.innerHTML = visibleLogs.map(log => `
-        <article class="log-card ${logProgressClass(log.progress)}${log.id === lastAddedLogId ? " just-added" : ""}">
+        <article class="log-card ${logProgressClass(log.progress)}${hasFollowup(log) ? " log-followup" : ""}${log.id === lastAddedLogId ? " just-added" : ""}">
           <div class="d-flex justify-content-between gap-2">
             <div>
               <div class="fw-bold">${escapeHtml(log.employee)} <span class="text-secondary fw-normal">- ${escapeHtml(log.shift)}</span></div>
@@ -1681,8 +1701,9 @@
           </div>
           <div class="mt-2 fw-semibold">${escapeHtml(log.selectedTask)}</div>
           <div class="mt-1">${escapeHtml(log.result)}</div>
-          ${log.issue ? `<div class="mt-2 small text-danger"><i class="bi bi-exclamation-triangle me-1"></i>${escapeHtml(log.issue)}</div>` : ""}
-          ${log.nextAction ? `<div class="mt-1 small text-secondary"><i class="bi bi-arrow-return-right me-1"></i>${escapeHtml(log.nextAction)}</div>` : ""}
+          ${log.issue ? `<div class="mt-2 small text-danger"><i class="bi bi-exclamation-triangle me-1"></i>Tồn: ${escapeHtml(log.issue)}</div>` : ""}
+          ${log.nextAction ? `<div class="mt-1 small" style="color: var(--warn)"><i class="bi bi-arrow-return-right me-1"></i>Đề xuất: ${escapeHtml(log.nextAction)}</div>` : ""}
+          ${hasFollowup(log) ? `<button class="btn btn-sm btn-warning fw-bold mt-2" type="button" onclick="continueLog('${escapeAttr(log.id)}')"><i class="bi bi-arrow-right-circle me-1"></i>Tiếp tục xử lý</button>` : ""}
         </article>
       `).join("");
       toggleBtn.style.display = logs.length > RECENT_LOG_LIMIT ? "block" : "none";
@@ -1693,6 +1714,39 @@
     function toggleLogs() {
       showAllLogs = !showAllLogs;
       renderLogs();
+    }
+
+    // Nhật ký còn tồn tại hoặc đề xuất → cần theo dõi xử lý tiếp
+    function hasFollowup(log) {
+      return Boolean((log.issue || log.nextAction) && !String(log.selectedTask || "").startsWith("[Kế hoạch]"));
+    }
+
+    // Bấm "Tiếp tục xử lý": đổ lại thông tin việc vào form Ghi nhanh
+    function continueLog(id) {
+      const log = logs.find(item => item.id === id);
+      if (!log) return;
+
+      if (log.planId && plans.some(plan => plan.id === log.planId)) {
+        selectPlan(log.planId);
+      } else {
+        document.getElementById("planId").value = log.planId || "";
+        document.getElementById("workDate").value = today;
+        document.getElementById("selectedTask").value = log.selectedTask || "";
+        renderPeopleResults("");
+        setProgress("Hoàn thành");
+        document.getElementById("startTime").value = roundQuarter(currentTime());
+        openQuickForm(() => {
+          document.getElementById("quickFormPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+          document.getElementById("result").focus();
+        });
+      }
+
+      // Nhắc lại nội dung tồn/đề xuất ngay trong dòng việc để xử lý tiếp
+      const followup = log.issue || log.nextAction;
+      if (followup) {
+        const box = document.getElementById("selectedTask");
+        if (!box.value.includes(followup)) box.value = (box.value ? box.value + " | " : "") + "Xử lý tiếp: " + followup;
+      }
     }
 
     function logProgressClass(progress) {
@@ -1711,6 +1765,47 @@
       document.getElementById("metricDone").textContent = visible.length ? `${done}/${visible.length}` : "0";
       document.getElementById("metricDoneBar").style.width = visible.length ? Math.round(done / visible.length * 100) + "%" : "0%";
       document.getElementById("metricLogs").textContent = logs.length;
+      renderPersonStats(visible);
+    }
+
+    // Bảng thống kê theo từng nhân viên, tính từ kế hoạch trong phạm vi lọc
+    function renderPersonStats(visible) {
+      const selectedDate = document.getElementById("filterDate").value;
+      const stats = {};
+      visible.forEach(plan => {
+        String(plan.assignee || "").split(",").map(name => name.trim()).filter(Boolean).forEach(name => {
+          const s = stats[name] = stats[name] || { total: 0, done: 0, doing: 0, help: 0 };
+          s.total++;
+          if (plan.status === "Hoàn thành") s.done++;
+          else if (plan.status === "Đang làm") s.doing++;
+          else if (plan.status === "Cần hỗ trợ" || isCarryOver(plan, selectedDate)) s.help++;
+        });
+      });
+
+      const names = Object.keys(stats).sort((a, b) => stats[b].total - stats[a].total || a.localeCompare(b));
+      const body = document.getElementById("personStats");
+      if (names.length === 0) {
+        body.innerHTML = '<tr><td colspan="5" class="text-secondary small">Chưa có kế hoạch gán người trong phạm vi đang lọc.</td></tr>';
+        return;
+      }
+      body.innerHTML = names.map(name => {
+        const s = stats[name];
+        return `
+        <tr role="button" onclick="filterByPerson('${escapeAttr(name)}')" title="Bấm để lọc kế hoạch của ${escapeAttr(name)}">
+          <td class="fw-semibold text-brand">${escapeHtml(name)}</td>
+          <td class="text-center fw-bold">${s.total}</td>
+          <td class="text-center">${s.done ? `<span class="badge-soft badge-done">${s.done}</span>` : '<span class="text-secondary">0</span>'}</td>
+          <td class="text-center">${s.doing ? `<span class="badge-soft badge-doing">${s.doing}</span>` : '<span class="text-secondary">0</span>'}</td>
+          <td class="text-center">${s.help ? `<span class="badge-soft badge-high">${s.help}</span>` : '<span class="text-secondary">0</span>'}</td>
+        </tr>
+      `; }).join("");
+    }
+
+    function filterByPerson(name) {
+      document.getElementById("filterPerson").value = name;
+      renderPlans();
+      document.getElementById("filterPerson").scrollIntoView({ behavior: "smooth", block: "center" });
+      showToast("Đang lọc kế hoạch của " + name);
     }
 
     const RATING_OPTIONS = ["Hoàn thành tốt", "Đạt", "Chưa đạt", "Vắng/Không tham gia"];
