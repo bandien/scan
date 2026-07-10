@@ -49,6 +49,7 @@ function doGet(e) {
       case 'getMeterStats':     return handleGetMeterStats(e);      // Phase 11
       case 'getPumpTimerSettings': return handleGetPumpTimerSettings(e);
       case 'getPlans':          return handleGetPlans(e);           // Kế hoạch trang nhatky
+      case 'getWorkLogs':       return handleGetWorkLogs(e);        // Nhật ký cả tổ (trang nhatky)
       case 'tempDumpDevices':   return handleTempDumpDevices(e);
       case 'migrateDevicesData':return handleMigrateDevicesData(e);
       default:                  return handleGetDevice(e);          // UID lookup
@@ -156,6 +157,55 @@ function ensureWorkLogsSheet_() {
     }
   }
   return sheet;
+}
+
+// Nhật ký của cả tổ (mặc định 7 ngày gần nhất) để mọi máy cùng thấy
+function handleGetWorkLogs(e) {
+  const sheet = ensureWorkLogsSheet_();
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return contentResponse({ status: "success", logs: [] });
+
+  const days = Math.max(1, parseInt(e.parameter.days, 10) || 7);
+  const cutoff = Utilities.formatDate(new Date(Date.now() - days * 86400000), Session.getScriptTimeZone(), "yyyy-MM-dd");
+  const maxRows = 400;
+  const startRow = Math.max(2, lastRow - maxRows + 1);
+  const rows = sheet.getRange(startRow, 1, lastRow - startRow + 1, 18).getValues();
+
+  const logs = [];
+  rows.forEach(function(r) {
+    if (!String(r[0]).trim()) return;
+    const workDate = formatPlanDate_(r[2]);
+    if (workDate && workDate < cutoff) return;
+    logs.push({
+      id: String(r[0]),
+      createdAt: r[1] instanceof Date ? r[1].toISOString() : String(r[1] || ""),
+      workDate: workDate,
+      employee: String(r[3] || ""),
+      shift: String(r[4] || ""),
+      progress: String(r[5] || ""),
+      startTime: formatLogTime_(r[6]),
+      endTime: formatLogTime_(r[7]),
+      selectedTask: String(r[8] || ""),
+      result: String(r[9] || ""),
+      issue: String(r[10] || ""),
+      nextAction: String(r[11] || ""),
+      planId: String(r[12] || ""),
+      rating: String(r[14] || ""),
+      recordedBy: String(r[15] || ""),
+      quantity: r[16] === "" || r[16] === null ? "" : Number(r[16]),
+      unit: String(r[17] || ""),
+      syncStatus: "synced"
+    });
+  });
+  logs.reverse(); // mới nhất trước
+  return contentResponse({ status: "success", logs: logs });
+}
+
+function formatLogTime_(value) {
+  if (value instanceof Date) {
+    return Utilities.formatDate(value, Session.getScriptTimeZone(), "HH:mm");
+  }
+  return String(value || "");
 }
 
 function handleCreateWorkLog(params) {
