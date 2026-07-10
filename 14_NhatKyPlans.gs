@@ -14,7 +14,7 @@ function ensurePlansSheet_() {
   const headers = [
     "PlanID","Date","Time","Team","Area","Asset","Task",
     "Assignee","Priority","Status","UpdatedAt","UpdatedBy",
-    "Watcher","Collaborators","DateEnd"
+    "Watcher","Collaborators","DateEnd","Type","PlanQty","Unit"
   ];
 
   if (!sheet) sheet = ss.insertSheet("NhatKyPlans");
@@ -28,6 +28,14 @@ function ensurePlansSheet_() {
     if (String(sheet.getRange(1, 15).getValue()).trim() === "") {
       // Sheet cũ chưa có cột DateEnd (việc kéo dài nhiều ngày)
       sheet.getRange(1, 15).setValue("DateEnd").setFontWeight("bold");
+    }
+    if (String(sheet.getRange(1, 16).getValue()).trim() === "") {
+      // Phân loại: Kế hoạch / Phát sinh
+      sheet.getRange(1, 16).setValue("Type").setFontWeight("bold");
+    }
+    if (String(sheet.getRange(1, 17).getValue()).trim() === "") {
+      // Khối lượng kế hoạch + đơn vị (đối chiếu với lũy kế đã ghi)
+      sheet.getRange(1, 17, 1, 2).setValues([["PlanQty", "Unit"]]).setFontWeight("bold");
     }
   }
   // Date/Time/DateEnd lưu dạng text để trả về đúng chuỗi yyyy-MM-dd / HH:mm-HH:mm
@@ -64,7 +72,7 @@ function handleGetPlans(e) {
   if (lastRow < 2) return contentResponse({ status: "success", plans: [] });
 
   const totals = planQuantityTotals_();
-  const rows = sheet.getRange(2, 1, lastRow - 1, 15).getValues();
+  const rows = sheet.getRange(2, 1, lastRow - 1, 18).getValues();
   const plans = rows
     .filter(function(r) { return String(r[0]).trim() !== ""; })
     .map(function(r) {
@@ -83,6 +91,9 @@ function handleGetPlans(e) {
         watcher: String(r[12] || ""),
         collaborators: String(r[13] || ""),
         dateEnd: formatPlanDate_(r[14]),
+        type: String(r[15] || ""),
+        planQty: r[16] === "" || r[16] === null ? "" : Number(r[16]),
+        unit: String(r[17] || ""),
         doneQty: totals[id] || 0
       };
     });
@@ -115,7 +126,10 @@ function handleSavePlan(params) {
     String(payload.updatedBy || ""),
     String(payload.watcher || ""),
     String(payload.collaborators || ""),
-    formatPlanDate_(payload.dateEnd)
+    formatPlanDate_(payload.dateEnd),
+    String(payload.type || "Kế hoạch"),
+    payload.planQty === 0 || payload.planQty ? payload.planQty : "",
+    String(payload.unit || "")
   ];
 
   const rowIndex = findPlanRow_(sheet, planId);
