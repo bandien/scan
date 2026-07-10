@@ -218,7 +218,7 @@
     .log-card {
       border: 1px solid var(--line);
       border-radius: 8px;
-      padding: 12px;
+      padding: 10px;
       background: #fbfcfe;
     }
 
@@ -1851,20 +1851,50 @@
 
     function renderLogCard(log) {
       return `
-        <article class="log-card ${logProgressClass(log.progress)}${hasFollowup(log) ? " log-followup" : ""}${log.id === lastAddedLogId ? " just-added" : ""}">
-          <div class="d-flex justify-content-between gap-2">
-            <div>
-              <div class="fw-bold">${escapeHtml(log.employee)} <span class="text-secondary fw-normal">- ${escapeHtml(log.shift)}</span></div>
-              <div class="small text-secondary">${friendlyDate(log.workDate)} ${escapeHtml(log.startTime || "")}${log.endTime ? " - " + escapeHtml(log.endTime) : ""}${syncLabel(log)}</div>
-              ${log.recordedBy && log.recordedBy !== log.employee ? `<div class="small text-secondary"><i class="bi bi-person-check me-1"></i>Ghi bởi ${escapeHtml(log.recordedBy)}</div>` : ""}
+        <article class="log-card ${logProgressClass(log.progress)}${hasFollowup(log) ? " log-followup" : ""}${log.id === lastAddedLogId ? " just-added" : ""}" style="padding: 10px; margin-bottom: 8px;">
+          <!-- Hàng 1: Người thực hiện, Ca và các Badge trạng thái/đánh giá -->
+          <div class="d-flex justify-content-between align-items-start gap-2">
+            <div class="min-w-0">
+              <span class="fw-bold" style="font-size: 0.95rem;">${escapeHtml(log.employee)}</span>
+              <span class="text-secondary small">(${escapeHtml(log.shift)})</span>
+              ${log.recordedBy && log.recordedBy !== log.employee ? `<span class="text-muted" style="font-size: 0.78rem;" title="Người ghi hồ sơ"> (Ghi bởi ${escapeHtml(log.recordedBy)})</span>` : ""}
             </div>
-            <div class="d-flex flex-column align-items-end gap-1">${statusBadge(log.progress)}${ratingBadge(log.rating)}${typeof log.quantity === "number" ? `<span class="badge-soft badge-low">SL ${escapeHtml(log.quantity)}${log.unit ? " " + escapeHtml(log.unit) : ""}</span>` : ""}</div>
+            <div class="d-flex align-items-center gap-1 flex-shrink-0">
+              ${statusBadge(log.progress)}
+              ${ratingBadge(log.rating)}
+            </div>
           </div>
-          <div class="mt-2 fw-semibold">${escapeHtml(log.selectedTask)}</div>
-          <div class="mt-1">${escapeHtml(log.result)}</div>
-          ${log.issue ? `<div class="mt-2 small text-danger"><i class="bi bi-exclamation-triangle me-1"></i>Tồn: ${escapeHtml(log.issue)}</div>` : ""}
-          ${log.nextAction ? `<div class="mt-1 small" style="color: var(--warn)"><i class="bi bi-arrow-return-right me-1"></i>Đề xuất: ${escapeHtml(log.nextAction)}</div>` : ""}
-          ${hasFollowup(log) ? `<button class="btn btn-sm btn-warning fw-bold mt-2" type="button" onclick="continueLog('${escapeAttr(log.id)}')"><i class="bi bi-arrow-right-circle me-1"></i>Tiếp tục xử lý</button>` : ""}
+          
+          <!-- Hàng 2: Thời gian làm việc và trạng thái đồng bộ, số lượng nếu có -->
+          <div class="text-muted mb-1" style="font-size: 0.8rem; margin-top: 2px;">
+            <i class="bi bi-clock me-1"></i>${friendlyDate(log.workDate)} ${escapeHtml(log.startTime || "")}${log.endTime ? " - " + escapeHtml(log.endTime) : ""}${syncLabel(log)}
+            ${typeof log.quantity === "number" ? `<span class="badge-soft badge-low ms-1" style="font-size: 0.72rem; padding: 2px 6px;">SL: ${escapeHtml(log.quantity)}${log.unit ? " " + escapeHtml(log.unit) : ""}</span>` : ""}
+          </div>
+
+          <!-- Hàng 3: Tên công việc -->
+          <div class="fw-semibold text-brand" style="font-size: 0.92rem; line-height: 1.35; margin-top: 4px;">
+            ${escapeHtml(log.selectedTask)}
+          </div>
+
+          <!-- Hàng 4: Kết quả thực tế -->
+          <div class="text-secondary" style="font-size: 0.9rem; line-height: 1.35; margin-top: 2px;">
+            ${escapeHtml(log.result)}
+          </div>
+
+          <!-- Hàng 5: Tồn tại / Đề xuất & Nút Xử lý tiếp -->
+          ${log.issue || log.nextAction || hasFollowup(log) ? `
+            <div class="mt-2 pt-2" style="border-top: 1px dashed #e2e8f0;">
+              ${log.issue ? `<div class="small text-danger d-flex align-items-start gap-1"><i class="bi bi-exclamation-triangle-fill mt-0.5" style="font-size: 0.8rem;"></i><span>Tồn: ${escapeHtml(log.issue)}</span></div>` : ""}
+              ${log.nextAction ? `<div class="small d-flex align-items-start gap-1" style="color: var(--warn)"><i class="bi bi-arrow-right-short mt-0.5" style="font-size: 1rem; line-height: 1;"></i><span>Đề xuất: ${escapeHtml(log.nextAction)}</span></div>` : ""}
+              ${hasFollowup(log) ? `
+                <div class="d-flex justify-content-end mt-1">
+                  <button class="btn btn-sm btn-warning fw-bold py-1 px-2" style="font-size: 0.78rem;" type="button" onclick="continueLog('${escapeAttr(log.id)}')">
+                    <i class="bi bi-arrow-right-circle me-1"></i>Tiếp tục xử lý
+                  </button>
+                </div>
+              ` : ""}
+            </div>
+          ` : ""}
         </article>
       `;
     }
