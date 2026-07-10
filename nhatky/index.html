@@ -427,6 +427,10 @@
               <label class="form-label" for="endTime">Đến giờ</label>
               <select class="form-select" id="endTime"></select>
             </div>
+            <div class="col-6" id="quantityField">
+              <label class="form-label" for="quantity">Số lượng <span class="fw-normal text-secondary">(nếu có)</span></label>
+              <input class="form-control" id="quantity" type="number" inputmode="decimal" step="any" min="0" placeholder="vd: 12">
+            </div>
             <div class="col-12">
               <span class="form-label d-block">Tiến độ</span>
               <input type="hidden" id="progress" value="Hoàn thành">
@@ -440,6 +444,7 @@
             <div class="col-12">
               <label class="form-label" for="selectedTask">Việc/kế hoạch</label>
               <textarea class="form-control" id="selectedTask" rows="2" placeholder="Chọn đầu việc hoặc nhập việc phát sinh" required></textarea>
+              <div class="small text-primary fw-bold mt-1 d-none" id="planCumNote"></div>
             </div>
             <div class="col-12">
               <label class="form-label" for="result">Kết quả</label>
@@ -593,8 +598,12 @@
             <input type="hidden" id="planFormId">
             <div class="row g-2">
               <div class="col-6">
-                <label class="form-label" for="planDate">Ngày</label>
+                <label class="form-label" for="planDate">Từ ngày</label>
                 <input class="form-control" id="planDate" type="date" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label" for="planDateEnd">Đến ngày <span class="fw-normal text-secondary">(nếu nhiều ngày)</span></label>
+                <input class="form-control" id="planDateEnd" type="date">
               </div>
               <div class="col-6">
                 <label class="form-label" for="planTimeFrom">Khung giờ</label>
@@ -609,7 +618,7 @@
                 <input class="form-control" id="planTeam" list="planTeamSuggestions" placeholder="Tổ điện">
                 <datalist id="planTeamSuggestions"></datalist>
               </div>
-              <div class="col-6">
+              <div class="col-12">
                 <label class="form-label" for="planPersonSelect">Người thực hiện</label>
                 <select class="form-select" id="planPersonSelect"></select>
                 <div class="d-flex flex-wrap gap-1 mt-2" id="planPersonChips"></div>
@@ -1025,6 +1034,7 @@
       document.getElementById("btnDeletePlan").style.display = plan ? "inline-block" : "none";
       document.getElementById("planFormId").value = plan ? plan.id : "";
       document.getElementById("planDate").value = plan ? (plan.date || today) : (document.getElementById("filterDate").value || today);
+      document.getElementById("planDateEnd").value = plan ? (plan.dateEnd || "") : "";
       // Khung giờ lưu dạng "07:30-09:30" → tách vào 2 ô chọn giờ tròn 15'
       const timeParts = plan && plan.time ? plan.time.split("-").map(part => part.trim()) : [];
       fillTimeSelect("planTimeFrom", timeParts[0] || "");
@@ -1077,9 +1087,13 @@
 
     async function submitPlanForm(event) {
       event.preventDefault();
+      const dateValue = document.getElementById("planDate").value;
+      let dateEndValue = document.getElementById("planDateEnd").value;
+      if (dateEndValue && dateEndValue <= dateValue) dateEndValue = "";
       const payload = {
         id: document.getElementById("planFormId").value.trim(),
-        date: document.getElementById("planDate").value,
+        date: dateValue,
+        dateEnd: dateEndValue,
         time: [document.getElementById("planTimeFrom").value, document.getElementById("planTimeTo").value].filter(Boolean).join("-"),
         team: document.getElementById("planTeam").value.trim(),
         assignee: planPeople.join(", "),
@@ -1098,6 +1112,8 @@
       }
       payload.syncStatus = "syncing";
       const index = plans.findIndex(item => item.id === payload.id);
+      // Giữ lũy kế đã tính (server sẽ tính lại chính xác ở lần nạp sau)
+      if (index >= 0 && plans[index].doneQty) payload.doneQty = plans[index].doneQty;
       if (index >= 0) plans[index] = payload; else plans.push(payload);
       localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
       planModal.hide();
@@ -1250,14 +1266,46 @@
       select.value = current;
     }
 
+    // Việc nhiều ngày: ngày kết thúc thực tế = dateEnd (nếu có) hoặc date
+    function planEnd(plan) {
+      return plan.dateEnd && plan.dateEnd > plan.date ? plan.dateEnd : plan.date;
+    }
+
+    function dayDiff(a, b) {
+      return Math.round((new Date(a + "T00:00:00") - new Date(b + "T00:00:00")) / 86400000);
+    }
+
+    function isMultiDay(plan) {
+      return planEnd(plan) > plan.date;
+    }
+
+    function inPlanRange(plan, iso) {
+      return Boolean(iso && plan.date && iso >= plan.date && iso <= planEnd(plan));
+    }
+
+    // Badge "Ngày x/y" cho việc nhiều ngày đang trong tiến trình
+    function multiDayBadge(plan, selectedDate) {
+      if (!isMultiDay(plan) || !inPlanRange(plan, selectedDate)) return "";
+      const dayNo = dayDiff(selectedDate, plan.date) + 1;
+      const totalDays = dayDiff(planEnd(plan), plan.date) + 1;
+      return `<span class="badge-soft badge-doing">Ngày ${dayNo}/${totalDays}</span>`;
+    }
+
+    function doneQtyBadge(plan) {
+      if (!plan.doneQty) return "";
+      return `<span class="badge-soft badge-low" title="Lũy kế số lượng đã ghi">Σ ${escapeHtml(plan.doneQty)}</span>`;
+    }
+
     function planSyncIcon(plan) {
       if (plan.syncStatus === "syncing") return ' <i class="bi bi-cloud-arrow-up text-primary" title="Đang đồng bộ"></i>';
       if (plan.syncStatus === "pending") return ' <i class="bi bi-cloud-slash text-warning" title="Chờ đồng bộ"></i>';
       return "";
     }
 
+    // Tồn = đã qua ngày kết thúc dự kiến mà chưa hoàn thành (việc nhiều ngày
+    // đang trong khoảng Từ ngày-Đến ngày thì KHÔNG tính tồn)
     function isCarryOver(plan, selectedDate) {
-      return Boolean(selectedDate && plan.date && plan.date < selectedDate && plan.status !== "Hoàn thành");
+      return Boolean(selectedDate && plan.date && planEnd(plan) < selectedDate && plan.status !== "Hoàn thành");
     }
 
     function getVisiblePlans() {
@@ -1273,12 +1321,13 @@
 
       if (viewMode === "week") {
         const days = weekDates(date);
-        return plans.filter(plan => days.includes(plan.date) && matchesFilters(plan));
+        // Việc nhiều ngày hiện ở mọi ngày nó chạy qua trong tuần
+        return plans.filter(plan => plan.date <= days[6] && planEnd(plan) >= days[0] && matchesFilters(plan));
       }
 
       return plans.filter(plan => {
-        const byDate = !date || plan.date === date;
-        // Kế hoạch ngày trước chưa hoàn thành → vẫn hiện ở ngày đang xem (tồn cũ)
+        const byDate = !date || inPlanRange(plan, date);
+        // Kế hoạch quá hạn chưa hoàn thành → vẫn hiện ở ngày đang xem (tồn cũ)
         return (byDate || isCarryOver(plan, date)) && matchesFilters(plan);
       });
     }
@@ -1323,13 +1372,13 @@
         const carry = isCarryOver(plan, selectedDate);
         return `
         <tr${carry ? ' class="carry-row"' : ""}>
-          <td class="fw-bold text-nowrap">${escapeHtml(plan.time || "")}${planSyncIcon(plan)}${carry ? `<div><span class="badge-soft badge-carry">Tồn ${shortDateVn(plan.date)}</span></div>` : ""}</td>
+          <td class="fw-bold text-nowrap">${escapeHtml(plan.time || "")}${planSyncIcon(plan)}${carry ? `<div><span class="badge-soft badge-carry">Tồn ${shortDateVn(planEnd(plan))}</span></div>` : ""}${multiDayBadge(plan, selectedDate) ? `<div>${multiDayBadge(plan, selectedDate)}</div>` : ""}</td>
           <td>${escapeHtml(plan.team || "")}<div class="small text-secondary">${escapeHtml(plan.assignee || "")}</div></td>
           <td>${escapeHtml(plan.area || "")}</td>
           <td class="fw-semibold">${escapeHtml(plan.asset || "")}</td>
           <td class="task-text">${escapeHtml(plan.task || "")}</td>
           <td>${priorityBadge(plan.priority)}</td>
-          <td>${statusBadge(plan.status)}</td>
+          <td>${statusBadge(plan.status)}${doneQtyBadge(plan) ? `<div class="mt-1">${doneQtyBadge(plan)}</div>` : ""}</td>
           <td class="text-end text-nowrap">
             <button class="btn btn-sm btn-outline-secondary" type="button" title="Sửa kế hoạch" onclick="openPlanModal('${escapeAttr(plan.id)}')">
               <i class="bi bi-pencil"></i>
@@ -1347,7 +1396,7 @@
         <article class="plan-card${carry ? " carry" : ""}">
           <div class="d-flex justify-content-between gap-2">
             <div class="min-w-0">
-              <div class="small fw-bold text-primary">${escapeHtml(plan.time || "")} - ${escapeHtml(plan.team || "")}${planSyncIcon(plan)}${carry ? ` <span class="badge-soft badge-carry">Tồn ${shortDateVn(plan.date)}</span>` : ""}</div>
+              <div class="small fw-bold text-primary">${escapeHtml(plan.time || "")} - ${escapeHtml(plan.team || "")}${planSyncIcon(plan)}${carry ? ` <span class="badge-soft badge-carry">Tồn ${shortDateVn(planEnd(plan))}</span>` : ""} ${multiDayBadge(plan, selectedDate)}</div>
               <div class="plan-card-title">${escapeHtml(plan.asset || plan.area || "")}</div>
               <div class="small text-secondary">${escapeHtml(plan.area || "")}${plan.assignee ? " - " + escapeHtml(plan.assignee) : ""}</div>
             </div>
@@ -1361,7 +1410,7 @@
             </div>
           </div>
           <div class="plan-card-task mt-2">${escapeHtml(plan.task || "")}</div>
-          <div class="d-flex gap-2 mt-2">${priorityBadge(plan.priority)} ${statusBadge(plan.status)}</div>
+          <div class="d-flex flex-wrap gap-2 mt-2">${priorityBadge(plan.priority)} ${statusBadge(plan.status)} ${doneQtyBadge(plan)}</div>
         </article>
       `; }).join("");
       renderMetrics();
@@ -1381,7 +1430,7 @@
       const label = `Tuần ${shortDateVn(days[0])} - ${shortDateVn(days[6])}`;
       const body = days.map((iso, index) => {
         const dayPlans = visible
-          .filter(plan => plan.date === iso)
+          .filter(plan => inPlanRange(plan, iso))
           .sort((a, b) => (a.time || "").localeCompare(b.time || ""));
         const items = dayPlans.map(plan => `
           <button class="week-item ${weekItemClass(plan.status)}" type="button" onclick="openPlanModal('${escapeAttr(plan.id)}')" title="Bấm để sửa kế hoạch">
@@ -1442,7 +1491,7 @@
               <div class="small text-secondary">${friendlyDate(log.workDate)} ${escapeHtml(log.startTime || "")}${log.endTime ? " - " + escapeHtml(log.endTime) : ""}${syncLabel(log)}</div>
               ${log.recordedBy && log.recordedBy !== log.employee ? `<div class="small text-secondary"><i class="bi bi-person-check me-1"></i>Ghi bởi ${escapeHtml(log.recordedBy)}</div>` : ""}
             </div>
-            <div class="d-flex flex-column align-items-end gap-1">${statusBadge(log.progress)}${ratingBadge(log.rating)}</div>
+            <div class="d-flex flex-column align-items-end gap-1">${statusBadge(log.progress)}${ratingBadge(log.rating)}${typeof log.quantity === "number" ? `<span class="badge-soft badge-low">SL ${escapeHtml(log.quantity)}</span>` : ""}</div>
           </div>
           <div class="mt-2 fw-semibold">${escapeHtml(log.selectedTask)}</div>
           <div class="mt-1">${escapeHtml(log.result)}</div>
@@ -1489,6 +1538,7 @@
       if (people.length === 0) {
         wrap.classList.add("d-none");
         rows.innerHTML = "";
+        document.getElementById("quantityField").classList.remove("d-none");
         return;
       }
 
@@ -1500,10 +1550,15 @@
               ${RATING_OPTIONS.map((option, index) => `<option${index === 1 ? " selected" : ""}>${option}</option>`).join("")}
             </select>
           </div>
-          <input class="form-control form-control-sm mt-2 person-note" placeholder="Ghi chú riêng (không bắt buộc)">
+          <div class="d-flex gap-2 mt-2">
+            <input class="form-control form-control-sm person-qty" type="number" inputmode="decimal" step="any" min="0" placeholder="SL" title="Số lượng người này làm được" style="max-width: 90px">
+            <input class="form-control form-control-sm person-note flex-grow-1" placeholder="Ghi chú riêng (không bắt buộc)">
+          </div>
         </div>
       `).join("");
       wrap.classList.remove("d-none");
+      // Có ô SL từng người thì ẩn ô số lượng chung để không nhập trùng
+      document.getElementById("quantityField").classList.add("d-none");
     }
 
     function getPeopleResults() {
@@ -1511,19 +1566,35 @@
       return [...document.querySelectorAll("#peopleResultRows .person-result-row")].map(row => ({
         name: row.dataset.person,
         rating: row.querySelector(".person-rating").value,
+        qty: row.querySelector(".person-qty").value,
         note: row.querySelector(".person-note").value.trim()
       }));
+    }
+
+    function parseQty(value) {
+      const num = parseFloat(String(value || "").replace(",", "."));
+      return isNaN(num) ? "" : num;
     }
 
     function selectPlan(id) {
       const plan = plans.find(item => item.id === id);
       if (!plan) return;
       document.getElementById("planId").value = plan.id;
-      document.getElementById("workDate").value = plan.date || today;
+      // Việc nhiều ngày: ngày ghi là ngày đang xem/hôm nay nếu nằm trong khoảng
+      const viewedDate = document.getElementById("filterDate").value;
+      document.getElementById("workDate").value = inPlanRange(plan, viewedDate) ? viewedDate
+        : (inPlanRange(plan, today) ? today : (plan.date || today));
       document.getElementById("selectedTask").value = `${plan.time || ""} | ${plan.area || ""} | ${plan.asset || ""}: ${plan.task || ""}`.trim();
       setProgress("Hoàn thành");
       document.getElementById("startTime").value = roundQuarter(currentTime());
       renderPeopleResults(plan.assignee);
+      const note = document.getElementById("planCumNote");
+      if (plan.doneQty) {
+        note.textContent = `Lũy kế đã ghi: ${plan.doneQty} — nhập thêm số lượng hôm nay để cộng dồn`;
+        note.classList.remove("d-none");
+      } else {
+        note.classList.add("d-none");
+      }
       openQuickForm(() => {
         document.getElementById("quickFormPanel").scrollIntoView({ behavior: "smooth", block: "start" });
         document.getElementById("result").focus();
@@ -1558,9 +1629,17 @@
             id: "LOG-" + Date.now() + "-" + index,
             employee: person.name,
             rating: person.rating,
+            quantity: parseQty(person.qty),
             result: base.result + (person.note ? ` | ${person.name}: ${person.note}` : "")
           }))
-        : [{ ...base, id: "LOG-" + Date.now(), employee: recordedBy, rating: "" }];
+        : [{ ...base, id: "LOG-" + Date.now(), employee: recordedBy, rating: "", quantity: parseQty(document.getElementById("quantity").value) }];
+
+      // Cộng dồn lũy kế ngay trên kế hoạch (server sẽ tính lại chính xác)
+      const addedQty = newLogs.reduce((sum, log) => sum + (typeof log.quantity === "number" ? log.quantity : 0), 0);
+      if (base.planId && addedQty > 0) {
+        const plan = plans.find(item => item.id === base.planId);
+        if (plan) plan.doneQty = (plan.doneQty || 0) + addedQty;
+      }
 
       // Lưu và hiển thị NGAY, đồng bộ lên Sheets chạy nền — không bắt người
       // dùng chờ 2-4 giây mỗi lượt gọi Google Apps Script
@@ -1634,6 +1713,7 @@
       if (keepEmployee) document.getElementById("employee").value = employee;
       document.getElementById("planId").value = "";
       renderPeopleResults("");
+      document.getElementById("planCumNote").classList.add("d-none");
     }
 
     function clearLogs() {
@@ -1649,7 +1729,7 @@
         showToast("Chưa có dữ liệu để xuất");
         return;
       }
-      const headers = ["createdAt", "workDate", "employee", "rating", "recordedBy", "shift", "progress", "startTime", "endTime", "selectedTask", "result", "issue", "nextAction", "syncStatus"];
+      const headers = ["createdAt", "workDate", "employee", "rating", "quantity", "recordedBy", "shift", "progress", "startTime", "endTime", "selectedTask", "result", "issue", "nextAction", "syncStatus"];
       const lines = [headers.join(",")].concat(logs.map(log => headers.map(key => csvCell(log[key] || "")).join(",")));
       const blob = new Blob(["\ufeff" + lines.join("\n")], { type: "text/csv;charset=utf-8" });
       const url = URL.createObjectURL(blob);
