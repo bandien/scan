@@ -135,12 +135,16 @@ function ensureWorkLogsSheet_() {
   let sheet = ss.getSheetByName("WorkLogs");
   const headers = [
     "LogID","CreatedAt","WorkDate","Employee","Shift","Progress",
-    "StartTime","EndTime","Task","Result","Issue","NextAction","PlanID","SyncStatus"
+    "StartTime","EndTime","Task","Result","Issue","NextAction","PlanID","SyncStatus",
+    "Rating","RecordedBy"
   ];
 
   if (!sheet) sheet = ss.insertSheet("WorkLogs");
   if (sheet.getLastRow() === 0) {
     sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight("bold");
+  } else if (String(sheet.getRange(1, 15).getValue()).trim() === "") {
+    // Sheet cũ chưa có 2 cột đánh giá từng người → bổ sung tiêu đề
+    sheet.getRange(1, 15, 1, 2).setValues([["Rating", "RecordedBy"]]).setFontWeight("bold");
   }
   return sheet;
 }
@@ -171,7 +175,9 @@ function handleCreateWorkLog(params) {
     payload.issue || "",
     payload.nextAction || "",
     payload.planId || "",
-    "synced"
+    "synced",
+    payload.rating || "",
+    payload.recordedBy || ""
   ]);
 
   writeAuditLog(employee, "createWorkLog", logId, "Ghi nhật ký công việc từ trang nhatky");

@@ -188,6 +188,35 @@
       background: #fbfcfe;
     }
 
+    .person-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface-soft);
+      border: 1px solid #cbe7db;
+      color: #24624a;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: .85rem;
+      font-weight: 600;
+    }
+
+    .person-chip button {
+      border: 0;
+      background: none;
+      color: inherit;
+      padding: 0;
+      line-height: 1;
+      font-size: 1rem;
+    }
+
+    .person-result-row {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: #fbfcfe;
+    }
+
     .mobile-plan-list { display: none; }
 
     .plan-card {
@@ -386,6 +415,11 @@
               </div>
               <textarea class="form-control" id="result" rows="3" placeholder="Nhập ngắn gọn: đã làm, tình trạng, số đo nếu có..." required></textarea>
             </div>
+            <div class="col-12 d-none" id="peopleResults">
+              <span class="form-label d-block"><i class="bi bi-people me-1"></i>Kết quả từng người tham gia</span>
+              <div class="d-flex flex-column gap-2" id="peopleResultRows"></div>
+              <div class="small text-secondary mt-1">Mỗi người sẽ được ghi 1 dòng nhật ký riêng để đánh giá.</div>
+            </div>
             <div class="col-12 d-none extra-field">
               <label class="form-label" for="issue">Tồn tại / cần xử lý tiếp</label>
               <textarea class="form-control" id="issue" rows="2" placeholder="Bỏ trống nếu không có"></textarea>
@@ -539,19 +573,9 @@
                 <datalist id="planTeamSuggestions"></datalist>
               </div>
               <div class="col-6">
-                <label class="form-label" for="planAssignee">Người thực hiện</label>
-                <input class="form-control" id="planAssignee" list="planAssigneeSuggestions" placeholder="Ca trực sáng">
-                <datalist id="planAssigneeSuggestions"></datalist>
-              </div>
-              <div class="col-6">
-                <label class="form-label" for="planWatcher">Người theo dõi</label>
-                <input class="form-control" id="planWatcher" list="planWatcherSuggestions" placeholder="1 người giám sát">
-                <datalist id="planWatcherSuggestions"></datalist>
-              </div>
-              <div class="col-6">
-                <label class="form-label" for="planCollab">Người phối hợp</label>
-                <input class="form-control" id="planCollab" list="planCollabSuggestions" placeholder="Cách nhau dấu phẩy">
-                <datalist id="planCollabSuggestions"></datalist>
+                <label class="form-label" for="planPersonSelect">Người thực hiện</label>
+                <select class="form-select" id="planPersonSelect"></select>
+                <div class="d-flex flex-wrap gap-1 mt-2" id="planPersonChips"></div>
               </div>
               <div class="col-6">
                 <label class="form-label" for="planArea">Khu vực</label>
@@ -614,7 +638,8 @@
       logs: "bandien_nhatky_logs",
       settings: "bandien_nhatky_settings",
       employee: "bandien_nhatky_employee",
-      employees: "bandien_nhatky_employees"
+      employees: "bandien_nhatky_employees",
+      staff: "bandien_nhatky_staff"
     };
 
     function toIsoDate(d) {
@@ -637,6 +662,8 @@
     let planModal;
     let lastAddedLogId = null;
     let viewMode = "day";
+    let staffList = [];   // tên nhân viên từ backend (getStaff) cho dropdown
+    let planPeople = [];  // người thực hiện đang chọn trong modal kế hoạch
 
     const fallbackPlans = [
       {
@@ -677,6 +704,7 @@
       setProgress("Hoàn thành");
       initQuickFormCollapse();
       loadSettings();
+      loadStaff();
       await loadPlans();
       loadLogs();
       renderEmployeeSuggestions();
@@ -711,6 +739,15 @@
       document.getElementById("logForm").addEventListener("submit", submitLog);
       document.getElementById("btnAddPlan").addEventListener("click", () => openPlanModal(null));
       document.getElementById("planForm").addEventListener("submit", submitPlanForm);
+      document.getElementById("planPersonSelect").addEventListener("change", event => {
+        const value = event.target.value === "__other__" ? prompt("Tên người thực hiện:") : event.target.value;
+        addPlanPerson(value);
+        event.target.value = "";
+      });
+      document.getElementById("planPersonChips").addEventListener("click", event => {
+        const btn = event.target.closest("button[data-name]");
+        if (btn) removePlanPerson(btn.dataset.name);
+      });
       document.getElementById("btnDeletePlan").addEventListener("click", deletePlanFromModal);
       document.getElementById("btnClearForm").addEventListener("click", clearForm);
       document.getElementById("btnExport").addEventListener("click", exportCsv);
@@ -877,6 +914,61 @@
       return data;
     }
 
+    // Danh sách nhân viên cho dropdown "Người thực hiện": lấy từ sheet Staff
+    // (action=getStaff), cache lại; backend lỗi thì dùng cache/tên đã gặp
+    async function loadStaff() {
+      staffList = JSON.parse(localStorage.getItem(STORAGE_KEYS.staff) || "[]");
+      const sync = getSync();
+      if (!sync.url) return;
+      try {
+        const response = await fetch(`${sync.url}?action=getStaff&token=${encodeURIComponent(sync.token)}`, { cache: "no-cache", signal: AbortSignal.timeout(10000) });
+        const data = await response.json();
+        if (data.status === "success" && Array.isArray(data.staff)) {
+          staffList = data.staff.map(person => String(person.name || "").trim()).filter(Boolean).sort();
+          localStorage.setItem(STORAGE_KEYS.staff, JSON.stringify(staffList));
+        }
+      } catch (error) { /* giữ cache cũ */ }
+    }
+
+    // Nguồn tên cho dropdown: nhân viên chính thức + tên từng xuất hiện
+    function knownPeopleNames() {
+      const names = new Set(staffList);
+      plans.flatMap(p => String(p.assignee || "").split(",")).forEach(name => names.add(name.trim()));
+      getStoredEmployees().forEach(name => names.add(name));
+      return [...names].filter(Boolean).sort();
+    }
+
+    function renderPlanPersonSelect() {
+      const chosen = new Set(planPeople);
+      const options = knownPeopleNames().filter(name => !chosen.has(name));
+      document.getElementById("planPersonSelect").innerHTML =
+        '<option value="">-- Chọn để thêm người --</option>' +
+        options.map(name => `<option>${escapeHtml(name)}</option>`).join("") +
+        '<option value="__other__">➕ Nhập tên khác...</option>';
+    }
+
+    function renderPlanPersonChips() {
+      document.getElementById("planPersonChips").innerHTML = planPeople.map(name => `
+        <span class="person-chip">${escapeHtml(name)}
+          <button type="button" data-name="${escapeAttr(name)}" title="Bỏ ${escapeAttr(name)}"><i class="bi bi-x"></i></button>
+        </span>
+      `).join("");
+    }
+
+    function addPlanPerson(name) {
+      const cleaned = String(name || "").trim();
+      if (!cleaned || planPeople.includes(cleaned)) return;
+      planPeople.push(cleaned);
+      renderPlanPersonChips();
+      renderPlanPersonSelect();
+    }
+
+    function removePlanPerson(name) {
+      planPeople = planPeople.filter(person => person !== name);
+      renderPlanPersonChips();
+      renderPlanPersonSelect();
+    }
+
     function openPlanModal(id) {
       const plan = id ? plans.find(item => item.id === id) : null;
       document.getElementById("planModalTitle").textContent = plan ? "Sửa kế hoạch" : "Thêm kế hoạch";
@@ -888,9 +980,9 @@
       fillTimeSelect("planTimeFrom", timeParts[0] || "");
       fillTimeSelect("planTimeTo", timeParts[1] || "");
       document.getElementById("planTeam").value = plan ? (plan.team || "") : "";
-      document.getElementById("planAssignee").value = plan ? (plan.assignee || "") : "";
-      document.getElementById("planWatcher").value = plan ? (plan.watcher || "") : "";
-      document.getElementById("planCollab").value = plan ? (plan.collaborators || "") : "";
+      planPeople = plan ? String(plan.assignee || "").split(",").map(name => name.trim()).filter(Boolean) : [];
+      renderPlanPersonChips();
+      renderPlanPersonSelect();
       document.getElementById("planArea").value = plan ? (plan.area || "") : "";
       document.getElementById("planAsset").value = plan ? (plan.asset || "") : "";
       document.getElementById("planTask").value = plan ? (plan.task || "") : "";
@@ -898,14 +990,7 @@
       document.getElementById("planStatus").value = plan ? (plan.status || "Chưa làm") : "Chưa làm";
 
       // Gợi ý chọn nhanh từ các giá trị đã nhập ở những kế hoạch trước
-      const knownPeople = plans.map(p => p.assignee)
-        .concat(plans.map(p => p.watcher))
-        .concat(plans.flatMap(p => String(p.collaborators || "").split(",")))
-        .concat(getStoredEmployees());
       fillSuggestions("planTeamSuggestions", plans.map(p => p.team));
-      fillSuggestions("planAssigneeSuggestions", knownPeople);
-      fillSuggestions("planWatcherSuggestions", knownPeople);
-      fillSuggestions("planCollabSuggestions", knownPeople);
       fillSuggestions("planAreaSuggestions", plans.map(p => p.area));
       fillSuggestions("planAssetSuggestions", plans.map(p => p.asset));
 
@@ -947,9 +1032,7 @@
         date: document.getElementById("planDate").value,
         time: [document.getElementById("planTimeFrom").value, document.getElementById("planTimeTo").value].filter(Boolean).join("-"),
         team: document.getElementById("planTeam").value.trim(),
-        assignee: document.getElementById("planAssignee").value.trim(),
-        watcher: document.getElementById("planWatcher").value.trim(),
-        collaborators: document.getElementById("planCollab").value.trim(),
+        assignee: planPeople.join(", "),
         area: document.getElementById("planArea").value.trim(),
         asset: document.getElementById("planAsset").value.trim(),
         task: document.getElementById("planTask").value.trim(),
@@ -1093,7 +1176,7 @@
 
       const matchesFilters = plan => {
         const byTeam = !team || plan.team === team;
-        const haystack = [plan.area, plan.asset, plan.task, plan.assignee, plan.watcher, plan.collaborators, plan.priority, plan.status].join(" ").toLowerCase();
+        const haystack = [plan.area, plan.asset, plan.task, plan.assignee, plan.priority, plan.status].join(" ").toLowerCase();
         return byTeam && (!query || haystack.includes(query));
       };
 
@@ -1109,12 +1192,6 @@
       });
     }
 
-    function peopleLines(plan) {
-      let html = "";
-      if (plan.watcher) html += `<div class="small text-secondary text-nowrap"><i class="bi bi-eye me-1"></i>${escapeHtml(plan.watcher)}</div>`;
-      if (plan.collaborators) html += `<div class="small text-secondary"><i class="bi bi-people me-1"></i>${escapeHtml(plan.collaborators)}</div>`;
-      return html;
-    }
 
     function renderPlans() {
       const tableWrap = document.querySelector(".table-wrap");
@@ -1156,7 +1233,7 @@
         return `
         <tr${carry ? ' class="carry-row"' : ""}>
           <td class="fw-bold text-nowrap">${escapeHtml(plan.time || "")}${carry ? `<div><span class="badge-soft badge-carry">Tồn ${shortDateVn(plan.date)}</span></div>` : ""}</td>
-          <td>${escapeHtml(plan.team || "")}<div class="small text-secondary">${escapeHtml(plan.assignee || "")}</div>${peopleLines(plan)}</td>
+          <td>${escapeHtml(plan.team || "")}<div class="small text-secondary">${escapeHtml(plan.assignee || "")}</div></td>
           <td>${escapeHtml(plan.area || "")}</td>
           <td class="fw-semibold">${escapeHtml(plan.asset || "")}</td>
           <td class="task-text">${escapeHtml(plan.task || "")}</td>
@@ -1182,7 +1259,6 @@
               <div class="small fw-bold text-primary">${escapeHtml(plan.time || "")} - ${escapeHtml(plan.team || "")}${carry ? ` <span class="badge-soft badge-carry">Tồn ${shortDateVn(plan.date)}</span>` : ""}</div>
               <div class="plan-card-title">${escapeHtml(plan.asset || plan.area || "")}</div>
               <div class="small text-secondary">${escapeHtml(plan.area || "")}${plan.assignee ? " - " + escapeHtml(plan.assignee) : ""}</div>
-              ${peopleLines(plan)}
             </div>
             <div class="d-flex flex-column gap-1">
               <button class="btn btn-sm btn-success text-nowrap" type="button" onclick="selectPlan('${escapeAttr(plan.id)}')">
@@ -1268,8 +1344,9 @@
             <div>
               <div class="fw-bold">${escapeHtml(log.employee)} <span class="text-secondary fw-normal">- ${escapeHtml(log.shift)}</span></div>
               <div class="small text-secondary">${friendlyDate(log.workDate)} ${escapeHtml(log.startTime || "")}${log.endTime ? " - " + escapeHtml(log.endTime) : ""}${syncLabel(log)}</div>
+              ${log.recordedBy && log.recordedBy !== log.employee ? `<div class="small text-secondary"><i class="bi bi-person-check me-1"></i>Ghi bởi ${escapeHtml(log.recordedBy)}</div>` : ""}
             </div>
-            ${statusBadge(log.progress)}
+            <div class="d-flex flex-column align-items-end gap-1">${statusBadge(log.progress)}${ratingBadge(log.rating)}</div>
           </div>
           <div class="mt-2 fw-semibold">${escapeHtml(log.selectedTask)}</div>
           <div class="mt-1">${escapeHtml(log.result)}</div>
@@ -1305,6 +1382,43 @@
       document.getElementById("metricLogs").textContent = logs.length;
     }
 
+    const RATING_OPTIONS = ["Hoàn thành tốt", "Đạt", "Chưa đạt", "Vắng/Không tham gia"];
+
+    // Kế hoạch có người thực hiện → mỗi người 1 dòng đánh giá riêng trong form
+    function renderPeopleResults(assignee) {
+      const wrap = document.getElementById("peopleResults");
+      const rows = document.getElementById("peopleResultRows");
+      const people = String(assignee || "").split(",").map(name => name.trim()).filter(Boolean);
+
+      if (people.length === 0) {
+        wrap.classList.add("d-none");
+        rows.innerHTML = "";
+        return;
+      }
+
+      rows.innerHTML = people.map(name => `
+        <div class="person-result-row" data-person="${escapeAttr(name)}">
+          <div class="d-flex align-items-center justify-content-between gap-2">
+            <span class="fw-bold">${escapeHtml(name)}</span>
+            <select class="form-select form-select-sm w-auto person-rating">
+              ${RATING_OPTIONS.map((option, index) => `<option${index === 1 ? " selected" : ""}>${option}</option>`).join("")}
+            </select>
+          </div>
+          <input class="form-control form-control-sm mt-2 person-note" placeholder="Ghi chú riêng (không bắt buộc)">
+        </div>
+      `).join("");
+      wrap.classList.remove("d-none");
+    }
+
+    function getPeopleResults() {
+      if (document.getElementById("peopleResults").classList.contains("d-none")) return [];
+      return [...document.querySelectorAll("#peopleResultRows .person-result-row")].map(row => ({
+        name: row.dataset.person,
+        rating: row.querySelector(".person-rating").value,
+        note: row.querySelector(".person-note").value.trim()
+      }));
+    }
+
     function selectPlan(id) {
       const plan = plans.find(item => item.id === id);
       if (!plan) return;
@@ -1313,6 +1427,7 @@
       document.getElementById("selectedTask").value = `${plan.time || ""} | ${plan.area || ""} | ${plan.asset || ""}: ${plan.task || ""}`.trim();
       setProgress("Hoàn thành");
       document.getElementById("startTime").value = roundQuarter(currentTime());
+      renderPeopleResults(plan.assignee);
       openQuickForm(() => {
         document.getElementById("quickFormPanel").scrollIntoView({ behavior: "smooth", block: "start" });
         document.getElementById("result").focus();
@@ -1321,11 +1436,10 @@
 
     async function submitLog(event) {
       event.preventDefault();
-      const log = {
-        id: "LOG-" + Date.now(),
+      const recordedBy = document.getElementById("employee").value.trim();
+      const base = {
         planId: document.getElementById("planId").value,
         workDate: document.getElementById("workDate").value,
-        employee: document.getElementById("employee").value.trim(),
         shift: document.getElementById("shift").value,
         progress: document.getElementById("progress").value,
         startTime: document.getElementById("startTime").value,
@@ -1335,23 +1449,41 @@
         issue: document.getElementById("issue").value.trim(),
         nextAction: document.getElementById("nextAction").value.trim(),
         createdAt: new Date().toISOString(),
+        recordedBy: recordedBy,
         syncStatus: "local"
       };
+
+      // Việc có nhiều người tham gia → 1 dòng nhật ký/người để đánh giá riêng;
+      // việc phát sinh không gắn kế hoạch → 1 dòng cho chính người ghi
+      const people = getPeopleResults();
+      const newLogs = people.length > 0
+        ? people.map((person, index) => ({
+            ...base,
+            id: "LOG-" + Date.now() + "-" + index,
+            employee: person.name,
+            rating: person.rating,
+            result: base.result + (person.note ? ` | ${person.name}: ${person.note}` : "")
+          }))
+        : [{ ...base, id: "LOG-" + Date.now(), employee: recordedBy, rating: "" }];
 
       const submitBtn = document.querySelector("#logForm button[type=submit]");
       submitBtn.disabled = true;
       try {
-        rememberEmployee(log.employee);
-        await trySync(log);
-        logs.unshift(log);
+        rememberEmployee(recordedBy);
+        for (const log of newLogs) {
+          await trySync(log);
+        }
+        logs = newLogs.concat(logs);
         localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
         showAllLogs = false;
-        updatePlanStatus(log.planId, log.progress);
+        updatePlanStatus(base.planId, base.progress);
         clearForm(false);
-        lastAddedLogId = log.id;
+        lastAddedLogId = newLogs[0].id;
         render();
         lastAddedLogId = null;
-        showToast(log.syncStatus === "synced" ? "Đã lưu và đồng bộ" : "Đã lưu cục bộ, sẽ đồng bộ lại sau");
+        const syncedAll = newLogs.every(log => log.syncStatus === "synced");
+        const label = newLogs.length > 1 ? `${newLogs.length} nhật ký (từng người)` : "nhật ký";
+        showToast(syncedAll ? `Đã lưu và đồng bộ ${label}` : `Đã lưu ${label} cục bộ, sẽ đồng bộ lại sau`);
       } finally {
         submitBtn.disabled = false;
       }
@@ -1402,6 +1534,7 @@
       setProgress("Hoàn thành");
       if (keepEmployee) document.getElementById("employee").value = employee;
       document.getElementById("planId").value = "";
+      renderPeopleResults("");
     }
 
     function clearLogs() {
@@ -1417,7 +1550,7 @@
         showToast("Chưa có dữ liệu để xuất");
         return;
       }
-      const headers = ["createdAt", "workDate", "employee", "shift", "progress", "startTime", "endTime", "selectedTask", "result", "issue", "nextAction", "syncStatus"];
+      const headers = ["createdAt", "workDate", "employee", "rating", "recordedBy", "shift", "progress", "startTime", "endTime", "selectedTask", "result", "issue", "nextAction", "syncStatus"];
       const lines = [headers.join(",")].concat(logs.map(log => headers.map(key => csvCell(log[key] || "")).join(",")));
       const blob = new Blob(["\ufeff" + lines.join("\n")], { type: "text/csv;charset=utf-8" });
       const url = URL.createObjectURL(blob);
@@ -1432,6 +1565,15 @@
       const normalized = value || "Thấp";
       const cls = normalized === "Cao" ? "badge-high" : normalized === "Trung bình" ? "badge-mid" : "badge-low";
       return `<span class="badge-soft ${cls}">${escapeHtml(normalized)}</span>`;
+    }
+
+    function ratingBadge(value) {
+      if (!value) return "";
+      const cls = value === "Hoàn thành tốt" ? "badge-done"
+        : value === "Đạt" ? "badge-low"
+        : value === "Chưa đạt" ? "badge-high"
+        : "badge-open";
+      return `<span class="badge-soft ${cls}"><i class="bi bi-star me-1"></i>${escapeHtml(value)}</span>`;
     }
 
     function statusBadge(value) {
