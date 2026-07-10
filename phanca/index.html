@@ -33,6 +33,17 @@
 
     .shell { max-width: 1280px; margin: 0 auto; padding: 12px; }
 
+    .access-denied {
+      background: #fff;
+      border: 1px solid #d9e1e8;
+      border-radius: 8px;
+      box-shadow: 0 10px 28px rgba(17, 24, 39, .08);
+      display: none;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      margin-top: 18px;
+      padding: 18px;
+    }
+
     .sheet {
       background: var(--sheet-bg);
       border: 2px solid var(--line);
@@ -240,7 +251,7 @@
     </div>
   </header>
 
-  <main class="shell">
+  <main class="shell" id="appContent" style="display:none;">
     <section class="toolbar mb-2">
       <div class="row g-2 align-items-end">
         <div class="col-6 col-md-2">
@@ -325,6 +336,14 @@
     </section>
   </main>
 
+  <section class="shell">
+    <div class="access-denied" id="accessDenied">
+      <h2 class="h5 fw-bold mb-2"><i class="bi bi-shield-lock me-2 text-danger"></i>Không có quyền phân ca</h2>
+      <p class="mb-3 text-secondary">Chỉ tài khoản cấp quản lý mới được mở và tạo bảng phân ca. Vui lòng đăng nhập bằng tài khoản Admin/Manager hoặc liên hệ quản lý.</p>
+      <a class="btn btn-primary" href="../index.html"><i class="bi bi-house me-1"></i>Về trang chính</a>
+    </div>
+  </section>
+
   <div class="position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 50">
     <div class="toast align-items-center border-0" id="toast" role="status" aria-live="polite" aria-atomic="true">
       <div class="d-flex">
@@ -370,11 +389,35 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       toast = new bootstrap.Toast(document.getElementById("toast"), { delay: 1800 });
+      if (!canManageRoster()) {
+        document.getElementById("accessDenied").style.display = "block";
+        return;
+      }
+      document.getElementById("appContent").style.display = "block";
       state = loadState();
       bindEvents();
       syncControls();
       renderTable();
     });
+
+    function canManageRoster() {
+      const user = getCurrentUser();
+      const role = normalizeRole(user.role);
+      return role === "admin" || role === "manager" || role === "quản lý";
+    }
+
+    function getCurrentUser() {
+      try {
+        const raw = localStorage.getItem("currentUser") || sessionStorage.getItem("currentUser") || "{}";
+        return JSON.parse(raw) || {};
+      } catch (_) {
+        return {};
+      }
+    }
+
+    function normalizeRole(role) {
+      return String(role || "").trim().toLowerCase();
+    }
 
     function defaultState() {
       const weekStart = "2026-07-13";
