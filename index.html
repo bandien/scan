@@ -188,7 +188,6 @@
                     <li id="menuAddDevice" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="showAddDeviceModal()"><i class="bi bi-plus-square-dotted me-2 text-success"></i> Thêm thiết bị mới</a></li>
                     <li id="menuBatchGen" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleBatchGenerator()"><i class="bi bi-magic me-2 text-success"></i> Tạo mã hàng loạt</a></li>
                     <li id="menuProjMgr" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="openProjectManager()"><i class="bi bi-briefcase-fill me-2 text-success"></i> Quản lý Dự án</a></li>
-                    <li id="menuShiftMgr" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="openShiftManager()"><i class="bi bi-clock-history me-2 text-success"></i> Quản lý Ca trực</a></li>
                     <li id="menuShiftRoster" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="phanca/"><i class="bi bi-table me-2 text-success"></i> Bảng phân ca tuần</a></li>
                     <li id="menuLocMgr" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="openLocationManager()"><i class="bi bi-geo-fill me-2 text-success"></i> Quản lý Địa điểm</a></li>
                     <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleDeviceList()" id="btn-device-list"><i class="bi bi-cpu me-2 text-primary"></i> Thiết bị của tôi</a></li>
@@ -2584,7 +2583,7 @@
             document.getElementById('menuAddDevice').style.display = 'block';
             document.getElementById('menuBatchGen').style.display = 'block';
             document.getElementById('menuProjMgr').style.display = 'block';
-            document.getElementById('menuShiftMgr').style.display = 'block';
+            if (document.getElementById('menuShiftMgr')) document.getElementById('menuShiftMgr').style.display = 'block';
             if (document.getElementById('menuShiftRoster')) document.getElementById('menuShiftRoster').style.display = 'block';
             document.getElementById('menuLocMgr').style.display = 'block';
             document.getElementById('btnManageChecklist').style.display = 'inline-block';
@@ -2592,7 +2591,7 @@
             document.getElementById('menuAddDevice').style.display = 'none';
             document.getElementById('menuBatchGen').style.display = 'none';
             document.getElementById('menuProjMgr').style.display = 'none';
-            document.getElementById('menuShiftMgr').style.display = 'none';
+            if (document.getElementById('menuShiftMgr')) document.getElementById('menuShiftMgr').style.display = 'none';
             if (document.getElementById('menuShiftRoster')) document.getElementById('menuShiftRoster').style.display = 'none';
             document.getElementById('menuLocMgr').style.display = 'none';
             document.getElementById('btnManageChecklist').style.display = 'none';
