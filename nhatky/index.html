@@ -98,7 +98,7 @@
 
     .table td {
       vertical-align: middle;
-      font-size: .92rem;
+      font-size: .95rem;
     }
 
     .task-text {
@@ -109,9 +109,9 @@
     .badge-soft {
       border: 1px solid transparent;
       border-radius: 999px;
-      padding: 5px 9px;
+      padding: 5px 10px;
       font-weight: 700;
-      font-size: .75rem;
+      font-size: .8rem;
       white-space: nowrap;
     }
 
@@ -135,6 +135,7 @@
     .week-item-task {
       color: var(--brand);
       font-weight: 700;
+      font-size: .98rem;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
@@ -177,9 +178,9 @@
       .week-table .day-cell .fw-bold { font-size: .8rem; }
       .week-table .day-cell .small { font-size: .68rem; }
       .week-table td { padding-left: 6px; padding-right: 6px; }
-      .week-item { padding: 6px; font-size: .78rem; gap: 6px; }
-      .week-item .badge-soft { padding: 3px 6px; font-size: .62rem; }
-      .week-item-task { font-size: .75rem; }
+      .week-item { padding: 8px; font-size: .78rem; gap: 6px; }
+      .week-item .badge-soft { padding: 3px 6px; font-size: .68rem; }
+      .week-item-task { font-size: .92rem; }
     }
     .week-item.st-done { border-left-color: #2d8a5f; }
     .week-item.st-doing { border-left-color: #155ea8; }
@@ -262,7 +263,7 @@
 
     .plan-card {
       border-bottom: 1px solid var(--line);
-      padding: 12px;
+      padding: 14px 12px;
       background: var(--surface);
     }
 
@@ -270,14 +271,23 @@
 
     .text-brand { color: var(--brand); }
 
+    /* Tên công việc cỡ lớn cho dễ đọc (nhân viên lớn tuổi) */
     .plan-card-title {
       font-weight: 800;
-      line-height: 1.25;
+      font-size: 1.18rem;
+      line-height: 1.3;
       color: var(--brand);
       display: -webkit-box;
-      -webkit-line-clamp: 2;
+      -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
+    }
+
+    .plan-task-title {
+      font-size: 1.06rem;
+      font-weight: 700;
+      line-height: 1.35;
+      color: var(--brand);
     }
 
     .chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -1435,7 +1445,7 @@
         const carry = isCarryOver(plan, selectedDate);
         return `
         <tr${carry ? ' class="carry-row"' : ""}>
-          <td class="task-text"><div class="text-brand fw-semibold">${escapeHtml(plan.task || "")}</div>${typeBadge(plan) || doneQtyBadge(plan) ? `<div class="d-flex flex-wrap gap-1 mt-1">${typeBadge(plan)} ${doneQtyBadge(plan)}</div>` : ""}</td>
+          <td class="task-text"><div class="plan-task-title">${escapeHtml(plan.task || "")}</div>${typeBadge(plan) || doneQtyBadge(plan) ? `<div class="d-flex flex-wrap gap-1 mt-1">${typeBadge(plan)} ${doneQtyBadge(plan)}</div>` : ""}</td>
           <td class="text-brand fw-semibold">${escapeHtml(plan.area || "")}${plan.asset ? `<div class="small">${escapeHtml(plan.asset)}</div>` : ""}</td>
           <td>${escapeHtml(plan.team || "")}<div class="small text-secondary">${escapeHtml(plan.assignee || "")}</div></td>
           <td class="fw-bold text-nowrap">${escapeHtml(plan.time || "")}${planSyncIcon(plan)}${carry ? `<div><span class="badge-soft badge-carry">Tồn ${shortDateVn(planEnd(plan))}</span></div>` : ""}${multiDayBadge(plan, selectedDate) ? `<div>${multiDayBadge(plan, selectedDate)}</div>` : ""}</td>
