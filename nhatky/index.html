@@ -1739,7 +1739,7 @@
             <div class="min-w-0">
               <div class="plan-card-title">${escapeHtml(plan.task || "")}</div>
               <div class="small text-brand fw-semibold">${[plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ")}</div>
-              <div class="small text-secondary">${escapeHtml(plan.time || "")}${plan.team ? " - " + escapeHtml(plan.team) : ""}${plan.assignee ? " - " + escapeHtml(plan.assignee) : ""}${planSyncIcon(plan)}${carry ? ` <span class="badge-soft badge-carry">Tồn ${shortDateVn(planEnd(plan))}</span>` : ""} ${multiDayBadge(plan, selectedDate)}</div>
+              <div class="small text-secondary">${escapeHtml(plan.time || "")}${plan.team && plan.team.toLowerCase() !== "tổ cơ điện" && plan.team.toLowerCase() !== "tổ điện" ? " - " + escapeHtml(plan.team) : ""}${plan.assignee ? " - " + escapeHtml(plan.assignee) : ""}${planSyncIcon(plan)}${carry ? ` <span class="badge-soft badge-carry">Tồn ${shortDateVn(planEnd(plan))}</span>` : ""} ${multiDayBadge(plan, selectedDate)}</div>
             </div>
             <div class="d-flex flex-column gap-1">
               <button class="btn btn-success text-nowrap fw-bold" type="button" onclick="selectPlan('${escapeAttr(plan.id)}')">
@@ -1867,16 +1867,12 @@
     function renderLogCard(log) {
       return `
         <article class="log-card ${logProgressClass(log.progress)}${hasFollowup(log) ? " log-followup" : ""}${log.id === lastAddedLogId ? " just-added" : ""}" style="padding: 10px; margin-bottom: 8px;">
-          <!-- Hàng 1: Người thực hiện, Ca và các Badge trạng thái/đánh giá -->
+          <!-- Hàng 1: Người thực hiện, Ca -->
           <div class="d-flex justify-content-between align-items-start gap-2">
             <div class="min-w-0">
               <span class="fw-bold" style="font-size: 0.95rem;">${escapeHtml(log.employee)}</span>
               <span class="text-secondary small">(${escapeHtml(log.shift)})</span>
               ${log.recordedBy && log.recordedBy !== log.employee ? `<span class="text-muted" style="font-size: 0.78rem;" title="Người ghi hồ sơ"> (Ghi bởi ${escapeHtml(log.recordedBy)})</span>` : ""}
-            </div>
-            <div class="d-flex align-items-center gap-1 flex-shrink-0">
-              ${statusBadge(log.progress)}
-              ${ratingBadge(log.rating)}
             </div>
           </div>
           
