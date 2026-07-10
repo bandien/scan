@@ -135,7 +135,7 @@
     .week-item-task {
       color: var(--brand);
       font-weight: 700;
-      font-size: .98rem;
+      font-size: 1.1rem;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
@@ -145,7 +145,7 @@
 
     .week-item-meta {
       color: var(--muted);
-      font-size: .78rem;
+      font-size: .85rem;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -180,7 +180,7 @@
       .week-table td { padding-left: 6px; padding-right: 6px; }
       .week-item { padding: 8px; font-size: .78rem; gap: 6px; }
       .week-item .badge-soft { padding: 3px 6px; font-size: .68rem; }
-      .week-item-task { font-size: .92rem; }
+      .week-item-task { font-size: 1.02rem; }
     }
     .week-item.st-done { border-left-color: #2d8a5f; }
     .week-item.st-doing { border-left-color: #155ea8; }
@@ -274,7 +274,7 @@
     /* Tên công việc cỡ lớn cho dễ đọc (nhân viên lớn tuổi) */
     .plan-card-title {
       font-weight: 800;
-      font-size: 1.18rem;
+      font-size: 1.3rem;
       line-height: 1.3;
       color: var(--brand);
       display: -webkit-box;
@@ -284,7 +284,7 @@
     }
 
     .plan-task-title {
-      font-size: 1.06rem;
+      font-size: 1.16rem;
       font-weight: 700;
       line-height: 1.35;
       color: var(--brand);
@@ -402,6 +402,9 @@
           </div>
         </div>
         <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-outline-secondary btn-icon" type="button" id="btnFontScale" title="Phóng to chữ (bấm để đổi cỡ)">
+            <span class="fw-bold" id="fontScaleLabel">A</span>
+          </button>
           <button class="btn btn-outline-secondary text-nowrap" type="button" id="btnUser" title="Đổi người dùng">
             <i class="bi bi-person-circle me-1"></i><span id="userName">Đăng nhập</span>
           </button>
@@ -751,7 +754,8 @@
       settings: "bandien_nhatky_settings",
       employee: "bandien_nhatky_employee",
       employees: "bandien_nhatky_employees",
-      staff: "bandien_nhatky_staff"
+      staff: "bandien_nhatky_staff",
+      fontScale: "bandien_nhatky_fontscale"
     };
 
     function toIsoDate(d) {
@@ -809,6 +813,7 @@
       toast = new bootstrap.Toast(document.getElementById("toast"), { delay: 2200 });
       planModal = new bootstrap.Modal(document.getElementById("planModal"));
       loginModal = new bootstrap.Modal(document.getElementById("loginModal"));
+      applyFontScale();
       document.getElementById("filterDate").value = today;
       document.getElementById("workDate").value = today;
       fillTimeSelect("startTime", "");
@@ -872,6 +877,7 @@
       document.getElementById("employee").addEventListener("change", rememberEmployeeFromInput);
       document.getElementById("btnUser").addEventListener("click", openLogin);
       document.getElementById("btnLogin").addEventListener("click", doLogin);
+      document.getElementById("btnFontScale").addEventListener("click", cycleFontScale);
       document.getElementById("progressChips").addEventListener("click", event => {
         const btn = event.target.closest("button[data-value]");
         if (btn) setProgress(btn.dataset.value);
@@ -1294,6 +1300,24 @@
       localStorage.setItem(STORAGE_KEYS.employees, JSON.stringify(names));
       renderEmployeeSuggestions();
       updateUserButton();
+    }
+
+    // ===== Phóng to chữ toàn trang: mọi cỡ chữ dùng rem nên chỉ cần
+    // đổi font-size gốc; mức chọn lưu theo máy =====
+    const FONT_SCALES = [100, 115, 130];
+
+    function applyFontScale() {
+      const scale = parseInt(localStorage.getItem(STORAGE_KEYS.fontScale) || "100", 10);
+      document.documentElement.style.fontSize = scale + "%";
+      document.getElementById("fontScaleLabel").textContent = scale <= 100 ? "A" : scale <= 115 ? "A+" : "A++";
+    }
+
+    function cycleFontScale() {
+      const current = parseInt(localStorage.getItem(STORAGE_KEYS.fontScale) || "100", 10);
+      const next = FONT_SCALES[(FONT_SCALES.indexOf(current) + 1) % FONT_SCALES.length];
+      localStorage.setItem(STORAGE_KEYS.fontScale, String(next));
+      applyFontScale();
+      showToast("Cỡ chữ: " + (next === 100 ? "bình thường" : next + "%"));
     }
 
     // ===== Đăng nhập theo tên (danh tính nhẹ, lưu trên máy) =====
