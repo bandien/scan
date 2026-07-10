@@ -322,6 +322,17 @@
 
     .log-card { border-left: 4px solid #cbd5e1; }
     .log-card.log-followup { border-left-color: var(--warn); background: #fffaf0; }
+
+    .attention-head {
+      color: var(--danger);
+      font-weight: 800;
+      font-size: .95rem;
+    }
+
+    .attention-sep {
+      border-top: 1px dashed var(--line);
+      margin: 8px 0 2px;
+    }
     .log-card.log-done { border-left-color: #2d8a5f; }
     .log-card.log-doing { border-left-color: #155ea8; }
     .log-card.log-help { border-left-color: #c2413b; }
@@ -579,7 +590,7 @@
             <div class="d-flex align-items-center justify-content-between gap-2">
               <div>
                 <h2 class="h5 m-0 fw-bold"><i class="bi bi-clock-history text-primary me-2"></i>3. Nhật ký gần đây</h2>
-                <div class="small text-secondary mt-1">Gồm: nhật ký công việc ghi trên máy này (mỗi người tham gia 1 dòng riêng), việc còn tồn/đề xuất <span class="text-warning fw-bold">(nền vàng — bấm "Tiếp tục xử lý")</span>, và vết ai tạo/sửa/xóa kế hoạch <span class="fw-bold">[Kế hoạch]</span>. Nhật ký ghi từ máy khác xem đầy đủ trên Google Sheets.</div>
+                <div class="small text-secondary mt-1">Nhật ký của <span class="fw-bold">cả tổ</span> trong 7 ngày gần nhất (tự đồng bộ từ Google Sheets): việc <span class="text-danger fw-bold">cần hỗ trợ / còn tồn ghim trên đầu</span> — bấm "Tiếp tục xử lý" để làm tiếp; bên dưới là nhật ký ai đã làm gì và vết sửa kế hoạch <span class="fw-bold">[Kế hoạch]</span>.</div>
               </div>
             </div>
           </div>
@@ -597,7 +608,7 @@
         <div class="col-6 col-lg-3"><div class="metric"><strong id="metricTotal">0</strong><span id="metricTotalLabel">Kế hoạch trong ngày</span></div></div>
         <div class="col-6 col-lg-3"><div class="metric"><strong id="metricDoing">0</strong><span>Đang làm</span></div></div>
         <div class="col-6 col-lg-3"><div class="metric"><strong id="metricDone">0</strong><span>Đã hoàn thành</span><div class="mini-bar"><i id="metricDoneBar"></i></div></div></div>
-        <div class="col-6 col-lg-3"><div class="metric"><strong id="metricLogs">0</strong><span>Nhật ký đã ghi</span></div></div>
+        <div class="col-6 col-lg-3"><div class="metric"><strong id="metricLogs">0</strong><span>Nhật ký cả tổ (7 ngày)</span></div></div>
       </div>
       <div class="panel mt-3">
         <div class="panel-header">
@@ -853,6 +864,7 @@
       render();
       updateUserButton();
       if (!currentUser()) openLogin();
+      loadServerLogs();
       retryPendingLogs();
       retryPendingPlans();
     });
@@ -1681,18 +1693,63 @@
         : '<i class="bi bi-chevron-down me-1"></i>Chi tiết thêm';
     }
 
+    // Nhật ký của cả tổ từ Google Sheets (7 ngày gần nhất) — hợp nhất với
+    // log cục bộ chưa kịp đồng bộ để máy nào cũng thấy việc của nhau
+    async function loadServerLogs() {
+      const sync = getSync();
+      if (!sync.url) return;
+      try {
+        const response = await fetch(`${sync.url}?action=getWorkLogs&days=7&token=${encodeURIComponent(sync.token)}`, { cache: "no-cache", signal: AbortSignal.timeout(15000) });
+        const data = await response.json();
+        if (data.status !== "success" || !Array.isArray(data.logs)) return;
+        const serverIds = new Set(data.logs.map(log => log.id));
+        const localOnly = logs.filter(log => !serverIds.has(log.id) && log.syncStatus !== "synced");
+        logs = localOnly.concat(data.logs)
+          .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))
+          .slice(0, 300);
+        localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
+        renderLogs();
+        renderEmployeeSuggestions();
+      } catch (error) { /* offline → dùng log cục bộ */ }
+    }
+
+    // Cần chú ý = cần hỗ trợ hoặc còn tồn/đề xuất, và kế hoạch liên quan chưa Hoàn thành
+    function needsAttention(log) {
+      if (String(log.selectedTask || "").startsWith("[Kế hoạch]")) return false;
+      if (log.progress !== "Cần hỗ trợ" && !hasFollowup(log)) return false;
+      if (log.planId) {
+        const plan = plans.find(item => item.id === log.planId);
+        if (plan && plan.status === "Hoàn thành") return false;
+      }
+      return true;
+    }
+
     function renderLogs() {
       const list = document.getElementById("logList");
       const toggleBtn = document.getElementById("btnToggleLogs");
       if (logs.length === 0) {
-        list.innerHTML = '<div class="empty-state">Chưa có nhật ký nào trên trình duyệt này.</div>';
+        list.innerHTML = '<div class="empty-state">Chưa có nhật ký nào trong 7 ngày gần nhất.</div>';
         toggleBtn.style.display = "none";
         renderMetrics();
         return;
       }
 
-      const visibleLogs = showAllLogs ? logs : logs.slice(0, RECENT_LOG_LIMIT);
-      list.innerHTML = visibleLogs.map(log => `
+      const attention = logs.filter(needsAttention);
+      const normal = logs.filter(log => !needsAttention(log));
+      const visibleLogs = showAllLogs ? normal : normal.slice(0, RECENT_LOG_LIMIT);
+      const attentionHtml = attention.length ? `
+        <div class="attention-head"><i class="bi bi-exclamation-triangle-fill me-1"></i>Cần hỗ trợ / còn tồn (${attention.length}) — ưu tiên xử lý để tổ hoàn thành việc</div>
+        ${attention.map(renderLogCard).join("")}
+        <div class="attention-sep"></div>
+        <div class="small fw-bold text-secondary">Nhật ký mới nhất</div>` : "";
+      list.innerHTML = attentionHtml + visibleLogs.map(renderLogCard).join("");
+      toggleBtn.style.display = normal.length > RECENT_LOG_LIMIT ? "block" : "none";
+      toggleBtn.textContent = showAllLogs ? "Thu gọn" : `Xem thêm (${normal.length - RECENT_LOG_LIMIT})`;
+      renderMetrics();
+    }
+
+    function renderLogCard(log) {
+      return `
         <article class="log-card ${logProgressClass(log.progress)}${hasFollowup(log) ? " log-followup" : ""}${log.id === lastAddedLogId ? " just-added" : ""}">
           <div class="d-flex justify-content-between gap-2">
             <div>
@@ -1708,10 +1765,7 @@
           ${log.nextAction ? `<div class="mt-1 small" style="color: var(--warn)"><i class="bi bi-arrow-return-right me-1"></i>Đề xuất: ${escapeHtml(log.nextAction)}</div>` : ""}
           ${hasFollowup(log) ? `<button class="btn btn-sm btn-warning fw-bold mt-2" type="button" onclick="continueLog('${escapeAttr(log.id)}')"><i class="bi bi-arrow-right-circle me-1"></i>Tiếp tục xử lý</button>` : ""}
         </article>
-      `).join("");
-      toggleBtn.style.display = logs.length > RECENT_LOG_LIMIT ? "block" : "none";
-      toggleBtn.textContent = showAllLogs ? "Thu gọn" : `Xem thêm (${logs.length - RECENT_LOG_LIMIT})`;
-      renderMetrics();
+      `;
     }
 
     function toggleLogs() {
