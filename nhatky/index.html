@@ -271,6 +271,9 @@
 
     .text-brand { color: var(--brand); }
 
+    /* Bootstrap 5 không có sẵn utility này; cần cho text-truncate trong flex */
+    .min-w-0 { min-width: 0; }
+
     /* Tên công việc cỡ lớn cho dễ đọc (nhân viên lớn tuổi) */
     .plan-card-title {
       font-weight: 800;
@@ -376,6 +379,17 @@
       .shell { padding: 12px; }
       .app-title { font-size: 1rem; }
       .brand-mark { width: 38px; height: 38px; }
+      /* Header điện thoại: nút gọn + tên người cắt ngắn để không tràn ngang */
+      .app-header .btn { padding: 5px 8px; font-size: .85rem; }
+      .app-header .btn-icon { width: 34px; height: 34px; }
+      .user-name-label {
+        display: inline-block;
+        max-width: 72px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        vertical-align: bottom;
+      }
       .row.g-3.mb-3 { --bs-gutter-x: .5rem; --bs-gutter-y: .5rem; }
       .metric { min-height: 58px; padding: 9px 10px; }
       .metric strong { font-size: 1.1rem; }
@@ -405,20 +419,20 @@
 <body>
   <header class="app-header">
     <div class="shell py-3">
-      <div class="d-flex align-items-center justify-content-between gap-3">
-        <div class="d-flex align-items-center gap-3">
-          <div class="brand-mark"><i class="bi bi-journal-check fs-4"></i></div>
-          <div>
-            <div class="text-uppercase fw-bold text-primary" style="font-size:.72rem;">BanDienScan</div>
-            <h1 class="app-title m-0 fw-bold">Nhật ký công việc</h1>
+      <div class="d-flex align-items-center justify-content-between gap-2">
+        <div class="d-flex align-items-center gap-2 min-w-0 flex-grow-1">
+          <div class="brand-mark flex-shrink-0"><i class="bi bi-journal-check fs-4"></i></div>
+          <div class="min-w-0">
+            <div class="text-uppercase fw-bold text-primary text-truncate" style="font-size:.72rem;">BanDienScan</div>
+            <h1 class="app-title m-0 fw-bold text-truncate">Nhật ký công việc</h1>
           </div>
         </div>
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center gap-2 flex-shrink-0">
           <button class="btn btn-outline-secondary btn-icon" type="button" id="btnFontScale" title="Phóng to chữ (bấm để đổi cỡ)">
             <span class="fw-bold" id="fontScaleLabel">A</span>
           </button>
           <button class="btn btn-outline-secondary text-nowrap" type="button" id="btnUser" title="Đổi người dùng">
-            <i class="bi bi-person-circle me-1"></i><span id="userName">Đăng nhập</span>
+            <i class="bi bi-person-circle me-1"></i><span id="userName" class="user-name-label">Đăng nhập</span>
           </button>
           <a class="btn btn-outline-primary btn-icon" href="../index.html" title="Về BanDienScan">
             <i class="bi bi-house"></i>
