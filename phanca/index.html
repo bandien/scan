@@ -159,29 +159,30 @@
       grid-template-columns: 110px 94px 94px minmax(130px, 1fr);
     }
 
-    .skill-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 6px;
+    .skill-list { overflow-x: auto; }
+
+    .skill-table {
+      border-collapse: collapse;
+      min-width: 520px;
+      width: 100%;
     }
 
-    .skill-item {
-      align-items: center;
-      background: #f7f9fc;
+    .skill-table th,
+    .skill-table td {
       border: 1px solid #d9e1ec;
-      display: grid;
-      gap: 6px;
-      grid-template-columns: minmax(0, 1fr) 104px 132px;
       padding: 6px 8px;
+      vertical-align: middle;
     }
 
-    .skill-name {
-      font-size: .9rem;
+    .skill-table th {
+      background: #eef3f8;
+      font-size: .82rem;
       font-weight: 700;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
+
+    .skill-table td { background: #f7f9fc; }
+    .skill-table .staff-col { min-width: 220px; width: 48%; }
+    .skill-table .select-col { width: 26%; }
 
     .rule-note {
       color: #516070;
@@ -195,7 +196,8 @@
       .name-col { width: 170px; }
       .shift-col { width: 38px; min-width: 38px; }
       .rule-grid { grid-template-columns: repeat(3, minmax(70px, 1fr)); }
-      .skill-item { grid-template-columns: 1fr; }
+      .skill-table { min-width: 430px; }
+      .skill-table .staff-col { min-width: 160px; }
       .shift-rule-item { grid-template-columns: minmax(0, 1fr) 72px 36px; }
       .shift-rule-break { grid-column: 1 / -1; grid-template-columns: 1fr 1fr; }
     }
@@ -504,18 +506,35 @@
 
     function renderSkillList() {
       const list = document.getElementById("skillList");
-      list.innerHTML = state.staff.map((person, index) => `
-        <div class="skill-item">
-          <span class="skill-name">${escapeHtml(person.name)}</span>
-          <select class="form-select form-select-sm" onchange="setStaffLevel(${index}, this.value)" aria-label="Tay nghề ${escapeAttr(person.name)}">
-            <option value="senior" ${person.level === "senior" ? "selected" : ""}>Thợ cứng</option>
-            <option value="new" ${person.level === "new" ? "selected" : ""}>Thợ mới</option>
-          </select>
-          <select class="form-select form-select-sm" onchange="setStaffWorkType(${index}, this.value)" aria-label="Tính chất việc ${escapeAttr(person.name)}">
-            ${Object.entries(workTypes).map(([value, label]) => `<option value="${value}" ${person.workType === value ? "selected" : ""}>${label}</option>`).join("")}
-          </select>
-        </div>
-      `).join("");
+      list.innerHTML = `
+        <table class="skill-table">
+          <thead>
+            <tr>
+              <th class="staff-col">Nhân sự</th>
+              <th class="select-col">Tay nghề</th>
+              <th class="select-col">Tính chất việc</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${state.staff.map((person, index) => `
+              <tr>
+                <td class="staff-col fw-bold">${escapeHtml(person.name)}</td>
+                <td class="select-col">
+                  <select class="form-select form-select-sm" onchange="setStaffLevel(${index}, this.value)" aria-label="Tay nghề ${escapeAttr(person.name)}">
+                    <option value="senior" ${person.level === "senior" ? "selected" : ""}>Thợ cứng</option>
+                    <option value="new" ${person.level === "new" ? "selected" : ""}>Thợ mới</option>
+                  </select>
+                </td>
+                <td class="select-col">
+                  <select class="form-select form-select-sm" onchange="setStaffWorkType(${index}, this.value)" aria-label="Tính chất việc ${escapeAttr(person.name)}">
+                    ${Object.entries(workTypes).map(([value, label]) => `<option value="${value}" ${person.workType === value ? "selected" : ""}>${label}</option>`).join("")}
+                  </select>
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
     }
 
     function renderTable() {
