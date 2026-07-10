@@ -137,6 +137,21 @@
       gap: 8px;
     }
 
+    .shift-rule-list {
+      display: grid;
+      gap: 6px;
+    }
+
+    .shift-rule-item {
+      align-items: end;
+      background: #f7f9fc;
+      border: 1px solid #d9e1ec;
+      display: grid;
+      gap: 6px;
+      grid-template-columns: minmax(120px, 1fr) 82px 36px;
+      padding: 6px 8px;
+    }
+
     .skill-list {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
@@ -149,7 +164,7 @@
       border: 1px solid #d9e1ec;
       display: grid;
       gap: 6px;
-      grid-template-columns: minmax(0, 1fr) 104px;
+      grid-template-columns: minmax(0, 1fr) 104px 132px;
       padding: 6px 8px;
     }
 
@@ -174,6 +189,7 @@
       .shift-col { width: 38px; min-width: 38px; }
       .rule-grid { grid-template-columns: repeat(3, minmax(70px, 1fr)); }
       .skill-item { grid-template-columns: 1fr; }
+      .shift-rule-item { grid-template-columns: minmax(0, 1fr) 72px 36px; }
     }
 
     @media print {
@@ -230,22 +246,12 @@
       </div>
       <div class="collapse rule-panel" id="rulePanel">
         <div class="row g-2">
-          <div class="col-12 col-lg-4">
-            <label class="form-label fw-bold small">Số người mỗi ca</label>
-            <div class="rule-grid">
-              <div>
-                <label class="form-label small mb-1" for="needShift0">Ca.1</label>
-                <input class="form-control" id="needShift0" type="number" min="0" max="6" inputmode="numeric">
-              </div>
-              <div>
-                <label class="form-label small mb-1" for="needShift1">Ca.2</label>
-                <input class="form-control" id="needShift1" type="number" min="0" max="6" inputmode="numeric">
-              </div>
-              <div>
-                <label class="form-label small mb-1" for="needShift2">Ca.3</label>
-                <input class="form-control" id="needShift2" type="number" min="0" max="6" inputmode="numeric">
-              </div>
+          <div class="col-12 col-lg-5">
+            <div class="d-flex justify-content-between align-items-center gap-2 mb-1">
+              <label class="form-label fw-bold small m-0">Ca và số người cần</label>
+              <button class="btn btn-outline-success btn-sm" id="btnAddShift" type="button"><i class="bi bi-plus-lg me-1"></i>Thêm ca</button>
             </div>
+            <div class="shift-rule-list" id="shiftRuleList"></div>
           </div>
           <div class="col-12 col-lg-4">
             <label class="form-label fw-bold small">Luật xoay ca</label>
@@ -257,14 +263,18 @@
               <input class="form-check-input" id="pairSkill" type="checkbox">
               <label class="form-check-label" for="pairSkill">Ưu tiên thợ cứng kèm thợ mới</label>
             </div>
+            <div class="form-check">
+              <input class="form-check-input" id="prioritizeOfficeWork" type="checkbox">
+              <label class="form-check-label" for="prioritizeOfficeWork">Ưu tiên giờ hành chính theo tính chất việc</label>
+            </div>
           </div>
-          <div class="col-12 col-lg-4 d-flex align-items-end">
+          <div class="col-12 col-lg-3 d-flex align-items-end">
             <button class="btn btn-primary w-100" id="btnGenerateRules" type="button"><i class="bi bi-arrow-repeat me-1"></i>Tạo phân ca theo quy tắc</button>
           </div>
           <div class="col-12">
             <label class="form-label fw-bold small">Phân loại tay nghề</label>
             <div class="skill-list" id="skillList"></div>
-            <p class="rule-note">Khi tạo lịch, hệ thống đếm số ca đã chia để đảo đều, tránh một người bị xếp 2 ca trong cùng ngày, và cố gắng có thợ cứng đi kèm thợ mới ở ca cần từ 2 người trở lên.</p>
+            <p class="rule-note">Nhóm bảo trì, dự án, hỗ trợ được ưu tiên giữ giờ hành chính khi bật luật HC. Hệ thống vẫn đảm bảo đủ người từng ca trước, tránh một người bị xếp 2 ca trong cùng ngày, và cố gắng có thợ cứng kèm thợ mới.</p>
           </div>
         </div>
       </div>
@@ -295,11 +305,22 @@
     const STORAGE_KEY = "bandien_shift_roster_v1";
     const cycle = ["", "x", "hc", "CN"];
     const dayNames = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật"];
-    const shifts = ["Ca.1", "Ca.2", "Ca.3"];
+    const defaultShifts = [
+      { name: "Ca.1", needed: 2 },
+      { name: "Ca.2", needed: 2 },
+      { name: "Ca.3", needed: 1 }
+    ];
+    const workTypes = {
+      operation: "Vận hành",
+      maintenance: "Bảo trì",
+      project: "Dự án",
+      support: "Hỗ trợ"
+    };
     const defaultRules = {
-      needed: [2, 2, 1],
+      shifts: defaultShifts,
       rotateEvenly: true,
-      pairSkill: true
+      pairSkill: true,
+      prioritizeOfficeWork: true
     };
     const defaultStaff = [
       "Ngô Quyết Thắng",
@@ -322,7 +343,11 @@
 
     function defaultState() {
       const weekStart = "2026-07-13";
-      const staff = defaultStaff.map((name, index) => ({ name, level: index < 3 ? "senior" : "new" }));
+      const staff = defaultStaff.map((name, index) => ({
+        name,
+        level: index < 3 ? "senior" : "new",
+        workType: index % 3 === 0 ? "maintenance" : "operation"
+      }));
       const cells = {};
       const set = (r, d, s, value) => { cells[`${r}-${d}-${s}`] = value; };
       set(0,0,0,"CN"); set(0,1,0,"hc"); set(0,2,0,"hc"); set(0,3,0,"hc"); set(0,4,0,"hc"); set(0,5,0,"hc"); set(0,6,0,"hc");
@@ -331,7 +356,7 @@
       set(3,0,0,"x"); set(3,1,0,"x"); set(3,2,0,"x"); set(3,3,1,"CN"); set(3,4,0,"x"); set(3,5,0,"x"); set(3,6,0,"x");
       set(4,0,1,"x"); set(4,1,1,"x"); set(4,2,1,"x"); set(4,3,1,"x"); set(4,4,1,"CN"); set(4,5,0,"hc"); set(4,6,0,"hc");
       set(5,0,0,"hc"); set(5,1,0,"hc"); set(5,2,0,"hc"); set(5,3,0,"hc"); set(5,4,0,"hc"); set(5,5,1,"x"); set(5,6,1,"CN");
-      return { weekStart, weekNo: getISOWeek(new Date(weekStart)), staff, cells, rules: { ...defaultRules } };
+      return { weekStart, weekNo: getISOWeek(new Date(weekStart)), staff, cells, rules: cloneDefaultRules() };
     }
 
     function loadState() {
@@ -345,13 +370,32 @@
     function normalizeState(saved) {
       const fresh = defaultState();
       saved.rules = { ...fresh.rules, ...(saved.rules || {}) };
-      saved.rules.needed = [0, 1, 2].map(i => clampNumber(saved.rules.needed?.[i] ?? fresh.rules.needed[i], 0, saved.staff?.length || fresh.staff.length));
+      saved.rules.shifts = normalizeShifts(saved.rules, saved.staff?.length || fresh.staff.length);
+      saved.rules.prioritizeOfficeWork = saved.rules.prioritizeOfficeWork !== false;
       saved.staff = (saved.staff || fresh.staff).map((person, index) => ({
         name: person.name || `Nhân sự ${index + 1}`,
-        level: person.level ? (person.level === "new" ? "new" : "senior") : (index < 3 ? "senior" : "new")
+        level: person.level ? (person.level === "new" ? "new" : "senior") : (index < 3 ? "senior" : "new"),
+        workType: workTypes[person.workType] ? person.workType : (index % 3 === 0 ? "maintenance" : "operation")
       }));
       saved.cells = saved.cells || {};
       return saved;
+    }
+
+    function cloneDefaultRules() {
+      return {
+        ...defaultRules,
+        shifts: defaultShifts.map(shift => ({ ...shift }))
+      };
+    }
+
+    function normalizeShifts(rules, staffCount) {
+      const source = Array.isArray(rules.shifts) && rules.shifts.length
+        ? rules.shifts
+        : defaultShifts.map((shift, index) => ({ ...shift, needed: rules.needed?.[index] ?? shift.needed }));
+      return source.map((shift, index) => ({
+        name: String(shift.name || `Ca.${index + 1}`).trim() || `Ca.${index + 1}`,
+        needed: clampNumber(shift.needed, 0, staffCount)
+      }));
     }
 
     function bindEvents() {
@@ -375,12 +419,7 @@
       document.getElementById("btnExport").addEventListener("click", exportCsv);
       document.getElementById("btnReset").addEventListener("click", resetTemplate);
       document.getElementById("btnGenerateRules").addEventListener("click", generateRosterByRules);
-      [0, 1, 2].forEach(index => {
-        document.getElementById(`needShift${index}`).addEventListener("input", e => {
-          state.rules.needed[index] = clampNumber(e.target.value, 0, state.staff.length);
-          saveState(false);
-        });
-      });
+      document.getElementById("btnAddShift").addEventListener("click", addShift);
       document.getElementById("rotateEvenly").addEventListener("change", e => {
         state.rules.rotateEvenly = e.target.checked;
         saveState(false);
@@ -389,17 +428,37 @@
         state.rules.pairSkill = e.target.checked;
         saveState(false);
       });
+      document.getElementById("prioritizeOfficeWork").addEventListener("change", e => {
+        state.rules.prioritizeOfficeWork = e.target.checked;
+        saveState(false);
+      });
     }
 
     function syncControls() {
       document.getElementById("weekStart").value = state.weekStart;
       document.getElementById("weekNo").value = state.weekNo;
-      [0, 1, 2].forEach(index => {
-        document.getElementById(`needShift${index}`).value = state.rules.needed[index];
-      });
       document.getElementById("rotateEvenly").checked = !!state.rules.rotateEvenly;
       document.getElementById("pairSkill").checked = !!state.rules.pairSkill;
+      document.getElementById("prioritizeOfficeWork").checked = !!state.rules.prioritizeOfficeWork;
+      renderShiftRules();
       renderSkillList();
+    }
+
+    function renderShiftRules() {
+      const list = document.getElementById("shiftRuleList");
+      list.innerHTML = getShifts().map((shift, index) => `
+        <div class="shift-rule-item">
+          <div>
+            <label class="form-label small mb-1" for="shiftName${index}">Tên ca</label>
+            <input class="form-control form-control-sm" id="shiftName${index}" value="${escapeAttr(shift.name)}" onchange="setShiftName(${index}, this.value)">
+          </div>
+          <div>
+            <label class="form-label small mb-1" for="shiftNeed${index}">Người</label>
+            <input class="form-control form-control-sm" id="shiftNeed${index}" type="number" min="0" max="${state.staff.length}" inputmode="numeric" value="${escapeAttr(shift.needed)}" onchange="setShiftNeeded(${index}, this.value)">
+          </div>
+          <button class="btn btn-outline-danger btn-sm" type="button" onclick="removeShift(${index})" aria-label="Xóa ${escapeAttr(shift.name)}"><i class="bi bi-trash"></i></button>
+        </div>
+      `).join("");
     }
 
     function renderSkillList() {
@@ -411,49 +470,59 @@
             <option value="senior" ${person.level === "senior" ? "selected" : ""}>Thợ cứng</option>
             <option value="new" ${person.level === "new" ? "selected" : ""}>Thợ mới</option>
           </select>
+          <select class="form-select form-select-sm" onchange="setStaffWorkType(${index}, this.value)" aria-label="Tính chất việc ${escapeAttr(person.name)}">
+            ${Object.entries(workTypes).map(([value, label]) => `<option value="${value}" ${person.workType === value ? "selected" : ""}>${label}</option>`).join("")}
+          </select>
         </div>
       `).join("");
     }
 
     function renderTable() {
       const dates = weekDates(state.weekStart);
+      const shifts = getShifts();
+      const totalShiftCols = dates.length * shifts.length;
+      const weekSpan = Math.max(1, Math.floor(totalShiftCols / 8));
+      const valueSpan = Math.max(1, Math.floor(totalShiftCols / 8));
+      const fromSpan = Math.max(1, Math.floor((totalShiftCols - weekSpan - valueSpan) / 2));
+      const toSpan = Math.max(1, totalShiftCols - weekSpan - valueSpan - fromSpan);
       const table = document.getElementById("rosterTable");
       const from = formatDate(dates[0]);
       const to = formatDate(dates[6]);
       let html = `
         <colgroup>
           <col class="stt-col"><col class="name-col">
-          ${Array.from({ length: 21 }).map(() => '<col class="shift-col">').join("")}
+          ${Array.from({ length: totalShiftCols }).map(() => '<col class="shift-col">').join("")}
         </colgroup>
         <thead>
           <tr>
             <th></th>
             <th class="title-cell">BẢNG PHÂN CA</th>
-            <th colspan="3" class="week-label">Tuần:</th>
-            <th colspan="3" class="week-value">${escapeHtml(state.weekNo)}</th>
-            <th colspan="6">Từ: &nbsp;&nbsp; ${from}</th>
-            <th colspan="8">Đến: &nbsp;&nbsp; ${to}</th>
+            <th colspan="${weekSpan}" class="week-label">Tuần:</th>
+            <th colspan="${valueSpan}" class="week-value">${escapeHtml(state.weekNo)}</th>
+            <th colspan="${fromSpan}">Từ: &nbsp;&nbsp; ${from}</th>
+            <th colspan="${toSpan}">Đến: &nbsp;&nbsp; ${to}</th>
           </tr>
           <tr>
             <th rowspan="2">STT</th>
             <th rowspan="2">HỌ &amp; TÊN</th>
-            ${dates.map((date, idx) => `<th colspan="3" class="${idx === 6 ? "date-red" : ""}">${dayNames[idx]} ${formatShortDate(date)}</th>`).join("")}
+            ${dates.map((date, idx) => `<th colspan="${shifts.length}" class="${idx === 6 ? "date-red" : ""}">${dayNames[idx]} ${formatShortDate(date)}</th>`).join("")}
           </tr>
           <tr>
-            ${dates.map(() => shifts.map(s => `<th>${s}</th>`).join("")).join("")}
+            ${dates.map(() => shifts.map(shift => `<th>${escapeHtml(shift.name)}</th>`).join("")).join("")}
           </tr>
         </thead>
         <tbody>
-          <tr class="team-row"><td colspan="2">Tổ cơ điện Sân Golf</td><td colspan="21"></td></tr>
+          <tr class="team-row"><td colspan="2">Tổ cơ điện Sân Golf</td><td colspan="${totalShiftCols}"></td></tr>
           ${state.staff.map((person, rowIndex) => renderStaffRow(person, rowIndex)).join("")}
         </tbody>`;
       table.innerHTML = html;
     }
 
     function renderStaffRow(person, rowIndex) {
+      const shifts = getShifts();
       let row = `<tr><td>${rowIndex + 1}</td><td class="name-cell"><input value="${escapeAttr(person.name)}" onchange="renameStaff(${rowIndex}, this.value)"></td>`;
       for (let d = 0; d < 7; d++) {
-        for (let s = 0; s < 3; s++) {
+        for (let s = 0; s < shifts.length; s++) {
           const key = `${rowIndex}-${d}-${s}`;
           const value = state.cells[key] || "";
           row += `<td tabindex="0" class="shift-cell ${classFor(value)}" onclick="cycleCell('${key}')" onkeydown="cellKey(event, '${key}')">${escapeHtml(value)}</td>`;
@@ -502,27 +571,90 @@
       saveState(false);
     }
 
+    function setStaffWorkType(index, value) {
+      state.staff[index].workType = workTypes[value] ? value : "operation";
+      saveState(false);
+    }
+
     function addStaff() {
       const input = document.getElementById("newStaffName");
       const name = input.value.trim();
       if (!name) return;
-      state.staff.push({ name, level: "new" });
+      state.staff.push({ name, level: "new", workType: "operation" });
       input.value = "";
-      state.rules.needed = state.rules.needed.map(count => Math.min(Number(count) || 0, state.staff.length));
+      state.rules.shifts = getShifts().map(shift => ({ ...shift, needed: Math.min(Number(shift.needed) || 0, state.staff.length) }));
       syncControls();
       renderTable();
       saveState(true);
     }
 
+    function addShift() {
+      const shifts = getShifts();
+      shifts.push({ name: `Ca.${shifts.length + 1}`, needed: 1 });
+      state.rules.shifts = shifts;
+      syncControls();
+      renderTable();
+      saveState(true);
+      notify("Đã thêm ca mới");
+    }
+
+    function removeShift(index) {
+      const shifts = getShifts();
+      if (shifts.length <= 1) {
+        notify("Cần giữ ít nhất 1 ca");
+        return;
+      }
+      shifts.splice(index, 1);
+      state.rules.shifts = shifts;
+      state.cells = remapCellsAfterShiftRemove(index);
+      syncControls();
+      renderTable();
+      saveState(true);
+    }
+
+    function setShiftName(index, value) {
+      const shifts = getShifts();
+      shifts[index].name = value.trim() || `Ca.${index + 1}`;
+      state.rules.shifts = shifts;
+      renderTable();
+      saveState(false);
+    }
+
+    function setShiftNeeded(index, value) {
+      const shifts = getShifts();
+      shifts[index].needed = clampNumber(value, 0, state.staff.length);
+      state.rules.shifts = shifts;
+      saveState(false);
+    }
+
+    function getShifts() {
+      state.rules.shifts = normalizeShifts(state.rules, state.staff.length);
+      return state.rules.shifts;
+    }
+
+    function remapCellsAfterShiftRemove(removedIndex) {
+      const cells = {};
+      Object.entries(state.cells).forEach(([key, value]) => {
+        const parts = key.split("-").map(Number);
+        if (parts.length !== 3) return;
+        const [row, day, shift] = parts;
+        if (shift === removedIndex) return;
+        const nextShift = shift > removedIndex ? shift - 1 : shift;
+        cells[`${row}-${day}-${nextShift}`] = value;
+      });
+      return cells;
+    }
+
     function generateRosterByRules() {
-      const needed = state.rules.needed.map(count => clampNumber(count, 0, state.staff.length));
+      const shifts = getShifts();
+      const needed = shifts.map(shift => clampNumber(shift.needed, 0, state.staff.length));
       const cells = {};
       const totals = state.staff.map(() => 0);
       const weekSeed = state.rules.rotateEvenly ? Number(state.weekNo || 0) : 0;
 
       for (let d = 0; d < 7; d++) {
         const assignedToday = new Set();
-        for (let s = 0; s < 3; s++) {
+        for (let s = 0; s < shifts.length; s++) {
           const picked = pickForShift(needed[s], assignedToday, totals, weekSeed + d + s);
           picked.forEach(rowIndex => {
             cells[`${rowIndex}-${d}-${s}`] = "x";
@@ -573,14 +705,22 @@
       if (!candidates.length) return null;
 
       candidates.sort((a, b) => {
-        const totalDiff = totals[a.index] - totals[b.index];
-        if (totalDiff !== 0) return totalDiff;
+        const scoreA = assignmentScore(a.index, totals);
+        const scoreB = assignmentScore(b.index, totals);
+        const scoreDiff = scoreA - scoreB;
+        if (scoreDiff !== 0) return scoreDiff;
         const rankA = rotatedRank(a.index, seed);
         const rankB = rotatedRank(b.index, seed);
         return rankA - rankB;
       });
 
       return candidates[0].index;
+    }
+
+    function assignmentScore(index, totals) {
+      const person = state.staff[index];
+      const officePriority = state.rules.prioritizeOfficeWork && ["maintenance", "project", "support"].includes(person.workType) ? 1.35 : 0;
+      return totals[index] + officePriority;
     }
 
     function rotatedRank(index, seed) {
@@ -609,11 +749,12 @@
 
     function exportCsv() {
       const dates = weekDates(state.weekStart);
-      const headers = ["STT", "Họ tên"].concat(dates.flatMap(date => shifts.map(shift => `${formatShortDate(date)} ${shift}`)));
+      const shifts = getShifts();
+      const headers = ["STT", "Họ tên"].concat(dates.flatMap(date => shifts.map(shift => `${formatShortDate(date)} ${shift.name}`)));
       const rows = state.staff.map((person, r) => {
         const values = [r + 1, person.name];
         for (let d = 0; d < 7; d++) {
-          for (let s = 0; s < 3; s++) values.push(state.cells[`${r}-${d}-${s}`] || "");
+          for (let s = 0; s < shifts.length; s++) values.push(state.cells[`${r}-${d}-${s}`] || "");
         }
         return values;
       });
