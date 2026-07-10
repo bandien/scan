@@ -311,7 +311,7 @@
     .chip-active.chip-open { background: #edf3f6; border-color: #475467; color: #344054; }
 
     /* Tiến độ: lưới nút to đều nhau, màu nhận diện ngay cả khi chưa chọn */
-    #progressChips { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    #progressChips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
     #progressChips .chip { text-align: center; white-space: nowrap; }
     #progressChips .chip-done { border-color: #bfe4cf; color: #1f7a4d; }
     #progressChips .chip-doing { border-color: #bddcff; color: #155ea8; }
@@ -385,7 +385,8 @@
       #logList { max-height: 48vh; overflow: auto; }
       .chip { padding: 8px 14px; font-size: .9rem; }
       .chip-active { padding: 7px 13px; }
-      #progressChips { grid-template-columns: 1fr 1fr; }
+      #progressChips { grid-template-columns: repeat(3, 1fr); }
+      #progressChips .chip { padding: 8px 4px; font-size: .82rem; }
     }
   </style>
 </head>
@@ -456,13 +457,12 @@
               <input class="form-control" id="quantityUnit" placeholder="vd: m, cái, bộ...">
             </div>
             <div class="col-12">
-              <span class="form-label d-block">Tiến độ</span>
+              <span class="form-label d-block">Tiến độ công việc</span>
               <input type="hidden" id="progress" value="Hoàn thành">
               <div id="progressChips">
                 <button class="chip chip-done" type="button" data-value="Hoàn thành"><i class="bi bi-check2-circle me-1"></i>Hoàn thành</button>
                 <button class="chip chip-doing" type="button" data-value="Đang làm"><i class="bi bi-arrow-repeat me-1"></i>Đang làm</button>
                 <button class="chip chip-help" type="button" data-value="Cần hỗ trợ"><i class="bi bi-exclamation-triangle me-1"></i>Cần hỗ trợ</button>
-                <button class="chip chip-open" type="button" data-value="Chưa làm"><i class="bi bi-circle me-1"></i>Chưa làm</button>
               </div>
             </div>
             <div class="col-12">
@@ -471,12 +471,12 @@
               <div class="small text-primary fw-bold mt-1 d-none" id="planCumNote"></div>
             </div>
             <div class="col-12">
-              <label class="form-label" for="result">Kết quả</label>
+              <label class="form-label" for="result">Kết quả / tình trạng ghi nhận</label>
               <div class="chip-row mb-2" id="resultChips">
-                <button class="chip" type="button">Hoạt động bình thường</button>
-                <button class="chip" type="button">Đã vệ sinh, kiểm tra xong</button>
                 <button class="chip" type="button">Không phát hiện bất thường</button>
                 <button class="chip" type="button">Có bất thường, cần theo dõi</button>
+                <button class="chip" type="button">Đã xử lý dứt điểm</button>
+                <button class="chip" type="button">Cần vật tư thay thế</button>
               </div>
               <textarea class="form-control" id="result" rows="3" placeholder="Nhập ngắn gọn: đã làm, tình trạng, số đo nếu có..." required></textarea>
             </div>
