@@ -264,13 +264,17 @@
 
     .plan-card:last-child { border-bottom: 0; }
 
+    .text-brand { color: var(--brand); }
+
     .plan-card-title {
       font-weight: 800;
       line-height: 1.25;
+      color: var(--brand);
     }
 
     .plan-card-task {
-      color: #344054;
+      color: var(--brand);
+      font-weight: 600;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
@@ -482,13 +486,6 @@
       </div>
     </section>
 
-    <section class="row g-3 mb-3">
-      <div class="col-6 col-lg-3"><div class="metric"><strong id="metricTotal">0</strong><span id="metricTotalLabel">Kế hoạch trong ngày</span></div></div>
-      <div class="col-6 col-lg-3"><div class="metric"><strong id="metricDoing">0</strong><span>Đang làm</span></div></div>
-      <div class="col-6 col-lg-3"><div class="metric"><strong id="metricDone">0</strong><span>Đã hoàn thành</span><div class="mini-bar"><i id="metricDoneBar"></i></div></div></div>
-      <div class="col-6 col-lg-3"><div class="metric"><strong id="metricLogs">0</strong><span>Nhật ký đã ghi</span></div></div>
-    </section>
-
     <section class="panel mb-3">
       <div class="panel-header">
         <h2 class="h5 mb-2 fw-bold"><i class="bi bi-calendar3 text-primary me-2"></i>2. Kế hoạch</h2>
@@ -560,6 +557,16 @@
             <button class="btn btn-outline-primary w-100 mt-3" type="button" id="btnToggleLogs" style="display:none;">Xem thêm</button>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section class="mb-3">
+      <h2 class="h5 fw-bold mb-2"><i class="bi bi-bar-chart text-primary me-2"></i>4. Thống kê</h2>
+      <div class="row g-3">
+        <div class="col-6 col-lg-3"><div class="metric"><strong id="metricTotal">0</strong><span id="metricTotalLabel">Kế hoạch trong ngày</span></div></div>
+        <div class="col-6 col-lg-3"><div class="metric"><strong id="metricDoing">0</strong><span>Đang làm</span></div></div>
+        <div class="col-6 col-lg-3"><div class="metric"><strong id="metricDone">0</strong><span>Đã hoàn thành</span><div class="mini-bar"><i id="metricDoneBar"></i></div></div></div>
+        <div class="col-6 col-lg-3"><div class="metric"><strong id="metricLogs">0</strong><span>Nhật ký đã ghi</span></div></div>
       </div>
     </section>
   </main>
@@ -1374,9 +1381,9 @@
         <tr${carry ? ' class="carry-row"' : ""}>
           <td class="fw-bold text-nowrap">${escapeHtml(plan.time || "")}${planSyncIcon(plan)}${carry ? `<div><span class="badge-soft badge-carry">Tồn ${shortDateVn(planEnd(plan))}</span></div>` : ""}${multiDayBadge(plan, selectedDate) ? `<div>${multiDayBadge(plan, selectedDate)}</div>` : ""}</td>
           <td>${escapeHtml(plan.team || "")}<div class="small text-secondary">${escapeHtml(plan.assignee || "")}</div></td>
-          <td>${escapeHtml(plan.area || "")}</td>
-          <td class="fw-semibold">${escapeHtml(plan.asset || "")}</td>
-          <td class="task-text">${escapeHtml(plan.task || "")}</td>
+          <td class="text-brand fw-semibold">${escapeHtml(plan.area || "")}</td>
+          <td class="text-brand fw-semibold">${escapeHtml(plan.asset || "")}</td>
+          <td class="task-text text-brand fw-semibold">${escapeHtml(plan.task || "")}</td>
           <td>${priorityBadge(plan.priority)}</td>
           <td>${statusBadge(plan.status)}${doneQtyBadge(plan) ? `<div class="mt-1">${doneQtyBadge(plan)}</div>` : ""}</td>
           <td class="text-end text-nowrap">
@@ -1396,9 +1403,9 @@
         <article class="plan-card${carry ? " carry" : ""}">
           <div class="d-flex justify-content-between gap-2">
             <div class="min-w-0">
-              <div class="small fw-bold text-primary">${escapeHtml(plan.time || "")} - ${escapeHtml(plan.team || "")}${planSyncIcon(plan)}${carry ? ` <span class="badge-soft badge-carry">Tồn ${shortDateVn(planEnd(plan))}</span>` : ""} ${multiDayBadge(plan, selectedDate)}</div>
+              <div class="small text-secondary">${escapeHtml(plan.time || "")} - ${escapeHtml(plan.team || "")}${planSyncIcon(plan)}${carry ? ` <span class="badge-soft badge-carry">Tồn ${shortDateVn(planEnd(plan))}</span>` : ""} ${multiDayBadge(plan, selectedDate)}</div>
               <div class="plan-card-title">${escapeHtml(plan.asset || plan.area || "")}</div>
-              <div class="small text-secondary">${escapeHtml(plan.area || "")}${plan.assignee ? " - " + escapeHtml(plan.assignee) : ""}</div>
+              <div class="small"><span class="text-brand fw-semibold">${escapeHtml(plan.area || "")}</span><span class="text-secondary">${plan.assignee ? " - " + escapeHtml(plan.assignee) : ""}</span></div>
             </div>
             <div class="d-flex flex-column gap-1">
               <button class="btn btn-success text-nowrap fw-bold" type="button" onclick="selectPlan('${escapeAttr(plan.id)}')">
