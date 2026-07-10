@@ -732,6 +732,7 @@
       bindEvents();
       render();
       retryPendingLogs();
+      retryPendingPlans();
     });
 
     function bindEvents() {
@@ -894,7 +895,7 @@
 
       const fresh = await fetchPlansFromBackend();
       if (fresh) {
-        plans = fresh;
+        plans = mergePendingPlans(fresh);
         localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
         return;
       }
@@ -910,12 +911,24 @@
       localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
     }
 
+    // Bản từ server không được đè mất các kế hoạch local chưa kịp đồng bộ
+    function mergePendingPlans(fresh) {
+      const unsynced = plans.filter(plan => plan.syncStatus === "pending" || plan.syncStatus === "syncing");
+      const merged = fresh.slice();
+      unsynced.forEach(plan => {
+        const index = merged.findIndex(item => item.id === plan.id);
+        if (index >= 0) merged[index] = plan; else merged.push(plan);
+      });
+      return merged;
+    }
+
     async function refreshPlansInBackground() {
       const fresh = await fetchPlansFromBackend();
       if (!fresh) return;
-      const serialized = JSON.stringify(fresh);
+      const merged = mergePendingPlans(fresh);
+      const serialized = JSON.stringify(merged);
       if (serialized === JSON.stringify(plans)) return;
-      plans = fresh;
+      plans = merged;
       localStorage.setItem(STORAGE_KEYS.plans, serialized);
       render();
     }
@@ -1063,21 +1076,49 @@
         updatedBy: localStorage.getItem(STORAGE_KEYS.employee) || ""
       };
 
-      const saveBtn = document.getElementById("btnSavePlan");
-      saveBtn.disabled = true;
+      // Hiện lên bảng NGAY rồi mới đồng bộ nền (id sinh phía client,
+      // backend savePlan dùng lại id này nên không lệch dữ liệu)
+      if (!payload.id) {
+        payload.id = "PLAN-" + payload.date.replace(/-/g, "") + "-" + Date.now();
+      }
+      payload.syncStatus = "syncing";
+      const index = plans.findIndex(item => item.id === payload.id);
+      if (index >= 0) plans[index] = payload; else plans.push(payload);
+      localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
+      planModal.hide();
+      render();
+      showToast("Đã lưu kế hoạch ✓ — đang đồng bộ nền...");
+      syncPlanInBackground(payload);
+    }
+
+    async function syncPlanInBackground(plan) {
       try {
-        const data = await postPlanAction("savePlan", payload);
-        payload.id = data.planId;
-        const index = plans.findIndex(item => item.id === payload.id);
-        if (index >= 0) plans[index] = payload; else plans.push(payload);
-        localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
-        planModal.hide();
-        render();
-        showToast("Đã lưu kế hoạch");
+        await postPlanAction("savePlan", plan);
+        plan.syncStatus = "synced";
       } catch (error) {
-        showToast("Lỗi lưu kế hoạch: " + error.message);
-      } finally {
-        saveBtn.disabled = false;
+        plan.syncStatus = "pending";
+        showToast("Chưa đồng bộ được kế hoạch, sẽ tự thử lại: " + error.message);
+      }
+      localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
+      renderPlans();
+    }
+
+    // Đồng bộ lại các kế hoạch lưu dở (mất mạng, đóng trang giữa chừng...)
+    async function retryPendingPlans() {
+      const pending = plans.filter(plan => plan.syncStatus === "pending" || plan.syncStatus === "syncing");
+      if (pending.length === 0) return;
+      let syncedCount = 0;
+      await Promise.all(pending.map(async plan => {
+        try {
+          await postPlanAction("savePlan", plan);
+          plan.syncStatus = "synced";
+          syncedCount++;
+        } catch (error) { plan.syncStatus = "pending"; }
+      }));
+      localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
+      if (syncedCount > 0) {
+        renderPlans();
+        showToast(`Đã đồng bộ lại ${syncedCount} kế hoạch chờ`);
       }
     }
 
@@ -1086,20 +1127,15 @@
       if (!id) return;
       if (!confirm("Xóa kế hoạch này?")) return;
 
-      const deleteBtn = document.getElementById("btnDeletePlan");
-      deleteBtn.disabled = true;
-      try {
-        await postPlanAction("deletePlan", { id: id, updatedBy: localStorage.getItem(STORAGE_KEYS.employee) || "" });
-        plans = plans.filter(item => item.id !== id);
-        localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
-        planModal.hide();
-        render();
-        showToast("Đã xóa kế hoạch");
-      } catch (error) {
-        showToast("Lỗi xóa kế hoạch: " + error.message);
-      } finally {
-        deleteBtn.disabled = false;
-      }
+      // Xóa khỏi bảng ngay, gọi server chạy nền; lỗi thì kế hoạch sẽ
+      // hiện lại ở lần nạp sau (server vẫn còn bản gốc)
+      plans = plans.filter(item => item.id !== id);
+      localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
+      planModal.hide();
+      render();
+      showToast("Đã xóa kế hoạch");
+      postPlanAction("deletePlan", { id: id, updatedBy: localStorage.getItem(STORAGE_KEYS.employee) || "" })
+        .catch(error => showToast("Chưa xóa được trên server: " + error.message));
     }
 
     function loadLogs() {
@@ -1112,15 +1148,13 @@
       }
     }
 
-    // Gửi lại các nhật ký chưa đồng bộ được (mất mạng, backend lỗi...)
+    // Gửi lại các nhật ký chưa đồng bộ được (mất mạng, backend lỗi,
+    // đóng trang giữa chừng khi đang đồng bộ...)
     async function retryPendingLogs() {
-      const pending = logs.filter(log => log.syncStatus === "pending");
+      const pending = logs.filter(log => log.syncStatus !== "synced");
       if (pending.length === 0) return;
-      let syncedCount = 0;
-      for (const log of pending) {
-        await trySync(log);
-        if (log.syncStatus === "synced") syncedCount++;
-      }
+      await Promise.all(pending.map(log => trySync(log)));
+      const syncedCount = pending.filter(log => log.syncStatus === "synced").length;
       if (syncedCount > 0) {
         localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
         renderLogs();
@@ -1201,6 +1235,12 @@
       select.value = current;
     }
 
+    function planSyncIcon(plan) {
+      if (plan.syncStatus === "syncing") return ' <i class="bi bi-cloud-arrow-up text-primary" title="Đang đồng bộ"></i>';
+      if (plan.syncStatus === "pending") return ' <i class="bi bi-cloud-slash text-warning" title="Chờ đồng bộ"></i>';
+      return "";
+    }
+
     function isCarryOver(plan, selectedDate) {
       return Boolean(selectedDate && plan.date && plan.date < selectedDate && plan.status !== "Hoàn thành");
     }
@@ -1268,7 +1308,7 @@
         const carry = isCarryOver(plan, selectedDate);
         return `
         <tr${carry ? ' class="carry-row"' : ""}>
-          <td class="fw-bold text-nowrap">${escapeHtml(plan.time || "")}${carry ? `<div><span class="badge-soft badge-carry">Tồn ${shortDateVn(plan.date)}</span></div>` : ""}</td>
+          <td class="fw-bold text-nowrap">${escapeHtml(plan.time || "")}${planSyncIcon(plan)}${carry ? `<div><span class="badge-soft badge-carry">Tồn ${shortDateVn(plan.date)}</span></div>` : ""}</td>
           <td>${escapeHtml(plan.team || "")}<div class="small text-secondary">${escapeHtml(plan.assignee || "")}</div></td>
           <td>${escapeHtml(plan.area || "")}</td>
           <td class="fw-semibold">${escapeHtml(plan.asset || "")}</td>
@@ -1292,7 +1332,7 @@
         <article class="plan-card${carry ? " carry" : ""}">
           <div class="d-flex justify-content-between gap-2">
             <div class="min-w-0">
-              <div class="small fw-bold text-primary">${escapeHtml(plan.time || "")} - ${escapeHtml(plan.team || "")}${carry ? ` <span class="badge-soft badge-carry">Tồn ${shortDateVn(plan.date)}</span>` : ""}</div>
+              <div class="small fw-bold text-primary">${escapeHtml(plan.time || "")} - ${escapeHtml(plan.team || "")}${planSyncIcon(plan)}${carry ? ` <span class="badge-soft badge-carry">Tồn ${shortDateVn(plan.date)}</span>` : ""}</div>
               <div class="plan-card-title">${escapeHtml(plan.asset || plan.area || "")}</div>
               <div class="small text-secondary">${escapeHtml(plan.area || "")}${plan.assignee ? " - " + escapeHtml(plan.assignee) : ""}</div>
             </div>
@@ -1507,26 +1547,29 @@
           }))
         : [{ ...base, id: "LOG-" + Date.now(), employee: recordedBy, rating: "" }];
 
-      const submitBtn = document.querySelector("#logForm button[type=submit]");
-      submitBtn.disabled = true;
-      try {
-        rememberEmployee(recordedBy);
-        for (const log of newLogs) {
-          await trySync(log);
-        }
-        logs = newLogs.concat(logs);
-        localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
-        showAllLogs = false;
-        updatePlanStatus(base.planId, base.progress);
-        clearForm(false);
-        lastAddedLogId = newLogs[0].id;
-        render();
-        lastAddedLogId = null;
-        const syncedAll = newLogs.every(log => log.syncStatus === "synced");
-        const label = newLogs.length > 1 ? `${newLogs.length} nhật ký (từng người)` : "nhật ký";
-        showToast(syncedAll ? `Đã lưu và đồng bộ ${label}` : `Đã lưu ${label} cục bộ, sẽ đồng bộ lại sau`);
-      } finally {
-        submitBtn.disabled = false;
+      // Lưu và hiển thị NGAY, đồng bộ lên Sheets chạy nền — không bắt người
+      // dùng chờ 2-4 giây mỗi lượt gọi Google Apps Script
+      newLogs.forEach(log => { log.syncStatus = "syncing"; });
+      rememberEmployee(recordedBy);
+      logs = newLogs.concat(logs);
+      localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
+      showAllLogs = false;
+      updatePlanStatus(base.planId, base.progress);
+      clearForm(false);
+      lastAddedLogId = newLogs[0].id;
+      render();
+      lastAddedLogId = null;
+      const label = newLogs.length > 1 ? `${newLogs.length} nhật ký (từng người)` : "nhật ký";
+      showToast(`Đã lưu ${label} ✓ — đang đồng bộ nền...`);
+      syncLogsInBackground(newLogs);
+    }
+
+    async function syncLogsInBackground(newLogs) {
+      await Promise.all(newLogs.map(log => trySync(log)));
+      localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
+      renderLogs();
+      if (newLogs.some(log => log.syncStatus !== "synced")) {
+        showToast("Có nhật ký chưa đồng bộ được, sẽ tự thử lại sau");
       }
     }
 
@@ -1637,6 +1680,9 @@
     function syncLabel(log) {
       if (log.syncStatus === "synced") {
         return ' <span class="text-success text-nowrap"><i class="bi bi-cloud-check"></i> Đã đồng bộ</span>';
+      }
+      if (log.syncStatus === "syncing") {
+        return ' <span class="text-primary text-nowrap"><span class="spinner-border spinner-border-sm" style="width:.7rem;height:.7rem;border-width:.12em"></span> Đang đồng bộ</span>';
       }
       if (log.syncStatus === "pending") {
         return ' <span class="text-warning text-nowrap"><i class="bi bi-cloud-slash"></i> Chờ đồng bộ</span>';
