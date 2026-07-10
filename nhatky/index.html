@@ -357,7 +357,7 @@
       <div class="panel" id="quickFormPanel">
         <div class="panel-header" id="quickFormHeader" role="button" aria-controls="logFormBody" aria-expanded="true">
           <div class="d-flex align-items-center justify-content-between">
-            <h2 class="h5 m-0 fw-bold"><i class="bi bi-pencil-square text-primary me-2"></i>Ghi nhanh</h2>
+            <h2 class="h5 m-0 fw-bold"><i class="bi bi-pencil-square text-primary me-2"></i>1. Ghi nhanh</h2>
             <i class="bi bi-chevron-up" id="quickFormChevron"></i>
           </div>
         </div>
@@ -450,6 +450,7 @@
 
     <section class="panel mb-3">
       <div class="panel-header">
+        <h2 class="h5 mb-2 fw-bold"><i class="bi bi-calendar3 text-primary me-2"></i>2. Kế hoạch</h2>
         <div class="d-flex toolbar-grid align-items-end gap-2">
           <div>
             <label class="form-label" for="filterDate">Ngày kế hoạch</label>
@@ -506,7 +507,7 @@
         <div class="panel h-100">
           <div class="panel-header">
             <div class="d-flex align-items-center justify-content-between gap-2">
-              <h2 class="h5 m-0 fw-bold"><i class="bi bi-clock-history text-primary me-2"></i>Nhật ký gần đây</h2>
+              <h2 class="h5 m-0 fw-bold"><i class="bi bi-clock-history text-primary me-2"></i>3. Nhật ký gần đây</h2>
               <div class="d-flex gap-2">
                 <button class="btn btn-outline-primary btn-sm" type="button" id="btnExport"><i class="bi bi-download me-1"></i>CSV</button>
                 <button class="btn btn-outline-danger btn-sm" type="button" id="btnClearLogs"><i class="bi bi-trash me-1"></i>Xóa</button>
@@ -1243,8 +1244,8 @@
             <button class="btn btn-sm btn-outline-secondary" type="button" title="Sửa kế hoạch" onclick="openPlanModal('${escapeAttr(plan.id)}')">
               <i class="bi bi-pencil"></i>
             </button>
-            <button class="btn btn-sm btn-primary" type="button" title="Ghi nhật ký" onclick="selectPlan('${escapeAttr(plan.id)}')">
-              <i class="bi bi-journal-plus"></i>
+            <button class="btn btn-primary fw-bold" type="button" title="Ghi nhật ký" onclick="selectPlan('${escapeAttr(plan.id)}')">
+              <i class="bi bi-journal-plus me-1"></i>Ghi nhật ký
             </button>
           </td>
         </tr>
@@ -1261,8 +1262,8 @@
               <div class="small text-secondary">${escapeHtml(plan.area || "")}${plan.assignee ? " - " + escapeHtml(plan.assignee) : ""}</div>
             </div>
             <div class="d-flex flex-column gap-1">
-              <button class="btn btn-sm btn-success text-nowrap" type="button" onclick="selectPlan('${escapeAttr(plan.id)}')">
-                <i class="bi bi-journal-plus me-1"></i>Ghi
+              <button class="btn btn-success text-nowrap fw-bold" type="button" onclick="selectPlan('${escapeAttr(plan.id)}')">
+                <i class="bi bi-journal-plus me-1"></i>Ghi nhật ký
               </button>
               <button class="btn btn-sm btn-outline-secondary text-nowrap" type="button" onclick="openPlanModal('${escapeAttr(plan.id)}')">
                 <i class="bi bi-pencil me-1"></i>Sửa
