@@ -148,8 +148,15 @@
       border: 1px solid #d9e1ec;
       display: grid;
       gap: 6px;
-      grid-template-columns: minmax(120px, 1fr) 82px 36px;
+      grid-template-columns: minmax(112px, 1fr) 72px 94px 94px 92px 36px;
       padding: 6px 8px;
+    }
+
+    .shift-rule-break {
+      grid-column: 1 / -1;
+      display: grid;
+      gap: 6px;
+      grid-template-columns: 110px 94px 94px minmax(130px, 1fr);
     }
 
     .skill-list {
@@ -190,6 +197,7 @@
       .rule-grid { grid-template-columns: repeat(3, minmax(70px, 1fr)); }
       .skill-item { grid-template-columns: 1fr; }
       .shift-rule-item { grid-template-columns: minmax(0, 1fr) 72px 36px; }
+      .shift-rule-break { grid-column: 1 / -1; grid-template-columns: 1fr 1fr; }
     }
 
     @media print {
@@ -306,9 +314,9 @@
     const cycle = ["", "x", "hc", "CN"];
     const dayNames = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật"];
     const defaultShifts = [
-      { name: "Ca.1", needed: 2 },
-      { name: "Ca.2", needed: 2 },
-      { name: "Ca.3", needed: 1 }
+      { name: "Ca.1", needed: 2, start1: "06:00", end1: "14:00", split: false, start2: "", end2: "", mealNote: "Nghỉ ăn luân phiên" },
+      { name: "Ca.2", needed: 2, start1: "14:00", end1: "22:00", split: false, start2: "", end2: "", mealNote: "Nghỉ ăn luân phiên" },
+      { name: "Ca.3", needed: 1, start1: "22:00", end1: "06:00", split: false, start2: "", end2: "", mealNote: "Ăn ca theo thực tế" }
     ];
     const workTypes = {
       operation: "Vận hành",
@@ -394,7 +402,13 @@
         : defaultShifts.map((shift, index) => ({ ...shift, needed: rules.needed?.[index] ?? shift.needed }));
       return source.map((shift, index) => ({
         name: String(shift.name || `Ca.${index + 1}`).trim() || `Ca.${index + 1}`,
-        needed: clampNumber(shift.needed, 0, staffCount)
+        needed: clampNumber(shift.needed, 0, staffCount),
+        start1: normalizeTime(shift.start1, defaultShifts[index]?.start1 || "08:00"),
+        end1: normalizeTime(shift.end1, defaultShifts[index]?.end1 || "17:00"),
+        split: !!shift.split,
+        start2: normalizeTime(shift.start2, defaultShifts[index]?.start2 || ""),
+        end2: normalizeTime(shift.end2, defaultShifts[index]?.end2 || ""),
+        mealNote: String(shift.mealNote || defaultShifts[index]?.mealNote || "").trim()
       }));
     }
 
@@ -456,7 +470,34 @@
             <label class="form-label small mb-1" for="shiftNeed${index}">Người</label>
             <input class="form-control form-control-sm" id="shiftNeed${index}" type="number" min="0" max="${state.staff.length}" inputmode="numeric" value="${escapeAttr(shift.needed)}" onchange="setShiftNeeded(${index}, this.value)">
           </div>
+          <div>
+            <label class="form-label small mb-1" for="shiftStart1${index}">Từ 1</label>
+            <input class="form-control form-control-sm" id="shiftStart1${index}" type="time" value="${escapeAttr(shift.start1)}" onchange="setShiftTime(${index}, 'start1', this.value)">
+          </div>
+          <div>
+            <label class="form-label small mb-1" for="shiftEnd1${index}">Đến 1</label>
+            <input class="form-control form-control-sm" id="shiftEnd1${index}" type="time" value="${escapeAttr(shift.end1)}" onchange="setShiftTime(${index}, 'end1', this.value)">
+          </div>
+          <div class="form-check pb-1">
+            <input class="form-check-input" id="shiftSplit${index}" type="checkbox" ${shift.split ? "checked" : ""} onchange="setShiftSplit(${index}, this.checked)">
+            <label class="form-check-label small" for="shiftSplit${index}">Ca gãy</label>
+          </div>
           <button class="btn btn-outline-danger btn-sm" type="button" onclick="removeShift(${index})" aria-label="Xóa ${escapeAttr(shift.name)}"><i class="bi bi-trash"></i></button>
+          <div class="shift-rule-break">
+            <div>
+              <label class="form-label small mb-1" for="shiftStart2${index}">Từ 2</label>
+              <input class="form-control form-control-sm" id="shiftStart2${index}" type="time" value="${escapeAttr(shift.start2)}" ${shift.split ? "" : "disabled"} onchange="setShiftTime(${index}, 'start2', this.value)">
+            </div>
+            <div>
+              <label class="form-label small mb-1" for="shiftEnd2${index}">Đến 2</label>
+              <input class="form-control form-control-sm" id="shiftEnd2${index}" type="time" value="${escapeAttr(shift.end2)}" ${shift.split ? "" : "disabled"} onchange="setShiftTime(${index}, 'end2', this.value)">
+            </div>
+            <div>
+              <label class="form-label small mb-1" for="shiftMeal${index}">Nghỉ ăn</label>
+              <input class="form-control form-control-sm" id="shiftMeal${index}" value="${escapeAttr(shift.mealNote)}" placeholder="VD: 30p luân phiên" onchange="setShiftMeal(${index}, this.value)">
+            </div>
+            <div class="small text-secondary align-self-end">${escapeHtml(shiftSummary(shift))}</div>
+          </div>
         </div>
       `).join("");
     }
@@ -590,7 +631,7 @@
 
     function addShift() {
       const shifts = getShifts();
-      shifts.push({ name: `Ca.${shifts.length + 1}`, needed: 1 });
+      shifts.push({ name: `Ca.${shifts.length + 1}`, needed: 1, start1: "08:00", end1: "17:00", split: false, start2: "", end2: "", mealNote: "Nghỉ ăn luân phiên" });
       state.rules.shifts = shifts;
       syncControls();
       renderTable();
@@ -623,6 +664,34 @@
     function setShiftNeeded(index, value) {
       const shifts = getShifts();
       shifts[index].needed = clampNumber(value, 0, state.staff.length);
+      state.rules.shifts = shifts;
+      saveState(false);
+    }
+
+    function setShiftTime(index, field, value) {
+      const shifts = getShifts();
+      if (!["start1", "end1", "start2", "end2"].includes(field)) return;
+      shifts[index][field] = normalizeTime(value, "");
+      state.rules.shifts = shifts;
+      renderShiftRules();
+      saveState(false);
+    }
+
+    function setShiftSplit(index, checked) {
+      const shifts = getShifts();
+      shifts[index].split = checked;
+      if (checked && !shifts[index].start2 && !shifts[index].end2) {
+        shifts[index].start2 = "13:00";
+        shifts[index].end2 = "17:00";
+      }
+      state.rules.shifts = shifts;
+      renderShiftRules();
+      saveState(false);
+    }
+
+    function setShiftMeal(index, value) {
+      const shifts = getShifts();
+      shifts[index].mealNote = value.trim();
       state.rules.shifts = shifts;
       saveState(false);
     }
@@ -751,6 +820,7 @@
       const dates = weekDates(state.weekStart);
       const shifts = getShifts();
       const headers = ["STT", "Họ tên"].concat(dates.flatMap(date => shifts.map(shift => `${formatShortDate(date)} ${shift.name}`)));
+      const shiftInfo = ["Thông tin ca", ""].concat(dates.flatMap(() => shifts.map(shiftSummary)));
       const rows = state.staff.map((person, r) => {
         const values = [r + 1, person.name];
         for (let d = 0; d < 7; d++) {
@@ -758,7 +828,7 @@
         }
         return values;
       });
-      const csv = [headers, ...rows].map(row => row.map(csvCell).join(",")).join("\n");
+      const csv = [shiftInfo, headers, ...rows].map(row => row.map(csvCell).join(",")).join("\n");
       const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -791,6 +861,18 @@
 
     function formatShortDate(date) {
       return `${date.getDate()}/ ${date.getMonth() + 1}`;
+    }
+
+    function normalizeTime(value, fallback) {
+      const text = String(value || "").trim();
+      return /^\d{2}:\d{2}$/.test(text) ? text : fallback;
+    }
+
+    function shiftSummary(shift) {
+      const first = `${shift.start1 || "?"}-${shift.end1 || "?"}`;
+      const second = shift.split ? `; ${shift.start2 || "?"}-${shift.end2 || "?"}` : "";
+      const meal = shift.mealNote ? `; nghỉ ăn: ${shift.mealNote}` : "";
+      return `${first}${second}${meal}`;
     }
 
     function csvCell(value) {
