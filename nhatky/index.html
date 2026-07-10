@@ -545,6 +545,10 @@
                 <button class="chip chip-doing" type="button" data-value="Đang làm"><i class="bi bi-arrow-repeat me-1"></i>Đang làm</button>
                 <button class="chip chip-help" type="button" data-value="Cần hỗ trợ"><i class="bi bi-exclamation-triangle me-1"></i>Cần hỗ trợ</button>
               </div>
+              <div class="form-check mt-2" id="planCompleteCheckContainer" style="display: none;">
+                <input class="form-check-input" type="checkbox" id="markPlanDone">
+                <label class="form-check-label small text-success fw-bold" for="markPlanDone">Hoàn thành toàn bộ kế hoạch (kết thúc công việc này)</label>
+              </div>
             </div>
             <div class="col-12">
               <label class="form-label" for="selectedTask">Việc/kế hoạch</label>
@@ -1017,6 +1021,17 @@
       document.querySelectorAll("#progressChips .chip").forEach(btn => {
         btn.classList.toggle("chip-active", btn.dataset.value === value);
       });
+      
+      const planId = document.getElementById("planId").value;
+      const checkContainer = document.getElementById("planCompleteCheckContainer");
+      if (checkContainer) {
+        if (planId && value === "Hoàn thành") {
+          checkContainer.style.display = "block";
+        } else {
+          checkContainer.style.display = "none";
+          document.getElementById("markPlanDone").checked = false;
+        }
+      }
     }
 
     let quickFormCollapse;
@@ -2128,8 +2143,9 @@
       logs = newLogs.concat(logs);
       localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
       showAllLogs = false;
-      updatePlanStatus(base.planId, base.progress);
-      clearForm(false);
+      const markPlanDone = document.getElementById("markPlanDone") ? document.getElementById("markPlanDone").checked : false;
+      updatePlanStatus(base.planId, base.progress, markPlanDone);
+      clearForm();
       lastAddedLogId = newLogs[0].id;
       render();
       updateSyncStatus();
@@ -2176,11 +2192,27 @@
       }
     }
 
-    function updatePlanStatus(planId, progress) {
+    function updatePlanStatus(planId, logProgress, markPlanDone) {
       if (!planId) return;
       const plan = plans.find(item => item.id === planId);
       if (!plan) return;
-      plan.status = progress;
+      
+      let nextStatus = "Đang làm";
+      if (logProgress === "Cần hỗ trợ") {
+        nextStatus = "Cần hỗ trợ";
+      } else if (logProgress === "Đang làm") {
+        nextStatus = "Đang làm";
+      } else if (logProgress === "Hoàn thành") {
+        const done = parseFloat(plan.doneQty || 0);
+        const target = parseFloat(plan.planQty || 0);
+        if (markPlanDone || (target > 0 && done >= target)) {
+          nextStatus = "Hoàn thành";
+        } else {
+          nextStatus = "Đang làm";
+        }
+      }
+      
+      plan.status = nextStatus;
       localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
       // Đồng bộ trạng thái mới lên Sheets, lỗi thì thôi (log đã lưu riêng)
       postPlanAction("savePlan", plan).catch(() => {});
@@ -2188,10 +2220,10 @@
 
     function clearForm() {
       document.getElementById("logForm").reset();
+      document.getElementById("planId").value = "";
       document.getElementById("workDate").value = document.getElementById("filterDate").value || today;
       document.getElementById("shift").value = defaultShift();
       setProgress("Hoàn thành");
-      document.getElementById("planId").value = "";
       renderPeopleResults("");
       document.getElementById("planCumNote").classList.add("d-none");
       document.querySelectorAll("#resultChips .chip").forEach(btn => btn.classList.remove("chip-active"));
