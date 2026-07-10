@@ -402,6 +402,9 @@
           </div>
         </div>
         <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-outline-secondary text-nowrap" type="button" id="btnUser" title="Đổi người dùng">
+            <i class="bi bi-person-circle me-1"></i><span id="userName">Đăng nhập</span>
+          </button>
           <a class="btn btn-outline-primary btn-icon" href="../index.html" title="Về BanDienScan">
             <i class="bi bi-house"></i>
           </a>
@@ -457,7 +460,7 @@
               <input class="form-control" id="quantityUnit" placeholder="vd: m, cái, bộ...">
             </div>
             <div class="col-12">
-              <span class="form-label d-block">Tiến độ công việc</span>
+              <span class="form-label d-block">Trạng thái công việc <span class="fw-normal text-secondary">(tự cập nhật vào Kế hoạch)</span></span>
               <input type="hidden" id="progress" value="Hoàn thành">
               <div id="progressChips">
                 <button class="chip chip-done" type="button" data-value="Hoàn thành"><i class="bi bi-check2-circle me-1"></i>Hoàn thành</button>
@@ -614,6 +617,26 @@
     </div>
   </div>
 
+  <div class="modal fade" id="loginModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title h5"><i class="bi bi-person-circle text-primary me-2"></i>Bạn là ai?</h3>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body">
+          <label class="form-label" for="loginSelect">Chọn tên của bạn</label>
+          <select class="form-select mb-2" id="loginSelect"></select>
+          <input class="form-control" id="loginCustom" placeholder="Hoặc nhập tên mới...">
+          <div class="small text-secondary mt-2">Tên này dùng để ghi nhật ký và lưu vết khi bạn sửa kế hoạch.</div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary w-100" type="button" id="btnLogin"><i class="bi bi-box-arrow-in-right me-1"></i>Vào làm việc</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="modal fade" id="planModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
@@ -749,6 +772,7 @@
     let showAllLogs = false;
     let toast;
     let planModal;
+    let loginModal;
     let lastAddedLogId = null;
     let viewMode = "day";
     let staffList = [];   // tên nhân viên từ backend (getStaff) cho dropdown
@@ -784,6 +808,7 @@
     document.addEventListener("DOMContentLoaded", async () => {
       toast = new bootstrap.Toast(document.getElementById("toast"), { delay: 2200 });
       planModal = new bootstrap.Modal(document.getElementById("planModal"));
+      loginModal = new bootstrap.Modal(document.getElementById("loginModal"));
       document.getElementById("filterDate").value = today;
       document.getElementById("workDate").value = today;
       fillTimeSelect("startTime", "");
@@ -798,6 +823,8 @@
       renderEmployeeSuggestions();
       bindEvents();
       render();
+      updateUserButton();
+      if (!currentUser()) openLogin();
       retryPendingLogs();
       retryPendingPlans();
     });
@@ -843,6 +870,8 @@
       document.getElementById("btnToggleExtra").addEventListener("click", toggleExtraFields);
       document.getElementById("btnToggleLogs").addEventListener("click", toggleLogs);
       document.getElementById("employee").addEventListener("change", rememberEmployeeFromInput);
+      document.getElementById("btnUser").addEventListener("click", openLogin);
+      document.getElementById("btnLogin").addEventListener("click", doLogin);
       document.getElementById("progressChips").addEventListener("click", event => {
         const btn = event.target.closest("button[data-value]");
         if (btn) setProgress(btn.dataset.value);
@@ -1177,6 +1206,7 @@
       render();
       showToast("Đã lưu kế hoạch ✓ — đang đồng bộ nền...");
       syncPlanInBackground(payload);
+      logPlanAction(payload, index >= 0 ? "Cập nhật kế hoạch" : "Tạo kế hoạch mới");
     }
 
     async function syncPlanInBackground(plan) {
@@ -1217,6 +1247,7 @@
 
       // Xóa khỏi bảng ngay, gọi server chạy nền; lỗi thì kế hoạch sẽ
       // hiện lại ở lần nạp sau (server vẫn còn bản gốc)
+      const deletedPlan = plans.find(item => item.id === id);
       plans = plans.filter(item => item.id !== id);
       localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
       planModal.hide();
@@ -1224,6 +1255,7 @@
       showToast("Đã xóa kế hoạch");
       postPlanAction("deletePlan", { id: id, updatedBy: localStorage.getItem(STORAGE_KEYS.employee) || "" })
         .catch(error => showToast("Chưa xóa được trên server: " + error.message));
+      logPlanAction(deletedPlan || { id: id }, "Xóa kế hoạch");
     }
 
     function loadLogs() {
@@ -1261,6 +1293,68 @@
       localStorage.setItem(STORAGE_KEYS.employee, cleaned);
       localStorage.setItem(STORAGE_KEYS.employees, JSON.stringify(names));
       renderEmployeeSuggestions();
+      updateUserButton();
+    }
+
+    // ===== Đăng nhập theo tên (danh tính nhẹ, lưu trên máy) =====
+    function currentUser() {
+      return localStorage.getItem(STORAGE_KEYS.employee) || "";
+    }
+
+    function updateUserButton() {
+      document.getElementById("userName").textContent = currentUser() || "Đăng nhập";
+    }
+
+    function openLogin() {
+      const select = document.getElementById("loginSelect");
+      const current = currentUser();
+      const names = knownPeopleNames();
+      select.innerHTML = '<option value="">-- Chọn tên --</option>' +
+        names.map(name => `<option${name === current ? " selected" : ""}>${escapeHtml(name)}</option>`).join("");
+      document.getElementById("loginCustom").value = "";
+      loginModal.show();
+    }
+
+    function doLogin() {
+      const name = document.getElementById("loginCustom").value.trim() || document.getElementById("loginSelect").value;
+      if (!name) {
+        showToast("Hãy chọn hoặc nhập tên của bạn");
+        return;
+      }
+      rememberEmployee(name);
+      updateUserButton();
+      loginModal.hide();
+      showToast("Xin chào " + name);
+    }
+
+    // Sửa/tạo/xóa kế hoạch → tự ghi 1 dòng nhật ký lưu vết cho người thao tác
+    function logPlanAction(plan, actionLabel) {
+      const user = currentUser();
+      if (!user) return;
+      const log = {
+        id: "LOG-" + Date.now() + "-KH",
+        planId: plan.id || "",
+        workDate: today,
+        employee: user,
+        shift: defaultShift(),
+        progress: plan.status || "",
+        startTime: currentTime(),
+        endTime: "",
+        selectedTask: `[Kế hoạch] ${actionLabel}: ${plan.task || ""}`,
+        result: `${actionLabel} lúc ${currentTime()} ngày ${formatDateVn(today)}`,
+        issue: "",
+        nextAction: "",
+        quantity: "",
+        unit: "",
+        rating: "",
+        createdAt: new Date().toISOString(),
+        recordedBy: user,
+        syncStatus: "syncing"
+      };
+      logs.unshift(log);
+      localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
+      renderLogs();
+      syncLogsInBackground([log]);
     }
 
     function rememberEmployeeFromInput() {
