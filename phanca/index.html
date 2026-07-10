@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bảng phân ca tổ cơ điện sân golf | BanDienScan</title>
+  <meta name="description" content="Bảng phân ca tuần cho tổ cơ điện sân golf.">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <style>
+    :root {
+      --line: #111;
+      --grid: #777;
+      --sheet-bg: #fff;
+      --header-bg: #f5f5f5;
+      --hc: #9fe3d2;
+      --x: #f2d4d4;
+      --cn: #ffff00;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #eef2f6;
+      color: #111;
+      font-family: "Times New Roman", Times, serif;
+    }
+
+    .appbar {
+      background: #fff;
+      border-bottom: 1px solid #d9e1e8;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    .shell { max-width: 1280px; margin: 0 auto; padding: 12px; }
+
+    .sheet {
+      background: var(--sheet-bg);
+      border: 2px solid var(--line);
+      overflow: auto;
+      box-shadow: 0 10px 28px rgba(17, 24, 39, .08);
+    }
+
+    table.roster {
+      border-collapse: collapse;
+      width: max-content;
+      min-width: 100%;
+      table-layout: fixed;
+      background: #fff;
+    }
+
+    .roster th,
+    .roster td {
+      border: 1px dotted var(--grid);
+      padding: 2px 4px;
+      height: 24px;
+      line-height: 1.1;
+      text-align: center;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .roster th {
+      border: 1px solid var(--line);
+      background: var(--header-bg);
+      font-weight: 700;
+    }
+
+    .title-cell {
+      color: #00f;
+      text-decoration: underline;
+      font-size: 18px;
+      text-align: left !important;
+      background: #fff !important;
+    }
+
+    .week-label { color: red; font-weight: 700; }
+    .week-value { color: red; font-weight: 700; }
+    .date-red { color: red; }
+    .team-row td {
+      height: 48px;
+      font-weight: 700;
+      font-size: 16px;
+      border-left: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+    }
+
+    .stt-col { width: 46px; }
+    .name-col { width: 180px; text-align: left !important; }
+    .shift-col { width: 40px; min-width: 40px; }
+    .name-cell { text-align: left !important; }
+    .name-cell input {
+      width: 100%;
+      border: 0;
+      outline: none;
+      background: transparent;
+      font: inherit;
+    }
+
+    .shift-cell {
+      cursor: pointer;
+      user-select: none;
+      font-weight: 700;
+    }
+
+    .shift-cell.hc { background: var(--hc); }
+    .shift-cell.x { background: var(--x); }
+    .shift-cell.cn { background: var(--cn); }
+    .shift-cell:focus { outline: 2px solid #0d6efd; outline-offset: -2px; }
+
+    .toolbar {
+      background: #fff;
+      border: 1px solid #d9e1e8;
+      border-radius: 8px;
+      padding: 10px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-right: 12px;
+      font-size: .86rem;
+    }
+
+    .swatch { width: 18px; height: 14px; border: 1px solid #777; display: inline-block; }
+
+    @media (max-width: 760px) {
+      .shell { padding: 8px; }
+      .toolbar .btn, .toolbar .form-control { font-size: .86rem; }
+      .name-col { width: 170px; }
+      .shift-col { width: 38px; min-width: 38px; }
+    }
+
+    @media print {
+      body { background: #fff; }
+      .appbar, .toolbar { display: none !important; }
+      .shell { max-width: none; padding: 0; }
+      .sheet { box-shadow: none; border: 1px solid #000; overflow: visible; }
+      table.roster { width: 100%; font-size: 12px; }
+      .shift-col { width: 33px; }
+      .name-col { width: 155px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="appbar">
+    <div class="shell py-3">
+      <div class="d-flex justify-content-between align-items-center gap-2">
+        <div>
+          <div class="text-primary fw-bold text-uppercase" style="font-size:.72rem;">BanDienScan</div>
+          <h1 class="h5 fw-bold m-0">Quản lý Ca trực - Bảng phân ca tuần</h1>
+        </div>
+        <a class="btn btn-outline-primary btn-sm" href="../index.html"><i class="bi bi-house me-1"></i>Trang chính</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="toolbar mb-2">
+      <div class="row g-2 align-items-end">
+        <div class="col-6 col-md-2">
+          <label class="form-label fw-bold small" for="weekStart">Từ ngày</label>
+          <input class="form-control" id="weekStart" type="date">
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="form-label fw-bold small" for="weekNo">Tuần</label>
+          <input class="form-control" id="weekNo" type="number" min="1" max="53">
+        </div>
+        <div class="col-12 col-md-3">
+          <label class="form-label fw-bold small" for="newStaffName">Thêm nhân sự</label>
+          <div class="input-group">
+            <input class="form-control" id="newStaffName" placeholder="Họ và tên">
+            <button class="btn btn-success" id="btnAddStaff" type="button"><i class="bi bi-plus-lg"></i></button>
+          </div>
+        </div>
+        <div class="col-12 col-md-5">
+          <div class="d-flex flex-wrap gap-2 justify-content-md-end">
+            <button class="btn btn-outline-primary" id="btnSave" type="button"><i class="bi bi-save me-1"></i>Lưu</button>
+            <button class="btn btn-outline-secondary" id="btnExport" type="button"><i class="bi bi-download me-1"></i>CSV</button>
+            <button class="btn btn-outline-secondary" type="button" onclick="window.print()"><i class="bi bi-printer me-1"></i>In</button>
+            <button class="btn btn-outline-danger" id="btnReset" type="button"><i class="bi bi-arrow-counterclockwise me-1"></i>Mẫu</button>
+          </div>
+        </div>
+      </div>
+      <div class="legend mt-2">
+        <span><i class="swatch" style="background:var(--hc)"></i>hc: hành chính</span>
+        <span><i class="swatch" style="background:var(--x)"></i>x: trực/đi ca</span>
+        <span><i class="swatch" style="background:var(--cn)"></i>CN: chủ nhật/nghỉ</span>
+        <span class="text-secondary">Bấm vào ô để đổi: trống -> x -> hc -> CN.</span>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <table class="roster" id="rosterTable"></table>
+    </section>
+  </main>
+
+  <div class="position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 50">
+    <div class="toast align-items-center border-0" id="toast" role="status" aria-live="polite" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body" id="toastText">Đã lưu</div>
+        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Đóng"></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const STORAGE_KEY = "bandien_shift_roster_v1";
+    const cycle = ["", "x", "hc", "CN"];
+    const dayNames = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật"];
+    const shifts = ["Ca.1", "Ca.2", "Ca.3"];
+    const defaultStaff = [
+      "Ngô Quyết Thắng",
+      "Đinh Văn Hậu",
+      "Hoàng Viết Hoàng",
+      "Nguyễn Đức Phong",
+      "Nguyễn Văn Tùng (Montana)",
+      "Nguyễn Đình Thủy (Montana)"
+    ];
+    let state;
+    let toast;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      toast = new bootstrap.Toast(document.getElementById("toast"), { delay: 1800 });
+      state = loadState();
+      bindEvents();
+      syncControls();
+      renderTable();
+    });
+
+    function defaultState() {
+      const weekStart = "2026-07-13";
+      const staff = defaultStaff.map(name => ({ name }));
+      const cells = {};
+      const set = (r, d, s, value) => { cells[`${r}-${d}-${s}`] = value; };
+      set(0,0,0,"CN"); set(0,1,0,"hc"); set(0,2,0,"hc"); set(0,3,0,"hc"); set(0,4,0,"hc"); set(0,5,0,"hc"); set(0,6,0,"hc");
+      set(1,0,0,"hc"); set(1,1,1,"x"); set(1,2,1,"CN"); set(1,3,1,"x"); set(1,4,0,"hc"); set(1,5,0,"hc"); set(1,6,0,"hc");
+      set(2,0,1,"x"); set(2,1,1,"CN"); set(2,2,1,"x"); set(2,3,1,"x"); set(2,4,1,"x"); set(2,5,1,"x"); set(2,6,1,"x");
+      set(3,0,0,"x"); set(3,1,0,"x"); set(3,2,0,"x"); set(3,3,1,"CN"); set(3,4,0,"x"); set(3,5,0,"x"); set(3,6,0,"x");
+      set(4,0,1,"x"); set(4,1,1,"x"); set(4,2,1,"x"); set(4,3,1,"x"); set(4,4,1,"CN"); set(4,5,0,"hc"); set(4,6,0,"hc");
+      set(5,0,0,"hc"); set(5,1,0,"hc"); set(5,2,0,"hc"); set(5,3,0,"hc"); set(5,4,0,"hc"); set(5,5,1,"x"); set(5,6,1,"CN");
+      return { weekStart, weekNo: getISOWeek(new Date(weekStart)), staff, cells };
+    }
+
+    function loadState() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultState();
+      } catch (_) {
+        return defaultState();
+      }
+    }
+
+    function bindEvents() {
+      document.getElementById("weekStart").addEventListener("change", e => {
+        state.weekStart = e.target.value;
+        state.weekNo = getISOWeek(new Date(e.target.value));
+        syncControls();
+        renderTable();
+        saveState(false);
+      });
+      document.getElementById("weekNo").addEventListener("input", e => {
+        state.weekNo = e.target.value;
+        renderTable();
+        saveState(false);
+      });
+      document.getElementById("btnAddStaff").addEventListener("click", addStaff);
+      document.getElementById("newStaffName").addEventListener("keydown", e => {
+        if (e.key === "Enter") addStaff();
+      });
+      document.getElementById("btnSave").addEventListener("click", () => saveState(true));
+      document.getElementById("btnExport").addEventListener("click", exportCsv);
+      document.getElementById("btnReset").addEventListener("click", resetTemplate);
+    }
+
+    function syncControls() {
+      document.getElementById("weekStart").value = state.weekStart;
+      document.getElementById("weekNo").value = state.weekNo;
+    }
+
+    function renderTable() {
+      const dates = weekDates(state.weekStart);
+      const table = document.getElementById("rosterTable");
+      const from = formatDate(dates[0]);
+      const to = formatDate(dates[6]);
+      let html = `
+        <colgroup>
+          <col class="stt-col"><col class="name-col">
+          ${Array.from({ length: 21 }).map(() => '<col class="shift-col">').join("")}
+        </colgroup>
+        <thead>
+          <tr>
+            <th></th>
+            <th class="title-cell">BẢNG PHÂN CA</th>
+            <th colspan="3" class="week-label">Tuần:</th>
+            <th colspan="3" class="week-value">${escapeHtml(state.weekNo)}</th>
+            <th colspan="6">Từ: &nbsp;&nbsp; ${from}</th>
+            <th colspan="8">Đến: &nbsp;&nbsp; ${to}</th>
+          </tr>
+          <tr>
+            <th rowspan="2">STT</th>
+            <th rowspan="2">HỌ &amp; TÊN</th>
+            ${dates.map((date, idx) => `<th colspan="3" class="${idx === 6 ? "date-red" : ""}">${dayNames[idx]} ${formatShortDate(date)}</th>`).join("")}
+          </tr>
+          <tr>
+            ${dates.map(() => shifts.map(s => `<th>${s}</th>`).join("")).join("")}
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="team-row"><td colspan="2">Tổ cơ điện Sân Golf</td><td colspan="21"></td></tr>
+          ${state.staff.map((person, rowIndex) => renderStaffRow(person, rowIndex)).join("")}
+        </tbody>`;
+      table.innerHTML = html;
+    }
+
+    function renderStaffRow(person, rowIndex) {
+      let row = `<tr><td>${rowIndex + 1}</td><td class="name-cell"><input value="${escapeAttr(person.name)}" onchange="renameStaff(${rowIndex}, this.value)"></td>`;
+      for (let d = 0; d < 7; d++) {
+        for (let s = 0; s < 3; s++) {
+          const key = `${rowIndex}-${d}-${s}`;
+          const value = state.cells[key] || "";
+          row += `<td tabindex="0" class="shift-cell ${classFor(value)}" onclick="cycleCell('${key}')" onkeydown="cellKey(event, '${key}')">${escapeHtml(value)}</td>`;
+        }
+      }
+      row += `</tr>`;
+      return row;
+    }
+
+    function classFor(value) {
+      if (value === "hc") return "hc";
+      if (value === "x") return "x";
+      if (value === "CN") return "cn";
+      return "";
+    }
+
+    function cycleCell(key) {
+      const current = state.cells[key] || "";
+      const next = cycle[(cycle.indexOf(current) + 1) % cycle.length];
+      if (next) state.cells[key] = next;
+      else delete state.cells[key];
+      renderTable();
+      saveState(false);
+    }
+
+    function cellKey(event, key) {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        cycleCell(key);
+      }
+      if (["Backspace", "Delete"].includes(event.key)) {
+        delete state.cells[key];
+        renderTable();
+        saveState(false);
+      }
+    }
+
+    function renameStaff(index, value) {
+      state.staff[index].name = value.trim() || `Nhân sự ${index + 1}`;
+      saveState(false);
+    }
+
+    function addStaff() {
+      const input = document.getElementById("newStaffName");
+      const name = input.value.trim();
+      if (!name) return;
+      state.staff.push({ name });
+      input.value = "";
+      renderTable();
+      saveState(true);
+    }
+
+    function saveState(showToast) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      if (showToast) notify("Đã lưu bảng phân ca");
+    }
+
+    function resetTemplate() {
+      if (!confirm("Khôi phục bảng mẫu theo ảnh?")) return;
+      state = defaultState();
+      syncControls();
+      renderTable();
+      saveState(true);
+    }
+
+    function exportCsv() {
+      const dates = weekDates(state.weekStart);
+      const headers = ["STT", "Họ tên"].concat(dates.flatMap(date => shifts.map(shift => `${formatShortDate(date)} ${shift}`)));
+      const rows = state.staff.map((person, r) => {
+        const values = [r + 1, person.name];
+        for (let d = 0; d < 7; d++) {
+          for (let s = 0; s < 3; s++) values.push(state.cells[`${r}-${d}-${s}`] || "");
+        }
+        return values;
+      });
+      const csv = [headers, ...rows].map(row => row.map(csvCell).join(",")).join("\n");
+      const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `bang-phan-ca-tuan-${state.weekNo}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function weekDates(start) {
+      const first = new Date(start + "T00:00:00");
+      return Array.from({ length: 7 }, (_, i) => {
+        const date = new Date(first);
+        date.setDate(first.getDate() + i);
+        return date;
+      });
+    }
+
+    function getISOWeek(date) {
+      const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+      const dayNum = d.getUTCDay() || 7;
+      d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+      return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    }
+
+    function formatDate(date) {
+      return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+    }
+
+    function formatShortDate(date) {
+      return `${date.getDate()}/ ${date.getMonth() + 1}`;
+    }
+
+    function csvCell(value) {
+      return '"' + String(value ?? "").replace(/"/g, '""') + '"';
+    }
+
+    function notify(message) {
+      document.getElementById("toastText").textContent = message;
+      toast.show();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[char]));
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value).replace(/`/g, "&#096;");
+    }
+  </script>
+</body>
+</html>
