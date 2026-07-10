@@ -161,7 +161,22 @@
       color: var(--ink);
     }
 
-    .week-item .badge-soft { margin-left: auto; }
+    .week-item .badge-soft { margin-left: auto; flex-shrink: 0; }
+
+    /* Cột ngày cố định để cột nội dung tự cắt chữ, không đẩy tràn khung */
+    .week-table { table-layout: fixed; width: 100%; }
+    .week-table .day-cell { width: 92px; }
+    .week-table td { overflow: hidden; }
+
+    @media (max-width: 760px) {
+      .week-table .day-cell { width: 64px; padding: 8px 2px 8px 8px; }
+      .week-table .day-cell .fw-bold { font-size: .8rem; }
+      .week-table .day-cell .small { font-size: .68rem; }
+      .week-table td { padding-left: 6px; padding-right: 6px; }
+      .week-item { padding: 6px; font-size: .78rem; gap: 6px; }
+      .week-item .badge-soft { padding: 3px 6px; font-size: .62rem; }
+      .week-item-task { font-size: .75rem; }
+    }
     .week-item.st-done { border-left-color: #2d8a5f; }
     .week-item.st-doing { border-left-color: #155ea8; }
     .week-item.st-help { border-left-color: #c2413b; }
