@@ -86,7 +86,6 @@
 
     .stt-col { width: 46px; }
     .name-col { width: 180px; text-align: left !important; }
-    .code-col { width: 150px; min-width: 150px; }
     .shift-col { width: 40px; min-width: 40px; }
     .name-cell { text-align: left !important; }
     .name-cell input {
@@ -209,7 +208,6 @@
       .shell { padding: 8px; }
       .toolbar .btn, .toolbar .form-control { font-size: .86rem; }
       .name-col { width: 170px; }
-      .code-col { width: 120px; min-width: 120px; }
       .shift-col { width: 38px; min-width: 38px; }
       .rule-grid { grid-template-columns: repeat(3, minmax(70px, 1fr)); }
       .skill-table { min-width: 430px; }
@@ -226,7 +224,6 @@
       table.roster { width: 100%; font-size: 12px; }
       .shift-col { width: 33px; }
       .name-col { width: 155px; }
-      .code-col { width: 115px; }
     }
   </style>
 </head>
@@ -317,6 +314,7 @@
         <span><i class="swatch" style="background:var(--hc)"></i>hc: hành chính</span>
         <span><i class="swatch" style="background:var(--x)"></i>x: trực/đi ca</span>
         <span><i class="swatch" style="background:var(--cn)"></i>CN: chủ nhật/nghỉ</span>
+        <span id="shiftLegendText"></span>
         <span class="text-secondary">Bấm vào ô để đổi: trống -> x -> hc -> CN.</span>
       </div>
     </section>
@@ -489,6 +487,7 @@
       document.getElementById("prioritizeOfficeWork").checked = !!state.rules.prioritizeOfficeWork;
       renderShiftRules();
       renderSkillList();
+      renderShiftLegend();
       renderShareSummary();
     }
 
@@ -586,14 +585,13 @@
       const to = formatDate(dates[6]);
       let html = `
         <colgroup>
-          <col class="stt-col"><col class="name-col"><col class="code-col">
+          <col class="stt-col"><col class="name-col">
           ${Array.from({ length: totalShiftCols }).map(() => '<col class="shift-col">').join("")}
         </colgroup>
         <thead>
           <tr>
             <th></th>
             <th class="title-cell">BẢNG PHÂN CA</th>
-            <th></th>
             <th colspan="${weekSpan}" class="week-label">Tuần:</th>
             <th colspan="${valueSpan}" class="week-value">${escapeHtml(state.weekNo)}</th>
             <th colspan="${fromSpan}">Từ: &nbsp;&nbsp; ${from}</th>
@@ -602,7 +600,6 @@
           <tr>
             <th rowspan="2">STT</th>
             <th rowspan="2">HỌ &amp; TÊN</th>
-            <th rowspan="2">KÝ HIỆU CA</th>
             ${dates.map((date, idx) => `<th colspan="${shifts.length}" class="${idx === 6 ? "date-red" : ""}">${dayNames[idx]} ${formatShortDate(date)}</th>`).join("")}
           </tr>
           <tr>
@@ -610,7 +607,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr class="team-row"><td colspan="3">Tổ cơ điện Sân Golf</td><td colspan="${totalShiftCols}"></td></tr>
+          <tr class="team-row"><td colspan="2">Tổ cơ điện Sân Golf</td><td colspan="${totalShiftCols}"></td></tr>
           ${state.staff.map((person, rowIndex) => renderStaffRow(person, rowIndex)).join("")}
         </tbody>`;
       table.innerHTML = html;
@@ -618,7 +615,7 @@
 
     function renderStaffRow(person, rowIndex) {
       const shifts = getShifts();
-      let row = `<tr><td>${rowIndex + 1}</td><td class="name-cell"><input value="${escapeAttr(person.name)}" onchange="renameStaff(${rowIndex}, this.value)"></td><td class="small">${escapeHtml(weeklyCodeSummary(rowIndex, shifts))}</td>`;
+      let row = `<tr><td>${rowIndex + 1}</td><td class="name-cell"><input value="${escapeAttr(person.name)}" onchange="renameStaff(${rowIndex}, this.value)"></td>`;
       for (let d = 0; d < 7; d++) {
         for (let s = 0; s < shifts.length; s++) {
           const key = `${rowIndex}-${d}-${s}`;
@@ -715,6 +712,7 @@
       shifts[index].name = value.trim() || `Ca.${index + 1}`;
       state.rules.shifts = shifts;
       renderTable();
+      renderShiftLegend();
       renderShareSummary();
       saveState(false);
     }
@@ -724,6 +722,7 @@
       shifts[index].code = value.trim() || `C${index + 1}`;
       state.rules.shifts = shifts;
       renderTable();
+      renderShiftLegend();
       renderShareSummary();
       saveState(false);
     }
@@ -732,6 +731,7 @@
       const shifts = getShifts();
       shifts[index].needed = clampNumber(value, 0, state.staff.length);
       state.rules.shifts = shifts;
+      renderShiftLegend();
       renderShareSummary();
       saveState(false);
     }
@@ -742,6 +742,7 @@
       shifts[index][field] = normalizeTime(value, "");
       state.rules.shifts = shifts;
       renderShiftRules();
+      renderShiftLegend();
       renderShareSummary();
       saveState(false);
     }
@@ -755,6 +756,7 @@
       }
       state.rules.shifts = shifts;
       renderShiftRules();
+      renderShiftLegend();
       renderShareSummary();
       saveState(false);
     }
@@ -763,6 +765,7 @@
       const shifts = getShifts();
       shifts[index].mealNote = value.trim();
       state.rules.shifts = shifts;
+      renderShiftLegend();
       renderShareSummary();
       saveState(false);
     }
@@ -890,10 +893,10 @@
     function exportCsv() {
       const dates = weekDates(state.weekStart);
       const shifts = getShifts();
-      const headers = ["STT", "Họ tên", "Ký hiệu ca"].concat(dates.flatMap(date => shifts.map(shift => `${formatShortDate(date)} ${shift.code || shift.name}`)));
-      const shiftInfo = ["Thông tin ca", "", ""].concat(dates.flatMap(() => shifts.map(shiftSummary)));
+      const headers = ["STT", "Họ tên"].concat(dates.flatMap(date => shifts.map(shift => `${formatShortDate(date)} ${shift.code || shift.name}`)));
+      const shiftInfo = ["Thông tin ca", ""].concat(dates.flatMap(() => shifts.map(shiftSummary)));
       const rows = state.staff.map((person, r) => {
-        const values = [r + 1, person.name, weeklyCodeSummary(r, shifts)];
+        const values = [r + 1, person.name];
         for (let d = 0; d < 7; d++) {
           for (let s = 0; s < shifts.length; s++) values.push(state.cells[`${r}-${d}-${s}`] || "");
         }
@@ -946,16 +949,29 @@
       return items.join(", ");
     }
 
+    function renderShiftLegend() {
+      const target = document.getElementById("shiftLegendText");
+      if (!target) return;
+      const text = getShifts()
+        .map(shift => `${shift.code || shift.name}: ${shift.name} ${shiftTimeText(shift)}`)
+        .join("; ");
+      target.textContent = text ? `Giờ ca: ${text}.` : "";
+    }
+
     function normalizeTime(value, fallback) {
       const text = String(value || "").trim();
       return /^\d{2}:\d{2}$/.test(text) ? text : fallback;
     }
 
     function shiftSummary(shift) {
+      return `${shift.code || shift.name}: ${shiftTimeText(shift)}`;
+    }
+
+    function shiftTimeText(shift) {
       const first = `${shift.start1 || "?"}-${shift.end1 || "?"}`;
       const second = shift.split ? `; ${shift.start2 || "?"}-${shift.end2 || "?"}` : "";
       const meal = shift.mealNote ? `; nghỉ ăn: ${shift.mealNote}` : "";
-      return `${shift.code || shift.name}: ${first}${second}${meal}`;
+      return `${first}${second}${meal}`;
     }
 
     function renderShareSummary() {
