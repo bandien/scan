@@ -1585,6 +1585,11 @@
         updateUserButton();
         loginModal.hide();
         showToast((action === "nhatkyRegister" ? "Đã tạo tài khoản. Xin chào " : "Xin chào ") + (data.name || name));
+        
+        // Buộc tải lại dữ liệu theo đúng tổ của tài khoản vừa đăng nhập
+        localStorage.removeItem(STORAGE_KEYS.plans);
+        loadPlans(true).then(() => render());
+        loadServerLogs();
       } catch (error) {
         showLoginError("Không kết nối được máy chủ: " + error.message);
       } finally {
