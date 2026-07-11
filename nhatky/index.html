@@ -116,9 +116,20 @@
       white-space: nowrap;
     }
 
-    .badge-carry { background: #fff7df; color: #9a6b16; border-color: #ffe5a3; }
     .carry-row td { background: #fffaeb; }
     .plan-card.carry { background: #fffaeb; }
+
+    .plan-meta {
+      color: var(--muted);
+      font-size: .82rem;
+      font-weight: 500;
+      white-space: normal;
+    }
+
+    .reminder-mark {
+      color: #5f6b7a;
+      font-weight: 700;
+    }
 
     .week-table td { vertical-align: top; }
     .week-table .day-cell { width: 110px; white-space: nowrap; }
@@ -1666,10 +1677,22 @@
       return Boolean(iso && planReminder(plan) === iso);
     }
 
-    // Badge "Ngày x/y" cho việc nhiều ngày đang trong tiến trình
-    function multiDayBadge(plan, selectedDate) {
+    function reminderMark(plan, selectedDate) {
       if (!isDueForReview(plan, selectedDate)) return "";
-      return `<span class="badge-soft badge-doing" title="Deadline cuối ${shortDateVn(planDeadline(plan))}">Nhắc ${shortDateVn(planReminder(plan))}</span>`;
+      return `<span class="reminder-mark" title="Ngày nhắc/xem lại">✓ nhắc ${shortDateVn(planReminder(plan))}</span>`;
+    }
+
+    function planMetaLine(plan, selectedDate, includePerson) {
+      const parts = [];
+      if (plan.time) parts.push(`<i class="bi bi-clock me-1"></i>${escapeHtml(plan.time)}`);
+      else parts.push('<i class="bi bi-clock me-1"></i>Chưa xếp giờ');
+      if (includePerson && plan.assignee) parts.push(`<i class="bi bi-person-fill me-1"></i>${escapeHtml(plan.assignee)}`);
+      if (plan.dateEnd) parts.push(`deadline ${shortDateVn(planDeadline(plan))}`);
+      const reminder = reminderMark(plan, selectedDate);
+      if (reminder) parts.push(reminder);
+      const syncIcon = planSyncIcon(plan);
+      if (syncIcon) parts.push(syncIcon);
+      return parts.join(' <span class="mx-1">·</span> ');
     }
 
     function typeBadge(plan) {
@@ -1769,7 +1792,7 @@
           <td class="task-text"><div class="plan-task-title">${escapeHtml(plan.task || "")}</div>${typeBadge(plan) || doneQtyBadge(plan) ? `<div class="d-flex flex-wrap gap-1 mt-1">${typeBadge(plan)} ${doneQtyBadge(plan)}</div>` : ""}</td>
           <td class="text-brand fw-semibold">${escapeHtml(plan.area || "")}${plan.asset ? `<div class="small">${escapeHtml(plan.asset)}</div>` : ""}</td>
           <td>${escapeHtml(plan.team || "")}<div class="small text-secondary">${escapeHtml(plan.assignee || "")}</div></td>
-          <td class="fw-bold text-nowrap">${escapeHtml(plan.time || "")}${planSyncIcon(plan)}${carry ? `<div><span class="badge-soft badge-carry">Quá hạn ${shortDateVn(planDeadline(plan))}</span></div>` : ""}${multiDayBadge(plan, selectedDate) ? `<div>${multiDayBadge(plan, selectedDate)}</div>` : ""}</td>
+          <td class="plan-meta">${planMetaLine(plan, selectedDate, false)}</td>
           <td>${priorityBadge(plan.priority)}</td>
           <td>${statusBadge(plan.status)}</td>
           <td class="text-end text-nowrap">
@@ -1797,14 +1820,7 @@
             <div class="min-w-0">
               ${isHigh ? '<span class="badge bg-danger text-white mb-1" style="font-size:.7rem;">⚠ QUAN TRỌNG</span>' : ''}
               <div class="plan-card-title">${escapeHtml(plan.task || "")}</div>
-              <div class="small text-secondary" style="margin-top: 4px;">
-                <i class="bi bi-clock me-1"></i>${escapeHtml(plan.time || "Chưa xếp giờ")}
-                ${teamVisible ? ' <span class="mx-1">·</span> ' + escapeHtml(plan.team) : ''}
-                ${plan.assignee ? ' <span class="mx-1">·</span> <i class="bi bi-person-fill me-1"></i>' + escapeHtml(plan.assignee) : ''}
-                ${planSyncIcon(plan)}
-                ${carry ? ' <span class="badge-soft badge-carry">Quá hạn ' + shortDateVn(planDeadline(plan)) + '</span>' : ''}
-                ${multiDayBadge(plan, selectedDate)}
-              </div>
+              <div class="plan-meta" style="margin-top: 4px;">${planMetaLine(plan, selectedDate, true)}${teamVisible ? ' <span class="mx-1">·</span> ' + escapeHtml(plan.team) : ''}</div>
             </div>
             <div class="d-flex flex-column gap-1">
               <button class="btn btn-success text-nowrap fw-bold" type="button" onclick="selectPlan('${escapeAttr(plan.id)}')">
@@ -1841,7 +1857,7 @@
           <button class="week-item ${weekItemClass(plan.status)}" type="button" onclick="openPlanModal('${escapeAttr(plan.id)}')" title="Bấm để sửa kế hoạch">
             <div class="week-item-main">
               <div class="week-item-task">${escapeHtml(plan.task || "")}</div>
-              <div class="week-item-meta">${escapeHtml(plan.time || "--")}${[plan.area, plan.asset].filter(Boolean).length ? " · " + [plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ") : ""} · Deadline ${shortDateVn(planDeadline(plan))}${plan.type === "Phát sinh" ? ' · <span class="text-warning fw-bold">Phát sinh</span>' : ""}</div>
+              <div class="week-item-meta">${planMetaLine(plan, iso, true)}${[plan.area, plan.asset].filter(Boolean).length ? " · " + [plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ") : ""}${plan.type === "Phát sinh" ? ' · <span class="text-warning fw-bold">Phát sinh</span>' : ""}</div>
             </div>
             ${statusBadge(plan.status)}
           </button>
