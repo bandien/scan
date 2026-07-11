@@ -256,7 +256,11 @@
       <div class="row g-2 align-items-end">
         <div class="col-6 col-md-2">
           <label class="form-label fw-bold small" for="weekStart">Từ ngày</label>
-          <input class="form-control" id="weekStart" type="date">
+          <div class="input-group">
+            <button class="btn btn-outline-secondary" id="btnPrevWeek" type="button" title="Tuần trước"><i class="bi bi-chevron-left"></i></button>
+            <input class="form-control" id="weekStart" type="date">
+            <button class="btn btn-outline-secondary" id="btnNextWeek" type="button" title="Tuần sau"><i class="bi bi-chevron-right"></i></button>
+          </div>
         </div>
         <div class="col-6 col-md-2">
           <label class="form-label fw-bold small" for="weekNo">Tuần</label>
@@ -356,6 +360,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     const STORAGE_KEY = "bandien_shift_roster_v1";
+    const HISTORY_KEY = "bandien_shift_roster_weeks_v1";
     const cycle = ["", "x", "hc", "CN"];
     const dayNames = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật"];
     const dayCodes = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
@@ -439,7 +444,9 @@
 
     function loadState() {
       try {
-        return normalizeState(JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultState());
+        const saved = normalizeState(JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultState());
+        saveWeekState(saved);
+        return loadWeekState(saved.weekStart, saved);
       } catch (_) {
         return defaultState();
       }
@@ -483,19 +490,78 @@
       }));
     }
 
+    function loadWeekState(weekStart, fallback) {
+      const weeks = getWeekStore();
+      const key = weekKey(weekStart);
+      if (weeks[key]) return normalizeState(weeks[key]);
+      const base = normalizeState(fallback || state || defaultState());
+      return {
+        ...base,
+        weekStart: key,
+        weekNo: getISOWeek(new Date(key)),
+        cells: {}
+      };
+    }
+
+    function saveWeekState(data) {
+      const normalized = normalizeState(data);
+      const weeks = getWeekStore();
+      weeks[weekKey(normalized.weekStart)] = normalized;
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(weeks));
+      return normalized;
+    }
+
+    function getWeekStore() {
+      try {
+        return JSON.parse(localStorage.getItem(HISTORY_KEY) || "{}") || {};
+      } catch (_) {
+        return {};
+      }
+    }
+
+    function weekKey(value) {
+      return formatISODate(startOfWeek(value));
+    }
+
+    function startOfWeek(value) {
+      const date = new Date((value || defaultState().weekStart) + "T00:00:00");
+      const day = date.getDay() || 7;
+      date.setDate(date.getDate() - day + 1);
+      return date;
+    }
+
+    function formatISODate(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function switchWeek(value) {
+      saveState(false);
+      state = loadWeekState(weekKey(value), state);
+      syncControls();
+      renderTable();
+      saveState(false);
+    }
+
+    function shiftWeek(offset) {
+      const date = startOfWeek(state.weekStart);
+      date.setDate(date.getDate() + offset * 7);
+      switchWeek(formatISODate(date));
+    }
+
     function bindEvents() {
       document.getElementById("weekStart").addEventListener("change", e => {
-        state.weekStart = e.target.value;
-        state.weekNo = getISOWeek(new Date(e.target.value));
-        syncControls();
-        renderTable();
-        saveState(false);
+        switchWeek(e.target.value);
       });
       document.getElementById("weekNo").addEventListener("input", e => {
         state.weekNo = e.target.value;
         renderTable();
         saveState(false);
       });
+      document.getElementById("btnPrevWeek").addEventListener("click", () => shiftWeek(-1));
+      document.getElementById("btnNextWeek").addEventListener("click", () => shiftWeek(1));
       document.getElementById("btnAddStaff").addEventListener("click", addStaff);
       document.getElementById("newStaffName").addEventListener("keydown", e => {
         if (e.key === "Enter") addStaff();
@@ -922,7 +988,10 @@
     }
 
     function saveState(showToast) {
+      state.weekStart = weekKey(state.weekStart);
+      state.weekNo = getISOWeek(new Date(state.weekStart));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      saveWeekState(state);
       if (showToast) notify("Đã lưu bảng phân ca");
     }
 
