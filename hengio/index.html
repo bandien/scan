@@ -71,7 +71,10 @@
             <h1 class="m-0 fw-bold">Cài đặt đồng hồ bơm</h1>
           </div>
         </div>
-        <a class="btn btn-outline-primary btn-sm" href="../index.html"><i class="bi bi-house me-1"></i>Trang chính</a>
+        <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-outline-secondary btn-sm" type="button" id="btnFontScale" title="Phóng to chữ (bấm để đổi cỡ)"><span class="fw-bold" id="fontScaleLabel">A</span></button>
+          <a class="btn btn-outline-primary btn-sm" href="../index.html"><i class="bi bi-house me-1"></i>Trang chính</a>
+        </div>
       </div>
     </div>
   </header>
@@ -133,7 +136,25 @@
     let settings = [];
     let toast;
 
+    // Phóng to chữ toàn trang cho nhân viên lớn tuổi / mắt kém — mọi cỡ chữ
+    // dùng rem nên chỉ cần đổi font-size gốc; mức chọn lưu theo máy.
+    const FONT_SCALES = [100, 115, 130];
+    function applyFontScale() {
+      const scale = parseInt(localStorage.getItem("bandien_hengio_fontscale") || "100", 10);
+      document.documentElement.style.fontSize = scale + "%";
+      document.getElementById("fontScaleLabel").textContent = scale <= 100 ? "A" : scale <= 115 ? "A+" : "A++";
+    }
+    function cycleFontScale() {
+      const current = parseInt(localStorage.getItem("bandien_hengio_fontscale") || "100", 10);
+      const next = FONT_SCALES[(FONT_SCALES.indexOf(current) + 1) % FONT_SCALES.length];
+      localStorage.setItem("bandien_hengio_fontscale", String(next));
+      applyFontScale();
+    }
+
     document.addEventListener("DOMContentLoaded", async () => {
+      applyFontScale();
+      document.getElementById("btnFontScale").addEventListener("click", cycleFontScale);
+
       toast = new bootstrap.Toast(document.getElementById("toast"), { delay: 2200 });
       document.getElementById("btnReload").addEventListener("click", () => loadSettings(true));
       settings = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null") || defaults;

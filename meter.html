@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chốt Chỉ Số Đồng Hồ | BanDienScan</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -72,7 +72,10 @@
                 <div class="fw-black text-dark" style="font-size: 0.95rem;" id="headerTitle">Chốt Chỉ Số Đồng Hồ</div>
             </div>
         </div>
-        <button class="btn btn-light border-2 rounded-circle shadow-sm" onclick="loadMeterData()"><i class="bi bi-arrow-clockwise text-dark fw-bold"></i></button>
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-light border-2 rounded-circle shadow-sm" type="button" id="btnFontScale" title="Phóng to chữ (bấm để đổi cỡ)" style="width: 40px; height: 40px; padding: 0;"><span class="fw-bold" id="fontScaleLabel">A</span></button>
+            <button class="btn btn-light border-2 rounded-circle shadow-sm" onclick="loadMeterData()"><i class="bi bi-arrow-clockwise text-dark fw-bold"></i></button>
+        </div>
     </div>
 
     <!-- Alert Box -->
@@ -184,12 +187,30 @@
         document.getElementById('eventTimeInput').value = now.toISOString().slice(0, 16);
     }
 
+    // Phóng to chữ toàn trang cho nhân viên lớn tuổi / mắt kém — mọi cỡ chữ
+    // dùng rem nên chỉ cần đổi font-size gốc; mức chọn lưu theo máy.
+    const FONT_SCALES = [100, 115, 130];
+    function applyFontScale() {
+        const scale = parseInt(localStorage.getItem('cmms_meter_fontscale') || "100", 10);
+        document.documentElement.style.fontSize = scale + "%";
+        document.getElementById("fontScaleLabel").textContent = scale <= 100 ? "A" : scale <= 115 ? "A+" : "A++";
+    }
+    function cycleFontScale() {
+        const current = parseInt(localStorage.getItem('cmms_meter_fontscale') || "100", 10);
+        const next = FONT_SCALES[(FONT_SCALES.indexOf(current) + 1) % FONT_SCALES.length];
+        localStorage.setItem('cmms_meter_fontscale', String(next));
+        applyFontScale();
+    }
+
     window.onload = function() {
         const urlParams = new URLSearchParams(window.location.search);
         currentUid = urlParams.get('uid') || urlParams.get('id') || "NHA.DIEN.NO.01";
-        
+
         const savedOp = localStorage.getItem('cmms_op_name');
         if (savedOp) document.getElementById('operatorInput').value = savedOp;
+
+        applyFontScale();
+        document.getElementById('btnFontScale').addEventListener('click', cycleFontScale);
 
         resetToCurrentTime();
         loadMeterData();
