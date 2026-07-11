@@ -845,20 +845,24 @@
         </div>
         <div class="modal-body">
           <label class="form-label" for="loginName">Tên đăng nhập</label>
-          <input class="form-control mb-2" id="loginName" list="loginNameSuggestions" placeholder="Nhập tên đăng nhập (VD: ThanhNV)" autocomplete="username">
+          <input class="form-control mb-2" id="loginName" list="loginNameSuggestions" placeholder="Nhập tên đăng nhập (VD: thangnq)" autocomplete="username">
           <datalist id="loginNameSuggestions"></datalist>
           
-          <label class="form-label text-primary" for="loginFullName">Họ tên đầy đủ <small class="text-muted">(Chỉ nhập khi Đăng ký)</small></label>
-          <input class="form-control mb-2" id="loginFullName" placeholder="Nhập họ và tên thật (Ví dụ: Nguyễn Văn Thành)" autocomplete="name">
+          <div id="registerGroup" class="d-none">
+            <label class="form-label text-primary" for="loginFullName">Họ tên đầy đủ <small class="text-muted">(Bắt buộc)</small></label>
+            <input class="form-control mb-2" id="loginFullName" placeholder="Nhập họ và tên thật (Ví dụ: Nguyễn Văn Thành)" autocomplete="name">
+          </div>
           
           <label class="form-label" for="loginPassword">Mật khẩu</label>
           <input class="form-control" id="loginPassword" type="password" placeholder="Mật khẩu tài khoản" autocomplete="current-password">
-          <div class="small text-secondary mt-2" id="loginHint">Đã có tài khoản thì đăng nhập; chưa có thì tạo tài khoản mới với mật khẩu tự đặt.</div>
+          <div class="small text-secondary mt-2" id="loginHint">Nhập mật khẩu để đăng nhập vào tài khoản của bạn.</div>
           <div class="small text-danger mt-1 d-none" id="loginError"></div>
         </div>
-        <div class="modal-footer d-flex gap-2">
-          <button class="btn btn-outline-primary flex-fill" type="button" id="btnRegister"><i class="bi bi-person-plus me-1"></i>Tạo tài khoản mới</button>
-          <button class="btn btn-primary flex-fill" type="button" id="btnLogin"><i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập</button>
+        <div class="modal-footer flex-column align-items-stretch">
+          <button class="btn btn-primary w-100" type="button" id="btnSubmitAuth"><i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập</button>
+          <div class="text-center mt-2">
+            <a href="#" id="linkToggleAuthMode" class="text-decoration-none small text-muted">Chưa có tài khoản? Tạo tài khoản mới</a>
+          </div>
         </div>
       </div>
     </div>
@@ -1112,8 +1116,11 @@
       document.getElementById("btnToggleLogs").addEventListener("click", toggleLogs);
       document.getElementById("btnUser").addEventListener("click", openLogin);
       document.getElementById("btnAccessGateLogin").addEventListener("click", openLogin);
-      document.getElementById("btnLogin").addEventListener("click", doLogin);
-      document.getElementById("btnRegister").addEventListener("click", doRegister);
+      document.getElementById("btnSubmitAuth").addEventListener("click", doSubmitAuth);
+      document.getElementById("linkToggleAuthMode").addEventListener("click", e => {
+        e.preventDefault();
+        toggleAuthMode();
+      });
       document.getElementById("btnFontScale").addEventListener("click", cycleFontScale);
       document.getElementById("progressChips").addEventListener("click", event => {
         const btn = event.target.closest("button[data-value]");
@@ -1638,7 +1645,29 @@
       } catch (error) { /* offline → vẫn cho gõ tay */ }
     }
 
+    let authMode = "login";
+
+    function toggleAuthMode() {
+      authMode = authMode === "login" ? "register" : "login";
+      const isLogin = authMode === "login";
+      
+      document.getElementById("registerGroup").classList.toggle("d-none", isLogin);
+      document.getElementById("btnSubmitAuth").innerHTML = isLogin 
+        ? '<i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập' 
+        : '<i class="bi bi-person-plus me-1"></i>Tạo tài khoản mới';
+      document.getElementById("linkToggleAuthMode").textContent = isLogin 
+        ? "Chưa có tài khoản? Tạo tài khoản mới" 
+        : "Đã có tài khoản? Đăng nhập ngay";
+      document.getElementById("loginHint").textContent = isLogin
+        ? "Nhập mật khẩu để đăng nhập vào tài khoản của bạn."
+        : "Tạo tài khoản mới với tên đăng nhập (viết tắt) và họ tên thật.";
+        
+      showLoginError("");
+    }
+
     function openLogin() {
+      authMode = "register";
+      toggleAuthMode(); // Reset to login mode
       document.getElementById("loginName").value = currentUser();
       const fnInput = document.getElementById("loginFullName");
       if (fnInput) fnInput.value = "";
@@ -1702,17 +1731,22 @@
       }
     }
 
+    function doSubmitAuth() {
+      if (authMode === "login") doLogin();
+      else doRegister();
+    }
+
     function doLogin() {
       const { name, password } = readLoginForm();
       if (!name || !password) { showLoginError("Nhập đủ tên đăng nhập và mật khẩu"); return; }
-      callAuthAction("nhatkyLogin", name, "", password, document.getElementById("btnLogin"));
+      callAuthAction("nhatkyLogin", name, "", password, document.getElementById("btnSubmitAuth"));
     }
 
     function doRegister() {
       const { name, fullName, password } = readLoginForm();
       if (!name || !password || !fullName) { showLoginError("Nhập đủ tên đăng nhập, họ tên đầy đủ và mật khẩu"); return; }
       if (password.length < 4) { showLoginError("Mật khẩu tối thiểu 4 ký tự"); return; }
-      callAuthAction("nhatkyRegister", name, fullName, password, document.getElementById("btnRegister"));
+      callAuthAction("nhatkyRegister", name, fullName, password, document.getElementById("btnSubmitAuth"));
     }
 
     // Sửa/tạo/xóa kế hoạch → tự ghi 1 dòng nhật ký lưu vết cho người thao tác
