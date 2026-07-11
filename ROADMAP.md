@@ -1,3 +1,15 @@
+---
+title: Roadmap: 11_BanDienScan (Electrical Department Maintenance)
+aliases:
+  - roadmap
+  - roadmap: 11_bandienscan (electrical department maintenance)
+tags:
+  - khac
+  - scan-cmms
+  - dang-thuc-hien
+date: 2026-06-08
+updated: 2026-06-08
+---
 # Roadmap: 11_BanDienScan (Electrical Department Maintenance)
 
 > Module quét QR báo cáo bảo trì ban điện độc lập. CMMS Mini WebApp cho Ban Điện — Hapulico.

@@ -1,3 +1,15 @@
+---
+title: QUY TẮC ĐẶT TÊN VÀ MÃ HÓA HẠ TẦNG KỸ THUẬT (CODING SYSTEM STANDARD)
+aliases:
+  - quy tac dat ten tang
+  - quy tắc đặt tên và mã hóa hạ tầng kỹ thuật (coding system standard)
+tags:
+  - khac
+  - scan-cmms
+  - dang-thuc-hien
+date: 2026-06-08
+updated: 2026-06-08
+---
 # QUY TẮC ĐẶT TÊN VÀ MÃ HÓA HẠ TẦNG KỸ THUẬT (CODING SYSTEM STANDARD)
 
 Bộ tài liệu này quy định chuẩn mã hóa cấu trúc tên cho hệ thống thiết bị cơ điện (M&E), cáp mạng và hạ tầng kỹ thuật. Mục tiêu nhằm tối ưu hóa khả năng nhận diện OCR/AI, đồng bộ dữ liệu checklist vận hành và chuẩn hóa cơ sở dữ liệu.
@@ -53,7 +65,10 @@ Tất cả các mã định danh thiết bị, tủ điện và đường dây p
   - `TĐK-BOM1_PUMP01`: Cáp nguồn đi từ tủ điều khiển bơm 1 ra đến đầu cực động cơ bơm 01.
 
 ### 2.4. Hệ thống Cáp Mạng & Hạ tầng CNTT (Data Cables & IT)
-Tuân thủ nguyên tắc phân cấp từ Phòng máy trung tâm $ightarrow$ Tủ Rack $ightarrow$ Thanh đấu nối $ightarrow$ Đầu cuối.
+Tuân thủ nguyên tắc phân cấp từ Phòng máy trung tâm $
+ightarrow$ Tủ Rack $
+ightarrow$ Thanh đấu nối $
+ightarrow$ Đầu cuối.
 - **Ký hiệu Tủ mạng:**
   - `MDF` (Main Distribution Frame): Tủ mạng trung tâm
   - `IDF` (Intermediate Distribution Frame): Tủ mạng nhánh / tầng

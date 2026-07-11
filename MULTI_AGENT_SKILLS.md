@@ -1,3 +1,15 @@
+---
+title: Multi-Agent System (MAS) Workflow Skill
+aliases:
+  - skills
+  - multi-agent system (mas) workflow skill
+tags:
+  - khac
+  - scan-cmms
+  - dang-thuc-hien
+date: 2026-06-08
+updated: 2026-06-08
+---
 # Multi-Agent System (MAS) Workflow Skill
 
 Hệ thống Multi-Agent (MAS) được thiết kế để tối ưu hóa quy trình làm việc giữa **AI Kiến trúc (Architect)** và các **AI Thực thi (Sub-agents/Workers)**.
