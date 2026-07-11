@@ -148,14 +148,14 @@ function migrateAccountsToUsers() {
   const nhatkySheet = ss.getSheetByName("NhatKyAccounts");
   if (!nhatkySheet) {
     Logger.log("❌ Không tìm thấy sheet NhatKyAccounts");
-    return;
+    return "Không tìm thấy sheet NhatKyAccounts";
   }
   
   const userSheet = getSheet(SHEETS.USERS);
   const nhatkyData = nhatkySheet.getDataRange().getValues();
   if (nhatkyData.length < 2) {
     Logger.log("❌ Không có dữ liệu để dồn (Sheet NhatKyAccounts trống)");
-    return;
+    return "Không có dữ liệu để dồn (Sheet NhatKyAccounts trống)";
   }
   
   const newRows = [];
@@ -182,6 +182,29 @@ function migrateAccountsToUsers() {
     userSheet.getRange(userSheet.getLastRow() + 1, 1, newRows.length, 7).setValues(newRows);
     Logger.log(`✅ Đã dồn thành công ${newRows.length} tài khoản sang sheet Users.`);
     Logger.log(`⚠️ Lưu ý: Mật khẩu mặc định của các tài khoản này là 'Sangolf@123'`);
+    return `Đã dồn thành công ${newRows.length} tài khoản.`;
+  } else {
+    return "Không có dữ liệu hợp lệ để dồn.";
+  }
+}
+
+function deleteNhatKyAccountsSheet() {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  const sheet = ss.getSheetByName("NhatKyAccounts");
+  if (sheet) {
+    ss.deleteSheet(sheet);
+    return "Đã xóa thành công sheet NhatKyAccounts.";
+  } else {
+    return "Không tìm thấy sheet NhatKyAccounts (có thể đã bị xóa trước đó).";
+  }
+}
+
+function handleMigrateAccountsEndpoint() {
+  try {
+    const msg = deleteNhatKyAccountsSheet();
+    return contentResponse({ status: "success", message: msg });
+  } catch (err) {
+    return contentResponse({ status: "error", message: err.toString() });
   }
 }
 
