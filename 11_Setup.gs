@@ -112,3 +112,76 @@ function ensureSheet(ss, name, headers) {
 function ping() {
   return contentResponse({ status: "success", message: "Pong! BanDienScan Backend v3 active." });
 }
+
+// ── Hàm hỗ trợ tạo username từ họ tên ──────────────────────────────────────────
+function removeVietnameseTones_(str) {
+  str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+  str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+  str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+  str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+  str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+  str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+  str = str.replace(/đ/g, "d");
+  str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
+  str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
+  str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
+  str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
+  str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
+  str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
+  str = str.replace(/Đ/g, "D");
+  return str;
+}
+
+function generateUsername_(fullName) {
+  if (!fullName) return "";
+  let cleanName = removeVietnameseTones_(fullName).toLowerCase().trim();
+  let parts = cleanName.split(/\s+/);
+  if (parts.length === 1) return parts[0];
+  let lastName = parts.pop();
+  let initials = parts.map(p => p.charAt(0)).join("");
+  return lastName + initials;
+}
+
+// ── Hàm dồn dữ liệu từ NhatKyAccounts sang Users ─────────────────────────────
+function migrateAccountsToUsers() {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  const nhatkySheet = ss.getSheetByName("NhatKyAccounts");
+  if (!nhatkySheet) {
+    Logger.log("❌ Không tìm thấy sheet NhatKyAccounts");
+    return;
+  }
+  
+  const userSheet = getSheet(SHEETS.USERS);
+  const nhatkyData = nhatkySheet.getDataRange().getValues();
+  if (nhatkyData.length < 2) {
+    Logger.log("❌ Không có dữ liệu để dồn (Sheet NhatKyAccounts trống)");
+    return;
+  }
+  
+  const newRows = [];
+  // Cấu trúc Users: ["Username","FullName","PasswordHash","Role","Teams","CreatedAt","LastLoginAt"]
+  // Cấu trúc NhatKyAccounts cũ: ["Name", "PasswordHash", "CreatedAt", "LastLoginAt", "TeamGroup"]
+  
+  for (let i = 1; i < nhatkyData.length; i++) {
+    let r = nhatkyData[i];
+    let fullName = String(r[0]).trim();
+    if (!fullName) continue;
+    
+    let username = generateUsername_(fullName);
+    let passwordPlain = "Sangolf@123";
+    let passwordHash = hashPassword_(username, passwordPlain);
+    let role = "Operator";
+    let teams = r[4] || "- Chưa phân tổ -";
+    let createdAt = r[2] || new Date();
+    let lastLoginAt = r[3] || "";
+    
+    newRows.push([username, fullName, passwordHash, role, teams, createdAt, lastLoginAt]);
+  }
+  
+  if (newRows.length > 0) {
+    userSheet.getRange(userSheet.getLastRow() + 1, 1, newRows.length, 7).setValues(newRows);
+    Logger.log(`✅ Đã dồn thành công ${newRows.length} tài khoản sang sheet Users.`);
+    Logger.log(`⚠️ Lưu ý: Mật khẩu mặc định của các tài khoản này là 'Sangolf@123'`);
+  }
+}
+
