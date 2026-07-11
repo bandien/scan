@@ -42,6 +42,8 @@ function doGet(e) {
       case 'getStaff':          return handleGetStaff(e);
       case 'getProjects':       return handleGetProjects(e);
       case 'getShifts':         return handleGetShifts(e);
+      case 'getRosterStaff':    return handleGetRosterStaff(e);      // Bảng phân ca (trang phanca)
+      case 'getRosterWeek':     return handleGetRosterWeek(e);       // Bảng phân ca (trang phanca)
       case 'getAnalyticsData':  return handleGetAnalyticsData(e);
       case 'getMaintenanceDue': return handleGetMaintenanceDue(e);
       case 'getMeterPoints':    return handleGetMeterPoints(e);     // Phase 11
@@ -53,6 +55,7 @@ function doGet(e) {
       case 'nhatkyAccounts':    return handleListAccounts(e);       // Danh sách tài khoản trang nhatky
       case 'tempDumpDevices':   return handleTempDumpDevices(e);
       case 'migrateDevicesData':return handleMigrateDevicesData(e);
+      case 'migrateAccounts':   return handleMigrateAccountsEndpoint(); // Migration for Nhatky accounts
       default:                  return handleGetDevice(e);          // UID lookup
     }
   } catch (err) {
@@ -101,6 +104,7 @@ function doPost(e) {
       nhatkyLogin:          handleNhatKyLogin,
       savePumpTimerSetting: handleSavePumpTimerSetting,
       seedPumpTimerSettings: handleSeedPumpTimerSettings,
+      saveRosterWeek:       handleSaveRosterWeek,       // Bảng phân ca (trang phanca)
       // Masters
       createProject:        handleCreateProject,
       updateProject:        handleUpdateProject,
@@ -175,6 +179,12 @@ function handleGetWorkLogs(e) {
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return contentResponse({ status: "success", logs: [] });
 
+  const isPrivileged = teamGroup === "*" || teamGroup.toLowerCase() === "admin";
+  // Không có tài khoản, hoặc tài khoản chưa được phân nhóm tổ → không trả về nhật ký nào
+  if (!isPrivileged && (!teamGroup || teamGroup === "- Chưa phân tổ -")) {
+    return contentResponse({ status: "success", logs: [] });
+  }
+
   const days = Math.max(1, parseInt(e.parameter.days, 10) || 7);
   const cutoff = Utilities.formatDate(new Date(Date.now() - days * 86400000), Session.getScriptTimeZone(), "yyyy-MM-dd");
   const maxRows = 400;
@@ -186,9 +196,10 @@ function handleGetWorkLogs(e) {
     if (!String(r[0]).trim()) return;
     const workDate = formatPlanDate_(r[2]);
     if (workDate && workDate < cutoff) return;
-    
-    const rTeam = String(r[18] || "").trim();
-    if (teamGroup && teamGroup !== "*" && teamGroup.toLowerCase() !== "admin") {
+
+    // Không có quyền admin → chỉ lấy đúng nhật ký của tổ mình
+    if (!isPrivileged) {
+      const rTeam = String(r[18] || "").trim();
       if (rTeam !== teamGroup) return;
     }
 
