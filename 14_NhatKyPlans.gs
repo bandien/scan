@@ -84,14 +84,20 @@ function handleGetPlans(e) {
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return contentResponse({ status: "success", plans: [] });
 
+  const isPrivileged = teamGroup === "*" || teamGroup.toLowerCase() === "admin";
+  // Không có tài khoản, hoặc tài khoản chưa được phân nhóm tổ → không trả về kế hoạch nào
+  if (!isPrivileged && (!teamGroup || teamGroup === "- Chưa phân tổ -")) {
+    return contentResponse({ status: "success", plans: [] });
+  }
+
   let totals = null; // Lazy-load only when some plan rows have empty DoneQty
   const rows = sheet.getRange(2, 1, lastRow - 1, 20).getValues();
   const plans = rows
     .filter(function(r) {
       if (String(r[0]).trim() === "") return false;
-      const rTeam = String(r[3] || "").trim();
-      // Nếu user có TeamGroup cụ thể (khác rỗng, *, admin), chỉ lấy việc của đúng tổ đó
-      if (teamGroup && teamGroup !== "*" && teamGroup.toLowerCase() !== "admin") {
+      // Không có quyền admin → chỉ lấy đúng việc của tổ mình
+      if (!isPrivileged) {
+        const rTeam = String(r[3] || "").trim();
         if (rTeam !== teamGroup) return false;
       }
       return true;
