@@ -2469,9 +2469,6 @@
     }
 
     function syncLabel(log) {
-      if (log.syncStatus === "synced") {
-        return ' <span class="text-success text-nowrap"><i class="bi bi-cloud-check"></i> Đã đồng bộ</span>';
-      }
       if (log.syncStatus === "syncing") {
         return ' <span class="text-primary text-nowrap"><span class="spinner-border spinner-border-sm" style="width:.7rem;height:.7rem;border-width:.12em"></span> Đang đồng bộ</span>';
       }
@@ -2489,20 +2486,18 @@
     function updateSyncStatus() {
       const syncBadge = document.getElementById("syncBadge");
       if (!syncBadge) return;
-      syncBadge.style.display = "inline-block";
 
       const pendingPlansCount = plans.filter(p => p.syncStatus === "pending" || p.syncStatus === "syncing").length;
       const pendingLogsCount = logs.filter(l => l.syncStatus !== "synced" && (l.syncStatus === "pending" || l.syncStatus === "syncing" || l.syncStatus === "local")).length;
       const totalPending = pendingPlansCount + pendingLogsCount;
 
       if (totalPending > 0) {
+        syncBadge.style.display = "inline-block";
         syncBadge.className = "badge bg-warning-subtle text-warning shadow-sm px-2 py-2 rounded-pill";
         syncBadge.innerHTML = `<i class="bi bi-cloud-arrow-up-fill"></i> ${totalPending}`;
         syncBadge.title = `Có ${totalPending} mục đang chờ đồng bộ lên Google Sheets`;
       } else {
-        syncBadge.className = "badge bg-success-subtle text-success shadow-sm px-2 py-2 rounded-pill";
-        syncBadge.innerHTML = '<i class="bi bi-cloud-check-fill"></i>';
-        syncBadge.title = "Đã đồng bộ toàn bộ dữ liệu an toàn lên Cloud";
+        syncBadge.style.display = "none";
       }
     }
 
