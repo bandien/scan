@@ -469,7 +469,7 @@
       .chip-active { padding: 7px 13px; }
       #progressChips { grid-template-columns: repeat(3, 1fr); }
       #progressChips .chip { padding: 8px 4px; font-size: .82rem; }
-      /* Ô Việc/kế hoạch cao hơn trên điện thoại để nhìn được nhiều dòng hơn */
+      /* Ô Việc cao hơn trên điện thoại để nhìn được nhiều dòng hơn */
       #selectedTask { min-height: 130px; }
     }
 
@@ -547,11 +547,21 @@
   </header>
 
   <main class="shell">
+    <section class="panel mb-3 d-none" id="accessGatePanel">
+      <div class="p-4 text-center">
+        <i class="bi bi-shield-lock text-secondary" style="font-size:2rem;"></i>
+        <h2 class="h5 fw-bold mt-2 mb-1">Chưa thể xem nhật ký / việc</h2>
+        <p class="text-secondary mb-3" id="accessGateMessage">Vui lòng đăng nhập tài khoản đã được phân nhóm tổ để xem nội dung này.</p>
+        <button class="btn btn-primary" type="button" id="btnAccessGateLogin"><i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập</button>
+      </div>
+    </section>
+
+    <div id="appContent">
     <section class="mb-3">
       <div class="panel" id="quickFormPanel">
         <div class="panel-header" id="quickFormHeader" role="button" aria-controls="logFormBody" aria-expanded="true">
           <div class="d-flex align-items-center justify-content-between">
-            <h2 class="h5 m-0 fw-bold"><i class="bi bi-pencil-square text-primary me-2"></i>1. Ghi nhanh nhật ký</h2>
+            <h2 class="h5 m-0 fw-bold"><i class="bi bi-pencil-square text-primary me-2"></i>1. Ghi kết quả</h2>
             <i class="bi bi-chevron-up" id="quickFormChevron"></i>
           </div>
         </div>
@@ -602,7 +612,7 @@
               </div>
             </div>
             <div class="col-12">
-              <label class="form-label" for="selectedTask">Việc/kế hoạch</label>
+              <label class="form-label" for="selectedTask">Việc</label>
               <textarea class="form-control" id="selectedTask" rows="3" placeholder="Chọn đầu việc hoặc nhập việc phát sinh" required></textarea>
               <div class="small text-primary fw-bold mt-1 d-none" id="planCumNote"></div>
             </div>
@@ -644,7 +654,7 @@
 
     <section class="panel mb-3">
       <div class="panel-header">
-        <h2 class="h5 mb-2 fw-bold"><i class="bi bi-calendar3 text-primary me-2"></i>2. Kế hoạch</h2>
+        <h2 class="h5 mb-2 fw-bold"><i class="bi bi-calendar3 text-primary me-2"></i>2. Việc cần làm</h2>
         <div class="d-flex toolbar-grid align-items-end gap-2">
           <div>
             <label class="form-label" for="filterDate">Ngày</label>
@@ -656,7 +666,7 @@
           </div>
           <div>
             <label class="form-label d-block">Kiểu xem</label>
-            <div class="btn-group" role="group" aria-label="Kiểu xem kế hoạch">
+            <div class="btn-group" role="group" aria-label="Kiểu xem việc">
               <button class="btn btn-outline-primary active" type="button" id="btnViewDay">Ngày</button>
               <button class="btn btn-outline-primary" type="button" id="btnViewWeek">Tuần</button>
             </div>
@@ -679,7 +689,7 @@
           </div>
           <button class="btn btn-outline-secondary" type="button" id="btnToggleFilters"><i class="bi bi-funnel me-1"></i>Lọc</button>
           <button class="btn btn-primary" type="button" id="btnReload"><i class="bi bi-arrow-clockwise me-1"></i>Nạp</button>
-          <button class="btn btn-success" type="button" id="btnAddPlan"><i class="bi bi-plus-lg me-1"></i>Thêm kế hoạch</button>
+          <button class="btn btn-success" type="button" id="btnAddPlan"><i class="bi bi-plus-lg me-1"></i>Thêm việc</button>
         </div>
       </div>
       <div class="table-wrap">
@@ -727,14 +737,14 @@
       </button>
       <div class="collapse" id="statsBody">
       <div class="row g-3">
-        <div class="col-6 col-lg-3"><div class="metric"><strong id="metricTotal">0</strong><span id="metricTotalLabel">Kế hoạch trong ngày</span></div></div>
+        <div class="col-6 col-lg-3"><div class="metric"><strong id="metricTotal">0</strong><span id="metricTotalLabel">Việc trong ngày</span></div></div>
         <div class="col-6 col-lg-3"><div class="metric"><strong id="metricDoing">0</strong><span>Đang làm</span></div></div>
         <div class="col-6 col-lg-3"><div class="metric"><strong id="metricDone">0</strong><span>Đã hoàn thành</span><div class="mini-bar"><i id="metricDoneBar"></i></div></div></div>
         <div class="col-6 col-lg-3"><div class="metric"><strong id="metricLogs">0</strong><span>Nhật ký cả tổ (7 ngày)</span></div></div>
       </div>
       <div class="panel mt-3">
         <div class="panel-header">
-          <h3 class="h6 m-0 fw-bold"><i class="bi bi-people text-primary me-2"></i>Theo từng nhân viên <span class="fw-normal text-secondary small">(bấm tên để lọc kế hoạch)</span></h3>
+          <h3 class="h6 m-0 fw-bold"><i class="bi bi-people text-primary me-2"></i>Theo từng nhân viên <span class="fw-normal text-secondary small">(bấm tên để lọc việc)</span></h3>
         </div>
         <div class="table-responsive">
           <table class="table table-sm align-middle mb-0">
@@ -753,6 +763,7 @@
       </div>
       </div>
     </section>
+    </div>
   </main>
 
   <div class="modal fade" id="settingsModal" tabindex="-1" aria-hidden="true">
@@ -805,7 +816,7 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h3 class="modal-title h5" id="planModalTitle">Thêm kế hoạch</h3>
+          <h3 class="modal-title h5" id="planModalTitle">Thêm việc</h3>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
         </div>
         <form id="planForm">
@@ -894,7 +905,7 @@
             <button class="btn btn-outline-danger" type="button" id="btnDeletePlan" style="display:none;"><i class="bi bi-trash me-1"></i>Xóa</button>
             <div class="d-flex gap-2 ms-auto">
               <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Đóng</button>
-              <button class="btn btn-primary" type="submit" id="btnSavePlan"><i class="bi bi-check2-circle me-1"></i>Lưu kế hoạch</button>
+              <button class="btn btn-primary" type="submit" id="btnSavePlan"><i class="bi bi-check2-circle me-1"></i>Lưu việc</button>
             </div>
           </div>
         </form>
@@ -918,6 +929,7 @@
       logs: "bandien_nhatky_logs",
       settings: "bandien_nhatky_settings",
       employee: "bandien_nhatky_employee",
+      teamGroup: "bandien_nhatky_teamgroup",
       employees: "bandien_nhatky_employees",
       staff: "bandien_nhatky_staff",
       fontScale: "bandien_nhatky_fontscale"
@@ -994,7 +1006,8 @@
       render();
       updateSyncStatus();
       updateUserButton();
-      if (!currentUser()) openLogin();
+      updateAccessGate();
+      if (!hasTeamAccess()) openLogin();
       loadServerLogs();
       retryPendingLogs();
       retryPendingPlans();
@@ -1018,7 +1031,7 @@
           localStorage.removeItem(STORAGE_KEYS.plans);
           await loadPlans(true);
           render();
-          showToast("Đã nạp lại kế hoạch");
+          showToast("Đã nạp lại việc");
         } finally {
           btn.disabled = false;
           btn.innerHTML = original;
@@ -1042,6 +1055,7 @@
       document.getElementById("btnToggleExtra").addEventListener("click", toggleExtraFields);
       document.getElementById("btnToggleLogs").addEventListener("click", toggleLogs);
       document.getElementById("btnUser").addEventListener("click", openLogin);
+      document.getElementById("btnAccessGateLogin").addEventListener("click", openLogin);
       document.getElementById("btnLogin").addEventListener("click", doLogin);
       document.getElementById("btnRegister").addEventListener("click", doRegister);
       document.getElementById("btnFontScale").addEventListener("click", cycleFontScale);
@@ -1306,7 +1320,7 @@
 
     function openPlanModal(id) {
       const plan = id ? plans.find(item => item.id === id) : null;
-      document.getElementById("planModalTitle").textContent = plan ? "Sửa kế hoạch" : "Thêm kế hoạch";
+      document.getElementById("planModalTitle").textContent = plan ? "Sửa việc" : "Thêm việc";
       document.getElementById("btnDeletePlan").style.display = plan ? "inline-block" : "none";
       document.getElementById("planFormId").value = plan ? plan.id : "";
       document.getElementById("planDate").value = plan ? (plan.date || today) : (document.getElementById("filterDate").value || today);
@@ -1404,9 +1418,9 @@
       planModal.hide();
       render();
       updateSyncStatus();
-      showToast("Đã lưu kế hoạch ✓ — đang đồng bộ nền...");
+      showToast("Đã lưu việc ✓ — đang đồng bộ nền...");
       syncPlanInBackground(payload);
-      logPlanAction(payload, index >= 0 ? "Cập nhật kế hoạch" : "Tạo kế hoạch mới");
+      logPlanAction(payload, index >= 0 ? "Cập nhật việc" : "Tạo việc mới");
     }
 
     async function syncPlanInBackground(plan) {
@@ -1415,7 +1429,7 @@
         plan.syncStatus = "synced";
       } catch (error) {
         plan.syncStatus = "pending";
-        showToast("Chưa đồng bộ được kế hoạch, sẽ tự thử lại: " + error.message);
+        showToast("Chưa đồng bộ được việc, sẽ tự thử lại: " + error.message);
       }
       localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
       renderPlans();
@@ -1437,7 +1451,7 @@
       localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
       if (syncedCount > 0) {
         renderPlans();
-        showToast(`Đã đồng bộ lại ${syncedCount} kế hoạch chờ`);
+        showToast(`Đã đồng bộ lại ${syncedCount} việc chờ`);
       }
       updateSyncStatus();
     }
@@ -1445,7 +1459,7 @@
     async function deletePlanFromModal() {
       const id = document.getElementById("planFormId").value.trim();
       if (!id) return;
-      if (!confirm("Xóa kế hoạch này?")) return;
+      if (!confirm("Xóa việc này?")) return;
 
       // Xóa khỏi bảng ngay, gọi server chạy nền; lỗi thì kế hoạch sẽ
       // hiện lại ở lần nạp sau (server vẫn còn bản gốc)
@@ -1455,10 +1469,10 @@
       planModal.hide();
       render();
       updateSyncStatus();
-      showToast("Đã xóa kế hoạch");
+      showToast("Đã xóa việc");
       postPlanAction("deletePlan", { id: id, updatedBy: localStorage.getItem(STORAGE_KEYS.employee) || "" })
         .catch(error => showToast("Chưa xóa được trên server: " + error.message));
-      logPlanAction(deletedPlan || { id: id }, "Xóa kế hoạch");
+      logPlanAction(deletedPlan || { id: id }, "Xóa việc");
     }
 
     function loadLogs() {
@@ -1523,6 +1537,27 @@
       return localStorage.getItem(STORAGE_KEYS.employee) || "";
     }
 
+    function currentTeamGroup() {
+      return localStorage.getItem(STORAGE_KEYS.teamGroup) || "";
+    }
+
+    // Không có tài khoản, hoặc tài khoản chưa được phân nhóm tổ → chưa cho xem nhật ký/kế hoạch
+    function hasTeamAccess() {
+      if (!currentUser()) return false;
+      const team = currentTeamGroup().trim();
+      if (!team || team === "- Chưa phân tổ -") return false;
+      return true;
+    }
+
+    function updateAccessGate() {
+      const ok = hasTeamAccess();
+      document.getElementById("appContent").classList.toggle("d-none", !ok);
+      document.getElementById("accessGatePanel").classList.toggle("d-none", ok);
+      document.getElementById("accessGateMessage").textContent = currentUser()
+        ? "Tài khoản của bạn chưa được phân nhóm tổ. Vui lòng liên hệ quản trị viên để được phân tổ."
+        : "Vui lòng đăng nhập tài khoản đã được phân nhóm tổ để xem nội dung này.";
+    }
+
     function updateUserButton() {
       document.getElementById("userName").textContent = currentUser() || "Đăng nhập";
     }
@@ -1582,14 +1617,18 @@
           return;
         }
         rememberEmployee(data.name || name);
+        localStorage.setItem(STORAGE_KEYS.teamGroup, data.teamGroup || "");
         updateUserButton();
+        updateAccessGate();
         loginModal.hide();
         showToast((action === "nhatkyRegister" ? "Đã tạo tài khoản. Xin chào " : "Xin chào ") + (data.name || name));
-        
+
         // Buộc tải lại dữ liệu theo đúng tổ của tài khoản vừa đăng nhập
         localStorage.removeItem(STORAGE_KEYS.plans);
-        loadPlans(true).then(() => render());
-        loadServerLogs();
+        if (hasTeamAccess()) {
+          loadPlans(true).then(() => render());
+          loadServerLogs();
+        }
       } catch (error) {
         showLoginError("Không kết nối được máy chủ: " + error.message);
       } finally {
@@ -1728,6 +1767,14 @@
       return "";
     }
 
+    function compactPlanBadges(plan) {
+      const badges = [];
+      if (plan.status && plan.status !== "Chưa làm") badges.push(statusBadge(plan.status));
+      const qty = doneQtyBadge(plan);
+      if (qty) badges.push(qty);
+      return badges.join(" ");
+    }
+
     function planSyncIcon(plan) {
       if (plan.syncStatus === "syncing") return ' <i class="bi bi-cloud-arrow-up text-primary" title="Đang đồng bộ"></i>';
       if (plan.syncStatus === "pending") return ' <i class="bi bi-cloud-slash text-warning" title="Chờ đồng bộ"></i>';
@@ -1809,14 +1856,14 @@
         const carry = isCarryOver(plan, selectedDate);
         return `
         <tr${carry ? ' class="carry-row"' : ""}>
-          <td class="task-text"><div class="plan-task-title">${escapeHtml(plan.task || "")}</div>${typeBadge(plan) || doneQtyBadge(plan) ? `<div class="d-flex flex-wrap gap-1 mt-1">${typeBadge(plan)} ${doneQtyBadge(plan)}</div>` : ""}</td>
+          <td class="task-text"><div class="plan-task-title">${escapeHtml(plan.task || "")}</div>${compactPlanBadges(plan) ? `<div class="d-flex flex-wrap gap-1 mt-1">${compactPlanBadges(plan)}</div>` : ""}</td>
           <td class="text-brand fw-semibold">${escapeHtml(plan.area || "")}${plan.asset ? `<div class="small">${escapeHtml(plan.asset)}</div>` : ""}</td>
           <td>${escapeHtml(plan.team || "")}<div class="small text-secondary">${escapeHtml(plan.assignee || "")}</div></td>
           <td class="plan-meta">${planMetaLine(plan, selectedDate, false)}</td>
           <td>${priorityBadge(plan.priority)}</td>
           <td>${statusBadge(plan.status)}</td>
           <td class="text-end text-nowrap">
-            <button class="btn btn-sm btn-outline-secondary" type="button" title="Sửa kế hoạch" onclick="openPlanModal('${escapeAttr(plan.id)}')">
+            <button class="btn btn-sm btn-outline-secondary" type="button" title="Sửa việc" onclick="openPlanModal('${escapeAttr(plan.id)}')">
               <i class="bi bi-pencil"></i>
             </button>
             <button class="btn btn-primary fw-bold" type="button" title="Ghi nhật ký" onclick="selectPlan('${escapeAttr(plan.id)}')">
@@ -1851,7 +1898,7 @@
               </button>
             </div>
           </div>
-          <div class="d-flex flex-wrap gap-2 mt-2">${typeBadge(plan)} ${statusBadge(plan.status)} ${doneQtyBadge(plan)}</div>
+          ${compactPlanBadges(plan) ? `<div class="d-flex flex-wrap gap-2 mt-2">${compactPlanBadges(plan)}</div>` : ""}
         </article>
       `; }).join("");
       renderMetrics();
@@ -1874,7 +1921,7 @@
           .filter(plan => planReminder(plan) === iso || (iso === days[0] && planReminder(plan) < days[0] && plan.status !== "Hoàn thành"))
           .sort((a, b) => (a.time || "").localeCompare(b.time || ""));
         const items = dayPlans.map(plan => `
-          <button class="week-item ${weekItemClass(plan.status)}" type="button" onclick="openPlanModal('${escapeAttr(plan.id)}')" title="Bấm để sửa kế hoạch">
+          <button class="week-item ${weekItemClass(plan.status)}" type="button" onclick="openPlanModal('${escapeAttr(plan.id)}')" title="Bấm để sửa việc">
             <div class="week-item-main">
               <div class="week-item-task">${escapeHtml(plan.task || "")}</div>
               <div class="week-item-meta">${planMetaLine(plan, iso, true)}${[plan.area, plan.asset].filter(Boolean).length ? " · " + [plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ") : ""}${plan.type === "Phát sinh" ? ' · <span class="text-warning fw-bold">Phát sinh</span>' : ""}</div>
@@ -1888,7 +1935,7 @@
               <div class="fw-bold">${WEEK_DAY_NAMES[index]}</div>
               <div class="small text-secondary">${shortDateVn(iso)}${iso === today ? " · Hôm nay" : ""}</div>
             </td>
-            <td><div class="week-items">${items || '<span class="text-secondary small">Không có kế hoạch</span>'}</div></td>
+            <td><div class="week-items">${items || '<span class="text-secondary small">Không có việc</span>'}</div></td>
           </tr>
         `;
       }).join("");
@@ -2072,7 +2119,7 @@
     function renderMetrics() {
       const visible = getVisiblePlans();
       const done = visible.filter(p => p.status === "Hoàn thành").length;
-      document.getElementById("metricTotalLabel").textContent = viewMode === "week" ? "Kế hoạch trong tuần" : "Kế hoạch trong ngày";
+      document.getElementById("metricTotalLabel").textContent = viewMode === "week" ? "Việc trong tuần" : "Việc trong ngày";
       document.getElementById("metricTotal").textContent = visible.length;
       document.getElementById("metricDoing").textContent = visible.filter(p => p.status === "Đang làm").length;
       document.getElementById("metricDone").textContent = visible.length ? `${done}/${visible.length}` : "0";
@@ -2098,13 +2145,13 @@
       const names = Object.keys(stats).sort((a, b) => stats[b].total - stats[a].total || a.localeCompare(b));
       const body = document.getElementById("personStats");
       if (names.length === 0) {
-        body.innerHTML = '<tr><td colspan="5" class="text-secondary small">Chưa có kế hoạch gán người trong phạm vi đang lọc.</td></tr>';
+        body.innerHTML = '<tr><td colspan="5" class="text-secondary small">Chưa có việc gán người trong phạm vi đang lọc.</td></tr>';
         return;
       }
       body.innerHTML = names.map(name => {
         const s = stats[name];
         return `
-        <tr role="button" onclick="filterByPerson('${escapeAttr(name)}')" title="Bấm để lọc kế hoạch của ${escapeAttr(name)}">
+        <tr role="button" onclick="filterByPerson('${escapeAttr(name)}')" title="Bấm để lọc việc của ${escapeAttr(name)}">
           <td class="fw-semibold text-brand">${escapeHtml(name)}</td>
           <td class="text-center fw-bold">${s.total}</td>
           <td class="text-center">${s.done ? `<span class="badge-soft badge-done">${s.done}</span>` : '<span class="text-secondary">0</span>'}</td>
@@ -2119,7 +2166,7 @@
       if (!document.getElementById("advancedFiltersPerson").classList.contains("show")) toggleAdvancedFilters();
       renderPlans();
       document.getElementById("filterPerson").scrollIntoView({ behavior: "smooth", block: "center" });
-      showToast("Đang lọc kế hoạch của " + name);
+      showToast("Đang lọc việc của " + name);
     }
 
     const RATING_OPTIONS = ["Hoàn thành tốt", "Đạt", "Chưa đạt", "Vắng/Không tham gia"];
