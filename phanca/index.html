@@ -79,7 +79,7 @@
     .title-cell {
       color: #00f;
       text-decoration: underline;
-      font-size: 18px;
+      font-size: 1.125rem;
       text-align: left !important;
       background: #fff !important;
     }
@@ -87,10 +87,11 @@
     .week-label { color: red; font-weight: 700; }
     .week-value { color: red; font-weight: 700; }
     .date-red { color: red; }
+    .roster th.shortfall { background: #f8d7da !important; color: #842029; }
     .team-row td {
       height: 48px;
       font-weight: 700;
-      font-size: 16px;
+      font-size: 1rem;
       border-left: 1px solid var(--line);
       border-right: 1px solid var(--line);
     }
@@ -246,7 +247,10 @@
           <div class="text-primary fw-bold text-uppercase" style="font-size:.72rem;">BanDienScan</div>
           <h1 class="h5 fw-bold m-0">Quản lý Ca trực - Bảng phân ca tuần</h1>
         </div>
-        <a class="btn btn-outline-primary btn-sm" href="../index.html"><i class="bi bi-house me-1"></i>Trang chính</a>
+        <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-outline-secondary btn-sm" type="button" id="btnFontScale" title="Phóng to chữ (bấm để đổi cỡ)"><span class="fw-bold" id="fontScaleLabel">A</span></button>
+          <a class="btn btn-outline-primary btn-sm" href="../index.html"><i class="bi bi-house me-1"></i>Trang chính</a>
+        </div>
       </div>
     </div>
   </header>
@@ -264,7 +268,7 @@
         </div>
         <div class="col-6 col-md-2">
           <label class="form-label fw-bold small" for="weekNo">Tuần</label>
-          <input class="form-control" id="weekNo" type="number" min="1" max="53">
+          <input class="form-control" id="weekNo" type="text" readonly title="Tự động tính theo ngày bắt đầu">
         </div>
         <div class="col-12 col-md-3">
           <label class="form-label fw-bold small" for="newStaffName">Thêm nhân sự</label>
@@ -274,7 +278,8 @@
           </div>
         </div>
         <div class="col-12 col-md-5">
-          <div class="d-flex flex-wrap gap-2 justify-content-md-end">
+          <div class="d-flex flex-wrap gap-2 align-items-center justify-content-md-end">
+            <span id="syncStatus" class="small text-secondary"></span>
             <button class="btn btn-outline-primary" id="btnSave" type="button"><i class="bi bi-save me-1"></i>Lưu</button>
             <button class="btn btn-outline-dark" type="button" data-bs-toggle="collapse" data-bs-target="#rulePanel" aria-expanded="false" aria-controls="rulePanel"><i class="bi bi-sliders me-1"></i>Quy tắc</button>
             <button class="btn btn-outline-secondary" id="btnExport" type="button"><i class="bi bi-download me-1"></i>CSV</button>
@@ -306,6 +311,10 @@
               <div class="form-check">
                 <input class="form-check-input" id="prioritizeOfficeWork" type="checkbox">
                 <label class="form-check-label" for="prioritizeOfficeWork">Ưu tiên giờ hành chính theo tính chất việc</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" id="restBetweenShifts" type="checkbox">
+                <label class="form-check-label" for="restBetweenShifts">Đảm bảo nghỉ tối thiểu 11 giờ giữa 2 ca liền nhau</label>
               </div>
               <button class="btn btn-primary w-100 mt-3" id="btnGenerateRules" type="button"><i class="bi bi-arrow-repeat me-1"></i>Tạo phân ca theo quy tắc</button>
             </div>
@@ -358,6 +367,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/config.js"></script>
   <script>
     const STORAGE_KEY = "bandien_shift_roster_v1";
     const HISTORY_KEY = "bandien_shift_roster_weeks_v1";
@@ -379,8 +389,11 @@
       shifts: defaultShifts,
       rotateEvenly: true,
       pairSkill: true,
-      prioritizeOfficeWork: true
+      prioritizeOfficeWork: true,
+      restBetweenShifts: true
     };
+    const MIN_REST_MINUTES = 11 * 60;
+    let lastShortfall = {};
     const defaultStaff = [
       "Ngô Quyết Thắng",
       "Đinh Văn Hậu",
@@ -392,7 +405,25 @@
     let state;
     let toast;
 
-    document.addEventListener("DOMContentLoaded", () => {
+    // Phóng to chữ toàn trang cho nhân viên lớn tuổi / mắt kém — mức tối đa
+    // giữ vừa phải (130%) để không vỡ layout bảng phân ca dạng lưới cố định.
+    const FONT_SCALES = [100, 115, 130];
+    function applyFontScale() {
+      const scale = parseInt(localStorage.getItem("bandien_phanca_fontscale") || "100", 10);
+      document.documentElement.style.fontSize = scale + "%";
+      document.getElementById("fontScaleLabel").textContent = scale <= 100 ? "A" : scale <= 115 ? "A+" : "A++";
+    }
+    function cycleFontScale() {
+      const current = parseInt(localStorage.getItem("bandien_phanca_fontscale") || "100", 10);
+      const next = FONT_SCALES[(FONT_SCALES.indexOf(current) + 1) % FONT_SCALES.length];
+      localStorage.setItem("bandien_phanca_fontscale", String(next));
+      applyFontScale();
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      applyFontScale();
+      document.getElementById("btnFontScale").addEventListener("click", cycleFontScale);
+
       toast = new bootstrap.Toast(document.getElementById("toast"), { delay: 1800 });
       if (!canManageRoster()) {
         document.getElementById("accessDenied").style.display = "block";
@@ -403,6 +434,7 @@
       bindEvents();
       syncControls();
       renderTable();
+      await initialServerSync();
     });
 
     function canManageRoster() {
@@ -457,6 +489,7 @@
       saved.rules = { ...fresh.rules, ...(saved.rules || {}) };
       saved.rules.shifts = normalizeShifts(saved.rules, saved.staff?.length || fresh.staff.length);
       saved.rules.prioritizeOfficeWork = saved.rules.prioritizeOfficeWork !== false;
+      saved.rules.restBetweenShifts = saved.rules.restBetweenShifts !== false;
       saved.staff = (saved.staff || fresh.staff).map((person, index) => ({
         name: person.name || `Nhân sự ${index + 1}`,
         level: person.level ? (person.level === "new" ? "new" : "senior") : (index < 3 ? "senior" : "new"),
@@ -540,9 +573,11 @@
     function switchWeek(value) {
       saveState(false);
       state = loadWeekState(weekKey(value), state);
+      lastShortfall = {};
       syncControls();
       renderTable();
       saveState(false);
+      refreshWeekFromServer();
     }
 
     function shiftWeek(offset) {
@@ -551,14 +586,109 @@
       switchWeek(formatISODate(date));
     }
 
+    async function apiGet(action, params) {
+      if (typeof gasUrl === "undefined") return null;
+      try {
+        const query = new URLSearchParams({ action, token: API_TOKEN, ...params });
+        const res = await fetch(`${gasUrl}?${query.toString()}`);
+        return await res.json();
+      } catch (_) {
+        return null;
+      }
+    }
+
+    async function apiPost(action, payload) {
+      if (typeof gasUrl === "undefined") return null;
+      try {
+        const res = await fetch(gasUrl, {
+          method: "POST",
+          body: JSON.stringify({ action, token: API_TOKEN, ...payload })
+        });
+        return await res.json();
+      } catch (_) {
+        return null;
+      }
+    }
+
+    function setSyncStatus(text) {
+      const el = document.getElementById("syncStatus");
+      if (el) el.textContent = text;
+    }
+
+    function mergeStaffFromServer(staffRes) {
+      if (!staffRes || staffRes.status !== "success" || !Array.isArray(staffRes.staff)) return false;
+      const existingNames = new Set(state.staff.map(p => p.name));
+      let changed = false;
+      staffRes.staff.forEach(person => {
+        if (!existingNames.has(person.name)) {
+          state.staff.push({ name: person.name, level: "new", workType: "operation" });
+          existingNames.add(person.name);
+          changed = true;
+        }
+      });
+      return changed;
+    }
+
+    function applyServerWeek(weekRes) {
+      if (!weekRes || weekRes.status !== "success" || !weekRes.found) return false;
+      if (Array.isArray(weekRes.staff) && weekRes.staff.length) state.staff = weekRes.staff;
+      if (weekRes.cells) state.cells = weekRes.cells;
+      if (weekRes.rules) state.rules = { ...state.rules, ...weekRes.rules };
+      state = normalizeState(state);
+      return true;
+    }
+
+    function fetchServerWeek(weekStart) {
+      return apiGet("getRosterWeek", { weekStart });
+    }
+
+    async function initialServerSync() {
+      setSyncStatus("Đang đồng bộ...");
+      const [staffRes, weekRes] = await Promise.all([
+        apiGet("getRosterStaff", {}),
+        fetchServerWeek(state.weekStart)
+      ]);
+      const staffChanged = mergeStaffFromServer(staffRes);
+      const weekChanged = applyServerWeek(weekRes);
+      if (staffChanged || weekChanged) {
+        saveWeekState(state);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        syncControls();
+        renderTable();
+      }
+      setSyncStatus(staffRes || weekRes ? "Đã đồng bộ" : "Ngoại tuyến (chưa đồng bộ)");
+    }
+
+    async function refreshWeekFromServer() {
+      setSyncStatus("Đang đồng bộ...");
+      const requestedWeek = state.weekStart;
+      const weekRes = await fetchServerWeek(requestedWeek);
+      if (state.weekStart !== requestedWeek) return;
+      if (applyServerWeek(weekRes)) {
+        saveWeekState(state);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        syncControls();
+        renderTable();
+      }
+      setSyncStatus(weekRes ? "Đã đồng bộ" : "Ngoại tuyến (chưa đồng bộ)");
+    }
+
+    function syncRosterToServer() {
+      const user = getCurrentUser();
+      apiPost("saveRosterWeek", {
+        user: user.name || "Web",
+        payload: {
+          weekStart: state.weekStart,
+          staff: state.staff,
+          cells: state.cells,
+          rules: state.rules
+        }
+      }).then(res => setSyncStatus(res && res.status === "success" ? "Đã đồng bộ" : "Chưa đồng bộ — offline"));
+    }
+
     function bindEvents() {
       document.getElementById("weekStart").addEventListener("change", e => {
         switchWeek(e.target.value);
-      });
-      document.getElementById("weekNo").addEventListener("input", e => {
-        state.weekNo = e.target.value;
-        renderTable();
-        saveState(false);
       });
       document.getElementById("btnPrevWeek").addEventListener("click", () => shiftWeek(-1));
       document.getElementById("btnNextWeek").addEventListener("click", () => shiftWeek(1));
@@ -587,6 +717,11 @@
         renderShareSummary();
         saveState(false);
       });
+      document.getElementById("restBetweenShifts").addEventListener("change", e => {
+        state.rules.restBetweenShifts = e.target.checked;
+        renderShareSummary();
+        saveState(false);
+      });
     }
 
     function syncControls() {
@@ -595,6 +730,7 @@
       document.getElementById("rotateEvenly").checked = !!state.rules.rotateEvenly;
       document.getElementById("pairSkill").checked = !!state.rules.pairSkill;
       document.getElementById("prioritizeOfficeWork").checked = !!state.rules.prioritizeOfficeWork;
+      document.getElementById("restBetweenShifts").checked = !!state.rules.restBetweenShifts;
       renderShiftRules();
       renderSkillList();
       renderShiftLegend();
@@ -713,7 +849,11 @@
             ${dates.map((date, idx) => `<th colspan="${shifts.length}" class="${idx === 6 ? "date-red" : ""}">${dayNames[idx]} ${formatShortDate(date)}</th>`).join("")}
           </tr>
           <tr>
-            ${dates.map(() => shifts.map(shift => `<th title="${escapeAttr(shift.name)}">${escapeHtml(shift.code || shift.name)}</th>`).join("")).join("")}
+            ${dates.map((date, dayIdx) => shifts.map((shift, shiftIdx) => {
+              const short = lastShortfall[`${dayIdx}-${shiftIdx}`] || 0;
+              const title = short > 0 ? `${shift.name} - thiếu ${short} người` : shift.name;
+              return `<th class="${short > 0 ? "shortfall" : ""}" title="${escapeAttr(title)}">${escapeHtml(shift.code || shift.name)}</th>`;
+            }).join("")).join("")}
           </tr>
         </thead>
         <tbody>
@@ -749,6 +889,7 @@
       const next = cycle[(cycle.indexOf(current) + 1) % cycle.length];
       if (next) state.cells[key] = next;
       else delete state.cells[key];
+      lastShortfall = {};
       renderTable();
       saveState(false);
     }
@@ -904,16 +1045,18 @@
       const cells = {};
       const totals = state.staff.map(() => 0);
       const weekSeed = state.rules.rotateEvenly ? Number(state.weekNo || 0) : 0;
+      const shortfall = {};
 
       for (let d = 0; d < 7; d++) {
         const assignedToday = new Set();
         for (let s = 0; s < shifts.length; s++) {
-          const picked = pickForShift(needed[s], assignedToday, totals, weekSeed + d + s);
+          const picked = pickForShift(needed[s], assignedToday, totals, weekSeed + d + s, d, s, shifts, cells);
           picked.forEach(rowIndex => {
             cells[`${rowIndex}-${d}-${s}`] = "x";
             assignedToday.add(rowIndex);
             totals[rowIndex] += 1;
           });
+          if (picked.length < needed[s]) shortfall[`${d}-${s}`] = needed[s] - picked.length;
         }
 
         state.staff.forEach((_, rowIndex) => {
@@ -923,24 +1066,38 @@
       }
 
       state.cells = cells;
+      lastShortfall = shortfall;
       renderTable();
       saveState(true);
-      notify("Đã tạo phân ca theo quy tắc");
+      notifyGenerateResult(shortfall, shifts);
     }
 
-    function pickForShift(count, assignedToday, totals, seed) {
+    function notifyGenerateResult(shortfall, shifts) {
+      const keys = Object.keys(shortfall);
+      if (!keys.length) {
+        notify("Đã tạo phân ca theo quy tắc");
+        return;
+      }
+      const detail = keys.map(key => {
+        const [d, s] = key.split("-").map(Number);
+        return `${dayCodes[d]}-${shifts[s].code || shifts[s].name} thiếu ${shortfall[key]}`;
+      }).join(", ");
+      notify(`Đã tạo phân ca, còn thiếu người: ${detail}`);
+    }
+
+    function pickForShift(count, assignedToday, totals, seed, dayIndex, shiftIndex, shifts, cells) {
       if (count <= 0) return [];
       const picked = [];
 
       if (state.rules.pairSkill && count >= 2) {
-        const senior = bestCandidate("senior", assignedToday, totals, seed, picked);
+        const senior = bestCandidate("senior", assignedToday, totals, seed, picked, dayIndex, shiftIndex, shifts, cells);
         if (senior !== null) picked.push(senior);
-        const junior = bestCandidate("new", assignedToday, totals, seed + 1, picked);
+        const junior = bestCandidate("new", assignedToday, totals, seed + 1, picked, dayIndex, shiftIndex, shifts, cells);
         if (junior !== null) picked.push(junior);
       }
 
       while (picked.length < count) {
-        const next = bestCandidate(null, assignedToday, totals, seed + picked.length, picked);
+        const next = bestCandidate(null, assignedToday, totals, seed + picked.length, picked, dayIndex, shiftIndex, shifts, cells);
         if (next === null) break;
         picked.push(next);
       }
@@ -948,12 +1105,13 @@
       return picked.slice(0, count);
     }
 
-    function bestCandidate(level, assignedToday, totals, seed, picked) {
+    function bestCandidate(level, assignedToday, totals, seed, picked, dayIndex, shiftIndex, shifts, cells) {
       const candidates = state.staff
         .map((person, index) => ({ person, index }))
         .filter(item => !assignedToday.has(item.index))
         .filter(item => !picked.includes(item.index))
-        .filter(item => !level || item.person.level === level);
+        .filter(item => !level || item.person.level === level)
+        .filter(item => !hasRestConflict(item.index, dayIndex, shiftIndex, shifts, cells));
 
       if (!candidates.length) return null;
 
@@ -981,6 +1139,37 @@
       return (index - (seed % length) + length) % length;
     }
 
+    function hasRestConflict(index, dayIndex, shiftIndex, shifts, cells) {
+      if (!state.rules.restBetweenShifts || dayIndex <= 0) return false;
+      const currentRange = shiftAbsRange(shifts[shiftIndex], dayIndex);
+      for (let s = 0; s < shifts.length; s++) {
+        if (cells[`${index}-${dayIndex - 1}-${s}`] !== "x") continue;
+        const prevRange = shiftAbsRange(shifts[s], dayIndex - 1);
+        if (currentRange.start - prevRange.end < MIN_REST_MINUTES) return true;
+      }
+      return false;
+    }
+
+    function shiftAbsRange(shift, dayIndex) {
+      const dayBase = dayIndex * 1440;
+      const start = dayBase + timeToMinutes(shift.start1);
+      let end = dayBase + timeToMinutes(shift.end1);
+      if (end <= start) end += 1440;
+      if (shift.split && shift.start2 && shift.end2) {
+        let start2 = dayBase + timeToMinutes(shift.start2);
+        let end2 = dayBase + timeToMinutes(shift.end2);
+        if (end2 <= start2) end2 += 1440;
+        if (start2 < start) start2 += 1440;
+        end = Math.max(end, end2);
+      }
+      return { start, end };
+    }
+
+    function timeToMinutes(value) {
+      const [h, m] = String(value || "00:00").split(":").map(Number);
+      return (Number.isFinite(h) ? h : 0) * 60 + (Number.isFinite(m) ? m : 0);
+    }
+
     function clampNumber(value, min, max) {
       const number = Number.parseInt(value, 10);
       if (Number.isNaN(number)) return min;
@@ -992,7 +1181,10 @@
       state.weekNo = getISOWeek(new Date(state.weekStart));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       saveWeekState(state);
-      if (showToast) notify("Đã lưu bảng phân ca");
+      if (showToast) {
+        notify("Đã lưu bảng phân ca");
+        syncRosterToServer();
+      }
     }
 
     function resetTemplate() {
@@ -1110,6 +1302,7 @@
       lines.push(`- Đảo đều ca theo tuần: ${state.rules.rotateEvenly ? "Có" : "Không"}`);
       lines.push(`- Thợ cứng kèm thợ mới: ${state.rules.pairSkill ? "Ưu tiên" : "Không bắt buộc"}`);
       lines.push(`- Ưu tiên giờ hành chính theo tính chất việc: ${state.rules.prioritizeOfficeWork ? "Có" : "Không"}`);
+      lines.push(`- Nghỉ tối thiểu 11 giờ giữa 2 ca liền nhau: ${state.rules.restBetweenShifts ? "Có" : "Không"}`);
       lines.push("- Người được ký hiệu x là trực/đi ca; hc là hành chính; CN là nghỉ/chủ nhật.");
       lines.push("");
       lines.push("QUY ĐỊNH BÀN GIAO:");
