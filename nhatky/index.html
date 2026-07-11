@@ -1959,7 +1959,18 @@
                 </div>
               ` : ""}
             </div>
-          ` : `${log.nextAction ? `<div class="log-suggest-row mt-2"><i class="bi bi-lightbulb me-1"></i>Đề xuất: ${escapeHtml(log.nextAction)}</div>` : ""}`}
+          ` : `${log.nextAction || hasFollowup(log) ? `
+            <div class="log-suggest-row mt-2">
+              ${log.nextAction ? `<i class="bi bi-lightbulb me-1"></i>Đề xuất: ${escapeHtml(log.nextAction)}` : ""}
+              ${hasFollowup(log) ? `
+                <div class="d-flex justify-content-end mt-1">
+                  <button class="btn btn-sm btn-warning fw-bold py-1 px-2" style="font-size: 0.82rem;" type="button" onclick="continueLog('${escapeAttr(log.id)}')">
+                    <i class="bi bi-arrow-right-circle me-1"></i>Tiếp tục xử lý
+                  </button>
+                </div>
+              ` : ""}
+            </div>
+          ` : ""}`}
         </article>
       `;
     }
