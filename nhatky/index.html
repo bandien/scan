@@ -131,6 +131,52 @@
       font-weight: 700;
     }
 
+    .day-log-summary {
+      margin: 10px 0 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fbfa;
+      color: var(--muted);
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: .88rem;
+    }
+
+    .day-log-summary strong { color: var(--ink); }
+
+    .log-check {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: .75rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .log-check.done {
+      background: #e8f6ef;
+      border-color: #bfe4cf;
+      color: #1f7a4d;
+    }
+
+    .log-check.partial {
+      background: #fff7df;
+      border-color: #ffe5a3;
+      color: #9a6b16;
+    }
+
+    .log-check.missing {
+      background: #fff1f0;
+      border-color: #ffd0cc;
+      color: #c2413b;
+    }
+
     .week-table td { vertical-align: top; }
     .week-table .day-cell { width: 110px; white-space: nowrap; }
     .week-today td { background: #eef6f4; }
@@ -667,8 +713,8 @@
           <div>
             <label class="form-label d-block">Kiểu xem</label>
             <div class="btn-group" role="group" aria-label="Kiểu xem việc">
-              <button class="btn btn-outline-primary active" type="button" id="btnViewDay">Ngày</button>
-              <button class="btn btn-outline-primary" type="button" id="btnViewWeek">Tuần</button>
+              <button class="btn btn-outline-primary active" type="button" id="btnViewDay">Việc ngày</button>
+              <button class="btn btn-outline-primary" type="button" id="btnViewWeek">Việc tuần</button>
             </div>
           </div>
           <div class="advanced-filter collapse" id="advancedFilters">
@@ -687,10 +733,12 @@
             <label class="form-label" for="searchBox">Tìm nhanh</label>
             <input class="form-control" id="searchBox" type="search" placeholder="Khu vực, thiết bị, nội dung việc...">
           </div>
+          <button class="btn btn-outline-primary" type="button" id="btnToday"><i class="bi bi-calendar-check me-1"></i>Hôm nay</button>
           <button class="btn btn-outline-secondary" type="button" id="btnToggleFilters"><i class="bi bi-funnel me-1"></i>Lọc</button>
           <button class="btn btn-primary" type="button" id="btnReload"><i class="bi bi-arrow-clockwise me-1"></i>Nạp</button>
           <button class="btn btn-success" type="button" id="btnAddPlan"><i class="bi bi-plus-lg me-1"></i>Thêm việc</button>
         </div>
+        <div class="day-log-summary" id="dayLogSummary"></div>
       </div>
       <div class="table-wrap">
         <table class="table table-hover align-middle mb-0">
@@ -1025,6 +1073,10 @@
       document.getElementById("btnNextDay").addEventListener("click", () => shiftFilterDate(viewMode === "week" ? 7 : 1));
       document.getElementById("btnViewDay").addEventListener("click", () => setViewMode("day"));
       document.getElementById("btnViewWeek").addEventListener("click", () => setViewMode("week"));
+      document.getElementById("btnToday").addEventListener("click", () => {
+        document.getElementById("filterDate").value = today;
+        setViewMode("day");
+      });
       document.getElementById("btnToggleFilters").addEventListener("click", toggleAdvancedFilters);
       document.getElementById("btnReload").addEventListener("click", async () => {
         const btn = document.getElementById("btnReload");
@@ -1505,6 +1557,7 @@
       if (syncedCount > 0) {
         localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
         renderLogs();
+        renderPlans();
         showToast(`Đã đồng bộ lại ${syncedCount} nhật ký chờ`);
       }
       updateSyncStatus();
@@ -1788,6 +1841,83 @@
       return badges.join(" ");
     }
 
+    function splitAssignees(value) {
+      return String(value || "")
+        .split(",")
+        .map(name => name.trim())
+        .filter(Boolean);
+    }
+
+    function normalizePerson(value) {
+      return String(value || "").trim().toLowerCase();
+    }
+
+    function isWorkLog(log) {
+      return !String(log.selectedTask || "").startsWith("[Kế hoạch]");
+    }
+
+    function logBelongsToPlan(log, plan) {
+      if (plan.id && log.planId === plan.id) return true;
+      const task = normalizeWorkText(plan.task);
+      const loggedTask = normalizeWorkText(log.selectedTask);
+      return Boolean(task && loggedTask && (task === loggedTask || loggedTask.includes(task)));
+    }
+
+    function planLogsForDate(plan, date) {
+      return logs.filter(log => log.workDate === date && isWorkLog(log) && logBelongsToPlan(log, plan));
+    }
+
+    function planLogCoverage(plan, date) {
+      const entries = planLogsForDate(plan, date);
+      const people = splitAssignees(plan.assignee);
+      if (people.length === 0) {
+        return { done: entries.length > 0 ? 1 : 0, total: 1, entries };
+      }
+      const done = people.filter(person =>
+        entries.some(log => normalizePerson(log.employee) === normalizePerson(person))
+      ).length;
+      return { done, total: people.length, entries };
+    }
+
+    function logCoverageBadge(plan, date) {
+      const coverage = planLogCoverage(plan, date);
+      if (coverage.done >= coverage.total) {
+        return '<span class="log-check done"><i class="bi bi-check2-circle"></i>Đã ghi đủ</span>';
+      }
+      if (coverage.done > 0) {
+        return `<span class="log-check partial"><i class="bi bi-exclamation-circle"></i>Thiếu ${coverage.total - coverage.done}/${coverage.total}</span>`;
+      }
+      return '<span class="log-check missing"><i class="bi bi-pencil-square"></i>Chưa ghi</span>';
+    }
+
+    function renderDayLogSummary(visible, selectedDate) {
+      const summary = document.getElementById("dayLogSummary");
+      if (!summary) return;
+      if (viewMode !== "day") {
+        summary.style.display = "none";
+        return;
+      }
+      summary.style.display = "flex";
+      const active = visible.filter(plan => plan.status !== "Hoàn thành");
+      if (active.length === 0) {
+        summary.innerHTML = `<i class="bi bi-check2-circle text-success"></i><strong>${shortDateVn(selectedDate)}</strong><span>Không còn việc cần ghi nhật ký.</span>`;
+        return;
+      }
+      const complete = active.filter(plan => {
+        const coverage = planLogCoverage(plan, selectedDate);
+        return coverage.done >= coverage.total;
+      }).length;
+      const missing = active.length - complete;
+      const cls = missing ? "text-danger" : "text-success";
+      const icon = missing ? "bi-exclamation-triangle-fill" : "bi-check2-circle";
+      summary.innerHTML = `
+        <i class="bi ${icon} ${cls}"></i>
+        <strong>${shortDateVn(selectedDate)}</strong>
+        <span>Nhật ký: <strong>${complete}/${active.length}</strong> việc đã ghi đủ.</span>
+        ${missing ? `<span class="text-danger fw-semibold">Còn ${missing} việc thiếu.</span>` : '<span class="text-success fw-semibold">Đủ nhật ký trong ngày.</span>'}
+      `;
+    }
+
     function planSyncIcon(plan) {
       if (plan.syncStatus === "syncing") return ' <i class="bi bi-cloud-arrow-up text-primary" title="Đang đồng bộ"></i>';
       if (plan.syncStatus === "pending") return ' <i class="bi bi-cloud-slash text-warning" title="Chờ đồng bộ"></i>';
@@ -1842,6 +1972,7 @@
         tableWrap.style.display = "none";
         cards.style.display = "none";
         weekView.style.display = "block";
+        renderDayLogSummary(visible, selectedDate);
         renderWeek(visible);
         renderMetrics();
         return;
@@ -1849,6 +1980,7 @@
       weekView.style.display = "none";
       tableWrap.style.display = "";
       cards.style.display = "";
+      renderDayLogSummary(visible, selectedDate);
 
       if (visible.length === 0) {
         rows.innerHTML = '<tr><td colspan="7"><div class="empty-state">Không có việc cần xem.</div></td></tr>';
@@ -1874,7 +2006,7 @@
           <td>${escapeHtml(plan.team || "")}<div class="small text-secondary">${escapeHtml(plan.assignee || "")}</div></td>
           <td class="plan-meta">${planMetaLine(plan, selectedDate, false)}</td>
           <td>${priorityBadge(plan.priority)}</td>
-          <td>${statusBadge(plan.status)}</td>
+          <td>${statusBadge(plan.status)}<div class="mt-1">${logCoverageBadge(plan, selectedDate)}</div></td>
           <td class="text-end text-nowrap">
             <button class="btn btn-sm btn-outline-secondary" type="button" title="Sửa việc" onclick="openPlanModal('${escapeAttr(plan.id)}')">
               <i class="bi bi-pencil"></i>
@@ -1901,6 +2033,7 @@
               ${isHigh ? '<span class="badge bg-danger text-white mb-1" style="font-size:.7rem;">⚠ QUAN TRỌNG</span>' : ''}
               <div class="plan-card-title">${escapeHtml(plan.task || "")}</div>
               <div class="plan-meta" style="margin-top: 4px;">${planMetaLine(plan, selectedDate, true)}${teamVisible ? ' <span class="mx-1">·</span> ' + escapeHtml(plan.team) : ''}</div>
+              <div class="mt-2">${logCoverageBadge(plan, selectedDate)}</div>
             </div>
             <div class="d-flex flex-column gap-1">
               <button class="btn btn-success text-nowrap fw-bold" type="button" onclick="selectPlan('${escapeAttr(plan.id)}')">
@@ -1987,6 +2120,7 @@
           .slice(0, 300);
         localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
         renderLogs();
+        renderPlans();
         updateSyncStatus();
       } catch (error) { /* offline → dùng log cục bộ */ }
     }
@@ -2365,6 +2499,7 @@
       await Promise.all(newLogs.map(log => trySync(log)));
       localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
       renderLogs();
+      renderPlans();
       updateSyncStatus();
       if (newLogs.some(log => log.syncStatus !== "synced")) {
         showToast("Có nhật ký chưa đồng bộ được, sẽ tự thử lại sau");
