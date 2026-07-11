@@ -1083,6 +1083,11 @@
           btn.classList.add("chip-active");
         }
         box.value = parts.join("; ");
+        if (text === "Đã xử lý dứt điểm" && parts.includes(text)) {
+          setProgress("Hoàn thành");
+          document.getElementById("issue").value = "";
+          document.getElementById("nextAction").value = "";
+        }
         box.focus();
       });
     }
@@ -1990,11 +1995,40 @@
     function needsAttention(log) {
       if (String(log.selectedTask || "").startsWith("[Kế hoạch]")) return false;
       if (log.progress !== "Cần hỗ trợ" && !hasFollowup(log)) return false;
+      if (isFollowupResolved(log)) return false;
       if (log.planId) {
         const plan = plans.find(item => item.id === log.planId);
         if (plan && plan.status === "Hoàn thành") return false;
       }
       return true;
+    }
+
+    function isFollowupResolved(log) {
+      return logs.some(other => {
+        if (other.id === log.id) return false;
+        if (!isSameWorkLog(log, other)) return false;
+        if (String(other.createdAt || "") <= String(log.createdAt || "")) return false;
+        return isResolutionLog(other);
+      });
+    }
+
+    function isSameWorkLog(a, b) {
+      if (a.planId && b.planId && a.planId === b.planId) return true;
+      return normalizeWorkText(a.selectedTask) && normalizeWorkText(a.selectedTask) === normalizeWorkText(b.selectedTask);
+    }
+
+    function normalizeWorkText(value) {
+      return String(value || "")
+        .replace(/\s*\|\s*Xử lý tiếp:.*/i, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
+    }
+
+    function isResolutionLog(log) {
+      const text = [log.progress, log.result, log.issue, log.nextAction].join(" ").toLowerCase();
+      const doneText = text.includes("đã xử lý dứt điểm") || text.includes("xử lý dứt điểm");
+      return log.progress === "Hoàn thành" || doneText;
     }
 
     function renderLogs() {
