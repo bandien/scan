@@ -1,0 +1,65 @@
+<!-- @dsCard group="Cards" -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root { --muted: #667085; --line: #d9e1e8; --surface: #ffffff; --brand-2: #2d8a5f; }
+    body { background: #f6f7fb; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; padding: 20px; color: #17212f; }
+    .metric {
+      min-height: 76px; padding: 12px;
+      border: 1px solid var(--line); border-radius: 8px; background: var(--surface);
+    }
+    .metric strong { display: block; font-size: 1.45rem; line-height: 1.1; }
+    .metric span { color: var(--muted); font-size: .82rem; }
+    .mini-bar { height: 4px; border-radius: 2px; background: #e2e8f0; margin-top: 8px; overflow: hidden; }
+    .mini-bar i { display: block; height: 100%; background: var(--brand-2); border-radius: 2px; }
+  </style>
+</head>
+<body>
+  <div class="row g-3">
+    <div class="col-6 col-md-3">
+      <div class="metric">
+        <strong>4</strong>
+        <span>Kế hoạch trong ngày</span>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="metric">
+        <strong>1</strong>
+        <span>Đang làm</span>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="metric">
+        <strong>3/4</strong>
+        <span>Đã hoàn thành</span>
+        <div class="mini-bar"><i style="width: 75%;"></i></div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="metric">
+        <strong>12</strong>
+        <span>Nhật ký cả tổ (7 ngày)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-4 row g-3">
+    <div class="col-6 col-md-3">
+      <div class="metric">
+        <strong>0</strong>
+        <span>Trạng thái rỗng</span>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="metric">
+        <strong>7/7</strong>
+        <span>100% hoàn thành</span>
+        <div class="mini-bar"><i style="width: 100%;"></i></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

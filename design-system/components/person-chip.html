@@ -1,0 +1,55 @@
+<!-- @dsCard group="Forms" -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <style>
+    :root { --surface-soft: #eef6f4; --muted: #667085; }
+    body { background: #f6f7fb; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; padding: 20px; color: #17212f; }
+    .person-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--surface-soft); border: 1px solid #cbe7db; color: #24624a;
+      border-radius: 999px; padding: 4px 10px; font-size: .85rem; font-weight: 600;
+    }
+    .person-chip button { border: 0; background: none; color: inherit; padding: 0; line-height: 1; font-size: 1rem; }
+    .form-label { font-size: .78rem; font-weight: 700; color: #475467; }
+    .form-control, .form-select { border-radius: 8px; border-color: #cfd8e3; }
+    .section-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <div class="section-label mb-3">Person chip (removable tag)</div>
+  <div class="d-flex flex-wrap gap-2 mb-4">
+    <span class="person-chip">
+      Nguyễn Văn An <button type="button" title="Bỏ Nguyễn Văn An"><i class="bi bi-x"></i></button>
+    </span>
+    <span class="person-chip">
+      Trần Thị Bình <button type="button" title="Bỏ Trần Thị Bình"><i class="bi bi-x"></i></button>
+    </span>
+    <span class="person-chip">
+      Lê Văn Cường <button type="button"><i class="bi bi-x"></i></button>
+    </span>
+  </div>
+
+  <div class="section-label mb-2">Trong context form "Người thực hiện"</div>
+  <div style="max-width: 380px;">
+    <label class="form-label" for="ex-person">Người thực hiện</label>
+    <select class="form-select mb-2" id="ex-person">
+      <option value="">-- Chọn để thêm người --</option>
+      <option>Nguyễn Văn Dũng</option>
+      <option>Phạm Thị Hoa</option>
+      <option value="__other__">➕ Nhập tên khác...</option>
+    </select>
+    <div class="d-flex flex-wrap gap-1">
+      <span class="person-chip">
+        Nguyễn Văn An <button type="button"><i class="bi bi-x"></i></button>
+      </span>
+      <span class="person-chip">
+        Trần Thị Bình <button type="button"><i class="bi bi-x"></i></button>
+      </span>
+    </div>
+  </div>
+</body>
+</html>

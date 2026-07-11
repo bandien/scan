@@ -1,0 +1,87 @@
+<!-- @dsCard group="Tokens" -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --page-bg: #f6f7fb; --surface: #ffffff; --surface-soft: #eef6f4;
+      --ink: #17212f; --muted: #667085; --line: #d9e1e8;
+      --brand: #176b87; --brand-2: #2d8a5f; --warn: #b7791f; --danger: #c2413b;
+    }
+    body { background: var(--page-bg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; padding: 20px; color: var(--ink); }
+    .swatch { width: 64px; height: 64px; border-radius: 10px; border: 1px solid rgba(0,0,0,.08); }
+    .swatch-label { font-size: .75rem; font-weight: 700; color: var(--muted); margin-top: 6px; }
+    .swatch-hex { font-size: .7rem; color: var(--muted); }
+    .section-title { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+  <div class="section-title mb-2">Brand</div>
+  <div class="d-flex gap-3 flex-wrap mb-4">
+    <div class="text-center">
+      <div class="swatch" style="background: var(--brand);"></div>
+      <div class="swatch-label">--brand</div>
+      <div class="swatch-hex">#176b87</div>
+    </div>
+    <div class="text-center">
+      <div class="swatch" style="background: var(--brand-2);"></div>
+      <div class="swatch-label">--brand-2</div>
+      <div class="swatch-hex">#2d8a5f</div>
+    </div>
+  </div>
+
+  <div class="section-title">Surfaces</div>
+  <div class="d-flex gap-3 flex-wrap mb-4">
+    <div class="text-center">
+      <div class="swatch" style="background: var(--page-bg);"></div>
+      <div class="swatch-label">--page-bg</div>
+      <div class="swatch-hex">#f6f7fb</div>
+    </div>
+    <div class="text-center">
+      <div class="swatch" style="background: var(--surface);"></div>
+      <div class="swatch-label">--surface</div>
+      <div class="swatch-hex">#ffffff</div>
+    </div>
+    <div class="text-center">
+      <div class="swatch" style="background: var(--surface-soft);"></div>
+      <div class="swatch-label">--surface-soft</div>
+      <div class="swatch-hex">#eef6f4</div>
+    </div>
+  </div>
+
+  <div class="section-title">Semantic</div>
+  <div class="d-flex gap-3 flex-wrap mb-4">
+    <div class="text-center">
+      <div class="swatch" style="background: var(--warn);"></div>
+      <div class="swatch-label">--warn</div>
+      <div class="swatch-hex">#b7791f</div>
+    </div>
+    <div class="text-center">
+      <div class="swatch" style="background: var(--danger);"></div>
+      <div class="swatch-label">--danger</div>
+      <div class="swatch-hex">#c2413b</div>
+    </div>
+  </div>
+
+  <div class="section-title">Text & Line</div>
+  <div class="d-flex gap-3 flex-wrap">
+    <div class="text-center">
+      <div class="swatch" style="background: var(--ink);"></div>
+      <div class="swatch-label">--ink</div>
+      <div class="swatch-hex">#17212f</div>
+    </div>
+    <div class="text-center">
+      <div class="swatch" style="background: var(--muted);"></div>
+      <div class="swatch-label">--muted</div>
+      <div class="swatch-hex">#667085</div>
+    </div>
+    <div class="text-center">
+      <div class="swatch" style="background: var(--line);"></div>
+      <div class="swatch-label">--line</div>
+      <div class="swatch-hex">#d9e1e8</div>
+    </div>
+  </div>
+</body>
+</html>

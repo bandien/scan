@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>In Tem QR Đồng Hồ | BanDienScan</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+  <style>
+    :root {
+      --border: #cbd5e1;
+      --text: #0f172a;
+      --muted: #64748b;
+      --blue: #2563eb;
+      --amber: #d97706;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #f8fafc;
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      background: white;
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+    }
+    .title { font-weight: 800; }
+    .sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+    .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    select, button {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: white;
+      color: var(--text);
+      font-weight: 700;
+    }
+    button {
+      background: var(--blue);
+      color: white;
+      border-color: var(--blue);
+      cursor: pointer;
+    }
+    .sheet {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding: 14px;
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+    .label {
+      min-height: 178px;
+      display: grid;
+      grid-template-columns: 108px 1fr;
+      gap: 10px;
+      padding: 10px;
+      background: white;
+      border: 1.5px solid #111827;
+      border-radius: 8px;
+      break-inside: avoid;
+    }
+    .qr {
+      width: 104px;
+      height: 104px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+    .qr canvas { width: 96px !important; height: 96px !important; }
+    .brand {
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--blue);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    .name {
+      margin-top: 4px;
+      font-size: 15px;
+      line-height: 1.15;
+      font-weight: 900;
+    }
+    .meta {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.25;
+    }
+    .uid {
+      margin-top: 8px;
+      display: inline-block;
+      padding: 3px 6px;
+      border-radius: 5px;
+      background: #111827;
+      color: white;
+      font-family: Consolas, monospace;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .type {
+      margin-top: 6px;
+      display: inline-block;
+      color: #92400e;
+      background: #fef3c7;
+      border: 1px solid #fcd34d;
+      border-radius: 999px;
+      padding: 2px 7px;
+      font-size: 10px;
+      font-weight: 800;
+    }
+    .url {
+      grid-column: 1 / -1;
+      margin-top: -2px;
+      font-size: 8.5px;
+      color: #475569;
+      overflow-wrap: anywhere;
+      border-top: 1px dashed #cbd5e1;
+      padding-top: 5px;
+      font-family: Consolas, monospace;
+    }
+    .empty {
+      padding: 40px;
+      text-align: center;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    @page { size: A4 portrait; margin: 8mm; }
+    @media print {
+      body { background: white; }
+      .toolbar { display: none; }
+      .sheet { max-width: none; padding: 0; gap: 6mm; grid-template-columns: repeat(2, 1fr); }
+      .label { border-radius: 4px; min-height: 45mm; page-break-inside: avoid; }
+      .url { font-size: 7.5px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <div>
+      <div class="title">Tem QR đồng hồ điện/nước</div>
+      <div class="sub" id="summary">Đang tải danh sách...</div>
+    </div>
+    <div class="controls">
+      <select id="typeFilter" onchange="renderLabels()">
+        <option value="ALL">Tất cả</option>
+        <option value="Điện">Điện</option>
+        <option value="Nước">Nước</option>
+      </select>
+      <button onclick="window.print()">In tem QR</button>
+    </div>
+  </div>
+  <main class="sheet" id="sheet"></main>
+
+  <script>
+    let meters = [];
+
+    async function loadMeters() {
+      const res = await fetch("data/meter-points.json");
+      meters = await res.json();
+      renderLabels();
+    }
+
+    function renderLabels() {
+      const type = document.getElementById("typeFilter").value;
+      const list = meters.filter(m => type === "ALL" || m.Type === type);
+      document.getElementById("summary").textContent = `${list.length}/${meters.length} đồng hồ - URL: https://bandien.github.io/scan/meter.html?uid=...`;
+      const sheet = document.getElementById("sheet");
+      if (!list.length) {
+        sheet.innerHTML = '<div class="empty">Không có đồng hồ phù hợp bộ lọc.</div>';
+        return;
+      }
+
+      sheet.innerHTML = list.map((m, idx) => `
+        <section class="label">
+          <div>
+            <div class="qr" id="qr-${idx}"></div>
+            <span class="type">${escapeHtml(m.Type)} · ${escapeHtml(m.Unit)}</span>
+          </div>
+          <div>
+            <div class="brand">BanDienScan x CMMS</div>
+            <div class="name">${escapeHtml(m.Name)}</div>
+            <div class="meta">${escapeHtml(m.Location || "Chưa có vị trí")}</div>
+            <div class="meta">Mã SX: ${escapeHtml(m.SerialNumber || "-")}</div>
+            <span class="uid">${escapeHtml(m.MeterID)}</span>
+          </div>
+          <div class="url">${escapeHtml(m.QrUrl)}</div>
+        </section>
+      `).join("");
+
+      list.forEach((m, idx) => {
+        QRCode.toCanvas(document.createElement("canvas"), m.QrUrl, {
+          width: 96,
+          margin: 1,
+          color: { dark: "#0f172a", light: "#ffffff" },
+        }, (err, canvas) => {
+          const target = document.getElementById(`qr-${idx}`);
+          if (!target) return;
+          target.innerHTML = "";
+          if (err) target.textContent = "QR lỗi";
+          else target.appendChild(canvas);
+        });
+      });
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, ch => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;",
+      }[ch]));
+    }
+
+    loadMeters().catch(err => {
+      document.getElementById("sheet").innerHTML = `<div class="empty">Không tải được data/meter-points.json: ${escapeHtml(err.message)}</div>`;
+    });
+  </script>
+</body>
+</html>
