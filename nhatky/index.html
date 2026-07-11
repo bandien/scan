@@ -796,9 +796,13 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
         </div>
         <div class="modal-body">
-          <label class="form-label" for="loginName">Họ tên</label>
-          <input class="form-control mb-2" id="loginName" list="loginNameSuggestions" placeholder="Nhập họ tên của bạn" autocomplete="username">
+          <label class="form-label" for="loginName">Tên đăng nhập</label>
+          <input class="form-control mb-2" id="loginName" list="loginNameSuggestions" placeholder="Nhập tên đăng nhập (VD: ThanhNV)" autocomplete="username">
           <datalist id="loginNameSuggestions"></datalist>
+          
+          <label class="form-label text-primary" for="loginFullName">Họ tên đầy đủ <small class="text-muted">(Chỉ nhập khi Đăng ký)</small></label>
+          <input class="form-control mb-2" id="loginFullName" placeholder="Nhập họ và tên thật (Ví dụ: Nguyễn Văn Thành)" autocomplete="name">
+          
           <label class="form-label" for="loginPassword">Mật khẩu</label>
           <input class="form-control" id="loginPassword" type="password" placeholder="Mật khẩu tài khoản" autocomplete="current-password">
           <div class="small text-secondary mt-2" id="loginHint">Đã có tài khoản thì đăng nhập; chưa có thì tạo tài khoản mới với mật khẩu tự đặt.</div>
@@ -1578,6 +1582,8 @@
 
     function openLogin() {
       document.getElementById("loginName").value = currentUser();
+      const fnInput = document.getElementById("loginFullName");
+      if (fnInput) fnInput.value = "";
       document.getElementById("loginPassword").value = "";
       showLoginError("");
       loadAccountNames();
@@ -1591,13 +1597,15 @@
     }
 
     function readLoginForm() {
+      const fnInput = document.getElementById("loginFullName");
       return {
         name: document.getElementById("loginName").value.trim(),
+        fullName: fnInput ? fnInput.value.trim() : "",
         password: document.getElementById("loginPassword").value
       };
     }
 
-    async function callAuthAction(action, name, password, busyBtn) {
+    async function callAuthAction(action, name, fullName, password, busyBtn) {
       const sync = getSync();
       if (!sync.url) {
         showLoginError("Chưa cấu hình URL đồng bộ, không thể xác thực");
@@ -1609,7 +1617,7 @@
         const response = await fetch(sync.url, {
           method: "POST",
           signal: AbortSignal.timeout(15000),
-          body: JSON.stringify({ action: action, token: sync.token, payload: { name: name, password: password } })
+          body: JSON.stringify({ action: action, token: sync.token, payload: { name: name, fullName: fullName, password: password } })
         });
         const data = await response.json().catch(() => ({}));
         if (data.status !== "success") {
@@ -1638,15 +1646,15 @@
 
     function doLogin() {
       const { name, password } = readLoginForm();
-      if (!name || !password) { showLoginError("Nhập đủ họ tên và mật khẩu"); return; }
-      callAuthAction("nhatkyLogin", name, password, document.getElementById("btnLogin"));
+      if (!name || !password) { showLoginError("Nhập đủ tên đăng nhập và mật khẩu"); return; }
+      callAuthAction("nhatkyLogin", name, "", password, document.getElementById("btnLogin"));
     }
 
     function doRegister() {
-      const { name, password } = readLoginForm();
-      if (!name || !password) { showLoginError("Nhập đủ họ tên và mật khẩu"); return; }
+      const { name, fullName, password } = readLoginForm();
+      if (!name || !password || !fullName) { showLoginError("Nhập đủ tên đăng nhập, họ tên đầy đủ và mật khẩu"); return; }
       if (password.length < 4) { showLoginError("Mật khẩu tối thiểu 4 ký tự"); return; }
-      callAuthAction("nhatkyRegister", name, password, document.getElementById("btnRegister"));
+      callAuthAction("nhatkyRegister", name, fullName, password, document.getElementById("btnRegister"));
     }
 
     // Sửa/tạo/xóa kế hoạch → tự ghi 1 dòng nhật ký lưu vết cho người thao tác
