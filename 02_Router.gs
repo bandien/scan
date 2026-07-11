@@ -140,7 +140,7 @@ function ensureWorkLogsSheet_() {
   const headers = [
     "LogID","CreatedAt","WorkDate","Employee","Shift","Progress",
     "StartTime","EndTime","Task","Result","Issue","NextAction","PlanID","SyncStatus",
-    "Rating","RecordedBy","Quantity","Unit"
+    "Rating","RecordedBy","Quantity","Unit","TeamGroup"
   ];
 
   if (!sheet) sheet = ss.insertSheet("WorkLogs");
@@ -158,12 +158,19 @@ function ensureWorkLogsSheet_() {
     if (String(sheet.getRange(1, 18).getValue()).trim() === "") {
       sheet.getRange(1, 18).setValue("Unit").setFontWeight("bold");
     }
+    if (String(sheet.getRange(1, 19).getValue()).trim() === "") {
+      // Phân tổ cách ly dữ liệu
+      sheet.getRange(1, 19).setValue("TeamGroup").setFontWeight("bold");
+    }
   }
   return sheet;
 }
 
 // Nhật ký của cả tổ (mặc định 7 ngày gần nhất) để mọi máy cùng thấy
 function handleGetWorkLogs(e) {
+  const user = e && e.parameter ? e.parameter.user : "";
+  const teamGroup = typeof getUserTeamGroup_ === "function" ? getUserTeamGroup_(user) : "";
+
   const sheet = ensureWorkLogsSheet_();
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return contentResponse({ status: "success", logs: [] });
@@ -172,13 +179,19 @@ function handleGetWorkLogs(e) {
   const cutoff = Utilities.formatDate(new Date(Date.now() - days * 86400000), Session.getScriptTimeZone(), "yyyy-MM-dd");
   const maxRows = 400;
   const startRow = Math.max(2, lastRow - maxRows + 1);
-  const rows = sheet.getRange(startRow, 1, lastRow - startRow + 1, 18).getValues();
+  const rows = sheet.getRange(startRow, 1, lastRow - startRow + 1, 19).getValues();
 
   const logs = [];
   rows.forEach(function(r) {
     if (!String(r[0]).trim()) return;
     const workDate = formatPlanDate_(r[2]);
     if (workDate && workDate < cutoff) return;
+    
+    const rTeam = String(r[18] || "").trim();
+    if (teamGroup && teamGroup !== "*" && teamGroup.toLowerCase() !== "admin") {
+      if (rTeam !== teamGroup) return;
+    }
+
     logs.push({
       id: String(r[0]),
       createdAt: r[1] instanceof Date ? r[1].toISOString() : String(r[1] || ""),
@@ -223,6 +236,10 @@ function handleCreateWorkLog(params) {
 
   const logId = payload.id || ("LOG-" + new Date().getTime());
   const sheet = ensureWorkLogsSheet_();
+  
+  const user = payload.recordedBy || employee;
+  const teamGroup = typeof getUserTeamGroup_ === "function" ? getUserTeamGroup_(user) : "";
+
   sheet.appendRow([
     logId,
     payload.createdAt || new Date(),
@@ -241,7 +258,8 @@ function handleCreateWorkLog(params) {
     payload.rating || "",
     payload.recordedBy || "",
     payload.quantity === 0 || payload.quantity ? payload.quantity : "",
-    payload.unit || ""
+    payload.unit || "",
+    teamGroup
   ]);
 
   // Cập nhật tăng dần lũy kế vào dòng kế hoạch (Incremental Update)
