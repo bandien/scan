@@ -12,11 +12,15 @@
 function ensureAccountsSheet_() {
   const ss = SpreadsheetApp.openById(SHEET_ID);
   let sheet = ss.getSheetByName("NhatKyAccounts");
-  const headers = ["Name", "PasswordHash", "CreatedAt", "LastLoginAt"];
+  const headers = ["Name", "PasswordHash", "CreatedAt", "LastLoginAt", "TeamGroup"];
 
   if (!sheet) sheet = ss.insertSheet("NhatKyAccounts");
   if (sheet.getLastRow() === 0) {
     sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight("bold");
+  } else {
+    if (String(sheet.getRange(1, 5).getValue()).trim() === "") {
+      sheet.getRange(1, 5).setValue("TeamGroup").setFontWeight("bold");
+    }
   }
   return sheet;
 }
@@ -38,6 +42,16 @@ function findAccountRow_(sheet, name) {
     if (String(names[i][0]).trim().toLowerCase() === target) return i + 2;
   }
   return 0;
+}
+
+function getUserTeamGroup_(name) {
+  if (!name) return "";
+  const sheet = ensureAccountsSheet_();
+  const rowIndex = findAccountRow_(sheet, name);
+  if (rowIndex > 0) {
+    return String(sheet.getRange(rowIndex, 5).getValue() || "").trim();
+  }
+  return "";
 }
 
 function handleListAccounts(e) {
@@ -64,9 +78,9 @@ function handleNhatKyRegister(params) {
     return contentResponse({ status: "error", message: "Tên này đã có tài khoản — hãy đăng nhập thay vì tạo mới" });
   }
 
-  sheet.appendRow([name, hashPassword_(name, password), new Date(), new Date()]);
+  sheet.appendRow([name, hashPassword_(name, password), new Date(), new Date(), ""]);
   writeAuditLog(name, "nhatkyRegister", name, "Tạo tài khoản trang nhật ký");
-  return contentResponse({ status: "success", name: name });
+  return contentResponse({ status: "success", name: name, teamGroup: "" });
 }
 
 function handleNhatKyLogin(params) {
@@ -86,5 +100,6 @@ function handleNhatKyLogin(params) {
   }
 
   sheet.getRange(rowIndex, 4).setValue(new Date());
-  return contentResponse({ status: "success", name: name });
+  const teamGroup = String(sheet.getRange(rowIndex, 5).getValue() || "").trim();
+  return contentResponse({ status: "success", name: name, teamGroup: teamGroup });
 }

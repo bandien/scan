@@ -77,6 +77,9 @@ function formatPlanDate_(value) {
 }
 
 function handleGetPlans(e) {
+  const user = e && e.parameter ? e.parameter.user : "";
+  const teamGroup = typeof getUserTeamGroup_ === "function" ? getUserTeamGroup_(user) : "";
+
   const sheet = ensurePlansSheet_();
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return contentResponse({ status: "success", plans: [] });
@@ -84,7 +87,15 @@ function handleGetPlans(e) {
   let totals = null; // Lazy-load only when some plan rows have empty DoneQty
   const rows = sheet.getRange(2, 1, lastRow - 1, 20).getValues();
   const plans = rows
-    .filter(function(r) { return String(r[0]).trim() !== ""; })
+    .filter(function(r) {
+      if (String(r[0]).trim() === "") return false;
+      const rTeam = String(r[3] || "").trim();
+      // Nếu user có TeamGroup cụ thể (khác rỗng, *, admin), chỉ lấy việc của đúng tổ đó
+      if (teamGroup && teamGroup !== "*" && teamGroup.toLowerCase() !== "admin") {
+        if (rTeam !== teamGroup) return false;
+      }
+      return true;
+    })
     .map(function(r) {
       const id = String(r[0]);
       let doneQtyVal = r[18];
