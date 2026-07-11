@@ -1,0 +1,93 @@
+<!-- @dsCard group="Cards" -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <style>
+    :root { --brand: #176b87; --muted: #667085; --line: #d9e1e8; }
+    body { background: #f6f7fb; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; padding: 20px; color: #17212f; }
+    .week-table { table-layout: fixed; width: 100%; border-collapse: collapse; }
+    .week-table .day-cell { width: 92px; padding: 8px; vertical-align: top; }
+    .week-table td { padding: 8px; vertical-align: top; overflow: hidden; }
+    .week-today td { background: #eef6f4; }
+    .week-items { display: flex; flex-direction: column; gap: 6px; }
+    .week-item {
+      display: flex; gap: 8px; align-items: flex-start; width: 100%; text-align: left;
+      border: 1px solid var(--line); border-left-width: 4px; border-radius: 6px;
+      padding: 6px 8px; background: #fff; font-size: .85rem; color: #17212f;
+    }
+    .week-item.st-done  { border-left-color: #2d8a5f; }
+    .week-item.st-doing { border-left-color: #155ea8; }
+    .week-item.st-help  { border-left-color: #c2413b; }
+    .week-item.st-open  { border-left-color: #94a3b8; }
+    .week-item-main { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 2px; }
+    .week-item-task { color: var(--brand); font-weight: 700; font-size: 1.1rem; overflow: hidden; white-space: normal; }
+    .week-item-meta { color: var(--muted); font-size: .85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .week-item .badge-soft { margin-left: auto; flex-shrink: 0; }
+    .badge-soft { border: 1px solid transparent; border-radius: 999px; padding: 5px 10px; font-weight: 700; font-size: .8rem; white-space: nowrap; display: inline-block; }
+    .badge-open  { background: #edf3f6; color: #475467; border-color: #d9e1e8; }
+    .badge-doing { background: #e8f3ff; color: #155ea8; border-color: #bddcff; }
+    .badge-done  { background: #e8f6ef; color: #1f7a4d; border-color: #bfe4cf; }
+    .badge-high  { background: #fff1f0; color: #c2413b; border-color: #ffd0cc; }
+  </style>
+</head>
+<body>
+  <div class="small fw-bold text-secondary mb-2">Tuần 07/07 - 13/07</div>
+  <table class="table table-hover align-middle mb-0 week-table">
+    <tbody>
+      <tr>
+        <td class="day-cell">
+          <div class="fw-bold">Thứ 2</div>
+          <div class="small text-secondary">07/07</div>
+        </td>
+        <td>
+          <div class="week-items">
+            <button class="week-item st-done" type="button">
+              <div class="week-item-main">
+                <div class="week-item-task">Kiểm tra nhiệt độ đầu cốt Tủ MSB-B1</div>
+                <div class="week-item-meta"><i class="bi bi-clock me-1"></i>07:30 - 09:30 · Ca trực sáng · Tầng hầm B1</div>
+              </div>
+              <span class="badge-soft badge-done">Hoàn thành</span>
+            </button>
+            <button class="week-item st-open" type="button">
+              <div class="week-item-main">
+                <div class="week-item-task">Kiểm tra đèn lỗi, CB nhánh chiếu sáng cảnh quan</div>
+                <div class="week-item-meta"><i class="bi bi-clock me-1"></i>13:30 - 15:00 · Ca trực chiều · Sân vườn</div>
+              </div>
+              <span class="badge-soft badge-open">Chưa làm</span>
+            </button>
+          </div>
+        </td>
+      </tr>
+      <tr class="week-today">
+        <td class="day-cell">
+          <div class="fw-bold">Thứ 6</div>
+          <div class="small text-secondary">11/07 · Hôm nay</div>
+        </td>
+        <td>
+          <div class="week-items">
+            <button class="week-item st-doing" type="button">
+              <div class="week-item-main">
+                <div class="week-item-task">Kiểm tra máy phát dự phòng</div>
+                <div class="week-item-meta"><i class="bi bi-clock me-1"></i>15:00 - 16:30 · Ca trực chiều · Trạm biến áp · <span class="text-warning fw-bold">Phát sinh</span></div>
+              </div>
+              <span class="badge-soft badge-doing">Đang làm</span>
+            </button>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="day-cell">
+          <div class="fw-bold">Thứ 7</div>
+          <div class="small text-secondary">12/07</div>
+        </td>
+        <td>
+          <span class="text-secondary small">Không có kế hoạch</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!-- @dsCard group="Badges & Status" -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <style>
+    :root { --brand-2: #2d8a5f; --surface-soft: #eef6f4; --muted: #667085; --line: #d9e1e8; }
+    body { background: #f6f7fb; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; padding: 20px; color: #17212f; }
+    .chip {
+      border: 1px solid #cfd8e3; background: #fff; color: #475467;
+      border-radius: 999px; padding: 6px 12px; font-size: .85rem;
+      font-weight: 600; line-height: 1.2; cursor: pointer; display: inline-block;
+    }
+    .chip-active { border-width: 2px; padding: 5px 11px; }
+    .chip-active.chip-done  { background: #e8f6ef; border-color: #1f7a4d; color: #1f7a4d; }
+    .chip-active.chip-doing { background: #e8f3ff; border-color: #155ea8; color: #155ea8; }
+    .chip-active.chip-help  { background: #fff1f0; border-color: #c2413b; color: #c2413b; }
+    .chip-active.chip-open  { background: #edf3f6; border-color: #475467; color: #344054; }
+    /* Dùng trong #progressChips (lưới 3 cột) */
+    .chip-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; max-width: 340px; }
+    .chip-grid .chip { text-align: center; }
+    .chip-grid .chip-done  { border-color: #bfe4cf; color: #1f7a4d; }
+    .chip-grid .chip-doing { border-color: #bddcff; color: #155ea8; }
+    .chip-grid .chip-help  { border-color: #ffd0cc; color: #c2413b; }
+    /* Chip kết quả */
+    .chip-result.chip-active { background: var(--surface-soft); border-color: var(--brand-2); color: #24624a; }
+    .row-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 8px; }
+    .group { margin-bottom: 24px; }
+  </style>
+</head>
+<body>
+  <div class="group">
+    <div class="row-label">Chip trạng thái — lưới 3 cột (progressChips)</div>
+    <div class="chip-grid">
+      <button class="chip chip-done chip-active" type="button"><i class="bi bi-check2-circle me-1"></i>Hoàn thành</button>
+      <button class="chip chip-doing" type="button"><i class="bi bi-arrow-repeat me-1"></i>Đang làm</button>
+      <button class="chip chip-help" type="button"><i class="bi bi-exclamation-triangle me-1"></i>Cần hỗ trợ</button>
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="row-label">Trạng thái đã chọn (active variants)</div>
+    <div class="d-flex gap-2 flex-wrap">
+      <button class="chip chip-active chip-done" type="button"><i class="bi bi-check2-circle me-1"></i>Hoàn thành</button>
+      <button class="chip chip-active chip-doing" type="button"><i class="bi bi-arrow-repeat me-1"></i>Đang làm</button>
+      <button class="chip chip-active chip-help" type="button"><i class="bi bi-exclamation-triangle me-1"></i>Cần hỗ trợ</button>
+      <button class="chip chip-active chip-open" type="button">Chưa làm</button>
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="row-label">Chip kết quả (resultChips) — bật/tắt</div>
+    <div class="d-flex flex-wrap gap-2">
+      <button class="chip chip-result chip-active" type="button">Không phát hiện bất thường</button>
+      <button class="chip chip-result" type="button">Có bất thường, cần theo dõi</button>
+      <button class="chip chip-result" type="button">Đã xử lý dứt điểm</button>
+      <button class="chip chip-result" type="button">Cần vật tư thay thế</button>
+    </div>
+  </div>
+</body>
+</html>

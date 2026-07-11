@@ -1,0 +1,6 @@
+
+# Local tool config (contains local-only permissions, example commands with tokens)
+.claude/
+
+# Local design-sync bookkeeping (project id, timestamps) - not needed in git history
+.design-sync/
