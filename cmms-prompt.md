@@ -1,3 +1,16 @@
+---
+title: Prompt Triển khai Hệ thống CMMS — Hapulico
+aliases:
+  - cmms prompt
+  - prompt triển khai hệ thống cmms — hapulico
+tags:
+  - khac
+  - cmms
+  - scan-cmms
+  - dang-thuc-hien
+date: 2026-06-08
+updated: 2026-06-08
+---
 # Prompt Triển khai Hệ thống CMMS — Hapulico
 
 > **Mục đích:** File prompt tổng hợp để đưa cho AI coding agent (Claude Code, Cursor, v.v.) triển khai hệ thống CMMS doanh nghiệp cho công ty Hapulico — quản lý sân golf và khu phức hợp đa tòa nhà.

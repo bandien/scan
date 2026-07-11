@@ -1,3 +1,15 @@
+---
+title: HỒ SƠ ĐẶC TẢ KỸ THUẬT: HỆ THỐNG QUẢN LÝ BẢO TRÌ QR-UID TOÀN DIỆN
+aliases:
+  - yeu cau thong uid
+  - hồ sơ đặc tả kỹ thuật: hệ thống quản lý bảo trì qr-uid toàn diện
+tags:
+  - khac
+  - scan-cmms
+  - dang-thuc-hien
+date: 2026-06-08
+updated: 2026-06-08
+---
 # HỒ SƠ ĐẶC TẢ KỸ THUẬT: HỆ THỐNG QUẢN LÝ BẢO TRÌ QR-UID TOÀN DIỆN
 
 ## 1. TỔNG QUAN GIẢI PHÁP
@@ -168,4 +180,4 @@ Hệ thống sẽ được triển khai theo mô hình tự động hóa hoàn t
 4. **Giai đoạn 4 (Bàn giao):** Gửi link WebApp dùng thử và hướng dẫn cài đặt Google Sheets cho người dùng.
 
 > [!IMPORTANT]
-> **Người dùng chỉ cần phê duyệt hồ sơ này.** Mọi công việc sau đó sẽ được thực hiện tự động và báo cáo kết quả định kỳ.
+> **Người dùng chỉ cần phê duyệt hồ sơ này.** Mọi công việc sau đó sẽ được thực hiện tự động và báo cáo kết quả định kỳ.
