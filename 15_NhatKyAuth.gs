@@ -45,8 +45,8 @@ function findAccountRow_(sheet, name) {
 }
 
 function getUserTeamGroup_(name) {
-  if (!name) return "";
   const sheet = ensureAccountsSheet_();
+  if (!name) return "";
   const rowIndex = findAccountRow_(sheet, name);
   if (rowIndex > 0) {
     return String(sheet.getRange(rowIndex, 5).getValue() || "").trim();
@@ -78,9 +78,9 @@ function handleNhatKyRegister(params) {
     return contentResponse({ status: "error", message: "Tên này đã có tài khoản — hãy đăng nhập thay vì tạo mới" });
   }
 
-  sheet.appendRow([name, hashPassword_(name, password), new Date(), new Date(), ""]);
+  sheet.appendRow([name, hashPassword_(name, password), new Date(), new Date(), "- Chưa phân tổ -"]);
   writeAuditLog(name, "nhatkyRegister", name, "Tạo tài khoản trang nhật ký");
-  return contentResponse({ status: "success", name: name, teamGroup: "" });
+  return contentResponse({ status: "success", name: name, teamGroup: "- Chưa phân tổ -" });
 }
 
 function handleNhatKyLogin(params) {
