@@ -796,12 +796,16 @@
           <div class="modal-body">
             <input type="hidden" id="planFormId">
             <div class="row g-2">
-              <div class="col-6">
-                <label class="form-label" for="planDate">Từ ngày</label>
+              <div class="col-4">
+                <label class="form-label" for="planDate">Ngày bắt đầu</label>
                 <input class="form-control" id="planDate" type="date" required>
               </div>
-              <div class="col-6">
-                <label class="form-label" for="planDateEnd">Đến ngày <span class="fw-normal text-secondary">(nếu nhiều ngày)</span></label>
+              <div class="col-4">
+                <label class="form-label" for="planFollowUpDate">Ngày nhắc/xem lại</label>
+                <input class="form-control" id="planFollowUpDate" type="date">
+              </div>
+              <div class="col-4">
+                <label class="form-label" for="planDateEnd">Deadline cuối</label>
                 <input class="form-control" id="planDateEnd" type="date">
               </div>
               <div class="col-6">
@@ -1280,6 +1284,7 @@
       document.getElementById("btnDeletePlan").style.display = plan ? "inline-block" : "none";
       document.getElementById("planFormId").value = plan ? plan.id : "";
       document.getElementById("planDate").value = plan ? (plan.date || today) : (document.getElementById("filterDate").value || today);
+      document.getElementById("planFollowUpDate").value = plan ? (plan.followUpDate || plan.date || today) : (document.getElementById("filterDate").value || today);
       document.getElementById("planDateEnd").value = plan ? (plan.dateEnd || "") : "";
       // Khung giờ lưu dạng "07:30-09:30" → tách vào 2 ô chọn giờ tròn 15'
       const timeParts = plan && plan.time ? plan.time.split("-").map(part => part.trim()) : [];
@@ -1338,10 +1343,12 @@
       event.preventDefault();
       const dateValue = document.getElementById("planDate").value;
       let dateEndValue = document.getElementById("planDateEnd").value;
-      if (dateEndValue && dateEndValue <= dateValue) dateEndValue = "";
+      const followUpDateValue = document.getElementById("planFollowUpDate").value || dateValue;
+      if (dateEndValue && dateEndValue < dateValue) dateEndValue = "";
       const payload = {
         id: document.getElementById("planFormId").value.trim(),
         date: dateValue,
+        followUpDate: followUpDateValue,
         dateEnd: dateEndValue,
         time: [document.getElementById("planTimeFrom").value, document.getElementById("planTimeTo").value].filter(Boolean).join("-"),
         team: document.getElementById("planTeam").value.trim(),
@@ -1638,9 +1645,13 @@
       personSelect.value = currentPerson;
     }
 
-    // Việc nhiều ngày: ngày kết thúc thực tế = dateEnd (nếu có) hoặc date
-    function planEnd(plan) {
-      return plan.dateEnd && plan.dateEnd > plan.date ? plan.dateEnd : plan.date;
+    // date = ngày bắt đầu, followUpDate = ngày nhắc/xem lại, dateEnd = deadline cuối
+    function planReminder(plan) {
+      return plan.followUpDate || plan.date;
+    }
+
+    function planDeadline(plan) {
+      return plan.dateEnd || plan.date;
     }
 
     function dayDiff(a, b) {
@@ -1648,19 +1659,17 @@
     }
 
     function isMultiDay(plan) {
-      return planEnd(plan) > plan.date;
+      return planDeadline(plan) > plan.date;
     }
 
     function inPlanRange(plan, iso) {
-      return Boolean(iso && plan.date && iso >= plan.date && iso <= planEnd(plan));
+      return Boolean(iso && planReminder(plan) === iso);
     }
 
     // Badge "Ngày x/y" cho việc nhiều ngày đang trong tiến trình
     function multiDayBadge(plan, selectedDate) {
-      if (!isMultiDay(plan) || !inPlanRange(plan, selectedDate)) return "";
-      const dayNo = dayDiff(selectedDate, plan.date) + 1;
-      const totalDays = dayDiff(planEnd(plan), plan.date) + 1;
-      return `<span class="badge-soft badge-doing">Ngày ${dayNo}/${totalDays}</span>`;
+      if (!isDueForReview(plan, selectedDate)) return "";
+      return `<span class="badge-soft badge-doing" title="Deadline cuối ${shortDateVn(planDeadline(plan))}">Nhắc ${shortDateVn(planReminder(plan))}</span>`;
     }
 
     function typeBadge(plan) {
@@ -1682,10 +1691,13 @@
       return "";
     }
 
-    // Tồn = đã qua ngày kết thúc dự kiến mà chưa hoàn thành (việc nhiều ngày
-    // đang trong khoảng Từ ngày-Đến ngày thì KHÔNG tính tồn)
+    // Tồn = đã qua deadline cuối mà chưa hoàn thành
     function isCarryOver(plan, selectedDate) {
-      return Boolean(selectedDate && plan.date && planEnd(plan) < selectedDate && plan.status !== "Hoàn thành");
+      return Boolean(selectedDate && plan.date && planDeadline(plan) < selectedDate && plan.status !== "Hoàn thành");
+    }
+
+    function isDueForReview(plan, iso) {
+      return Boolean(iso && planReminder(plan) <= iso && plan.status !== "Hoàn thành");
     }
 
     function getVisiblePlans() {
@@ -1703,13 +1715,13 @@
 
       if (viewMode === "week") {
         const days = weekDates(date);
-        // Việc nhiều ngày hiện ở mọi ngày nó chạy qua trong tuần
-        return plans.filter(plan => plan.date <= days[6] && planEnd(plan) >= days[0] && matchesFilters(plan));
+        // Chế độ tuần: hiện vào ngày nhắc/xem lại, hoặc việc đã quá deadline cuối
+        return plans.filter(plan => (isDueForReview(plan, days[6]) || isCarryOver(plan, days[6])) && matchesFilters(plan));
       }
 
       return plans.filter(plan => {
-        const byDate = !date || inPlanRange(plan, date);
-        // Kế hoạch quá hạn chưa hoàn thành → vẫn hiện ở ngày đang xem (tồn cũ)
+        const byDate = !date || isDueForReview(plan, date);
+        // Chỉ hiện lại vào ngày nhắc/xem lại; việc quá deadline cuối vẫn cảnh báo tồn
         return (byDate || isCarryOver(plan, date)) && matchesFilters(plan);
       });
     }
@@ -1757,7 +1769,7 @@
           <td class="task-text"><div class="plan-task-title">${escapeHtml(plan.task || "")}</div>${typeBadge(plan) || doneQtyBadge(plan) ? `<div class="d-flex flex-wrap gap-1 mt-1">${typeBadge(plan)} ${doneQtyBadge(plan)}</div>` : ""}</td>
           <td class="text-brand fw-semibold">${escapeHtml(plan.area || "")}${plan.asset ? `<div class="small">${escapeHtml(plan.asset)}</div>` : ""}</td>
           <td>${escapeHtml(plan.team || "")}<div class="small text-secondary">${escapeHtml(plan.assignee || "")}</div></td>
-          <td class="fw-bold text-nowrap">${escapeHtml(plan.time || "")}${planSyncIcon(plan)}${carry ? `<div><span class="badge-soft badge-carry">Tồn ${shortDateVn(planEnd(plan))}</span></div>` : ""}${multiDayBadge(plan, selectedDate) ? `<div>${multiDayBadge(plan, selectedDate)}</div>` : ""}</td>
+          <td class="fw-bold text-nowrap">${escapeHtml(plan.time || "")}${planSyncIcon(plan)}${carry ? `<div><span class="badge-soft badge-carry">Quá hạn ${shortDateVn(planDeadline(plan))}</span></div>` : ""}${multiDayBadge(plan, selectedDate) ? `<div>${multiDayBadge(plan, selectedDate)}</div>` : ""}</td>
           <td>${priorityBadge(plan.priority)}</td>
           <td>${statusBadge(plan.status)}</td>
           <td class="text-end text-nowrap">
@@ -1790,7 +1802,7 @@
                 ${teamVisible ? ' <span class="mx-1">·</span> ' + escapeHtml(plan.team) : ''}
                 ${plan.assignee ? ' <span class="mx-1">·</span> <i class="bi bi-person-fill me-1"></i>' + escapeHtml(plan.assignee) : ''}
                 ${planSyncIcon(plan)}
-                ${carry ? ' <span class="badge-soft badge-carry">Tồn ' + shortDateVn(planEnd(plan)) + '</span>' : ''}
+                ${carry ? ' <span class="badge-soft badge-carry">Quá hạn ' + shortDateVn(planDeadline(plan)) + '</span>' : ''}
                 ${multiDayBadge(plan, selectedDate)}
               </div>
             </div>
@@ -1823,13 +1835,13 @@
       const label = `Tuần ${shortDateVn(days[0])} - ${shortDateVn(days[6])}`;
       const body = days.map((iso, index) => {
         const dayPlans = visible
-          .filter(plan => inPlanRange(plan, iso))
+          .filter(plan => planReminder(plan) === iso || (iso === days[0] && planReminder(plan) < days[0] && plan.status !== "Hoàn thành"))
           .sort((a, b) => (a.time || "").localeCompare(b.time || ""));
         const items = dayPlans.map(plan => `
           <button class="week-item ${weekItemClass(plan.status)}" type="button" onclick="openPlanModal('${escapeAttr(plan.id)}')" title="Bấm để sửa kế hoạch">
             <div class="week-item-main">
               <div class="week-item-task">${escapeHtml(plan.task || "")}</div>
-              <div class="week-item-meta">${escapeHtml(plan.time || "--")}${[plan.area, plan.asset].filter(Boolean).length ? " · " + [plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ") : ""}${plan.type === "Phát sinh" ? ' · <span class="text-warning fw-bold">Phát sinh</span>' : ""}</div>
+              <div class="week-item-meta">${escapeHtml(plan.time || "--")}${[plan.area, plan.asset].filter(Boolean).length ? " · " + [plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ") : ""} · Deadline ${shortDateVn(planDeadline(plan))}${plan.type === "Phát sinh" ? ' · <span class="text-warning fw-bold">Phát sinh</span>' : ""}</div>
             </div>
             ${statusBadge(plan.status)}
           </button>
@@ -2125,10 +2137,10 @@
       const plan = plans.find(item => item.id === id);
       if (!plan) return;
       document.getElementById("planId").value = plan.id;
-      // Việc nhiều ngày: ngày ghi là ngày đang xem/hôm nay nếu nằm trong khoảng
+      // Ngày ghi ưu tiên ngày đang xem nếu đó là ngày nhắc/quá hạn; nếu không dùng hôm nay hoặc ngày nhắc
       const viewedDate = document.getElementById("filterDate").value;
-      document.getElementById("workDate").value = inPlanRange(plan, viewedDate) ? viewedDate
-        : (inPlanRange(plan, today) ? today : (plan.date || today));
+      document.getElementById("workDate").value = (viewedDate && (planReminder(plan) === viewedDate || isCarryOver(plan, viewedDate))) ? viewedDate
+        : (planReminder(plan) <= today ? today : planReminder(plan));
       document.getElementById("selectedTask").value = `${plan.time || ""} | ${plan.area || ""} | ${plan.asset || ""}: ${plan.task || ""}`.trim();
       setProgress("Hoàn thành");
       document.getElementById("startTime").value = roundQuarter(currentTime());

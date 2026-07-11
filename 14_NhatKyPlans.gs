@@ -42,10 +42,15 @@ function ensurePlansSheet_() {
       // DoneQty: Lũy kế đã hoàn thành (cộng dồn từ work logs)
       sheet.getRange(1, 19).setValue("DoneQty").setFontWeight("bold");
     }
+    if (String(sheet.getRange(1, 20).getValue()).trim() === "") {
+      // FollowUpDate: ngày nhắc/xem lại tiếp theo, tách riêng với DateEnd deadline cuối
+      sheet.getRange(1, 20).setValue("FollowUpDate").setFontWeight("bold");
+    }
   }
   // Date/Time/DateEnd lưu dạng text để trả về đúng chuỗi yyyy-MM-dd / HH:mm-HH:mm
   sheet.getRange("B:C").setNumberFormat("@");
   sheet.getRange("O:O").setNumberFormat("@");
+  sheet.getRange("T:T").setNumberFormat("@");
   return sheet;
 }
 
@@ -77,7 +82,7 @@ function handleGetPlans(e) {
   if (lastRow < 2) return contentResponse({ status: "success", plans: [] });
 
   let totals = null; // Lazy-load only when some plan rows have empty DoneQty
-  const rows = sheet.getRange(2, 1, lastRow - 1, 19).getValues();
+  const rows = sheet.getRange(2, 1, lastRow - 1, 20).getValues();
   const plans = rows
     .filter(function(r) { return String(r[0]).trim() !== ""; })
     .map(function(r) {
@@ -108,7 +113,8 @@ function handleGetPlans(e) {
         type: String(r[15] || ""),
         planQty: r[16] === "" || r[16] === null ? "" : Number(r[16]),
         unit: String(r[17] || ""),
-        doneQty: doneQtyVal
+        doneQty: doneQtyVal,
+        followUpDate: formatPlanDate_(r[19])
       };
     });
 
@@ -153,7 +159,8 @@ function handleSavePlan(params) {
     String(payload.type || "Kế hoạch"),
     payload.planQty === 0 || payload.planQty ? payload.planQty : "",
     String(payload.unit || ""),
-    Number(doneQty)
+    Number(doneQty),
+    formatPlanDate_(payload.followUpDate)
   ];
 
   if (rowIndex > 0) {
