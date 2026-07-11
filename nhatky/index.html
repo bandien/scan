@@ -580,16 +580,16 @@
               <label class="form-label" for="endTime">Đến giờ</label>
               <select class="form-select" id="endTime"></select>
             </div>
-            <div class="col-6" id="quantityField">
+            <div class="col-6 d-none" id="quantityField">
               <label class="form-label" for="quantity">Số lượng <span class="fw-normal text-secondary">(nếu có)</span></label>
               <input class="form-control" id="quantity" type="number" inputmode="decimal" step="any" min="0" placeholder="vd: 12">
             </div>
-            <div class="col-6" id="unitField">
+            <div class="col-6 d-none" id="unitField">
               <label class="form-label" for="quantityUnit">Đơn vị</label>
               <input class="form-control" id="quantityUnit" placeholder="vd: m, cái, bộ...">
             </div>
             <div class="col-12">
-              <span class="form-label d-block">Trạng thái công việc <span class="fw-normal text-secondary">(tự cập nhật vào Kế hoạch)</span></span>
+              <span class="form-label d-block">Trạng thái</span>
               <input type="hidden" id="progress" value="Hoàn thành">
               <div id="progressChips">
                 <button class="chip chip-done" type="button" data-value="Hoàn thành"><i class="bi bi-check2-circle me-1"></i>Hoàn thành</button>
@@ -598,7 +598,7 @@
               </div>
               <div class="form-check mt-2" id="planCompleteCheckContainer" style="display: none;">
                 <input class="form-check-input" type="checkbox" id="markPlanDone">
-                <label class="form-check-label small text-success fw-bold" for="markPlanDone">Hoàn thành toàn bộ kế hoạch (kết thúc công việc này)</label>
+                <label class="form-check-label small text-success fw-bold" for="markPlanDone">Kết thúc việc này</label>
               </div>
             </div>
             <div class="col-12">
@@ -607,14 +607,14 @@
               <div class="small text-primary fw-bold mt-1 d-none" id="planCumNote"></div>
             </div>
             <div class="col-12">
-              <label class="form-label" for="result">Kết quả / tình trạng ghi nhận</label>
+              <label class="form-label" for="result">Kết quả</label>
               <div class="chip-row mb-2" id="resultChips">
                 <button class="chip" type="button">Không phát hiện bất thường</button>
                 <button class="chip" type="button">Có bất thường, cần theo dõi</button>
                 <button class="chip" type="button">Đã xử lý dứt điểm</button>
                 <button class="chip" type="button">Cần vật tư thay thế</button>
               </div>
-              <textarea class="form-control" id="result" rows="3" placeholder="Nhập ngắn gọn: đã làm, tình trạng, số đo nếu có..." required></textarea>
+              <textarea class="form-control" id="result" rows="3" placeholder="Ghi ngắn gọn: đã làm gì, kết quả ra sao..." required></textarea>
             </div>
             <div class="col-12 d-none" id="peopleResults">
               <span class="form-label d-block"><i class="bi bi-people me-1"></i>Kết quả từng người tham gia</span>
@@ -622,11 +622,11 @@
               <div class="small text-secondary mt-1">Ghi riêng nội dung thực hiện của từng nhân viên</div>
             </div>
             <div class="col-12 d-none extra-field">
-              <label class="form-label" for="issue">Tồn tại / cần xử lý tiếp</label>
+              <label class="form-label" for="issue">Còn tồn</label>
               <textarea class="form-control" id="issue" rows="2" placeholder="Bỏ trống nếu không có"></textarea>
             </div>
             <div class="col-12 d-none extra-field">
-              <label class="form-label" for="nextAction">Đề xuất / kế hoạch tiếp theo</label>
+              <label class="form-label" for="nextAction">Làm tiếp</label>
               <input class="form-control" id="nextAction" placeholder="Ví dụ: thay bóng, đặt vật tư, kiểm tra lại sau mưa...">
             </div>
           </div>
@@ -635,7 +635,7 @@
           </button>
           <div class="d-grid gap-2 mt-3">
             <button class="btn btn-success btn-lg" type="submit"><i class="bi bi-check2-circle me-1"></i>Lưu</button>
-            <button class="btn btn-outline-secondary" type="button" id="btnClearForm"><i class="bi bi-eraser me-1"></i>Làm trống form</button>
+            <button class="btn btn-outline-secondary" type="button" id="btnClearForm"><i class="bi bi-eraser me-1"></i>Xóa nội dung</button>
           </div>
         </form>
         </div>
@@ -647,7 +647,7 @@
         <h2 class="h5 mb-2 fw-bold"><i class="bi bi-calendar3 text-primary me-2"></i>2. Kế hoạch</h2>
         <div class="d-flex toolbar-grid align-items-end gap-2">
           <div>
-            <label class="form-label" for="filterDate">Ngày kế hoạch</label>
+            <label class="form-label" for="filterDate">Ngày</label>
             <div class="d-flex align-items-center gap-1">
               <button class="btn btn-outline-secondary btn-icon" type="button" id="btnPrevDay" title="Ngày trước"><i class="bi bi-chevron-left"></i></button>
               <input class="form-control" id="filterDate" type="date">
@@ -661,23 +661,24 @@
               <button class="btn btn-outline-primary" type="button" id="btnViewWeek">Tuần</button>
             </div>
           </div>
-          <div>
+          <div class="advanced-filter collapse" id="advancedFilters">
             <label class="form-label" for="filterTeam">Tổ/ca</label>
             <select class="form-select" id="filterTeam">
               <option value="">Tất cả</option>
             </select>
           </div>
-          <div>
+          <div class="advanced-filter collapse" id="advancedFiltersPerson">
             <label class="form-label" for="filterPerson">Người</label>
             <select class="form-select" id="filterPerson">
               <option value="">Tất cả</option>
             </select>
           </div>
-          <div class="flex-grow-1">
+          <div class="flex-grow-1 advanced-filter collapse" id="advancedFiltersSearch">
             <label class="form-label" for="searchBox">Tìm nhanh</label>
             <input class="form-control" id="searchBox" type="search" placeholder="Khu vực, thiết bị, nội dung việc...">
           </div>
-          <button class="btn btn-primary" type="button" id="btnReload"><i class="bi bi-arrow-clockwise me-1"></i>Nạp lại</button>
+          <button class="btn btn-outline-secondary" type="button" id="btnToggleFilters"><i class="bi bi-funnel me-1"></i>Lọc</button>
+          <button class="btn btn-primary" type="button" id="btnReload"><i class="bi bi-arrow-clockwise me-1"></i>Nạp</button>
           <button class="btn btn-success" type="button" id="btnAddPlan"><i class="bi bi-plus-lg me-1"></i>Thêm kế hoạch</button>
         </div>
       </div>
@@ -685,7 +686,7 @@
         <table class="table table-hover align-middle mb-0">
           <thead>
             <tr>
-              <th>Nội dung công việc</th>
+              <th>Việc</th>
               <th>Vị trí</th>
               <th>Người</th>
               <th>Giờ</th>
@@ -707,8 +708,8 @@
           <div class="panel-header">
             <div class="d-flex align-items-center justify-content-between gap-2">
               <div>
-                <h2 class="h5 m-0 fw-bold"><i class="bi bi-clock-history text-primary me-2"></i>3. Nhật ký gần đây</h2>
-                <div class="small text-secondary mt-1">Nhật ký của <span class="fw-bold">cả tổ</span> trong 7 ngày gần nhất (tự đồng bộ từ Google Sheets): việc <span class="text-danger fw-bold">cần hỗ trợ / còn tồn ghim trên đầu</span> — bấm "Tiếp tục xử lý" để làm tiếp; bên dưới là nhật ký ai đã làm gì và vết sửa kế hoạch <span class="fw-bold">[Kế hoạch]</span>.</div>
+                <h2 class="h5 m-0 fw-bold"><i class="bi bi-clock-history text-primary me-2"></i>3. Còn tồn / nhật ký</h2>
+                <div class="small text-secondary mt-1">Việc cần làm tiếp nằm trên cùng. Nhật ký thường đã thu gọn.</div>
               </div>
             </div>
           </div>
@@ -721,7 +722,10 @@
     </section>
 
     <section class="mb-3">
-      <h2 class="h5 fw-bold mb-2"><i class="bi bi-bar-chart text-primary me-2"></i>4. Thống kê</h2>
+      <button class="btn btn-outline-secondary w-100 text-start fw-bold mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#statsBody" aria-expanded="false" aria-controls="statsBody">
+        <i class="bi bi-bar-chart text-primary me-2"></i>Thống kê
+      </button>
+      <div class="collapse" id="statsBody">
       <div class="row g-3">
         <div class="col-6 col-lg-3"><div class="metric"><strong id="metricTotal">0</strong><span id="metricTotalLabel">Kế hoạch trong ngày</span></div></div>
         <div class="col-6 col-lg-3"><div class="metric"><strong id="metricDoing">0</strong><span>Đang làm</span></div></div>
@@ -746,6 +750,7 @@
             <tbody id="personStats"></tbody>
           </table>
         </div>
+      </div>
       </div>
     </section>
   </main>
@@ -812,11 +817,11 @@
                 <input class="form-control" id="planDate" type="date" required>
               </div>
               <div class="col-4">
-                <label class="form-label" for="planFollowUpDate">Ngày nhắc/xem lại</label>
+                <label class="form-label" for="planFollowUpDate">Ngày xem lại</label>
                 <input class="form-control" id="planFollowUpDate" type="date">
               </div>
               <div class="col-4">
-                <label class="form-label" for="planDateEnd">Deadline cuối</label>
+                <label class="form-label" for="planDateEnd">Hạn cuối</label>
                 <input class="form-control" id="planDateEnd" type="date">
               </div>
               <div class="col-6">
@@ -926,7 +931,7 @@
 
     // Lấy ngày theo giờ địa phương (toISOString là UTC → sai ngày lúc 0h-7h sáng VN)
     const today = toIsoDate(new Date());
-    const RECENT_LOG_LIMIT = 5;
+    const RECENT_LOG_LIMIT = 3;
     const DEFAULT_SYNC = {
       url: typeof CONFIG !== "undefined" ? CONFIG.gasUrl : "https://script.google.com/macros/s/AKfycbzW4TxDarLBOpZvO8hnE0R65IsCd95a5l-XPASjUmZNuefH5MiWMs8lCpLpggzFwyXK/exec",
       token: typeof CONFIG !== "undefined" ? CONFIG.apiToken : "HAPU_QR_SECRET_2026"
@@ -1003,6 +1008,7 @@
       document.getElementById("btnNextDay").addEventListener("click", () => shiftFilterDate(viewMode === "week" ? 7 : 1));
       document.getElementById("btnViewDay").addEventListener("click", () => setViewMode("day"));
       document.getElementById("btnViewWeek").addEventListener("click", () => setViewMode("week"));
+      document.getElementById("btnToggleFilters").addEventListener("click", toggleAdvancedFilters);
       document.getElementById("btnReload").addEventListener("click", async () => {
         const btn = document.getElementById("btnReload");
         const original = btn.innerHTML;
@@ -1140,6 +1146,15 @@
       document.getElementById("btnViewDay").classList.toggle("active", mode === "day");
       document.getElementById("btnViewWeek").classList.toggle("active", mode === "week");
       renderPlans();
+    }
+
+    function toggleAdvancedFilters() {
+      const filters = document.querySelectorAll(".advanced-filter");
+      const shouldShow = ![...filters].some(item => item.classList.contains("show"));
+      filters.forEach(item => item.classList.toggle("show", shouldShow));
+      document.getElementById("btnToggleFilters").innerHTML = shouldShow
+        ? '<i class="bi bi-funnel-fill me-1"></i>Ẩn lọc'
+        : '<i class="bi bi-funnel me-1"></i>Lọc';
     }
 
     // 7 ngày (Thứ 2 → Chủ nhật) của tuần chứa ngày đang chọn
@@ -1771,8 +1786,8 @@
       cards.style.display = "";
 
       if (visible.length === 0) {
-        rows.innerHTML = '<tr><td colspan="8"><div class="empty-state">Không có kế hoạch phù hợp bộ lọc.</div></td></tr>';
-        cards.innerHTML = '<div class="empty-state m-2">Không có kế hoạch phù hợp bộ lọc.</div>';
+        rows.innerHTML = '<tr><td colspan="7"><div class="empty-state">Không có việc cần xem.</div></td></tr>';
+        cards.innerHTML = '<div class="empty-state m-2">Không có việc cần xem.</div>';
         renderMetrics();
         return;
       }
@@ -1925,7 +1940,7 @@
       const list = document.getElementById("logList");
       const toggleBtn = document.getElementById("btnToggleLogs");
       if (logs.length === 0) {
-        list.innerHTML = '<div class="empty-state">Chưa có nhật ký nào trong 7 ngày gần nhất.</div>';
+        list.innerHTML = '<div class="empty-state">Chưa có nhật ký gần đây.</div>';
         toggleBtn.style.display = "none";
         renderMetrics();
         return;
@@ -2095,6 +2110,7 @@
 
     function filterByPerson(name) {
       document.getElementById("filterPerson").value = name;
+      if (!document.getElementById("advancedFiltersPerson").classList.contains("show")) toggleAdvancedFilters();
       renderPlans();
       document.getElementById("filterPerson").scrollIntoView({ behavior: "smooth", block: "center" });
       showToast("Đang lọc kế hoạch của " + name);
@@ -2111,7 +2127,7 @@
       if (people.length === 0) {
         wrap.classList.add("d-none");
         rows.innerHTML = "";
-        document.getElementById("quantityField").classList.remove("d-none");
+        toggleQuantityFields(false);
         return;
       }
 
@@ -2131,7 +2147,12 @@
       `).join("");
       wrap.classList.remove("d-none");
       // Có ô SL từng người thì ẩn ô số lượng chung để không nhập trùng
-      document.getElementById("quantityField").classList.add("d-none");
+      toggleQuantityFields(false);
+    }
+
+    function toggleQuantityFields(show) {
+      document.getElementById("quantityField").classList.toggle("d-none", !show);
+      document.getElementById("unitField").classList.toggle("d-none", !show);
     }
 
     function getPeopleResults() {
@@ -2161,8 +2182,9 @@
       setProgress("Hoàn thành");
       document.getElementById("startTime").value = roundQuarter(currentTime());
       renderPeopleResults(plan.assignee);
-      // Việc có đơn vị sẵn → điền luôn vào ô đơn vị của form ghi
-      if (plan.unit) document.getElementById("quantityUnit").value = plan.unit;
+      const hasPlanQuantity = Boolean(plan.planQty || plan.unit);
+      if (!String(plan.assignee || "").trim()) toggleQuantityFields(hasPlanQuantity);
+      document.getElementById("quantityUnit").value = plan.unit || "";
       const note = document.getElementById("planCumNote");
       if (plan.doneQty || plan.planQty) {
         const unitTxt = plan.unit ? " " + plan.unit : "";
@@ -2314,6 +2336,7 @@
       document.getElementById("shift").value = defaultShift();
       setProgress("Hoàn thành");
       renderPeopleResults("");
+      toggleQuantityFields(false);
       document.getElementById("planCumNote").classList.add("d-none");
       document.querySelectorAll("#resultChips .chip").forEach(btn => btn.classList.remove("chip-active"));
     }
