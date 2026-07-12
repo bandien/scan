@@ -216,11 +216,10 @@
         </a>
     </nav>
 
-    <script>
+    <script class="">
         function switchTab(index) {
             const tabs = ['tab-0', 'tab-1', 'tab-2'];
             const indicator = document.getElementById('indicator');
-            const isDark = document.documentElement.classList.contains('dark');
             
             tabs.forEach((tabId, i) => {
                 const el = document.getElementById(tabId);
@@ -232,7 +231,8 @@
                     el.classList.remove('text-blue-600', 'dark:text-primary');
                 }
             });
-            indicator.style.left = (index * 33.33) + '%';
+            if (indicator) {
+                indicator.style.left = (index * 33.33) + '%';
+            }
         }
-    </script>
-</body></html>
+    </script></body></html>
