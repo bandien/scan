@@ -7,6 +7,7 @@
   <meta name="description" content="Ghi nhật ký công việc và xem kế hoạch hằng ngày cho nhân viên Ban Điện — giao diện dễ đọc, chạm to.">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
   <script src="../js/config.js" defer></script>
   <style>
     :root {
@@ -79,17 +80,33 @@
     .btn-today { min-height: 44px; padding: 0 12px; border-radius: 10px; border: 2px solid var(--brand); background: #fff; color: var(--brand); font-weight: 800; font-size: .95rem; cursor: pointer; flex-shrink: 0; }
 
     .filters-bar { flex-shrink: 0; padding: 10px 16px; display: flex; gap: 8px; overflow-x: auto; }
-    .a11y-chip { min-height: 48px; padding: 0 14px; border-radius: 14px; border: 3px solid var(--ink); font-size: .98rem; font-weight: 800; display: inline-flex; align-items: center; background: #fff; white-space: nowrap; flex-shrink: 0; cursor: pointer; color: var(--ink); }
-    .a11y-chip.active { background: var(--ink); color: #fff; }
-    .a11y-chip.warn { border-color: var(--danger); color: var(--danger); }
-    .a11y-chip .chip-count { background: var(--danger); color: #fff; border-radius: 999px; font-size: .85rem; padding: 1px 8px; margin-left: 6px; }
+    .a11y-chip { min-height: 40px; padding: 0 16px; border-radius: 9999px; border: 1px solid var(--line, #c7ccd1); font-size: .92rem; font-weight: 700; display: inline-flex; align-items: center; background: #f1f5f9; white-space: nowrap; flex-shrink: 0; cursor: pointer; color: #475569; transition: all 0.2s ease; }
+    .a11y-chip.active { background: #e7f1ff; border-color: #0d6efd; color: #0d6efd; }
+    .a11y-chip.warn { border-color: var(--danger); color: var(--danger); background: #fde8e8; }
+    .a11y-chip .chip-count { background: var(--danger); color: #fff; border-radius: 999px; font-size: .8rem; padding: 1px 6px; margin-left: 6px; }
+    
+    .dark-mode .a11y-chip, [data-bs-theme="dark"] .a11y-chip {
+        background: #272a32;
+        border-color: #424655;
+        color: #94a3b8;
+    }
+    .dark-mode .a11y-chip.active, [data-bs-theme="dark"] .a11y-chip.active {
+        background: #314577;
+        border-color: #b1c5ff;
+        color: #b1c5ff;
+    }
+    .dark-mode .a11y-chip.warn, [data-bs-theme="dark"] .a11y-chip.warn {
+        background: #4c1d1d;
+        border-color: #fca5a5;
+        color: #fca5a5;
+    }
 
     .day-log-summary { margin: 0 16px 10px; border: 2px solid var(--line); border-radius: 10px; background: #f8fbfa; color: var(--muted); padding: 8px 10px; display: none; align-items: center; gap: 8px; flex-wrap: wrap; font-size: .9rem; font-weight: 600; }
     .day-log-summary strong { color: var(--ink); }
 
     /* ===== Danh sách việc ===== */
     .section-label { font-size: .82rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 14px 0 8px; }
-    .a11y-list { background: #fff; border-radius: 16px; overflow: hidden; border: 2px solid var(--line); }
+    .a11y-list { background: transparent; border: none; }
     .task-row { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-bottom: 2px solid var(--line); min-height: 78px; width: 100%; border-left: 0; border-right: 0; border-top: 0; background: #fff; text-align: left; color: inherit; cursor: pointer; }
     .task-row:last-child { border-bottom: 0; }
     .task-row.attn { background: var(--warn-bg); }
@@ -105,6 +122,157 @@
     .task-chevron { margin-left: auto; font-size: 1.35rem; color: #555; flex-shrink: 0; }
 
     .empty-state { border: 2px dashed #8b97a3; border-radius: 10px; padding: 28px 16px; text-align: center; color: var(--muted); font-weight: 600; background: #fbfcfe; }
+
+    /* ===== Stitch-style Job Cards ===== */
+    .stitch-card {
+        background-color: var(--card-bg, #f8fafc);
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 12px;
+        position: relative;
+        padding: 16px 16px 16px 20px;
+        margin-bottom: 16px;
+        transition: all 0.2s ease;
+        text-align: left;
+        display: block;
+        width: 100%;
+        text-decoration: none;
+        color: inherit;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    .dark-mode .stitch-card, [data-bs-theme="dark"] .stitch-card {
+        --card-bg: #1c1f28;
+        --border-color: #32353d;
+    }
+    .stitch-card:active {
+        transform: scale(0.98);
+    }
+    .stitch-card-bar {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        border-top-left-radius: 12px;
+        border-bottom-left-radius: 12px;
+    }
+    .stitch-bar-high { background-color: #dc3545; }
+    .stitch-bar-medium { background-color: #fd7e14; }
+    .stitch-bar-low { background-color: #198754; }
+
+    .stitch-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    .stitch-badge {
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 4px 10px;
+        border-radius: 9999px;
+    }
+    .stitch-badge-high {
+        background-color: #fde8e8;
+        color: #9b1c1c;
+    }
+    .dark-mode .stitch-badge-high, [data-bs-theme="dark"] .stitch-badge-high {
+        background-color: #4c1d1d;
+        color: #fca5a5;
+    }
+    .stitch-badge-medium {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+    .dark-mode .stitch-badge-medium, [data-bs-theme="dark"] .stitch-badge-medium {
+        background-color: #451a03;
+        color: #fcd34d;
+    }
+    .stitch-badge-low {
+        background-color: #def7ec;
+        color: #03543f;
+    }
+    .dark-mode .stitch-badge-low, [data-bs-theme="dark"] .stitch-badge-low {
+        background-color: #064e3b;
+        color: #6ee7b7;
+    }
+
+    .stitch-time {
+        font-size: 12px;
+        color: #64748b;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .dark-mode .stitch-time, [data-bs-theme="dark"] .stitch-time {
+        color: #94a3b8;
+    }
+
+    .stitch-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1.3;
+        margin-bottom: 6px;
+    }
+    .dark-mode .stitch-title, [data-bs-theme="dark"] .stitch-title {
+        color: #f1f5f9;
+    }
+
+    .stitch-location {
+        font-size: 13px;
+        color: #475569;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 16px;
+    }
+    .dark-mode .stitch-location, [data-bs-theme="dark"] .stitch-location {
+        color: #94a3b8;
+    }
+
+    .stitch-btn {
+        width: 100%;
+        height: 48px;
+        border-radius: 8px;
+        font-weight: 800;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border: none;
+        transition: all 0.2s ease;
+    }
+    .stitch-btn-primary {
+        background-color: #0d6efd;
+        color: #ffffff;
+    }
+    .stitch-btn-primary:active {
+        background-color: #0b5ed7;
+    }
+    .stitch-btn-secondary {
+        background-color: #ffffff;
+        color: #0d6efd;
+        border: 1px solid #dee2e6;
+    }
+    .dark-mode .stitch-btn-secondary, [data-bs-theme="dark"] .stitch-btn-secondary {
+        background-color: #272a32;
+        color: #b1c5ff;
+        border-color: #424655;
+    }
+    .stitch-btn-success {
+        background-color: #d1e7dd;
+        color: #0f5132;
+        border: 1px solid #badbcc;
+    }
+    .dark-mode .stitch-btn-success, [data-bs-theme="dark"] .stitch-btn-success {
+        background-color: #052e16;
+        color: #86efac;
+        border-color: #14532d;
+    }
 
     /* ===== Chi tiết công việc ===== */
     .status-banner { display: flex; align-items: center; gap: 14px; border-radius: 16px; padding: 14px; margin-bottom: 14px; border: 3px solid; }
@@ -2220,20 +2388,59 @@
     }
 
     function taskRowHtml(plan, selectedDate, attn) {
-      const dot = taskRowStatusDot(plan, selectedDate);
       const timeText = plan.time ? escapeHtml(plan.time) : "Chưa xếp giờ";
-      const statusText = plan.status && plan.status !== "Chưa làm" ? " · " + escapeHtml(plan.status) : "";
-      const carryText = isCarryOver(plan, selectedDate) ? " · Quá hạn xem lại" : "";
+      
+      // Priority Badge mapping
+      let priorityClass = "stitch-badge-low";
+      let barClass = "stitch-bar-low";
+      let priorityText = "Ưu tiên: Thấp";
+      
+      if (plan.priority === "Cao" || attn) {
+        priorityClass = "stitch-badge-high";
+        barClass = "stitch-bar-high";
+        priorityText = "Ưu tiên: Cao";
+      } else if (plan.priority === "Trung bình") {
+        priorityClass = "stitch-badge-medium";
+        barClass = "stitch-bar-medium";
+        priorityText = "Ưu tiên: Trung bình";
+      }
+      
+      // Action Button mapping
+      let btnClass = "stitch-btn stitch-btn-secondary";
+      let btnText = 'BẮT ĐẦU LÀM <span class="material-symbols-outlined fs-6">play_arrow</span>';
+      let btnAction = `handleTaskAction('${escapeAttr(plan.id)}','Đang làm')`;
+      
+      if (plan.status === "Hoàn thành") {
+        btnClass = "stitch-btn stitch-btn-success";
+        btnText = 'ĐÃ HOÀN THÀNH <span class="material-symbols-outlined fs-6">check_circle</span>';
+        btnAction = `openTaskDetail('${escapeAttr(plan.id)}')`; // Hoàn thành -> xem chi tiết
+      } else if (plan.status === "Đang làm") {
+        btnClass = "stitch-btn stitch-btn-primary";
+        btnText = 'GHI NHẬT KÝ <span class="material-symbols-outlined fs-6">edit_document</span>';
+        btnAction = `handleTaskAction('${escapeAttr(plan.id)}','Hoàn thành')`;
+      }
+      
+      const locText = [plan.area, plan.asset].filter(Boolean).join(" - ") || "Chưa xác định địa điểm";
+      
       return `
-        <button class="task-row${attn ? " attn" : ""}" type="button" onclick="openTaskDetail('${escapeAttr(plan.id)}')">
-          <span class="status-dot ${dot.cls}"><i class="bi ${dot.icon}"></i></span>
-          <span class="task-row-main">
-            <span class="task-row-title">${escapeHtml(plan.task || "")}</span>
-            <span class="task-row-time">${timeText}${statusText}${carryText}</span>
-            ${attn ? '<span class="task-row-hint">Chạm để xem chi tiết &amp; xử lý</span>' : ""}
-          </span>
-          <i class="bi bi-chevron-right task-chevron"></i>
-        </button>
+        <div class="stitch-card" onclick="openTaskDetail('${escapeAttr(plan.id)}')">
+          <div class="stitch-card-bar ${barClass}"></div>
+          <div class="stitch-card-header">
+            <span class="stitch-badge ${priorityClass}">${priorityText}</span>
+            <span class="stitch-time">
+              <span class="material-symbols-outlined text-muted" style="font-size: 14px;">event</span>
+              ${timeText} - ${shortDateVn(plan.date)}
+            </span>
+          </div>
+          <h3 class="stitch-title">${escapeHtml(plan.task || "")}</h3>
+          <div class="stitch-location">
+            <span class="material-symbols-outlined text-muted" style="font-size: 18px;">location_on</span>
+            <span>${escapeHtml(locText)}</span>
+          </div>
+          <button class="${btnClass}" type="button" onclick="${btnAction}; event.stopPropagation();">
+            ${btnText}
+          </button>
+        </div>
       `;
     }
 
