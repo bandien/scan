@@ -31,7 +31,7 @@ const SHEETS = {
   PROJECTS:     "Projects",
   SHIFTS:       "Shifts",
   INVENTORY:    "Inventory",
-  STAFF:        "Staff",
+  STAFF:        "Users",
   METER_POINTS: "MeterPoints",      // Phase 11
   METER_READINGS: "MeterReadings",  // Phase 11
 };

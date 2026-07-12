@@ -68,10 +68,10 @@ function xepLichTuanMoi() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const ui = SpreadsheetApp.getUi();
   
-  // 1. Kiểm tra sheet DanhSachNhanSu
-  const dsSheet = ss.getSheetByName("DanhSachNhanSu");
+  // 1. Kiểm tra sheet Users
+  const dsSheet = ss.getSheetByName("Users");
   if (!dsSheet) {
-    ui.alert("Lỗi", "Không tìm thấy trang tính 'DanhSachNhanSu'. Vui lòng tạo trang tính này trước.", ui.ButtonSet.OK);
+    ui.alert("Lỗi", "Không tìm thấy trang tính 'Users'. Vui lòng tạo trang tính này trước.", ui.ButtonSet.OK);
     return;
   }
   
@@ -87,12 +87,12 @@ function xepLichTuanMoi() {
     lichSheet = ss.insertSheet("XepLichTuan");
   }
   
-  // 3. Đọc danh sách nhân sự hiện tại
-  const dsData = dsSheet.getRange(2, 1, dsSheet.getLastRow() - 1, 2).getValues();
+  // 3. Đọc danh sách nhân sự hiện tại từ Users
+  const dsData = dsSheet.getRange(2, 1, dsSheet.getLastRow() - 1, 5).getValues();
   const staffList = [];
   for (let i = 0; i < dsData.length; i++) {
-    const name = dsData[i][0].toString().trim();
-    const team = dsData[i][1].toString().trim();
+    const name = dsData[i][1].toString().trim(); // FullName
+    const team = dsData[i][4].toString().trim(); // Teams
     if (name && team) {
       staffList.push({ name: name, team: team });
     }

@@ -41,7 +41,7 @@ function setupAllSheets() {
   ensureSheet(ss, SHEETS.PROJECTS, ["ProjectID","Name","Status","StartDate","EndDate"]);
   ensureSheet(ss, SHEETS.SHIFTS, ["ShiftID","Name","Description","Status"]);
   ensureSheet(ss, SHEETS.INVENTORY, ["PartCode","Name","Stock","MinStock","Unit"]);
-  ensureSheet(ss, SHEETS.STAFF, ["StaffID","Name","Position","Department","Phone"]);
+
 
   // Phase 11 — Metering
   setupMeteringSheets(ss);
