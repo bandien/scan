@@ -176,7 +176,7 @@
     .qc { min-height: 44px; border-radius: 999px; border: 2px solid #445; background: #fff; color: #333; font-size: .9rem; font-weight: 700; padding: 6px 14px; cursor: pointer; }
     .qc.on { border: 3px solid var(--brand-2); background: var(--surface-soft); color: var(--brand-2); }
 
-    .media-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .media-row { display: grid; grid-template-columns: 1fr; gap: 10px; }
     .media-btn { min-height: 56px; border-radius: 14px; border: 3px dashed var(--brand); background: #fff; color: var(--brand); font-weight: 800; font-size: .92rem; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
 
     .extra-details { margin-top: 4px; }
@@ -350,10 +350,9 @@
             </div>
 
             <div class="field">
-              <div class="field-lb">Ảnh &amp; giọng nói</div>
+              <div class="field-lb">Ảnh</div>
               <div class="media-row">
                 <button class="media-btn" type="button" id="btnAttachPhoto"><i class="bi bi-camera-fill"></i>Chụp ảnh</button>
-                <button class="media-btn" type="button" id="btnAttachVoice"><i class="bi bi-mic-fill"></i>Nói</button>
               </div>
             </div>
 
@@ -899,7 +898,6 @@
       document.getElementById("btnQtyMinus").addEventListener("click", () => adjustQuantity(-1));
       document.getElementById("btnQtyPlus").addEventListener("click", () => adjustQuantity(1));
       document.getElementById("btnAttachPhoto").addEventListener("click", () => showToast("Chụp ảnh: tính năng sắp có"));
-      document.getElementById("btnAttachVoice").addEventListener("click", () => showToast("Ghi âm giọng nói: tính năng sắp có"));
 
       // Ghi chú nhanh: bấm thêm câu vào ô Kết quả, bấm lại để bỏ ra — không tự gán trạng thái
       document.getElementById("resultChips").addEventListener("click", event => {
