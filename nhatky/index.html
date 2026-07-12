@@ -2,818 +2,441 @@
 <html lang="vi">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Nhật ký công việc | BanDienScan</title>
-  <meta name="description" content="Bảng xem nhanh kế hoạch và ghi nhật ký công việc hằng ngày cho nhân viên Ban Điện.">
+  <meta name="description" content="Ghi nhật ký công việc và xem kế hoạch hằng ngày cho nhân viên Ban Điện — giao diện dễ đọc, chạm to.">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
   <script src="../js/config.js" defer></script>
   <style>
     :root {
-      --page-bg: #f6f7fb;
-      --surface: #ffffff;
-      --surface-soft: #eef6f4;
-      --ink: #17212f;
-      --muted: #667085;
-      --line: #d9e1e8;
-      --brand: #176b87;
-      --brand-2: #2d8a5f;
-      --warn: #b7791f;
-      --danger: #c2413b;
+      --brand: #0b4d5e; --brand-2: #1b5e20; --doing: #0d47a1;
+      --danger: #b3261e; --danger-dark: #7a1410; --warn: #8a5a00; --warn-bg: #ffc400; --warn-ink: #4a3800;
+      --ink: #000000; --muted: #3a3a3a; --line: #c7ccd1;
+      --surface: #ffffff; --surface-soft: #e3f2e9; --page-bg: #eef0f2;
+      --done: #1b5e20; --done-bg: #e8f5e9; --doing-bg: #e3ecfb;
     }
-
     * { box-sizing: border-box; }
-
+    html, body { margin: 0; }
     body {
-      min-height: 100vh;
-      margin: 0;
-      background: var(--page-bg);
+      min-height: 100dvh;
+      background: #d8dade;
       color: var(--ink);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      font-size: 1.05rem;
     }
-
-    .app-header {
-      background: var(--surface);
-      border-bottom: 1px solid var(--line);
-      position: sticky;
-      top: 0;
-      z-index: 20;
-    }
-
-    .brand-mark {
-      width: 42px;
-      height: 42px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      background: var(--brand);
-      color: #fff;
-    }
-
-    .shell {
-      max-width: 1240px;
-      margin: 0 auto;
-      padding: 18px;
-    }
-
-    .panel {
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      box-shadow: 0 8px 22px rgba(23, 33, 47, 0.05);
-    }
-
-    .panel-header {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .metric {
-      min-height: 76px;
-      padding: 12px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--surface);
-    }
-
-    .metric strong {
-      display: block;
-      font-size: 1.45rem;
-      line-height: 1.1;
-    }
-
-    .metric span {
-      color: var(--muted);
-      font-size: .82rem;
-    }
-
-    .table thead th {
-      background: #edf3f6;
-      color: #2f3b4a;
-      font-size: .76rem;
-      text-transform: uppercase;
-      letter-spacing: 0;
-      white-space: nowrap;
-    }
-
-    .table td {
-      vertical-align: middle;
-      font-size: .95rem;
-    }
-
-    .task-text {
-      min-width: 280px;
-      max-width: 460px;
-    }
-
-    .badge-soft {
-      border: 1px solid transparent;
-      border-radius: 999px;
-      padding: 5px 10px;
-      font-weight: 700;
-      font-size: .8rem;
-      white-space: nowrap;
-    }
-
-    .carry-row td { background: #fffaeb; }
-    .plan-card.carry { background: #fffaeb; }
-
-    .plan-meta {
-      color: var(--muted);
-      font-size: .82rem;
-      font-weight: 500;
-      white-space: normal;
-    }
-
-    .reminder-mark {
-      color: #5f6b7a;
-      font-weight: 700;
-    }
-
-    .day-log-summary {
-      margin: 10px 0 0;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #f8fbfa;
-      color: var(--muted);
-      padding: 8px 10px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-      font-size: .88rem;
-    }
-
-    .day-log-summary strong { color: var(--ink); }
-
-    .log-check {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      border: 1px solid transparent;
-      border-radius: 999px;
-      padding: 3px 8px;
-      font-size: .75rem;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .log-check.done {
-      background: #e8f6ef;
-      border-color: #bfe4cf;
-      color: #1f7a4d;
-    }
-
-    .log-check.partial {
-      background: #fff7df;
-      border-color: #ffe5a3;
-      color: #9a6b16;
-    }
-
-    .log-check.missing {
-      background: #fff1f0;
-      border-color: #ffd0cc;
-      color: #c2413b;
-    }
-
-    .week-table td { vertical-align: top; }
-    .week-table .day-cell { width: 110px; white-space: nowrap; }
-    .week-today td { background: #eef6f4; }
-    .week-items { display: flex; flex-direction: column; gap: 6px; }
-
-    .week-item-main {
-      min-width: 0;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .week-item-task {
-      color: var(--brand);
-      font-weight: 700;
-      font-size: 1.1rem;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      white-space: normal;
-    }
-
-    .week-item-meta {
-      color: var(--muted);
-      font-size: .85rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .week-item {
-      display: flex;
-      gap: 8px;
-      align-items: flex-start;
-      width: 100%;
-      text-align: left;
-      border: 1px solid var(--line);
-      border-left-width: 4px;
-      border-radius: 6px;
-      padding: 6px 8px;
-      background: #fff;
-      font-size: .85rem;
-      color: var(--ink);
-    }
-
-    .week-item .badge-soft { margin-left: auto; flex-shrink: 0; }
-
-    /* Cột ngày cố định để cột nội dung tự cắt chữ, không đẩy tràn khung */
-    .week-table { table-layout: fixed; width: 100%; }
-    .week-table .day-cell { width: 92px; }
-    .week-table td { overflow: hidden; }
-
-    @media (max-width: 760px) {
-      .week-table .day-cell { width: 64px; padding: 8px 2px 8px 8px; }
-      .week-table .day-cell .fw-bold { font-size: .8rem; }
-      .week-table .day-cell .small { font-size: .68rem; }
-      .week-table td { padding-left: 6px; padding-right: 6px; }
-      .week-item { padding: 8px; font-size: .78rem; gap: 6px; }
-      .week-item .badge-soft { padding: 3px 6px; font-size: .68rem; }
-      .week-item-task { font-size: 1.02rem; }
-    }
-    .week-item.st-done { border-left-color: #2d8a5f; }
-    .week-item.st-doing { border-left-color: #155ea8; }
-    .week-item.st-help { border-left-color: #c2413b; }
-    .week-item.st-open { border-left-color: #94a3b8; }
-
-    .badge-high { background: #fff1f0; color: var(--danger); border-color: #ffd0cc; }
-    .badge-mid { background: #fff7df; color: var(--warn); border-color: #ffe5a3; }
-    .badge-low { background: var(--surface-soft); color: var(--brand-2); border-color: #cbe7db; }
-    .badge-open { background: #edf3f6; color: #475467; border-color: #d9e1e8; }
-    .badge-doing { background: #e8f3ff; color: #155ea8; border-color: #bddcff; }
-    .badge-done { background: #e8f6ef; color: #1f7a4d; border-color: #bfe4cf; }
-
-    .btn-icon {
-      width: 38px;
-      height: 38px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-    }
-
-    .form-label {
-      font-size: .78rem;
-      font-weight: 700;
-      color: #475467;
-    }
-
-    .form-control, .form-select {
-      border-radius: 8px;
-      border-color: #cfd8e3;
-    }
-
-    .log-card {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 10px;
-      background: #fbfcfe;
-    }
-
-    .empty-state {
-      border: 1px dashed #b7c3cf;
-      border-radius: 8px;
-      padding: 28px 16px;
-      text-align: center;
-      color: var(--muted);
-      background: #fbfcfe;
-    }
-
-    .person-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--surface-soft);
-      border: 1px solid #cbe7db;
-      color: #24624a;
-      border-radius: 999px;
-      padding: 4px 10px;
-      font-size: .85rem;
-      font-weight: 600;
-    }
-
-    .person-chip button {
-      border: 0;
-      background: none;
-      color: inherit;
-      padding: 0;
-      line-height: 1;
-      font-size: 1rem;
-    }
-
-    .person-result-row {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 8px 10px;
-      background: #fbfcfe;
-    }
-
-    .mobile-plan-list { display: none; }
-
-    .plan-card {
-      border-bottom: 1px solid var(--line);
-      padding: 14px 12px;
-      background: var(--surface);
-      border-left: 4px solid transparent;
-      transition: border-color .15s;
-    }
-    .plan-card.priority-high {
-      border-left-color: var(--bs-danger, #dc3545);
-      background: linear-gradient(90deg, #fff5f5 0%, var(--surface) 20%);
-    }
-
-    .plan-card:last-child { border-bottom: 0; }
-
+    .min-w-0 { min-width: 0; }
     .text-brand { color: var(--brand); }
 
-    /* Bootstrap 5 không có sẵn utility này; cần cho text-truncate trong flex */
-    .min-w-0 { min-width: 0; }
-
-    /* Tiêu đề khu vực + thiết bị (Context First) */
-    .plan-card-context {
-      font-weight: 700;
-      font-size: 0.88rem;
-      color: var(--brand);
-      letter-spacing: .01em;
-      margin-bottom: 4px;
+    /* ===== App shell: fluid trên điện thoại, cột giữa trang trên màn rộng ===== */
+    .app-shell {
+      width: 100%; max-width: 460px; margin: 0 auto;
+      min-height: 100dvh; background: var(--page-bg);
+      display: flex; flex-direction: column; overflow-x: hidden;
+    }
+    @media (min-width: 700px) {
+      body { padding: 24px 12px; }
+      .app-shell { min-height: calc(100dvh - 48px); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.18); overflow: hidden; }
     }
 
-    /* Tên công việc cỡ lớn cho dễ đọc (nhân viên lớn tuổi) */
-    .plan-card-title {
-      font-weight: 800;
-      font-size: 1.25rem;
-      line-height: 1.3;
-      color: #1a2332;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
+    /* ===== Header (2 chế độ: trang chủ / quay lại) ===== */
+    .app-header { background: var(--surface); border-bottom: 2px solid var(--line); flex-shrink: 0; position: sticky; top: 0; z-index: 20; }
+    .header-inner { display: flex; align-items: center; gap: 10px; padding: 12px 16px; justify-content: space-between; }
+    .header-inner-back { justify-content: flex-start; }
+    .header-left { display: flex; align-items: center; gap: 10px; }
+    .header-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .header-titles { min-width: 0; }
+    .app-title { margin: 0; font-size: 1.25rem; font-weight: 800; line-height: 1.2; }
+    .header-sub { font-size: .85rem; font-weight: 700; color: var(--muted); margin-top: 1px; }
+    .brand-mark { width: 48px; height: 48px; border-radius: 10px; background: var(--brand); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+    .btn-back { width: 52px; height: 52px; border-radius: 14px; border: 3px solid var(--ink); background: #fff; font-size: 1.35rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--ink); cursor: pointer; padding: 0; }
+    .header-title { font-weight: 800; font-size: 1.15rem; line-height: 1.25; flex: 1; min-width: 0; }
+    .sync-pill { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; font-size: .9rem; padding: 6px 10px; border-radius: 999px; background: var(--done-bg); color: var(--done); }
+    .sync-pill.offline { background: var(--warn-bg); color: var(--warn-ink); border: 2px solid #8a5a00; }
 
-    /* Hộp cảnh báo tồn tại trong thẻ nhật ký */
-    .log-issue-alert {
-      background: #fff1f0;
-      border: 1px solid #ffccc7;
-      border-radius: 8px;
-      padding: 8px 10px;
-      margin-top: 8px;
-    }
-    .log-issue-alert .issue-title {
-      font-weight: 700;
-      color: #cf1322;
-      font-size: 0.82rem;
-      margin-bottom: 2px;
-    }
-    .log-issue-alert .issue-body {
-      color: #a8071a;
-      font-size: 0.88rem;
-      line-height: 1.4;
-    }
-    .log-suggest-row {
-      color: var(--warn, #d97706);
-      font-size: 0.84rem;
-      margin-top: 4px;
-    }
+    /* ===== Screens ===== */
+    #appContent { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+    .screen { display: none; flex-direction: column; flex: 1; min-height: 0; }
+    .screen.active { display: flex; }
+    .scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 14px 16px 20px; }
+    .list-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 0 16px 20px; }
 
-    .plan-task-title {
-      font-size: 1.16rem;
-      font-weight: 700;
-      line-height: 1.35;
-      color: var(--brand);
-    }
+    .action-bar { flex-shrink: 0; position: sticky; bottom: 0; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: linear-gradient(transparent, var(--page-bg) 35%); display: flex; flex-direction: column; gap: 10px; z-index: 10; }
+    .btn-main, .action-bar .btn-main { width: 100%; min-height: 60px; border-radius: 16px; border: none; background: var(--brand); color: #fff; font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 8px 20px rgba(0,0,0,.22); cursor: pointer; }
+    .btn-done { width: 100%; min-height: 60px; border-radius: 16px; border: none; background: var(--done); color: #fff; font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 8px 20px rgba(0,0,0,.22); cursor: pointer; }
+    .link-button { background: none; border: 0; color: var(--brand); font-weight: 700; font-size: 1rem; min-height: 46px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 6px; cursor: pointer; text-decoration: underline; width: 100%; }
 
-    .chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    /* ===== Tab bar dưới cùng ===== */
+    .tabbar { display: none; background: #fff; border-top: 2px solid var(--line); flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom); }
+    .tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 0 7px; font-size: .72rem; font-weight: 800; color: #7a848a; background: none; border: 0; cursor: pointer; }
+    .tab i { font-size: 1.4rem; }
+    .tab.on { color: var(--brand); }
 
-    .chip {
-      border: 1px solid #cfd8e3;
-      background: #fff;
-      color: #475467;
-      border-radius: 999px;
-      padding: 6px 12px;
-      font-size: .85rem;
-      font-weight: 600;
-      line-height: 1.2;
-    }
+    /* ===== Date bar / quick filters (màn Kế hoạch) ===== */
+    .date-bar { flex-shrink: 0; display: flex; align-items: center; gap: 6px; padding: 10px 16px 0; }
+    .btn-icon-sm { width: 44px; height: 44px; border-radius: 10px; border: 2px solid var(--line); background: #fff; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.05rem; color: var(--ink); cursor: pointer; padding: 0; }
+    .date-input { flex: 1; min-width: 0; min-height: 44px; border: 2px solid var(--line); border-radius: 10px; padding: 6px 8px; font-size: 1rem; font-weight: 700; }
+    .btn-today { min-height: 44px; padding: 0 12px; border-radius: 10px; border: 2px solid var(--brand); background: #fff; color: var(--brand); font-weight: 800; font-size: .95rem; cursor: pointer; flex-shrink: 0; }
 
-    .chip:active { transform: scale(.96); }
-    .chip-active { border-width: 2px; padding: 5px 11px; }
-    .chip-active.chip-done { background: #e8f6ef; border-color: #1f7a4d; color: #1f7a4d; }
-    .chip-active.chip-doing { background: #e8f3ff; border-color: #155ea8; color: #155ea8; }
-    .chip-active.chip-help { background: #fff1f0; border-color: #c2413b; color: #c2413b; }
-    .chip-active.chip-open { background: #edf3f6; border-color: #475467; color: #344054; }
+    .filters-bar { flex-shrink: 0; padding: 10px 16px; display: flex; gap: 8px; overflow-x: auto; }
+    .a11y-chip { min-height: 48px; padding: 0 14px; border-radius: 14px; border: 3px solid var(--ink); font-size: .98rem; font-weight: 800; display: inline-flex; align-items: center; background: #fff; white-space: nowrap; flex-shrink: 0; cursor: pointer; color: var(--ink); }
+    .a11y-chip.active { background: var(--ink); color: #fff; }
+    .a11y-chip.warn { border-color: var(--danger); color: var(--danger); }
+    .a11y-chip .chip-count { background: var(--danger); color: #fff; border-radius: 999px; font-size: .85rem; padding: 1px 8px; margin-left: 6px; }
 
-    /* Tiến độ: lưới nút to đều nhau, màu nhận diện ngay cả khi chưa chọn */
-    #progressChips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-    #progressChips .chip { text-align: center; white-space: nowrap; }
-    #progressChips .chip-done { border-color: #bfe4cf; color: #1f7a4d; }
-    #progressChips .chip-doing { border-color: #bddcff; color: #155ea8; }
-    #progressChips .chip-help { border-color: #ffd0cc; color: #c2413b; }
+    .day-log-summary { margin: 0 16px 10px; border: 2px solid var(--line); border-radius: 10px; background: #f8fbfa; color: var(--muted); padding: 8px 10px; display: none; align-items: center; gap: 8px; flex-wrap: wrap; font-size: .9rem; font-weight: 600; }
+    .day-log-summary strong { color: var(--ink); }
 
-    /* Kết quả: chip bật/tắt được, đang chọn thì tô nền xanh */
-    #resultChips .chip-active { background: var(--surface-soft); border-color: var(--brand-2); color: #24624a; }
+    /* ===== Danh sách việc ===== */
+    .section-label { font-size: .82rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 14px 0 8px; }
+    .a11y-list { background: #fff; border-radius: 16px; overflow: hidden; border: 2px solid var(--line); }
+    .task-row { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-bottom: 2px solid var(--line); min-height: 78px; width: 100%; border-left: 0; border-right: 0; border-top: 0; background: #fff; text-align: left; color: inherit; cursor: pointer; }
+    .task-row:last-child { border-bottom: 0; }
+    .task-row.attn { background: var(--warn-bg); }
+    .status-dot { width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #fff; }
+    .status-dot.help { background: var(--danger); }
+    .status-dot.done { background: var(--done); }
+    .status-dot.doing { background: var(--doing); }
+    .status-dot.open { background: #5b6472; }
+    .task-row-main { min-width: 0; flex: 1; }
+    .task-row-title { font-size: 1.12rem; font-weight: 800; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .task-row-time { font-size: .92rem; font-weight: 600; color: var(--muted); margin-top: 2px; }
+    .task-row-hint { font-size: .85rem; color: var(--warn-ink); font-weight: 700; margin-top: 2px; }
+    .task-chevron { margin-left: auto; font-size: 1.35rem; color: #555; flex-shrink: 0; }
 
-    .log-card { border-left: 4px solid #cbd5e1; }
+    .empty-state { border: 2px dashed #8b97a3; border-radius: 10px; padding: 28px 16px; text-align: center; color: var(--muted); font-weight: 600; background: #fbfcfe; }
+
+    /* ===== Chi tiết công việc ===== */
+    .status-banner { display: flex; align-items: center; gap: 14px; border-radius: 16px; padding: 14px; margin-bottom: 14px; border: 3px solid; }
+    .status-banner.danger { background: #fdeceb; border-color: var(--danger); color: var(--danger-dark); }
+    .status-banner.warn { background: var(--warn-bg); border-color: #8a5a00; color: var(--warn-ink); }
+    .status-banner .icon { width: 52px; height: 52px; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; }
+    .status-banner.danger .icon { background: var(--danger); }
+    .status-banner.warn .icon { background: #8a5a00; }
+    .status-banner .label { font-size: 1.2rem; font-weight: 800; line-height: 1.25; }
+    .status-banner .sub { font-size: .95rem; font-weight: 700; margin-top: 2px; }
+
+    .info-card { background: #fff; border: 2px solid var(--line); border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; }
+    .info-label { font-size: .88rem; font-weight: 800; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .info-label i { font-size: 1.15rem; color: var(--brand); }
+    .info-value { font-size: 1.25rem; font-weight: 800; line-height: 1.3; }
+    .info-value.normal { font-size: 1.05rem; font-weight: 600; }
+    .person-chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    /* ===== Badge / person-chip ===== */
+    .person-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; background: var(--surface-soft); border: 2px solid #93cdae; color: var(--brand-2); border-radius: 999px; padding: 6px 12px; font-size: .95rem; font-weight: 700; }
+    .person-chip button { border: 0; background: none; color: inherit; padding: 2px; line-height: 1; font-size: 1.05rem; }
+
+    .badge-soft { border: 2px solid transparent; border-radius: 999px; padding: 5px 12px; font-weight: 700; font-size: .9rem; white-space: nowrap; display: inline-block; }
+    .badge-high { background: #fff1f0; color: var(--danger); border-color: #ffd0cc; }
+    .badge-mid { background: #fff7df; color: var(--warn); border-color: #ffe5a3; }
+    .badge-low { background: var(--surface-soft); color: var(--brand-2); border-color: #93cdae; }
+    .badge-open { background: #edf3f6; color: #475467; border-color: var(--line); }
+    .badge-doing { background: var(--doing-bg); color: var(--doing); border-color: #bddcff; }
+    .badge-done { background: var(--done-bg); color: var(--done); border-color: #bfe4cf; }
+
+    /* ===== Log card (nhật ký) ===== */
+    .log-card { border: 2px solid var(--line); border-radius: 10px; padding: 12px; background: #fbfcfe; border-left: 6px solid #cbd5e1; margin-bottom: 10px; }
+    .log-card.log-done { border-left-color: var(--done); }
+    .log-card.log-doing { border-left-color: var(--doing); }
+    .log-card.log-help { border-left-color: var(--danger); }
     .log-card.log-followup { border-left-color: var(--warn); background: #fffaf0; }
+    .log-issue-alert { background: #fff1f0; border: 2px solid #ffb3ab; border-radius: 8px; padding: 10px 12px; margin-top: 8px; }
+    .log-issue-alert .issue-title { font-weight: 700; color: var(--danger); font-size: .95rem; margin-bottom: 4px; }
+    .log-issue-alert .issue-body { color: var(--danger-dark); font-size: .98rem; line-height: 1.4; }
+    .log-suggest-row { color: var(--warn); font-size: .92rem; font-weight: 600; margin-top: 6px; }
+    .attention-head { color: var(--danger); font-weight: 800; font-size: 1.05rem; margin-bottom: 8px; }
+    .attention-sep { border-top: 2px dashed var(--line); margin: 10px 0 6px; }
+    @keyframes flash-in { from { background: #fff3c4; } to { background: #fbfcfe; } }
+    .log-card.just-added { animation: flash-in 1.6s ease-out; }
+    .btn-outline-more { width: 100%; min-height: 48px; border-radius: 12px; border: 2px solid var(--brand); background: #fff; color: var(--brand); font-weight: 700; margin-top: 8px; cursor: pointer; }
 
-    .attention-head {
-      color: var(--danger);
-      font-weight: 800;
-      font-size: .95rem;
-    }
+    /* ===== Ghi nhật ký — Phương án A (bảng nhanh) ===== */
+    .ctx-card { background: var(--surface-soft); border: 2px solid #93cdae; border-radius: 14px; padding: 12px 14px; margin-bottom: 14px; }
+    .ctx-where { font-weight: 800; color: var(--brand); font-size: .92rem; }
+    .ctx-what { font-weight: 800; font-size: 1.1rem; line-height: 1.3; margin-top: 3px; }
 
-    .attention-sep {
-      border-top: 1px dashed var(--line);
-      margin: 8px 0 2px;
-    }
-    .log-card.log-done { border-left-color: #2d8a5f; }
-    .log-card.log-doing { border-left-color: #155ea8; }
-    .log-card.log-help { border-left-color: #c2413b; }
+    .field { margin-bottom: 16px; }
+    .field-lb { font-size: .96rem; font-weight: 800; color: #222; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .ta { width: 100%; border: 2px solid #4a5568; border-radius: 12px; padding: 10px 12px; font-size: 1rem; font-family: inherit; min-height: 70px; }
 
-    @keyframes flash-in {
-      from { background: #fff3c4; }
-      to { background: #fbfcfe; }
-    }
+    .seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .seg .opt { min-height: 64px; border-radius: 14px; border: 3px solid var(--line); background: #fff; font-weight: 800; font-size: .9rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #333; cursor: pointer; padding: 6px 2px; }
+    .seg .opt i { font-size: 1.25rem; }
+    .seg .opt.on-done { border-color: var(--done); background: var(--done-bg); color: var(--done); }
+    .seg .opt.on-doing { border-color: var(--doing); background: var(--doing-bg); color: var(--doing); }
+    .seg .opt.on-help { border-color: var(--danger); background: #fdecea; color: var(--danger); }
 
-    .log-card.just-added { animation: flash-in 1.5s ease-out; }
+    .measure { display: flex; align-items: center; gap: 10px; }
+    .stp { width: 52px; height: 52px; border-radius: 14px; border: 3px solid var(--ink); background: #fff; font-size: 1.3rem; font-weight: 800; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .measure .val { flex: 1; text-align: center; border: 2px solid #4a5568; border-radius: 12px; min-height: 52px; font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .measure .unit { font-size: .6em; font-weight: 700; color: var(--muted); }
 
-    .mini-bar {
-      height: 4px;
-      border-radius: 2px;
-      background: #e2e8f0;
-      margin-top: 8px;
-      overflow: hidden;
-    }
+    .quick-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .qc { min-height: 44px; border-radius: 999px; border: 2px solid #445; background: #fff; color: #333; font-size: .9rem; font-weight: 700; padding: 6px 14px; cursor: pointer; }
+    .qc.on { border: 3px solid var(--brand-2); background: var(--surface-soft); color: var(--brand-2); }
 
-    .mini-bar i {
-      display: block;
-      height: 100%;
-      width: 0;
-      background: var(--brand-2);
-      border-radius: 2px;
-      transition: width .3s;
-    }
+    .media-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .media-btn { min-height: 56px; border-radius: 14px; border: 3px dashed var(--brand); background: #fff; color: var(--brand); font-weight: 800; font-size: .92rem; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
 
-    #quickFormHeader { cursor: pointer; }
+    .extra-details { margin-top: 4px; }
+    .extra-details summary { cursor: pointer; font-weight: 700; color: var(--brand); padding: 8px 0; list-style: none; }
+    .extra-details summary::-webkit-details-marker { display: none; }
+    .extra-details summary::before { content: "▸ "; }
+    .extra-details[open] summary::before { content: "▾ "; }
 
-    .quick-form-note {
-      background: #eef6f4;
-      border: 1px solid #cbe7db;
-      border-radius: 8px;
-      padding: 10px 12px;
-      color: #24624a;
-      font-size: .88rem;
-    }
+    /* ===== Tuần / Thống kê ===== */
+    .week-label { font-weight: 800; color: var(--muted); margin-bottom: 10px; }
+    .week-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .week-table td { vertical-align: top; padding: 8px 6px; }
+    .week-table .day-cell { width: 78px; }
+    .week-today td { background: var(--surface-soft); border-radius: 8px; }
+    .week-items { display: flex; flex-direction: column; gap: 6px; }
+    .week-item { display: flex; gap: 8px; align-items: flex-start; width: 100%; text-align: left; border: 2px solid var(--line); border-left-width: 6px; border-radius: 8px; padding: 8px 10px; min-height: 52px; background: #fff; font-size: .92rem; color: var(--ink); cursor: pointer; }
+    .week-item.st-done { border-left-color: var(--done); }
+    .week-item.st-doing { border-left-color: var(--doing); }
+    .week-item.st-help { border-left-color: var(--danger); }
+    .week-item.st-open { border-left-color: #94a3b8; }
+    .week-item-main { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 2px; }
+    .week-item-task { color: var(--brand); font-weight: 700; font-size: 1rem; }
+    .week-item-meta { color: var(--muted); font-weight: 600; font-size: .82rem; }
+    .week-item .badge-soft { margin-left: auto; flex-shrink: 0; }
 
-    @media (max-width: 760px) {
-      .shell { padding: 12px; }
-      .app-title { font-size: 1rem; }
-      .brand-mark { width: 38px; height: 38px; }
-      /* Header điện thoại: nút gọn + tên người cắt ngắn để không tràn ngang */
-      .app-header .btn { padding: 5px 8px; font-size: .85rem; }
-      .app-header .btn-icon { width: 34px; height: 34px; }
-      .user-name-label {
-        display: inline-block;
-        max-width: 72px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        vertical-align: bottom;
-      }
-      .row.g-3.mb-3 { --bs-gutter-x: .5rem; --bs-gutter-y: .5rem; }
-      .metric { min-height: 58px; padding: 9px 10px; }
-      .metric strong { font-size: 1.1rem; }
-      .metric span { font-size: .72rem; }
-      
-      /* Cân bằng các nút bấm trên Toolbar */
-      .toolbar-grid { display: grid !important; grid-template-columns: 1fr 1fr; gap: 8px; }
-      .toolbar-grid .flex-grow-1 { grid-column: 1 / -1; }
-      #btnReload { grid-column: 1 / 2; }
-      #btnAddPlan { grid-column: 2 / 3; }
-      
-      .table-wrap { display: none; }
-      .mobile-plan-list { display: block; }
-      .panel-header { padding: 12px; }
-      #quickFormPanel {
-        position: sticky;
-        bottom: 0;
-        z-index: 15;
-        box-shadow: 0 -8px 24px rgba(23, 33, 47, 0.08);
-      }
-      #quickFormPanel .panel-header { padding: 10px 12px; }
-      #quickFormPanel form { padding: 12px !important; }
-      #logList { max-height: 48vh; overflow: auto; }
-      .chip { padding: 8px 14px; font-size: .9rem; }
-      .chip-active { padding: 7px 13px; }
-      #progressChips { grid-template-columns: repeat(3, 1fr); }
-      #progressChips .chip { padding: 8px 4px; font-size: .82rem; }
-      /* Ô Việc cao hơn trên điện thoại để nhìn được nhiều dòng hơn */
-      #selectedTask { min-height: 130px; }
-    }
+    .metric-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
+    .metric { min-height: 84px; padding: 14px; border: 2px solid var(--line); border-radius: 10px; background: #fff; }
+    .metric strong { display: block; font-size: 1.8rem; line-height: 1.1; }
+    .metric span { color: var(--muted); font-size: .92rem; font-weight: 600; }
+    .mini-bar { height: 4px; border-radius: 2px; background: #e2e8f0; margin-top: 8px; overflow: hidden; }
+    .mini-bar i { display: block; height: 100%; background: var(--brand-2); border-radius: 2px; }
+    .panel { background: #fff; border: 2px solid var(--line); border-radius: 10px; }
+    .panel-header { padding: 12px 14px; border-bottom: 2px solid var(--line); }
+    .table th, .table td { font-size: .92rem; }
+    .table thead th { text-transform: uppercase; font-size: .78rem; color: #2f3b4a; background: #edf3f6; }
 
-    /* Tối ưu hóa cho màn hình cực hẹp hoặc điện thoại cỡ nhỏ */
-    @media (max-width: 576px) {
-      /* Chuyển các nút bấm kế hoạch sang hàng ngang bên dưới phần text để tránh bị bó hẹp chiều ngang */
-      .plan-card .d-flex.justify-content-between {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 12px !important;
-      }
-      .plan-card .d-flex.flex-column {
-        flex-direction: row !important;
-        gap: 8px !important;
-        width: 100% !important;
-      }
-      .plan-card .d-flex.flex-column button {
-        flex: 1 !important;
-        padding: 10px 8px !important;
-        font-size: 0.92rem !important;
-      }
-      .plan-card-title {
-        font-size: 1.2rem;
-      }
-    }
+    /* ===== Cá nhân ===== */
+    .prof-hero { background: var(--brand); color: #fff; padding: 20px 16px; display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+    .avatar { width: 64px; height: 64px; border-radius: 50%; background: #fff; color: var(--brand); display: flex; align-items: center; justify-content: center; font-size: 1.7rem; font-weight: 800; flex-shrink: 0; }
+    .prof-name { font-size: 1.25rem; font-weight: 800; }
+    .prof-role { font-size: .88rem; font-weight: 600; opacity: .9; margin-top: 2px; }
+    .shift-card { background: var(--warn-bg); border: 3px solid #8a5a00; border-radius: 16px; padding: 14px 15px; margin-bottom: 14px; color: var(--warn-ink); }
+    .shift-card .t { font-size: .82rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+    .shift-card .v { font-size: 1.2rem; font-weight: 800; margin-top: 3px; }
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+    .metrics .metric { text-align: center; padding: 12px 6px; }
+    .metrics .metric .n { font-size: 1.5rem; font-weight: 800; line-height: 1; }
+    .metrics .metric .l { font-size: .75rem; font-weight: 700; color: var(--muted); margin-top: 4px; }
+    .metrics .metric.hi .n { color: var(--danger); }
+    .menu { background: #fff; border: 2px solid var(--line); border-radius: 16px; overflow: hidden; }
+    .mrow { display: flex; align-items: center; gap: 12px; width: 100%; padding: 15px; border: 0; border-bottom: 2px solid var(--line); background: #fff; font-size: 1.02rem; font-weight: 700; color: #222; text-align: left; cursor: pointer; }
+    .mrow:last-child { border-bottom: 0; }
+    .mrow i.lead { font-size: 1.3rem; color: var(--brand); width: 28px; text-align: center; flex-shrink: 0; }
+    .mrow i.tail { margin-left: auto; color: #888; font-size: 1.1rem; }
 
-    @media (max-width: 400px) {
-      /* Ẩn chữ "Đăng nhập" chỉ hiển thị biểu tượng người dùng trên điện thoại quá nhỏ */
-      .user-name-label { display: none !important; }
-      #btnUser i { margin-right: 0 !important; }
-      #btnUser {
-        width: 34px;
-        height: 34px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0;
-      }
-    }
+    /* ===== Access gate ===== */
+    .access-gate-panel { margin: 24px 16px; padding: 28px 18px; text-align: center; border: 2px solid var(--line); border-radius: 16px; background: #fff; }
+
+    /* ===== Form ===== */
+    .form-label { font-size: .92rem; font-weight: 700; color: #333; }
+    .form-control, .form-select { border-radius: 10px; border-color: #4a5568; border-width: 2px; min-height: 46px; font-size: 1rem; }
+    .quick-form-note { background: var(--surface-soft); border: 2px solid #93cdae; border-radius: 8px; padding: 10px 12px; color: var(--brand-2); font-size: .95rem; font-weight: 600; }
+    .modal-content { border-radius: 14px; border: 2px solid var(--line); }
+    .btn { min-height: 46px; font-weight: 700; }
 
     @media (max-width: 380px) {
-      /* Xếp dọc các chip trạng thái khi màn hình quá hẹp */
-      #progressChips { grid-template-columns: 1fr !important; }
-      #progressChips .chip { text-align: left; padding: 10px 14px; }
+      body { padding: 0; background: var(--page-bg); }
+      .app-shell { max-width: 100%; }
     }
   </style>
 </head>
 <body>
-  <header class="app-header">
-    <div class="shell py-3">
-      <div class="d-flex align-items-center justify-content-between gap-2">
-        <div class="d-flex align-items-center gap-2 min-w-0 flex-grow-1">
-          <div class="brand-mark flex-shrink-0"><i class="bi bi-journal-check fs-4"></i></div>
-          <div class="min-w-0">
-            <div class="text-uppercase fw-bold text-primary text-truncate" style="font-size:.72rem;">BanDienScan</div>
-            <h1 class="app-title m-0 fw-bold text-truncate">Nhật ký công việc</h1>
-          </div>
-        </div>
-        <div class="d-flex align-items-center gap-2 flex-shrink-0">
-          <span class="badge bg-success-subtle text-success shadow-sm px-2 py-2 rounded-pill" id="syncBadge" style="display: none;" title="Trạng thái đồng bộ">
-            <i class="bi bi-cloud-check-fill"></i>
-          </span>
-          <button class="btn btn-outline-secondary btn-icon" type="button" id="btnFontScale" title="Phóng to chữ (bấm để đổi cỡ)">
-            <span class="fw-bold" id="fontScaleLabel">A</span>
-          </button>
-          <button class="btn btn-outline-secondary text-nowrap" type="button" id="btnUser" title="Đổi người dùng">
-            <i class="bi bi-person-circle me-1"></i><span id="userName" class="user-name-label">Đăng nhập</span>
-          </button>
-          <a class="btn btn-outline-primary btn-icon" href="../index.html" title="Về BanDienScan">
-            <i class="bi bi-house"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-  </header>
+  <div class="app-shell">
+    <header class="app-header" id="appHeader"></header>
 
-  <main class="shell">
-    <section class="panel mb-3 d-none" id="accessGatePanel">
-      <div class="p-4 text-center">
-        <i class="bi bi-shield-lock text-secondary" style="font-size:2rem;"></i>
-        <h2 class="h5 fw-bold mt-2 mb-1">Chưa thể xem nhật ký / việc</h2>
-        <p class="text-secondary mb-3" id="accessGateMessage">Vui lòng đăng nhập tài khoản đã được phân nhóm tổ để xem nội dung này.</p>
-        <button class="btn btn-primary" type="button" id="btnAccessGateLogin"><i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập</button>
-      </div>
+    <section class="access-gate-panel d-none" id="accessGatePanel">
+      <i class="bi bi-shield-lock text-secondary" style="font-size:2rem;"></i>
+      <h2 class="h5 fw-bold mt-2 mb-1">Chưa thể xem nhật ký / việc</h2>
+      <p class="text-secondary mb-3" id="accessGateMessage">Vui lòng đăng nhập tài khoản đã được phân nhóm tổ để xem nội dung này.</p>
+      <button class="btn btn-primary" type="button" id="btnAccessGateLogin"><i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập</button>
     </section>
 
-    <div id="appContent">
-    <section class="mb-3">
-      <div class="panel" id="quickFormPanel">
-        <div class="panel-header" id="quickFormHeader" role="button" aria-controls="logFormBody" aria-expanded="true">
-          <div class="d-flex align-items-center justify-content-between">
-            <h2 class="h5 m-0 fw-bold"><i class="bi bi-pencil-square text-primary me-2"></i>1. Ghi kết quả</h2>
-            <i class="bi bi-chevron-up" id="quickFormChevron"></i>
-          </div>
+    <div id="appContent" class="d-none">
+      <!-- Màn 1: Kế hoạch -->
+      <section class="screen" data-screen="tasklist" id="screen-tasklist">
+        <div class="date-bar">
+          <button class="btn-icon-sm" id="btnPrevDay" type="button" title="Ngày trước"><i class="bi bi-chevron-left"></i></button>
+          <input class="date-input" id="filterDate" type="date">
+          <button class="btn-icon-sm" id="btnNextDay" type="button" title="Ngày sau"><i class="bi bi-chevron-right"></i></button>
+          <button class="btn-today" id="btnToday" type="button">Hôm nay</button>
+          <button class="btn-icon-sm" id="btnReload" type="button" title="Nạp lại"><i class="bi bi-arrow-clockwise"></i></button>
+          <button class="btn-icon-sm" id="btnAddPlan" type="button" title="Thêm kế hoạch"><i class="bi bi-plus-square"></i></button>
         </div>
-        <div class="collapse show" id="logFormBody">
-        <form class="p-3" id="logForm">
-          <input type="hidden" id="planId">
-          <div class="row g-2">
-            <div class="col-6 d-none extra-field">
-              <label class="form-label" for="workDate">Ngày</label>
-              <input class="form-control" id="workDate" type="date" required>
+        <div class="filters-bar" id="quickFilterBar">
+          <button class="a11y-chip active" type="button" data-quick="all">Tất cả</button>
+          <button class="a11y-chip warn" type="button" data-quick="attention"><i class="bi bi-exclamation-triangle-fill me-1"></i>Cần xử lý<span class="chip-count" id="attnCount" style="display:none">0</span></button>
+          <button class="a11y-chip" type="button" data-quick="today">Hôm nay</button>
+          <button class="a11y-chip" type="button" data-quick="done">Đã xong</button>
+          <button class="a11y-chip" type="button" id="btnOpenFilters" title="Lọc theo tổ/người/tìm kiếm"><i class="bi bi-funnel"></i></button>
+          <button class="a11y-chip" type="button" id="btnViewWeek" title="Xem theo tuần"><i class="bi bi-calendar-week"></i></button>
+        </div>
+        <div class="list-scroll">
+          <div class="day-log-summary" id="dayLogSummary"></div>
+          <div id="taskListBody"></div>
+        </div>
+        <div class="action-bar">
+          <button class="btn-main" id="btnQuickLog" type="button"><i class="bi bi-journal-plus"></i>Ghi nhật ký nhanh</button>
+        </div>
+      </section>
+
+      <!-- Màn 2: Chi tiết công việc -->
+      <section class="screen" data-screen="taskdetail" id="screen-taskdetail"></section>
+
+      <!-- Màn 3: Ghi nhật ký (Phương án A — bảng nhanh) -->
+      <section class="screen" data-screen="logentry" id="screen-logentry">
+        <div class="scroll">
+          <div class="ctx-card" id="logContextCard" style="display:none;">
+            <div class="ctx-where" id="logContextWhere"></div>
+            <div class="ctx-what" id="logContextWhat"></div>
+          </div>
+          <div class="small text-primary fw-bold mb-3 d-none" id="planCumNote"></div>
+
+          <form id="logForm">
+            <input type="hidden" id="planId">
+            <input type="hidden" id="progress" value="Hoàn thành">
+            <input type="hidden" id="quantity" value="">
+            <input type="hidden" id="quantityUnit" value="">
+
+            <div class="field d-none" id="adhocTaskField">
+              <div class="field-lb">Việc</div>
+              <textarea class="ta" id="selectedTask" rows="2" placeholder="Nhập việc phát sinh"></textarea>
             </div>
-            <div class="col-6 d-none extra-field">
-              <label class="form-label" for="shift">Ca</label>
-              <select class="form-select" id="shift">
-                <option>Ca sáng</option>
-                <option>Ca chiều</option>
-                <option>Ca đêm</option>
-                <option>Hành chính</option>
-              </select>
-            </div>
-            <div class="col-6">
-              <label class="form-label" for="startTime">Từ giờ</label>
-              <select class="form-select" id="startTime"></select>
-            </div>
-            <div class="col-6">
-              <label class="form-label" for="endTime">Đến giờ</label>
-              <select class="form-select" id="endTime"></select>
-            </div>
-            <div class="col-6 d-none" id="quantityField">
-              <label class="form-label" for="quantity">Số lượng <span class="fw-normal text-secondary">(nếu có)</span></label>
-              <input class="form-control" id="quantity" type="number" inputmode="decimal" step="any" min="0" placeholder="vd: 12">
-            </div>
-            <div class="col-6 d-none" id="unitField">
-              <label class="form-label" for="quantityUnit">Đơn vị</label>
-              <input class="form-control" id="quantityUnit" placeholder="vd: m, cái, bộ...">
-            </div>
-            <div class="col-12">
-              <span class="form-label d-block">Trạng thái</span>
-              <input type="hidden" id="progress" value="Hoàn thành">
-              <div id="progressChips">
-                <button class="chip chip-done" type="button" data-value="Hoàn thành"><i class="bi bi-check2-circle me-1"></i>Hoàn thành</button>
-                <button class="chip chip-doing" type="button" data-value="Đang làm"><i class="bi bi-arrow-repeat me-1"></i>Đang làm</button>
-                <button class="chip chip-help" type="button" data-value="Cần hỗ trợ"><i class="bi bi-exclamation-triangle me-1"></i>Cần hỗ trợ</button>
+
+            <div class="field">
+              <div class="field-lb">Kết quả — chạm chọn</div>
+              <div id="progressChips" class="seg">
+                <button class="opt" type="button" data-value="Hoàn thành"><i class="bi bi-check2-circle"></i>Hoàn thành</button>
+                <button class="opt" type="button" data-value="Đang làm"><i class="bi bi-arrow-repeat"></i>Đang làm</button>
+                <button class="opt" type="button" data-value="Cần hỗ trợ"><i class="bi bi-exclamation-triangle"></i>Cần hỗ trợ</button>
               </div>
               <div class="form-check mt-2" id="planCompleteCheckContainer" style="display: none;">
                 <input class="form-check-input" type="checkbox" id="markPlanDone">
                 <label class="form-check-label small text-success fw-bold" for="markPlanDone">Kết thúc việc này</label>
               </div>
             </div>
-            <div class="col-12">
-              <label class="form-label" for="selectedTask">Việc</label>
-              <textarea class="form-control" id="selectedTask" rows="3" placeholder="Chọn đầu việc hoặc nhập việc phát sinh" required></textarea>
-              <div class="small text-primary fw-bold mt-1 d-none" id="planCumNote"></div>
-            </div>
-            <div class="col-12">
-              <label class="form-label" for="result">Kết quả</label>
-              <div class="chip-row mb-2" id="resultChips">
-                <button class="chip" type="button">Không phát hiện bất thường</button>
-                <button class="chip" type="button">Có bất thường, cần theo dõi</button>
-                <button class="chip" type="button">Đã xử lý dứt điểm</button>
-                <button class="chip" type="button">Cần vật tư thay thế</button>
+
+            <div class="field d-none" id="quantityFieldWrap">
+              <div class="field-lb">Số đo</div>
+              <div class="measure">
+                <button class="stp" type="button" id="btnQtyMinus"><i class="bi bi-dash-lg"></i></button>
+                <div class="val"><span id="quantityDisplay">0</span><span class="unit" id="quantityUnitDisplay"></span></div>
+                <button class="stp" type="button" id="btnQtyPlus"><i class="bi bi-plus-lg"></i></button>
               </div>
-              <textarea class="form-control" id="result" rows="3" placeholder="Ghi ngắn gọn: đã làm gì, kết quả ra sao..." required></textarea>
             </div>
-            <div class="col-12 d-none" id="peopleResults">
-              <span class="form-label d-block"><i class="bi bi-people me-1"></i>Kết quả từng người tham gia</span>
+
+            <div class="field">
+              <div class="field-lb">Ghi chú nhanh — chọn mẫu</div>
+              <div class="quick-chips" id="resultChips">
+                <button class="qc" type="button" data-fill="Không phát hiện bất thường">Không bất thường</button>
+                <button class="qc" type="button" data-fill="Có bất thường, cần theo dõi">Còn theo dõi</button>
+                <button class="qc" type="button" data-fill="Đã xử lý dứt điểm">Đã xử lý dứt điểm</button>
+                <button class="qc" type="button" data-fill="Cần vật tư thay thế">Cần vật tư</button>
+              </div>
+              <textarea class="ta mt-2" id="result" rows="3" placeholder="Ghi ngắn gọn: đã làm gì, kết quả ra sao..." required></textarea>
+            </div>
+
+            <div class="field d-none" id="peopleResults">
+              <div class="field-lb"><i class="bi bi-people"></i>Kết quả từng người tham gia</div>
               <div class="d-flex flex-column gap-2" id="peopleResultRows"></div>
               <div class="small text-secondary mt-1">Ghi riêng nội dung thực hiện của từng nhân viên</div>
             </div>
-            <div class="col-12 d-none extra-field">
-              <label class="form-label" for="issue">Còn tồn</label>
-              <textarea class="form-control" id="issue" rows="2" placeholder="Bỏ trống nếu không có"></textarea>
-            </div>
-            <div class="col-12 d-none extra-field">
-              <label class="form-label" for="nextAction">Làm tiếp</label>
-              <input class="form-control" id="nextAction" placeholder="Ví dụ: thay bóng, đặt vật tư, kiểm tra lại sau mưa...">
-            </div>
-          </div>
-          <button class="btn btn-link px-0 mt-2 text-decoration-none" type="button" id="btnToggleExtra">
-            <i class="bi bi-chevron-down me-1"></i>Chi tiết thêm
-          </button>
-          <div class="d-grid gap-2 mt-3">
-            <button class="btn btn-success btn-lg" type="submit"><i class="bi bi-check2-circle me-1"></i>Lưu</button>
-            <button class="btn btn-outline-secondary" type="button" id="btnClearForm"><i class="bi bi-eraser me-1"></i>Xóa nội dung</button>
-          </div>
-        </form>
-        </div>
-      </div>
-    </section>
 
-    <section class="panel mb-3">
-      <div class="panel-header">
-        <h2 class="h5 mb-2 fw-bold"><i class="bi bi-calendar3 text-primary me-2"></i>2. Việc cần làm</h2>
-        <div class="d-flex toolbar-grid align-items-end gap-2">
-          <div>
-            <label class="form-label" for="filterDate">Ngày</label>
-            <div class="d-flex align-items-center gap-1">
-              <button class="btn btn-outline-secondary btn-icon" type="button" id="btnPrevDay" title="Ngày trước"><i class="bi bi-chevron-left"></i></button>
-              <input class="form-control" id="filterDate" type="date">
-              <button class="btn btn-outline-secondary btn-icon" type="button" id="btnNextDay" title="Ngày sau"><i class="bi bi-chevron-right"></i></button>
-            </div>
-          </div>
-          <div>
-            <label class="form-label d-block">Kiểu xem</label>
-            <div class="btn-group" role="group" aria-label="Kiểu xem việc">
-              <button class="btn btn-outline-primary active" type="button" id="btnViewDay">Việc ngày</button>
-              <button class="btn btn-outline-primary" type="button" id="btnViewWeek">Việc tuần</button>
-            </div>
-          </div>
-          <div class="advanced-filter collapse" id="advancedFilters">
-            <label class="form-label" for="filterTeam">Tổ/ca</label>
-            <select class="form-select" id="filterTeam">
-              <option value="">Tất cả</option>
-            </select>
-          </div>
-          <div class="advanced-filter collapse" id="advancedFiltersPerson">
-            <label class="form-label" for="filterPerson">Người</label>
-            <select class="form-select" id="filterPerson">
-              <option value="">Tất cả</option>
-            </select>
-          </div>
-          <div class="flex-grow-1 advanced-filter collapse" id="advancedFiltersSearch">
-            <label class="form-label" for="searchBox">Tìm nhanh</label>
-            <input class="form-control" id="searchBox" type="search" placeholder="Khu vực, thiết bị, nội dung việc...">
-          </div>
-          <button class="btn btn-outline-primary" type="button" id="btnToday"><i class="bi bi-calendar-check me-1"></i>Hôm nay</button>
-          <button class="btn btn-outline-secondary" type="button" id="btnToggleFilters"><i class="bi bi-funnel me-1"></i>Lọc</button>
-          <button class="btn btn-primary" type="button" id="btnReload"><i class="bi bi-arrow-clockwise me-1"></i>Nạp</button>
-          <button class="btn btn-success" type="button" id="btnAddPlan"><i class="bi bi-plus-lg me-1"></i>Thêm việc</button>
-        </div>
-        <div class="day-log-summary" id="dayLogSummary"></div>
-      </div>
-      <div class="table-wrap">
-        <table class="table table-hover align-middle mb-0">
-          <thead>
-            <tr>
-              <th>Việc</th>
-              <th>Vị trí</th>
-              <th>Người</th>
-              <th>Giờ</th>
-              <th>Mức</th>
-              <th>Trạng thái</th>
-              <th class="text-end">Ghi</th>
-            </tr>
-          </thead>
-          <tbody id="planRows"></tbody>
-        </table>
-      </div>
-      <div class="mobile-plan-list" id="planCards"></div>
-      <div id="weekView" style="display:none;"></div>
-    </section>
-
-    <section class="row g-3">
-      <div class="col-12">
-        <div class="panel h-100">
-          <div class="panel-header">
-            <div class="d-flex align-items-center justify-content-between gap-2">
-              <div>
-                <h2 class="h5 m-0 fw-bold"><i class="bi bi-clock-history text-primary me-2"></i>3. Còn tồn / nhật ký</h2>
-                <div class="small text-secondary mt-1">Việc cần làm tiếp nằm trên cùng. Nhật ký thường đã thu gọn.</div>
+            <div class="field">
+              <div class="field-lb">Ảnh &amp; giọng nói</div>
+              <div class="media-row">
+                <button class="media-btn" type="button" id="btnAttachPhoto"><i class="bi bi-camera-fill"></i>Chụp ảnh</button>
+                <button class="media-btn" type="button" id="btnAttachVoice"><i class="bi bi-mic-fill"></i>Nói</button>
               </div>
             </div>
-          </div>
-          <div class="p-3">
-            <div class="d-flex flex-column gap-2" id="logList"></div>
-            <button class="btn btn-outline-primary w-100 mt-3" type="button" id="btnToggleLogs" style="display:none;">Xem thêm</button>
-          </div>
-        </div>
-      </div>
-    </section>
 
-    <section class="mb-3">
-      <button class="btn btn-outline-secondary w-100 text-start fw-bold mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#statsBody" aria-expanded="false" aria-controls="statsBody">
-        <i class="bi bi-bar-chart text-primary me-2"></i>Thống kê
-      </button>
-      <div class="collapse" id="statsBody">
-      <div class="row g-3">
-        <div class="col-6 col-lg-3"><div class="metric"><strong id="metricTotal">0</strong><span id="metricTotalLabel">Việc trong ngày</span></div></div>
-        <div class="col-6 col-lg-3"><div class="metric"><strong id="metricDoing">0</strong><span>Đang làm</span></div></div>
-        <div class="col-6 col-lg-3"><div class="metric"><strong id="metricDone">0</strong><span>Đã hoàn thành</span><div class="mini-bar"><i id="metricDoneBar"></i></div></div></div>
-        <div class="col-6 col-lg-3"><div class="metric"><strong id="metricLogs">0</strong><span>Nhật ký cả tổ (7 ngày)</span></div></div>
-      </div>
-      <div class="panel mt-3">
-        <div class="panel-header">
-          <h3 class="h6 m-0 fw-bold"><i class="bi bi-people text-primary me-2"></i>Theo từng nhân viên <span class="fw-normal text-secondary small">(bấm tên để lọc việc)</span></h3>
+            <details class="extra-details">
+              <summary>Chi tiết thêm</summary>
+              <div class="row g-2 mt-1">
+                <div class="col-6">
+                  <label class="form-label" for="workDate">Ngày</label>
+                  <input class="form-control" id="workDate" type="date" required>
+                </div>
+                <div class="col-6">
+                  <label class="form-label" for="shift">Ca</label>
+                  <select class="form-select" id="shift">
+                    <option>Ca sáng</option>
+                    <option>Ca chiều</option>
+                    <option>Ca đêm</option>
+                    <option>Hành chính</option>
+                  </select>
+                </div>
+                <div class="col-6">
+                  <label class="form-label" for="startTime">Từ giờ</label>
+                  <select class="form-select" id="startTime"></select>
+                </div>
+                <div class="col-6">
+                  <label class="form-label" for="endTime">Đến giờ</label>
+                  <select class="form-select" id="endTime"></select>
+                </div>
+                <div class="col-12">
+                  <label class="form-label" for="issue">Còn tồn</label>
+                  <textarea class="form-control" id="issue" rows="2" placeholder="Bỏ trống nếu không có"></textarea>
+                </div>
+                <div class="col-12">
+                  <label class="form-label" for="nextAction">Làm tiếp</label>
+                  <input class="form-control" id="nextAction" placeholder="Ví dụ: thay bóng, đặt vật tư, kiểm tra lại sau mưa...">
+                </div>
+              </div>
+            </details>
+          </form>
+          <button class="link-button mt-2" type="button" id="btnClearForm"><i class="bi bi-eraser me-1"></i>Xóa nội dung</button>
         </div>
-        <div class="table-responsive">
-          <table class="table table-sm align-middle mb-0">
-            <thead>
-              <tr>
-                <th>Nhân viên</th>
-                <th class="text-center">Số việc</th>
-                <th class="text-center">Hoàn thành</th>
-                <th class="text-center">Đang làm</th>
-                <th class="text-center">Cần hỗ trợ / Tồn</th>
-              </tr>
-            </thead>
-            <tbody id="personStats"></tbody>
-          </table>
+        <div class="action-bar">
+          <button class="btn-done" type="submit" form="logForm"><i class="bi bi-check2-circle"></i>Lưu nhật ký</button>
         </div>
-      </div>
-      </div>
-    </section>
+      </section>
+
+      <!-- Màn 4: Nhật ký đã ghi -->
+      <section class="screen" data-screen="loghistory" id="screen-loghistory"></section>
+
+      <!-- Màn phụ: Tuần -->
+      <section class="screen" data-screen="week" id="screen-week"></section>
+
+      <!-- Màn phụ: Thống kê cả tổ -->
+      <section class="screen" data-screen="stats" id="screen-stats"></section>
+
+      <!-- Màn 5: Cá nhân -->
+      <section class="screen" data-screen="personal" id="screen-personal"></section>
     </div>
-  </main>
 
+    <nav class="tabbar" id="tabbar">
+      <button class="tab" type="button" data-tab="tasklist"><i class="bi bi-list-check"></i>Việc</button>
+      <button class="tab" type="button" data-tab="week"><i class="bi bi-calendar-week"></i>Lịch tuần</button>
+      <button class="tab" type="button" data-tab="logentry"><i class="bi bi-journal-plus"></i>Ghi</button>
+      <button class="tab" type="button" data-tab="personal"><i class="bi bi-person"></i>Cá nhân</button>
+    </nav>
+  </div>
+
+  <!-- Offcanvas bộ lọc nâng cao -->
+  <div class="offcanvas offcanvas-end" tabindex="-1" id="filterOffcanvas">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title fw-bold">Bộ lọc</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Đóng"></button>
+    </div>
+    <div class="offcanvas-body">
+      <label class="form-label" for="filterTeam">Tổ/ca</label>
+      <select class="form-select mb-3" id="filterTeam"><option value="">Tất cả</option></select>
+      <label class="form-label" for="filterPerson">Người</label>
+      <select class="form-select mb-3" id="filterPerson"><option value="">Tất cả</option></select>
+      <label class="form-label" for="searchBox">Tìm nhanh</label>
+      <input class="form-control" id="searchBox" type="search" placeholder="Khu vực, thiết bị, nội dung việc...">
+    </div>
+  </div>
+
+  <!-- Modal: cài đặt đồng bộ -->
   <div class="modal fade" id="settingsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
@@ -836,6 +459,7 @@
     </div>
   </div>
 
+  <!-- Modal: đăng nhập / đăng ký -->
   <div class="modal fade" id="loginModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
       <div class="modal-content">
@@ -847,12 +471,12 @@
           <label class="form-label" for="loginName">Tên đăng nhập</label>
           <input class="form-control mb-2" id="loginName" list="loginNameSuggestions" placeholder="Nhập tên đăng nhập (VD: thangnq)" autocomplete="username">
           <datalist id="loginNameSuggestions"></datalist>
-          
+
           <div id="registerGroup" class="d-none">
             <label class="form-label text-primary" for="loginFullName">Họ tên đầy đủ <small class="text-muted">(Bắt buộc)</small></label>
             <input class="form-control mb-2" id="loginFullName" placeholder="Nhập họ và tên thật (Ví dụ: Nguyễn Văn Thành)" autocomplete="name">
           </div>
-          
+
           <label class="form-label" for="loginPassword">Mật khẩu</label>
           <input class="form-control" id="loginPassword" type="password" placeholder="Mật khẩu tài khoản" autocomplete="current-password">
           <div class="small text-secondary mt-2" id="loginHint">Nhập mật khẩu để đăng nhập vào tài khoản của bạn.</div>
@@ -868,6 +492,7 @@
     </div>
   </div>
 
+  <!-- Modal: thêm/sửa kế hoạch -->
   <div class="modal fade" id="planModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
@@ -969,11 +594,11 @@
     </div>
   </div>
 
-  <div class="position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 50">
-    <div class="toast align-items-center border-0" id="toast" role="status" aria-live="polite" aria-atomic="true">
+  <div class="position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 1080">
+    <div class="toast align-items-center border-0 bg-dark" id="toast" role="status" aria-live="polite" aria-atomic="true">
       <div class="d-flex">
-        <div class="toast-body" id="toastText">Đã lưu</div>
-        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Đóng"></button>
+        <div class="toast-body text-white" id="toastText">Đã lưu</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Đóng"></button>
       </div>
     </div>
   </div>
@@ -1010,10 +635,128 @@
     let toast;
     let planModal;
     let loginModal;
+    let settingsModalInstance;
+    let filterOffcanvasInstance;
     let lastAddedLogId = null;
-    let viewMode = "day";
     let staffList = [];   // tên nhân viên từ backend (getStaff) cho dropdown
     let planPeople = [];  // người thực hiện đang chọn trong modal kế hoạch
+    let quickFilter = "all";
+
+    // ===== Điều hướng màn hình (router nhỏ gọn, không reload trang) =====
+    let currentScreen = "tasklist";
+    let currentParams = {};
+    const TOP_LEVEL_SCREENS = ["tasklist", "week", "personal"];
+
+    function navigateTo(screen, params) {
+      params = params || {};
+      history.pushState({ screen: screen, params: params }, "");
+      activateScreen(screen, params);
+    }
+
+    function goBack() {
+      history.back();
+    }
+
+    function activateScreen(screen, params) {
+      currentScreen = screen;
+      currentParams = params || {};
+      document.querySelectorAll(".screen").forEach(el => el.classList.toggle("active", el.dataset.screen === screen));
+      renderHeader(screen, currentParams);
+      updateTabbar(screen);
+      dispatchScreenRender(screen, currentParams);
+      window.scrollTo(0, 0);
+    }
+
+    function dispatchScreenRender(screen, params) {
+      if (screen === "tasklist") renderPlans();
+      else if (screen === "taskdetail") renderTaskDetail(params.id);
+      else if (screen === "logentry") renderLogEntry(params);
+      else if (screen === "loghistory") renderLogHistory(params.planId);
+      else if (screen === "week") renderWeekScreen();
+      else if (screen === "stats") renderStatsScreen();
+      else if (screen === "personal") renderPersonalScreen();
+    }
+
+    // Làm mới màn đang mở sau khi dữ liệu đổi (đồng bộ nền, lưu...) — không
+    // đụng vào màn Ghi nhật ký vì đang có nội dung người dùng gõ dở
+    function refreshCurrentScreen() {
+      if (currentScreen === "logentry") return;
+      dispatchScreenRender(currentScreen, currentParams);
+    }
+
+    function updateTabbar(screen) {
+      const tabbar = document.getElementById("tabbar");
+      const topLevel = TOP_LEVEL_SCREENS.includes(screen);
+      tabbar.style.display = topLevel ? "flex" : "none";
+      document.querySelectorAll("#tabbar .tab").forEach(tab => tab.classList.toggle("on", tab.dataset.tab === screen));
+    }
+
+    function openTaskDetail(id) {
+      navigateTo("taskdetail", { id: id });
+    }
+
+    function weekdayNameVn(iso) {
+      const d = new Date((iso || today) + "T00:00:00");
+      return WEEK_DAY_NAMES[(d.getDay() + 6) % 7];
+    }
+
+    function taskListSubtitle() {
+      return `${weekdayNameVn(today)}, ${shortDateVn(today)} · ${defaultShift()}`;
+    }
+
+    function homeHeaderHtml() {
+      return `
+        <div class="header-inner">
+          <div class="header-left min-w-0">
+            <div class="brand-mark flex-shrink-0"><i class="bi bi-lightning-charge-fill"></i></div>
+            <div class="header-titles min-w-0">
+              <div class="app-title text-truncate">Công việc hôm nay</div>
+              <div class="header-sub text-truncate">${escapeHtml(taskListSubtitle())}</div>
+            </div>
+          </div>
+          <div class="header-right">
+            <span class="sync-pill" id="syncBadge" style="display:none"></span>
+          </div>
+        </div>
+      `;
+    }
+
+    function backHeaderHtml(title, editPlanId) {
+      return `
+        <div class="header-inner header-inner-back">
+          <button class="btn-back" id="btnBack" type="button" title="Quay lại"><i class="bi bi-arrow-left"></i></button>
+          <div class="header-title text-truncate">${title}</div>
+          ${editPlanId ? `<button class="btn-back" id="btnHeaderEdit" type="button" title="Sửa việc" onclick="openPlanModal('${escapeAttr(editPlanId)}')"><i class="bi bi-pencil"></i></button>` : ""}
+        </div>
+      `;
+    }
+
+    function screenTitle(screen, params) {
+      if (screen === "taskdetail") return "Chi tiết công việc";
+      if (screen === "logentry") return "Ghi nhật ký";
+      if (screen === "loghistory") {
+        const plan = params.planId ? plans.find(p => p.id === params.planId) : null;
+        return plan ? `Nhật ký: ${escapeHtml(plan.task || "")}` : "Nhật ký gần đây";
+      }
+      if (screen === "week") return "Lịch tuần này";
+      if (screen === "stats") return "Thống kê cả tổ";
+      return "Nhật ký công việc";
+    }
+
+    function renderHeader(screen, params) {
+      const header = document.getElementById("appHeader");
+      if (screen === "personal") {
+        header.style.display = "none";
+        return;
+      }
+      header.style.display = "";
+      if (screen === "tasklist") {
+        header.innerHTML = homeHeaderHtml();
+      } else {
+        header.innerHTML = backHeaderHtml(screenTitle(screen, params), screen === "taskdetail" ? params.id : "");
+      }
+      updateSyncStatus();
+    }
 
     const fallbackPlans = [
       {
@@ -1046,6 +789,8 @@
       toast = new bootstrap.Toast(document.getElementById("toast"), { delay: 2200 });
       planModal = new bootstrap.Modal(document.getElementById("planModal"));
       loginModal = new bootstrap.Modal(document.getElementById("loginModal"));
+      settingsModalInstance = new bootstrap.Modal(document.getElementById("settingsModal"));
+      filterOffcanvasInstance = new bootstrap.Offcanvas(document.getElementById("filterOffcanvas"));
       applyFontScale();
       document.getElementById("filterDate").value = today;
       document.getElementById("workDate").value = today;
@@ -1053,15 +798,19 @@
       fillTimeSelect("endTime", "");
       document.getElementById("shift").value = defaultShift();
       setProgress("Hoàn thành");
-      initQuickFormCollapse();
       loadSettings();
       loadStaff();
       await loadPlans();
       loadLogs();
       bindEvents();
+      history.replaceState({ screen: "tasklist", params: {} }, "");
+      window.addEventListener("popstate", event => {
+        const state = event.state || { screen: "tasklist", params: {} };
+        activateScreen(state.screen, state.params);
+      });
+      activateScreen("tasklist", {});
       render();
       updateSyncStatus();
-      updateUserButton();
       updateAccessGate();
       if (!hasTeamAccess()) openLogin();
       loadServerLogs();
@@ -1070,23 +819,32 @@
     });
 
     function bindEvents() {
-      ["filterDate", "filterTeam", "filterPerson", "searchBox"].forEach(id => {
-        document.getElementById(id).addEventListener("input", renderPlans);
+      document.getElementById("appHeader").addEventListener("click", event => {
+        if (event.target.closest("#btnBack")) goBack();
       });
-      document.getElementById("btnPrevDay").addEventListener("click", () => shiftFilterDate(viewMode === "week" ? -7 : -1));
-      document.getElementById("btnNextDay").addEventListener("click", () => shiftFilterDate(viewMode === "week" ? 7 : 1));
-      document.getElementById("btnViewDay").addEventListener("click", () => setViewMode("day"));
-      document.getElementById("btnViewWeek").addEventListener("click", () => setViewMode("week"));
+
+      document.getElementById("tabbar").addEventListener("click", event => {
+        const btn = event.target.closest(".tab");
+        if (!btn) return;
+        const target = btn.dataset.tab;
+        if (target === "logentry") { navigateTo("logentry", {}); return; }
+        if (currentScreen === target) return;
+        navigateTo(target, {});
+      });
+
+      ["filterDate", "filterTeam", "filterPerson", "searchBox"].forEach(id => {
+        document.getElementById(id).addEventListener("input", () => { if (currentScreen === "tasklist") renderPlans(); });
+      });
+      document.getElementById("btnPrevDay").addEventListener("click", () => shiftFilterDate(-1));
+      document.getElementById("btnNextDay").addEventListener("click", () => shiftFilterDate(1));
       document.getElementById("btnToday").addEventListener("click", () => {
         document.getElementById("filterDate").value = today;
-        setViewMode("day");
+        renderPlans();
       });
-      document.getElementById("btnToggleFilters").addEventListener("click", toggleAdvancedFilters);
+      document.getElementById("btnViewWeek").addEventListener("click", () => navigateTo("week", {}));
       document.getElementById("btnReload").addEventListener("click", async () => {
         const btn = document.getElementById("btnReload");
-        const original = btn.innerHTML;
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Đang nạp...';
         try {
           localStorage.removeItem(STORAGE_KEYS.plans);
           await loadPlans(true);
@@ -1094,10 +852,26 @@
           showToast("Đã nạp lại việc");
         } finally {
           btn.disabled = false;
-          btn.innerHTML = original;
         }
       });
+      document.getElementById("btnOpenFilters").addEventListener("click", () => filterOffcanvasInstance.show());
+      document.getElementById("quickFilterBar").addEventListener("click", event => {
+        const btn = event.target.closest(".a11y-chip[data-quick]");
+        if (!btn) return;
+        const value = btn.dataset.quick;
+        if (value === "today") {
+          document.getElementById("filterDate").value = today;
+          quickFilter = "all";
+          document.querySelectorAll("#quickFilterBar .a11y-chip[data-quick]").forEach(chip => chip.classList.toggle("active", chip.dataset.quick === "all"));
+        } else {
+          quickFilter = value;
+          document.querySelectorAll("#quickFilterBar .a11y-chip[data-quick]").forEach(chip => chip.classList.toggle("active", chip.dataset.quick === value));
+        }
+        renderPlans();
+      });
+
       document.getElementById("logForm").addEventListener("submit", submitLog);
+      document.getElementById("btnQuickLog").addEventListener("click", () => navigateTo("logentry", {}));
       document.getElementById("btnAddPlan").addEventListener("click", () => openPlanModal(null));
       document.getElementById("planForm").addEventListener("submit", submitPlanForm);
       document.getElementById("planPersonSelect").addEventListener("change", event => {
@@ -1112,41 +886,37 @@
       document.getElementById("btnDeletePlan").addEventListener("click", deletePlanFromModal);
       document.getElementById("btnClearForm").addEventListener("click", clearForm);
       document.getElementById("btnSaveSettings").addEventListener("click", saveSettings);
-      document.getElementById("btnToggleExtra").addEventListener("click", toggleExtraFields);
-      document.getElementById("btnToggleLogs").addEventListener("click", toggleLogs);
-      document.getElementById("btnUser").addEventListener("click", openLogin);
       document.getElementById("btnAccessGateLogin").addEventListener("click", openLogin);
       document.getElementById("btnSubmitAuth").addEventListener("click", doSubmitAuth);
       document.getElementById("linkToggleAuthMode").addEventListener("click", e => {
         e.preventDefault();
         toggleAuthMode();
       });
-      document.getElementById("btnFontScale").addEventListener("click", cycleFontScale);
       document.getElementById("progressChips").addEventListener("click", event => {
         const btn = event.target.closest("button[data-value]");
         if (btn) setProgress(btn.dataset.value);
       });
-      // Chip kết quả bật/tắt: bấm thêm câu vào ô, bấm lại để bỏ ra
+      document.getElementById("btnQtyMinus").addEventListener("click", () => adjustQuantity(-1));
+      document.getElementById("btnQtyPlus").addEventListener("click", () => adjustQuantity(1));
+      document.getElementById("btnAttachPhoto").addEventListener("click", () => showToast("Chụp ảnh: tính năng sắp có"));
+      document.getElementById("btnAttachVoice").addEventListener("click", () => showToast("Ghi âm giọng nói: tính năng sắp có"));
+
+      // Ghi chú nhanh: bấm thêm câu vào ô Kết quả, bấm lại để bỏ ra — không tự gán trạng thái
       document.getElementById("resultChips").addEventListener("click", event => {
-        const btn = event.target.closest("button");
+        const btn = event.target.closest(".qc");
         if (!btn) return;
         const box = document.getElementById("result");
-        const text = btn.textContent.trim();
+        const text = btn.dataset.fill;
         const parts = box.value.split(";").map(part => part.trim()).filter(Boolean);
         const index = parts.indexOf(text);
         if (index >= 0) {
           parts.splice(index, 1);
-          btn.classList.remove("chip-active");
+          btn.classList.remove("on");
         } else {
           parts.push(text);
-          btn.classList.add("chip-active");
+          btn.classList.add("on");
         }
         box.value = parts.join("; ");
-        if (text === "Đã xử lý dứt điểm" && parts.includes(text)) {
-          setProgress("Hoàn thành");
-          document.getElementById("issue").value = "";
-          document.getElementById("nextAction").value = "";
-        }
         box.focus();
       });
     }
@@ -1161,10 +931,13 @@
 
     function setProgress(value) {
       document.getElementById("progress").value = value;
-      document.querySelectorAll("#progressChips .chip").forEach(btn => {
-        btn.classList.toggle("chip-active", btn.dataset.value === value);
+      document.querySelectorAll("#progressChips .opt").forEach(btn => {
+        btn.classList.remove("on-done", "on-doing", "on-help");
+        if (btn.dataset.value === value) {
+          btn.classList.add(value === "Hoàn thành" ? "on-done" : value === "Đang làm" ? "on-doing" : "on-help");
+        }
       });
-      
+
       const planId = document.getElementById("planId").value;
       const checkContainer = document.getElementById("planCompleteCheckContainer");
       if (checkContainer) {
@@ -1175,36 +948,6 @@
           document.getElementById("markPlanDone").checked = false;
         }
       }
-    }
-
-    let quickFormCollapse;
-
-    function initQuickFormCollapse() {
-      const body = document.getElementById("logFormBody");
-      const chevron = document.getElementById("quickFormChevron");
-      const header = document.getElementById("quickFormHeader");
-      quickFormCollapse = bootstrap.Collapse.getOrCreateInstance(body, { toggle: false });
-      header.addEventListener("click", () => quickFormCollapse.toggle());
-      body.addEventListener("shown.bs.collapse", () => {
-        chevron.className = "bi bi-chevron-up";
-        header.setAttribute("aria-expanded", "true");
-      });
-      body.addEventListener("hidden.bs.collapse", () => {
-        chevron.className = "bi bi-chevron-down";
-        header.setAttribute("aria-expanded", "false");
-      });
-      // Điện thoại: thu gọn form lúc mở trang để thấy ngay kế hoạch trong ngày
-      if (window.matchMedia("(max-width: 760px)").matches) quickFormCollapse.hide();
-    }
-
-    function openQuickForm(afterShown) {
-      const body = document.getElementById("logFormBody");
-      if (body.classList.contains("show")) {
-        afterShown();
-        return;
-      }
-      body.addEventListener("shown.bs.collapse", afterShown, { once: true });
-      quickFormCollapse.show();
     }
 
     function getSync() {
@@ -1221,22 +964,6 @@
       parsed.setDate(parsed.getDate() + deltaDays);
       input.value = toIsoDate(parsed);
       renderPlans();
-    }
-
-    function setViewMode(mode) {
-      viewMode = mode;
-      document.getElementById("btnViewDay").classList.toggle("active", mode === "day");
-      document.getElementById("btnViewWeek").classList.toggle("active", mode === "week");
-      renderPlans();
-    }
-
-    function toggleAdvancedFilters() {
-      const filters = document.querySelectorAll(".advanced-filter");
-      const shouldShow = ![...filters].some(item => item.classList.contains("show"));
-      filters.forEach(item => item.classList.toggle("show", shouldShow));
-      document.getElementById("btnToggleFilters").innerHTML = shouldShow
-        ? '<i class="bi bi-funnel-fill me-1"></i>Ẩn lọc'
-        : '<i class="bi bi-funnel me-1"></i>Lọc';
     }
 
     // 7 ngày (Thứ 2 → Chủ nhật) của tuần chứa ngày đang chọn
@@ -1500,7 +1227,7 @@
         showToast("Chưa đồng bộ được việc, sẽ tự thử lại: " + error.message);
       }
       localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
-      renderPlans();
+      render();
       updateSyncStatus();
     }
 
@@ -1518,7 +1245,7 @@
       }));
       localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
       if (syncedCount > 0) {
-        renderPlans();
+        render();
         showToast(`Đã đồng bộ lại ${syncedCount} việc chờ`);
       }
       updateSyncStatus();
@@ -1535,6 +1262,7 @@
       plans = plans.filter(item => item.id !== id);
       localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
       planModal.hide();
+      if (currentScreen === "taskdetail" && currentParams.id === id) goBack();
       render();
       updateSyncStatus();
       showToast("Đã xóa việc");
@@ -1563,8 +1291,7 @@
       const syncedCount = pending.filter(log => log.syncStatus === "synced").length;
       if (syncedCount > 0) {
         localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
-        renderLogs();
-        renderPlans();
+        render();
         showToast(`Đã đồng bộ lại ${syncedCount} nhật ký chờ`);
       }
       updateSyncStatus();
@@ -1586,11 +1313,11 @@
     // ===== Phóng to chữ toàn trang: mọi cỡ chữ dùng rem nên chỉ cần
     // đổi font-size gốc; mức chọn lưu theo máy =====
     const FONT_SCALES = [100, 115, 130];
+    const FONT_SCALE_LABELS = { 100: "Thường", 115: "Lớn", 130: "Rất lớn" };
 
     function applyFontScale() {
       const scale = parseInt(localStorage.getItem(STORAGE_KEYS.fontScale) || "100", 10);
       document.documentElement.style.fontSize = scale + "%";
-      document.getElementById("fontScaleLabel").textContent = scale <= 100 ? "A" : scale <= 115 ? "A+" : "A++";
     }
 
     function cycleFontScale() {
@@ -1598,7 +1325,7 @@
       const next = FONT_SCALES[(FONT_SCALES.indexOf(current) + 1) % FONT_SCALES.length];
       localStorage.setItem(STORAGE_KEYS.fontScale, String(next));
       applyFontScale();
-      showToast("Cỡ chữ: " + (next === 100 ? "bình thường" : next + "%"));
+      showToast("Cỡ chữ: " + FONT_SCALE_LABELS[next]);
     }
 
     // ===== Đăng nhập theo tên (danh tính nhẹ, lưu trên máy) =====
@@ -1628,7 +1355,16 @@
     }
 
     function updateUserButton() {
-      document.getElementById("userName").textContent = currentUser() || "Đăng nhập";
+      if (currentScreen === "personal") renderPersonalScreen();
+    }
+
+    function logout() {
+      if (!confirm("Đăng xuất khỏi tài khoản này?")) return;
+      localStorage.removeItem(STORAGE_KEYS.employee);
+      localStorage.removeItem(STORAGE_KEYS.teamGroup);
+      updateAccessGate();
+      navigateTo("tasklist", {});
+      openLogin();
     }
 
     // Danh sách tên đã có tài khoản, chỉ để gợi ý tự động điền (autocomplete)
@@ -1650,18 +1386,18 @@
     function toggleAuthMode() {
       authMode = authMode === "login" ? "register" : "login";
       const isLogin = authMode === "login";
-      
+
       document.getElementById("registerGroup").classList.toggle("d-none", isLogin);
-      document.getElementById("btnSubmitAuth").innerHTML = isLogin 
-        ? '<i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập' 
+      document.getElementById("btnSubmitAuth").innerHTML = isLogin
+        ? '<i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập'
         : '<i class="bi bi-person-plus me-1"></i>Tạo tài khoản mới';
-      document.getElementById("linkToggleAuthMode").textContent = isLogin 
-        ? "Chưa có tài khoản? Tạo tài khoản mới" 
+      document.getElementById("linkToggleAuthMode").textContent = isLogin
+        ? "Chưa có tài khoản? Tạo tài khoản mới"
         : "Đã có tài khoản? Đăng nhập ngay";
       document.getElementById("loginHint").textContent = isLogin
         ? "Nhập mật khẩu để đăng nhập vào tài khoản của bạn."
         : "Tạo tài khoản mới với tên đăng nhập (viết tắt) và họ tên thật.";
-        
+
       showLoginError("");
     }
 
@@ -1775,7 +1511,7 @@
       };
       logs.unshift(log);
       localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
-      renderLogs();
+      refreshCurrentScreen();
       syncLogsInBackground([log]);
     }
 
@@ -1796,9 +1532,7 @@
 
     function render() {
       renderTeamOptions();
-      renderPlans();
-      renderLogs();
-      renderMetrics();
+      refreshCurrentScreen();
     }
 
     function renderTeamOptions() {
@@ -1824,31 +1558,14 @@
       return plan.dateEnd || plan.date;
     }
 
-    function dayDiff(a, b) {
-      return Math.round((new Date(a + "T00:00:00") - new Date(b + "T00:00:00")) / 86400000);
-    }
-
-    function isMultiDay(plan) {
-      return planDeadline(plan) > plan.date;
-    }
-
-    function inPlanRange(plan, iso) {
-      return Boolean(iso && planReminder(plan) === iso);
-    }
-
-    function reminderMark(plan, selectedDate) {
-      if (!isDueForReview(plan, selectedDate)) return "";
-      return `<span class="reminder-mark" title="Ngày nhắc/xem lại">✓ nhắc ${shortDateVn(planReminder(plan))}</span>`;
-    }
-
     function planMetaLine(plan, selectedDate, includePerson) {
       const parts = [];
       if (plan.time) parts.push(`<i class="bi bi-clock me-1"></i>${escapeHtml(plan.time)}`);
       else parts.push('<i class="bi bi-clock me-1"></i>Chưa xếp giờ');
       if (includePerson && plan.assignee) parts.push(`<i class="bi bi-person-fill me-1"></i>${escapeHtml(plan.assignee)}`);
       if (plan.dateEnd) parts.push(`deadline ${shortDateVn(planDeadline(plan))}`);
-      const reminder = reminderMark(plan, selectedDate);
-      if (reminder) parts.push(reminder);
+      if (isDueForReview(plan, selectedDate)) parts.push(`nhắc ${shortDateVn(planReminder(plan))}`);
+      if (plan.team) parts.push(escapeHtml(plan.team));
       const syncIcon = planSyncIcon(plan);
       if (syncIcon) parts.push(syncIcon);
       return parts.join(' <span class="mx-1">·</span> ');
@@ -1865,14 +1582,6 @@
       if (plan.doneQty) return `<span class="badge-soft badge-low" title="Lũy kế số lượng đã ghi">Σ ${escapeHtml(plan.doneQty)}${unit}</span>`;
       if (plan.planQty) return `<span class="badge-soft badge-open" title="Khối lượng kế hoạch">KL ${escapeHtml(plan.planQty)}${unit}</span>`;
       return "";
-    }
-
-    function compactPlanBadges(plan) {
-      const badges = [];
-      if (plan.status && plan.status !== "Chưa làm") badges.push(statusBadge(plan.status));
-      const qty = doneQtyBadge(plan);
-      if (qty) badges.push(qty);
-      return badges.join(" ");
     }
 
     function splitAssignees(value) {
@@ -1916,27 +1625,23 @@
     function logCoverageBadge(plan, date) {
       const coverage = planLogCoverage(plan, date);
       if (coverage.done >= coverage.total) {
-        return '<span class="log-check done"><i class="bi bi-check2-circle"></i>Đã ghi đủ</span>';
+        return '<span class="badge-soft badge-done"><i class="bi bi-check2-circle"></i> Đã ghi đủ</span>';
       }
       if (coverage.done > 0) {
-        return `<span class="log-check partial"><i class="bi bi-exclamation-circle"></i>Thiếu ${coverage.total - coverage.done}/${coverage.total}</span>`;
+        return `<span class="badge-soft badge-mid"><i class="bi bi-exclamation-circle"></i> Thiếu ${coverage.total - coverage.done}/${coverage.total}</span>`;
       }
-      return '<span class="log-check missing"><i class="bi bi-pencil-square"></i>Chưa ghi</span>';
+      return '<span class="badge-soft badge-high"><i class="bi bi-pencil-square"></i> Chưa ghi</span>';
     }
 
     function renderDayLogSummary(visible, selectedDate) {
       const summary = document.getElementById("dayLogSummary");
       if (!summary) return;
-      if (viewMode !== "day") {
+      const active = visible.filter(plan => plan.status !== "Hoàn thành");
+      if (active.length === 0) {
         summary.style.display = "none";
         return;
       }
       summary.style.display = "flex";
-      const active = visible.filter(plan => plan.status !== "Hoàn thành");
-      if (active.length === 0) {
-        summary.innerHTML = `<i class="bi bi-check2-circle text-success"></i><strong>${shortDateVn(selectedDate)}</strong><span>Không còn việc cần ghi nhật ký.</span>`;
-        return;
-      }
       const complete = active.filter(plan => {
         const coverage = planLogCoverage(plan, selectedDate);
         return coverage.done >= coverage.total;
@@ -1967,12 +1672,17 @@
       return Boolean(iso && planReminder(plan) <= iso && plan.status !== "Hoàn thành");
     }
 
-    function getVisiblePlans() {
+    function isAttentionPlan(plan, selectedDate) {
+      return plan.status === "Cần hỗ trợ" || isCarryOver(plan, selectedDate);
+    }
+
+    function getVisiblePlans(mode) {
+      mode = mode || "day";
       const date = document.getElementById("filterDate").value;
       const team = document.getElementById("filterTeam").value;
       const query = document.getElementById("searchBox").value.trim().toLowerCase();
-
       const person = document.getElementById("filterPerson").value;
+
       const matchesFilters = plan => {
         const byTeam = !team || plan.team === team;
         const byPerson = !person || String(plan.assignee || "").split(",").map(name => name.trim()).includes(person);
@@ -1980,7 +1690,7 @@
         return byTeam && byPerson && (!query || haystack.includes(query));
       };
 
-      if (viewMode === "week") {
+      if (mode === "week") {
         const days = weekDates(date);
         // Chế độ tuần: hiện vào ngày nhắc/xem lại, hoặc việc đã quá deadline cuối
         return plans.filter(plan => (isDueForReview(plan, days[6]) || isCarryOver(plan, days[6])) && matchesFilters(plan));
@@ -1993,390 +1703,217 @@
       });
     }
 
+    function applyQuickFilter(list, selectedDate) {
+      if (quickFilter === "attention") return list.filter(plan => isAttentionPlan(plan, selectedDate));
+      if (quickFilter === "done") return list.filter(plan => plan.status === "Hoàn thành");
+      return list;
+    }
+
+    function taskRowStatusDot(plan, selectedDate) {
+      if (isAttentionPlan(plan, selectedDate)) return { cls: "help", icon: "bi-exclamation-triangle-fill" };
+      if (plan.status === "Đang làm") return { cls: "doing", icon: "bi-arrow-repeat" };
+      if (plan.status === "Hoàn thành") return { cls: "done", icon: "bi-check-lg" };
+      return { cls: "open", icon: "bi-circle" };
+    }
+
+    function taskRowHtml(plan, selectedDate, attn) {
+      const dot = taskRowStatusDot(plan, selectedDate);
+      const timeText = plan.time ? escapeHtml(plan.time) : "Chưa xếp giờ";
+      const statusText = plan.status && plan.status !== "Chưa làm" ? " · " + escapeHtml(plan.status) : "";
+      const carryText = isCarryOver(plan, selectedDate) ? " · Quá hạn xem lại" : "";
+      return `
+        <button class="task-row${attn ? " attn" : ""}" type="button" onclick="openTaskDetail('${escapeAttr(plan.id)}')">
+          <span class="status-dot ${dot.cls}"><i class="bi ${dot.icon}"></i></span>
+          <span class="task-row-main">
+            <span class="task-row-title">${escapeHtml(plan.task || "")}</span>
+            <span class="task-row-time">${timeText}${statusText}${carryText}</span>
+            ${attn ? '<span class="task-row-hint">Chạm để xem chi tiết &amp; xử lý</span>' : ""}
+          </span>
+          <i class="bi bi-chevron-right task-chevron"></i>
+        </button>
+      `;
+    }
 
     function renderPlans() {
-      const tableWrap = document.querySelector(".table-wrap");
-      const rows = document.getElementById("planRows");
-      const cards = document.getElementById("planCards");
-      const weekView = document.getElementById("weekView");
       const selectedDate = document.getElementById("filterDate").value;
-      const visible = getVisiblePlans();
-
-      if (viewMode === "week") {
-        tableWrap.style.display = "none";
-        cards.style.display = "none";
-        weekView.style.display = "block";
-        renderDayLogSummary(visible, selectedDate);
-        renderWeek(visible);
-        renderMetrics();
-        return;
-      }
-      weekView.style.display = "none";
-      tableWrap.style.display = "";
-      cards.style.display = "";
+      const visible = getVisiblePlans("day");
       renderDayLogSummary(visible, selectedDate);
 
-      if (visible.length === 0) {
-        rows.innerHTML = '<tr><td colspan="7"><div class="empty-state">Không có việc cần xem.</div></td></tr>';
-        cards.innerHTML = '<div class="empty-state m-2">Không có việc cần xem.</div>';
-        renderMetrics();
+      const attnAll = visible.filter(plan => isAttentionPlan(plan, selectedDate));
+      const attnCountEl = document.getElementById("attnCount");
+      attnCountEl.textContent = attnAll.length;
+      attnCountEl.style.display = attnAll.length ? "inline-block" : "none";
+
+      const filtered = applyQuickFilter(visible, selectedDate);
+      const body = document.getElementById("taskListBody");
+
+      if (filtered.length === 0) {
+        body.innerHTML = '<div class="empty-state">Không có việc cần xem.</div>';
         return;
       }
 
-      // Kế hoạch tồn cũ đưa lên đầu (cũ nhất trước), còn lại xếp theo giờ
-      visible.sort((a, b) => {
-        const carryA = isCarryOver(a, selectedDate);
-        const carryB = isCarryOver(b, selectedDate);
-        if (carryA !== carryB) return carryA ? -1 : 1;
-        return ((a.date || "") + (a.time || "")).localeCompare((b.date || "") + (b.time || ""));
-      });
+      const attn = filtered.filter(plan => isAttentionPlan(plan, selectedDate));
+      const rest = filtered.filter(plan => !isAttentionPlan(plan, selectedDate));
+      const byTime = (a, b) => ((a.date || "") + (a.time || "")).localeCompare((b.date || "") + (b.time || ""));
+      attn.sort(byTime);
+      rest.sort(byTime);
 
-      rows.innerHTML = visible.map(plan => {
-        const carry = isCarryOver(plan, selectedDate);
-        return `
-        <tr${carry ? ' class="carry-row"' : ""}>
-          <td class="task-text"><div class="plan-task-title">${escapeHtml(plan.task || "")}</div>${compactPlanBadges(plan) ? `<div class="d-flex flex-wrap gap-1 mt-1">${compactPlanBadges(plan)}</div>` : ""}</td>
-          <td class="text-brand fw-semibold">${escapeHtml(plan.area || "")}${plan.asset ? `<div class="small">${escapeHtml(plan.asset)}</div>` : ""}</td>
-          <td>${escapeHtml(plan.team || "")}<div class="small text-secondary">${escapeHtml(plan.assignee || "")}</div></td>
-          <td class="plan-meta">${planMetaLine(plan, selectedDate, false)}</td>
-          <td>${priorityBadge(plan.priority)}</td>
-          <td>${statusBadge(plan.status)}<div class="mt-1">${logCoverageBadge(plan, selectedDate)}</div></td>
-          <td class="text-end text-nowrap">
-            <button class="btn btn-sm btn-outline-secondary" type="button" title="Sửa việc" onclick="openPlanModal('${escapeAttr(plan.id)}')">
-              <i class="bi bi-pencil"></i>
-            </button>
-            <button class="btn btn-primary fw-bold" type="button" title="Ghi nhật ký" onclick="selectPlan('${escapeAttr(plan.id)}')">
-              <i class="bi bi-journal-plus me-1"></i>Ghi nhật ký
-            </button>
-          </td>
-        </tr>
-      `; }).join("");
-
-      cards.innerHTML = visible.map(plan => {
-        const carry = isCarryOver(plan, selectedDate);
-        const isHigh = String(plan.priority || "").toLowerCase() === "cao";
-        const teamVisible = plan.team && plan.team.toLowerCase() !== "tổ cơ điện" && plan.team.toLowerCase() !== "tổ điện";
-        return `
-        <article class="plan-card${carry ? " carry" : ""}${isHigh ? " priority-high" : ""}">
-          <!-- Context First: Khu vực · Thiết bị -->
-          <div class="plan-card-context">
-            <i class="bi bi-geo-alt-fill me-1"></i>${[plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ") || "Chưa xác định"}
-          </div>
-          <div class="d-flex justify-content-between gap-2">
-            <div class="min-w-0">
-              ${isHigh ? '<span class="badge bg-danger text-white mb-1" style="font-size:.7rem;">⚠ QUAN TRỌNG</span>' : ''}
-              <div class="plan-card-title">${escapeHtml(plan.task || "")}</div>
-              <div class="plan-meta" style="margin-top: 4px;">${planMetaLine(plan, selectedDate, true)}${teamVisible ? ' <span class="mx-1">·</span> ' + escapeHtml(plan.team) : ''}</div>
-              <div class="mt-2">${logCoverageBadge(plan, selectedDate)}</div>
-            </div>
-            <div class="d-flex flex-column gap-1">
-              <button class="btn btn-success text-nowrap fw-bold" type="button" onclick="selectPlan('${escapeAttr(plan.id)}')">
-                <i class="bi bi-journal-plus me-1"></i>Ghi nhật ký
-              </button>
-              <button class="btn btn-sm btn-outline-secondary text-nowrap" type="button" onclick="openPlanModal('${escapeAttr(plan.id)}')">
-                <i class="bi bi-pencil me-1"></i>Sửa
-              </button>
-            </div>
-          </div>
-          ${compactPlanBadges(plan) ? `<div class="d-flex flex-wrap gap-2 mt-2">${compactPlanBadges(plan)}</div>` : ""}
-        </article>
-      `; }).join("");
-      renderMetrics();
-    }
-
-    const WEEK_DAY_NAMES = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật"];
-
-    function weekItemClass(status) {
-      if (status === "Hoàn thành") return "st-done";
-      if (status === "Đang làm") return "st-doing";
-      if (status === "Cần hỗ trợ") return "st-help";
-      return "st-open";
-    }
-
-    function renderWeek(visible) {
-      const days = weekDates(document.getElementById("filterDate").value);
-      const label = `Tuần ${shortDateVn(days[0])} - ${shortDateVn(days[6])}`;
-      const body = days.map((iso, index) => {
-        const dayPlans = visible
-          .filter(plan => planReminder(plan) === iso || (iso === days[0] && planReminder(plan) < days[0] && plan.status !== "Hoàn thành"))
-          .sort((a, b) => (a.time || "").localeCompare(b.time || ""));
-        const items = dayPlans.map(plan => `
-          <button class="week-item ${weekItemClass(plan.status)}" type="button" onclick="openPlanModal('${escapeAttr(plan.id)}')" title="Bấm để sửa việc">
-            <div class="week-item-main">
-              <div class="week-item-task">${escapeHtml(plan.task || "")}</div>
-              <div class="week-item-meta">${planMetaLine(plan, iso, true)}${[plan.area, plan.asset].filter(Boolean).length ? " · " + [plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ") : ""}${plan.type === "Phát sinh" ? ' · <span class="text-warning fw-bold">Phát sinh</span>' : ""}</div>
-            </div>
-            ${statusBadge(plan.status)}
-          </button>
-        `).join("");
-        return `
-          <tr${iso === today ? ' class="week-today"' : ""}>
-            <td class="day-cell">
-              <div class="fw-bold">${WEEK_DAY_NAMES[index]}</div>
-              <div class="small text-secondary">${shortDateVn(iso)}${iso === today ? " · Hôm nay" : ""}</div>
-            </td>
-            <td><div class="week-items">${items || '<span class="text-secondary small">Không có việc</span>'}</div></td>
-          </tr>
-        `;
-      }).join("");
-
-      document.getElementById("weekView").innerHTML = `
-        <div class="px-3 pt-2 pb-1 small fw-bold text-secondary">${label}</div>
-        <table class="table table-hover align-middle mb-0 week-table">
-          <tbody>${body}</tbody>
-        </table>
-      `;
-    }
-
-    function toggleExtraFields() {
-      const fields = document.querySelectorAll(".extra-field");
-      const shouldShow = [...fields].some(field => field.classList.contains("d-none"));
-      fields.forEach(field => field.classList.toggle("d-none", !shouldShow));
-      document.getElementById("btnToggleExtra").innerHTML = shouldShow
-        ? '<i class="bi bi-chevron-up me-1"></i>Ẩn chi tiết'
-        : '<i class="bi bi-chevron-down me-1"></i>Chi tiết thêm';
-    }
-
-    // Nhật ký của cả tổ từ Google Sheets (7 ngày gần nhất) — hợp nhất với
-    // log cục bộ chưa kịp đồng bộ để máy nào cũng thấy việc của nhau
-    async function loadServerLogs() {
-      const sync = getSync();
-      if (!sync.url) return;
-      try {
-        const user = currentUser();
-        const response = await fetch(`${sync.url}?action=getWorkLogs&days=7&user=${encodeURIComponent(user)}&token=${encodeURIComponent(sync.token)}`, { cache: "no-cache", signal: AbortSignal.timeout(15000) });
-        const data = await response.json();
-        if (data.status !== "success" || !Array.isArray(data.logs)) return;
-        const serverIds = new Set(data.logs.map(log => log.id));
-        const localOnly = logs.filter(log => !serverIds.has(log.id) && log.syncStatus !== "synced");
-        logs = localOnly.concat(data.logs)
-          .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))
-          .slice(0, 300);
-        localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
-        renderLogs();
-        renderPlans();
-        updateSyncStatus();
-      } catch (error) { /* offline → dùng log cục bộ */ }
-    }
-
-    // Cần chú ý = cần hỗ trợ hoặc còn tồn/đề xuất, và kế hoạch liên quan chưa Hoàn thành
-    function needsAttention(log) {
-      if (String(log.selectedTask || "").startsWith("[Kế hoạch]")) return false;
-      if (log.progress !== "Cần hỗ trợ" && !hasFollowup(log)) return false;
-      if (isFollowupResolved(log)) return false;
-      if (log.planId) {
-        const plan = plans.find(item => item.id === log.planId);
-        if (plan && plan.status === "Hoàn thành") return false;
+      let html = "";
+      if (attn.length) {
+        html += `<div class="section-label">Cần xử lý ngay</div><div class="a11y-list">${attn.map(plan => taskRowHtml(plan, selectedDate, true)).join("")}</div>`;
       }
-      return true;
-    }
-
-    function isFollowupResolved(log) {
-      return logs.some(other => {
-        if (other.id === log.id) return false;
-        if (!isSameWorkLog(log, other)) return false;
-        if (String(other.createdAt || "") <= String(log.createdAt || "")) return false;
-        return isResolutionLog(other);
-      });
-    }
-
-    function isSameWorkLog(a, b) {
-      if (a.planId && b.planId && a.planId === b.planId) return true;
-      return normalizeWorkText(a.selectedTask) && normalizeWorkText(a.selectedTask) === normalizeWorkText(b.selectedTask);
-    }
-
-    function normalizeWorkText(value) {
-      return String(value || "")
-        .replace(/\s*\|\s*Xử lý tiếp:.*/i, "")
-        .replace(/\s+/g, " ")
-        .trim()
-        .toLowerCase();
-    }
-
-    function isResolutionLog(log) {
-      const text = [log.progress, log.result, log.issue, log.nextAction].join(" ").toLowerCase();
-      const doneText = text.includes("đã xử lý dứt điểm") || text.includes("xử lý dứt điểm");
-      return log.progress === "Hoàn thành" || doneText;
-    }
-
-    function renderLogs() {
-      const list = document.getElementById("logList");
-      const toggleBtn = document.getElementById("btnToggleLogs");
-      if (logs.length === 0) {
-        list.innerHTML = '<div class="empty-state">Chưa có nhật ký gần đây.</div>';
-        toggleBtn.style.display = "none";
-        renderMetrics();
-        return;
+      if (rest.length) {
+        html += `<div class="section-label">Việc trong ngày</div><div class="a11y-list">${rest.map(plan => taskRowHtml(plan, selectedDate, false)).join("")}</div>`;
       }
-
-      const attention = logs.filter(needsAttention);
-      const normal = logs.filter(log => !needsAttention(log));
-      const visibleLogs = showAllLogs ? normal : normal.slice(0, RECENT_LOG_LIMIT);
-      const attentionHtml = attention.length ? `
-        <div class="attention-head"><i class="bi bi-exclamation-triangle-fill me-1"></i>Cần hỗ trợ / còn tồn (${attention.length}) — ưu tiên xử lý để tổ hoàn thành việc</div>
-        ${attention.map(renderLogCard).join("")}
-        <div class="attention-sep"></div>
-        <div class="small fw-bold text-secondary">Nhật ký mới nhất</div>` : "";
-      list.innerHTML = attentionHtml + visibleLogs.map(renderLogCard).join("");
-      toggleBtn.style.display = normal.length > RECENT_LOG_LIMIT ? "block" : "none";
-      toggleBtn.textContent = showAllLogs ? "Thu gọn" : `Xem thêm (${normal.length - RECENT_LOG_LIMIT})`;
-      renderMetrics();
+      body.innerHTML = html;
     }
 
-    function renderLogCard(log) {
+    // ===== Màn Chi tiết công việc =====
+    function statusBannerHtml(kind, icon, label, sub) {
       return `
-        <article class="log-card ${logProgressClass(log.progress)}${hasFollowup(log) ? " log-followup" : ""}${log.id === lastAddedLogId ? " just-added" : ""}" style="padding: 10px; margin-bottom: 8px;">
-          <!-- Hàng 1: Người thực hiện, Ca -->
-          <div class="d-flex justify-content-between align-items-start gap-2">
-            <div class="min-w-0">
-              <span class="fw-bold" style="font-size: 0.95rem;">${escapeHtml(log.employee)}</span>
-              <span class="text-secondary small">(${escapeHtml(log.shift)})</span>
-              ${log.recordedBy && log.recordedBy !== log.employee ? `<span class="text-muted" style="font-size: 0.78rem;"> (Ghi bởi ${escapeHtml(log.recordedBy)})</span>` : ""}
-            </div>
+        <div class="status-banner ${kind}">
+          <span class="icon"><i class="bi ${icon}"></i></span>
+          <div>
+            <div class="label">${escapeHtml(label)}</div>
+            <div class="sub">${escapeHtml(sub)}</div>
           </div>
-          
-          <!-- Hàng 2: Thời gian làm việc -->
-          <div class="text-muted mb-1" style="font-size: 0.8rem; margin-top: 2px;">
-            <i class="bi bi-clock me-1"></i>${friendlyDate(log.workDate)} ${escapeHtml(log.startTime || "")}${log.endTime ? " - " + escapeHtml(log.endTime) : ""}${syncLabel(log)}
-            ${typeof log.quantity === "number" ? `<span class="badge-soft badge-low ms-1" style="font-size: 0.72rem; padding: 2px 6px;">SL: ${escapeHtml(log.quantity)}${log.unit ? " " + escapeHtml(log.unit) : ""}</span>` : ""}
-          </div>
-
-          <!-- Hàng 3: Công việc kế hoạch -->
-          <div style="font-size: 0.92rem; line-height: 1.35; margin-top: 4px;">
-            <i class="bi bi-clipboard-check me-1 text-brand"></i><span class="fw-semibold">${escapeHtml(log.selectedTask)}</span>
-          </div>
-
-          <!-- Hàng 4: Kết quả thực tế -->
-          <div class="text-secondary" style="font-size: 0.9rem; line-height: 1.35; margin-top: 2px;">
-            <i class="bi bi-pencil-square me-1"></i>${escapeHtml(log.result)}
-          </div>
-
-          <!-- Hàng 5: Hộp cảnh báo Tồn tại / Đề xuất -->
-          ${log.issue ? `
-            <div class="log-issue-alert">
-              <div class="issue-title"><i class="bi bi-exclamation-triangle-fill me-1"></i>Tồn tại chưa xử lý xong</div>
-              <div class="issue-body">${escapeHtml(log.issue)}</div>
-              ${log.nextAction ? `<div class="log-suggest-row"><i class="bi bi-lightbulb me-1"></i>Đề xuất: ${escapeHtml(log.nextAction)}</div>` : ""}
-              ${hasFollowup(log) ? `
-                <div class="d-flex justify-content-end mt-2">
-                  <button class="btn btn-sm btn-warning fw-bold py-1 px-2" style="font-size: 0.82rem;" type="button" onclick="continueLog('${escapeAttr(log.id)}')">
-                    <i class="bi bi-arrow-right-circle me-1"></i>Tiếp tục xử lý
-                  </button>
-                </div>
-              ` : ""}
-            </div>
-          ` : `${log.nextAction || hasFollowup(log) ? `
-            <div class="log-suggest-row mt-2">
-              ${log.nextAction ? `<i class="bi bi-lightbulb me-1"></i>Đề xuất: ${escapeHtml(log.nextAction)}` : ""}
-              ${hasFollowup(log) ? `
-                <div class="d-flex justify-content-end mt-1">
-                  <button class="btn btn-sm btn-warning fw-bold py-1 px-2" style="font-size: 0.82rem;" type="button" onclick="continueLog('${escapeAttr(log.id)}')">
-                    <i class="bi bi-arrow-right-circle me-1"></i>Tiếp tục xử lý
-                  </button>
-                </div>
-              ` : ""}
-            </div>
-          ` : ""}`}
-        </article>
+        </div>
       `;
     }
 
-    function toggleLogs() {
-      showAllLogs = !showAllLogs;
-      renderLogs();
-    }
-
-    // Nhật ký còn tồn tại hoặc đề xuất → cần theo dõi xử lý tiếp
-    function hasFollowup(log) {
-      return Boolean((log.issue || log.nextAction) && !String(log.selectedTask || "").startsWith("[Kế hoạch]"));
-    }
-
-    // Bấm "Tiếp tục xử lý": đổ lại thông tin việc vào form Ghi nhanh
-    function continueLog(id) {
-      const log = logs.find(item => item.id === id);
-      if (!log) return;
-
-      if (log.planId && plans.some(plan => plan.id === log.planId)) {
-        selectPlan(log.planId);
-      } else {
-        document.getElementById("planId").value = log.planId || "";
-        document.getElementById("workDate").value = today;
-        document.getElementById("selectedTask").value = log.selectedTask || "";
-        renderPeopleResults("");
-        setProgress("Hoàn thành");
-        document.getElementById("startTime").value = roundQuarter(currentTime());
-        openQuickForm(() => {
-          document.getElementById("quickFormPanel").scrollIntoView({ behavior: "smooth", block: "start" });
-          document.getElementById("result").focus();
-        });
-      }
-
-      // Nhắc lại nội dung tồn/đề xuất ngay trong dòng việc để xử lý tiếp
-      const followup = log.issue || log.nextAction;
-      if (followup) {
-        const box = document.getElementById("selectedTask");
-        if (!box.value.includes(followup)) box.value = (box.value ? box.value + " | " : "") + "Xử lý tiếp: " + followup;
-      }
-    }
-
-    function logProgressClass(progress) {
-      if (progress === "Hoàn thành") return "log-done";
-      if (progress === "Đang làm") return "log-doing";
-      if (progress === "Cần hỗ trợ") return "log-help";
-      return "";
-    }
-
-    function renderMetrics() {
-      const visible = getVisiblePlans();
-      const done = visible.filter(p => p.status === "Hoàn thành").length;
-      document.getElementById("metricTotalLabel").textContent = viewMode === "week" ? "Việc trong tuần" : "Việc trong ngày";
-      document.getElementById("metricTotal").textContent = visible.length;
-      document.getElementById("metricDoing").textContent = visible.filter(p => p.status === "Đang làm").length;
-      document.getElementById("metricDone").textContent = visible.length ? `${done}/${visible.length}` : "0";
-      document.getElementById("metricDoneBar").style.width = visible.length ? Math.round(done / visible.length * 100) + "%" : "0%";
-      document.getElementById("metricLogs").textContent = logs.length;
-      renderPersonStats(visible);
-    }
-
-    // Bảng thống kê theo từng nhân viên, tính từ kế hoạch trong phạm vi lọc
-    function renderPersonStats(visible) {
-      const selectedDate = document.getElementById("filterDate").value;
-      const stats = {};
-      visible.forEach(plan => {
-        String(plan.assignee || "").split(",").map(name => name.trim()).filter(Boolean).forEach(name => {
-          const s = stats[name] = stats[name] || { total: 0, done: 0, doing: 0, help: 0 };
-          s.total++;
-          if (plan.status === "Hoàn thành") s.done++;
-          else if (plan.status === "Đang làm") s.doing++;
-          else if (plan.status === "Cần hỗ trợ" || isCarryOver(plan, selectedDate)) s.help++;
-        });
-      });
-
-      const names = Object.keys(stats).sort((a, b) => stats[b].total - stats[a].total || a.localeCompare(b));
-      const body = document.getElementById("personStats");
-      if (names.length === 0) {
-        body.innerHTML = '<tr><td colspan="5" class="text-secondary small">Chưa có việc gán người trong phạm vi đang lọc.</td></tr>';
+    function renderTaskDetail(id) {
+      const container = document.getElementById("screen-taskdetail");
+      const plan = plans.find(item => item.id === id);
+      if (!plan) {
+        container.innerHTML = '<div class="scroll"><div class="empty-state">Không tìm thấy việc này.</div></div>';
         return;
       }
-      body.innerHTML = names.map(name => {
-        const s = stats[name];
-        return `
-        <tr role="button" onclick="filterByPerson('${escapeAttr(name)}')" title="Bấm để lọc việc của ${escapeAttr(name)}">
-          <td class="fw-semibold text-brand">${escapeHtml(name)}</td>
-          <td class="text-center fw-bold">${s.total}</td>
-          <td class="text-center">${s.done ? `<span class="badge-soft badge-done">${s.done}</span>` : '<span class="text-secondary">0</span>'}</td>
-          <td class="text-center">${s.doing ? `<span class="badge-soft badge-doing">${s.doing}</span>` : '<span class="text-secondary">0</span>'}</td>
-          <td class="text-center">${s.help ? `<span class="badge-soft badge-high">${s.help}</span>` : '<span class="text-secondary">0</span>'}</td>
-        </tr>
-      `; }).join("");
+      const selectedDate = document.getElementById("filterDate").value || today;
+      const help = plan.status === "Cần hỗ trợ";
+      const carry = isCarryOver(plan, selectedDate);
+      let banner = "";
+      if (help) {
+        banner = statusBannerHtml("danger", "bi-exclamation-triangle-fill", "Cần xử lý ngay", "Việc gấp — làm trước các việc khác");
+      } else if (carry) {
+        banner = statusBannerHtml("warn", "bi-exclamation-triangle-fill", "Việc tồn — quá hạn xem lại", `Hạn xem lại: ${shortDateVn(planReminder(plan))}`);
+      }
+
+      const people = splitAssignees(plan.assignee);
+      const peopleHtml = people.length
+        ? `<div class="person-chip-row">${people.map(name => `<span class="person-chip">${escapeHtml(name)}</span>`).join("")}</div>`
+        : `<div class="info-value normal text-secondary">Chưa gán người</div>`;
+
+      const qtyBadge = doneQtyBadge(plan);
+      const qtyCard = (plan.planQty || plan.unit) ? `
+        <div class="info-card">
+          <div class="info-label"><i class="bi bi-sigma"></i>Khối lượng</div>
+          <div class="info-value normal">${qtyBadge || "Chưa có dữ liệu"}</div>
+        </div>` : "";
+
+      container.innerHTML = `
+        <div class="scroll">
+          ${banner}
+          <div class="info-card">
+            <div class="info-label"><i class="bi bi-lightning-charge-fill"></i>Việc gì</div>
+            <div class="info-value">${escapeHtml(plan.task || "")}</div>
+            <div class="d-flex flex-wrap gap-2 mt-2">${priorityBadge(plan.priority)}${typeBadge(plan)}${statusBadge(plan.status)}</div>
+          </div>
+          <div class="info-card">
+            <div class="info-label"><i class="bi bi-geo-alt-fill"></i>Ở đâu</div>
+            <div class="info-value">${[plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ") || "Chưa xác định"}</div>
+          </div>
+          <div class="info-card">
+            <div class="info-label"><i class="bi bi-clock-fill"></i>Khi nào</div>
+            <div class="info-value normal">${planMetaLine(plan, selectedDate, false) || "Chưa xếp giờ"}</div>
+          </div>
+          <div class="info-card">
+            <div class="info-label"><i class="bi bi-people-fill"></i>Ai làm</div>
+            ${peopleHtml}
+          </div>
+          ${qtyCard}
+          <button class="link-button" type="button" onclick="navigateTo('loghistory', {planId:'${escapeAttr(plan.id)}'})"><i class="bi bi-clock-history me-1"></i>Xem nhật ký đã ghi</button>
+        </div>
+        <div class="action-bar">
+          <button class="btn-done" type="button" onclick="handleTaskAction('${escapeAttr(plan.id)}','Hoàn thành')"><i class="bi bi-journal-plus"></i>Ghi nhật ký cho việc này</button>
+        </div>
+      `;
     }
 
-    function filterByPerson(name) {
-      document.getElementById("filterPerson").value = name;
-      if (!document.getElementById("advancedFiltersPerson").classList.contains("show")) toggleAdvancedFilters();
-      renderPlans();
-      document.getElementById("filterPerson").scrollIntoView({ behavior: "smooth", block: "center" });
-      showToast("Đang lọc việc của " + name);
+    function handleTaskAction(id, presetProgress) {
+      navigateTo("logentry", { planId: id, presetProgress: presetProgress });
+    }
+
+    // ===== Màn Ghi nhật ký (Phương án A) =====
+    function syncQuantityDisplay() {
+      const val = parseFloat(document.getElementById("quantity").value) || 0;
+      document.getElementById("quantityDisplay").textContent = val;
+      document.getElementById("quantityUnitDisplay").textContent = document.getElementById("quantityUnit").value || "";
+    }
+
+    function adjustQuantity(delta) {
+      const input = document.getElementById("quantity");
+      const current = parseFloat(input.value) || 0;
+      const next = Math.max(0, current + delta);
+      input.value = next;
+      syncQuantityDisplay();
+    }
+
+    function prefillLogForm(plan, presetProgress) {
+      document.getElementById("planId").value = plan.id;
+      // Ngày ghi ưu tiên ngày đang xem nếu đó là ngày nhắc/quá hạn; nếu không dùng hôm nay hoặc ngày nhắc
+      const viewedDate = document.getElementById("filterDate").value;
+      document.getElementById("workDate").value = (viewedDate && (planReminder(plan) === viewedDate || isCarryOver(plan, viewedDate))) ? viewedDate
+        : (planReminder(plan) <= today ? today : planReminder(plan));
+      document.getElementById("selectedTask").value = `${plan.time || ""} | ${plan.area || ""} | ${plan.asset || ""}: ${plan.task || ""}`.trim();
+      setProgress(presetProgress || "Hoàn thành");
+      document.getElementById("startTime").value = roundQuarter(currentTime());
+      renderPeopleResults(plan.assignee);
+      const hasPlanQuantity = Boolean(plan.planQty || plan.unit);
+      if (!String(plan.assignee || "").trim()) toggleQuantityFields(hasPlanQuantity);
+      document.getElementById("quantityUnit").value = plan.unit || "";
+      const note = document.getElementById("planCumNote");
+      if (plan.doneQty || plan.planQty) {
+        const unitTxt = plan.unit ? " " + plan.unit : "";
+        note.textContent = plan.planQty
+          ? `Lũy kế đã ghi: ${plan.doneQty || 0}/${plan.planQty}${unitTxt} — nhập thêm số lượng hôm nay để cộng dồn`
+          : `Lũy kế đã ghi: ${plan.doneQty}${unitTxt} — nhập thêm số lượng hôm nay để cộng dồn`;
+        note.classList.remove("d-none");
+      } else {
+        note.classList.add("d-none");
+      }
+    }
+
+    function renderLogEntry(params) {
+      params = params || {};
+      document.getElementById("quantity").value = "";
+      const ctxCard = document.getElementById("logContextCard");
+      const adhocField = document.getElementById("adhocTaskField");
+      const plan = params.planId ? plans.find(item => item.id === params.planId) : null;
+
+      if (plan) {
+        ctxCard.style.display = "";
+        adhocField.classList.add("d-none");
+        document.getElementById("logContextWhere").innerHTML = `<i class="bi bi-geo-alt-fill"></i> ${[plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ")}${plan.time ? " · " + escapeHtml(plan.time) : ""}`;
+        document.getElementById("logContextWhat").textContent = plan.task || "";
+        prefillLogForm(plan, params.presetProgress || "Hoàn thành");
+      } else {
+        ctxCard.style.display = "none";
+        adhocField.classList.remove("d-none");
+        if (params.adhocTask) {
+          clearForm();
+          document.getElementById("selectedTask").value = params.adhocTask;
+          renderPeopleResults("");
+          setProgress("Hoàn thành");
+          document.getElementById("startTime").value = roundQuarter(currentTime());
+        } else {
+          clearForm();
+        }
+      }
+      if (params.followupNote) {
+        const box = document.getElementById("selectedTask");
+        if (!box.value.includes(params.followupNote)) box.value = (box.value ? box.value + " | " : "") + "Xử lý tiếp: " + params.followupNote;
+      }
+      syncQuantityDisplay();
     }
 
     const RATING_OPTIONS = ["Hoàn thành tốt", "Đạt", "Chưa đạt", "Vắng/Không tham gia"];
@@ -2414,8 +1951,7 @@
     }
 
     function toggleQuantityFields(show) {
-      document.getElementById("quantityField").classList.toggle("d-none", !show);
-      document.getElementById("unitField").classList.toggle("d-none", !show);
+      document.getElementById("quantityFieldWrap").classList.toggle("d-none", !show);
     }
 
     function getPeopleResults() {
@@ -2431,37 +1967,6 @@
     function parseQty(value) {
       const num = parseFloat(String(value || "").replace(",", "."));
       return isNaN(num) ? "" : num;
-    }
-
-    function selectPlan(id) {
-      const plan = plans.find(item => item.id === id);
-      if (!plan) return;
-      document.getElementById("planId").value = plan.id;
-      // Ngày ghi ưu tiên ngày đang xem nếu đó là ngày nhắc/quá hạn; nếu không dùng hôm nay hoặc ngày nhắc
-      const viewedDate = document.getElementById("filterDate").value;
-      document.getElementById("workDate").value = (viewedDate && (planReminder(plan) === viewedDate || isCarryOver(plan, viewedDate))) ? viewedDate
-        : (planReminder(plan) <= today ? today : planReminder(plan));
-      document.getElementById("selectedTask").value = `${plan.time || ""} | ${plan.area || ""} | ${plan.asset || ""}: ${plan.task || ""}`.trim();
-      setProgress("Hoàn thành");
-      document.getElementById("startTime").value = roundQuarter(currentTime());
-      renderPeopleResults(plan.assignee);
-      const hasPlanQuantity = Boolean(plan.planQty || plan.unit);
-      if (!String(plan.assignee || "").trim()) toggleQuantityFields(hasPlanQuantity);
-      document.getElementById("quantityUnit").value = plan.unit || "";
-      const note = document.getElementById("planCumNote");
-      if (plan.doneQty || plan.planQty) {
-        const unitTxt = plan.unit ? " " + plan.unit : "";
-        note.textContent = plan.planQty
-          ? `Lũy kế đã ghi: ${plan.doneQty || 0}/${plan.planQty}${unitTxt} — nhập thêm số lượng hôm nay để cộng dồn`
-          : `Lũy kế đã ghi: ${plan.doneQty}${unitTxt} — nhập thêm số lượng hôm nay để cộng dồn`;
-        note.classList.remove("d-none");
-      } else {
-        note.classList.add("d-none");
-      }
-      openQuickForm(() => {
-        document.getElementById("quickFormPanel").scrollIntoView({ behavior: "smooth", block: "start" });
-        document.getElementById("result").focus();
-      });
     }
 
     async function submitLog(event) {
@@ -2526,14 +2031,14 @@
       lastAddedLogId = null;
       const label = newLogs.length > 1 ? `${newLogs.length} nhật ký (từng người)` : "nhật ký";
       showToast(`Đã lưu ${label} ✓ — đang đồng bộ nền...`);
+      goBack();
       syncLogsInBackground(newLogs);
     }
 
     async function syncLogsInBackground(newLogs) {
       await Promise.all(newLogs.map(log => trySync(log)));
       localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
-      renderLogs();
-      renderPlans();
+      render();
       updateSyncStatus();
       if (newLogs.some(log => log.syncStatus !== "synced")) {
         showToast("Có nhật ký chưa đồng bộ được, sẽ tự thử lại sau");
@@ -2571,7 +2076,7 @@
       if (!planId) return;
       const plan = plans.find(item => item.id === planId);
       if (!plan) return;
-      
+
       let nextStatus = "Đang làm";
       if (logProgress === "Cần hỗ trợ") {
         nextStatus = "Cần hỗ trợ";
@@ -2586,7 +2091,7 @@
           nextStatus = "Đang làm";
         }
       }
-      
+
       plan.status = nextStatus;
       localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
       // Đồng bộ trạng thái mới lên Sheets, lỗi thì thôi (log đã lưu riêng)
@@ -2602,27 +2107,380 @@
       renderPeopleResults("");
       toggleQuantityFields(false);
       document.getElementById("planCumNote").classList.add("d-none");
-      document.querySelectorAll("#resultChips .chip").forEach(btn => btn.classList.remove("chip-active"));
+      document.querySelectorAll("#resultChips .qc").forEach(btn => btn.classList.remove("on"));
+      syncQuantityDisplay();
     }
 
+    // ===== Màn Nhật ký đã ghi =====
+    // Nhật ký của cả tổ từ Google Sheets (7 ngày gần nhất) — hợp nhất với
+    // log cục bộ chưa kịp đồng bộ để máy nào cũng thấy việc của nhau
+    async function loadServerLogs() {
+      const sync = getSync();
+      if (!sync.url) return;
+      try {
+        const user = currentUser();
+        const response = await fetch(`${sync.url}?action=getWorkLogs&days=7&user=${encodeURIComponent(user)}&token=${encodeURIComponent(sync.token)}`, { cache: "no-cache", signal: AbortSignal.timeout(15000) });
+        const data = await response.json();
+        if (data.status !== "success" || !Array.isArray(data.logs)) return;
+        const serverIds = new Set(data.logs.map(log => log.id));
+        const localOnly = logs.filter(log => !serverIds.has(log.id) && log.syncStatus !== "synced");
+        logs = localOnly.concat(data.logs)
+          .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))
+          .slice(0, 300);
+        localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
+        render();
+        updateSyncStatus();
+      } catch (error) { /* offline → dùng log cục bộ */ }
+    }
+
+    // Cần chú ý = cần hỗ trợ hoặc còn tồn/đề xuất, và kế hoạch liên quan chưa Hoàn thành
+    function needsAttention(log) {
+      if (String(log.selectedTask || "").startsWith("[Kế hoạch]")) return false;
+      if (log.progress !== "Cần hỗ trợ" && !hasFollowup(log)) return false;
+      if (isFollowupResolved(log)) return false;
+      if (log.planId) {
+        const plan = plans.find(item => item.id === log.planId);
+        if (plan && plan.status === "Hoàn thành") return false;
+      }
+      return true;
+    }
+
+    function isFollowupResolved(log) {
+      return logs.some(other => {
+        if (other.id === log.id) return false;
+        if (!isSameWorkLog(log, other)) return false;
+        if (String(other.createdAt || "") <= String(log.createdAt || "")) return false;
+        return isResolutionLog(other);
+      });
+    }
+
+    function isSameWorkLog(a, b) {
+      if (a.planId && b.planId && a.planId === b.planId) return true;
+      return normalizeWorkText(a.selectedTask) && normalizeWorkText(a.selectedTask) === normalizeWorkText(b.selectedTask);
+    }
+
+    function normalizeWorkText(value) {
+      return String(value || "")
+        .replace(/\s*\|\s*Xử lý tiếp:.*/i, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
+    }
+
+    function isResolutionLog(log) {
+      const text = [log.progress, log.result, log.issue, log.nextAction].join(" ").toLowerCase();
+      const doneText = text.includes("đã xử lý dứt điểm") || text.includes("xử lý dứt điểm");
+      return log.progress === "Hoàn thành" || doneText;
+    }
+
+    function logHistoryActionBar(planId) {
+      if (planId) {
+        return `
+          <div class="action-bar">
+            <button class="btn-main" type="button" onclick="handleTaskAction('${escapeAttr(planId)}','Đang làm')"><i class="bi bi-journal-plus"></i>Ghi nhật ký mới</button>
+          </div>`;
+      }
+      return `
+        <div class="action-bar">
+          <button class="btn-main" type="button" onclick="navigateTo('logentry', {})"><i class="bi bi-journal-plus"></i>Ghi nhật ký phát sinh</button>
+        </div>`;
+    }
+
+    function renderLogHistory(planId) {
+      const container = document.getElementById("screen-loghistory");
+      const scopedPlan = planId ? plans.find(p => p.id === planId) : null;
+      const scopedLogs = scopedPlan
+        ? logs.filter(log => isWorkLog(log) && logBelongsToPlan(log, scopedPlan))
+        : logs;
+
+      if (scopedLogs.length === 0) {
+        container.innerHTML = `<div class="scroll"><div class="empty-state">Chưa có nhật ký gần đây.</div></div>${logHistoryActionBar(planId)}`;
+        return;
+      }
+
+      const attention = scopedLogs.filter(needsAttention);
+      const normal = scopedLogs.filter(log => !needsAttention(log));
+      const visibleLogs = showAllLogs ? normal : normal.slice(0, RECENT_LOG_LIMIT);
+      const attentionHtml = attention.length ? `
+        <div class="attention-head"><i class="bi bi-exclamation-triangle-fill me-1"></i>Cần hỗ trợ / còn tồn (${attention.length}) — ưu tiên xử lý</div>
+        ${attention.map(renderLogCard).join("")}
+        <div class="attention-sep"></div>
+        <div class="section-label">Nhật ký mới nhất</div>` : `<div class="section-label">Nhật ký mới nhất</div>`;
+
+      container.innerHTML = `
+        <div class="scroll">
+          ${attentionHtml}
+          ${visibleLogs.map(renderLogCard).join("")}
+          ${normal.length > RECENT_LOG_LIMIT ? `<button class="btn-outline-more" id="btnToggleLogs" type="button">${showAllLogs ? "Thu gọn" : `Xem thêm (${normal.length - RECENT_LOG_LIMIT})`}</button>` : ""}
+        </div>
+        ${logHistoryActionBar(planId)}
+      `;
+      const toggleBtn = document.getElementById("btnToggleLogs");
+      if (toggleBtn) toggleBtn.addEventListener("click", () => { showAllLogs = !showAllLogs; renderLogHistory(planId); });
+    }
+
+    function renderLogCard(log) {
+      return `
+        <article class="log-card ${logProgressClass(log.progress)}${hasFollowup(log) ? " log-followup" : ""}${log.id === lastAddedLogId ? " just-added" : ""}">
+          <div class="d-flex justify-content-between align-items-start gap-2">
+            <div class="min-w-0">
+              <span class="fw-bold" style="font-size: 1rem;">${escapeHtml(log.employee)}</span>
+              <span class="text-secondary small">(${escapeHtml(log.shift)})</span>
+              ${log.recordedBy && log.recordedBy !== log.employee ? `<span class="text-muted small"> (Ghi bởi ${escapeHtml(log.recordedBy)})</span>` : ""}
+            </div>
+          </div>
+          <div class="text-muted mb-1" style="font-size: .85rem; margin-top: 2px;">
+            <i class="bi bi-clock me-1"></i>${friendlyDate(log.workDate)} ${escapeHtml(log.startTime || "")}${log.endTime ? " - " + escapeHtml(log.endTime) : ""}${syncLabel(log)}
+            ${typeof log.quantity === "number" ? `<span class="badge-soft badge-low ms-1" style="font-size: .78rem; padding: 2px 8px;">SL: ${escapeHtml(log.quantity)}${log.unit ? " " + escapeHtml(log.unit) : ""}</span>` : ""}
+          </div>
+          <div style="font-size: .98rem; line-height: 1.35; margin-top: 4px;">
+            <i class="bi bi-clipboard-check me-1 text-brand"></i><span class="fw-semibold">${escapeHtml(log.selectedTask)}</span>
+          </div>
+          <div class="text-secondary" style="font-size: .95rem; line-height: 1.35; margin-top: 2px;">
+            <i class="bi bi-pencil-square me-1"></i>${escapeHtml(log.result)}
+          </div>
+          ${log.issue ? `
+            <div class="log-issue-alert">
+              <div class="issue-title"><i class="bi bi-exclamation-triangle-fill me-1"></i>Tồn tại chưa xử lý xong</div>
+              <div class="issue-body">${escapeHtml(log.issue)}</div>
+              ${log.nextAction ? `<div class="log-suggest-row"><i class="bi bi-lightbulb me-1"></i>Đề xuất: ${escapeHtml(log.nextAction)}</div>` : ""}
+              ${hasFollowup(log) ? `
+                <div class="d-flex justify-content-end mt-2">
+                  <button class="btn btn-sm btn-warning fw-bold" type="button" onclick="continueLog('${escapeAttr(log.id)}')">
+                    <i class="bi bi-arrow-right-circle me-1"></i>Tiếp tục xử lý
+                  </button>
+                </div>
+              ` : ""}
+            </div>
+          ` : `${log.nextAction || hasFollowup(log) ? `
+            <div class="log-suggest-row mt-2">
+              ${log.nextAction ? `<i class="bi bi-lightbulb me-1"></i>Đề xuất: ${escapeHtml(log.nextAction)}` : ""}
+              ${hasFollowup(log) ? `
+                <div class="d-flex justify-content-end mt-1">
+                  <button class="btn btn-sm btn-warning fw-bold" type="button" onclick="continueLog('${escapeAttr(log.id)}')">
+                    <i class="bi bi-arrow-right-circle me-1"></i>Tiếp tục xử lý
+                  </button>
+                </div>
+              ` : ""}
+            </div>
+          ` : ""}`}
+        </article>
+      `;
+    }
+
+    // Nhật ký còn tồn tại hoặc đề xuất → cần theo dõi xử lý tiếp
+    function hasFollowup(log) {
+      return Boolean((log.issue || log.nextAction) && !String(log.selectedTask || "").startsWith("[Kế hoạch]"));
+    }
+
+    // Bấm "Tiếp tục xử lý": đổ lại thông tin việc vào màn Ghi nhật ký
+    function continueLog(id) {
+      const log = logs.find(item => item.id === id);
+      if (!log) return;
+      const followup = log.issue || log.nextAction;
+      if (log.planId && plans.some(plan => plan.id === log.planId)) {
+        navigateTo("logentry", { planId: log.planId, presetProgress: "Hoàn thành", followupNote: followup });
+      } else {
+        navigateTo("logentry", { adhocTask: log.selectedTask, followupNote: followup });
+      }
+    }
+
+    function logProgressClass(progress) {
+      if (progress === "Hoàn thành") return "log-done";
+      if (progress === "Đang làm") return "log-doing";
+      if (progress === "Cần hỗ trợ") return "log-help";
+      return "";
+    }
+
+    // ===== Màn Tuần =====
+    const WEEK_DAY_NAMES = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật"];
+
+    function weekItemClass(status) {
+      if (status === "Hoàn thành") return "st-done";
+      if (status === "Đang làm") return "st-doing";
+      if (status === "Cần hỗ trợ") return "st-help";
+      return "st-open";
+    }
+
+    function renderWeekScreen() {
+      const container = document.getElementById("screen-week");
+      const visible = getVisiblePlans("week");
+      const days = weekDates(document.getElementById("filterDate").value);
+      const label = `Tuần ${shortDateVn(days[0])} - ${shortDateVn(days[6])}`;
+      const body = days.map((iso, index) => {
+        const dayPlans = visible
+          .filter(plan => planReminder(plan) === iso || (iso === days[0] && planReminder(plan) < days[0] && plan.status !== "Hoàn thành"))
+          .sort((a, b) => (a.time || "").localeCompare(b.time || ""));
+        const items = dayPlans.map(plan => `
+          <button class="week-item ${weekItemClass(plan.status)}" type="button" onclick="openTaskDetail('${escapeAttr(plan.id)}')" title="Bấm để xem chi tiết">
+            <div class="week-item-main">
+              <div class="week-item-task">${escapeHtml(plan.task || "")}</div>
+              <div class="week-item-meta">${planMetaLine(plan, iso, true)}${[plan.area, plan.asset].filter(Boolean).length ? " · " + [plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ") : ""}${plan.type === "Phát sinh" ? ' · <span class="text-warning fw-bold">Phát sinh</span>' : ""}</div>
+            </div>
+            ${statusBadge(plan.status)}
+          </button>
+        `).join("");
+        return `
+          <tr${iso === today ? ' class="week-today"' : ""}>
+            <td class="day-cell">
+              <div class="fw-bold">${WEEK_DAY_NAMES[index]}</div>
+              <div class="small text-secondary">${shortDateVn(iso)}${iso === today ? " · Hôm nay" : ""}</div>
+            </td>
+            <td><div class="week-items">${items || '<span class="text-secondary small">Không có việc</span>'}</div></td>
+          </tr>
+        `;
+      }).join("");
+
+      container.innerHTML = `
+        <div class="scroll">
+          <div class="week-label">${label}</div>
+          <table class="week-table"><tbody>${body}</tbody></table>
+        </div>
+      `;
+    }
+
+    // ===== Màn Thống kê cả tổ =====
+    function renderStatsScreen() {
+      const container = document.getElementById("screen-stats");
+      const visible = getVisiblePlans("day");
+      const done = visible.filter(p => p.status === "Hoàn thành").length;
+      const donePct = visible.length ? Math.round(done / visible.length * 100) : 0;
+      container.innerHTML = `
+        <div class="scroll">
+          <div class="metric-grid">
+            <div class="metric"><strong>${visible.length}</strong><span>Việc trong ngày</span></div>
+            <div class="metric"><strong>${visible.filter(p => p.status === "Đang làm").length}</strong><span>Đang làm</span></div>
+            <div class="metric"><strong>${visible.length ? `${done}/${visible.length}` : "0"}</strong><span>Đã hoàn thành</span><div class="mini-bar"><i style="width:${donePct}%"></i></div></div>
+            <div class="metric"><strong>${logs.length}</strong><span>Nhật ký cả tổ (7 ngày)</span></div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><h3 class="h6 m-0 fw-bold"><i class="bi bi-people text-primary me-2"></i>Theo từng nhân viên <span class="fw-normal text-secondary small">(bấm tên để lọc)</span></h3></div>
+            <div class="table-responsive">
+              <table class="table table-sm align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>Nhân viên</th>
+                    <th class="text-center">Số việc</th>
+                    <th class="text-center">Hoàn thành</th>
+                    <th class="text-center">Đang làm</th>
+                    <th class="text-center">Cần hỗ trợ / Tồn</th>
+                  </tr>
+                </thead>
+                <tbody id="personStats"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `;
+      renderPersonStats(visible);
+    }
+
+    // Bảng thống kê theo từng nhân viên, tính từ kế hoạch trong phạm vi lọc
+    function renderPersonStats(visible) {
+      const body = document.getElementById("personStats");
+      if (!body) return;
+      const selectedDate = document.getElementById("filterDate").value;
+      const stats = {};
+      visible.forEach(plan => {
+        String(plan.assignee || "").split(",").map(name => name.trim()).filter(Boolean).forEach(name => {
+          const s = stats[name] = stats[name] || { total: 0, done: 0, doing: 0, help: 0 };
+          s.total++;
+          if (plan.status === "Hoàn thành") s.done++;
+          else if (plan.status === "Đang làm") s.doing++;
+          else if (plan.status === "Cần hỗ trợ" || isCarryOver(plan, selectedDate)) s.help++;
+        });
+      });
+
+      const names = Object.keys(stats).sort((a, b) => stats[b].total - stats[a].total || a.localeCompare(b));
+      if (names.length === 0) {
+        body.innerHTML = '<tr><td colspan="5" class="text-secondary small">Chưa có việc gán người trong phạm vi đang lọc.</td></tr>';
+        return;
+      }
+      body.innerHTML = names.map(name => {
+        const s = stats[name];
+        return `
+        <tr role="button" onclick="filterByPerson('${escapeAttr(name)}')" title="Bấm để lọc việc của ${escapeAttr(name)}">
+          <td class="fw-semibold text-brand">${escapeHtml(name)}</td>
+          <td class="text-center fw-bold">${s.total}</td>
+          <td class="text-center">${s.done ? `<span class="badge-soft badge-done">${s.done}</span>` : '<span class="text-secondary">0</span>'}</td>
+          <td class="text-center">${s.doing ? `<span class="badge-soft badge-doing">${s.doing}</span>` : '<span class="text-secondary">0</span>'}</td>
+          <td class="text-center">${s.help ? `<span class="badge-soft badge-high">${s.help}</span>` : '<span class="text-secondary">0</span>'}</td>
+        </tr>
+      `; }).join("");
+    }
+
+    function filterByPerson(name) {
+      document.getElementById("filterPerson").value = name;
+      showToast("Đang lọc việc của " + name);
+      navigateTo("tasklist", {});
+    }
+
+    // ===== Màn Cá nhân =====
+    const SHIFT_RANGES = {
+      "Ca sáng": "06:00 – 14:00",
+      "Ca chiều": "14:00 – 22:00",
+      "Ca đêm": "22:00 – 06:00",
+      "Hành chính": "08:00 – 17:00"
+    };
+
+    function renderPersonalScreen() {
+      const container = document.getElementById("screen-personal");
+      const user = currentUser() || "?";
+      const initial = escapeHtml((user.trim().charAt(0) || "?").toUpperCase());
+      const team = currentTeamGroup() || "Chưa phân tổ";
+      const shift = defaultShift();
+      const shiftRange = SHIFT_RANGES[shift] || "";
+      const todays = plans.filter(plan => isDueForReview(plan, today) || isCarryOver(plan, today));
+      const doneCount = todays.filter(p => p.status === "Hoàn thành").length;
+      const attnCount = todays.filter(p => isAttentionPlan(p, today)).length;
+      const scale = parseInt(localStorage.getItem(STORAGE_KEYS.fontScale) || "100", 10);
+      const scaleLabel = FONT_SCALE_LABELS[scale] || "Thường";
+
+      container.innerHTML = `
+        <div class="prof-hero">
+          <div class="avatar">${initial}</div>
+          <div>
+            <div class="prof-name">${escapeHtml(user)}</div>
+            <div class="prof-role">${escapeHtml(team)}</div>
+          </div>
+        </div>
+        <div class="scroll">
+          <div class="shift-card">
+            <div class="t"><i class="bi bi-clock-fill"></i> Ca đang trực</div>
+            <div class="v">${escapeHtml(shift)}${shiftRange ? " · " + shiftRange : ""}</div>
+          </div>
+          <div class="metrics">
+            <div class="metric"><div class="n">${todays.length}</div><div class="l">Việc hôm nay</div></div>
+            <div class="metric"><div class="n">${doneCount}</div><div class="l">Đã xong</div></div>
+            <div class="metric${attnCount ? " hi" : ""}"><div class="n">${attnCount}</div><div class="l">Cần xử lý</div></div>
+          </div>
+          <div class="menu">
+            <button class="mrow" type="button" onclick="navigateTo('week',{})"><i class="bi bi-calendar-week lead"></i>Lịch làm việc của tôi<i class="bi bi-chevron-right tail"></i></button>
+            <button class="mrow" type="button" onclick="navigateTo('loghistory',{})"><i class="bi bi-journal-text lead"></i>Nhật ký đã ghi<i class="bi bi-chevron-right tail"></i></button>
+            <button class="mrow" type="button" onclick="navigateTo('stats',{})"><i class="bi bi-bar-chart lead"></i>Thống kê cả tổ<i class="bi bi-chevron-right tail"></i></button>
+            <button class="mrow" type="button" id="btnPersonalFilters"><i class="bi bi-funnel lead"></i>Bộ lọc nâng cao<i class="bi bi-chevron-right tail"></i></button>
+            <button class="mrow" type="button" id="btnPersonalSettings"><i class="bi bi-gear lead"></i>Cấu hình đồng bộ<i class="bi bi-chevron-right tail"></i></button>
+            <button class="mrow" type="button" id="btnPersonalFontScale"><i class="bi bi-fonts lead"></i>Cỡ chữ: ${scaleLabel}<i class="bi bi-chevron-right tail"></i></button>
+            <button class="mrow" type="button" id="btnPersonalLogout"><i class="bi bi-box-arrow-right lead"></i>Đăng xuất<i class="bi bi-chevron-right tail"></i></button>
+          </div>
+        </div>
+      `;
+      document.getElementById("btnPersonalFilters").addEventListener("click", () => filterOffcanvasInstance.show());
+      document.getElementById("btnPersonalSettings").addEventListener("click", () => settingsModalInstance.show());
+      document.getElementById("btnPersonalFontScale").addEventListener("click", () => { cycleFontScale(); renderPersonalScreen(); });
+      document.getElementById("btnPersonalLogout").addEventListener("click", logout);
+    }
+
+    // ===== Badge dùng chung =====
     function priorityBadge(value) {
       const normalized = value || "Thấp";
       const cls = normalized === "Cao" ? "badge-high" : normalized === "Trung bình" ? "badge-mid" : "badge-low";
       return `<span class="badge-soft ${cls}">${escapeHtml(normalized)}</span>`;
     }
 
-    function ratingBadge(value) {
-      if (!value) return "";
-      const cls = value === "Hoàn thành tốt" ? "badge-done"
-        : value === "Đạt" ? "badge-low"
-        : value === "Chưa đạt" ? "badge-high"
-        : "badge-open";
-      return `<span class="badge-soft ${cls}"><i class="bi bi-star me-1"></i>${escapeHtml(value)}</span>`;
-    }
-
     function statusBadge(value) {
       const normalized = value || "Chưa làm";
-      const cls = normalized === "Hoàn thành" ? "badge-done" : normalized === "Đang làm" ? "badge-doing" : "badge-open";
+      const cls = normalized === "Hoàn thành" ? "badge-done" : normalized === "Đang làm" ? "badge-doing" : normalized === "Cần hỗ trợ" ? "badge-high" : "badge-open";
       return `<span class="badge-soft ${cls}">${escapeHtml(normalized)}</span>`;
     }
 
@@ -2661,12 +2519,13 @@
       const totalPending = pendingPlansCount + pendingLogsCount;
 
       if (totalPending > 0) {
-        syncBadge.style.display = "inline-block";
-        syncBadge.className = "badge bg-warning-subtle text-warning shadow-sm px-2 py-2 rounded-pill";
+        syncBadge.style.display = "inline-flex";
+        syncBadge.classList.add("offline");
         syncBadge.innerHTML = `<i class="bi bi-cloud-arrow-up-fill"></i> ${totalPending}`;
         syncBadge.title = `Có ${totalPending} mục đang chờ đồng bộ lên Google Sheets`;
       } else {
         syncBadge.style.display = "none";
+        syncBadge.classList.remove("offline");
       }
     }
 
