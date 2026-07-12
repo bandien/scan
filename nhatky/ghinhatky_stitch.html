@@ -208,7 +208,7 @@
         </button>
     </nav>
 
-    <script>
+    <script class="">
         document.getElementById('submit-btn').addEventListener('click', function() {
             const btn = this;
             const originalContent = btn.innerHTML;
@@ -230,11 +230,12 @@
 
         // Focus styling for textarea
         const textarea = document.getElementById('tech-note');
-        textarea.addEventListener('focus', () => {
-            textarea.parentElement.classList.add('scale-[1.01]');
-        });
-        textarea.addEventListener('blur', () => {
-            textarea.parentElement.classList.remove('scale-[1.01]');
-        });
-    </script>
-</body></html>
+        if (textarea) {
+            textarea.addEventListener('focus', () => {
+                textarea.parentElement.classList.add('scale-[1.01]');
+            });
+            textarea.addEventListener('blur', () => {
+                textarea.parentElement.classList.remove('scale-[1.01]');
+            });
+        }
+    </script></body></html>
