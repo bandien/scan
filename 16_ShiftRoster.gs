@@ -44,16 +44,16 @@ function findRosterRow_(sheet, weekStart) {
 function handleGetRosterStaff(e) {
   const team = (e && e.parameter && e.parameter.team) ? e.parameter.team : ROSTER_DEFAULT_TEAM;
   const ss = SpreadsheetApp.openById(SHEET_ID);
-  const sheet = ss.getSheetByName("DanhSachNhanSu");
+  const sheet = ss.getSheetByName(SHEETS.USERS || "Users");
   if (!sheet) return contentResponse({ status: "success", staff: [] });
 
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return contentResponse({ status: "success", staff: [] });
 
-  const rows = sheet.getRange(2, 1, lastRow - 1, 2).getValues();
+  const rows = sheet.getRange(2, 1, lastRow - 1, 5).getValues();
   const staff = rows
-    .filter(r => String(r[0] || "").trim() && String(r[1] || "").trim() === team)
-    .map(r => ({ name: String(r[0]).trim(), team: String(r[1]).trim() }));
+    .filter(r => String(r[1] || "").trim() && String(r[4] || "").trim().toLowerCase() === team.trim().toLowerCase())
+    .map(r => ({ name: String(r[1]).trim(), team: String(r[4]).trim() }));
 
   return contentResponse({ status: "success", staff: staff });
 }

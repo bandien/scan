@@ -75,10 +75,14 @@ function handleGetInventory(e) {
 }
 
 function handleGetStaff(e) {
-  const sheet = getSheet(SHEETS.STAFF);
-  if (!sheet) return contentResponse({ status: "error", message: "Staff sheet not found" });
+  const sheet = getSheet(SHEETS.USERS || "Users");
+  if (!sheet) return contentResponse({ status: "error", message: "Users sheet not found" });
   const staff = sheet.getDataRange().getValues().slice(1).filter(r => r[0]).map(r => ({
-    id: r[0], name: r[1], position: r[2], dept: r[3], phone: r[4] || ""
+    id: r[0],               // Username acts as ID
+    name: r[1],             // FullName acts as Name
+    position: r[3] || "",   // Role acts as Position
+    dept: r[4] || "",       // Teams acts as Dept/Team
+    phone: ""               // Phone is blank for users
   }));
   return contentResponse({ status: "success", staff });
 }
