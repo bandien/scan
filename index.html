@@ -2712,6 +2712,8 @@
     function doLogout() {
         localStorage.removeItem('currentUser');
         sessionStorage.removeItem('currentUser');
+        localStorage.removeItem('bandien_nhatky_employee');
+        localStorage.removeItem('bandien_nhatky_teamgroup');
         localStorage.removeItem('localDevices');
         localStorage.removeItem('localDevicesMap');
         localStorage.removeItem('localChecklists');
@@ -2785,6 +2787,11 @@
 
             if (result.status === "success") {
                 console.log(`[DEBUG] Login successful. Role: ${result.user.role}`);
+                
+                // Unified SSO for nhatky sub-app
+                localStorage.setItem('bandien_nhatky_employee', result.user.username || result.user.name);
+                localStorage.setItem('bandien_nhatky_teamgroup', result.user.teams || "");
+
                 if (document.getElementById('rememberMe').checked) {
                     localStorage.setItem('currentUser', JSON.stringify(result.user));
                     localStorage.setItem('savedUsername', username);
