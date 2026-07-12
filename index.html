@@ -29,7 +29,7 @@
             min-height: 100vh;
         }
 
-        .app-shell { max-width: 480px; margin: 0 auto; padding: 20px; }
+        .app-shell { max-width: 480px; margin: 0 auto; padding: 20px 20px 92px 20px; }
 
         .header-section { padding: 30px 0; text-align: center; }
 
@@ -120,6 +120,82 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .anim-up { animation: fadeInUp 0.4s ease-out; }
         .anim-in { animation: fadeIn 0.3s ease-out; }
+
+        /* ===== Bottom Navigation Bar ===== */
+        .bottom-nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            height: 72px;
+            background: #ffffff;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1040;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+            padding: 0 8px;
+        }
+        .bottom-nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 800;
+            transition: all 0.2s ease;
+            background: none;
+            border: none;
+            padding: 4px 0;
+        }
+        .bottom-nav-item:active {
+            transform: scale(0.97);
+        }
+        .bottom-nav-item i {
+            font-size: 20px;
+            margin-bottom: 2px;
+            display: block;
+        }
+        .bottom-nav-item.active {
+            color: #0d6efd;
+        }
+        .bottom-nav-item.active .nav-icon-wrapper {
+            background-color: #e7f1ff;
+            color: #0d6efd;
+            border-radius: 16px;
+            padding: 4px 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .bottom-nav-item:not(.active) .nav-icon-wrapper {
+            padding: 4px 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Dark mode overrides */
+        .dark-mode .bottom-nav-bar, [data-bs-theme="dark"] .bottom-nav-bar {
+            background: #1c1f28;
+            border-top-color: #32353d;
+        }
+        .dark-mode .bottom-nav-item, [data-bs-theme="dark"] .bottom-nav-item {
+            color: #c2c6d8;
+        }
+        .dark-mode .bottom-nav-item.active, [data-bs-theme="dark"] .bottom-nav-item.active {
+            color: #b1c5ff;
+        }
+        .dark-mode .bottom-nav-item.active .nav-icon-wrapper, [data-bs-theme="dark"] .bottom-nav-item.active .nav-icon-wrapper {
+            background-color: #314577;
+            color: #b1c5ff;
+        }
     </style>
 </head>
 <body>
@@ -1389,6 +1465,38 @@
         </div>
         <button class="btn-submit" onclick="submitData()" data-i18n="btn_complete">COMPLETE INSPECTION <i class="bi bi-check-circle ms-2"></i></button>
     </div>
+
+    <!-- Unified Bottom Navigation Bar -->
+    <nav class="bottom-nav-bar" id="mainBottomNav" style="display: none;">
+        <!-- Tổng quan -->
+        <a class="bottom-nav-item" href="nhatky/baocao_stitch.html">
+            <div class="nav-icon-wrapper">
+                <i class="bi bi-grid-fill"></i>
+            </div>
+            <span>Tổng quan</span>
+        </a>
+        <!-- Công việc -->
+        <a class="bottom-nav-item" href="nhatky/nhatky_stitch.html">
+            <div class="nav-icon-wrapper">
+                <i class="bi bi-journal-check"></i>
+            </div>
+            <span>Công việc</span>
+        </a>
+        <!-- Tìm kiếm (Active) -->
+        <a class="bottom-nav-item active" href="index.html">
+            <div class="nav-icon-wrapper">
+                <i class="bi bi-qr-code-scan"></i>
+            </div>
+            <span>Tìm kiếm</span>
+        </a>
+        <!-- Nhiều hơn -->
+        <a class="bottom-nav-item" href="nhatky/caidat_stitch.html">
+            <div class="nav-icon-wrapper">
+                <i class="bi bi-three-dots"></i>
+            </div>
+            <span>Nhiều hơn</span>
+        </a>
+    </nav>
 </div>
 
 <script>
@@ -2576,6 +2684,7 @@
     function updateUI(user) {
         document.getElementById('loginOverlay').style.display = 'none';
         document.getElementById('appShell').style.display = 'block';
+        document.getElementById('mainBottomNav').style.display = 'flex';
         document.getElementById('userBadge').style.display = 'inline-block';
         document.getElementById('userNameDisplay').innerText = user.name;
         document.getElementById('userRoleDisplay').innerHTML = '<i class="bi bi-briefcase me-1"></i> ' + (user.role || 'User');
