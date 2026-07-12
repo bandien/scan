@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html class="dark" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Fidelity Secure - Nhật ký công việc</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Public+Sans:wght@400;500&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Public+Sans:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline": "#8c90a1",
+                    "primary-container": "#0e6efd",
+                    "secondary-container": "#2a4481",
+                    "tertiary-container": "#cf4b00",
+                    "secondary-fixed": "#dae2ff",
+                    "on-primary-fixed-variant": "#00419e",
+                    "on-tertiary-fixed-variant": "#7f2b00",
+                    "on-secondary-container": "#9bb4f8",
+                    "surface-variant": "#31353d",
+                    "on-primary-container": "#ffffff",
+                    "on-surface-variant": "#c2c6d8",
+                    "surface-container-low": "#181c24",
+                    "on-surface": "#e0e2ed",
+                    "tertiary-fixed": "#ffdbce",
+                    "on-secondary-fixed-variant": "#2a4481",
+                    "surface-tint": "#b1c5ff",
+                    "primary-fixed": "#dae2ff",
+                    "outline-variant": "#424655",
+                    "on-tertiary-container": "#ffffff",
+                    "surface-bright": "#363942",
+                    "error": "#ffb4ab",
+                    "background": "#10131b",
+                    "on-secondary": "#0d2d69",
+                    "tertiary-fixed-dim": "#ffb599",
+                    "secondary": "#b1c5ff",
+                    "on-primary-fixed": "#001946",
+                    "on-tertiary": "#5a1c00",
+                    "secondary-fixed-dim": "#b1c5ff",
+                    "error-container": "#93000a",
+                    "on-tertiary-fixed": "#370e00",
+                    "on-primary": "#002c70",
+                    "primary-fixed-dim": "#b1c5ff",
+                    "primary": "#b1c5ff",
+                    "inverse-on-surface": "#2d3039",
+                    "surface-container-lowest": "#0b0e16",
+                    "inverse-surface": "#e0e2ed",
+                    "surface-container-highest": "#31353d",
+                    "on-background": "#e0e2ed",
+                    "surface-container": "#1c2028",
+                    "surface-container-high": "#262a32",
+                    "inverse-primary": "#0057ce",
+                    "surface": "#10131b",
+                    "surface-dim": "#10131b",
+                    "on-secondary-fixed": "#001847",
+                    "tertiary": "#ffb599",
+                    "on-error": "#690005",
+                    "on-error-container": "#ffdad6"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "sm": "8px",
+                    "gutter": "16px",
+                    "xl": "32px",
+                    "lg": "24px",
+                    "base": "8px",
+                    "md": "16px",
+                    "margin": "24px",
+                    "xs": "4px"
+            },
+            "fontFamily": {
+                    "label-md": ["Public Sans"],
+                    "headline-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "headline-md": ["Inter"]
+            },
+            "fontSize": {
+                    "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            user-select: none;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface-container shadow-sm flex justify-between items-center px-gutter h-16 w-full">
+<button class="material-symbols-outlined text-primary hover:bg-surface-variant/50 transition-colors active:scale-95 duration-150 p-2 rounded-full">
+            menu
+        </button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Nhật ký công việc</h1>
+<div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A professional close-up portrait of a security supervisor in a dark navy uniform, looking confident and approachable. The lighting is soft and cinematic with subtle blue highlights, reflecting a high-tech corporate environment. The background is a blurred office with digital screens, maintaining the dark mode aesthetic of the Fidelity Secure platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMfS_eKdF-XkBxuxzpAL0WVsrlP0bodq8909we7H0DstFV3MF3WZkOQ8YfK-Z6SmJx8H993f0-1SIS2ZQYMjsEdH0CWbMECHbDxOVSbv7zVL-NN9-vPAzx20MDNA5vOlFqCkWkKJlBFQyEjSQ5r9zQhsCbj8XINYWPJiJzR_VLzeo_ZcpN1PAFoJg6vK-WbPlv5A2cJPDzZxvEGGdfupanbVJTemAqACKTUXjPlc_bI1Zvp1qkqwzICIA1A40BiM_jvyMh3dUj6JbU"/>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="pt-20 px-gutter space-y-md">
+<!-- Search Bar -->
+<section class="mt-4">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full h-12 bg-surface-container-high border-none rounded-xl pl-10 pr-4 text-on-surface placeholder:text-on-surface-variant focus:ring-2 focus:ring-primary transition-all" placeholder="Tìm kiếm công việc..." type="text"/>
+</div>
+</section>
+<!-- Quick Filters -->
+<section>
+<div class="flex gap-sm overflow-x-auto hide-scrollbar py-2">
+<button class="px-gutter py-2 bg-primary-container text-on-primary-container rounded-full font-label-md text-label-md whitespace-nowrap active:scale-95 transition-transform">
+                    Tất cả
+                </button>
+<button class="px-gutter py-2 bg-surface-container-high text-on-surface-variant border border-outline-variant rounded-full font-label-md text-label-md whitespace-nowrap hover:bg-surface-variant/50 transition-colors active:scale-95">
+                    Tổ A
+                </button>
+<button class="px-gutter py-2 bg-surface-container-high text-on-surface-variant border border-outline-variant rounded-full font-label-md text-label-md whitespace-nowrap hover:bg-surface-variant/50 transition-colors active:scale-95">
+                    Tổ B
+                </button>
+<button class="px-gutter py-2 bg-surface-container-high text-on-surface-variant border border-outline-variant rounded-full font-label-md text-label-md whitespace-nowrap hover:bg-surface-variant/50 transition-colors active:scale-95">
+                    Tổ C
+                </button>
+<button class="px-gutter py-2 bg-surface-container-high text-on-surface-variant border border-outline-variant rounded-full font-label-md text-label-md whitespace-nowrap hover:bg-surface-variant/50 transition-colors active:scale-95">
+                    Tổ D
+                </button>
+</div>
+</section>
+<!-- Task List -->
+<section class="space-y-md">
+<!-- Card 1: High Priority / Completed -->
+<div class="bg-surface-container-high border border-outline-variant p-md rounded-xl space-y-sm hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start">
+<span class="px-3 py-1 bg-error-container text-on-error-container rounded-full font-label-md text-label-md">
+                        Cao
+                    </span>
+<span class="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-lg font-label-md text-label-md">
+                        Hoàn thành
+                    </span>
+</div>
+<h3 class="font-headline-md text-body-md font-bold text-on-surface">Kiểm tra hệ thống PCCC khu A</h3>
+<div class="grid grid-cols-2 gap-sm text-on-surface-variant font-label-md text-label-md">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span>Tòa nhà North Wing</span>
+</div>
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span>08:30 - 10:00</span>
+</div>
+<div class="flex items-center gap-xs col-span-2">
+<span class="material-symbols-outlined text-[18px]">person</span>
+<span>Nguyễn Văn An, Lê Thị Bình</span>
+</div>
+</div>
+</div>
+<!-- Card 2: Medium Priority / In Progress -->
+<div class="bg-surface-container-high border border-outline-variant p-md rounded-xl space-y-sm">
+<div class="flex justify-between items-start">
+<span class="px-3 py-1 bg-tertiary-container text-on-tertiary-container rounded-full font-label-md text-label-md">
+                        Trung bình
+                    </span>
+<span class="px-3 py-1 bg-primary/20 text-primary rounded-lg font-label-md text-label-md animate-pulse">
+                        Đang làm
+                    </span>
+</div>
+<h3 class="font-headline-md text-body-md font-bold text-on-surface">Tuần tra bãi đỗ xe hầm B2</h3>
+<div class="grid grid-cols-2 gap-sm text-on-surface-variant font-label-md text-label-md">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span>Hầm B2, Zone 4</span>
+</div>
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span>14:00 - 16:00</span>
+</div>
+<div class="flex items-center gap-xs col-span-2">
+<span class="material-symbols-outlined text-[18px]">person</span>
+<span>Trần Minh Tâm</span>
+</div>
+</div>
+<div class="w-full bg-surface-variant rounded-full h-1.5 mt-2">
+<div class="bg-primary h-1.5 rounded-full" style="width: 65%"></div>
+</div>
+</div>
+<!-- Card 3: Low Priority / Not Started -->
+<div class="bg-surface-container-high border border-outline-variant p-md rounded-xl space-y-sm">
+<div class="flex justify-between items-start">
+<span class="px-3 py-1 bg-green-900/30 text-green-400 rounded-full font-label-md text-label-md border border-green-800">
+                        Thấp
+                    </span>
+<span class="px-3 py-1 bg-surface-variant text-on-surface-variant rounded-lg font-label-md text-label-md">
+                        Chưa làm
+                    </span>
+</div>
+<h3 class="font-headline-md text-body-md font-bold text-on-surface">Thay pin khóa từ phòng 402</h3>
+<div class="grid grid-cols-2 gap-sm text-on-surface-variant font-label-md text-label-md">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span>Tầng 4</span>
+</div>
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span>17:00 - 17:30</span>
+</div>
+<div class="flex items-center gap-xs col-span-2">
+<span class="material-symbols-outlined text-[18px]">person</span>
+<span>Phạm Quốc Hùng</span>
+</div>
+</div>
+</div>
+<!-- Card 4: High Priority / Not Started -->
+<div class="bg-surface-container-high border border-outline-variant p-md rounded-xl space-y-sm">
+<div class="flex justify-between items-start">
+<span class="px-3 py-1 bg-error-container text-on-error-container rounded-full font-label-md text-label-md">
+                        Cao
+                    </span>
+<span class="px-3 py-1 bg-surface-variant text-on-surface-variant rounded-lg font-label-md text-label-md">
+                        Chưa làm
+                    </span>
+</div>
+<h3 class="font-headline-md text-body-md font-bold text-on-surface">Xử lý báo động cửa thoát hiểm</h3>
+<div class="grid grid-cols-2 gap-sm text-on-surface-variant font-label-md text-label-md">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span>Cửa E3, Tầng G</span>
+</div>
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span>ASAP</span>
+</div>
+<div class="flex items-center gap-xs col-span-2">
+<span class="material-symbols-outlined text-[18px]">person</span>
+<span>Đội phản ứng nhanh</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-xl bg-surface-container-low shadow-lg flex justify-around items-center h-20 w-full px-4">
+<!-- Tasks (Active) -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">assignment</span>
+<span class="font-label-md text-label-md">Tasks</span>
+</a>
+<!-- Teams -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary dark:hover:text-primary active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-label-md text-label-md">Teams</span>
+</a>
+<!-- History -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary dark:hover:text-primary active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-label-md text-label-md">History</span>
+</a>
+<!-- Settings -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary dark:hover:text-primary active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</nav>
+<!-- Floating Action Button for adding task (Contextual for Log view) -->
+<button class="fixed right-6 bottom-24 w-14 h-14 bg-primary text-on-primary rounded-xl shadow-xl flex items-center justify-center active:scale-90 transition-transform z-40">
+<span class="material-symbols-outlined text-[32px]">add</span>
+</button>
+<script>
+        // Interactive state for filter buttons
+        const filterButtons = document.querySelectorAll('section:nth-of-type(2) button');
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterButtons.forEach(b => {
+                    b.classList.remove('bg-primary-container', 'text-on-primary-container');
+                    b.classList.add('bg-surface-container-high', 'text-on-surface-variant', 'border', 'border-outline-variant');
+                });
+                btn.classList.add('bg-primary-container', 'text-on-primary-container');
+                btn.classList.remove('bg-surface-container-high', 'text-on-surface-variant', 'border', 'border-outline-variant');
+            });
+        });
+
+        // Search input micro-interaction
+        const searchInput = document.querySelector('input[type="text"]');
+        searchInput.addEventListener('focus', () => {
+            searchInput.parentElement.classList.add('scale-[1.02]');
+            searchInput.parentElement.style.transition = 'transform 0.2s ease-out';
+        });
+        searchInput.addEventListener('blur', () => {
+            searchInput.parentElement.classList.remove('scale-[1.02]');
+        });
+    </script>
+</body></html>
