@@ -2,7 +2,15 @@
 // 15_NhatKyAuth.gs - NhatKy account login
 // ==========================================
 // Tài khoản dùng chung duy nhất trong sheet Users:
-// Username | PIN | Role | Teams
+// Username | PIN | Role | Teams | Ghi chú | Cập nhật lúc | Cập nhật bởi | Phone
+
+const NHATKY_SESSION_TTL_SECONDS = 21600;
+
+function createNhatKySession_(username) {
+  const token = Utilities.getUuid().replace(/-/g, "") + Utilities.getUuid().replace(/-/g, "");
+  CacheService.getScriptCache().put("nhatky_session_" + token, String(username || "").trim(), NHATKY_SESSION_TTL_SECONDS);
+  return token;
+}
 
 function findAccountRow_(sheet, username) {
   const lastRow = sheet.getLastRow();
@@ -91,7 +99,8 @@ function handleNhatKyLogin(params) {
   const name = String(row[schema.usernameIndex] || username).trim();
   const role = String(row[schema.roleIndex] || "User").trim();
   const teams = String(row[schema.teamsIndex] || "").trim();
+  const authToken = createNhatKySession_(name);
   writeAuditLog(username, "nhatkyLogin", username, "Đăng nhập trang nhật ký");
 
-  return contentResponse({ status: "success", name: name, username: name, role: role, teams: teams });
+  return contentResponse({ status: "success", name: name, username: name, role: role, teams: teams, authToken: authToken });
 }

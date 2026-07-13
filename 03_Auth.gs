@@ -100,12 +100,23 @@ function getUsersSchema_(rows) {
   const headers = rows && rows.length ? rows[0].map(function(h) {
     return String(h || "").trim().toLowerCase();
   }) : [];
+  function findHeader(names, fallback) {
+    for (let i = 0; i < names.length; i++) {
+      const index = headers.indexOf(names[i]);
+      if (index !== -1) return index;
+    }
+    return typeof fallback === "number" ? fallback : -1;
+  }
   return {
-    usernameIndex: headers.indexOf("username") !== -1 ? headers.indexOf("username") : 0,
-    pinIndex: headers.indexOf("pin") !== -1 ? headers.indexOf("pin") : 1,
-    roleIndex: headers.indexOf("role") !== -1 ? headers.indexOf("role") : 2,
-    teamsIndex: headers.indexOf("teams") !== -1 ? headers.indexOf("teams") : 3,
-    lastLoginIndex: headers.indexOf("lastloginat")
+    usernameIndex: findHeader(["username"], 0),
+    pinIndex: findHeader(["pin"], 1),
+    roleIndex: findHeader(["role"], 2),
+    teamsIndex: findHeader(["teams"], 3),
+    noteIndex: findHeader(["ghi chú", "ghi chu", "note"]),
+    updatedAtIndex: findHeader(["cập nhật lúc", "cap nhat luc", "updatedat"]),
+    updatedByIndex: findHeader(["cập nhật bởi", "cap nhat boi", "updatedby"]),
+    phoneIndex: findHeader(["phone", "số điện thoại", "so dien thoai"]),
+    lastLoginIndex: findHeader(["lastloginat"])
   };
 }
 
