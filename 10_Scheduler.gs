@@ -60,3 +60,18 @@ function weeklyMeterReport() {
   const lines = Object.entries(totalByType).map(([t, v]) => `• ${t}: ${v.toFixed(1)}`);
   sendAlert(`📊 BÁO CÁO TIÊU THỤ TUẦN (${readings.length} lần đọc):\n${lines.join('\n')}`);
 }
+
+/**
+ * Tác vụ chạy định kỳ để tự động đồng bộ dữ liệu ngầm lên ERPNext.
+ * Hướng dẫn cài đặt Trigger trong Apps Script Editor:
+ *   1. Chọn biểu tượng Đồng hồ (Triggers) ở thanh bên trái.
+ *   2. Chọn "Add Trigger" ở dưới cùng bên phải.
+ *   3. Chọn hàm chạy: triggerERPNextSync
+ *   4. Chọn nguồn sự kiện: Time-driven (Theo thời gian).
+ *   5. Chọn kiểu: Minutes timer -> Every 10 minutes (hoặc 15 minutes).
+ *   6. Nhấn Save để lưu.
+ */
+function triggerERPNextSync() {
+  syncAllPendingData();
+}
+

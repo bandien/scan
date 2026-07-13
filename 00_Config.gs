@@ -35,3 +35,44 @@ const SHEETS = {
   METER_POINTS: "MeterPoints",      // Phase 11
   METER_READINGS: "MeterReadings",  // Phase 11
 };
+
+// ==========================================
+// CẤU HÌNH TÍCH HỢP ERPNEXT
+// ==========================================
+const ERPNEXT_CONFIG = (() => {
+  let userProperties = null;
+  try {
+    userProperties = PropertiesService.getScriptProperties();
+  } catch (e) {
+    Logger.log("Không thể truy cập Script Properties: " + e.toString());
+  }
+
+  const getProp = (key, fallback) => {
+    if (userProperties) {
+      const val = userProperties.getProperty(key);
+      if (val !== null && val !== undefined) return val.trim();
+    }
+    return fallback;
+  };
+
+  return {
+    // Trạng thái bật/tắt đồng bộ chung
+    ENABLED: getProp("ERPNEXT_ENABLED", "true") === "true",
+
+    // URL của hệ thống ERPNext (Frappe Instance)
+    BASE_URL: getProp("ERPNEXT_BASE_URL", "https://your-erpnext-domain.com"),
+
+    // Key & Secret để xác thực (Sinh ra từ tài khoản User trên ERPNext)
+    API_KEY: getProp("ERPNEXT_API_KEY", "YOUR_API_KEY_HERE"),
+    API_SECRET: getProp("ERPNEXT_API_SECRET", "YOUR_API_SECRET_HERE"),
+
+    // Chế độ chạy thử nghiệm (Chỉ log payload, không ghi dữ liệu thực tế)
+    DRY_RUN: getProp("ERPNEXT_DRY_RUN", "false") === "true",
+
+    // Định nghĩa tên Doctype trên ERPNext để đồng bộ
+    DOCTYPES: {
+      METER_READINGS: getProp("ERPNEXT_DOCTYPE_METER_READINGS", "Energy Point Log"),
+      MAINTENANCE_LOGS: getProp("ERPNEXT_DOCTYPE_MAINTENANCE_LOGS", "Asset Maintenance Log")
+    }
+  };
+})();
