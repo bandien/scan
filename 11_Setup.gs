@@ -31,7 +31,7 @@ function setupAllSheets() {
     "Status","Project","SerialNumber","Area","EquipmentType"
   ]);
   ensureSheet(ss, SHEETS.LOGS, ["Timestamp","UID","Items","Notes","User","ImageUrl"]);
-  ensureSheet(ss, SHEETS.USERS, ["Username","FullName","PasswordHash","Role","Teams","CreatedAt","LastLoginAt"]);
+  ensureSheet(ss, SHEETS.USERS, ["Username","PIN","Role","Teams"]);
   ensureSheet(ss, SHEETS.CHECKLISTS, ["Type","ID","Title","Description"]);
   ensureSheet(ss, SHEETS.WORK_ORDERS, [
     "WO_ID","Type","Priority","Status","AssetUID","AssignedTo",
@@ -159,7 +159,7 @@ function migrateAccountsToUsers() {
   }
   
   const newRows = [];
-  // Cấu trúc Users: ["Username","FullName","PasswordHash","Role","Teams","CreatedAt","LastLoginAt"]
+  // Cấu trúc Users: ["Username","PIN","Role","Teams"]
   // Cấu trúc NhatKyAccounts cũ: ["Name", "PasswordHash", "CreatedAt", "LastLoginAt", "TeamGroup"]
   
   for (let i = 1; i < nhatkyData.length; i++) {
@@ -168,20 +168,17 @@ function migrateAccountsToUsers() {
     if (!fullName) continue;
     
     let username = generateUsername_(fullName);
-    let passwordPlain = "Sangolf@123";
-    let passwordHash = hashPassword_(username, passwordPlain);
-    let role = "Operator";
+    let pin = "12345678";
+    let role = "User";
     let teams = r[4] || "- Chưa phân tổ -";
-    let createdAt = r[2] || new Date();
-    let lastLoginAt = r[3] || "";
     
-    newRows.push([username, fullName, passwordHash, role, teams, createdAt, lastLoginAt]);
+    newRows.push([username, pin, role, teams]);
   }
   
   if (newRows.length > 0) {
-    userSheet.getRange(userSheet.getLastRow() + 1, 1, newRows.length, 7).setValues(newRows);
+    userSheet.getRange(userSheet.getLastRow() + 1, 1, newRows.length, 4).setValues(newRows);
     Logger.log(`✅ Đã dồn thành công ${newRows.length} tài khoản sang sheet Users.`);
-    Logger.log(`⚠️ Lưu ý: Mật khẩu mặc định của các tài khoản này là 'Sangolf@123'`);
+    Logger.log(`⚠️ Lưu ý: PIN mặc định của các tài khoản này là '12345678'`);
     return `Đã dồn thành công ${newRows.length} tài khoản.`;
   } else {
     return "Không có dữ liệu hợp lệ để dồn.";

@@ -1,12 +1,12 @@
 // ==========================================
 // 16_ShiftRoster.gs — BẢNG PHÂN CA (trang phanca)
 // ==========================================
-// - GET  action=getRosterStaff {team?}         → danh sách nhân sự theo tổ, đọc từ DanhSachNhanSu
+// - GET  action=getRosterStaff {team?}         → danh sách nhân sự theo tổ, đọc từ Users
 // - GET  action=getRosterWeek  {weekStart}      → dữ liệu phân ca đã lưu của 1 tuần
 // - POST action=saveRosterWeek {weekStart,staff,cells,rules,user} → lưu/ghi đè 1 tuần
 //
-// DanhSachNhanSu và XepLichTuan thuộc về XepLich.gs (bộ xếp lịch riêng, chạy qua menu Sheet) —
-// module này chỉ ĐỌC DanhSachNhanSu để lấy danh sách nhân sự dùng chung, không đụng tới
+// XepLichTuan thuộc về XepLich.gs (bộ xếp lịch riêng, chạy qua menu Sheet) —
+// module này chỉ ĐỌC Users để lấy danh sách nhân sự dùng chung, không đụng tới
 // XepLichTuan hay thuật toán scheduleWithRules/scheduleGolfTeam.
 
 const ROSTER_SHEET_NAME = "PhanCaGolf";
@@ -50,10 +50,10 @@ function handleGetRosterStaff(e) {
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return contentResponse({ status: "success", staff: [] });
 
-  const rows = sheet.getRange(2, 1, lastRow - 1, 5).getValues();
+  const rows = sheet.getRange(2, 1, lastRow - 1, 4).getValues();
   const staff = rows
-    .filter(r => String(r[1] || "").trim() && String(r[4] || "").trim().toLowerCase() === team.trim().toLowerCase())
-    .map(r => ({ name: String(r[1]).trim(), team: String(r[4]).trim() }));
+    .filter(r => String(r[0] || "").trim() && String(r[3] || "").trim().toLowerCase() === team.trim().toLowerCase())
+    .map(r => ({ name: String(r[0]).trim(), team: String(r[3]).trim() }));
 
   return contentResponse({ status: "success", staff: staff });
 }

@@ -34,7 +34,7 @@ const TRANSLATIONS = {
     btn_complete:      "HOÀN TẤT KIỂM TRA",
     login_title:       "Đăng nhập Ban Điện",
     login_username:    "Tên đăng nhập",
-    login_pin:         "Mật khẩu / PIN",
+    login_pin:         "PIN",
     login_btn:         "ĐĂNG NHẬP",
     logout:            "Đăng xuất",
     menu_scan:         "Quét QR",
