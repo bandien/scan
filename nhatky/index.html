@@ -1419,6 +1419,73 @@
       color: var(--brand);
     }
 
+    .user-admin-toolbar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .user-admin-toolbar .form-control { flex: 1; min-width: 0; }
+    .user-admin-add {
+      min-width: 52px;
+      height: 52px;
+      border: 0;
+      border-radius: 16px;
+      background: var(--brand);
+      color: #fff;
+      font-size: 1.25rem;
+    }
+    .user-admin-summary {
+      color: var(--muted);
+      font-size: .88rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .user-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+    .user-card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .user-card-name { color: var(--ink); font-weight: 800; overflow-wrap: anywhere; }
+    .user-card-meta { color: var(--muted); font-size: .88rem; margin-top: 5px; }
+    .user-card-actions { display: flex; gap: 8px; margin-top: 12px; }
+    .user-card-actions button {
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-high);
+      color: var(--ink);
+      font-weight: 700;
+      flex: 1;
+    }
+    .user-card-actions .danger { color: #ffdad6; border-color: rgba(255, 180, 171, .4); }
+    .user-team-options {
+      display: grid;
+      gap: 8px;
+      max-height: 190px;
+      overflow-y: auto;
+      padding: 4px;
+    }
+    .user-team-check {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-high);
+      color: var(--ink);
+    }
+    .user-team-check input { width: 22px; height: 22px; flex-shrink: 0; }
+
     .modal-header,
     .modal-footer {
       border-color: var(--line);
@@ -1610,6 +1677,9 @@
 
       <!-- Màn 5: Cá nhân -->
       <section class="screen" data-screen="personal" id="screen-personal"></section>
+
+      <!-- Màn quản lý Users: chỉ Admin / Manager -->
+      <section class="screen" data-screen="usermanagement" id="screen-usermanagement"></section>
     </div>
 
     <nav class="bottom-nav-bar" id="mainBottomNav" style="display: none;" role="navigation" aria-label="Điều hướng chính">
@@ -1815,6 +1885,54 @@
     </div>
   </div>
 
+  <!-- Modal: thêm/sửa người dùng -->
+  <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title h5" id="userModalTitle">Thêm người dùng</h3>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <form id="userForm">
+          <div class="modal-body">
+            <input type="hidden" id="userOriginalUsername">
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label" for="userUsername">Tên đăng nhập</label>
+                <input class="form-control" id="userUsername" autocomplete="off" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label" for="userPin">PIN <span class="fw-normal text-secondary" id="userPinHint"></span></label>
+                <input class="form-control" id="userPin" type="password" minlength="4" autocomplete="new-password">
+              </div>
+              <div class="col-6">
+                <label class="form-label" for="userRole">Vai trò</label>
+                <select class="form-select" id="userRole" required></select>
+              </div>
+              <div class="col-6">
+                <label class="form-label" for="userPhone">Số điện thoại</label>
+                <input class="form-control" id="userPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09...">
+              </div>
+              <div class="col-12">
+                <div class="form-label">Tổ được xem / phụ trách</div>
+                <div class="user-team-options" id="userTeamOptions"></div>
+              </div>
+              <div class="col-12">
+                <label class="form-label" for="userNote">Ghi chú</label>
+                <textarea class="form-control" id="userNote" rows="2"></textarea>
+              </div>
+              <div class="col-12 d-none text-danger small" id="userFormError"></div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Đóng</button>
+            <button class="btn btn-primary" type="submit" id="btnSaveUser"><i class="bi bi-check2-circle me-1"></i>Lưu người dùng</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <div class="position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 1080">
     <div class="toast align-items-center border-0 bg-dark" id="toast" role="status" aria-live="polite" aria-atomic="true">
       <div class="d-flex">
@@ -1859,7 +1977,8 @@
       teams: "bandien_nhatky_teams",
       employees: "bandien_nhatky_employees",
       staff: "bandien_nhatky_staff",
-      fontScale: "bandien_nhatky_fontscale"
+      fontScale: "bandien_nhatky_fontscale",
+      authToken: "bandien_nhatky_auth_token"
     };
 
     function toIsoDate(d) {
@@ -1880,6 +1999,7 @@
     let showAllLogs = false;
     let toast;
     let planModal;
+    let userModal;
     let loginModal;
     let settingsModalInstance;
     let filterOffcanvasInstance;
@@ -1887,6 +2007,10 @@
     let staffList = [];   // tên nhân viên từ backend (getStaff) cho dropdown
     let planPeople = [];  // người thực hiện đang chọn trong modal kế hoạch
     let quickFilter = "all";
+    let managedUsers = [];
+    let managedUserRoles = [];
+    let managedTeamOptions = [];
+    let managedActorRole = "";
 
     // ===== Điều hướng màn hình (router nhỏ gọn, không reload trang) =====
     let currentScreen = "tasklist";
@@ -1925,6 +2049,7 @@
       else if (screen === "week") renderWeekScreen();
       else if (screen === "stats") renderStatsScreen();
       else if (screen === "personal") renderPersonalScreen();
+      else if (screen === "usermanagement") renderUserManagementScreen();
     }
 
     // Làm mới màn đang mở sau khi dữ liệu đổi (đồng bộ nền, lưu...) — không
@@ -2029,6 +2154,7 @@
       }
       if (screen === "week") return "Lịch tuần này";
       if (screen === "stats") return "Báo cáo tổ";
+      if (screen === "usermanagement") return "Quản lý người dùng";
       return "Nhật ký công việc";
     }
 
@@ -2075,6 +2201,7 @@
     document.addEventListener("DOMContentLoaded", async () => {
       toast = new bootstrap.Toast(document.getElementById("toast"), { delay: 2200 });
       planModal = new bootstrap.Modal(document.getElementById("planModal"));
+      userModal = new bootstrap.Modal(document.getElementById("userModal"));
       loginModal = new bootstrap.Modal(document.getElementById("loginModal"));
       settingsModalInstance = new bootstrap.Modal(document.getElementById("settingsModal"));
       filterOffcanvasInstance = new bootstrap.Offcanvas(document.getElementById("filterOffcanvas"));
@@ -2170,6 +2297,7 @@
         if (btn) removePlanPerson(btn.dataset.name);
       });
       document.getElementById("btnDeletePlan").addEventListener("click", deletePlanFromModal);
+      document.getElementById("userForm").addEventListener("submit", saveManagedUser);
       document.getElementById("btnClearForm").addEventListener("click", clearForm);
       document.getElementById("btnSaveSettings").addEventListener("click", saveSettings);
       const accessGateLogin = document.getElementById("btnAccessGateLogin");
@@ -2638,6 +2766,24 @@
       }
     }
 
+    function currentRole() {
+      try {
+        const shared = JSON.parse(localStorage.getItem("currentUser") || sessionStorage.getItem("currentUser") || "null");
+        return shared ? String(shared.role || "User") : "User";
+      } catch (_) {
+        return "User";
+      }
+    }
+
+    function currentAuthToken() {
+      return localStorage.getItem(STORAGE_KEYS.authToken) || "";
+    }
+
+    function canManageUsers() {
+      const role = currentRole().toLowerCase();
+      return role === "admin" || role === "manager";
+    }
+
     const SUPPORTED_TEAMS = ["Tổ cơ điện", "Tổ điện nước"];
 
     function allowedTeams() {
@@ -2657,7 +2803,7 @@
     // Không có tài khoản, hoặc tài khoản chưa được phân nhóm tổ → chưa cho xem nhật ký/kế hoạch
     function hasTeamAccess() {
       if (!currentUser()) return false;
-      return allowedTeams().length > 0;
+      return allowedTeams().length > 0 || canManageUsers();
     }
 
     function updateAccessGate() {
@@ -2677,6 +2823,7 @@
       if (!confirm("Đăng xuất khỏi tài khoản này?")) return;
       localStorage.removeItem(STORAGE_KEYS.employee);
       localStorage.removeItem(STORAGE_KEYS.teams);
+      localStorage.removeItem(STORAGE_KEYS.authToken);
       localStorage.removeItem("currentUser");
       sessionStorage.removeItem("currentUser");
       localStorage.removeItem("savedUsername");
@@ -2769,13 +2916,16 @@
         const loggedName = data.username || data.name || name;
         const loggedTeams = data.teams || "";
         const loggedRole = data.role || "User";
+        const loggedAuthToken = data.authToken || "";
         rememberEmployee(loggedName);
         localStorage.setItem(STORAGE_KEYS.teams, loggedTeams);
+        localStorage.setItem(STORAGE_KEYS.authToken, loggedAuthToken);
         localStorage.setItem("currentUser", JSON.stringify({
           username: loggedName,
           name: loggedName,
           role: loggedRole,
-          teams: loggedTeams
+          teams: loggedTeams,
+          authToken: loggedAuthToken
         }));
         sessionStorage.removeItem("currentUser");
         updateUserButton();
@@ -3798,6 +3948,7 @@
       const user = currentUser() || "?";
       const initial = escapeHtml((user.trim().charAt(0) || "?").toUpperCase());
       const team = currentTeams() || "Chưa phân tổ";
+      const role = currentRole();
       const shift = defaultShift();
       const shiftRange = SHIFT_RANGES[shift] || "";
       const todays = plans.filter(plan => isDueForReview(plan, today) || isCarryOver(plan, today));
@@ -3811,7 +3962,7 @@
           <div class="avatar">${initial}</div>
           <div>
             <div class="prof-name">${escapeHtml(user)}</div>
-            <div class="prof-role">${escapeHtml(team)}</div>
+            <div class="prof-role">${escapeHtml(role)} · ${escapeHtml(team)}</div>
           </div>
         </div>
         <div class="scroll">
@@ -3824,6 +3975,11 @@
             <div class="metric"><div class="n">${doneCount}</div><div class="l">Đã xong</div></div>
             <div class="metric${attnCount ? " hi" : ""}"><div class="n">${attnCount}</div><div class="l">Cần xử lý</div></div>
           </div>
+          ${canManageUsers() ? `
+          <div class="section-label">Quản lý</div>
+          <div class="menu mb-3">
+            <button class="mrow" type="button" id="btnManageUsers"><i class="bi bi-people lead"></i>Quản lý người dùng<i class="bi bi-chevron-right tail"></i></button>
+          </div>` : ""}
           <div class="section-label">Ứng dụng</div>
           <div class="menu mb-3">
             <button class="mrow" type="button" id="btnOpenScan"><i class="bi bi-qr-code-scan lead"></i>Quét / tìm thiết bị<i class="bi bi-box-arrow-up-right tail"></i></button>
@@ -3840,11 +3996,199 @@
           </div>
         </div>
       `;
+      const manageUsersButton = document.getElementById("btnManageUsers");
+      if (manageUsersButton) manageUsersButton.addEventListener("click", () => navigateTo("usermanagement", {}));
       document.getElementById("btnOpenScan").addEventListener("click", () => { window.location.href = "../index.html"; });
       document.getElementById("btnPersonalFilters").addEventListener("click", () => filterOffcanvasInstance.show());
       document.getElementById("btnPersonalSettings").addEventListener("click", () => settingsModalInstance.show());
       document.getElementById("btnPersonalFontScale").addEventListener("click", () => { cycleFontScale(); renderPersonalScreen(); });
       document.getElementById("btnPersonalLogout").addEventListener("click", logout);
+    }
+
+    // ===== Quản lý Users: chỉ Admin / Manager, backend kiểm tra lại quyền =====
+    async function postUserAdminAction(action, payload) {
+      const sync = getSync();
+      if (!sync.url) throw new Error("Chưa cấu hình URL đồng bộ.");
+      const response = await fetch(sync.url, {
+        method: "POST",
+        signal: AbortSignal.timeout(20000),
+        body: JSON.stringify({
+          action: action,
+          token: sync.token,
+          payload: Object.assign({}, payload || {}, {
+            actorUsername: currentUser(),
+            authToken: currentAuthToken()
+          })
+        })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (data.status !== "success") throw new Error(data.message || "Không thực hiện được yêu cầu.");
+      return data;
+    }
+
+    function userAdminErrorHtml(message) {
+      return `<div class="scroll"><div class="empty-state"><i class="bi bi-shield-exclamation d-block mb-2" style="font-size:2rem"></i>${escapeHtml(message)}</div></div>`;
+    }
+
+    async function renderUserManagementScreen() {
+      const container = document.getElementById("screen-usermanagement");
+      if (!canManageUsers()) {
+        container.innerHTML = userAdminErrorHtml("Bạn không có quyền xem màn hình này.");
+        return;
+      }
+      if (!currentAuthToken()) {
+        container.innerHTML = `${userAdminErrorHtml("Vui lòng đăng nhập lại để mở phiên quản lý an toàn.")}<div class="action-bar"><button class="btn-main" type="button" onclick="openLogin()"><i class="bi bi-box-arrow-in-right"></i>Đăng nhập lại</button></div>`;
+        return;
+      }
+
+      container.innerHTML = '<div class="scroll"><div class="empty-state"><span class="spinner-border spinner-border-sm me-2"></span>Đang tải danh sách người dùng...</div></div>';
+      try {
+        const data = await postUserAdminAction("listUsers", {});
+        managedUsers = Array.isArray(data.users) ? data.users : [];
+        managedUserRoles = Array.isArray(data.roles) ? data.roles : ["User"];
+        managedTeamOptions = Array.isArray(data.teamOptions) ? data.teamOptions : [];
+        managedActorRole = data.actorRole || currentRole();
+        renderUserManagementShell();
+      } catch (error) {
+        if (/phiên đăng nhập|đăng nhập lại/i.test(error.message)) localStorage.removeItem(STORAGE_KEYS.authToken);
+        container.innerHTML = `${userAdminErrorHtml(error.message)}<div class="action-bar"><button class="btn-main" type="button" onclick="renderUserManagementScreen()"><i class="bi bi-arrow-clockwise"></i>Thử lại</button></div>`;
+      }
+    }
+
+    function renderUserManagementShell() {
+      const container = document.getElementById("screen-usermanagement");
+      container.innerHTML = `
+        <div class="scroll">
+          <div class="user-admin-toolbar">
+            <input class="form-control" id="userAdminSearch" type="search" placeholder="Tìm tên, tổ, số điện thoại..." aria-label="Tìm người dùng">
+            <button class="user-admin-add" id="btnAddUser" type="button" title="Thêm người dùng" aria-label="Thêm người dùng"><i class="bi bi-person-plus"></i></button>
+          </div>
+          <div class="user-admin-summary" id="userAdminSummary"></div>
+          <div id="userAdminList"></div>
+        </div>`;
+      document.getElementById("btnAddUser").addEventListener("click", () => openUserEditor(""));
+      document.getElementById("userAdminSearch").addEventListener("input", event => renderManagedUserList(event.target.value));
+      container.onclick = event => {
+        const edit = event.target.closest("[data-edit-user]");
+        const remove = event.target.closest("[data-delete-user]");
+        if (edit) openUserEditor(decodeURIComponent(edit.dataset.editUser));
+        if (remove) deleteManagedUser(decodeURIComponent(remove.dataset.deleteUser));
+      };
+      renderManagedUserList("");
+    }
+
+    function renderManagedUserList(query) {
+      const list = document.getElementById("userAdminList");
+      const summary = document.getElementById("userAdminSummary");
+      if (!list || !summary) return;
+      const normalized = String(query || "").trim().toLowerCase();
+      const visible = managedUsers.filter(user => {
+        const haystack = [user.username, user.role, user.teams, user.phone, user.note].join(" ").toLowerCase();
+        return !normalized || haystack.includes(normalized);
+      });
+      summary.textContent = `${visible.length}/${managedUsers.length} tài khoản · Quyền ${managedActorRole}`;
+      if (!visible.length) {
+        list.innerHTML = '<div class="empty-state">Không có tài khoản phù hợp.</div>';
+        return;
+      }
+      list.innerHTML = visible.map(user => {
+        const encoded = escapeAttr(encodeURIComponent(user.username));
+        const roleClass = user.role === "Admin" ? "badge-high" : user.role === "Manager" ? "badge-mid" : "badge-low";
+        return `
+          <article class="user-card">
+            <div class="user-card-head">
+              <div>
+                <div class="user-card-name">${escapeHtml(user.username)}</div>
+                <div class="user-card-meta"><i class="bi bi-diagram-3 me-1"></i>${escapeHtml(user.teams || "Chưa phân tổ")}</div>
+                ${user.phone ? `<div class="user-card-meta"><i class="bi bi-telephone me-1"></i>${escapeHtml(user.phone)}</div>` : ""}
+              </div>
+              <span class="badge-soft ${roleClass}">${escapeHtml(user.role)}</span>
+            </div>
+            ${user.note ? `<div class="user-card-meta mt-2">${escapeHtml(user.note)}</div>` : ""}
+            <div class="user-card-actions">
+              <button type="button" data-edit-user="${encoded}"><i class="bi bi-pencil me-1"></i>Sửa</button>
+              ${user.canDelete ? `<button class="danger" type="button" data-delete-user="${encoded}"><i class="bi bi-trash me-1"></i>Xóa</button>` : ""}
+            </div>
+          </article>`;
+      }).join("");
+    }
+
+    function renderUserTeamChecks(selectedTeams) {
+      const selected = String(selectedTeams || "").split(/[,;|]/).map(team => team.trim()).filter(Boolean);
+      const box = document.getElementById("userTeamOptions");
+      box.innerHTML = managedTeamOptions.map((team, index) => {
+        const id = `userTeam_${index}`;
+        const checked = selected.includes(team) ? " checked" : "";
+        const label = team === "*" ? "Tất cả tổ (*)" : team;
+        return `<label class="user-team-check" for="${id}"><input id="${id}" type="checkbox" value="${escapeAttr(team)}"${checked}><span>${escapeHtml(label)}</span></label>`;
+      }).join("") || '<div class="text-secondary small">Chưa có danh sách tổ.</div>';
+      box.onchange = event => {
+        if (!event.target.checked) return;
+        if (event.target.value === "*") {
+          box.querySelectorAll('input[type="checkbox"]').forEach(input => { if (input !== event.target) input.checked = false; });
+        } else {
+          const allTeams = box.querySelector('input[value="*"]');
+          if (allTeams) allTeams.checked = false;
+        }
+      };
+    }
+
+    function openUserEditor(username) {
+      const user = username ? managedUsers.find(item => item.username === username) : null;
+      document.getElementById("userModalTitle").textContent = user ? "Sửa người dùng" : "Thêm người dùng";
+      document.getElementById("userOriginalUsername").value = user ? user.username : "";
+      document.getElementById("userUsername").value = user ? user.username : "";
+      document.getElementById("userPin").value = "";
+      document.getElementById("userPin").required = !user;
+      document.getElementById("userPinHint").textContent = user ? "(bỏ trống để giữ PIN cũ)" : "(bắt buộc)";
+      document.getElementById("userPhone").value = user ? user.phone || "" : "";
+      document.getElementById("userNote").value = user ? user.note || "" : "";
+      document.getElementById("userFormError").classList.add("d-none");
+      const roleSelect = document.getElementById("userRole");
+      roleSelect.innerHTML = managedUserRoles.map(role => `<option>${escapeHtml(role)}</option>`).join("");
+      roleSelect.value = user && managedUserRoles.includes(user.role) ? user.role : managedUserRoles[managedUserRoles.length - 1] || "User";
+      renderUserTeamChecks(user ? user.teams : "");
+      userModal.show();
+    }
+
+    async function saveManagedUser(event) {
+      event.preventDefault();
+      const button = document.getElementById("btnSaveUser");
+      const errorBox = document.getElementById("userFormError");
+      const teams = Array.from(document.querySelectorAll('#userTeamOptions input[type="checkbox"]:checked')).map(input => input.value);
+      const payload = {
+        originalUsername: document.getElementById("userOriginalUsername").value,
+        username: document.getElementById("userUsername").value.trim(),
+        pin: document.getElementById("userPin").value,
+        role: document.getElementById("userRole").value,
+        teams: teams.join(", "),
+        phone: document.getElementById("userPhone").value.trim(),
+        note: document.getElementById("userNote").value.trim()
+      };
+      button.disabled = true;
+      errorBox.classList.add("d-none");
+      try {
+        const data = await postUserAdminAction("saveUser", { user: payload });
+        userModal.hide();
+        showToast(data.message || "Đã lưu người dùng");
+        await renderUserManagementScreen();
+      } catch (error) {
+        errorBox.textContent = error.message;
+        errorBox.classList.remove("d-none");
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    async function deleteManagedUser(username) {
+      if (!confirm(`Xóa tài khoản “${username}”? Thao tác này không thể hoàn tác.`)) return;
+      try {
+        const data = await postUserAdminAction("deleteUser", { username: username });
+        showToast(data.message || "Đã xóa tài khoản");
+        await renderUserManagementScreen();
+      } catch (error) {
+        alert(error.message);
+      }
     }
 
     // ===== Badge dùng chung =====
