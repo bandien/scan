@@ -1129,6 +1129,69 @@
     }
 
     .filters-bar { padding: 10px 16px 12px; }
+    .task-top-controls {
+      flex-shrink: 0;
+      background: var(--page-bg);
+      border-bottom: 1px solid var(--line);
+    }
+    .task-top-controls .date-bar {
+      padding-bottom: 8px;
+    }
+    .task-top-controls .date-input {
+      text-align: center;
+    }
+    .task-top-controls .filters-bar {
+      align-items: center;
+      gap: 8px;
+      overflow: visible;
+      padding-top: 0;
+    }
+    .quick-filter-scroll {
+      display: flex;
+      flex: 1;
+      gap: 8px;
+      min-width: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .quick-filter-scroll::-webkit-scrollbar { display: none; }
+    .task-toolbar-button {
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      padding: 0;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--surface-high);
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .task-toolbar-button:active { transform: scale(.97); }
+    .task-more-menu {
+      min-width: 220px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface-high);
+      box-shadow: 0 18px 42px rgba(0, 0, 0, .32);
+    }
+    .task-more-menu .dropdown-item {
+      min-height: 44px;
+      border-radius: 10px;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+    }
+    .task-more-menu .dropdown-item:hover,
+    .task-more-menu .dropdown-item:focus {
+      background: var(--surface-container-highest, #32353d);
+      color: var(--ink);
+    }
+    .task-more-menu .dropdown-divider { border-color: var(--line); }
     .a11y-chip,
     .qc,
     .link-button {
@@ -1382,21 +1445,30 @@
     <div id="appContent" class="d-none">
       <!-- Màn 1: Kế hoạch -->
       <section class="screen" data-screen="tasklist" id="screen-tasklist">
-        <div class="date-bar">
-          <button class="btn-icon-sm" id="btnPrevDay" type="button" title="Ngày trước"><i class="bi bi-chevron-left"></i></button>
-          <input class="date-input" id="filterDate" type="date">
-          <button class="btn-icon-sm" id="btnNextDay" type="button" title="Ngày sau"><i class="bi bi-chevron-right"></i></button>
-          <button class="btn-today" id="btnToday" type="button">Hôm nay</button>
-          <button class="btn-icon-sm" id="btnReload" type="button" title="Nạp lại"><i class="bi bi-arrow-clockwise"></i></button>
-          <button class="btn-icon-sm" id="btnAddPlan" type="button" title="Thêm kế hoạch"><i class="bi bi-plus-square"></i></button>
-        </div>
-        <div class="filters-bar" id="quickFilterBar">
-          <button class="a11y-chip active" type="button" data-quick="all">Tất cả</button>
-          <button class="a11y-chip warn" type="button" data-quick="attention"><i class="bi bi-exclamation-triangle-fill me-1"></i>Cần xử lý<span class="chip-count" id="attnCount" style="display:none">0</span></button>
-          <button class="a11y-chip" type="button" data-quick="today">Hôm nay</button>
-          <button class="a11y-chip" type="button" data-quick="done">Đã xong</button>
-          <button class="a11y-chip" type="button" id="btnOpenFilters" title="Lọc theo tổ/người/tìm kiếm"><i class="bi bi-funnel"></i></button>
-          <button class="a11y-chip" type="button" id="btnViewWeek" title="Xem theo tuần"><i class="bi bi-calendar-week"></i></button>
+        <div class="task-top-controls">
+          <div class="date-bar" aria-label="Chọn ngày xem công việc">
+            <button class="btn-icon-sm" id="btnPrevDay" type="button" title="Ngày trước" aria-label="Ngày trước"><i class="bi bi-chevron-left"></i></button>
+            <input class="date-input" id="filterDate" type="date" aria-label="Ngày đang xem">
+            <button class="btn-icon-sm" id="btnNextDay" type="button" title="Ngày sau" aria-label="Ngày sau"><i class="bi bi-chevron-right"></i></button>
+            <button class="btn-icon-sm" id="btnToday" type="button" title="Về hôm nay" aria-label="Về hôm nay"><i class="bi bi-calendar-check"></i></button>
+          </div>
+          <div class="filters-bar" id="quickFilterBar">
+            <div class="quick-filter-scroll" aria-label="Lọc trạng thái công việc">
+              <button class="a11y-chip active" type="button" data-quick="all">Tất cả</button>
+              <button class="a11y-chip warn" type="button" data-quick="attention"><i class="bi bi-exclamation-triangle-fill me-1"></i>Cần xử lý<span class="chip-count" id="attnCount" style="display:none">0</span></button>
+              <button class="a11y-chip" type="button" data-quick="done">Đã xong</button>
+            </div>
+            <button class="task-toolbar-button" type="button" id="btnOpenFilters" title="Tìm kiếm và bộ lọc" aria-label="Tìm kiếm và bộ lọc"><i class="bi bi-funnel"></i></button>
+            <div class="dropdown">
+              <button class="task-toolbar-button" type="button" id="btnTaskMore" data-bs-toggle="dropdown" aria-expanded="false" title="Thao tác khác" aria-label="Thao tác khác"><i class="bi bi-three-dots-vertical"></i></button>
+              <ul class="dropdown-menu dropdown-menu-end task-more-menu" aria-labelledby="btnTaskMore">
+                <li><button class="dropdown-item" id="btnViewWeek" type="button"><i class="bi bi-calendar-week"></i>Lịch tuần</button></li>
+                <li><button class="dropdown-item" id="btnReload" type="button"><i class="bi bi-arrow-clockwise"></i>Nạp lại dữ liệu</button></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><button class="dropdown-item" id="btnAddPlan" type="button"><i class="bi bi-plus-square"></i>Thêm kế hoạch</button></li>
+              </ul>
+            </div>
+          </div>
         </div>
         <div class="list-scroll">
           <div class="day-log-summary" id="dayLogSummary"></div>
@@ -1883,8 +1955,19 @@
       return WEEK_DAY_NAMES[(d.getDay() + 6) % 7];
     }
 
+    function selectedTaskDate() {
+      const input = document.getElementById("filterDate");
+      return input && input.value ? input.value : today;
+    }
+
+    function taskListTitle() {
+      const selectedDate = selectedTaskDate();
+      return selectedDate === today ? "Công việc hôm nay" : `Công việc ngày ${shortDateVn(selectedDate)}`;
+    }
+
     function taskListSubtitle() {
-      return `${weekdayNameVn(today)}, ${shortDateVn(today)} · ${defaultShift()}`;
+      const selectedDate = selectedTaskDate();
+      return `${weekdayNameVn(selectedDate)}, ${formatDateVn(selectedDate)} · ${defaultShift()}`;
     }
 
     function homeHeaderHtml() {
@@ -1893,7 +1976,7 @@
           <div class="header-left min-w-0">
             <div class="brand-mark flex-shrink-0"><i class="bi bi-lightning-charge-fill"></i></div>
             <div class="header-titles min-w-0">
-              <div class="app-title text-truncate">Công việc hôm nay</div>
+              <div class="app-title text-truncate">${escapeHtml(taskListTitle())}</div>
               <div class="header-sub text-truncate">${escapeHtml(taskListSubtitle())}</div>
             </div>
           </div>
@@ -2037,12 +2120,17 @@
       });
 
       ["filterDate", "filterTeam", "filterPerson", "searchBox"].forEach(id => {
-        document.getElementById(id).addEventListener("input", () => { if (currentScreen === "tasklist") renderPlans(); });
+        document.getElementById(id).addEventListener("input", () => {
+          if (currentScreen !== "tasklist") return;
+          if (id === "filterDate") renderHeader("tasklist", {});
+          renderPlans();
+        });
       });
       document.getElementById("btnPrevDay").addEventListener("click", () => shiftFilterDate(-1));
       document.getElementById("btnNextDay").addEventListener("click", () => shiftFilterDate(1));
       document.getElementById("btnToday").addEventListener("click", () => {
         document.getElementById("filterDate").value = today;
+        renderHeader("tasklist", {});
         renderPlans();
       });
       document.getElementById("btnViewWeek").addEventListener("click", () => navigateTo("week", {}));
@@ -2063,14 +2151,8 @@
         const btn = event.target.closest(".a11y-chip[data-quick]");
         if (!btn) return;
         const value = btn.dataset.quick;
-        if (value === "today") {
-          document.getElementById("filterDate").value = today;
-          quickFilter = "all";
-          document.querySelectorAll("#quickFilterBar .a11y-chip[data-quick]").forEach(chip => chip.classList.toggle("active", chip.dataset.quick === "all"));
-        } else {
-          quickFilter = value;
-          document.querySelectorAll("#quickFilterBar .a11y-chip[data-quick]").forEach(chip => chip.classList.toggle("active", chip.dataset.quick === value));
-        }
+        quickFilter = value;
+        document.querySelectorAll("#quickFilterBar .a11y-chip[data-quick]").forEach(chip => chip.classList.toggle("active", chip.dataset.quick === value));
         renderPlans();
       });
 
@@ -2167,6 +2249,7 @@
       const parsed = input.value ? new Date(input.value + "T00:00:00") : new Date();
       parsed.setDate(parsed.getDate() + deltaDays);
       input.value = toIsoDate(parsed);
+      renderHeader("tasklist", {});
       renderPlans();
     }
 
