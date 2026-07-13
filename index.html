@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" data-bs-theme="dark">
+<html lang="vi" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,25 +19,25 @@
     <style>
         /* ===== Design tokens: "Scan Industrial Utility" (design-system/stitch_scan_mobile_design_system) ===== */
         :root {
-            --siu-bg: #10131b;
-            --siu-surface-low: #181b24;
-            --siu-surface: #1c2028;
-            --siu-surface-high: #272a32;
-            --siu-surface-highest: #32353d;
-            --siu-on-surface: #e0e2ed;
-            --siu-on-surface-variant: #c2c6d8;
-            --siu-outline: #8c90a1;
-            --siu-outline-variant: #424655;
-            --siu-primary: #b1c5ff;
+            --siu-bg: #fdfbff;
+            --siu-surface-low: #f3f3f7;
+            --siu-surface: #ffffff;
+            --siu-surface-high: #eeeef3;
+            --siu-surface-highest: #e2e2e6;
+            --siu-on-surface: #1a1c1e;
+            --siu-on-surface-variant: #44474e;
+            --siu-outline: #74777f;
+            --siu-outline-variant: #c2c6d8;
+            --siu-primary: #0057ce;
             --siu-primary-container: #0e6efd;
-            --siu-secondary-container: #314577;
-            --siu-on-secondary-container: #a0b4ed;
-            --siu-success: #2d8a5f;
-            --siu-error-container: #93000a;
-            --siu-on-error-container: #ffdad6;
+            --siu-secondary-container: #dae2ff;
+            --siu-on-secondary-container: #001d35;
+            --siu-success: #006d3e;
+            --siu-error-container: #ba1a1a;
+            --siu-on-error-container: #ffffff;
             --siu-tertiary-container: #cf4b00;
-            --siu-tertiary: #ffb599;
-            --r-sm: 4px; --r-md: 12px; --r-lg: 16px; --r-xl: 24px;
+            --siu-tertiary: #7f2b00;
+            --r-sm: 4px; --r-md: 8px; --r-lg: 12px; --r-xl: 24px;
             /* Alias tên biến cũ — rule nào còn sót vẫn ra màu dark hợp lệ */
             --glass-bg: var(--siu-surface);
             --primary-grad: var(--siu-primary-container);
@@ -56,15 +56,25 @@
             min-height: 100vh;
         }
 
-        .app-shell { max-width: 440px; margin: 0 auto; padding: 12px 16px 92px 16px; }
+        .app-shell { max-width: 440px; margin: 0 auto; padding: 76px 16px 92px 16px; }
 
-        .header-section { padding: 10px 0 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .header-section {
+            position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 440px; min-height: 64px; padding: 8px 16px;
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            background: var(--siu-surface); border-bottom: 1px solid var(--siu-outline-variant);
+            z-index: 1030;
+        }
         .header-title-row { display: flex; align-items: center; gap: 10px; min-width: 0; }
         .header-title-row i { color: var(--siu-primary); font-size: 22px; }
-        .header-title-row h1 { font-size: 20px; font-weight: 800; margin: 0; line-height: 1.2; }
+        .header-title-row h1 { font-size: 20px; font-weight: 800; margin: 0; line-height: 1.2; color: var(--siu-on-surface); }
+        .header-section > .logo-box,
+        .header-section > h2,
+        .header-section > p { display: none; }
+        .header-section > .d-flex { margin: 0 !important; padding: 0 !important; flex: 0 0 auto; }
 
         .logo-box {
-            background: var(--siu-primary-container);
+            background: var(--siu-primary);
             width: 44px; height: 44px; border-radius: var(--r-md);
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
@@ -78,12 +88,13 @@
             border: 1px solid var(--siu-outline-variant);
             overflow: hidden;
             margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
 
         /* Skeleton Loading Effect (dark shimmer) */
         .skeleton {
             background: var(--siu-surface-high);
-            background: linear-gradient(110deg, #272a32 8%, #32353d 18%, #272a32 33%);
+            background: linear-gradient(110deg, #eeeef3 8%, #ffffff 18%, #eeeef3 33%);
             border-radius: 5px;
             background-size: 200% 100%;
             animation: 1.5s shine linear infinite;
@@ -94,30 +105,57 @@
         .skeleton-text { height: 20px; margin-bottom: 10px; width: 80%; }
         .skeleton-title { height: 30px; margin-bottom: 15px; width: 60%; }
 
-        #reader { width: 100%; display: none; background: #000; position: relative; }
+        #reader { width: 100%; min-height: min(100vw, 408px); display: none; background: #000; position: relative; z-index: 10; }
         #scanner-ui-overlay { position: absolute; top: 10px; right: 10px; z-index: 100; }
 
         /* ===== Khung quét theo mockup "Tìm kiếm" ===== */
-        .scan-frame { position: relative; background: #0b0e16; border-radius: var(--r-lg); overflow: hidden; min-height: 210px; display: flex; flex-direction: column; justify-content: center; }
-        .scan-corner { position: absolute; width: 34px; height: 34px; border: 3px solid var(--siu-primary); pointer-events: none; z-index: 50; }
-        .scan-corner.tl { top: 14px; left: 14px; border-right: 0; border-bottom: 0; border-top-left-radius: 10px; }
-        .scan-corner.tr { top: 14px; right: 14px; border-left: 0; border-bottom: 0; border-top-right-radius: 10px; }
-        .scan-corner.bl { bottom: 64px; left: 14px; border-right: 0; border-top: 0; border-bottom-left-radius: 10px; }
-        .scan-corner.br { bottom: 64px; right: 14px; border-left: 0; border-top: 0; border-bottom-right-radius: 10px; }
-        .scan-line { position: absolute; left: 20px; right: 20px; height: 2px; background: linear-gradient(90deg, transparent, var(--siu-primary-container), transparent); pointer-events: none; z-index: 50; animation: scanSweep 2.4s ease-in-out infinite; display: none; }
+        .scan-frame {
+            position: relative; background: #080b12; border-radius: 0; overflow: hidden;
+            min-height: min(100vw, 408px); display: flex; flex-direction: column;
+            justify-content: center; margin: -12px -16px 0; isolation: isolate;
+        }
+        .scan-frame::before {
+            content: ""; position: absolute; inset: 0;
+            background:
+                linear-gradient(rgba(16, 19, 27, 0.4), rgba(16, 19, 27, 0.4)),
+                radial-gradient(circle at center, transparent 150px, rgba(16, 19, 27, 0.82) 151px);
+            z-index: 20; pointer-events: none;
+        }
+        .scan-frame::after {
+            content: ""; position: absolute; inset: 0;
+            background:
+                linear-gradient(135deg, rgba(255,255,255,.08), transparent 22%),
+                repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 1px, transparent 1px 24px);
+            opacity: .45; z-index: 5; pointer-events: none;
+        }
+        .scan-corner { position: absolute; width: 38px; height: 38px; border: 4px solid #b1c5ff; pointer-events: none; z-index: 50; }
+        .scan-corner.tl { top: calc(50% - 142px); left: calc(50% - 142px); border-right: 0; border-bottom: 0; border-top-left-radius: 14px; }
+        .scan-corner.tr { top: calc(50% - 142px); right: calc(50% - 142px); border-left: 0; border-bottom: 0; border-top-right-radius: 14px; }
+        .scan-corner.bl { bottom: calc(50% - 142px); left: calc(50% - 142px); border-right: 0; border-top: 0; border-bottom-left-radius: 14px; }
+        .scan-corner.br { bottom: calc(50% - 142px); right: calc(50% - 142px); border-left: 0; border-top: 0; border-bottom-right-radius: 14px; }
+        .scan-line {
+            position: absolute; left: calc(50% - 140px); right: calc(50% - 140px);
+            height: 2px; background: #b1c5ff; box-shadow: 0 0 15px #0e6efd;
+            pointer-events: none; z-index: 50; animation: scanSweep 3s ease-in-out infinite; display: none;
+        }
         .scan-frame.scanning .scan-line { display: block; }
-        @keyframes scanSweep { 0%,100% { top: 18%; } 50% { top: 68%; } }
-        .scan-controls { position: relative; z-index: 60; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 10px 14px 14px; margin-top: auto; }
+        @keyframes scanSweep { 0%,100% { top: 18%; } 50% { top: 82%; } }
+        .scan-controls {
+            position: relative; z-index: 60; display: flex; align-items: center; justify-content: space-between;
+            gap: 12px; padding: 0 32px 24px; margin-top: auto; width: 100%;
+        }
         .scan-ctrl-btn {
-            width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--siu-outline-variant);
-            background: rgba(28, 32, 40, 0.85); color: var(--siu-on-surface); font-size: 20px;
+            width: 52px; height: 52px; border-radius: 50%; border: 1px solid rgba(194, 198, 216, .7);
+            background: #ffffff; color: var(--siu-primary); font-size: 20px;
             display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, .18);
         }
         .scan-ctrl-btn:active { transform: scale(0.95); }
         .scan-status-pill {
-            background: rgba(28, 32, 40, 0.9); border: 1px solid var(--siu-outline-variant);
-            color: var(--siu-on-surface-variant); border-radius: 999px; padding: 10px 18px;
-            font-size: 13px; font-weight: 700; white-space: nowrap;
+            background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(194, 198, 216, .8);
+            color: var(--siu-on-surface); border-radius: 999px; padding: 10px 18px;
+            font-size: 13px; font-weight: 800; white-space: nowrap;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, .14);
         }
 
         .btn-scan-main {
@@ -150,13 +188,14 @@
         .recent-scan-card {
             display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
             background: var(--siu-surface); border: 1px solid var(--siu-outline-variant);
-            border-radius: var(--r-md); overflow: hidden; padding: 0; margin-bottom: 10px;
+            border-radius: var(--r-lg); overflow: hidden; padding: 0; margin-bottom: 14px;
             color: var(--siu-on-surface); cursor: pointer;
+            min-height: 80px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
         .recent-scan-card:active { transform: scale(0.98); }
         .status-bar-left { width: 4px; align-self: stretch; flex-shrink: 0; }
         .status-bar-left.st-active { background: var(--siu-success); }
-        .status-bar-left.st-incident { background: #dc2626; }
+        .status-bar-left.st-incident { background: var(--siu-error-container); }
         .status-bar-left.st-maintenance { background: var(--siu-tertiary-container); }
         .status-bar-left.st-unknown { background: var(--siu-outline); }
         .recent-scan-main { flex: 1; min-width: 0; padding: 12px 0; }
@@ -167,13 +206,13 @@
             text-transform: uppercase; letter-spacing: .03em; border-radius: 999px;
             padding: 4px 10px; white-space: nowrap; flex-shrink: 0;
         }
-        .status-chip.st-active { background: rgba(45, 138, 95, .18); color: #6fcf9b; }
+        .status-chip.st-active { background: var(--siu-success); color: #ffffff; }
         .status-chip.st-incident { background: var(--siu-error-container); color: var(--siu-on-error-container); }
-        .status-chip.st-maintenance { background: rgba(207, 75, 0, .2); color: var(--siu-tertiary); }
+        .status-chip.st-maintenance { background: var(--siu-tertiary-container); color: #ffffff; }
         .status-chip.st-unknown { background: var(--siu-surface-highest); color: var(--siu-on-surface-variant); }
         .recent-scan-chevron { color: var(--siu-outline); font-size: 16px; padding-right: 12px; flex-shrink: 0; }
-        .section-heading { display: flex; align-items: center; justify-content: space-between; margin: 18px 2px 10px; }
-        .section-heading h2 { font-size: 17px; font-weight: 800; margin: 0; }
+        .section-heading { display: flex; align-items: center; justify-content: space-between; margin: 24px 0 16px; }
+        .section-heading h2 { font-size: 20px; font-weight: 800; margin: 0; }
         .section-heading a, .section-heading button.link-like { color: var(--siu-primary); font-size: 13px; font-weight: 700; text-decoration: none; background: none; border: 0; padding: 4px; }
 
         /* Toast Notification */
@@ -183,9 +222,9 @@
         }
 
         .custom-toast {
-            background: var(--siu-surface-highest); color: var(--siu-on-surface); padding: 15px 25px; border-radius: var(--r-md);
+            background: var(--siu-surface); color: var(--siu-on-surface); padding: 15px 25px; border-radius: var(--r-md);
             border: 1px solid var(--siu-outline-variant); display: flex; align-items: center; gap: 12px;
-            margin-bottom: 10px; animation: fadeInUp 0.4s;
+            margin-bottom: 10px; animation: fadeInUp 0.4s; box-shadow: 0 10px 28px rgba(0,0,0,.14);
         }
 
         #loginOverlay {
@@ -220,6 +259,7 @@
             align-items: center;
             z-index: 1040;
             padding: 0 8px;
+            box-shadow: 0 -4px 10px rgba(0,0,0,.05);
         }
         .bottom-nav-item {
             flex: 1;
@@ -248,9 +288,9 @@
             color: var(--siu-primary);
         }
         .bottom-nav-item.active .nav-icon-wrapper {
-            background-color: var(--siu-secondary-container);
+            background-color: rgba(0, 87, 206, .1);
             color: var(--siu-primary);
-            border-radius: 16px;
+            border-radius: 12px;
             padding: 4px 16px;
             display: inline-flex;
             align-items: center;
@@ -301,6 +341,10 @@
 
 <div class="app-shell" id="appShell" style="display: none;">
     <div class="header-section">
+        <div class="header-title-row">
+            <i class="bi bi-search"></i>
+            <h1>Tìm kiếm</h1>
+        </div>
         <div class="d-flex justify-content-between px-3 align-items-center mb-2">
             <div class="d-flex gap-2 align-items-center">
                 <div class="dropdown" id="userBadge" style="display: none;">
