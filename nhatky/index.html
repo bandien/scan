@@ -1497,6 +1497,295 @@
       color: var(--brand-2);
       background: var(--surface-high);
     }
+
+    /* ===== Danh sách công việc kiểu Vikunja — mobile first ===== */
+    #screen-tasklist .list-scroll {
+      padding: 12px 12px 112px;
+      background: var(--page-bg);
+    }
+    #screen-tasklist .task-top-controls {
+      border-bottom: 0;
+      box-shadow: 0 1px 0 var(--line);
+    }
+    #screen-tasklist .date-bar {
+      padding: 10px 12px 6px;
+    }
+    #screen-tasklist .date-input {
+      min-height: 44px;
+      border-radius: 12px;
+      font-size: .92rem;
+    }
+    #screen-tasklist .btn-icon-sm {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+    }
+    #screen-tasklist .filters-bar {
+      padding: 4px 12px 10px;
+    }
+    #screen-tasklist .a11y-chip {
+      min-height: 38px;
+      padding: 0 13px;
+      font-size: .82rem;
+    }
+    #screen-tasklist .task-toolbar-button {
+      width: 40px;
+      min-width: 40px;
+      height: 40px;
+      border-radius: 12px;
+    }
+
+    .vikunja-day-progress {
+      display: block;
+      margin: 0 0 14px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--surface);
+    }
+    .vikunja-day-progress-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: .8rem;
+      font-weight: 700;
+    }
+    .vikunja-day-progress-head strong {
+      color: var(--ink);
+      font-size: .9rem;
+    }
+    .vikunja-progress-track {
+      height: 6px;
+      margin-top: 9px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: var(--surface-high);
+    }
+    .vikunja-progress-value {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--done);
+      transition: width .2s ease;
+    }
+    .vikunja-progress-note {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: .76rem;
+      line-height: 1.35;
+    }
+    .vikunja-progress-note.attention { color: var(--warn); }
+
+    .vikunja-section { margin: 0 0 18px; }
+    .vikunja-section-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 32px;
+      padding: 0 4px 7px;
+      color: var(--muted);
+      font-size: .86rem;
+      font-weight: 800;
+    }
+    .vikunja-section-head i { font-size: .95rem; }
+    .vikunja-section-head.attention { color: #ffb4ab; }
+    .vikunja-section-head.doing { color: var(--brand-2); }
+    .vikunja-section-head.done { color: #8ee0b6; }
+    .vikunja-section-count {
+      min-width: 24px;
+      margin-left: auto;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--surface-high);
+      color: var(--muted);
+      text-align: center;
+      font-size: .75rem;
+    }
+    .vikunja-task-list {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--surface);
+    }
+    .vikunja-task {
+      position: relative;
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr) 34px;
+      gap: 10px;
+      width: 100%;
+      min-height: 92px;
+      padding: 13px 10px 12px 12px;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink);
+      text-align: left;
+      cursor: pointer;
+    }
+    .vikunja-task:last-child { border-bottom: 0; }
+    .vikunja-task:active { background: var(--surface-high); }
+    .vikunja-task::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 3px;
+      background: transparent;
+    }
+    .vikunja-task.is-attention::before { background: var(--danger); }
+    .vikunja-task.is-doing::before { background: var(--brand-2); }
+    .vikunja-task.is-done { opacity: .72; }
+    .vikunja-task.is-done .vikunja-task-title { text-decoration: line-through; }
+    .vikunja-check {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      margin-top: 1px;
+      padding: 0;
+      border: 2px solid #697386;
+      border-radius: 50%;
+      background: transparent;
+      color: transparent;
+      font-size: .82rem;
+    }
+    .vikunja-check.doing {
+      border-color: var(--brand-2);
+      color: var(--brand-2);
+    }
+    .vikunja-check.attention {
+      border-color: var(--danger);
+      color: #ffb4ab;
+    }
+    .vikunja-check.done {
+      border-color: var(--done);
+      background: var(--done);
+      color: #fff;
+    }
+    .vikunja-task-content { min-width: 0; }
+    .vikunja-task-title {
+      margin: 0;
+      color: var(--ink);
+      font-size: .96rem;
+      font-weight: 750;
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+    }
+    .vikunja-labels {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 7px;
+    }
+    .vikunja-label {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      padding: 2px 7px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface-high);
+      color: var(--muted);
+      font-size: .68rem;
+      font-weight: 750;
+      line-height: 1.1;
+    }
+    .vikunja-label.priority-high {
+      border-color: rgba(255, 180, 171, .42);
+      background: rgba(255, 180, 171, .12);
+      color: #ffb4ab;
+    }
+    .vikunja-label.priority-medium {
+      border-color: rgba(255, 181, 153, .42);
+      background: rgba(255, 181, 153, .12);
+      color: var(--warn);
+    }
+    .vikunja-label.status-doing {
+      border-color: rgba(177, 197, 255, .42);
+      background: rgba(177, 197, 255, .12);
+      color: var(--brand-2);
+    }
+    .vikunja-task-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px 11px;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: .73rem;
+      line-height: 1.3;
+    }
+    .vikunja-task-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      min-width: 0;
+    }
+    .vikunja-task-meta .is-overdue { color: #ffb4ab; }
+    .vikunja-task-meta .truncate-meta {
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .vikunja-task-open {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      align-self: center;
+      border: 0;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+    .vikunja-task-open:active { background: var(--surface-high); }
+    .vikunja-empty {
+      padding: 40px 20px;
+      border: 1px dashed var(--line);
+      border-radius: 14px;
+      background: var(--surface);
+      color: var(--muted);
+      text-align: center;
+    }
+    .vikunja-empty i {
+      display: block;
+      margin-bottom: 10px;
+      color: var(--brand-2);
+      font-size: 2rem;
+    }
+    #screen-tasklist .task-list-actionbar {
+      position: fixed;
+      right: max(16px, calc((100vw - 440px) / 2 + 16px));
+      bottom: calc(84px + env(safe-area-inset-bottom));
+      left: auto;
+      width: auto;
+      padding: 0;
+      background: none;
+      pointer-events: none;
+      z-index: 1035;
+    }
+    #screen-tasklist .task-quick-log {
+      width: auto;
+      min-height: 50px;
+      padding: 0 17px;
+      border-radius: 999px;
+      font-size: .9rem;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, .32);
+      pointer-events: auto;
+    }
+    @media (max-width: 360px) {
+      .vikunja-task { grid-template-columns: 30px minmax(0, 1fr) 28px; gap: 7px; padding-left: 9px; }
+      .vikunja-task-open { width: 28px; }
+      #screen-tasklist .task-quick-log span { display: none; }
+      #screen-tasklist .task-quick-log { width: 50px; padding: 0; }
+    }
   </style>
 </head>
 <body class="dark-mode" data-bs-theme="dark">
@@ -1523,7 +1812,7 @@
             <div class="quick-filter-scroll" aria-label="Lọc trạng thái công việc">
               <button class="a11y-chip active" type="button" data-quick="all">Tất cả</button>
               <button class="a11y-chip warn" type="button" data-quick="attention"><i class="bi bi-exclamation-triangle-fill me-1"></i>Cần xử lý<span class="chip-count" id="attnCount" style="display:none">0</span></button>
-              <button class="a11y-chip" type="button" data-quick="done">Đã xong</button>
+              <button class="a11y-chip" type="button" data-quick="done">Xong</button>
             </div>
             <button class="task-toolbar-button" type="button" id="btnOpenFilters" title="Tìm kiếm và bộ lọc" aria-label="Tìm kiếm và bộ lọc"><i class="bi bi-funnel"></i></button>
             <div class="dropdown">
@@ -1541,8 +1830,8 @@
           <div class="day-log-summary" id="dayLogSummary"></div>
           <div id="taskListBody"></div>
         </div>
-        <div class="action-bar">
-          <button class="btn-main" id="btnQuickLog" type="button"><i class="bi bi-journal-plus"></i>Ghi nhật ký nhanh</button>
+        <div class="action-bar task-list-actionbar">
+          <button class="btn-main task-quick-log" id="btnQuickLog" type="button"><i class="bi bi-journal-plus"></i><span>Ghi nhanh</span></button>
         </div>
       </section>
 
@@ -3183,13 +3472,19 @@
         return coverage.done >= coverage.total;
       }).length;
       const missing = active.length - complete;
-      const cls = missing ? "text-danger" : "text-success";
-      const icon = missing ? "bi-exclamation-triangle-fill" : "bi-check2-circle";
+      const percent = active.length ? Math.round((complete / active.length) * 100) : 0;
+      summary.className = "day-log-summary vikunja-day-progress";
       summary.innerHTML = `
-        <i class="bi ${icon} ${cls}"></i>
-        <strong>${shortDateVn(selectedDate)}</strong>
-        <span>Nhật ký: <strong>${complete}/${active.length}</strong> việc đã ghi đủ.</span>
-        ${missing ? `<span class="text-danger fw-semibold">Còn ${missing} việc thiếu.</span>` : '<span class="text-success fw-semibold">Đủ nhật ký trong ngày.</span>'}
+        <div class="vikunja-day-progress-head">
+          <strong>Tiến độ nhật ký ${shortDateVn(selectedDate)}</strong>
+          <span>${complete}/${active.length} việc</span>
+        </div>
+        <div class="vikunja-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}" aria-label="Tiến độ ghi nhật ký">
+          <span class="vikunja-progress-value" style="width:${percent}%"></span>
+        </div>
+        <div class="vikunja-progress-note ${missing ? "attention" : ""}">
+          ${missing ? `Còn ${missing} việc chưa ghi đủ nhật ký.` : "Đã ghi đủ nhật ký cho các việc đang theo dõi."}
+        </div>
       `;
     }
 
@@ -3253,59 +3548,60 @@
     }
 
     function taskRowHtml(plan, selectedDate, attn) {
-      const timeText = plan.time ? escapeHtml(plan.time) : "Chưa xếp giờ";
-      
-      // Priority Badge mapping
-      let priorityClass = "stitch-badge-low";
-      let barClass = "stitch-bar-low";
-      let priorityText = "Ưu tiên: Thấp";
-      
-      if (plan.priority === "Cao" || attn) {
-        priorityClass = "stitch-badge-high";
-        barClass = "stitch-bar-high";
-        priorityText = "Ưu tiên: Cao";
-      } else if (plan.priority === "Trung bình") {
-        priorityClass = "stitch-badge-medium";
-        barClass = "stitch-bar-medium";
-        priorityText = "Ưu tiên: Trung bình";
-      }
-      
-      // Action Button mapping
-      let btnClass = "stitch-btn stitch-btn-secondary";
-      let btnText = 'BẮT ĐẦU LÀM <span class="material-symbols-outlined fs-6">play_arrow</span>';
-      let btnAction = `handleTaskAction('${escapeAttr(plan.id)}','Đang làm')`;
-      
-      if (plan.status === "Hoàn thành") {
-        btnClass = "stitch-btn stitch-btn-success";
-        btnText = 'ĐÃ HOÀN THÀNH <span class="material-symbols-outlined fs-6">check_circle</span>';
-        btnAction = `openTaskDetail('${escapeAttr(plan.id)}')`; // Hoàn thành -> xem chi tiết
-      } else if (plan.status === "Đang làm") {
-        btnClass = "stitch-btn stitch-btn-primary";
-        btnText = 'GHI NHẬT KÝ <span class="material-symbols-outlined fs-6">edit_document</span>';
-        btnAction = `handleTaskAction('${escapeAttr(plan.id)}','Hoàn thành')`;
-      }
-      
-      const locText = [plan.area, plan.asset].filter(Boolean).join(" - ") || "Chưa xác định địa điểm";
-      
+      const done = plan.status === "Hoàn thành";
+      const doing = plan.status === "Đang làm";
+      const status = taskRowStatusDot(plan, selectedDate);
+      const stateClass = done ? "is-done" : (attn ? "is-attention" : (doing ? "is-doing" : ""));
+      const checkClass = done ? "done" : (attn ? "attention" : (doing ? "doing" : ""));
+      const checkIcon = done ? "bi-check-lg" : (attn ? "bi-exclamation-lg" : (doing ? "bi-play-fill" : "bi-circle"));
+      const quickProgress = doing ? "Hoàn thành" : "Đang làm";
+      const quickLabel = done ? "Xem chi tiết" : (doing ? "Ghi hoàn thành" : "Bắt đầu và ghi nhật ký");
+      const location = [plan.area, plan.asset].filter(Boolean).join(" · ");
+      const deadline = planDeadline(plan);
+      const overdue = !done && deadline && deadline < selectedDate;
+      const labels = [];
+      if (plan.priority === "Cao" || attn) labels.push('<span class="vikunja-label priority-high">Ưu tiên cao</span>');
+      else if (plan.priority === "Trung bình") labels.push('<span class="vikunja-label priority-medium">Trung bình</span>');
+      if (doing) labels.push('<span class="vikunja-label status-doing">Đang làm</span>');
+      if (plan.team) labels.push(`<span class="vikunja-label">${escapeHtml(plan.team)}</span>`);
+      if (plan.type === "Phát sinh") labels.push('<span class="vikunja-label">Phát sinh</span>');
+      const syncIcon = planSyncIcon(plan);
       return `
-        <div class="stitch-card" onclick="openTaskDetail('${escapeAttr(plan.id)}')">
-          <div class="stitch-card-bar ${barClass}"></div>
-          <div class="stitch-card-header">
-            <span class="stitch-badge ${priorityClass}">${priorityText}</span>
-            <span class="stitch-time">
-              <span class="material-symbols-outlined text-muted" style="font-size: 14px;">event</span>
-              ${timeText} - ${shortDateVn(plan.date)}
-            </span>
-          </div>
-          <h3 class="stitch-title">${escapeHtml(plan.task || "")}</h3>
-          <div class="stitch-location">
-            <span class="material-symbols-outlined text-muted" style="font-size: 18px;">location_on</span>
-            <span>${escapeHtml(locText)}</span>
-          </div>
-          <button class="${btnClass}" type="button" onclick="${btnAction}; event.stopPropagation();">
-            ${btnText}
+        <article class="vikunja-task ${stateClass}" onclick="openTaskDetail('${escapeAttr(plan.id)}')">
+          <button class="vikunja-check ${checkClass}" type="button"
+                  title="${escapeAttr(quickLabel)}" aria-label="${escapeAttr(quickLabel)}"
+                  onclick="${done ? `openTaskDetail('${escapeAttr(plan.id)}')` : `handleTaskAction('${escapeAttr(plan.id)}','${quickProgress}')`}; event.stopPropagation();">
+            <i class="bi ${checkIcon}"></i>
           </button>
-        </div>
+          <div class="vikunja-task-content">
+            <h3 class="vikunja-task-title">${escapeHtml(plan.task || "Chưa đặt tên công việc")} ${syncIcon}</h3>
+            ${labels.length ? `<div class="vikunja-labels">${labels.join("")}</div>` : ""}
+            <div class="vikunja-task-meta">
+              <span class="${overdue ? "is-overdue" : ""}"><i class="bi bi-calendar-event"></i>${plan.time ? escapeHtml(plan.time) : "Chưa xếp giờ"}${deadline ? ` · ${shortDateVn(deadline)}` : ""}</span>
+              ${location ? `<span class="truncate-meta"><i class="bi bi-geo-alt"></i>${escapeHtml(location)}</span>` : ""}
+              ${plan.assignee ? `<span class="truncate-meta"><i class="bi bi-people"></i>${escapeHtml(plan.assignee)}</span>` : ""}
+            </div>
+          </div>
+          <button class="vikunja-task-open" type="button" title="Mở chi tiết" aria-label="Mở chi tiết"
+                  onclick="openTaskDetail('${escapeAttr(plan.id)}'); event.stopPropagation();">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </article>
+      `;
+    }
+
+    function taskSectionHtml(title, icon, tone, items, selectedDate) {
+      if (!items.length) return "";
+      return `
+        <section class="vikunja-section">
+          <div class="vikunja-section-head ${tone}">
+            <i class="bi ${icon}"></i><span>${title}</span>
+            <span class="vikunja-section-count">${items.length}</span>
+          </div>
+          <div class="vikunja-task-list">
+            ${items.map(plan => taskRowHtml(plan, selectedDate, tone === "attention")).join("")}
+          </div>
+        </section>
       `;
     }
 
@@ -3323,24 +3619,26 @@
       const body = document.getElementById("taskListBody");
 
       if (filtered.length === 0) {
-        body.innerHTML = '<div class="empty-state">Không có việc cần xem.</div>';
+        body.innerHTML = '<div class="vikunja-empty"><i class="bi bi-check2-circle"></i><strong>Không có việc cần xem</strong><div class="small mt-1">Hãy đổi ngày hoặc điều chỉnh bộ lọc.</div></div>';
         return;
       }
 
       const attn = filtered.filter(plan => isAttentionPlan(plan, selectedDate));
-      const rest = filtered.filter(plan => !isAttentionPlan(plan, selectedDate));
+      const doing = filtered.filter(plan => !isAttentionPlan(plan, selectedDate) && plan.status === "Đang làm");
+      const pending = filtered.filter(plan => !isAttentionPlan(plan, selectedDate) && plan.status !== "Đang làm" && plan.status !== "Hoàn thành");
+      const done = filtered.filter(plan => !isAttentionPlan(plan, selectedDate) && plan.status === "Hoàn thành");
       const byTime = (a, b) => ((a.date || "") + (a.time || "")).localeCompare((b.date || "") + (b.time || ""));
       attn.sort(byTime);
-      rest.sort(byTime);
+      doing.sort(byTime);
+      pending.sort(byTime);
+      done.sort(byTime);
 
-      let html = "";
-      if (attn.length) {
-        html += `<div class="section-label">Cần xử lý ngay</div><div class="a11y-list">${attn.map(plan => taskRowHtml(plan, selectedDate, true)).join("")}</div>`;
-      }
-      if (rest.length) {
-        html += `<div class="section-label">Việc trong ngày</div><div class="a11y-list">${rest.map(plan => taskRowHtml(plan, selectedDate, false)).join("")}</div>`;
-      }
-      body.innerHTML = html;
+      body.innerHTML = [
+        taskSectionHtml("Cần xử lý ngay", "bi-exclamation-triangle-fill", "attention", attn, selectedDate),
+        taskSectionHtml("Đang thực hiện", "bi-play-circle-fill", "doing", doing, selectedDate),
+        taskSectionHtml("Cần làm", "bi-list-check", "", pending, selectedDate),
+        taskSectionHtml("Đã hoàn thành", "bi-check2-circle", "done", done, selectedDate)
+      ].join("");
     }
 
     // ===== Màn Chi tiết công việc =====
