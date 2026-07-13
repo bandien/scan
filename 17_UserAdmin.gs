@@ -45,7 +45,9 @@ function getUserManagerActor_(params) {
   const authToken = String(payload.authToken || "").trim();
   if (!actorUsername || !authToken) return { ok: false, message: "Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại." };
 
-  const cachedUsername = CacheService.getScriptCache().get("nhatky_session_" + authToken);
+  const cachedUsername = typeof getNhatKySessionUsername_ === "function"
+    ? getNhatKySessionUsername_(authToken)
+    : CacheService.getScriptCache().get("nhatky_session_" + authToken);
   if (!cachedUsername || cachedUsername.toLowerCase() !== actorUsername.toLowerCase()) {
     return { ok: false, message: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại." };
   }
