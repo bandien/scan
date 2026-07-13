@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+
+<html class="light" lang="vi"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&amp;family=Public+Sans:wght@600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"/><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">try{
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary": "#ffffff",
+                    "tertiary-container": "#cf4b00",
+                    "primary-fixed-dim": "#b1c5ff",
+                    "primary": "#0057ce",
+                    "surface-variant": "#f1f3f9",
+                    "secondary-fixed-dim": "#b1c5ff",
+                    "surface-bright": "#ffffff",
+                    "tertiary-fixed-dim": "#ffb599",
+                    "on-background": "#1a1c1e",
+                    "on-tertiary-fixed": "#370e00",
+                    "on-surface-variant": "#44474e",
+                    "on-error-container": "#ffdad6",
+                    "surface-container": "#f0f4f9",
+                    "error-container": "#ba1a1a",
+                    "surface": "#f8f9ff",
+                    "inverse-on-surface": "#f1f0f4",
+                    "on-secondary-container": "#101c2b",
+                    "success": "#1b5e20",
+                    "inverse-primary": "#b1c5ff",
+                    "error": "#ba1a1a",
+                    "secondary": "#535f70",
+                    "on-primary-fixed-variant": "#00419e",
+                    "on-tertiary-container": "#ffffff",
+                    "on-error": "#ffffff",
+                    "primary-container": "#d8e2ff",
+                    "secondary-fixed": "#dae2ff",
+                    "surface-container-high": "#e7e8ee",
+                    "surface-tint": "#0057ce",
+                    "on-tertiary-fixed-variant": "#7f2b00",
+                    "on-surface": "#1a1c1e",
+                    "surface-high": "#f0f1f7",
+                    "surface-container-highest": "#e2e2e6",
+                    "on-secondary-fixed-variant": "#3b4858",
+                    "background": "#f8f9ff",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "surface-container-low": "#f7f8fd",
+                    "tertiary-fixed": "#ffdbce",
+                    "tertiary": "#984018",
+                    "on-secondary-fixed": "#101c2b",
+                    "on-primary-fixed": "#001a41",
+                    "outline": "#74777f",
+                    "surface-dim": "#dad9e0",
+                    "on-primary-container": "#001a41",
+                    "secondary-container": "#d7e3f7",
+                    "primary-fixed": "#d8e2ff",
+                    "inverse-surface": "#2f3033",
+                    "outline-variant": "#c4c6d0",
+                    "on-tertiary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "base": "8px",
+                    "touch-target": "52px",
+                    "margin-mobile": "16px",
+                    "card-gap": "20px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "body-md": ["Inter"],
+                    "label-md": ["Public Sans"],
+                    "headline-md": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "headline-lg-mobile": ["Inter"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "500"}],
+                    "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "600"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "700"}],
+                    "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "800"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "800"}]
+            }
+          },
+        },
+      }
+    }catch(_e){}</script></head><body class="flex justify-center bg-surface-container-lowest text-on-surface">
+<!-- Mobile Container (Max 440px as per spec) -->
+<main class="w-full max-w-[440px] min-h-screen bg-surface flex flex-col relative overflow-hidden">
+<!-- TopAppBar -->
+<header class="flex items-center justify-between px-margin-mobile h-touch-target w-full sticky top-0 z-50 bg-surface border-b border-outline-variant/30">
+<div class="flex items-center gap-base">
+<span class="material-symbols-outlined text-primary">assignment</span>
+<h1 class="font-headline-md text-headline-md font-extrabold text-primary tracking-tight">CÔNG VIỆC</h1>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high active:scale-[0.97] transition-transform">
+<span class="material-symbols-outlined text-on-surface">notifications</span>
+</button>
+</header>
+<!-- Navigation Drawer (Tab Switcher) -->
+<nav class="flex flex-col gap-base p-gutter bg-surface">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Phân loại</span>
+</div>
+<div class="flex gap-2 p-1 bg-surface-container rounded-xl overflow-x-auto scrollbar-hide">
+<button class="flex-1 py-3 flex items-center justify-center gap-2 font-label-md text-[12px] text-on-surface-variant relative z-10 transition-colors" id="tab-0">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+<span class="">Kế hoạch</span>
+</button>
+<button class="flex-1 py-3 flex items-center justify-center gap-2 font-label-md text-[12px] text-on-surface-variant relative z-10 transition-colors" id="tab-1">
+<span class="material-symbols-outlined text-[18px]">assignment_ind</span>
+<span class="">Việc của tôi</span>
+</button>
+<button class="flex-1 py-3 flex items-center justify-center gap-2 font-label-md text-[12px] relative z-10 transition-colors bg-primary text-on-primary rounded-lg shadow-sm" id="tab-2">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">history</span>
+<span class="">Lịch sử</span>
+</button>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<div class="flex-1 px-margin-mobile pb-32 overflow-y-auto">
+<!-- Section: Hôm nay -->
+<section class="mt-6">
+<div class="flex items-center gap-2 mb-4">
+<div class="h-[1px] flex-1 bg-outline-variant"></div>
+<h2 class="font-label-md text-label-md text-on-surface-variant px-2">Hôm nay, 24 Tháng 5</h2>
+<div class="h-[1px] flex-1 bg-outline-variant"></div>
+</div>
+<div class="space-y-4">
+<!-- Task Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/50 overflow-hidden flex relative active:scale-[0.99] transition-transform shadow-sm">
+<div class="w-1.5 bg-success shrink-0"></div> <!-- Status Bar -->
+<div class="p-4 flex-1 flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<h3 class="font-body-md text-body-md text-on-surface font-bold leading-tight">Bảo trì máy phát điện dự phòng</h3>
+<span class="material-symbols-outlined text-success" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span class="text-[13px]">Hoàn thành: 09:30</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">person</span>
+<span class="text-[13px] font-medium">Người thực hiện: <span class="text-on-surface">Nguyễn Văn Hùng</span></span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">edit_note</span>
+<span class="text-[13px] font-medium">Người ghi: <span class="text-on-surface">Nguyễn Văn Hùng</span></span>
+</div>
+</div>
+</div>
+</div>
+<!-- Task Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/50 overflow-hidden flex relative active:scale-[0.99] transition-transform shadow-sm">
+<div class="w-1.5 bg-success shrink-0"></div>
+<div class="p-4 flex-1 flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<h3 class="font-body-md text-body-md text-on-surface font-bold leading-tight">Vệ sinh lưới lọc AHU-02</h3>
+<span class="material-symbols-outlined text-success" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span class="text-[13px]">Hoàn thành: 14:15</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">person</span>
+<span class="text-[13px] font-medium">Người thực hiện: <span class="text-on-surface">Trần Minh Tâm</span></span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">edit_note</span>
+<span class="text-[13px] font-medium">Người ghi: <span class="text-on-surface">Trần Minh Tâm</span></span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: Hôm qua -->
+<section class="mt-8">
+<div class="flex items-center gap-2 mb-4">
+<div class="h-[1px] flex-1 bg-outline-variant"></div>
+<h2 class="font-label-md text-label-md text-on-surface-variant px-2">Hôm qua</h2>
+<div class="h-[1px] flex-1 bg-outline-variant"></div>
+</div>
+<div class="space-y-4">
+<!-- Task Card 3 -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/50 overflow-hidden flex relative opacity-90 shadow-sm">
+<div class="w-1.5 bg-success shrink-0"></div>
+<div class="p-4 flex-1 flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<h3 class="font-body-md text-body-md text-on-surface font-bold leading-tight">Kiểm tra hệ thống PCCC</h3>
+<span class="material-symbols-outlined text-success" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span class="text-[13px]">Hoàn thành: 16:45</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">person</span>
+<span class="text-[13px] font-medium">Người thực hiện: <span class="text-on-surface">Lê Quốc Dũng</span></span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">edit_note</span>
+<span class="text-[13px] font-medium">Người ghi: <span class="text-on-surface">Lê Quốc Dũng</span></span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: Tuần này -->
+<section class="mt-8">
+<div class="flex items-center gap-2 mb-4">
+<div class="h-[1px] flex-1 bg-outline-variant"></div>
+<h2 class="font-label-md text-label-md text-on-surface-variant px-2">Tuần này</h2>
+<div class="h-[1px] flex-1 bg-outline-variant"></div>
+</div>
+<div class="grid grid-cols-1 gap-4">
+<!-- Placeholder for older tasks -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-4 flex items-center justify-between opacity-70">
+<div class="flex flex-col gap-1">
+<h3 class="font-body-md text-body-md text-on-surface font-bold">Kiểm tra trạm biến áp</h3>
+<div class="flex flex-col">
+<span class="text-[12px] text-on-surface-variant">21 Tháng 5</span>
+<span class="text-[12px] text-on-surface-variant">Người thực hiện: Phạm Thành</span>
+<span class="text-[12px] text-on-surface-variant">Người ghi: Phạm Thành</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-success">check</span>
+</div>
+</div>
+</section>
+</div>
+<!-- BottomNavBar -->
+<footer class="fixed bottom-0 left-0 right-0 w-full z-50 flex justify-around items-center h-[72px] px-base max-w-[440px] mx-auto bg-surface-container-lowest border-t border-outline-variant/30">
+<!-- Nav Item: Tổng quan -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary active:scale-[0.95] transition-transform duration-200">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-[11px] mt-1">Tổng quan</span>
+</button>
+<!-- Nav Item: Công việc (Active) -->
+<a class="flex flex-col items-center justify-center flex-1 text-primary active:scale-[0.97] transition-all duration-200" href="#">
+<div class="bg-primary-container text-primary rounded-xl px-4 py-1.5 flex flex-col items-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">assignment</span>
+<span class="font-label-md text-[11px] mt-0.5 font-bold">Công việc</span>
+</div>
+</a>
+<!-- Nav Item: Tìm kiếm -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary active:scale-[0.95] transition-transform duration-200">
+<span class="material-symbols-outlined">search</span>
+<span class="font-label-md text-[11px] mt-1">Tìm kiếm</span>
+</button>
+<!-- Nav Item: Nhiều hơn -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary active:scale-[0.95] transition-transform duration-200">
+<span class="material-symbols-outlined">more_horiz</span>
+<span class="font-label-md text-[11px] mt-1">Nhiều hơn</span>
+</button>
+</footer>
+</main>
+<script>
+        // Simple micro-interaction for cards
+        document.querySelectorAll('.active\\:scale-\\[0\\.99\\]').forEach(card => {
+            card.addEventListener('click', () => {
+                console.log('Card clicked');
+            });
+        });
+    </script>
+</body></html>
