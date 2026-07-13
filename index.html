@@ -321,14 +321,14 @@
         <h3 class="fw-bold mb-1" style="color: var(--siu-on-surface);">BanDienScan</h3>
         <p class="text-muted small mb-4" id="loginSubtitle">Hệ thống Quản lý & Bảo trì Ban điện</p>
         <input type="text" id="usernameInput" class="form-control mb-3" style="border-radius: 12px; padding: 14px 18px;" placeholder="Tên đăng nhập">
-        <input type="password" id="passwordInput" class="form-control mb-2" style="border-radius: 12px; padding: 14px 18px;" placeholder="Mật khẩu (PIN)">
+        <input type="password" id="passwordInput" class="form-control mb-2" style="border-radius: 12px; padding: 14px 18px;" placeholder="PIN">
         
         <div class="d-flex justify-content-between align-items-center mb-4 ms-1">
             <div class="form-check text-start mb-0">
                 <input class="form-check-input" type="checkbox" id="rememberMe" checked>
                 <label class="form-check-label text-muted small" for="rememberMe" data-i18n="remember_me">Ghi nhớ đăng nhập</label>
             </div>
-            <a href="#" class="text-primary small text-decoration-none fw-bold" onclick="alert('Vui lòng liên hệ Quản trị viên (Admin) hoặc Tổ trưởng để được cấp lại mật khẩu hoặc đổi mã PIN mới.'); event.preventDefault();">Quên mật khẩu?</a>
+            <a href="#" class="text-primary small text-decoration-none fw-bold" onclick="alert('Vui lòng liên hệ Quản trị viên (Admin) hoặc Tổ trưởng để được cấp lại PIN mới.'); event.preventDefault();">Quên PIN?</a>
         </div>
 
         <button id="btnLogin" class="btn btn-primary w-100 py-3 rounded-pill fw-bold" onclick="doLogin()">
@@ -361,7 +361,7 @@
                             </div>
                         </li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" onclick="showChangePasswordModal()"><i class="bi bi-key me-2"></i>Đổi mật khẩu</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="showChangePasswordModal()"><i class="bi bi-key me-2"></i>Đổi PIN</a></li>
                         <li><a class="dropdown-item text-danger" href="#" onclick="doLogout()"><i class="bi bi-box-arrow-left me-2"></i>Đăng xuất</a></li>
                     </ul>
                 </div>
@@ -1130,21 +1130,21 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content rounded-4 border-0 shadow">
                 <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold"><i class="bi bi-shield-lock me-2 text-primary"></i>Đổi mật khẩu</h5>
+                    <h5 class="modal-title fw-bold"><i class="bi bi-shield-lock me-2 text-primary"></i>Đổi PIN</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label fw-bold small">Mật khẩu hiện tại</label>
+                        <label class="form-label fw-bold small">PIN hiện tại</label>
                         <input type="password" class="form-control rounded-3" id="oldPin" placeholder="••••••">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold small">Mật khẩu mới</label>
-                        <input type="password" class="form-control rounded-3" id="newPin" placeholder="Mật khẩu mới">
+                        <label class="form-label fw-bold small">PIN mới</label>
+                        <input type="password" class="form-control rounded-3" id="newPin" placeholder="PIN mới">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold small">Xác nhận mật khẩu mới</label>
-                        <input type="password" class="form-control rounded-3" id="confirmPin" placeholder="Xác nhận mật khẩu mới">
+                        <label class="form-label fw-bold small">Xác nhận PIN mới</label>
+                        <input type="password" class="form-control rounded-3" id="confirmPin" placeholder="Xác nhận PIN mới">
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
@@ -2924,7 +2924,7 @@
     async function doLogin() {
         const username = document.getElementById('usernameInput').value.trim();
         const password = document.getElementById('passwordInput').value;
-        if (!username || !password) { showToast("Vui lòng nhập tên và mật khẩu", "warning"); return; }
+        if (!username || !password) { showToast("Vui lòng nhập tên đăng nhập và PIN", "warning"); return; }
         
         document.getElementById('btnLogin').style.display = 'none';
         document.getElementById('loginSpinner').style.display = 'inline-block';
@@ -2991,7 +2991,7 @@
                 showToast(`Xin chào ${result.user.name}`);
             } else {
                 console.warn(`[DEBUG] Login failed: ${result.message}`);
-                showToast(result.message || "Sai tên hoặc mật khẩu", "danger");
+                showToast(result.message || "Sai tên đăng nhập hoặc PIN", "danger");
                 document.getElementById('btnLogin').style.display = 'block';
                 document.getElementById('loginSpinner').style.display = 'none';
             }
@@ -4204,8 +4204,8 @@
         const user = JSON.parse(localStorage.getItem('currentUser'));
 
         if (!oldPin || !newPin || !confirmPin) { showToast("Vui lòng điền đủ thông tin", "warning"); return; }
-        if (newPin !== confirmPin) { showToast("Mật khẩu mới không khớp", "warning"); return; }
-        if (newPin.length < 4) { showToast("Mật khẩu phải ít nhất 4 ký tự", "warning"); return; }
+        if (newPin !== confirmPin) { showToast("PIN mới không khớp", "warning"); return; }
+        if (newPin.length < 4) { showToast("PIN phải ít nhất 4 ký tự", "warning"); return; }
 
         showToast("Đang xử lý...");
         try {
@@ -4223,12 +4223,12 @@
             
             // Even if we can't read the response due to CORS, 
             // the request has been sent and processed on Server side.
-            showToast("Mật khẩu đã được thay đổi thành công!");
+            showToast("PIN đã được thay đổi thành công!");
             bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
             setTimeout(() => doLogout(), 2000);
         } catch (e) {
             console.error("Sync Error:", e);
-            showToast("Đã gửi yêu cầu đổi mật khẩu. Vui lòng đăng nhập lại.", "info");
+            showToast("Đã gửi yêu cầu đổi PIN. Vui lòng đăng nhập lại.", "info");
             setTimeout(() => doLogout(), 2000);
         }
     }
