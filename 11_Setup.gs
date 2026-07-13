@@ -30,12 +30,11 @@ function setupAllSheets() {
     "Manager","Shift","WarningDays","ManufactureDate","InstallationDate",
     "Status","Project","SerialNumber","Area","EquipmentType"
   ]);
-  
   // LOGS: Bổ sung 3 cột ERPNext ở cuối để đồng bộ
   const logsSheet = ensureSheet(ss, SHEETS.LOGS, ["Timestamp","UID","Items","Notes","User","ImageUrl","SyncStatus","ERPNextID","SyncMessage"]);
   ensureColumnsExist_(logsSheet, ["SyncStatus", "ERPNextID", "SyncMessage"]);
 
-  ensureSheet(ss, SHEETS.USERS, ["Username","PIN","Role","Teams"]);
+  ensureSheet(ss, SHEETS.USERS, ["Username","PIN","Role","Teams","Ghi chú","Cập nhật lúc","Cập nhật bởi","Phone","Họ và tên"]);
   ensureSheet(ss, SHEETS.CHECKLISTS, ["Type","ID","Title","Description"]);
   ensureSheet(ss, SHEETS.WORK_ORDERS, [
     "WO_ID","Type","Priority","Status","AssetUID","AssignedTo",

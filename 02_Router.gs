@@ -104,6 +104,10 @@ function doPost(e) {
       deletePlan:           handleDeletePlan,
       nhatkyRegister:       handleNhatKyRegister,
       nhatkyLogin:          handleNhatKyLogin,
+      nhatkyChangePin:      handleNhatKyChangePin,
+      listUsers:            handleListUsers,
+      saveUser:             handleSaveUser,
+      deleteUser:           handleDeleteUser,
       savePumpTimerSetting: handleSavePumpTimerSetting,
       seedPumpTimerSettings: handleSeedPumpTimerSettings,
       saveRosterWeek:       handleSaveRosterWeek,       // Bảng phân ca (trang phanca)
