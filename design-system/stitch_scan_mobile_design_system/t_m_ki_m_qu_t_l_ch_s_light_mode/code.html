@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+
+<html class="light" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Hệ Thống Kỹ Thuật - Quét Mã</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&amp;family=Public+Sans:wght@600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary": "#cf4b00",
+                    "surface-dim": "#f8f9ff",
+                    "surface-container-high": "#e1e2ec",
+                    "error-container": "#ffdad6",
+                    "outline-variant": "#c2c6d8",
+                    "on-primary-fixed": "#001946",
+                    "inverse-on-surface": "#f1f0f4",
+                    "secondary-fixed": "#dae2ff",
+                    "tertiary-container": "#ffdbce",
+                    "surface-bright": "#fdfbff",
+                    "on-primary-container": "#001946",
+                    "on-surface-variant": "#44474e",
+                    "on-secondary-fixed-variant": "#3f4759",
+                    "on-secondary": "#ffffff",
+                    "surface": "#fdfbff",
+                    "surface-variant": "#e1e2ec",
+                    "primary-container": "#dae2ff",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-fixed-dim": "#b1c5ff",
+                    "on-tertiary-fixed": "#370e00",
+                    "outline": "#74777f",
+                    "tertiary-fixed-dim": "#ffb599",
+                    "primary": "#0057ce",
+                    "tertiary-fixed": "#ffdbce",
+                    "surface-high": "#e7e8ee",
+                    "surface-container-highest": "#e2e2e6",
+                    "success": "#006d3e",
+                    "on-secondary-container": "#001d35",
+                    "primary-fixed": "#dae2ff",
+                    "on-tertiary-container": "#410e00",
+                    "surface-tint": "#0057ce",
+                    "background": "#fdfbff",
+                    "on-error": "#ffffff",
+                    "on-surface": "#1a1c1e",
+                    "inverse-primary": "#b1c5ff",
+                    "inverse-surface": "#2f3033",
+                    "surface-container-low": "#f3f3f7",
+                    "on-tertiary-fixed-variant": "#7f2b00",
+                    "surface-container": "#eeeef3",
+                    "on-tertiary": "#ffffff",
+                    "on-background": "#1a1c1e",
+                    "on-primary": "#ffffff",
+                    "secondary-container": "#dae2ff",
+                    "on-primary-fixed-variant": "#00419e",
+                    "on-secondary-fixed": "#001847",
+                    "secondary-fixed-dim": "#b1c5ff",
+                    "secondary": "#535f70",
+                    "error": "#ba1a1a",
+                    "on-error-container": "#410002"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "base": "8px",
+                    "card-gap": "20px",
+                    "margin-mobile": "16px",
+                    "gutter": "16px",
+                    "touch-target": "52px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Inter"],
+                    "label-md": ["Public Sans"],
+                    "headline-md": ["Inter"],
+                    "body-md": ["Inter"],
+                    "headline-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "800"}],
+                    "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "600"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "500"}],
+                    "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "800"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .scanner-overlay {
+            background: linear-gradient(rgba(16, 19, 27, 0.4), rgba(16, 19, 27, 0.4)),
+                        radial-gradient(circle, transparent 150px, rgba(16, 19, 27, 0.8) 150px);
+        }
+        .scan-line {
+            height: 2px;
+            background: #b1c5ff;
+            box-shadow: 0 0 15px #0e6efd;
+            animation: scan 3s ease-in-out infinite;
+        }
+        @keyframes scan {
+            0%, 100% { top: 15%; }
+            50% { top: 85%; }
+        }
+        .active-scale:active { transform: scale(0.97); }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col items-center">
+<!-- Top AppBar -->
+<header class="bg-surface text-primary fixed top-0 w-full z-50 border-b border-outline-variant flex justify-between items-center px-margin-mobile max-w-[440px] mx-auto h-[64px]">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-headline-md">search</span>
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface">Tìm kiếm</h1>
+</div>
+<div class="flex items-center gap-2">
+<button class="material-symbols-outlined p-2 hover:bg-surface-container-high rounded-full transition-colors text-on-surface-variant">notifications</button>
+</div>
+</header>
+<main class="w-full max-w-[440px] pt-[64px] flex-1 flex flex-col pb-24">
+<!-- Scanner View (Area stays dark as requested) -->
+<section class="relative aspect-square w-full overflow-hidden bg-black flex flex-col items-center justify-center">
+<!-- Simulated Camera Background -->
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover opacity-60" data-alt="Industrial panel view" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDxBctQtxSE8r5FSqg7xPNC3SxF9iKU2q95w_JHYI2e9CQsxSAbIXIuY9AGGPpy_6OJcMLLiqtGBhnue-SdgoYMSozKrJNabSRjdaI4kGXL-MxaGrPXLHDFizNtqxsgwrFkhN4aEmYYV16ZaevET8DzFLmVttj6qvJWDw8JJQtbZq2N4vAySdL0755YpjRdv4QxROm6FB6jaDz_CIkjnmlES3wAI7DhZhp5lewR57tMxBuNw5S_njVgXOxuLOiKDeQUGI3jKWa22lA"/>
+</div>
+<!-- Scanner Frame & UI Overlay -->
+<div class="absolute inset-0 z-10 scanner-overlay flex items-center justify-center">
+<div class="relative w-[280px] h-[280px] border-2 border-primary/40 rounded-3xl overflow-hidden">
+<div class="scan-line absolute w-full z-20"></div>
+<!-- Corner Accents -->
+<div class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-primary rounded-tl-xl"></div>
+<div class="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-primary rounded-tr-xl"></div>
+<div class="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-primary rounded-bl-xl"></div>
+<div class="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-primary rounded-br-xl"></div>
+</div>
+</div>
+<!-- Scanner Controls (Changed to Light/White Background as requested) -->
+<div class="absolute bottom-6 left-0 w-full px-8 z-20 flex justify-between items-center">
+<button class="bg-white p-4 rounded-full shadow-lg active-scale transition-all flex items-center justify-center group">
+<span class="material-symbols-outlined text-primary group-hover:scale-110">flashlight_on</span>
+</button>
+<div class="bg-white/90 backdrop-blur-md px-6 py-2 rounded-full border border-outline-variant shadow-sm">
+<span class="text-label-md text-on-surface font-bold">Đang quét thiết bị...</span>
+</div>
+<button class="bg-white p-4 rounded-full shadow-lg active-scale transition-all flex items-center justify-center group">
+<span class="material-symbols-outlined text-primary group-hover:scale-110">upload_file</span>
+</button>
+</div>
+</section>
+<!-- Recent Scans Section (Light Mode) -->
+<section class="flex-1 bg-background px-margin-mobile pt-6">
+<div class="flex justify-between items-center mb-5">
+<h2 class="font-headline-md text-headline-md text-on-surface">Lịch sử quét gần đây</h2>
+<a class="text-label-md text-primary font-bold hover:underline" href="#">Xem tất cả</a>
+</div>
+<div class="space-y-4">
+<!-- Scan Item 1: Status High (Error) -->
+<div class="bg-white border border-outline-variant rounded-xl overflow-hidden flex items-stretch h-20 active-scale transition-transform shadow-sm">
+<div class="w-1.5 bg-error"></div>
+<div class="flex-1 px-4 flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-body-md font-bold text-on-surface">Máy Bơm PCCC - P01</span>
+<span class="text-label-md text-on-surface-variant">Hôm nay, 08:45</span>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="px-3 py-1 rounded-full bg-error text-white text-[11px] font-bold uppercase tracking-wider shadow-sm">Sự cố</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- Scan Item 2: Status Normal -->
+<div class="bg-white border border-outline-variant rounded-xl overflow-hidden flex items-stretch h-20 active-scale transition-transform shadow-sm">
+<div class="w-1.5 bg-success"></div>
+<div class="flex-1 px-4 flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-body-md font-bold text-on-surface">Tủ Điện Tầng 4 - MSB04</span>
+<span class="text-label-md text-on-surface-variant">Hôm nay, 08:12</span>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="px-3 py-1 rounded-full bg-success text-white text-[11px] font-bold uppercase tracking-wider shadow-sm">Hoạt động</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- Scan Item 3: Status Maintenance -->
+<div class="bg-white border border-outline-variant rounded-xl overflow-hidden flex items-stretch h-20 active-scale transition-transform shadow-sm">
+<div class="w-1.5 bg-tertiary"></div>
+<div class="flex-1 px-4 flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-body-md font-bold text-on-surface">Hệ Thống Chiller - CHL01</span>
+<span class="text-label-md text-on-surface-variant">Hôm qua, 17:30</span>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="px-3 py-1 rounded-full bg-tertiary text-white text-[11px] font-bold uppercase tracking-wider shadow-sm">Bảo trì</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- Scan Item 4: Status Normal -->
+<div class="bg-white border border-outline-variant rounded-xl overflow-hidden flex items-stretch h-20 active-scale transition-transform shadow-sm">
+<div class="w-1.5 bg-success"></div>
+<div class="flex-1 px-4 flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-body-md font-bold text-on-surface">Thang Máy Tòa A - L01</span>
+<span class="text-label-md text-on-surface-variant">Hôm qua, 15:20</span>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="px-3 py-1 rounded-full bg-success text-white text-[11px] font-bold uppercase tracking-wider shadow-sm">Hoạt động</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">chevron_right</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar (Fixed) -->
+<nav class="bg-white fixed bottom-0 w-full z-50 max-w-[440px] left-1/2 -translate-x-1/2 border-t border-outline-variant flex justify-around items-center h-touch-target px-2 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]" role="navigation">
+<a class="flex flex-col items-center justify-center text-on-surface-variant active:scale-[0.97] transition-all duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">Tổng quan</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant active:scale-[0.97] transition-all duration-200" href="#">
+<span class="material-symbols-outlined">assignment</span>
+<span class="font-label-md text-label-md">Công việc</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary active:scale-[0.97] transition-all duration-200 bg-primary/10 px-4 py-1 rounded-xl" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">search</span>
+<span class="font-label-md text-label-md">Tìm kiếm</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant active:scale-[0.97] transition-all duration-200" href="#">
+<span class="material-symbols-outlined">more_horiz</span>
+<span class="font-label-md text-label-md">Nhiều hơn</span>
+</a>
+</nav>
+<script>
+        // Simple micro-interaction for status list items
+        document.querySelectorAll('.active-scale').forEach(item => {
+            item.addEventListener('touchstart', () => {
+                item.classList.add('scale-[0.98]');
+            });
+            item.addEventListener('touchend', () => {
+                item.classList.remove('scale-[0.98]');
+            });
+        });
+
+        // Flash toggle simulation
+        let flashOn = false;
+        const flashBtnIcon = document.querySelector('.material-symbols-outlined:contains("flashlight_on")') || document.querySelector('span[class*="flashlight"]');
+        if(flashBtnIcon) {
+            flashBtnIcon.parentElement.addEventListener('click', () => {
+                flashOn = !flashOn;
+                flashBtnIcon.innerText = flashOn ? 'flashlight_off' : 'flashlight_on';
+                if(flashOn) {
+                    flashBtnIcon.parentElement.classList.remove('bg-white');
+                    flashBtnIcon.parentElement.classList.add('bg-primary');
+                    flashBtnIcon.classList.remove('text-primary');
+                    flashBtnIcon.classList.add('text-white');
+                } else {
+                    flashBtnIcon.parentElement.classList.remove('bg-primary');
+                    flashBtnIcon.parentElement.classList.add('bg-white');
+                    flashBtnIcon.classList.remove('text-white');
+                    flashBtnIcon.classList.add('text-primary');
+                }
+            });
+        }
+    </script>
+</body></html>

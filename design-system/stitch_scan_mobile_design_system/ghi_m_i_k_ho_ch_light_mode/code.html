@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ghi mới việc</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&amp;family=Public+Sans:wght@600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#0b4d5e",
+                        "on-primary": "#ffffff",
+                        "surface": "#ffffff",
+                        "background": "#f8f9fa",
+                        "on-surface": "#1a1c1e",
+                        "on-surface-variant": "#44474e",
+                        "outline": "#8c90a1",
+                        "outline-variant": "#c7ccd1",
+                        "surface-container-low": "#ffffff",
+                        "surface-container": "#ffffff",
+                        "surface-container-high": "#f1f3f4",
+                        "surface-container-highest": "#e8eaed",
+                        "secondary-container": "#e0f2f1",
+                        "on-secondary-container": "#00201f",
+                        "error": "#ba1a1a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "card-gap": "20px",
+                        "base": "8px",
+                        "touch-target": "52px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-md": ["Public Sans"],
+                        "headline-lg-mobile": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "700"}],
+                        "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "800"}],
+                        "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "800"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #f8f9fa;
+            color: #1a1c1e;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #0b4d5e !important;
+            box-shadow: 0 0 0 1px #0b4d5e;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f8f9fa;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c7ccd1;
+            border-radius: 10px;
+        }
+        body {
+            min-height: 100dvh;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen items-center overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky z-50 bg-white border-b border-outline-variant max-w-[440px] mx-auto">
+<div class="flex items-center px-margin-mobile h-touch-target w-full">
+<button class="material-symbols-outlined text-primary active:scale-[0.97] transition-transform duration-100 p-2 -ml-2" data-icon="arrow_back">arrow_back</button>
+<h1 class="ml-2 font-headline-lg-mobile text-headline-lg-mobile text-on-surface flex-1 truncate">Ghi mới việc</h1>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 w-full max-w-[440px] px-margin-mobile py-6 pb-32 space-y-6">
+<!-- Form Section -->
+<section class="space-y-6">
+<!-- Work Title -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Tiêu đề công việc</label>
+<input class="w-full h-[50px] bg-white border border-outline-variant rounded-lg px-4 text-on-surface placeholder:text-outline focus:ring-0 transition-all" placeholder="Nhập tên nhiệm vụ..." type="text"/>
+</div>
+<!-- Description -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Mô tả chi tiết</label>
+<textarea class="w-full bg-white border border-outline-variant rounded-lg p-4 text-on-surface placeholder:text-outline focus:ring-0 transition-all resize-none" placeholder="Mô tả tình trạng thiết bị hoặc yêu cầu..." rows="4"></textarea>
+</div>
+<!-- Responsible Person -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Người thực hiện</label>
+<div class="relative">
+<input class="w-full h-[50px] bg-white border border-outline-variant rounded-lg pl-12 pr-4 text-on-surface placeholder:text-outline focus:ring-0 transition-all" placeholder="Tìm kiếm kỹ sư..." type="text"/>
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline pointer-events-none" data-icon="search">person_search</span>
+</div>
+</div>
+<div class="space-y-4 border-t border-outline-variant pt-4">
+<button class="flex items-center justify-between w-full py-2 text-primary font-headline-md" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.chevron').classList.toggle('rotate-180')" type="button">
+<span>Thông tin bổ sung</span>
+<span class="material-symbols-outlined chevron transition-transform duration-200 rotate-180" data-icon="expand_more">expand_more</span>
+</button>
+<div class="space-y-6">
+<!-- Item quantity rows -->
+<div class="space-y-3">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Số lượng thực hiện</label>
+<div class="space-y-3" id="quantity-list">
+<!-- Item Row -->
+<div class="grid grid-cols-12 gap-2 items-center">
+<div class="col-span-5">
+<input class="w-full h-[50px] bg-white border border-outline-variant rounded-lg px-3 text-on-surface placeholder:text-outline focus:ring-0 text-label-md" placeholder="Tên ..." type="text"/>
+</div>
+<div class="col-span-3">
+<input class="w-full h-[50px] bg-white border border-outline-variant rounded-lg px-2 text-on-surface placeholder:text-outline focus:ring-0 text-label-md" placeholder="SL" type="number"/>
+</div>
+<div class="col-span-3">
+<input class="w-full h-[50px] bg-white border border-outline-variant rounded-lg px-2 text-on-surface placeholder:text-outline focus:ring-0 text-label-md" placeholder="Đơn vị" type="text"/>
+</div>
+<div class="col-span-1 flex justify-center">
+<button class="material-symbols-outlined text-error" type="button">delete</button>
+</div>
+</div>
+</div>
+<button class="flex items-center gap-2 text-primary font-label-md py-2 active:scale-95 transition-transform" type="button">
+<span class="material-symbols-outlined">add_circle</span>
+<span>Thêm dòng</span>
+</button>
+</div>
+<!-- Category -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Phân loại</label>
+<div class="flex gap-2">
+<button class="flex-1 py-3 px-2 rounded-lg border border-primary bg-primary text-white font-label-md text-center transition-all active:scale-95" type="button">Kế hoạch</button>
+<button class="flex-1 py-3 px-2 rounded-lg border border-outline-variant bg-white text-on-surface font-label-md text-center transition-all active:scale-95" type="button">Phát sinh</button>
+</div>
+</div>
+<!-- Team -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Tổ thực hiện</label>
+<div class="relative">
+<select class="w-full h-[50px] bg-white border border-outline-variant rounded-lg px-4 text-on-surface appearance-none focus:ring-0">
+<option disabled="" selected="" value="">Chọn tổ thực hiện...</option>
+<option value="dien">Tổ Điện</option>
+<option value="co_khi">Tổ Cơ khí</option>
+<option value="van_hanh">Tổ Vận hành</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none" data-icon="groups">groups</span>
+</div>
+</div>
+<!-- Hạng mục -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Hạng mục</label>
+<div class="relative">
+<select class="w-full h-[50px] bg-white border border-outline-variant rounded-lg px-4 text-on-surface appearance-none focus:ring-0">
+<option disabled="" selected="" value="">Chọn hạng mục...</option>
+<option value="maintenance">Bảo trì (Maintenance)</option>
+<option value="repair">Sửa chữa (Repair)</option>
+<option value="inspection">Kiểm tra (Inspection)</option>
+<option value="other">Khác (Other)</option>
+<option value="construction">Thi công (Construction)</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<!-- Equipment (Scan) -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Thiết bị</label>
+<div class="relative flex gap-2">
+<div class="relative flex-1">
+<input class="w-full h-[50px] bg-white border border-outline-variant rounded-lg px-4 text-on-surface placeholder:text-outline focus:ring-0" placeholder="Tên/Mã thiết bị..." type="text"/>
+</div>
+<button class="h-[50px] w-[50px] flex items-center justify-center bg-primary text-white rounded-lg active:scale-95 transition-transform" type="button">
+<span class="material-symbols-outlined" data-icon="qr_code_scanner">qr_code_scanner</span>
+</button>
+</div>
+</div>
+<!-- Location -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Vị trí</label>
+<div class="relative">
+<input class="w-full h-[50px] bg-white border border-outline-variant rounded-lg pl-4 pr-12 text-on-surface placeholder:text-outline focus:ring-0" placeholder="Xác định vị trí..." type="text"/>
+<button class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-primary active:scale-95" data-icon="my_location" type="button">my_location</button>
+</div>
+</div>
+<!-- Images -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Hình ảnh</label>
+<div class="flex gap-3 overflow-x-auto pb-2 custom-scrollbar">
+<button class="flex-shrink-0 w-20 h-20 border border-dashed border-outline-variant rounded-lg flex flex-col items-center justify-center text-outline active:scale-95 transition-all bg-white" type="button">
+<span class="material-symbols-outlined" data-icon="add_a_photo">add_a_photo</span>
+<span class="text-[10px] mt-1">Thêm ảnh</span>
+</button>
+<!-- Image placeholders -->
+<div class="flex-shrink-0 w-20 h-20 bg-surface-container-highest rounded-lg border border-outline-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-outline" data-icon="image">image</span>
+</div>
+</div>
+</div>
+<!-- Remind & Deadline -->
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Ngày nhắc</label>
+<div class="relative">
+<input class="w-full h-[50px] bg-white border border-outline-variant rounded-lg px-4 text-on-surface appearance-none focus:ring-0" type="date"/>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none" data-icon="notifications">notifications</span>
+</div>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Thời hạn</label>
+<div class="relative">
+<input class="w-full h-[50px] bg-white border border-outline-variant rounded-lg px-4 text-on-surface appearance-none focus:ring-0" type="date"/>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none" data-icon="event_busy">event_busy</span>
+</div>
+</div>
+</div>
+<!-- Material Proposal -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Đề xuất vật tư</label>
+<textarea class="w-full bg-white border border-outline-variant rounded-lg p-4 text-on-surface placeholder:text-outline focus:ring-0 transition-all resize-none" placeholder="Nhập danh sách vật tư cần thiết..." rows="2"></textarea>
+</div>
+<!-- Labor Proposal -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Đề xuất nhân công</label>
+<textarea class="w-full bg-white border border-outline-variant rounded-lg p-4 text-on-surface placeholder:text-outline focus:ring-0 transition-all resize-none" placeholder="Số lượng kỹ sư, chuyên môn..." rows="2"></textarea>
+</div>
+</div>
+</div>
+<!-- Priority -->
+<div class="space-y-3">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Mức độ ưu tiên</label>
+<div class="flex gap-2">
+<button class="priority-chip flex-1 py-3 px-2 rounded-lg border border-outline-variant bg-white text-on-surface font-label-md text-center transition-all active:scale-95" data-priority="low" onclick="selectPriority(this)" type="button">
+                        Thấp
+                    </button>
+<button class="priority-chip flex-1 py-3 px-2 rounded-lg border border-primary font-label-md text-center transition-all active:scale-95 bg-primary text-white" data-priority="medium" onclick="selectPriority(this)" type="button">
+                        Trung bình
+                    </button>
+<button class="priority-chip flex-1 py-3 px-2 rounded-lg border border-outline-variant bg-white text-on-surface font-label-md text-center transition-all active:scale-95" data-priority="high" onclick="selectPriority(this)" type="button">
+                        Cao
+                    </button>
+</div>
+</div>
+<!-- Save Button -->
+<button class="w-full h-touch-target bg-primary text-white font-headline-md rounded-lg shadow-lg active:scale-[0.97] transition-all flex items-center justify-center gap-2 mt-8">
+<span class="material-symbols-outlined" data-icon="save">save</span>
+                Lưu việc mới
+            </button>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 max-w-[440px] left-1/2 -translate-x-1/2 bg-white border-t border-outline-variant h-[72px]">
+<div class="flex justify-around items-center w-full px-base py-2">
+<!-- Dashboard -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 active:scale-[0.97] transition-transform duration-100" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-md text-label-md mt-1">Dashboard</span>
+</a>
+<!-- Công việc (Active) -->
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-xl p-2 active:scale-[0.97] transition-transform duration-100" href="#">
+<span class="material-symbols-outlined" data-icon="assignment" style="font-variation-settings: 'FILL' 1;">assignment</span>
+<span class="font-label-md text-label-md mt-1">Công việc</span>
+</a>
+<!-- Tìm kiếm -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 active:scale-[0.97] transition-transform duration-100" href="#">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+<span class="font-label-md text-label-md mt-1">Tìm kiếm</span>
+</a>
+<!-- Thêm -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 active:scale-[0.97] transition-transform duration-100" href="#">
+<span class="material-symbols-outlined" data-icon="more_horiz">more_horiz</span>
+<span class="font-label-md text-label-md mt-1">Thêm</span>
+</a>
+</div>
+</nav>
+<script>
+        function selectPriority(element) {
+            document.querySelectorAll('.priority-chip').forEach(chip => {
+                chip.classList.remove('bg-primary', 'text-white', 'border-primary');
+                chip.classList.add('bg-white', 'text-on-surface', 'border-outline-variant');
+            });
+            
+            element.classList.remove('bg-white', 'text-on-surface', 'border-outline-variant');
+            element.classList.add('bg-primary', 'text-white', 'border-primary');
+        }
+
+        // Initialize default state
+        document.querySelector('[data-priority="medium"]').click();
+
+        window.addEventListener('resize', () => {
+            if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+                document.activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+    </script>
+</body></html>
