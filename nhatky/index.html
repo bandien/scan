@@ -1541,29 +1541,29 @@
     </div>
 
     <nav class="bottom-nav-bar" id="mainBottomNav" style="display: none;" role="navigation" aria-label="Điều hướng chính">
-        <button class="bottom-nav-item" type="button" data-bottom-screen="stats">
-            <div class="nav-icon-wrapper">
-                <span class="material-symbols-outlined">dashboard</span>
-            </div>
-            <span>Tổng quan</span>
-        </button>
         <button class="bottom-nav-item active" type="button" data-bottom-screen="tasklist" aria-current="page">
             <div class="nav-icon-wrapper">
                 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">assignment</span>
             </div>
             <span>Công việc</span>
         </button>
-        <a class="bottom-nav-item" href="../index.html">
+        <button class="bottom-nav-item" type="button" data-bottom-screen="loghistory">
             <div class="nav-icon-wrapper">
-                <span class="material-symbols-outlined">search</span>
+                <span class="material-symbols-outlined">history_edu</span>
             </div>
-            <span>Tìm kiếm</span>
-        </a>
+            <span>Nhật ký</span>
+        </button>
+        <button class="bottom-nav-item" type="button" data-bottom-screen="stats">
+            <div class="nav-icon-wrapper">
+                <span class="material-symbols-outlined">analytics</span>
+            </div>
+            <span>Báo cáo</span>
+        </button>
         <button class="bottom-nav-item" type="button" data-bottom-screen="personal">
             <div class="nav-icon-wrapper">
-                <span class="material-symbols-outlined">more_horiz</span>
+                <span class="material-symbols-outlined">person</span>
             </div>
-            <span>Nhiều hơn</span>
+            <span>Cá nhân</span>
         </button>
     </nav>
   </div>
@@ -1819,7 +1819,11 @@
     // ===== Điều hướng màn hình (router nhỏ gọn, không reload trang) =====
     let currentScreen = "tasklist";
     let currentParams = {};
-    const TOP_LEVEL_SCREENS = ["tasklist", "week", "stats", "personal"];
+    const TOP_LEVEL_SCREENS = ["tasklist", "loghistory", "stats", "personal"];
+
+    function isTopLevelScreen(screen, params) {
+      return TOP_LEVEL_SCREENS.includes(screen) && !(screen === "loghistory" && params && params.planId);
+    }
 
     function navigateTo(screen, params) {
       params = params || {};
@@ -1836,7 +1840,7 @@
       currentParams = params || {};
       document.querySelectorAll(".screen").forEach(el => el.classList.toggle("active", el.dataset.screen === screen));
       renderHeader(screen, currentParams);
-      updateTabbar(screen);
+      updateTabbar(screen, currentParams);
       dispatchScreenRender(screen, currentParams);
       window.scrollTo(0, 0);
     }
@@ -1858,12 +1862,12 @@
       dispatchScreenRender(currentScreen, currentParams);
     }
 
-    function updateTabbar(screen) {
+    function updateTabbar(screen, params) {
       const tabbar = document.getElementById("mainBottomNav");
-      const topLevel = TOP_LEVEL_SCREENS.includes(screen);
+      const topLevel = isTopLevelScreen(screen, params);
       tabbar.style.display = topLevel ? "flex" : "none";
       tabbar.querySelectorAll("[data-bottom-screen]").forEach(item => {
-        const active = item.dataset.bottomScreen === screen || (screen === "week" && item.dataset.bottomScreen === "tasklist");
+        const active = item.dataset.bottomScreen === screen;
         item.classList.toggle("active", active);
         if (active) item.setAttribute("aria-current", "page");
         else item.removeAttribute("aria-current");
@@ -1900,6 +1904,29 @@
       `;
     }
 
+    function topLevelHeaderHtml(screen) {
+      const meta = {
+        loghistory: { icon: "bi-journal-text", title: "Nhật ký đã ghi", subtitle: "Theo dõi kết quả công việc" },
+        stats: { icon: "bi-bar-chart-fill", title: "Báo cáo", subtitle: "Tổng hợp công việc của tổ" },
+        personal: { icon: "bi-person-fill", title: "Cá nhân", subtitle: "Tài khoản và tùy chọn" }
+      }[screen];
+      if (!meta) return homeHeaderHtml();
+      return `
+        <div class="header-inner">
+          <div class="header-left min-w-0">
+            <div class="brand-mark flex-shrink-0"><i class="bi ${meta.icon}"></i></div>
+            <div class="header-titles min-w-0">
+              <div class="app-title text-truncate">${meta.title}</div>
+              <div class="header-sub text-truncate">${meta.subtitle}</div>
+            </div>
+          </div>
+          <div class="header-right">
+            <span class="sync-pill" id="syncBadge" style="display:none"></span>
+          </div>
+        </div>
+      `;
+    }
+
     function backHeaderHtml(title, editPlanId) {
       return `
         <div class="header-inner header-inner-back">
@@ -1918,19 +1945,17 @@
         return plan ? `Nhật ký: ${escapeHtml(plan.task || "")}` : "Nhật ký gần đây";
       }
       if (screen === "week") return "Lịch tuần này";
-      if (screen === "stats") return "Thống kê cả tổ";
+      if (screen === "stats") return "Báo cáo tổ";
       return "Nhật ký công việc";
     }
 
     function renderHeader(screen, params) {
       const header = document.getElementById("appHeader");
-      if (screen === "personal") {
-        header.style.display = "none";
-        return;
-      }
       header.style.display = "";
       if (screen === "tasklist") {
         header.innerHTML = homeHeaderHtml();
+      } else if (isTopLevelScreen(screen, params)) {
+        header.innerHTML = topLevelHeaderHtml(screen);
       } else {
         header.innerHTML = backHeaderHtml(screenTitle(screen, params), screen === "taskdetail" ? params.id : "");
       }
@@ -2002,18 +2027,6 @@
       document.getElementById("appHeader").addEventListener("click", event => {
         if (event.target.closest("#btnBack")) goBack();
       });
-
-      const legacyTabbar = document.getElementById("tabbar");
-      if (legacyTabbar) {
-        legacyTabbar.addEventListener("click", event => {
-          const btn = event.target.closest(".tab");
-          if (!btn) return;
-          const target = btn.dataset.tab;
-          if (target === "logentry") { navigateTo("logentry", {}); return; }
-          if (currentScreen === target) return;
-          navigateTo(target, {});
-        });
-      }
 
       document.getElementById("mainBottomNav").addEventListener("click", event => {
         const item = event.target.closest("[data-bottom-screen]");
@@ -3728,17 +3741,23 @@
             <div class="metric"><div class="n">${doneCount}</div><div class="l">Đã xong</div></div>
             <div class="metric${attnCount ? " hi" : ""}"><div class="n">${attnCount}</div><div class="l">Cần xử lý</div></div>
           </div>
-          <div class="menu">
-            <button class="mrow" type="button" onclick="navigateTo('week',{})"><i class="bi bi-calendar-week lead"></i>Lịch làm việc của tôi<i class="bi bi-chevron-right tail"></i></button>
-            <button class="mrow" type="button" onclick="navigateTo('loghistory',{})"><i class="bi bi-journal-text lead"></i>Nhật ký đã ghi<i class="bi bi-chevron-right tail"></i></button>
-            <button class="mrow" type="button" onclick="navigateTo('stats',{})"><i class="bi bi-bar-chart lead"></i>Thống kê cả tổ<i class="bi bi-chevron-right tail"></i></button>
+          <div class="section-label">Ứng dụng</div>
+          <div class="menu mb-3">
+            <button class="mrow" type="button" id="btnOpenScan"><i class="bi bi-qr-code-scan lead"></i>Quét / tìm thiết bị<i class="bi bi-box-arrow-up-right tail"></i></button>
+          </div>
+          <div class="section-label">Tùy chọn</div>
+          <div class="menu mb-3">
             <button class="mrow" type="button" id="btnPersonalFilters"><i class="bi bi-funnel lead"></i>Bộ lọc nâng cao<i class="bi bi-chevron-right tail"></i></button>
             <button class="mrow" type="button" id="btnPersonalSettings"><i class="bi bi-gear lead"></i>Cấu hình đồng bộ<i class="bi bi-chevron-right tail"></i></button>
             <button class="mrow" type="button" id="btnPersonalFontScale"><i class="bi bi-fonts lead"></i>Cỡ chữ: ${scaleLabel}<i class="bi bi-chevron-right tail"></i></button>
+          </div>
+          <div class="section-label">Tài khoản</div>
+          <div class="menu">
             <button class="mrow" type="button" id="btnPersonalLogout"><i class="bi bi-box-arrow-right lead"></i>Đăng xuất<i class="bi bi-chevron-right tail"></i></button>
           </div>
         </div>
       `;
+      document.getElementById("btnOpenScan").addEventListener("click", () => { window.location.href = "../index.html"; });
       document.getElementById("btnPersonalFilters").addEventListener("click", () => filterOffcanvasInstance.show());
       document.getElementById("btnPersonalSettings").addEventListener("click", () => settingsModalInstance.show());
       document.getElementById("btnPersonalFontScale").addEventListener("click", () => { cycleFontScale(); renderPersonalScreen(); });
