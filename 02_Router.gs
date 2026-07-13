@@ -144,7 +144,7 @@ function ensureWorkLogsSheet_() {
   const headers = [
     "LogID","CreatedAt","WorkDate","Employee","Shift","Progress",
     "StartTime","EndTime","Task","Result","Issue","NextAction","PlanID","SyncStatus",
-    "Rating","RecordedBy","Quantity","Unit","TeamGroup","WorkTeam"
+    "Rating","RecordedBy","Quantity","Unit","Teams"
   ];
 
   if (!sheet) sheet = ss.insertSheet("WorkLogs");
@@ -162,14 +162,7 @@ function ensureWorkLogsSheet_() {
     if (String(sheet.getRange(1, 18).getValue()).trim() === "") {
       sheet.getRange(1, 18).setValue("Unit").setFontWeight("bold");
     }
-    if (String(sheet.getRange(1, 19).getValue()).trim() === "") {
-      // Phân tổ cách ly dữ liệu
-      sheet.getRange(1, 19).setValue("TeamGroup").setFontWeight("bold");
-    }
-    if (String(sheet.getRange(1, 20).getValue()).trim() === "") {
-      // Tổ thực hiện công việc, tách biệt với TeamGroup dùng để phân quyền
-      sheet.getRange(1, 20).setValue("WorkTeam").setFontWeight("bold");
-    }
+    sheet.getRange(1, 19).setValue("Teams").setFontWeight("bold");
   }
   return sheet;
 }
@@ -177,15 +170,15 @@ function ensureWorkLogsSheet_() {
 // Nhật ký của cả tổ (mặc định 7 ngày gần nhất) để mọi máy cùng thấy
 function handleGetWorkLogs(e) {
   const user = e && e.parameter ? e.parameter.user : "";
-  const teamGroup = typeof getUserTeamGroup_ === "function" ? getUserTeamGroup_(user) : "";
+  const userTeams = typeof getUserTeams_ === "function" ? getUserTeams_(user) : "";
 
   const sheet = ensureWorkLogsSheet_();
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return contentResponse({ status: "success", logs: [] });
 
-  const isPrivileged = teamGroup === "*" || teamGroup.toLowerCase() === "admin";
+  const isPrivileged = typeof isPrivilegedTeams_ === "function" && isPrivilegedTeams_(userTeams);
   // Không có tài khoản, hoặc tài khoản chưa được phân nhóm tổ → không trả về nhật ký nào
-  if (!isPrivileged && (!teamGroup || teamGroup === "- Chưa phân tổ -")) {
+  if (!isPrivileged && (!userTeams || userTeams === "- Chưa phân tổ -")) {
     return contentResponse({ status: "success", logs: [] });
   }
 
@@ -193,7 +186,7 @@ function handleGetWorkLogs(e) {
   const cutoff = Utilities.formatDate(new Date(Date.now() - days * 86400000), Session.getScriptTimeZone(), "yyyy-MM-dd");
   const maxRows = 400;
   const startRow = Math.max(2, lastRow - maxRows + 1);
-  const rows = sheet.getRange(startRow, 1, lastRow - startRow + 1, 20).getValues();
+  const rows = sheet.getRange(startRow, 1, lastRow - startRow + 1, 19).getValues();
 
   const logs = [];
   rows.forEach(function(r) {
@@ -204,7 +197,7 @@ function handleGetWorkLogs(e) {
     // Không có quyền admin → chỉ lấy đúng nhật ký của tổ mình
     if (!isPrivileged) {
       const rTeam = String(r[18] || "").trim();
-      if (rTeam !== teamGroup) return;
+      if (typeof userCanAccessTeam_ !== "function" || !userCanAccessTeam_(userTeams, rTeam)) return;
     }
 
     logs.push({
@@ -225,7 +218,7 @@ function handleGetWorkLogs(e) {
       recordedBy: String(r[15] || ""),
       quantity: r[16] === "" || r[16] === null ? "" : Number(r[16]),
       unit: String(r[17] || ""),
-      workTeam: String(r[19] || ""),
+      teams: String(r[18] || ""),
       syncStatus: "synced"
     });
   });
@@ -254,12 +247,11 @@ function handleCreateWorkLog(params) {
   const sheet = ensureWorkLogsSheet_();
   
   const user = payload.recordedBy || employee;
-  const teamGroup = typeof getUserTeamGroup_ === "function" ? getUserTeamGroup_(user) : "";
-  const allowedWorkTeams = ["Tổ cơ điện", "Tổ điện nước"];
-  const requestedWorkTeam = String(payload.workTeam || "").trim();
-  const workTeam = allowedWorkTeams.indexOf(requestedWorkTeam) >= 0
-    ? requestedWorkTeam
-    : (allowedWorkTeams.indexOf(teamGroup) >= 0 ? teamGroup : "");
+  const userTeams = typeof getUserTeams_ === "function" ? getUserTeams_(user) : "";
+  const requestedTeam = String(payload.teams || "").trim();
+  if (typeof userCanAccessTeam_ !== "function" || !userCanAccessTeam_(userTeams, requestedTeam)) {
+    return contentResponse({ status: "error", message: "Tổ không thuộc quyền của tài khoản" });
+  }
 
   sheet.appendRow([
     logId,
@@ -280,8 +272,7 @@ function handleCreateWorkLog(params) {
     payload.recordedBy || "",
     payload.quantity === 0 || payload.quantity ? payload.quantity : "",
     payload.unit || "",
-    teamGroup,
-    workTeam
+    requestedTeam
   ]);
 
   // Cập nhật tăng dần lũy kế vào dòng kế hoạch (Incremental Update)
