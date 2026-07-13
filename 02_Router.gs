@@ -56,6 +56,8 @@ function doGet(e) {
       case 'tempDumpDevices':   return handleTempDumpDevices(e);
       case 'migrateDevicesData':return handleMigrateDevicesData(e);
       case 'migrateAccounts':   return handleMigrateAccountsEndpoint(); // Migration for Nhatky accounts
+      case 'syncERPNext':       return handleSyncERPNext(e);
+      case 'testERPNext':       return handleTestERPNext(e);
       default:                  return handleGetDevice(e);          // UID lookup
     }
   } catch (err) {

@@ -30,7 +30,11 @@ function setupAllSheets() {
     "Manager","Shift","WarningDays","ManufactureDate","InstallationDate",
     "Status","Project","SerialNumber","Area","EquipmentType"
   ]);
-  ensureSheet(ss, SHEETS.LOGS, ["Timestamp","UID","Items","Notes","User","ImageUrl"]);
+  
+  // LOGS: Bổ sung 3 cột ERPNext ở cuối để đồng bộ
+  const logsSheet = ensureSheet(ss, SHEETS.LOGS, ["Timestamp","UID","Items","Notes","User","ImageUrl","SyncStatus","ERPNextID","SyncMessage"]);
+  ensureColumnsExist_(logsSheet, ["SyncStatus", "ERPNextID", "SyncMessage"]);
+
   ensureSheet(ss, SHEETS.USERS, ["Username","PIN","Role","Teams"]);
   ensureSheet(ss, SHEETS.CHECKLISTS, ["Type","ID","Title","Description"]);
   ensureSheet(ss, SHEETS.WORK_ORDERS, [
@@ -41,7 +45,6 @@ function setupAllSheets() {
   ensureSheet(ss, SHEETS.PROJECTS, ["ProjectID","Name","Status","StartDate","EndDate"]);
   ensureSheet(ss, SHEETS.SHIFTS, ["ShiftID","Name","Description","Status"]);
   ensureSheet(ss, SHEETS.INVENTORY, ["PartCode","Name","Stock","MinStock","Unit"]);
-
 
   // Phase 11 — Metering
   setupMeteringSheets(ss);
@@ -55,9 +58,13 @@ function setupMeteringSheets(ss) {
   ensureSheet(ss, SHEETS.METER_POINTS, [
     "MeterID","Type","Name","Location","Multiplier","Threshold","Unit","Notes","LastReading","LastDate"
   ]);
-  ensureSheet(ss, SHEETS.METER_READINGS, [
-    "ReadingID","MeterID","Value","PhotoUrl","Timestamp","User","Calculated","Alert"
+  
+  // METER_READINGS: Bổ sung 3 cột ERPNext ở cuối để đồng bộ
+  const readingSheet = ensureSheet(ss, SHEETS.METER_READINGS, [
+    "ReadingID","MeterID","Value","PhotoUrl","Timestamp","User","Calculated","Alert","SyncStatus","ERPNextID","SyncMessage"
   ]);
+  ensureColumnsExist_(readingSheet, ["SyncStatus", "ERPNextID", "SyncMessage"]);
+
   Logger.log("✅ Metering sheets initialized: MeterPoints, MeterReadings");
 }
 
@@ -202,6 +209,84 @@ function handleMigrateAccountsEndpoint() {
     return contentResponse({ status: "success", message: msg });
   } catch (err) {
     return contentResponse({ status: "error", message: err.toString() });
+  }
+}
+
+/** Hàm kiểm tra và tự động bổ sung cột nếu chưa có cho các sheet hiện hữu */
+function ensureColumnsExist_(sheet, requiredColumns) {
+  if (!sheet) return;
+  const lastCol = sheet.getLastColumn();
+  let headers = [];
+  if (lastCol > 0) {
+    headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0].map(h => String(h).trim());
+  }
+  
+  requiredColumns.forEach(col => {
+    if (headers.indexOf(col) === -1) {
+      const nextCol = sheet.getLastColumn() + 1;
+      sheet.getRange(1, nextCol).setValue(col).setFontWeight("bold");
+      Logger.log("  ➕ Đã thêm cột '" + col + "' vào sheet " + sheet.getName());
+    }
+  });
+}
+
+/**
+ * TỰ ĐỘNG CẤU HÌNH TOÀN BỘ TÍCH HỢP ERPNEXT (1-Click Setup)
+ * Chỉ cần chọn hàm này và bấm "Run" (Chạy) trong Apps Script Editor.
+ */
+function setupERPNextIntegration() {
+  Logger.log("🏁 Bắt đầu thiết lập tích hợp ERPNext tự động...");
+  
+  const props = PropertiesService.getScriptProperties();
+  
+  // 1. Ghi nhận các thông số kết nối bảo mật
+  props.setProperty("ERPNEXT_BASE_URL", "https://royal-expend-ripping.ngrok-free.dev");
+  props.setProperty("ERPNEXT_API_KEY", "884c6a8bccf6bb1");
+  props.setProperty("ERPNEXT_API_SECRET", "f45e10911905f66");
+  props.setProperty("ERPNEXT_ENABLED", "true");
+  props.setProperty("ERPNEXT_DRY_RUN", "false");
+  
+  Logger.log("✅ Đã ghi nhận thông số kết nối vào Script Properties.");
+  
+  // 2. Chạy di chuyển cấu trúc bảng (thêm các cột SyncStatus, ERPNextID, SyncMessage)
+  Logger.log("🔄 Đang kiểm tra và nâng cấp cấu trúc bảng Google Sheet...");
+  setupAllSheets();
+  
+  // 3. Khởi tạo trigger chạy ngầm tự động (nếu chưa có)
+  Logger.log("⏰ Đang thiết lập trigger chạy ngầm 10 phút...");
+  setupERPNextTrigger_();
+  
+  // 4. Kiểm thử kết nối thực tế tới ERPNext
+  Logger.log("🔍 Đang chạy kiểm thử kết nối tới ERPNext...");
+  const connected = testERPNextConnection();
+  
+  if (connected) {
+    Logger.log("🎉 THÀNH CÔNG! Dự án đã được cấu hình và kết nối hoàn tất tới ERPNext.");
+  } else {
+    Logger.log("❌ THẤT BẠI! Không thể kết nối tới ERPNext. Vui lòng kiểm tra lại trạng thái của ngrok.");
+  }
+}
+
+/** Tạo trigger thời gian chạy ngầm 10 phút (nếu chưa tồn tại) */
+function setupERPNextTrigger_() {
+  const triggers = ScriptApp.getProjectTriggers();
+  let exists = false;
+  
+  for (let i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === "triggerERPNextSync") {
+      exists = true;
+      break;
+    }
+  }
+  
+  if (!exists) {
+    ScriptApp.newTrigger("triggerERPNextSync")
+      .timeBased()
+      .everyMinutes(10)
+      .create();
+    Logger.log("➕ Đã tạo mới trigger chạy ngầm triggerERPNextSync (mỗi 10 phút).");
+  } else {
+    Logger.log("➖ Trigger chạy ngầm đã tồn tại, bỏ qua tạo mới.");
   }
 }
 
