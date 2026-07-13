@@ -101,12 +101,10 @@
 <main class="flex-1 w-full max-w-[440px] pt-[80px] pb-[100px] px-margin-mobile overflow-y-auto">
 <!-- User Profile Header Section -->
 <section class="mb-8 p-6 rounded-xl bg-surface-container-low dark:bg-surface-container border border-outline-variant flex items-center gap-4 relative overflow-hidden">
-<div class="w-16 h-16 rounded-full overflow-hidden border-2 border-primary-container shrink-0">
-<img class="w-full h-full object-cover" alt="Kỹ sư Nguyễn Văn A" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSrHcokWef7pJU1th6WhPVxpJSW4SNxTkpEFsstExkJ31pGr2RqMbXY3GkwghxJzuQv8X4qzz6WkE79Z5UFnnp5XzFOr26mbvwgqRIfY4p9UoIX1CHbM7hmViXda9XqwiV_eXZdGMfFMY2tW2RRtdLC7s2CSWswrkU-FrO3iUpU6wBArdMKx433yu2YEJnPGHe8W0bWe78SQMQoqAxv8CrWhwH6pFKaE-pGCC_YY-qy_LslmAheRQ8S-t8dx8cmCYS0DmEvyGiM40">
-</div>
+<div id="profile-avatar" class="w-16 h-16 rounded-full border-2 border-primary flex items-center justify-center bg-secondary-container text-primary font-bold text-xl shrink-0 uppercase">--</div>
 <div class="flex flex-col">
-<h2 class="font-headline-md text-headline-md text-on-surface">Kỹ sư Nguyễn Văn A</h2>
-<p class="font-label-md text-label-md text-on-surface-variant">ID: ENG-49201 • Đội Cơ Điện 1</p>
+<h2 id="profile-name" class="font-headline-md text-headline-md text-on-surface">--</h2>
+<p id="profile-id-line" class="font-label-md text-label-md text-on-surface-variant">--</p>
 </div>
 </section>
 <!-- Setting Groups -->
@@ -121,7 +119,7 @@
 <span class="font-body-md text-body-md text-on-surface">Thông báo đẩy</span>
 </div>
 <label class="relative inline-flex items-center cursor-pointer">
-<input checked="" class="sr-only peer custom-switch" type="checkbox">
+<input id="pref-push" checked="" class="sr-only peer custom-switch" type="checkbox">
 <div class="switch-bg w-11 h-6 bg-surface-variant rounded-full transition-all">
 <div class="switch-dot absolute top-[2px] left-[2px] bg-white border-gray-300 border rounded-full h-5 w-5 transition-all"></div>
 </div>
@@ -133,7 +131,7 @@
 <span class="font-body-md text-body-md text-on-surface">Cảnh báo sự cố khẩn cấp</span>
 </div>
 <label class="relative inline-flex items-center cursor-pointer">
-<input checked="" class="sr-only peer" id="emergency-toggle" type="checkbox">
+<input checked="" class="sr-only peer" id="pref-emergency" type="checkbox">
 <div class="w-11 h-6 bg-surface-variant rounded-full peer-checked:bg-error transition-all relative">
 <div class="absolute top-[2px] left-[2px] bg-white border-gray-300 border rounded-full h-5 w-5 transition-all peer-checked:translate-x-full"></div>
 </div>
@@ -145,20 +143,25 @@
 <div>
 <h3 class="font-label-md text-label-md text-primary-container dark:text-primary mb-3 px-1 uppercase tracking-wider">Cấu hình Quét mã</h3>
 <div class="rounded-xl border border-outline-variant divide-y divide-outline-variant overflow-hidden">
-<button class="w-full flex items-center justify-between p-4 bg-surface-container-lowest dark:bg-surface-container-low active:bg-surface-container-high transition-all">
+<div class="flex items-center justify-between p-4 bg-surface-container-lowest dark:bg-surface-container-low">
 <div class="flex items-center gap-3">
 <span class="material-symbols-outlined text-primary-container dark:text-on-secondary-container" data-icon="flashlight_on">flashlight_on</span>
 <span class="font-body-md text-body-md text-on-surface">Tự động bật đèn Flash</span>
 </div>
-<span class="material-symbols-outlined text-outline" data-icon="chevron_right">chevron_right</span>
-</button>
+<label class="relative inline-flex items-center cursor-pointer">
+<input id="pref-flash" class="sr-only peer" type="checkbox">
+<div class="w-11 h-6 bg-surface-variant rounded-full peer-checked:bg-primary-container transition-all relative">
+<div class="absolute top-[2px] left-[2px] bg-white border-gray-300 border rounded-full h-5 w-5 transition-all peer-checked:translate-x-full"></div>
+</div>
+</label>
+</div>
 <div class="flex items-center justify-between p-4 bg-surface-container-lowest dark:bg-surface-container-low">
 <div class="flex items-center gap-3">
 <span class="material-symbols-outlined text-primary-container dark:text-on-secondary-container" data-icon="vibration">vibration</span>
 <span class="font-body-md text-body-md text-on-surface">Rung khi quét thành công</span>
 </div>
 <label class="relative inline-flex items-center cursor-pointer">
-<input checked="" class="sr-only peer" type="checkbox">
+<input id="pref-vibrate" checked="" class="sr-only peer" type="checkbox">
 <div class="w-11 h-6 bg-surface-variant rounded-full peer-checked:bg-primary-container transition-all relative">
 <div class="absolute top-[2px] left-[2px] bg-white border-gray-300 border rounded-full h-5 w-5 transition-all peer-checked:translate-x-full"></div>
 </div>
@@ -177,19 +180,19 @@
 <span class="font-body-md text-body-md text-on-surface">Chế độ tối (Dark Mode)</span>
 </div>
 <label class="relative inline-flex items-center cursor-pointer">
-<input id="theme-toggle" checked="" class="sr-only peer" type="checkbox">
+<input id="theme-toggle" checked="" disabled="" class="sr-only peer" type="checkbox">
 <div class="w-11 h-6 bg-surface-variant rounded-full peer-checked:bg-primary-container transition-all relative">
 <div class="absolute top-[2px] left-[2px] bg-white border-gray-300 border rounded-full h-5 w-5 transition-all peer-checked:translate-x-full"></div>
 </div>
 </label>
 </div>
-<button class="w-full flex items-center justify-between p-4 bg-surface-container-lowest dark:bg-surface-container-low active:bg-surface-container-high transition-all">
+<button onclick="toggleLanguage(event)" class="w-full flex items-center justify-between p-4 bg-surface-container-lowest dark:bg-surface-container-low active:bg-surface-container-high transition-all">
 <div class="flex items-center gap-3">
 <span class="material-symbols-outlined text-primary-container dark:text-on-secondary-container" data-icon="language">language</span>
 <span class="font-body-md text-body-md text-on-surface">Ngôn ngữ hiển thị</span>
 </div>
 <div class="flex items-center gap-2">
-<span class="text-on-surface-variant font-label-md">Tiếng Việt</span>
+<span id="language-display-text" class="text-on-surface-variant font-label-md">Tiếng Việt</span>
 <span class="material-symbols-outlined text-outline" data-icon="chevron_right">chevron_right</span>
 </div>
 </button>
@@ -201,9 +204,13 @@
 <div class="rounded-xl border border-outline-variant divide-y divide-outline-variant overflow-hidden">
 <div class="flex items-center justify-between p-4 bg-surface-container-lowest dark:bg-surface-container-low">
 <span class="font-body-md text-body-md text-on-surface-variant">Phiên bản hiện tại</span>
-<span class="font-label-md text-on-surface">v4.2.0-stable</span>
+<span id="app-version-text" class="font-label-md text-on-surface">v3.0.0</span>
 </div>
-<button class="w-full flex items-center justify-between p-4 bg-surface-container-lowest dark:bg-surface-container-low active:bg-surface-container-high transition-all text-error">
+<div class="flex items-center justify-between p-4 bg-surface-container-lowest dark:bg-surface-container-low">
+<span class="font-body-md text-body-md text-on-surface-variant">Trạng thái đồng bộ</span>
+<span id="sync-status-text" class="font-label-md text-on-surface">Đang kiểm tra...</span>
+</div>
+<button onclick="handleLogout(event)" class="w-full flex items-center justify-between p-4 bg-surface-container-lowest dark:bg-surface-container-low active:bg-surface-container-high transition-all text-error">
 <div class="flex items-center gap-3">
 <span class="material-symbols-outlined" data-icon="logout">logout</span>
 <span class="font-body-md text-body-md font-bold">Đăng xuất hệ thống</span>
@@ -213,7 +220,7 @@
 </div>
 </div>
 <!-- Feedback Button -->
-<button class="mt-8 w-full h-touch-target bg-primary-container text-white dark:text-on-primary-container rounded-xl font-bold active:scale-[0.97] transition-transform flex items-center justify-center gap-2">
+<button onclick="sendFeedback()" class="mt-8 w-full h-touch-target bg-primary-container text-white dark:text-on-primary-container rounded-xl font-bold active:scale-[0.97] transition-transform flex items-center justify-center gap-2">
 <span class="material-symbols-outlined" data-icon="feedback">feedback</span>
         GỬI PHẢN HỒI KỸ THUẬT
     </button>
@@ -225,15 +232,18 @@
         <a class="flex flex-col items-center justify-center flex-1 text-gray-500 dark:text-on-surface-variant active:scale-[0.97] transition-all duration-200" href="baocao_stitch.html">
             <span class="material-symbols-outlined">grid_view</span>
             <span class="font-label-md text-[11px] mt-1">Tổng quan</span>
-        </a>\n        <!-- Công việc -->
+        </a>
+        <!-- Công việc -->
         <a class="flex flex-col items-center justify-center flex-1 text-gray-500 dark:text-on-surface-variant active:scale-[0.97] transition-all duration-200" href="index.html">
             <span class="material-symbols-outlined">assignment</span>
             <span class="font-label-md text-[11px] mt-1">Công việc</span>
-        </a>\n        <!-- Tìm kiếm -->
+        </a>
+        <!-- Tìm kiếm -->
         <a class="flex flex-col items-center justify-center flex-1 text-gray-500 dark:text-on-surface-variant active:scale-[0.97] transition-all duration-200" href="../index.html">
             <span class="material-symbols-outlined">search</span>
             <span class="font-label-md text-[11px] mt-1">Tìm kiếm</span>
-        </a>\n        <!-- Nhiều hơn (Active) -->
+        </a>
+        <!-- Nhiều hơn (Active) -->
         <a class="flex flex-col items-center justify-center flex-1 text-blue-600 dark:text-on-secondary-container active:scale-[0.97] transition-all duration-200" href="caidat_stitch.html">
             <div class="bg-blue-50 dark:bg-secondary-container rounded-xl px-4 py-1.5 flex flex-col items-center">
                 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">more_horiz</span>
@@ -264,4 +274,117 @@
         });
     });
 </script>
-</body></html>
+
+    <!-- Phase 4 Live Bindings -->
+    <script src="../js/config.js"></script>
+    <script src="../js/sso.js"></script>
+    <script>
+        // Auth Guard
+        const user = BD_SSO.requireLogin('../index.html');
+        if (user) {
+            document.addEventListener("DOMContentLoaded", () => {
+                initSettings();
+            });
+        }
+
+        function initSettings() {
+            // 1. Profile Section Bindings
+            if (user) {
+                const name = user.name || user.username || "Kỹ sư";
+                document.getElementById('profile-name').innerText = name;
+                
+                const initials = name.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase();
+                document.getElementById('profile-avatar').innerText = initials || "U";
+                
+                const teams = user.teams || "Nhóm kỹ thuật";
+                document.getElementById('profile-id-line').innerText = `${user.username || "user"} • ${teams}`;
+            }
+
+            // 2. Load Preferences from localStorage
+            const prefs = JSON.parse(localStorage.getItem('bandien_scan_prefs') || '{}');
+            
+            // Map switches
+            const pushSwitch = document.getElementById('pref-push');
+            const emergencySwitch = document.getElementById('pref-emergency');
+            const flashSwitch = document.getElementById('pref-flash');
+            const vibrateSwitch = document.getElementById('pref-vibrate');
+            
+            if (pushSwitch) {
+                pushSwitch.checked = prefs.notifications !== false;
+                pushSwitch.addEventListener('change', (e) => savePref('notifications', e.target.checked));
+            }
+            if (emergencySwitch) {
+                emergencySwitch.checked = prefs.emergency !== false;
+                emergencySwitch.addEventListener('change', (e) => savePref('emergency', e.target.checked));
+            }
+            if (flashSwitch) {
+                flashSwitch.checked = prefs.autoFlash === true;
+                flashSwitch.addEventListener('change', (e) => savePref('autoFlash', e.target.checked));
+            }
+            if (vibrateSwitch) {
+                vibrateSwitch.checked = prefs.vibrate !== false;
+                vibrateSwitch.addEventListener('change', (e) => savePref('vibrate', e.target.checked));
+            }
+
+            // 3. Language settings
+            const currentLang = localStorage.getItem('lang') || 'vi';
+            updateLanguageUI(currentLang);
+
+            // 4. Sync status & Version text
+            const pending = BD_SSO.pendingSyncCount();
+            const syncStatusText = document.getElementById('sync-status-text');
+            if (pending > 0) {
+                syncStatusText.innerText = `${pending} mục chờ đồng bộ`;
+                syncStatusText.className = 'font-label-md text-warning';
+            } else {
+                syncStatusText.innerText = "Đã đồng bộ";
+                syncStatusText.className = 'font-label-md text-success';
+            }
+
+            document.getElementById('app-version-text').innerText = `${CONFIG.version} • SIU-1.0`;
+        }
+
+        function savePref(key, value) {
+            const prefs = JSON.parse(localStorage.getItem('bandien_scan_prefs') || '{}');
+            prefs[key] = value;
+            localStorage.setItem('bandien_scan_prefs', JSON.stringify(prefs));
+        }
+
+        function updateLanguageUI(lang) {
+            const display = document.getElementById('language-display-text');
+            if (display) {
+                display.innerText = lang === 'vi' ? 'Tiếng Việt' : 'English';
+            }
+        }
+
+        function toggleLanguage(e) {
+            if (e) e.preventDefault();
+            const currentLang = localStorage.getItem('lang') || 'vi';
+            const nextLang = currentLang === 'vi' ? 'en' : 'vi';
+            localStorage.setItem('lang', nextLang);
+            updateLanguageUI(nextLang);
+            
+            // Call config.js setLanguage if available, or just reload to apply language properly
+            if (window.setLanguage) {
+                window.setLanguage(nextLang);
+            } else {
+                location.reload();
+            }
+        }
+
+        function handleLogout(e) {
+            if (e) e.preventDefault();
+            if (confirm("Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?")) {
+                BD_SSO.logout();
+                location.href = '../index.html';
+            }
+        }
+
+        function sendFeedback() {
+            const subject = encodeURIComponent("Phản hồi kỹ thuật BanDienScan");
+            const body = encodeURIComponent(`Phiên bản: ${CONFIG.version} - SIU-1.0\nTrình duyệt: ${navigator.userAgent}\nTài khoản: ${user ? user.username : 'N/A'}\n\nNội dung phản hồi:\n`);
+            location.href = `mailto:support@bandien.github.io?subject=${subject}&body=${body}`;
+        }
+    </script>
+</body>
+</html>

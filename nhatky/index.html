@@ -69,6 +69,64 @@
 
     /* ===== Tab bar dưới cùng ===== */
     .tabbar { display: none; background: #fff; border-top: 2px solid var(--line); flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom); }
+    /* ===== Bottom Navigation Bar ===== */
+    .bottom-nav-bar {
+        position: fixed;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        max-width: 460px;
+        height: 72px;
+        background: #1c2028;
+        border-top: 1px solid #424655;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        z-index: 1040;
+        padding: 0 8px;
+    }
+    .bottom-nav-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        color: #c2c6d8;
+        font-size: 11px;
+        font-weight: 800;
+        transition: all 0.2s ease;
+        background: none;
+        border: none;
+        padding: 4px 0;
+    }
+    .bottom-nav-item:active {
+        transform: scale(0.97);
+    }
+    .bottom-nav-item i {
+        font-size: 20px;
+        margin-bottom: 2px;
+        display: block;
+    }
+    .bottom-nav-item.active {
+        color: #b1c5ff;
+    }
+    .bottom-nav-item.active .nav-icon-wrapper {
+        background-color: #314577;
+        color: #b1c5ff;
+        border-radius: 16px;
+        padding: 4px 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .bottom-nav-item:not(.active) .nav-icon-wrapper {
+        padding: 4px 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
     .tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 0 7px; font-size: .72rem; font-weight: 800; color: #7a848a; background: none; border: 0; cursor: pointer; }
     .tab i { font-size: 1.4rem; }
     .tab.on { color: var(--brand); }
@@ -1084,11 +1142,35 @@
       <section class="screen" data-screen="personal" id="screen-personal"></section>
     </div>
 
-    <nav class="tabbar" id="tabbar">
-      <button class="tab" type="button" data-tab="tasklist"><i class="bi bi-list-check"></i>Việc</button>
-      <button class="tab" type="button" data-tab="week"><i class="bi bi-calendar-week"></i>Lịch tuần</button>
-      <button class="tab" type="button" data-tab="logentry"><i class="bi bi-journal-plus"></i>Ghi</button>
-      <button class="tab" type="button" data-tab="personal"><i class="bi bi-person"></i>Cá nhân</button>
+    <nav class="bottom-nav-bar" id="mainBottomNav" style="display: none;">
+        <!-- Tổng quan -->
+        <a class="bottom-nav-item" href="baocao_stitch.html">
+            <div class="nav-icon-wrapper">
+                <i class="bi bi-grid-fill"></i>
+            </div>
+            <span>Tổng quan</span>
+        </a>
+        <!-- Công việc (Active) -->
+        <a class="bottom-nav-item active" href="index.html">
+            <div class="nav-icon-wrapper">
+                <i class="bi bi-journal-check"></i>
+            </div>
+            <span>Công việc</span>
+        </a>
+        <!-- Tìm kiếm -->
+        <a class="bottom-nav-item" href="../index.html">
+            <div class="nav-icon-wrapper">
+                <i class="bi bi-qr-code-scan"></i>
+            </div>
+            <span>Tìm kiếm</span>
+        </a>
+        <!-- Nhiều hơn -->
+        <a class="bottom-nav-item" href="caidat_stitch.html">
+            <div class="nav-icon-wrapper">
+                <i class="bi bi-three-dots"></i>
+            </div>
+            <span>Nhiều hơn</span>
+        </a>
     </nav>
   </div>
 
@@ -1358,10 +1440,9 @@
     }
 
     function updateTabbar(screen) {
-      const tabbar = document.getElementById("tabbar");
+      const tabbar = document.getElementById("mainBottomNav");
       const topLevel = TOP_LEVEL_SCREENS.includes(screen);
       tabbar.style.display = topLevel ? "flex" : "none";
-      document.querySelectorAll("#tabbar .tab").forEach(tab => tab.classList.toggle("on", tab.dataset.tab === screen));
     }
 
     function openTaskDetail(id) {
