@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+
+<html class="light" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&amp;family=Public+Sans:wght@600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        try {
+            tailwind.config = {
+                darkMode: "class",
+                theme: {
+                    extend: {
+                        "colors": {
+                            "background": "#eef0f2",
+                            "surface": "#ffffff",
+                            "primary": "#0b4d5e",
+                            "on-surface": "#10131b",
+                            "on-surface-variant": "#5c606b",
+                            "outline": "#d1d5db",
+                            "outline-variant": "#e5e7eb",
+                            "success": "#2d8a5f"
+                        },
+                        "borderRadius": {
+                            "DEFAULT": "0.25rem",
+                            "lg": "0.5rem",
+                            "xl": "0.75rem",
+                            "full": "9999px"
+                        },
+                        "spacing": {
+                            "card-gap": "20px",
+                            "touch-target": "52px",
+                            "margin-mobile": "16px",
+                            "gutter": "16px",
+                            "base": "8px"
+                        },
+                        "fontFamily": {
+                            "label-md": ["Public Sans"],
+                            "headline-lg": ["Inter"],
+                            "body-md": ["Inter"],
+                            "headline-lg-mobile": ["Inter"],
+                            "headline-md": ["Inter"]
+                        },
+                        "fontSize": {
+                            "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "600"}],
+                            "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "800"}],
+                            "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "500"}],
+                            "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "800"}],
+                            "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "700"}]
+                        }
+                    },
+                },
+            }
+        } catch (_e) {}
+    </script>
+</head>
+<body class="max-w-[440px] mx-auto min-h-screen relative flex flex-col bg-background text-on-surface transition-colors duration-200 pb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface border-b border-outline-variant max-w-[440px] mx-auto">
+<div class="flex items-center justify-between px-margin-mobile h-touch-target">
+<div class="flex items-center gap-3">
+<button class="active:scale-95 transition-transform duration-100 text-on-surface">
+<span class="material-symbols-outlined">assignment</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Công việc</h1>
+</div>
+<button class="active:scale-95 transition-transform duration-100 text-on-surface">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</header>
+<!-- Content Canvas -->
+<main class="mt-[52px] px-margin-mobile pt-4 flex-1">
+<!-- Filter Tabs -->
+<div class="flex items-center gap-2 mb-6 p-1 bg-white/50 rounded-xl border border-outline-variant">
+<button class="flex-1 py-2.5 flex items-center justify-center gap-2 font-label-md text-[13px] transition-colors bg-primary text-white rounded-lg shadow-sm" id="tab-0">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+<span>Kế hoạch</span>
+</button>
+<button class="flex-1 py-2.5 flex items-center justify-center gap-2 font-label-md text-[13px] text-on-surface-variant transition-colors" id="tab-1">
+<span class="material-symbols-outlined text-[18px]">assignment_ind</span>
+<span>Việc của tôi</span>
+</button>
+<button class="flex-1 py-2.5 flex items-center justify-center gap-2 font-label-md text-[13px] text-on-surface-variant transition-colors" id="tab-2">
+<span class="material-symbols-outlined text-[18px]">history</span>
+<span>Lịch sử</span>
+</button>
+</div>
+<!-- Task List -->
+<div class="space-y-8 pb-4">
+<!-- Section: Kế hoạch tuần -->
+<section>
+<div class="flex items-center justify-between mb-4 bg-surface p-2 rounded-xl border border-outline-variant shadow-sm">
+<button class="p-2 active:scale-95 transition-transform text-on-surface">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">event_note</span>
+<span class="font-bold text-on-surface">Tuần 44 (28/10 - 03/11)</span>
+<span class="material-symbols-outlined text-on-surface-variant">arrow_drop_down</span>
+</div>
+<button class="p-2 active:scale-95 transition-transform text-on-surface">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+<h2 class="font-headline-md text-headline-md mb-4 text-on-surface flex items-center gap-2">Kế hoạch tuần</h2>
+<div class="space-y-4">
+<!-- Thứ Hai -->
+<div class="space-y-3">
+<div class="flex items-center gap-2 px-1">
+<span class="text-on-surface-variant text-[12px] font-bold uppercase tracking-wider">Thứ Hai - 28/10</span>
+<div class="h-px flex-1 bg-outline-variant"></div>
+</div>
+<div class="bg-surface border border-outline-variant rounded-xl p-4 shadow-sm active:scale-[0.98] transition-transform">
+<div class="flex flex-col">
+<span class="text-on-surface-variant text-[11px] font-medium">08:00 - 09:00</span>
+<span class="font-bold text-on-surface">Bảo trì máy phát điện dự phòng - Phần 1</span>
+</div>
+</div>
+<div class="bg-surface border border-outline-variant rounded-xl p-4 shadow-sm active:scale-[0.98] transition-transform">
+<div class="flex flex-col">
+<span class="text-on-surface-variant text-[11px] font-medium">09:00 - 10:30</span>
+<span class="font-bold text-on-surface">Kiểm tra hệ thống nhiên liệu</span>
+</div>
+</div>
+<div class="bg-surface border border-outline-variant rounded-xl p-4 shadow-sm active:scale-[0.98] transition-transform">
+<div class="flex flex-col">
+<span class="text-on-surface-variant text-[11px] font-medium">10:30 - 11:30</span>
+<span class="font-bold text-on-surface">Vệ sinh khu vực máy phát</span>
+</div>
+</div>
+</div>
+<!-- Thứ Ba -->
+<div class="space-y-3">
+<div class="flex items-center gap-2 px-1">
+<span class="text-on-surface-variant text-[12px] font-bold uppercase tracking-wider">Thứ Ba - 29/10</span>
+<div class="h-px flex-1 bg-outline-variant"></div>
+</div>
+<div class="border border-dashed border-outline rounded-xl p-6 flex items-center justify-center bg-white/30">
+<div class="flex flex-col items-center gap-1">
+<span class="text-on-surface-variant opacity-60 italic text-[14px]">Trống - Không có công việc</span>
+</div>
+</div>
+</div>
+<!-- Thứ Tư -->
+<div class="space-y-3">
+<div class="flex items-center gap-2 px-1">
+<span class="text-on-surface-variant text-[12px] font-bold uppercase tracking-wider">Thứ Tư - 30/10</span>
+<div class="h-px flex-1 bg-outline-variant"></div>
+</div>
+<div class="bg-surface border border-outline-variant rounded-xl p-4 shadow-sm active:scale-[0.98] transition-transform">
+<div class="flex flex-col">
+<span class="text-on-surface-variant text-[11px] font-medium">08:00 - 09:30</span>
+<span class="font-bold text-on-surface">Kiểm tra hệ thống PCCC - Khu vực A</span>
+</div>
+</div>
+<div class="bg-surface border border-outline-variant rounded-xl p-4 shadow-sm active:scale-[0.98] transition-transform">
+<div class="flex flex-col">
+<span class="text-on-surface-variant text-[11px] font-medium">13:30 - 14:30</span>
+<span class="font-bold text-on-surface">Ghi chỉ số đồng hồ điện nước</span>
+</div>
+</div>
+</div>
+<!-- Thứ Năm -->
+<div class="space-y-3">
+<div class="flex items-center gap-2 px-1">
+<span class="text-on-surface-variant text-[12px] font-bold uppercase tracking-wider">Thứ Năm - 31/10</span>
+<div class="h-px flex-1 bg-outline-variant"></div>
+</div>
+<div class="border border-dashed border-outline rounded-xl p-6 flex items-center justify-center bg-white/30">
+<span class="text-on-surface-variant opacity-60 italic text-[14px]">Trống</span>
+</div>
+</div>
+<!-- Thứ Sáu -->
+<div class="space-y-3">
+<div class="flex items-center gap-2 px-1">
+<span class="text-on-surface-variant text-[12px] font-bold uppercase tracking-wider">Thứ Sáu - 01/11</span>
+<div class="h-px flex-1 bg-outline-variant"></div>
+</div>
+<div class="border border-dashed border-outline rounded-xl p-6 flex items-center justify-center bg-white/30">
+<span class="text-on-surface-variant opacity-60 italic text-[14px]">Trống</span>
+</div>
+</div>
+<!-- Thứ Bảy -->
+<div class="space-y-3">
+<div class="flex items-center gap-2 px-1">
+<span class="text-on-surface-variant text-[12px] font-bold uppercase tracking-wider">Thứ Bảy - 02/11</span>
+<div class="h-px flex-1 bg-outline-variant"></div>
+</div>
+<div class="border border-dashed border-outline rounded-xl p-6 flex items-center justify-center bg-white/30">
+<span class="text-on-surface-variant opacity-60 italic text-[14px]">Trống</span>
+</div>
+</div>
+<!-- Chủ Nhật -->
+<div class="space-y-3">
+<div class="flex items-center gap-2 px-1">
+<span class="text-on-surface-variant text-[12px] font-bold uppercase tracking-wider">Chủ Nhật - 03/11</span>
+<div class="h-px flex-1 bg-outline-variant"></div>
+</div>
+<div class="border border-dashed border-outline rounded-xl p-6 flex items-center justify-center bg-white/30">
+<span class="text-on-surface-variant opacity-60 italic text-[14px]">Trống</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: Hoàn thành -->
+<section>
+<h2 class="font-headline-md text-headline-md mb-4 text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-success">task_alt</span> 
+                    Hoàn thành
+                </h2>
+<div class="space-y-3 opacity-80">
+<div class="bg-surface border border-outline-variant rounded-xl p-4 flex justify-between items-center shadow-sm">
+<div class="flex flex-col">
+<span class="text-on-surface-variant text-[12px] font-medium">Hôm qua - 23/10</span>
+<span class="font-bold text-on-surface line-through opacity-60">Vệ sinh lưới lọc AHU-02</span>
+</div>
+<span class="text-success flex items-center gap-1 font-bold text-[12px]">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+                            Xong
+                        </span>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 max-w-[440px] left-1/2 -translate-x-1/2 bg-surface border-t border-outline-variant flex justify-around items-center h-[72px] px-2 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+<!-- Tổng quan -->
+<a class="flex flex-col items-center justify-center flex-1 text-on-surface-variant active:scale-[0.97] transition-all duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-[11px] mt-1">Tổng quan</span>
+</a>
+<!-- Công việc (Active) -->
+<a class="flex flex-col items-center justify-center flex-1 text-primary active:scale-[0.97] transition-all duration-200" href="#">
+<div class="bg-primary/10 rounded-xl px-4 py-1.5 flex flex-col items-center">
+<span class="material-symbols-outlined">assignment</span>
+<span class="font-label-md text-[11px] mt-0.5">Công việc</span>
+</div>
+</a>
+<!-- Tìm kiếm -->
+<a class="flex flex-col items-center justify-center flex-1 text-on-surface-variant active:scale-[0.97] transition-all duration-200" href="#">
+<span class="material-symbols-outlined">search</span>
+<span class="font-label-md text-[11px] mt-1">Tìm kiếm</span>
+</a>
+<!-- Nhiều hơn -->
+<a class="flex flex-col items-center justify-center flex-1 text-on-surface-variant active:scale-[0.97] transition-all duration-200" href="#">
+<span class="material-symbols-outlined">more_horiz</span>
+<span class="font-label-md text-[11px] mt-1">Nhiều hơn</span>
+</a>
+</nav>
+</body></html>
