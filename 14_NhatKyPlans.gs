@@ -78,15 +78,15 @@ function formatPlanDate_(value) {
 
 function handleGetPlans(e) {
   const user = e && e.parameter ? e.parameter.user : "";
-  const teamGroup = typeof getUserTeamGroup_ === "function" ? getUserTeamGroup_(user) : "";
+  const userTeams = typeof getUserTeams_ === "function" ? getUserTeams_(user) : "";
 
   const sheet = ensurePlansSheet_();
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return contentResponse({ status: "success", plans: [] });
 
-  const isPrivileged = teamGroup === "*" || teamGroup.toLowerCase() === "admin";
+  const isPrivileged = typeof isPrivilegedTeams_ === "function" && isPrivilegedTeams_(userTeams);
   // Không có tài khoản, hoặc tài khoản chưa được phân nhóm tổ → không trả về kế hoạch nào
-  if (!isPrivileged && (!teamGroup || teamGroup === "- Chưa phân tổ -")) {
+  if (!isPrivileged && (!userTeams || userTeams === "- Chưa phân tổ -")) {
     return contentResponse({ status: "success", plans: [] });
   }
 
@@ -98,7 +98,7 @@ function handleGetPlans(e) {
       // Không có quyền admin → chỉ lấy đúng việc của tổ mình
       if (!isPrivileged) {
         const rTeam = String(r[3] || "").trim();
-        if (rTeam !== teamGroup) return false;
+        if (typeof userCanAccessTeam_ !== "function" || !userCanAccessTeam_(userTeams, rTeam)) return false;
       }
       return true;
     })
