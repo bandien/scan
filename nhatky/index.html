@@ -1616,16 +1616,16 @@
             <input class="form-control mb-2" id="loginFullName" placeholder="Nhập họ và tên thật (Ví dụ: Nguyễn Văn Thành)" autocomplete="name">
           </div>
 
-          <label class="form-label" for="loginPassword">Mật khẩu</label>
-          <input class="form-control" id="loginPassword" type="password" placeholder="Mật khẩu tài khoản" autocomplete="current-password">
-          <div class="small text-secondary mt-2" id="loginHint">Nhập mật khẩu để đăng nhập vào tài khoản của bạn.</div>
+          <label class="form-label" for="loginPassword">PIN</label>
+          <input class="form-control" id="loginPassword" type="password" placeholder="PIN tài khoản" autocomplete="current-password">
+          <div class="small text-secondary mt-2" id="loginHint">Nhập PIN trong bảng Users để đăng nhập.</div>
           <div class="small text-danger mt-1 d-none" id="loginError"></div>
         </div>
         <div class="modal-footer flex-column align-items-stretch">
           <button class="btn btn-primary w-100" type="button" id="btnSubmitAuth"><i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập</button>
           <div class="text-center mt-2 d-flex justify-content-between px-1">
-            <a href="#" id="linkToggleAuthMode" class="text-decoration-none small text-muted">Tạo tài khoản mới</a>
-            <a href="#" class="text-decoration-none small text-primary fw-bold" onclick="alert('Vui lòng liên hệ Quản trị viên (Admin) hoặc Tổ trưởng để được cấp lại mật khẩu.'); event.preventDefault();">Quên mật khẩu?</a>
+            <a href="#" id="linkToggleAuthMode" class="text-decoration-none small text-muted d-none">Tạo tài khoản mới</a>
+            <a href="#" class="text-decoration-none small text-primary fw-bold" onclick="alert('Vui lòng liên hệ Quản trị viên (Admin) hoặc Tổ trưởng để được cấp lại PIN.'); event.preventDefault();">Quên PIN?</a>
           </div>
         </div>
       </div>
@@ -2511,11 +2511,25 @@
 
     // ===== Đăng nhập theo tên (danh tính nhẹ, lưu trên máy) =====
     function currentUser() {
-      return localStorage.getItem(STORAGE_KEYS.employee) || "";
+      const direct = localStorage.getItem(STORAGE_KEYS.employee) || "";
+      if (direct) return direct;
+      try {
+        const shared = JSON.parse(localStorage.getItem("currentUser") || sessionStorage.getItem("currentUser") || "null");
+        return shared ? (shared.username || shared.name || "") : "";
+      } catch (_) {
+        return "";
+      }
     }
 
     function currentTeamGroup() {
-      return localStorage.getItem(STORAGE_KEYS.teamGroup) || "";
+      const direct = localStorage.getItem(STORAGE_KEYS.teamGroup) || "";
+      if (direct) return direct;
+      try {
+        const shared = JSON.parse(localStorage.getItem("currentUser") || sessionStorage.getItem("currentUser") || "null");
+        return shared ? (shared.teams || "") : "";
+      } catch (_) {
+        return "";
+      }
     }
 
     // Không có tài khoản, hoặc tài khoản chưa được phân nhóm tổ → chưa cho xem nhật ký/kế hoạch
@@ -2543,6 +2557,10 @@
       if (!confirm("Đăng xuất khỏi tài khoản này?")) return;
       localStorage.removeItem(STORAGE_KEYS.employee);
       localStorage.removeItem(STORAGE_KEYS.teamGroup);
+      localStorage.removeItem("currentUser");
+      sessionStorage.removeItem("currentUser");
+      localStorage.removeItem("savedUsername");
+      localStorage.removeItem("savedPassword");
       updateAccessGate();
       navigateTo("tasklist", {});
       openLogin();
@@ -2576,8 +2594,8 @@
         ? "Chưa có tài khoản? Tạo tài khoản mới"
         : "Đã có tài khoản? Đăng nhập ngay";
       document.getElementById("loginHint").textContent = isLogin
-        ? "Nhập mật khẩu để đăng nhập vào tài khoản của bạn."
-        : "Tạo tài khoản mới với tên đăng nhập (viết tắt) và họ tên thật.";
+        ? "Nhập PIN trong bảng Users để đăng nhập."
+        : "Tài khoản được quản lý tập trung trong sheet Users.";
 
       showLoginError("");
     }
@@ -2628,12 +2646,22 @@
           showLoginError(data.message || "Không thực hiện được, thử lại sau");
           return;
         }
-        rememberEmployee(data.name || name);
-        localStorage.setItem(STORAGE_KEYS.teamGroup, data.teamGroup || "");
+        const loggedName = data.username || data.name || name;
+        const loggedTeams = data.teams || data.teamGroup || "";
+        const loggedRole = data.role || "User";
+        rememberEmployee(loggedName);
+        localStorage.setItem(STORAGE_KEYS.teamGroup, loggedTeams);
+        localStorage.setItem("currentUser", JSON.stringify({
+          username: loggedName,
+          name: loggedName,
+          role: loggedRole,
+          teams: loggedTeams
+        }));
+        sessionStorage.removeItem("currentUser");
         updateUserButton();
         updateAccessGate();
         loginModal.hide();
-        showToast((action === "nhatkyRegister" ? "Đã tạo tài khoản. Xin chào " : "Xin chào ") + (data.name || name));
+        showToast("Xin chào " + loggedName);
 
         // Buộc tải lại dữ liệu theo đúng tổ của tài khoản vừa đăng nhập
         localStorage.removeItem(STORAGE_KEYS.plans);
@@ -2649,21 +2677,17 @@
     }
 
     function doSubmitAuth() {
-      if (authMode === "login") doLogin();
-      else doRegister();
+      doLogin();
     }
 
     function doLogin() {
       const { name, password } = readLoginForm();
-      if (!name || !password) { showLoginError("Nhập đủ tên đăng nhập và mật khẩu"); return; }
+      if (!name || !password) { showLoginError("Nhập đủ tên đăng nhập và PIN"); return; }
       callAuthAction("nhatkyLogin", name, "", password, document.getElementById("btnSubmitAuth"));
     }
 
     function doRegister() {
-      const { name, fullName, password } = readLoginForm();
-      if (!name || !password || !fullName) { showLoginError("Nhập đủ tên đăng nhập, họ tên đầy đủ và mật khẩu"); return; }
-      if (password.length < 4) { showLoginError("Mật khẩu tối thiểu 4 ký tự"); return; }
-      callAuthAction("nhatkyRegister", name, fullName, password, document.getElementById("btnSubmitAuth"));
+      showLoginError("Tài khoản được quản lý tập trung trong sheet Users.");
     }
 
     // Sửa/tạo/xóa kế hoạch → tự ghi 1 dòng nhật ký lưu vết cho người thao tác

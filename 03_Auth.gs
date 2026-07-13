@@ -1,5 +1,5 @@
 // ==========================================
-// 03_Auth.gs — XÁC THỰC & PHÂN QUYỀN
+// 03_Auth.gs - Authentication & authorization
 // ==========================================
 
 function handleLogin(e) {
@@ -12,42 +12,53 @@ function handleLogin(e) {
   if (!userSheet) return contentResponse({ status: "error", message: "Users sheet not found" });
 
   const users = userSheet.getDataRange().getValues();
+  const schema = getUsersSchema_(users);
   let foundUser = null;
   let rowIdx = -1;
+
   for (let i = 1; i < users.length; i++) {
-    if (String(users[i][0]).trim().toLowerCase() === String(userParam).trim().toLowerCase()) {
-      const storedPass = String(users[i][2]).trim();
-      const inputPass = String(pin).trim();
-      // Chấp nhận mật khẩu thô trong giai đoạn chuyển đổi (nếu lỡ nhập thô) hoặc chuỗi đã hash
-      const inputHash = (typeof hashPassword_ === 'function') ? hashPassword_(users[i][0], inputPass) : inputPass;
-      if (storedPass === inputHash || storedPass === inputPass) {
-        foundUser = { username: users[i][0], name: users[i][1], role: users[i][3], teams: users[i][4] || "" };
-        rowIdx = i + 1;
-        break;
-      }
+    const row = users[i];
+    if (!userRowMatches_(row, schema, userParam)) continue;
+
+    const storedPin = String(row[schema.pinIndex] || "").trim();
+    const inputPin = String(pin).trim();
+
+    if (storedPin === inputPin) {
+      foundUser = {
+        username: row[schema.usernameIndex],
+        name: row[schema.usernameIndex],
+        role: row[schema.roleIndex] || "User",
+        teams: row[schema.teamsIndex] || ""
+      };
+      rowIdx = i + 1;
+      break;
     }
   }
-  if (!foundUser) return contentResponse({ status: "error", message: "Sai tên đăng nhập hoặc mật khẩu" });
 
-  // Cập nhật LastLoginAt
-  if (rowIdx > 0) {
-    userSheet.getRange(rowIdx, 7).setValue(new Date());
+  if (!foundUser) return contentResponse({ status: "error", message: "Sai tên đăng nhập hoặc PIN" });
+
+  if (rowIdx > 0 && schema.lastLoginIndex >= 0) {
+    userSheet.getRange(rowIdx, schema.lastLoginIndex + 1).setValue(new Date());
   }
 
   writeAuditLog(foundUser.username || foundUser.name, "Login", "Web App", "Đăng nhập thành công");
 
-  // Preload toàn bộ dữ liệu sau khi login (Local-First architecture)
-  const devSheet   = ss.getSheetByName(SHEETS.DEVICES);
+  const devSheet = ss.getSheetByName(SHEETS.DEVICES);
   const checkSheet = ss.getSheetByName(SHEETS.CHECKLISTS);
 
-  const devData    = devSheet ? devSheet.getDataRange().getValues() : [];
-  const devices    = devData.slice(1).filter(r => r[0]).map(r => mapDeviceRow(r));
+  const devData = devSheet ? devSheet.getDataRange().getValues() : [];
+  const devices = devData.slice(1).filter(r => r[0]).map(r => mapDeviceRow(r));
 
   const checklists = checkSheet
     ? checkSheet.getDataRange().getValues().slice(1).map(r => ({ type: r[0], id: r[1], title: r[2], desc: r[3] }))
     : [];
 
-  const usersList = users.slice(1).map(r => ({ username: r[0], name: r[1], role: r[3], teams: r[4] || "" }));
+  const usersList = users.slice(1).filter(r => r[0]).map(r => ({
+    username: r[schema.usernameIndex],
+    name: r[schema.usernameIndex],
+    role: r[schema.roleIndex] || "User",
+    teams: r[schema.teamsIndex] || ""
+  }));
 
   return contentResponse({
     status: "success",
@@ -63,27 +74,47 @@ function handleChangePassword(params) {
   if (!userSheet) return contentResponse({ status: "error", message: "Users sheet not found" });
 
   const users = userSheet.getDataRange().getValues();
+  const schema = getUsersSchema_(users);
   let rowIdx = -1;
+
   for (let i = 1; i < users.length; i++) {
-    if (String(users[i][0]).trim().toLowerCase() === String(params.username).trim().toLowerCase()) {
-      const storedPass = String(users[i][2]).trim();
-      const inputPass = String(params.oldPin).trim();
-      const inputHash = (typeof hashPassword_ === 'function') ? hashPassword_(users[i][0], inputPass) : inputPass;
-      if (storedPass === inputHash || storedPass === inputPass) {
-        rowIdx = i + 1;
-        break;
-      }
+    if (!userRowMatches_(users[i], schema, params.username)) continue;
+
+    const storedPin = String(users[i][schema.pinIndex] || "").trim();
+    const inputPin = String(params.oldPin).trim();
+
+    if (storedPin === inputPin) {
+      rowIdx = i + 1;
+      break;
     }
   }
-  if (rowIdx === -1) return contentResponse({ status: "error", message: "Mật khẩu cũ không chính xác" });
 
-  const newHash = (typeof hashPassword_ === 'function') ? hashPassword_(params.username, params.newPin) : params.newPin;
-  userSheet.getRange(rowIdx, 3).setValue(newHash);
-  writeAuditLog(params.username, 'changePassword', params.username, 'User changed their own password');
+  if (rowIdx === -1) return contentResponse({ status: "error", message: "PIN hiện tại không chính xác" });
+
+  userSheet.getRange(rowIdx, schema.pinIndex + 1).setValue(String(params.newPin || "").trim());
+  writeAuditLog(params.username, "changePin", params.username, "User changed their own PIN");
   return contentResponse({ status: "success" });
 }
 
-// ── Internal helper: map Devices row array → object ─────────────────────────
+function getUsersSchema_(rows) {
+  const headers = rows && rows.length ? rows[0].map(function(h) {
+    return String(h || "").trim().toLowerCase();
+  }) : [];
+  return {
+    usernameIndex: headers.indexOf("username") !== -1 ? headers.indexOf("username") : 0,
+    pinIndex: headers.indexOf("pin") !== -1 ? headers.indexOf("pin") : 1,
+    roleIndex: headers.indexOf("role") !== -1 ? headers.indexOf("role") : 2,
+    teamsIndex: headers.indexOf("teams") !== -1 ? headers.indexOf("teams") : 3,
+    lastLoginIndex: headers.indexOf("lastloginat")
+  };
+}
+
+function userRowMatches_(row, schema, userParam) {
+  const target = String(userParam || "").trim().toLowerCase();
+  if (!target) return false;
+  return String(row[schema.usernameIndex] || "").trim().toLowerCase() === target;
+}
+
 function mapDeviceRow(r) {
   return {
     uid:             r[0],  name:            r[1],  location:        r[2],
