@@ -77,12 +77,24 @@ function handleGetInventory(e) {
 function handleGetStaff(e) {
   const sheet = getSheet(SHEETS.USERS || "Users");
   if (!sheet) return contentResponse({ status: "error", message: "Users sheet not found" });
-  const staff = sheet.getDataRange().getValues().slice(1).filter(r => r[0]).map(r => ({
-    id: r[0],               // Username acts as ID
-    name: r[1],             // FullName acts as Name
-    position: r[3] || "",   // Role acts as Position
-    dept: r[4] || "",       // Teams acts as Dept/Team
-    phone: ""               // Phone is blank for users
-  }));
+  const data = sheet.getDataRange().getValues();
+  const schema = typeof getUsersSchema_ === "function"
+    ? getUsersSchema_(data)
+    : { usernameIndex: 0, roleIndex: 2, teamsIndex: 3, phoneIndex: 7, fullNameIndex: 8 };
+  const staff = data.slice(1).filter(function(row) {
+    return String(row[schema.usernameIndex] || "").trim();
+  }).map(function(row) {
+    const username = String(row[schema.usernameIndex] || "").trim();
+    const fullName = schema.fullNameIndex >= 0 ? String(row[schema.fullNameIndex] || "").trim() : "";
+    return {
+      id: username,
+      username: username,
+      name: fullName || username,
+      fullName: fullName,
+      position: String(row[schema.roleIndex] || "User").trim(),
+      dept: String(row[schema.teamsIndex] || "").trim(),
+      phone: schema.phoneIndex >= 0 ? String(row[schema.phoneIndex] || "").trim() : ""
+    };
+  });
   return contentResponse({ status: "success", staff });
 }
