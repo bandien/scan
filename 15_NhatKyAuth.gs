@@ -2,19 +2,68 @@
 // 15_NhatKyAuth.gs - NhatKy account login
 // ==========================================
 // Tài khoản dùng chung duy nhất trong sheet Users:
-// Username | PIN | Role | Teams | Ghi chú | Cập nhật lúc | Cập nhật bởi | Phone
+// Username | PIN | Role | Teams | Ghi chú | Cập nhật lúc | Cập nhật bởi | Phone | Họ và tên
 
-const NHATKY_SESSION_TTL_SECONDS = 21600;
+const NHATKY_SESSION_CACHE_SECONDS = 21600;
+const NHATKY_SESSION_DAYS = 30;
+const NHATKY_SESSION_PREFIX = "nhatky_session_";
+
+function cleanupExpiredNhatKySessions_() {
+  const properties = PropertiesService.getScriptProperties();
+  const all = properties.getProperties();
+  const now = Date.now();
+  Object.keys(all).forEach(function(key) {
+    if (key.indexOf(NHATKY_SESSION_PREFIX) !== 0) return;
+    try {
+      const session = JSON.parse(all[key]);
+      if (!session.expiresAt || Number(session.expiresAt) <= now) properties.deleteProperty(key);
+    } catch (_) {
+      properties.deleteProperty(key);
+    }
+  });
+}
 
 function createNhatKySession_(username) {
   const token = Utilities.getUuid().replace(/-/g, "") + Utilities.getUuid().replace(/-/g, "");
-  CacheService.getScriptCache().put("nhatky_session_" + token, String(username || "").trim(), NHATKY_SESSION_TTL_SECONDS);
+  const normalizedUsername = String(username || "").trim();
+  const key = NHATKY_SESSION_PREFIX + token;
+  const expiresAt = Date.now() + NHATKY_SESSION_DAYS * 24 * 60 * 60 * 1000;
+  cleanupExpiredNhatKySessions_();
+  PropertiesService.getScriptProperties().setProperty(key, JSON.stringify({
+    username: normalizedUsername,
+    expiresAt: expiresAt
+  }));
+  CacheService.getScriptCache().put(key, normalizedUsername, NHATKY_SESSION_CACHE_SECONDS);
   return token;
 }
 
 function getNhatKySessionUsername_(authToken) {
   const token = String(authToken || "").trim();
-  return token ? String(CacheService.getScriptCache().get("nhatky_session_" + token) || "").trim() : "";
+  if (!token) return "";
+  const key = NHATKY_SESSION_PREFIX + token;
+  const cached = String(CacheService.getScriptCache().get(key) || "").trim();
+  if (cached) return cached;
+
+  const properties = PropertiesService.getScriptProperties();
+  const raw = properties.getProperty(key);
+  if (!raw) return "";
+  try {
+    const session = JSON.parse(raw);
+    if (!session.expiresAt || Number(session.expiresAt) <= Date.now()) {
+      properties.deleteProperty(key);
+      return "";
+    }
+    const username = String(session.username || "").trim();
+    if (!username) {
+      properties.deleteProperty(key);
+      return "";
+    }
+    CacheService.getScriptCache().put(key, username, NHATKY_SESSION_CACHE_SECONDS);
+    return username;
+  } catch (_) {
+    properties.deleteProperty(key);
+    return "";
+  }
 }
 
 function findAccountRow_(sheet, username) {
@@ -90,7 +139,7 @@ function handleNhatKyLogin(params) {
   const rowIndex = findAccountRow_(sheet, username);
   if (rowIndex === 0) return contentResponse({ status: "error", message: "Tài khoản không tồn tại" });
 
-  const row = sheet.getRange(rowIndex, 1, 1, Math.max(schema.teamsIndex + 1, 4)).getValues()[0];
+  const row = data[rowIndex - 1];
   const storedPin = String(row[schema.pinIndex] || "").trim();
   const inputPin = pin.trim();
 
@@ -102,12 +151,22 @@ function handleNhatKyLogin(params) {
     sheet.getRange(rowIndex, schema.lastLoginIndex + 1).setValue(new Date());
   }
   const name = String(row[schema.usernameIndex] || username).trim();
+  const fullName = schema.fullNameIndex >= 0 ? String(row[schema.fullNameIndex] || "").trim() : "";
   const role = String(row[schema.roleIndex] || "User").trim();
   const teams = String(row[schema.teamsIndex] || "").trim();
   const authToken = createNhatKySession_(name);
   writeAuditLog(username, "nhatkyLogin", username, "Đăng nhập trang nhật ký");
 
-  return contentResponse({ status: "success", name: name, username: name, role: role, teams: teams, authToken: authToken });
+  return contentResponse({
+    status: "success",
+    name: fullName || name,
+    fullName: fullName,
+    username: name,
+    role: role,
+    teams: teams,
+    authToken: authToken,
+    sessionDays: NHATKY_SESSION_DAYS
+  });
 }
 
 function handleNhatKyChangePin(params) {

@@ -15,14 +15,18 @@ function getUserAdminSheet_() {
   return sheet;
 }
 
-function ensureUserPhoneColumn_(sheet) {
+function ensureUserAdminColumns_(sheet) {
   let data = sheet.getDataRange().getValues();
   let schema = getUsersSchema_(data);
-  if (schema.phoneIndex >= 0) return { data: data, schema: schema };
-
-  const column = sheet.getLastColumn() + 1;
-  sheet.getRange(1, column).setValue("Phone").setFontWeight("bold");
-  sheet.getRange(2, column, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat("@");
+  const missingHeaders = [];
+  if (schema.phoneIndex < 0) missingHeaders.push("Phone");
+  if (schema.fullNameIndex < 0) missingHeaders.push("Họ và tên");
+  missingHeaders.forEach(function(header) {
+    const column = sheet.getLastColumn() + 1;
+    sheet.getRange(1, column).setValue(header).setFontWeight("bold");
+    sheet.getRange(2, column, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat("@");
+  });
+  if (!missingHeaders.length) return { data: data, schema: schema };
   data = sheet.getDataRange().getValues();
   schema = getUsersSchema_(data);
   return { data: data, schema: schema };
@@ -31,6 +35,7 @@ function ensureUserPhoneColumn_(sheet) {
 function userAdminRecord_(row, schema) {
   return {
     username: String(row[schema.usernameIndex] || "").trim(),
+    fullName: schema.fullNameIndex >= 0 ? String(row[schema.fullNameIndex] || "").trim() : "",
     role: normalizeUserRole_(row[schema.roleIndex]),
     teams: String(row[schema.teamsIndex] || "").trim(),
     note: schema.noteIndex >= 0 ? String(row[schema.noteIndex] || "").trim() : "",
@@ -53,7 +58,7 @@ function getUserManagerActor_(params) {
   }
 
   const sheet = getUserAdminSheet_();
-  const prepared = ensureUserPhoneColumn_(sheet);
+  const prepared = ensureUserAdminColumns_(sheet);
   const rowIndex = findAccountRow_(sheet, actorUsername);
   if (!rowIndex) return { ok: false, message: "Tài khoản quản lý không còn tồn tại." };
 
@@ -135,6 +140,7 @@ function handleListUsers(params) {
 
 function validateManagedUser_(actor, user) {
   if (!user.username) return "Tên đăng nhập không được để trống.";
+  if (!user.fullName) return "Họ và tên không được để trống.";
   if (["Admin", "Manager", "User"].indexOf(user.role) < 0) return "Vai trò không hợp lệ.";
   if (actor.role === "Manager" && user.role !== "User") return "Cấp quản lý chỉ được quản lý tài khoản User.";
   if (user.pin && user.pin.length < 4) return "PIN phải có ít nhất 4 ký tự.";
@@ -160,6 +166,7 @@ function handleSaveUser(params) {
     const originalUsername = String(input.originalUsername || "").trim();
     const user = {
       username: String(input.username || "").trim(),
+      fullName: String(input.fullName || "").trim(),
       pin: String(input.pin || "").trim(),
       role: normalizeUserRole_(input.role),
       teams: splitTeams_(input.teams).filter(function(team, index, all) { return all.indexOf(team) === index; }).join(", "),
@@ -204,6 +211,7 @@ function handleSaveUser(params) {
     if (context.schema.updatedAtIndex >= 0) row[context.schema.updatedAtIndex] = new Date();
     if (context.schema.updatedByIndex >= 0) row[context.schema.updatedByIndex] = context.actor.username;
     if (context.schema.phoneIndex >= 0) row[context.schema.phoneIndex] = user.phone;
+    if (context.schema.fullNameIndex >= 0) row[context.schema.fullNameIndex] = user.fullName;
     context.sheet.getRange(rowIndex, 1, 1, lastColumn).setValues([row]);
 
     writeAuditLog(context.actor.username, originalRowIndex ? "updateUser" : "createUser", user.username, "Quản lý tài khoản Users");

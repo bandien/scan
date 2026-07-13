@@ -31,7 +31,7 @@ function setupAllSheets() {
     "Status","Project","SerialNumber","Area","EquipmentType"
   ]);
   ensureSheet(ss, SHEETS.LOGS, ["Timestamp","UID","Items","Notes","User","ImageUrl"]);
-  ensureSheet(ss, SHEETS.USERS, ["Username","PIN","Role","Teams","Ghi chú","Cập nhật lúc","Cập nhật bởi","Phone"]);
+  ensureSheet(ss, SHEETS.USERS, ["Username","PIN","Role","Teams","Ghi chú","Cập nhật lúc","Cập nhật bởi","Phone","Họ và tên"]);
   ensureSheet(ss, SHEETS.CHECKLISTS, ["Type","ID","Title","Description"]);
   ensureSheet(ss, SHEETS.WORK_ORDERS, [
     "WO_ID","Type","Priority","Status","AssetUID","AssignedTo",
