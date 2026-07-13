@@ -15,7 +15,7 @@ function ensurePlansSheet_() {
     "PlanID","Date","Time","Team","Area","Asset","Task",
     "Assignee","Priority","Status","UpdatedAt","UpdatedBy",
     "Watcher","Collaborators","DateEnd","Type","PlanQty","Unit",
-    "DoneQty"
+    "DoneQty","FollowUpDate","Source","SourceText"
   ];
 
   if (!sheet) sheet = ss.insertSheet("NhatKyPlans");
@@ -45,6 +45,10 @@ function ensurePlansSheet_() {
     if (String(sheet.getRange(1, 20).getValue()).trim() === "") {
       // FollowUpDate: ngày nhắc/xem lại tiếp theo, tách riêng với DateEnd deadline cuối
       sheet.getRange(1, 20).setValue("FollowUpDate").setFontWeight("bold");
+    }
+    if (String(sheet.getRange(1, 21).getValue()).trim() === "") {
+      // Nguồn tạo kế hoạch (ví dụ Zalo Web) và nội dung gốc để truy vết
+      sheet.getRange(1, 21, 1, 2).setValues([["Source", "SourceText"]]).setFontWeight("bold");
     }
   }
   // Date/Time/DateEnd lưu dạng text để trả về đúng chuỗi yyyy-MM-dd / HH:mm-HH:mm
@@ -91,7 +95,7 @@ function handleGetPlans(e) {
   }
 
   let totals = null; // Lazy-load only when some plan rows have empty DoneQty
-  const rows = sheet.getRange(2, 1, lastRow - 1, 20).getValues();
+  const rows = sheet.getRange(2, 1, lastRow - 1, 22).getValues();
   const plans = rows
     .filter(function(r) {
       if (String(r[0]).trim() === "") return false;
@@ -131,7 +135,9 @@ function handleGetPlans(e) {
         planQty: r[16] === "" || r[16] === null ? "" : Number(r[16]),
         unit: String(r[17] || ""),
         doneQty: doneQtyVal,
-        followUpDate: formatPlanDate_(r[19])
+        followUpDate: formatPlanDate_(r[19]),
+        source: String(r[20] || ""),
+        sourceText: String(r[21] || "")
       };
     });
 
@@ -152,9 +158,14 @@ function handleSavePlan(params) {
   const rowIndex = findPlanRow_(sheet, planId);
   // Preserve current DoneQty in the sheet or set to 0 for new plans
   let doneQty = 0;
+  let preservedSource = "";
+  let preservedSourceText = "";
   if (rowIndex > 0) {
     doneQty = sheet.getRange(rowIndex, 19).getValue();
     if (doneQty === "" || doneQty === null) doneQty = 0;
+    const sourceValues = sheet.getRange(rowIndex, 21, 1, 2).getValues()[0];
+    preservedSource = String(sourceValues[0] || "");
+    preservedSourceText = String(sourceValues[1] || "");
   }
 
   const row = [
@@ -177,7 +188,9 @@ function handleSavePlan(params) {
     payload.planQty === 0 || payload.planQty ? payload.planQty : "",
     String(payload.unit || ""),
     Number(doneQty),
-    formatPlanDate_(payload.followUpDate)
+    formatPlanDate_(payload.followUpDate),
+    payload.source === undefined ? preservedSource : String(payload.source || ""),
+    payload.sourceText === undefined ? preservedSourceText : String(payload.sourceText || "")
   ];
 
   if (rowIndex > 0) {

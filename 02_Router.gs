@@ -101,6 +101,8 @@ function doPost(e) {
       createWorkLog:        handleCreateWorkLog,
       seedWorkLogsDemo:     handleSeedWorkLogsDemo,
       savePlan:             handleSavePlan,
+      nhatkyExtensionOptions: handleNhatKyExtensionOptions,
+      savePlanFromExtension: handleSavePlanFromExtension,
       deletePlan:           handleDeletePlan,
       nhatkyRegister:       handleNhatKyRegister,
       nhatkyLogin:          handleNhatKyLogin,
