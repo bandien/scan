@@ -144,7 +144,7 @@ function ensureWorkLogsSheet_() {
   const headers = [
     "LogID","CreatedAt","WorkDate","Employee","Shift","Progress",
     "StartTime","EndTime","Task","Result","Issue","NextAction","PlanID","SyncStatus",
-    "Rating","RecordedBy","Quantity","Unit","TeamGroup"
+    "Rating","RecordedBy","Quantity","Unit","TeamGroup","WorkTeam"
   ];
 
   if (!sheet) sheet = ss.insertSheet("WorkLogs");
@@ -165,6 +165,10 @@ function ensureWorkLogsSheet_() {
     if (String(sheet.getRange(1, 19).getValue()).trim() === "") {
       // Phân tổ cách ly dữ liệu
       sheet.getRange(1, 19).setValue("TeamGroup").setFontWeight("bold");
+    }
+    if (String(sheet.getRange(1, 20).getValue()).trim() === "") {
+      // Tổ thực hiện công việc, tách biệt với TeamGroup dùng để phân quyền
+      sheet.getRange(1, 20).setValue("WorkTeam").setFontWeight("bold");
     }
   }
   return sheet;
@@ -189,7 +193,7 @@ function handleGetWorkLogs(e) {
   const cutoff = Utilities.formatDate(new Date(Date.now() - days * 86400000), Session.getScriptTimeZone(), "yyyy-MM-dd");
   const maxRows = 400;
   const startRow = Math.max(2, lastRow - maxRows + 1);
-  const rows = sheet.getRange(startRow, 1, lastRow - startRow + 1, 19).getValues();
+  const rows = sheet.getRange(startRow, 1, lastRow - startRow + 1, 20).getValues();
 
   const logs = [];
   rows.forEach(function(r) {
@@ -221,6 +225,7 @@ function handleGetWorkLogs(e) {
       recordedBy: String(r[15] || ""),
       quantity: r[16] === "" || r[16] === null ? "" : Number(r[16]),
       unit: String(r[17] || ""),
+      workTeam: String(r[19] || ""),
       syncStatus: "synced"
     });
   });
@@ -250,6 +255,11 @@ function handleCreateWorkLog(params) {
   
   const user = payload.recordedBy || employee;
   const teamGroup = typeof getUserTeamGroup_ === "function" ? getUserTeamGroup_(user) : "";
+  const allowedWorkTeams = ["Tổ cơ điện", "Tổ điện nước"];
+  const requestedWorkTeam = String(payload.workTeam || "").trim();
+  const workTeam = allowedWorkTeams.indexOf(requestedWorkTeam) >= 0
+    ? requestedWorkTeam
+    : (allowedWorkTeams.indexOf(teamGroup) >= 0 ? teamGroup : "");
 
   sheet.appendRow([
     logId,
@@ -270,7 +280,8 @@ function handleCreateWorkLog(params) {
     payload.recordedBy || "",
     payload.quantity === 0 || payload.quantity ? payload.quantity : "",
     payload.unit || "",
-    teamGroup
+    teamGroup,
+    workTeam
   ]);
 
   // Cập nhật tăng dần lũy kế vào dòng kế hoạch (Incremental Update)

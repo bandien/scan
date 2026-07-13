@@ -1431,6 +1431,15 @@
             </div>
 
             <div class="field">
+              <label class="field-lb" for="workTeam">Việc của tổ nào</label>
+              <select class="form-select" id="workTeam" required>
+                <option value="">— Chọn tổ thực hiện —</option>
+                <option>Tổ cơ điện</option>
+                <option>Tổ điện nước</option>
+              </select>
+            </div>
+
+            <div class="field">
               <div class="field-lb">Kết quả — chạm chọn</div>
               <div id="progressChips" class="seg">
                 <button class="opt" type="button" data-value="Hoàn thành"><i class="bi bi-check2-circle"></i>Hoàn thành</button>
@@ -1967,6 +1976,7 @@
       fillTimeSelect("startTime", "");
       fillTimeSelect("endTime", "");
       document.getElementById("shift").value = defaultShift();
+      document.getElementById("workTeam").value = defaultWorkTeam();
       setProgress("Hoàn thành");
       loadSettings();
       loadStaff();
@@ -2532,6 +2542,12 @@
       }
     }
 
+    function defaultWorkTeam() {
+      const allowed = ["Tổ cơ điện", "Tổ điện nước"];
+      const current = currentTeamGroup().trim();
+      return allowed.includes(current) ? current : "";
+    }
+
     // Không có tài khoản, hoặc tài khoản chưa được phân nhóm tổ → chưa cho xem nhật ký/kế hoạch
     function hasTeamAccess() {
       if (!currentUser()) return false;
@@ -2709,6 +2725,7 @@
         nextAction: "",
         quantity: "",
         unit: "",
+        workTeam: ["Tổ cơ điện", "Tổ điện nước"].includes(plan.team) ? plan.team : defaultWorkTeam(),
         rating: "",
         createdAt: new Date().toISOString(),
         recordedBy: user,
@@ -3109,6 +3126,7 @@
       document.getElementById("workDate").value = (viewedDate && (planReminder(plan) === viewedDate || isCarryOver(plan, viewedDate))) ? viewedDate
         : (planReminder(plan) <= today ? today : planReminder(plan));
       document.getElementById("selectedTask").value = `${plan.time || ""} | ${plan.area || ""} | ${plan.asset || ""}: ${plan.task || ""}`.trim();
+      document.getElementById("workTeam").value = ["Tổ cơ điện", "Tổ điện nước"].includes(plan.team) ? plan.team : defaultWorkTeam();
       setProgress(presetProgress || "Hoàn thành");
       document.getElementById("startTime").value = roundQuarter(currentTime());
       renderPeopleResults(plan.assignee);
@@ -3229,6 +3247,7 @@
         startTime: document.getElementById("startTime").value,
         endTime: document.getElementById("endTime").value,
         selectedTask: document.getElementById("selectedTask").value.trim(),
+        workTeam: document.getElementById("workTeam").value,
         result: document.getElementById("result").value.trim(),
         issue: document.getElementById("issue").value.trim(),
         nextAction: document.getElementById("nextAction").value.trim(),
@@ -3347,6 +3366,7 @@
       document.getElementById("planId").value = "";
       document.getElementById("workDate").value = document.getElementById("filterDate").value || today;
       document.getElementById("shift").value = defaultShift();
+      document.getElementById("workTeam").value = defaultWorkTeam();
       setProgress("Hoàn thành");
       renderPeopleResults("");
       toggleQuantityFields(false);
@@ -3470,6 +3490,7 @@
             <div class="min-w-0">
               <span class="fw-bold" style="font-size: 1rem;">${escapeHtml(log.employee)}</span>
               <span class="text-secondary small">(${escapeHtml(log.shift)})</span>
+              ${log.workTeam ? `<span class="badge-soft badge-medium ms-1">${escapeHtml(log.workTeam)}</span>` : ""}
               ${log.recordedBy && log.recordedBy !== log.employee ? `<span class="text-muted small"> (Ghi bởi ${escapeHtml(log.recordedBy)})</span>` : ""}
             </div>
           </div>
