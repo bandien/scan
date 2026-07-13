@@ -102,6 +102,7 @@ function doPost(e) {
       deletePlan:           handleDeletePlan,
       nhatkyRegister:       handleNhatKyRegister,
       nhatkyLogin:          handleNhatKyLogin,
+      nhatkyChangePin:      handleNhatKyChangePin,
       listUsers:            handleListUsers,
       saveUser:             handleSaveUser,
       deleteUser:           handleDeleteUser,

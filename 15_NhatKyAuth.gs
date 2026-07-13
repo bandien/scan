@@ -12,6 +12,11 @@ function createNhatKySession_(username) {
   return token;
 }
 
+function getNhatKySessionUsername_(authToken) {
+  const token = String(authToken || "").trim();
+  return token ? String(CacheService.getScriptCache().get("nhatky_session_" + token) || "").trim() : "";
+}
+
 function findAccountRow_(sheet, username) {
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return 0;
@@ -103,4 +108,39 @@ function handleNhatKyLogin(params) {
   writeAuditLog(username, "nhatkyLogin", username, "Đăng nhập trang nhật ký");
 
   return contentResponse({ status: "success", name: name, username: name, role: role, teams: teams, authToken: authToken });
+}
+
+function handleNhatKyChangePin(params) {
+  try {
+    const payload = params && params.payload ? params.payload : (params || {});
+    const actorUsername = String(payload.actorUsername || "").trim();
+    const sessionUsername = getNhatKySessionUsername_(payload.authToken);
+    const oldPin = String(payload.oldPin || "").trim();
+    const newPin = String(payload.newPin || "").trim();
+
+    if (!actorUsername || !sessionUsername || actorUsername.toLowerCase() !== sessionUsername.toLowerCase()) {
+      return contentResponse({ status: "error", message: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại." });
+    }
+    if (!oldPin || !newPin) return contentResponse({ status: "error", message: "Nhập đầy đủ PIN hiện tại và PIN mới." });
+    if (newPin.length < 4) return contentResponse({ status: "error", message: "PIN mới phải có ít nhất 4 ký tự." });
+    if (newPin.length > 32) return contentResponse({ status: "error", message: "PIN mới không được vượt quá 32 ký tự." });
+    if (oldPin === newPin) return contentResponse({ status: "error", message: "PIN mới phải khác PIN hiện tại." });
+
+    const sheet = getSheet(SHEETS.USERS);
+    const data = sheet.getDataRange().getValues();
+    const schema = getUsersSchema_(data);
+    const rowIndex = findAccountRow_(sheet, actorUsername);
+    if (!rowIndex) return contentResponse({ status: "error", message: "Tài khoản không tồn tại." });
+
+    const storedPin = String(data[rowIndex - 1][schema.pinIndex] || "").trim();
+    if (storedPin !== oldPin) return contentResponse({ status: "error", message: "PIN hiện tại không chính xác." });
+
+    sheet.getRange(rowIndex, schema.pinIndex + 1).setValue(newPin).setNumberFormat("@");
+    if (schema.updatedAtIndex >= 0) sheet.getRange(rowIndex, schema.updatedAtIndex + 1).setValue(new Date());
+    if (schema.updatedByIndex >= 0) sheet.getRange(rowIndex, schema.updatedByIndex + 1).setValue(actorUsername);
+    writeAuditLog(actorUsername, "changeOwnPin", actorUsername, "Người dùng tự đổi PIN tại trang nhật ký");
+    return contentResponse({ status: "success", message: "Đã đổi PIN thành công." });
+  } catch (error) {
+    return contentResponse({ status: "error", message: "Không đổi được PIN: " + error.message });
+  }
 }
