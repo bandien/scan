@@ -71,61 +71,64 @@
     .tabbar { display: none; background: #fff; border-top: 2px solid var(--line); flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom); }
     /* ===== Bottom Navigation Bar ===== */
     .bottom-nav-bar {
-        position: fixed;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 100%;
-        max-width: 460px;
-        height: 72px;
-        background: #1c2028;
-        border-top: 1px solid #424655;
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        z-index: 1040;
-        padding: 0 8px;
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 440px;
+      height: 72px;
+      background: var(--surface);
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 1040;
+      padding: 0 8px;
+      box-shadow: 0 -4px 10px rgba(0,0,0,.05);
     }
     .bottom-nav-item {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-decoration: none;
-        color: #c2c6d8;
-        font-size: 11px;
-        font-weight: 800;
-        transition: all 0.2s ease;
-        background: none;
-        border: none;
-        padding: 4px 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      transition: all 0.2s ease;
+      background: none;
+      border: none;
+      padding: 4px 0;
+      min-width: 0;
     }
     .bottom-nav-item:active {
         transform: scale(0.97);
     }
-    .bottom-nav-item i {
-        font-size: 20px;
-        margin-bottom: 2px;
-        display: block;
+    .bottom-nav-item .material-symbols-outlined {
+      font-size: 24px;
+      line-height: 1;
+      margin-bottom: 2px;
+      display: block;
     }
     .bottom-nav-item.active {
-        color: #b1c5ff;
+      color: var(--brand);
     }
     .bottom-nav-item.active .nav-icon-wrapper {
-        background-color: #314577;
-        color: #b1c5ff;
-        border-radius: 16px;
-        padding: 4px 16px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+      background: rgba(11,77,94,.1);
+      color: var(--brand);
+      border-radius: 12px;
+      padding: 6px 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
     .bottom-nav-item:not(.active) .nav-icon-wrapper {
-        padding: 4px 16px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+      padding: 6px 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
     .tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 0 7px; font-size: .72rem; font-weight: 800; color: #7a848a; background: none; border: 0; cursor: pointer; }
     .tab i { font-size: 1.4rem; }
@@ -977,9 +980,396 @@
       border-radius: 24px;
       box-shadow: var(--shadow-md);
     }
+
+    /* ===== Stitch Scan Mobile Design System: dark industrial pass ===== */
+    :root {
+      --brand: #0e6efd;
+      --brand-2: #b1c5ff;
+      --accent: #cf4b00;
+      --danger: #ffb4ab;
+      --danger-dark: #ffdad6;
+      --warn: #ffb599;
+      --warn-bg: #3f2b1f;
+      --warn-ink: #ffdbce;
+      --ink: #e0e2ed;
+      --muted: #c2c6d8;
+      --line: #424655;
+      --surface: #1c2028;
+      --surface-soft: #181b24;
+      --surface-high: #272a32;
+      --page-bg: #10131b;
+      --done: #2d8a5f;
+      --done-bg: rgba(45, 138, 95, .18);
+      --doing: #b1c5ff;
+      --doing-bg: rgba(177, 197, 255, .16);
+      --shadow-sm: none;
+      --shadow-md: none;
+    }
+
+    html,
+    body {
+      background: #10131b;
+      color: var(--ink);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at 100% -10%, rgba(177, 197, 255, .10), transparent 28%),
+        linear-gradient(180deg, #10131b 0%, #0b0e16 100%);
+    }
+
+    .app-shell {
+      max-width: 440px;
+      background: var(--page-bg);
+      border-left: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+    }
+
+    @media (min-width: 700px) {
+      body { padding: 24px 12px; }
+      .app-shell {
+        min-height: calc(100dvh - 48px);
+        border-radius: 24px;
+        box-shadow: 0 24px 70px rgba(0, 0, 0, .35);
+        overflow: hidden;
+      }
+    }
+
+    .app-header,
+    .tabbar,
+    .bottom-nav-bar {
+      background: var(--surface);
+      border-color: var(--line);
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+
+    .header-inner { padding: 12px 16px; min-height: 64px; }
+    .brand-mark,
+    .status-dot {
+      border-radius: 16px;
+      background: var(--brand);
+      color: #fff;
+      box-shadow: none;
+    }
+    .app-title,
+    .header-title,
+    .task-row-title,
+    .info-value,
+    .ctx-what,
+    .week-item-task {
+      color: var(--ink);
+      letter-spacing: 0;
+    }
+    .header-sub,
+    .task-row-time,
+    .info-label,
+    .week-item-meta,
+    .text-secondary,
+    .small.text-secondary,
+    .form-text {
+      color: var(--muted) !important;
+    }
+    .btn-back,
+    .btn-icon-sm {
+      min-width: 52px;
+      width: 52px;
+      height: 52px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface-high);
+      color: var(--ink);
+      box-shadow: none;
+    }
+    .sync-pill {
+      background: var(--done-bg);
+      color: #8ee0b6;
+      border: 1px solid rgba(45, 138, 95, .45);
+    }
+    .sync-pill.offline {
+      background: rgba(255, 181, 153, .16);
+      color: var(--warn);
+      border-color: rgba(255, 181, 153, .42);
+    }
+
+    .date-bar {
+      padding: 12px 16px 4px;
+      gap: 8px;
+      background: var(--page-bg);
+    }
+    .date-input,
+    .btn-today,
+    .form-control,
+    .form-select,
+    .ta {
+      min-height: 52px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface-soft);
+      color: var(--ink);
+      box-shadow: none;
+    }
+    .date-input:focus,
+    .form-control:focus,
+    .form-select:focus,
+    .ta:focus {
+      background: var(--surface-soft);
+      color: var(--ink);
+      border-color: var(--brand-2);
+      box-shadow: 0 0 0 3px rgba(177, 197, 255, .16);
+    }
+    .btn-today {
+      color: var(--brand-2);
+      border-color: rgba(177, 197, 255, .45);
+      background: var(--surface-high);
+      font-weight: 800;
+    }
+
+    .filters-bar { padding: 10px 16px 12px; }
+    .a11y-chip,
+    .qc,
+    .link-button {
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface-high);
+      color: var(--muted);
+      box-shadow: none;
+    }
+    .a11y-chip.active,
+    .qc.on {
+      background: #314577;
+      border-color: var(--brand-2);
+      color: var(--brand-2);
+    }
+    .a11y-chip.warn {
+      background: rgba(255, 181, 153, .14);
+      border-color: rgba(255, 181, 153, .45);
+      color: var(--warn);
+    }
+    .a11y-chip .chip-count { background: var(--accent); color: #fff; }
+
+    .day-log-summary,
+    .empty-state,
+    .info-card,
+    .ctx-card,
+    .metric,
+    .panel,
+    .menu,
+    .shift-card,
+    .log-card,
+    .week-item,
+    .access-gate-panel,
+    .modal-content {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: none;
+    }
+    .empty-state {
+      border-style: dashed;
+      color: var(--muted);
+    }
+    .section-label {
+      color: var(--muted);
+      letter-spacing: .08em;
+    }
+
+    .task-row,
+    .stitch-card {
+      position: relative;
+      min-height: 88px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: none;
+      overflow: hidden;
+    }
+    .task-row::before,
+    .stitch-card-bar {
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 4px;
+      border-radius: 0;
+    }
+    .task-row.attn,
+    .log-card.log-followup {
+      background: var(--surface);
+      border-color: rgba(255, 181, 153, .55);
+    }
+    .task-row.attn::before { background: var(--accent); }
+    .task-chevron {
+      background: var(--surface-high);
+      color: var(--muted);
+    }
+    .stitch-title { color: var(--ink); }
+    .stitch-location,
+    .stitch-time { color: var(--muted); }
+    .stitch-btn,
+    .btn-main,
+    .action-bar .btn-main,
+    .btn-done {
+      min-height: 52px;
+      border-radius: 16px;
+      box-shadow: none;
+      font-weight: 800;
+    }
+    .btn-main,
+    .action-bar .btn-main,
+    .stitch-btn-primary {
+      background: var(--brand);
+      color: #fff;
+    }
+    .btn-done,
+    .stitch-btn-success {
+      background: var(--done);
+      color: #fff;
+    }
+    .stitch-btn-secondary {
+      background: var(--surface-high);
+      border: 1px solid rgba(177, 197, 255, .32);
+      color: var(--brand-2);
+    }
+
+    .badge-soft,
+    .person-chip,
+    .stitch-badge {
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+    .badge-high,
+    .stitch-badge-high {
+      background: rgba(255, 180, 171, .14);
+      border-color: rgba(255, 180, 171, .45);
+      color: #ffdad6;
+    }
+    .badge-mid,
+    .stitch-badge-medium {
+      background: rgba(255, 181, 153, .14);
+      border-color: rgba(255, 181, 153, .45);
+      color: var(--warn);
+    }
+    .badge-low,
+    .badge-open,
+    .person-chip,
+    .stitch-badge-low {
+      background: var(--surface-high);
+      border-color: var(--line);
+      color: var(--muted);
+    }
+    .badge-doing {
+      background: var(--doing-bg);
+      border-color: rgba(177, 197, 255, .45);
+      color: var(--brand-2);
+    }
+    .badge-done {
+      background: var(--done-bg);
+      border-color: rgba(45, 138, 95, .45);
+      color: #8ee0b6;
+    }
+
+    .status-banner {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: none;
+    }
+    .status-banner.danger {
+      background: rgba(255, 180, 171, .10);
+      color: #ffdad6;
+      border-color: rgba(255, 180, 171, .36);
+    }
+    .status-banner.warn {
+      background: rgba(255, 181, 153, .10);
+      color: var(--warn);
+      border-color: rgba(255, 181, 153, .36);
+    }
+    .status-banner .icon {
+      border-radius: 16px;
+      background: var(--surface-high);
+    }
+
+    .field-lb,
+    .form-label {
+      color: var(--muted);
+      font-family: "Public Sans", Inter, sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .seg .opt,
+    .stp,
+    .measure .val,
+    .media-btn,
+    .extra-details summary,
+    .mrow {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface-high);
+      color: var(--ink);
+      box-shadow: none;
+    }
+    .seg .opt { min-height: 68px; }
+    .seg .opt.on-done {
+      background: var(--done-bg);
+      border-color: rgba(45, 138, 95, .45);
+      color: #8ee0b6;
+    }
+    .seg .opt.on-doing {
+      background: var(--doing-bg);
+      border-color: rgba(177, 197, 255, .45);
+      color: var(--brand-2);
+    }
+    .seg .opt.on-help {
+      background: rgba(255, 180, 171, .14);
+      border-color: rgba(255, 180, 171, .45);
+      color: #ffdad6;
+    }
+    .media-btn {
+      border-style: dashed;
+      color: var(--brand-2);
+    }
+    .extra-details summary {
+      color: var(--brand-2);
+      margin-bottom: 8px;
+    }
+
+    .action-bar {
+      background: linear-gradient(transparent, rgba(16, 19, 27, .98) 35%);
+    }
+    .bottom-nav-bar {
+      max-width: 440px;
+      height: 72px;
+      background: var(--surface);
+    }
+    .bottom-nav-item { color: var(--muted); }
+    .bottom-nav-item.active { color: var(--brand); }
+    .bottom-nav-item.active .nav-icon-wrapper {
+      background: rgba(11,77,94,.1);
+      color: var(--brand);
+    }
+
+    .modal-header,
+    .modal-footer {
+      border-color: var(--line);
+    }
+    .btn-close { filter: invert(1) grayscale(100%); }
+    .btn-outline-secondary,
+    .btn-outline-primary {
+      border-color: var(--line);
+      color: var(--brand-2);
+      background: var(--surface-high);
+    }
   </style>
 </head>
-<body>
+<body class="dark-mode" data-bs-theme="dark">
   <div class="app-shell">
     <header class="app-header" id="appHeader"></header>
 
@@ -1142,35 +1532,31 @@
       <section class="screen" data-screen="personal" id="screen-personal"></section>
     </div>
 
-    <nav class="bottom-nav-bar" id="mainBottomNav" style="display: none;">
-        <!-- Tổng quan -->
-        <a class="bottom-nav-item" href="baocao_stitch.html">
+    <nav class="bottom-nav-bar" id="mainBottomNav" style="display: none;" role="navigation" aria-label="Điều hướng chính">
+        <button class="bottom-nav-item" type="button" data-bottom-screen="stats">
             <div class="nav-icon-wrapper">
-                <i class="bi bi-grid-fill"></i>
+                <span class="material-symbols-outlined">dashboard</span>
             </div>
             <span>Tổng quan</span>
-        </a>
-        <!-- Công việc (Active) -->
-        <a class="bottom-nav-item active" href="index.html">
+        </button>
+        <button class="bottom-nav-item active" type="button" data-bottom-screen="tasklist" aria-current="page">
             <div class="nav-icon-wrapper">
-                <i class="bi bi-journal-check"></i>
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">assignment</span>
             </div>
             <span>Công việc</span>
-        </a>
-        <!-- Tìm kiếm -->
+        </button>
         <a class="bottom-nav-item" href="../index.html">
             <div class="nav-icon-wrapper">
-                <i class="bi bi-qr-code-scan"></i>
+                <span class="material-symbols-outlined">search</span>
             </div>
             <span>Tìm kiếm</span>
         </a>
-        <!-- Nhiều hơn -->
-        <a class="bottom-nav-item" href="caidat_stitch.html">
+        <button class="bottom-nav-item" type="button" data-bottom-screen="personal">
             <div class="nav-icon-wrapper">
-                <i class="bi bi-three-dots"></i>
+                <span class="material-symbols-outlined">more_horiz</span>
             </div>
             <span>Nhiều hơn</span>
-        </a>
+        </button>
     </nav>
   </div>
 
@@ -1360,6 +1746,31 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    if (!window.bootstrap) {
+      class BootstrapLite {
+        constructor(element) {
+          this.element = element;
+        }
+        show() {
+          if (!this.element) return;
+          this.element.classList.add("show");
+          this.element.style.display = "block";
+          this.element.removeAttribute("aria-hidden");
+        }
+        hide() {
+          if (!this.element) return;
+          this.element.classList.remove("show");
+          this.element.style.display = "none";
+          this.element.setAttribute("aria-hidden", "true");
+        }
+      }
+      window.bootstrap = {
+        Toast: BootstrapLite,
+        Modal: BootstrapLite,
+        Offcanvas: BootstrapLite
+      };
+    }
+
     const STORAGE_KEYS = {
       plans: "bandien_nhatky_plans",
       logs: "bandien_nhatky_logs",
@@ -1400,7 +1811,7 @@
     // ===== Điều hướng màn hình (router nhỏ gọn, không reload trang) =====
     let currentScreen = "tasklist";
     let currentParams = {};
-    const TOP_LEVEL_SCREENS = ["tasklist", "week", "personal"];
+    const TOP_LEVEL_SCREENS = ["tasklist", "week", "stats", "personal"];
 
     function navigateTo(screen, params) {
       params = params || {};
@@ -1443,6 +1854,12 @@
       const tabbar = document.getElementById("mainBottomNav");
       const topLevel = TOP_LEVEL_SCREENS.includes(screen);
       tabbar.style.display = topLevel ? "flex" : "none";
+      tabbar.querySelectorAll("[data-bottom-screen]").forEach(item => {
+        const active = item.dataset.bottomScreen === screen || (screen === "week" && item.dataset.bottomScreen === "tasklist");
+        item.classList.toggle("active", active);
+        if (active) item.setAttribute("aria-current", "page");
+        else item.removeAttribute("aria-current");
+      });
     }
 
     function openTaskDetail(id) {
@@ -1577,11 +1994,22 @@
         if (event.target.closest("#btnBack")) goBack();
       });
 
-      document.getElementById("tabbar").addEventListener("click", event => {
-        const btn = event.target.closest(".tab");
-        if (!btn) return;
-        const target = btn.dataset.tab;
-        if (target === "logentry") { navigateTo("logentry", {}); return; }
+      const legacyTabbar = document.getElementById("tabbar");
+      if (legacyTabbar) {
+        legacyTabbar.addEventListener("click", event => {
+          const btn = event.target.closest(".tab");
+          if (!btn) return;
+          const target = btn.dataset.tab;
+          if (target === "logentry") { navigateTo("logentry", {}); return; }
+          if (currentScreen === target) return;
+          navigateTo(target, {});
+        });
+      }
+
+      document.getElementById("mainBottomNav").addEventListener("click", event => {
+        const item = event.target.closest("[data-bottom-screen]");
+        if (!item) return;
+        const target = item.dataset.bottomScreen;
         if (currentScreen === target) return;
         navigateTo(target, {});
       });
