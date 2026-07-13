@@ -16,7 +16,7 @@ function findAccountRow_(sheet, username) {
   return 0;
 }
 
-function getUserTeamGroup_(username) {
+function getUserTeams_(username) {
   const sheet = getSheet(SHEETS.USERS);
   if (!username) return "";
   const rowIndex = findAccountRow_(sheet, username);
@@ -24,6 +24,24 @@ function getUserTeamGroup_(username) {
   const data = sheet.getDataRange().getValues();
   const schema = typeof getUsersSchema_ === "function" ? getUsersSchema_(data) : { teamsIndex: 3 };
   return String(sheet.getRange(rowIndex, schema.teamsIndex + 1).getValue() || "").trim();
+}
+
+function splitTeams_(value) {
+  return String(value || "").split(/[,;|]/).map(function(team) { return team.trim(); }).filter(Boolean);
+}
+
+function isPrivilegedTeams_(value) {
+  return splitTeams_(value).some(function(team) {
+    const normalized = team.toLowerCase();
+    return team === "*" || normalized === "admin";
+  });
+}
+
+function userCanAccessTeam_(userTeams, requestedTeam) {
+  const requested = String(requestedTeam || "").trim();
+  if (!requested) return false;
+  if (isPrivilegedTeams_(userTeams)) return true;
+  return Boolean(requested) && splitTeams_(userTeams).indexOf(requested) >= 0;
 }
 
 function handleListAccounts(e) {
@@ -72,8 +90,8 @@ function handleNhatKyLogin(params) {
   }
   const name = String(row[schema.usernameIndex] || username).trim();
   const role = String(row[schema.roleIndex] || "User").trim();
-  const teamGroup = String(row[schema.teamsIndex] || "").trim();
+  const teams = String(row[schema.teamsIndex] || "").trim();
   writeAuditLog(username, "nhatkyLogin", username, "Đăng nhập trang nhật ký");
 
-  return contentResponse({ status: "success", name: name, username: name, role: role, teamGroup: teamGroup, teams: teamGroup });
+  return contentResponse({ status: "success", name: name, username: name, role: role, teams: teams });
 }

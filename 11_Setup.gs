@@ -160,7 +160,7 @@ function migrateAccountsToUsers() {
   
   const newRows = [];
   // Cấu trúc Users: ["Username","PIN","Role","Teams"]
-  // Cấu trúc NhatKyAccounts cũ: ["Name", "PasswordHash", "CreatedAt", "LastLoginAt", "TeamGroup"]
+  // Cấu trúc NhatKyAccounts cũ: cột cuối là thông tin tổ, được chuyển về Users.Teams
   
   for (let i = 1; i < nhatkyData.length; i++) {
     let r = nhatkyData[i];
