@@ -460,6 +460,15 @@
     .mrow:last-child { border-bottom: 0; }
     .mrow i.lead { font-size: 1.3rem; color: var(--brand); width: 28px; text-align: center; flex-shrink: 0; }
     .mrow i.tail { margin-left: auto; color: #888; font-size: 1.1rem; }
+    .display-setting-list { border: 2px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--surface); color: var(--ink); }
+    .display-setting-row { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 14px; border-bottom: 2px solid var(--line); background: var(--surface-high, var(--surface)); color: var(--ink); }
+    .display-setting-row:last-child { border-bottom: 0; }
+    .display-setting-icon { width: 38px; height: 38px; border-radius: 10px; background: var(--surface-soft); color: var(--brand); display: inline-flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0; }
+    .display-setting-copy { min-width: 0; flex: 1; }
+    .display-setting-copy strong { display: block; color: var(--ink); font-size: 1rem; }
+    .display-setting-copy span { display: block; margin-top: 2px; color: var(--muted); font-size: .82rem; }
+    .display-setting-row .form-check { margin: 0; min-height: auto; padding-left: 2.9rem; }
+    .display-setting-row .form-check-input { width: 2.65rem; height: 1.45rem; margin-left: -2.9rem; cursor: pointer; }
 
     /* ===== Access gate ===== */
     .access-gate-panel { margin: 24px 16px; padding: 28px 18px; text-align: center; border: 2px solid var(--line); border-radius: 16px; background: #fff; }
@@ -2038,6 +2047,47 @@
     </div>
   </div>
 
+  <!-- Modal: cấu hình nội dung danh sách công việc -->
+  <div class="modal fade" id="taskDisplayModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title h5"><i class="bi bi-layout-text-sidebar-reverse me-2"></i>Hiển thị danh sách</h3>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-secondary small mb-3">Chọn thông tin phụ cần hiện trên mỗi công việc. Thiết lập được lưu trên thiết bị này.</p>
+          <div class="display-setting-list">
+            <label class="display-setting-row" for="displayPriority">
+              <span class="display-setting-icon"><i class="bi bi-flag-fill"></i></span>
+              <span class="display-setting-copy"><strong>Ưu tiên</strong><span>Cao, trung bình hoặc thấp</span></span>
+              <span class="form-check form-switch"><input class="form-check-input" type="checkbox" id="displayPriority"></span>
+            </label>
+            <label class="display-setting-row" for="displayTeam">
+              <span class="display-setting-icon"><i class="bi bi-diagram-3-fill"></i></span>
+              <span class="display-setting-copy"><strong>Tổ</strong><span>Tổ phụ trách công việc</span></span>
+              <span class="form-check form-switch"><input class="form-check-input" type="checkbox" id="displayTeam"></span>
+            </label>
+            <label class="display-setting-row" for="displayType">
+              <span class="display-setting-icon"><i class="bi bi-tag-fill"></i></span>
+              <span class="display-setting-copy"><strong>Loại việc</strong><span>Kế hoạch, phát sinh...</span></span>
+              <span class="form-check form-switch"><input class="form-check-input" type="checkbox" id="displayType"></span>
+            </label>
+            <label class="display-setting-row" for="displayAssignee">
+              <span class="display-setting-icon"><i class="bi bi-people-fill"></i></span>
+              <span class="display-setting-copy"><strong>Người thực hiện</strong><span>Một hoặc nhiều người cùng làm</span></span>
+              <span class="form-check form-switch"><input class="form-check-input" type="checkbox" id="displayAssignee"></span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer justify-content-between">
+          <button class="btn btn-outline-secondary" type="button" id="btnResetTaskDisplay">Mặc định</button>
+          <button class="btn btn-primary" type="button" id="btnSaveTaskDisplay"><i class="bi bi-check2-circle me-1"></i>Áp dụng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: đăng nhập / đăng ký -->
   <div class="modal fade" id="loginModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
@@ -2299,6 +2349,7 @@
       employees: "bandien_nhatky_employees",
       staff: "bandien_nhatky_staff_v2",
       fontScale: "bandien_nhatky_fontscale",
+      taskDisplay: "bandien_nhatky_task_display",
       authToken: "bandien_nhatky_auth_token"
     };
 
@@ -2325,6 +2376,7 @@
     let changePinModal;
     let loginModal;
     let settingsModalInstance;
+    let taskDisplayModalInstance;
     let filterOffcanvasInstance;
     let lastAddedLogId = null;
     let staffList = [];   // tên nhân viên từ backend (getStaff) cho dropdown
@@ -2529,6 +2581,7 @@
       changePinModal = new bootstrap.Modal(document.getElementById("changePinModal"));
       loginModal = new bootstrap.Modal(document.getElementById("loginModal"));
       settingsModalInstance = new bootstrap.Modal(document.getElementById("settingsModal"));
+      taskDisplayModalInstance = new bootstrap.Modal(document.getElementById("taskDisplayModal"));
       filterOffcanvasInstance = new bootstrap.Offcanvas(document.getElementById("filterOffcanvas"));
       applyFontScale();
       document.getElementById("filterDate").value = today;
@@ -2629,6 +2682,8 @@
       document.getElementById("changePinForm").addEventListener("submit", submitOwnPinChange);
       document.getElementById("btnClearForm").addEventListener("click", clearForm);
       document.getElementById("btnSaveSettings").addEventListener("click", saveSettings);
+      document.getElementById("btnSaveTaskDisplay").addEventListener("click", saveTaskDisplaySettings);
+      document.getElementById("btnResetTaskDisplay").addEventListener("click", resetTaskDisplaySettings);
       const accessGateLogin = document.getElementById("btnAccessGateLogin");
       if (accessGateLogin) accessGateLogin.addEventListener("click", openLogin);
       document.getElementById("btnSubmitAuth").addEventListener("click", doSubmitAuth);
@@ -3355,6 +3410,58 @@
       showToast("Đã lưu cấu hình đồng bộ");
     }
 
+    const DEFAULT_TASK_DISPLAY = Object.freeze({
+      priority: true,
+      team: true,
+      type: true,
+      assignee: true
+    });
+
+    function getTaskDisplaySettings() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS.taskDisplay) || "{}");
+        return Object.keys(DEFAULT_TASK_DISPLAY).reduce((result, key) => {
+          result[key] = typeof saved[key] === "boolean" ? saved[key] : DEFAULT_TASK_DISPLAY[key];
+          return result;
+        }, {});
+      } catch (_) {
+        return { ...DEFAULT_TASK_DISPLAY };
+      }
+    }
+
+    function loadTaskDisplaySettings() {
+      const settings = getTaskDisplaySettings();
+      document.getElementById("displayPriority").checked = settings.priority;
+      document.getElementById("displayTeam").checked = settings.team;
+      document.getElementById("displayType").checked = settings.type;
+      document.getElementById("displayAssignee").checked = settings.assignee;
+    }
+
+    function openTaskDisplaySettings() {
+      loadTaskDisplaySettings();
+      taskDisplayModalInstance.show();
+    }
+
+    function saveTaskDisplaySettings() {
+      const settings = {
+        priority: document.getElementById("displayPriority").checked,
+        team: document.getElementById("displayTeam").checked,
+        type: document.getElementById("displayType").checked,
+        assignee: document.getElementById("displayAssignee").checked
+      };
+      localStorage.setItem(STORAGE_KEYS.taskDisplay, JSON.stringify(settings));
+      taskDisplayModalInstance.hide();
+      renderPlans();
+      showToast("Đã áp dụng cấu hình hiển thị");
+    }
+
+    function resetTaskDisplaySettings() {
+      document.getElementById("displayPriority").checked = DEFAULT_TASK_DISPLAY.priority;
+      document.getElementById("displayTeam").checked = DEFAULT_TASK_DISPLAY.team;
+      document.getElementById("displayType").checked = DEFAULT_TASK_DISPLAY.type;
+      document.getElementById("displayAssignee").checked = DEFAULT_TASK_DISPLAY.assignee;
+    }
+
     function render() {
       renderTeamOptions();
       refreshCurrentScreen();
@@ -3548,6 +3655,7 @@
     }
 
     function taskRowHtml(plan, selectedDate, attn) {
+      const display = getTaskDisplaySettings();
       const done = plan.status === "Hoàn thành";
       const doing = plan.status === "Đang làm";
       const status = taskRowStatusDot(plan, selectedDate);
@@ -3560,11 +3668,12 @@
       const deadline = planDeadline(plan);
       const overdue = !done && deadline && deadline < selectedDate;
       const labels = [];
-      if (plan.priority === "Cao" || attn) labels.push('<span class="vikunja-label priority-high">Ưu tiên cao</span>');
-      else if (plan.priority === "Trung bình") labels.push('<span class="vikunja-label priority-medium">Trung bình</span>');
+      if (display.priority && (plan.priority === "Cao" || attn)) labels.push('<span class="vikunja-label priority-high">Ưu tiên cao</span>');
+      else if (display.priority && plan.priority === "Trung bình") labels.push('<span class="vikunja-label priority-medium">Trung bình</span>');
+      else if (display.priority && plan.priority) labels.push(`<span class="vikunja-label">${escapeHtml(plan.priority)}</span>`);
       if (doing) labels.push('<span class="vikunja-label status-doing">Đang làm</span>');
-      if (plan.team) labels.push(`<span class="vikunja-label">${escapeHtml(plan.team)}</span>`);
-      if (plan.type === "Phát sinh") labels.push('<span class="vikunja-label">Phát sinh</span>');
+      if (display.team && plan.team) labels.push(`<span class="vikunja-label">${escapeHtml(plan.team)}</span>`);
+      if (display.type && plan.type) labels.push(`<span class="vikunja-label">${escapeHtml(plan.type)}</span>`);
       const syncIcon = planSyncIcon(plan);
       return `
         <article class="vikunja-task ${stateClass}" onclick="openTaskDetail('${escapeAttr(plan.id)}')">
@@ -3579,7 +3688,7 @@
             <div class="vikunja-task-meta">
               <span class="${overdue ? "is-overdue" : ""}"><i class="bi bi-calendar-event"></i>${plan.time ? escapeHtml(plan.time) : "Chưa xếp giờ"}${deadline ? ` · ${shortDateVn(deadline)}` : ""}</span>
               ${location ? `<span class="truncate-meta"><i class="bi bi-geo-alt"></i>${escapeHtml(location)}</span>` : ""}
-              ${plan.assignee ? `<span class="truncate-meta"><i class="bi bi-people"></i>${escapeHtml(plan.assignee)}</span>` : ""}
+              ${display.assignee && plan.assignee ? `<span class="truncate-meta"><i class="bi bi-people"></i>${escapeHtml(plan.assignee)}</span>` : ""}
             </div>
           </div>
           <button class="vikunja-task-open" type="button" title="Mở chi tiết" aria-label="Mở chi tiết"
@@ -4437,6 +4546,7 @@
           <div class="section-label">Tùy chọn</div>
           <div class="menu mb-3">
             <button class="mrow" type="button" id="btnPersonalFilters"><i class="bi bi-funnel lead"></i>Bộ lọc nâng cao<i class="bi bi-chevron-right tail"></i></button>
+            <button class="mrow" type="button" id="btnTaskDisplaySettings"><i class="bi bi-layout-text-sidebar-reverse lead"></i>Hiển thị danh sách<i class="bi bi-chevron-right tail"></i></button>
             <button class="mrow" type="button" id="btnPersonalSettings"><i class="bi bi-gear lead"></i>Cấu hình đồng bộ<i class="bi bi-chevron-right tail"></i></button>
             <button class="mrow" type="button" id="btnPersonalFontScale"><i class="bi bi-fonts lead"></i>Cỡ chữ: ${scaleLabel}<i class="bi bi-chevron-right tail"></i></button>
           </div>
@@ -4451,6 +4561,7 @@
       if (manageUsersButton) manageUsersButton.addEventListener("click", () => navigateTo("usermanagement", {}));
       document.getElementById("btnOpenScan").addEventListener("click", () => { window.location.href = "../index.html"; });
       document.getElementById("btnPersonalFilters").addEventListener("click", () => filterOffcanvasInstance.show());
+      document.getElementById("btnTaskDisplaySettings").addEventListener("click", openTaskDisplaySettings);
       document.getElementById("btnPersonalSettings").addEventListener("click", () => settingsModalInstance.show());
       document.getElementById("btnPersonalFontScale").addEventListener("click", () => { cycleFontScale(); renderPersonalScreen(); });
       document.getElementById("btnChangePin").addEventListener("click", openChangePinModal);
