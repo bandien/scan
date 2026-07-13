@@ -116,6 +116,7 @@ function getUsersSchema_(rows) {
     updatedAtIndex: findHeader(["cập nhật lúc", "cap nhat luc", "updatedat"]),
     updatedByIndex: findHeader(["cập nhật bởi", "cap nhat boi", "updatedby"]),
     phoneIndex: findHeader(["phone", "số điện thoại", "so dien thoai"]),
+    fullNameIndex: findHeader(["họ và tên", "ho va ten", "fullname", "full name"]),
     lastLoginIndex: findHeader(["lastloginat"])
   };
 }

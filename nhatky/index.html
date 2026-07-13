@@ -1926,6 +1926,10 @@
             <input type="hidden" id="userOriginalUsername">
             <div class="row g-3">
               <div class="col-12">
+                <label class="form-label" for="userFullName">Họ và tên</label>
+                <input class="form-control" id="userFullName" autocomplete="name" required>
+              </div>
+              <div class="col-12">
                 <label class="form-label" for="userUsername">Tên đăng nhập</label>
                 <input class="form-control" id="userUsername" autocomplete="off" required>
               </div>
@@ -2786,6 +2790,15 @@
       }
     }
 
+    function currentFullName() {
+      try {
+        const shared = JSON.parse(localStorage.getItem("currentUser") || sessionStorage.getItem("currentUser") || "null");
+        return shared ? String(shared.fullName || shared.name || shared.username || "") : currentUser();
+      } catch (_) {
+        return currentUser();
+      }
+    }
+
     function currentTeams() {
       const direct = localStorage.getItem(STORAGE_KEYS.teams) || "";
       if (direct) return direct;
@@ -2892,7 +2905,7 @@
         ? "Chưa có tài khoản? Tạo tài khoản mới"
         : "Đã có tài khoản? Đăng nhập ngay";
       document.getElementById("loginHint").textContent = isLogin
-        ? "Nhập PIN trong bảng Users để đăng nhập."
+        ? "Đăng nhập bằng Username + PIN. Phiên được lưu an toàn trên máy này trong 30 ngày."
         : "Tài khoản được quản lý tập trung trong sheet Users.";
 
       showLoginError("");
@@ -2944,7 +2957,8 @@
           showLoginError(data.message || "Không thực hiện được, thử lại sau");
           return;
         }
-        const loggedName = data.username || data.name || name;
+        const loggedName = data.username || name;
+        const loggedFullName = data.fullName || data.name || loggedName;
         const loggedTeams = data.teams || "";
         const loggedRole = data.role || "User";
         const loggedAuthToken = data.authToken || "";
@@ -2953,7 +2967,8 @@
         localStorage.setItem(STORAGE_KEYS.authToken, loggedAuthToken);
         localStorage.setItem("currentUser", JSON.stringify({
           username: loggedName,
-          name: loggedName,
+          name: loggedFullName,
+          fullName: loggedFullName,
           role: loggedRole,
           teams: loggedTeams,
           authToken: loggedAuthToken
@@ -2963,7 +2978,7 @@
         updateAccessGate();
         refreshTeamOptions();
         loginModal.hide();
-        showToast("Xin chào " + loggedName);
+        showToast("Xin chào " + loggedFullName);
 
         // Buộc tải lại dữ liệu theo đúng tổ của tài khoản vừa đăng nhập
         localStorage.removeItem(STORAGE_KEYS.plans);
@@ -3977,7 +3992,8 @@
     function renderPersonalScreen() {
       const container = document.getElementById("screen-personal");
       const user = currentUser() || "?";
-      const initial = escapeHtml((user.trim().charAt(0) || "?").toUpperCase());
+      const fullName = currentFullName() || user;
+      const initial = escapeHtml((fullName.trim().charAt(0) || "?").toUpperCase());
       const team = currentTeams() || "Chưa phân tổ";
       const role = currentRole();
       const shift = defaultShift();
@@ -3992,8 +4008,8 @@
         <div class="prof-hero">
           <div class="avatar">${initial}</div>
           <div>
-            <div class="prof-name">${escapeHtml(user)}</div>
-            <div class="prof-role">${escapeHtml(role)} · ${escapeHtml(team)}</div>
+            <div class="prof-name">${escapeHtml(fullName)}</div>
+            <div class="prof-role">@${escapeHtml(user)} · ${escapeHtml(role)} · ${escapeHtml(team)}</div>
           </div>
         </div>
         <div class="scroll">
@@ -4155,7 +4171,7 @@
       container.innerHTML = `
         <div class="scroll">
           <div class="user-admin-toolbar">
-            <input class="form-control" id="userAdminSearch" type="search" placeholder="Tìm tên, tổ, số điện thoại..." aria-label="Tìm người dùng">
+            <input class="form-control" id="userAdminSearch" type="search" placeholder="Tìm họ tên, username, tổ, số điện thoại..." aria-label="Tìm người dùng">
             <button class="user-admin-add" id="btnAddUser" type="button" title="Thêm người dùng" aria-label="Thêm người dùng"><i class="bi bi-person-plus"></i></button>
           </div>
           <div class="user-admin-summary" id="userAdminSummary"></div>
@@ -4178,7 +4194,7 @@
       if (!list || !summary) return;
       const normalized = String(query || "").trim().toLowerCase();
       const visible = managedUsers.filter(user => {
-        const haystack = [user.username, user.role, user.teams, user.phone, user.note].join(" ").toLowerCase();
+        const haystack = [user.fullName, user.username, user.role, user.teams, user.phone, user.note].join(" ").toLowerCase();
         return !normalized || haystack.includes(normalized);
       });
       summary.textContent = `${visible.length}/${managedUsers.length} tài khoản · Quyền ${managedActorRole}`;
@@ -4193,7 +4209,8 @@
           <article class="user-card">
             <div class="user-card-head">
               <div>
-                <div class="user-card-name">${escapeHtml(user.username)}</div>
+                <div class="user-card-name">${escapeHtml(user.fullName || user.username)}</div>
+                <div class="user-card-meta"><i class="bi bi-person-badge me-1"></i>@${escapeHtml(user.username)}</div>
                 <div class="user-card-meta"><i class="bi bi-diagram-3 me-1"></i>${escapeHtml(user.teams || "Chưa phân tổ")}</div>
                 ${user.phone ? `<div class="user-card-meta"><i class="bi bi-telephone me-1"></i>${escapeHtml(user.phone)}</div>` : ""}
               </div>
@@ -4232,6 +4249,7 @@
       const user = username ? managedUsers.find(item => item.username === username) : null;
       document.getElementById("userModalTitle").textContent = user ? "Sửa người dùng" : "Thêm người dùng";
       document.getElementById("userOriginalUsername").value = user ? user.username : "";
+      document.getElementById("userFullName").value = user ? user.fullName || "" : "";
       document.getElementById("userUsername").value = user ? user.username : "";
       document.getElementById("userPin").value = "";
       document.getElementById("userPin").required = !user;
@@ -4253,6 +4271,7 @@
       const teams = Array.from(document.querySelectorAll('#userTeamOptions input[type="checkbox"]:checked')).map(input => input.value);
       const payload = {
         originalUsername: document.getElementById("userOriginalUsername").value,
+        fullName: document.getElementById("userFullName").value.trim(),
         username: document.getElementById("userUsername").value.trim(),
         pin: document.getElementById("userPin").value,
         role: document.getElementById("userRole").value,
