@@ -2021,6 +2021,7 @@
 
     // Lấy ngày theo giờ địa phương (toISOString là UTC → sai ngày lúc 0h-7h sáng VN)
     const today = toIsoDate(new Date());
+    const REQUESTED_PLAN_ID = new URLSearchParams(window.location.search).get("plan") || "";
     const RECENT_LOG_LIMIT = 3;
     const DEFAULT_SYNC = {
       url: typeof CONFIG !== "undefined" ? CONFIG.gasUrl : "https://script.google.com/macros/s/AKfycbzW4TxDarLBOpZvO8hnE0R65IsCd95a5l-XPASjUmZNuefH5MiWMs8lCpLpggzFwyXK/exec",
@@ -2253,12 +2254,15 @@
       await loadPlans();
       loadLogs();
       bindEvents();
-      history.replaceState({ screen: "tasklist", params: {} }, "");
+      const initialState = REQUESTED_PLAN_ID && plans.some(plan => plan.id === REQUESTED_PLAN_ID)
+        ? { screen: "taskdetail", params: { id: REQUESTED_PLAN_ID } }
+        : { screen: "tasklist", params: {} };
+      history.replaceState(initialState, "");
       window.addEventListener("popstate", event => {
         const state = event.state || { screen: "tasklist", params: {} };
         activateScreen(state.screen, state.params);
       });
-      activateScreen("tasklist", {});
+      activateScreen(initialState.screen, initialState.params);
       render();
       updateSyncStatus();
       updateAccessGate();
@@ -2986,7 +2990,13 @@
         // Buộc tải lại dữ liệu theo đúng tổ của tài khoản vừa đăng nhập
         localStorage.removeItem(STORAGE_KEYS.plans);
         if (hasTeamAccess()) {
-          loadPlans(true).then(() => render());
+          loadPlans(true).then(() => {
+            if (REQUESTED_PLAN_ID && plans.some(plan => plan.id === REQUESTED_PLAN_ID)) {
+              navigateTo("taskdetail", { id: REQUESTED_PLAN_ID });
+            } else {
+              render();
+            }
+          });
           loadServerLogs();
         }
       } catch (error) {
@@ -3445,6 +3455,11 @@
           <div class="info-label"><i class="bi bi-sigma"></i>Khối lượng</div>
           <div class="info-value normal">${qtyBadge || "Chưa có dữ liệu"}</div>
         </div>` : "";
+      const sourceCard = plan.sourceText ? `
+        <div class="info-card">
+          <div class="info-label"><i class="bi bi-chat-quote-fill"></i>Nguồn ${escapeHtml(plan.source || "Zalo Web")}</div>
+          <div class="info-value normal" style="white-space:pre-wrap">${escapeHtml(plan.sourceText)}</div>
+        </div>` : "";
 
       container.innerHTML = `
         <div class="scroll">
@@ -3467,6 +3482,7 @@
             ${peopleHtml}
           </div>
           ${qtyCard}
+          ${sourceCard}
           <button class="link-button" type="button" onclick="navigateTo('loghistory', {planId:'${escapeAttr(plan.id)}'})"><i class="bi bi-clock-history me-1"></i>Xem nhật ký đã ghi</button>
         </div>
         <div class="action-bar">
