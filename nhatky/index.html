@@ -1885,6 +1885,34 @@
     </div>
   </div>
 
+  <!-- Modal: nhân viên tự đổi PIN -->
+  <div class="modal fade" id="changePinModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title h5"><i class="bi bi-key me-2"></i>Đổi PIN</h3>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <form id="changePinForm">
+          <div class="modal-body">
+            <label class="form-label" for="currentPin">PIN hiện tại</label>
+            <input class="form-control mb-3" id="currentPin" type="password" autocomplete="current-password" required>
+            <label class="form-label" for="newPin">PIN mới</label>
+            <input class="form-control mb-3" id="newPin" type="password" minlength="4" maxlength="32" autocomplete="new-password" required>
+            <label class="form-label" for="confirmNewPin">Nhập lại PIN mới</label>
+            <input class="form-control" id="confirmNewPin" type="password" minlength="4" maxlength="32" autocomplete="new-password" required>
+            <div class="small text-secondary mt-2">PIN mới phải có ít nhất 4 ký tự.</div>
+            <div class="small text-danger mt-2 d-none" id="changePinError"></div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Đóng</button>
+            <button class="btn btn-primary" type="submit" id="btnSubmitChangePin"><i class="bi bi-check2-circle me-1"></i>Đổi PIN</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: thêm/sửa người dùng -->
   <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -2000,6 +2028,7 @@
     let toast;
     let planModal;
     let userModal;
+    let changePinModal;
     let loginModal;
     let settingsModalInstance;
     let filterOffcanvasInstance;
@@ -2202,6 +2231,7 @@
       toast = new bootstrap.Toast(document.getElementById("toast"), { delay: 2200 });
       planModal = new bootstrap.Modal(document.getElementById("planModal"));
       userModal = new bootstrap.Modal(document.getElementById("userModal"));
+      changePinModal = new bootstrap.Modal(document.getElementById("changePinModal"));
       loginModal = new bootstrap.Modal(document.getElementById("loginModal"));
       settingsModalInstance = new bootstrap.Modal(document.getElementById("settingsModal"));
       filterOffcanvasInstance = new bootstrap.Offcanvas(document.getElementById("filterOffcanvas"));
@@ -2298,6 +2328,7 @@
       });
       document.getElementById("btnDeletePlan").addEventListener("click", deletePlanFromModal);
       document.getElementById("userForm").addEventListener("submit", saveManagedUser);
+      document.getElementById("changePinForm").addEventListener("submit", submitOwnPinChange);
       document.getElementById("btnClearForm").addEventListener("click", clearForm);
       document.getElementById("btnSaveSettings").addEventListener("click", saveSettings);
       const accessGateLogin = document.getElementById("btnAccessGateLogin");
@@ -3992,6 +4023,7 @@
           </div>
           <div class="section-label">Tài khoản</div>
           <div class="menu">
+            <button class="mrow" type="button" id="btnChangePin"><i class="bi bi-key lead"></i>Đổi PIN<i class="bi bi-chevron-right tail"></i></button>
             <button class="mrow" type="button" id="btnPersonalLogout"><i class="bi bi-box-arrow-right lead"></i>Đăng xuất<i class="bi bi-chevron-right tail"></i></button>
           </div>
         </div>
@@ -4002,7 +4034,70 @@
       document.getElementById("btnPersonalFilters").addEventListener("click", () => filterOffcanvasInstance.show());
       document.getElementById("btnPersonalSettings").addEventListener("click", () => settingsModalInstance.show());
       document.getElementById("btnPersonalFontScale").addEventListener("click", () => { cycleFontScale(); renderPersonalScreen(); });
+      document.getElementById("btnChangePin").addEventListener("click", openChangePinModal);
       document.getElementById("btnPersonalLogout").addEventListener("click", logout);
+    }
+
+    function openChangePinModal() {
+      if (!currentAuthToken()) {
+        showToast("Vui lòng đăng nhập lại trước khi đổi PIN");
+        openLogin();
+        return;
+      }
+      document.getElementById("changePinForm").reset();
+      document.getElementById("changePinError").classList.add("d-none");
+      changePinModal.show();
+    }
+
+    async function submitOwnPinChange(event) {
+      event.preventDefault();
+      const currentPin = document.getElementById("currentPin").value;
+      const newPin = document.getElementById("newPin").value;
+      const confirmPin = document.getElementById("confirmNewPin").value;
+      const errorBox = document.getElementById("changePinError");
+      const button = document.getElementById("btnSubmitChangePin");
+      errorBox.classList.add("d-none");
+
+      if (newPin.length < 4) {
+        errorBox.textContent = "PIN mới phải có ít nhất 4 ký tự.";
+        errorBox.classList.remove("d-none");
+        return;
+      }
+      if (newPin !== confirmPin) {
+        errorBox.textContent = "Hai lần nhập PIN mới chưa khớp.";
+        errorBox.classList.remove("d-none");
+        return;
+      }
+
+      const sync = getSync();
+      button.disabled = true;
+      try {
+        const response = await fetch(sync.url, {
+          method: "POST",
+          signal: AbortSignal.timeout(15000),
+          body: JSON.stringify({
+            action: "nhatkyChangePin",
+            token: sync.token,
+            payload: {
+              actorUsername: currentUser(),
+              authToken: currentAuthToken(),
+              oldPin: currentPin,
+              newPin: newPin
+            }
+          })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (data.status !== "success") throw new Error(data.message || "Không đổi được PIN.");
+        changePinModal.hide();
+        document.getElementById("changePinForm").reset();
+        showToast(data.message || "Đã đổi PIN thành công");
+      } catch (error) {
+        if (/phiên đăng nhập|đăng nhập lại/i.test(error.message)) localStorage.removeItem(STORAGE_KEYS.authToken);
+        errorBox.textContent = error.message;
+        errorBox.classList.remove("d-none");
+      } finally {
+        button.disabled = false;
+      }
     }
 
     // ===== Quản lý Users: chỉ Admin / Manager, backend kiểm tra lại quyền =====
