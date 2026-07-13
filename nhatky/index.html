@@ -1377,7 +1377,6 @@
       <i class="bi bi-shield-lock text-secondary" style="font-size:2rem;"></i>
       <h2 class="h5 fw-bold mt-2 mb-1">Chưa thể xem nhật ký / việc</h2>
       <p class="text-secondary mb-3" id="accessGateMessage">Vui lòng đăng nhập tài khoản đã được phân nhóm tổ để xem nội dung này.</p>
-      <button class="btn btn-primary" type="button" id="btnAccessGateLogin"><i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập</button>
     </section>
 
     <div id="appContent" class="d-none">
@@ -2068,7 +2067,8 @@
       document.getElementById("btnDeletePlan").addEventListener("click", deletePlanFromModal);
       document.getElementById("btnClearForm").addEventListener("click", clearForm);
       document.getElementById("btnSaveSettings").addEventListener("click", saveSettings);
-      document.getElementById("btnAccessGateLogin").addEventListener("click", openLogin);
+      const accessGateLogin = document.getElementById("btnAccessGateLogin");
+      if (accessGateLogin) accessGateLogin.addEventListener("click", openLogin);
       document.getElementById("btnSubmitAuth").addEventListener("click", doSubmitAuth);
       document.getElementById("linkToggleAuthMode").addEventListener("click", e => {
         e.preventDefault();
