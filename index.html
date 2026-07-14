@@ -111,9 +111,10 @@
 
         /* ===== Khung quét theo mockup "Tìm kiếm" ===== */
         .scan-frame {
-            position: relative; background: #080b12; border-radius: 0; overflow: hidden;
-            min-height: min(100vw, 408px); display: flex; flex-direction: column;
-            justify-content: center; margin: -12px -16px 0; isolation: isolate;
+            position: relative; background: #080b12; border-radius: var(--r-lg); overflow: hidden;
+            min-height: min(100vw, 408px); display: none; flex-direction: column;
+            justify-content: center; margin: 10px 0 20px 0; isolation: isolate;
+            border: 1px solid var(--siu-outline-variant);
         }
         .scan-frame::before {
             content: ""; position: absolute; inset: 0;
@@ -356,68 +357,73 @@
 
 <div class="app-shell" id="appShell" style="display: none;">
     <div class="header-section">
-        <div class="header-title-row">
-            <i class="bi bi-search"></i>
-            <h1>Tìm kiếm</h1>
-        </div>
-        <div class="d-flex justify-content-between px-3 align-items-center mb-2">
-            <div class="d-flex gap-2 align-items-center">
-                <div class="dropdown" id="userBadge" style="display: none;">
-                    <button class="btn btn-sm rounded-pill border px-3 py-2 dropdown-toggle" style="background: var(--siu-surface-high); color: var(--siu-on-surface); border-color: var(--siu-outline-variant);" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-person-circle text-primary me-1"></i> <span id="userNameDisplay">User</span>
+        <div class="header-inner w-100 d-flex align-items-center justify-content-between">
+          <div class="header-left min-w-0 d-flex align-items-center gap-2">
+            <div class="brand-mark flex-shrink-0" style="width: 40px; height: 40px; border-radius: 14px; background: linear-gradient(135deg, var(--siu-primary), #1c9a7c); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; box-shadow: 0 6px 18px rgba(15,107,95,.2);"><i class="bi bi-qr-code-scan"></i></div>
+            <div class="header-titles min-w-0">
+              <div class="app-title text-truncate" style="font-size: 1.1rem; font-weight: 800; line-height: 1.2; color: var(--siu-on-surface);">Tìm kiếm</div>
+              <div class="header-sub text-truncate" style="font-size: .75rem; font-weight: 700; color: var(--siu-on-surface-variant); margin-top: 1px;">Quét QR & Tìm thiết bị</div>
+            </div>
+          </div>
+          <div class="header-right d-flex align-items-center gap-2">
+                <span class="badge bg-success-subtle text-success shadow-sm px-2 py-2 rounded-pill" id="syncBadge" style="display: none;" title="Data Synced">
+                    <i class="bi bi-cloud-check-fill"></i>
+                </span>
+                
+                <div class="dropdown">
+                    <button class="btn btn-sm rounded-pill border px-2 py-2 dropdown-toggle d-flex align-items-center" style="background: var(--siu-surface-high); color: var(--siu-on-surface); border-color: var(--siu-outline-variant);" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-grid text-primary" style="font-size: 18px;"></i>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-start" style="min-width: 180px; background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant);">
+                    <ul class="dropdown-menu dropdown-menu-end rounded-4 mt-2 p-2" style="min-width: 200px; background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant);">
+                        <li id="menuAddDevice" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="showAddDeviceModal()"><i class="bi bi-plus-square-dotted me-2 text-success"></i> Thêm thiết bị mới</a></li>
+                        <li id="menuBatchGen" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleBatchGenerator()"><i class="bi bi-magic me-2 text-success"></i> Tạo mã hàng loạt</a></li>
+                        <li id="menuProjMgr" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="openProjectManager()"><i class="bi bi-briefcase-fill me-2 text-success"></i> Quản lý Dự án</a></li>
+                        <li id="menuShiftRoster" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="phanca/"><i class="bi bi-table me-2 text-success"></i> Bảng phân ca tuần</a></li>
+                        <li id="menuLocMgr" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="openLocationManager()"><i class="bi bi-geo-fill me-2 text-success"></i> Quản lý Địa điểm</a></li>
+                        <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleDeviceList()" id="btn-device-list"><i class="bi bi-cpu me-2 text-primary"></i> Thiết bị của tôi</a></li>
+                        <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleCalendar()" id="btn-calendar"><i class="bi bi-calendar-event me-2 text-primary"></i> Lịch Bảo Trì</a></li>
+                        <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleKanban()" id="btn-kanban"><i class="bi bi-kanban me-2 text-primary"></i> Kanban WO</a></li>
+                        <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleDashboard()" id="btn-dashboard"><i class="bi bi-bar-chart-fill me-2 text-primary"></i> Dashboard</a></li>
+                        <li><hr class="dropdown-divider opacity-50"></li>
+                        <li><a class="dropdown-item rounded-3 py-2" href="architecture.html" target="_blank"><i class="bi bi-diagram-3 me-2 text-secondary"></i> Sơ đồ Hệ thống</a></li>
+                        <li><a class="dropdown-item rounded-3 py-2" href="nhatky/"><i class="bi bi-journal-check me-2 text-primary"></i> Nhật ký công việc</a></li>
+                        <li><a class="dropdown-item rounded-3 py-2" href="hengio/"><i class="bi bi-alarm me-2 text-primary"></i> Cài đặt đồng hồ bơm</a></li>
+                        <li><a class="dropdown-item rounded-3 py-2" href="phongvan/"><i class="bi bi-person-workspace me-2 text-primary"></i> Câu hỏi phỏng vấn</a></li>
+                        <li><a class="dropdown-item rounded-3 py-2" href="status.html" target="_blank"><i class="bi bi-cpu-fill me-2 text-success"></i> Giám sát Server Uptime</a></li>
+                        <li><a class="dropdown-item rounded-3 py-2" href="changelog.html" target="_blank"><i class="bi bi-history me-2 text-info"></i> Nhật ký Thay đổi (Log)</a></li>
+                        <li><a class="dropdown-item rounded-3 py-2" href="na111.html" target="_blank"><i class="bi bi-tools me-2 text-warning"></i> Chẩn đoán EBYTE NA111</a></li>
+                        <li><hr class="dropdown-divider opacity-50"></li>
+                        <li class="px-3 py-1 text-center text-muted" style="font-size: 0.72rem; list-style-type: none;"><span data-i18n="version">Phiên bản</span> v2.8.0</li>
+                    </ul>
+                </div>
+
+                <div class="dropdown" id="userBadge" style="display: none;">
+                    <button class="btn btn-sm rounded-pill border px-2 py-2 dropdown-toggle d-flex align-items-center" style="background: var(--siu-surface-high); color: var(--siu-on-surface); border-color: var(--siu-outline-variant);" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle text-primary" style="font-size: 18px;"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" style="min-width: 180px; background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant);">
                         <li><h6 class="dropdown-header" id="userRoleDisplay"><i class="bi bi-briefcase me-1"></i> Role</h6></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <div class="px-3 py-1 d-flex gap-1">
-                                <button class="btn btn-sm btn-outline-primary flex-fill rounded-pill" onclick="setLanguage('vi')">VN</button>
-                                <button class="btn btn-sm btn-outline-primary flex-fill rounded-pill" onclick="setLanguage('en')">EN</button>
-                            </div>
-                        </li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="#" onclick="showChangePasswordModal()"><i class="bi bi-key me-2"></i>Đổi PIN</a></li>
                         <li><a class="dropdown-item text-danger" href="#" onclick="doLogout()"><i class="bi bi-box-arrow-left me-2"></i>Đăng xuất</a></li>
                     </ul>
                 </div>
-                <span class="badge bg-success-subtle text-success shadow-sm px-2 py-2 rounded-pill" id="syncBadge" style="display: none;" title="Data Synced">
-                    <i class="bi bi-cloud-check-fill"></i>
-                </span>
-            </div>
-            <div class="dropdown">
-                <button class="btn btn-sm rounded-pill px-3 dropdown-toggle" style="background: var(--siu-surface-high); color: var(--siu-on-surface); border: 1px solid var(--siu-outline-variant);" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-grid-fill me-1"></i> Menu
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end rounded-4 mt-2 p-2" style="min-width: 200px; background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant);">
-                    <li id="menuAddDevice" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="showAddDeviceModal()"><i class="bi bi-plus-square-dotted me-2 text-success"></i> Thêm thiết bị mới</a></li>
-                    <li id="menuBatchGen" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleBatchGenerator()"><i class="bi bi-magic me-2 text-success"></i> Tạo mã hàng loạt</a></li>
-                    <li id="menuProjMgr" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="openProjectManager()"><i class="bi bi-briefcase-fill me-2 text-success"></i> Quản lý Dự án</a></li>
-                    <li id="menuShiftRoster" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="phanca/"><i class="bi bi-table me-2 text-success"></i> Bảng phân ca tuần</a></li>
-                    <li id="menuLocMgr" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="openLocationManager()"><i class="bi bi-geo-fill me-2 text-success"></i> Quản lý Địa điểm</a></li>
-                    <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleDeviceList()" id="btn-device-list"><i class="bi bi-cpu me-2 text-primary"></i> Thiết bị của tôi</a></li>
-                    <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleCalendar()" id="btn-calendar"><i class="bi bi-calendar-event me-2 text-primary"></i> Lịch Bảo Trì</a></li>
-                    <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleKanban()" id="btn-kanban"><i class="bi bi-kanban me-2 text-primary"></i> Kanban WO</a></li>
-                    <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleDashboard()" id="btn-dashboard"><i class="bi bi-bar-chart-fill me-2 text-primary"></i> Dashboard</a></li>
-                    <li><hr class="dropdown-divider opacity-50"></li>
-                    <li><a class="dropdown-item rounded-3 py-2" href="architecture.html" target="_blank"><i class="bi bi-diagram-3 me-2 text-secondary"></i> Sơ đồ Hệ thống</a></li>
-                    <li><a class="dropdown-item rounded-3 py-2" href="nhatky/"><i class="bi bi-journal-check me-2 text-primary"></i> Nhật ký công việc</a></li>
-                    <li><a class="dropdown-item rounded-3 py-2" href="hengio/"><i class="bi bi-alarm me-2 text-primary"></i> Cài đặt đồng hồ bơm</a></li>
-                    <li><a class="dropdown-item rounded-3 py-2" href="phongvan/"><i class="bi bi-person-workspace me-2 text-primary"></i> Câu hỏi phỏng vấn</a></li>
-                    <li><a class="dropdown-item rounded-3 py-2" href="status.html" target="_blank"><i class="bi bi-cpu-fill me-2 text-success"></i> Giám sát Server Uptime</a></li>
-                    <li><a class="dropdown-item rounded-3 py-2" href="changelog.html" target="_blank"><i class="bi bi-history me-2 text-info"></i> Nhật ký Thay đổi (Log)</a></li>
-                    <li><a class="dropdown-item rounded-3 py-2" href="na111.html" target="_blank"><i class="bi bi-tools me-2 text-warning"></i> Chẩn đoán EBYTE NA111</a></li>
-                    <li><hr class="dropdown-divider opacity-50"></li>
-                    <li class="px-3 py-1 text-center text-muted" style="font-size: 0.72rem; list-style-type: none;"><span data-i18n="version">Phiên bản</span> v2.8.0</li>
-                </ul>
-            </div>
+          </div>
         </div>
-        <div class="logo-box">
-            <a href="index.html" style="cursor: pointer; color: inherit; text-decoration: none;">
-                <i class="bi bi-qr-code-scan"></i>
-            </a>
+    </div>
+
+    <!-- Search & Scan Card -->
+    <div class="card-premium p-3 mb-3">
+        <div class="d-flex gap-2">
+            <div class="input-group">
+                <span class="input-group-text border-0 bg-light-subtle text-muted" style="border-radius: 12px 0 0 12px; background-color: var(--siu-surface-high) !important;"><i class="bi bi-search"></i></span>
+                <input type="text" id="manual_uid" class="form-control border-0 bg-light-subtle p-3" style="border-radius: 0 12px 12px 0; background-color: var(--siu-surface-high) !important; font-size: 14px; font-weight: 600; color: var(--siu-on-surface);" placeholder="Nhập mã thiết bị (UID)..." data-i18n-placeholder="placeholder_uid">
+            </div>
+            <button class="btn btn-primary px-3 d-flex align-items-center justify-content-center fw-bold" style="border-radius: 12px; min-width: 56px;" onclick="handleManualEntry()" data-i18n="btn_go">GO</button>
         </div>
-        <h2 class="fw-800 m-0" data-i18n="app_title">BanDienScan</h2>
-        <p class="text-muted small mt-1" data-i18n="app_subtitle">Smart Electrical Maintenance</p>
+        <button class="btn w-100 mt-3 d-flex align-items-center justify-content-center gap-2 fw-bold text-white" id="startScan" style="background: linear-gradient(135deg, var(--siu-primary), #1c9a7c); border: none; border-radius: 12px; height: 50px;" data-i18n="btn_scan">
+            <i class="bi bi-qr-code-scan"></i> QUÉT MÃ QR THIẾT BỊ
+        </button>
     </div>
 
     <!-- Scan Frame (SIU Design) -->
@@ -433,8 +439,8 @@
                 <i class="bi bi-flashlight"></i>
             </button>
             <span class="scan-status-pill" id="scanStatusPill" data-i18n="scanning_status">Đang quét thiết bị...</span>
-            <button class="scan-ctrl-btn" onclick="document.getElementById('disp_uid').focus()" title="Nhập tay">
-                <i class="bi bi-keyboard"></i>
+            <button class="scan-ctrl-btn text-danger" onclick="stopScanning()" title="Đóng camera" id="closeScanBtn">
+                <i class="bi bi-x-lg"></i>
             </button>
         </div>
     </div>
@@ -1503,15 +1509,7 @@
         <div id="filteredDeviceList" style="display: none;" class="mt-2 border-top pt-2"></div>
     </div>
 
-    <div class="card-premium p-3 mb-4">
-        <button class="btn-scan-main w-100" id="startScan" data-i18n="btn_scan">
-            <i class="bi bi-qr-code-scan"></i> SCAN EQUIPMENT
-        </button>
-        <div class="mt-3 pt-3 border-top d-flex gap-2">
-            <input type="text" id="manual_uid" class="form-control border-0 bg-light p-3" style="border-radius: 14px;" placeholder="Or enter UID manually..." data-i18n-placeholder="placeholder_uid">
-            <button class="btn btn-primary px-4" style="border-radius: 14px;" onclick="handleManualEntry()" data-i18n="btn_go">GO</button>
-        </div>
-    </div>
+
 
     <div id="skeletonLoader" style="display: none;">
         <div class="card-premium p-4">
@@ -1790,6 +1788,7 @@
         const reader = document.getElementById('reader'); 
         const torchBtn = document.getElementById('torchBtn');
         const scanFrame = document.getElementById('scanFrame');
+        scanFrame.style.display = 'flex';
         reader.style.display = 'block';
         scanFrame.classList.add('scanning');
         isScanProcessing = false;
@@ -1813,6 +1812,7 @@
             reader.style.display = 'none'; 
             torchBtn.style.display = 'none';
             scanFrame.classList.remove('scanning');
+            scanFrame.style.display = 'none';
             s.stop().then(() => {
                 isScanProcessing = false;
                 currentVideoTrack = null;
@@ -1840,9 +1840,33 @@
         }, 2000);
     });
 
+    function stopScanning() {
+        const reader = document.getElementById('reader');
+        const torchBtn = document.getElementById('torchBtn');
+        const scanFrame = document.getElementById('scanFrame');
+        reader.style.display = 'none';
+        torchBtn.style.display = 'none';
+        scanFrame.classList.remove('scanning');
+        scanFrame.style.display = 'none';
+        
+        if (scanner) {
+            scanner.stop().then(() => {
+                isScanProcessing = false;
+                currentVideoTrack = null;
+            }).catch(e => {
+                isScanProcessing = false;
+                currentVideoTrack = null;
+            });
+        }
+    }
+
     function handleManualEntry() {
         const uid = document.getElementById('manual_uid').value.trim();
-        if (uid) { document.getElementById('disp_uid').innerText = uid; fetchData(uid); }
+        if (uid) { 
+            document.getElementById('disp_uid').innerText = uid; 
+            stopScanning();
+            fetchData(uid); 
+        }
     }
 
     let chartInstance = null;
