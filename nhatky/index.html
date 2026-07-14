@@ -8,14 +8,27 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+  <link href="../css/shared.css" rel="stylesheet">
   <script src="../js/config.js" defer></script>
   <style>
     :root {
-      --brand: #0b4d5e; --brand-2: #1b5e20; --doing: #0d47a1;
-      --danger: #b3261e; --danger-dark: #7a1410; --warn: #8a5a00; --warn-bg: #ffc400; --warn-ink: #4a3800;
-      --ink: #000000; --muted: #3a3a3a; --line: #c7ccd1;
-      --surface: #ffffff; --surface-soft: #e3f2e9; --page-bg: #eef0f2;
-      --done: #1b5e20; --done-bg: #e8f5e9; --doing-bg: #e3ecfb;
+      --brand: var(--bds-primary);
+      --brand-2: var(--bds-success);
+      --doing: #0d47a1;
+      --danger: var(--bds-danger);
+      --danger-dark: var(--bds-danger-ink);
+      --warn: var(--bds-warning-ink);
+      --warn-bg: var(--bds-warning-bg);
+      --warn-ink: var(--bds-warning-ink);
+      --ink: var(--bds-on-surface);
+      --muted: var(--bds-muted);
+      --line: var(--bds-line);
+      --surface: var(--bds-surface);
+      --surface-soft: var(--bds-success-bg);
+      --page-bg: var(--bds-bg);
+      --done: var(--bds-success);
+      --done-bg: var(--bds-success-bg);
+      --doing-bg: var(--bds-primary-light);
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; }
@@ -2314,6 +2327,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/api.js"></script>
   <script>
     if (!window.bootstrap) {
       class BootstrapLite {
@@ -2777,13 +2791,12 @@
     }
 
     async function fetchPlansFromBackend() {
-      const sync = getSync();
-      if (!sync.url) return null;
       try {
-        const response = await fetch(`${sync.url}?action=getPlans&user=${encodeURIComponent(currentUser())}&token=${encodeURIComponent(sync.token)}`, { cache: "no-cache", signal: AbortSignal.timeout(10000) });
-        const data = await response.json();
+        const data = await bdsApiFetch('getPlans', { user: currentUser() }, { timeout: 15000, retries: 2 });
         if (data.status === "success" && Array.isArray(data.plans)) return data.plans;
-      } catch (error) { /* backend lỗi → dùng cache/plan.json */ }
+      } catch (error) {
+        console.error("Lỗi fetchPlansFromBackend:", error);
+      }
       return null;
     }
 
@@ -2791,6 +2804,8 @@
     // fallback khi không gọi được backend
     async function loadPlans(force) {
       const cached = localStorage.getItem(STORAGE_KEYS.plans);
+      const listBody = document.getElementById("taskListBody");
+      
       if (cached && !force) {
         // Hiện cache ngay cho nhanh, đồng thời lấy bản mới từ Sheets phía sau
         plans = JSON.parse(cached);
@@ -2799,20 +2814,35 @@
         return;
       }
 
-      const fresh = await fetchPlansFromBackend();
-      if (fresh) {
-        plans = mergePendingPlans(fresh);
-        localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
-        updateSyncStatus();
-        return;
+      if (listBody && (force || !cached)) {
+        bdsShowLoading(listBody, { type: 'skeleton', count: 3, message: 'Đang tải kế hoạch...' });
       }
 
+      try {
+        const fresh = await fetchPlansFromBackend();
+        if (fresh) {
+          plans = mergePendingPlans(fresh);
+          localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
+          updateSyncStatus();
+          if (listBody) bdsHideLoading(listBody);
+          return;
+        }
+      } catch (e) {
+        console.error("Lỗi khi loadPlans:", e);
+      }
+
+      // Fallback sang local file plan.json
       try {
         const response = await fetch("plan.json", { cache: "no-cache" });
         if (!response.ok) throw new Error("Cannot load plan.json");
         plans = await response.json();
+        if (listBody) bdsHideLoading(listBody);
       } catch (error) {
         plans = fallbackPlans;
+        if (listBody) {
+          bdsHideLoading(listBody);
+          bdsShowError(listBody, 'Không thể kết nối với server. Đang sử dụng dữ liệu mặc định.', () => loadPlans(true), { type: 'card' });
+        }
       }
 
       localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
@@ -2843,36 +2873,29 @@
     }
 
     async function postPlanAction(action, payload) {
-      const sync = getSync();
-      if (!sync.url) throw new Error("Chưa cấu hình URL đồng bộ");
-      const response = await fetch(sync.url, {
-        method: "POST",
-        signal: AbortSignal.timeout(15000),
-        body: JSON.stringify({ action: action, token: sync.token, payload: payload })
-      });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok || data.status !== "success") {
-        throw new Error(data.message || "Backend từ chối yêu cầu");
+      try {
+        const data = await bdsApiPost(action, payload, { timeout: 15000, retries: 2 });
+        return data;
+      } catch (error) {
+        throw new Error(error.message || "Không thể thực hiện tác vụ với backend");
       }
-      return data;
     }
 
     // Danh sách nhân viên cho dropdown "Người thực hiện": lấy từ sheet Staff
     // (action=getStaff), cache lại; backend lỗi thì dùng cache/tên đã gặp
     async function loadStaff() {
       staffList = JSON.parse(localStorage.getItem(STORAGE_KEYS.staff) || "[]");
-      const sync = getSync();
-      if (!sync.url) return;
       try {
-        const response = await fetch(`${sync.url}?action=getStaff&token=${encodeURIComponent(sync.token)}`, { cache: "no-cache", signal: AbortSignal.timeout(10000) });
-        const data = await response.json();
+        const data = await bdsApiFetch('getStaff', {}, { timeout: 10000, retries: 2 });
         if (data.status === "success" && Array.isArray(data.staff)) {
           staffList = data.staff.map(person => String(person.name || "").trim()).filter(Boolean).sort();
           localStorage.setItem(STORAGE_KEYS.staff, JSON.stringify(staffList));
           if (document.getElementById("taskAssigneeSelect")) refreshTaskAssigneeEditor();
           if (document.getElementById("planPersonSelect")) renderPlanPersonSelect();
         }
-      } catch (error) { /* giữ cache cũ */ }
+      } catch (error) {
+        console.warn("Lỗi loadStaff, sử dụng dữ liệu cục bộ:", error);
+      }
     }
 
     // Nguồn tên cho dropdown: nhân viên chính thức + tên từng xuất hiện
@@ -4122,28 +4145,16 @@
     }
 
     async function trySync(log) {
-      const settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.settings) || "{}");
-      const syncUrl = settings.url || DEFAULT_SYNC.url;
-      const syncToken = settings.token || DEFAULT_SYNC.token;
-      if (!syncUrl) return;
-
       try {
-        const response = await fetch(syncUrl, {
-          method: "POST",
-          signal: AbortSignal.timeout(12000),
-          body: JSON.stringify({
-            action: "createWorkLog",
-            token: syncToken,
-            payload: log
-          })
-        });
-        const data = await response.json().catch(() => ({}));
-        if (response.ok && (data.status === "success" || data.ok === true)) {
+        log.syncStatus = "syncing";
+        const data = await bdsApiPost('createWorkLog', { payload: log }, { timeout: 12000, retries: 2 });
+        if (data.status === "success" || data.ok === true) {
           log.syncStatus = "synced";
         } else {
           log.syncStatus = "pending";
         }
       } catch (error) {
+        console.error("Lỗi trySync:", error);
         log.syncStatus = "pending";
       }
     }

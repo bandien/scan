@@ -6,20 +6,22 @@
     <title>CMMS Water Scan | BanDienScan</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link href="css/shared.css" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --text-main: #0f172a;
-            --text-sub: #475569;
-            --border-color: #e2e8f0;
+            --bg-color: var(--bds-bg);
+            --card-bg: var(--bds-surface);
+            --text-main: var(--bds-on-surface);
+            --text-sub: var(--bds-muted);
+            --border-color: var(--bds-line);
             --accent-green: #059669;
             --accent-red: #dc2626;
         }
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: var(--bds-font);
             min-height: 100vh;
             padding-bottom: 40px;
         }
@@ -82,22 +84,21 @@
 <body>
 
 <div class="app-shell">
-    <!-- Header Bar -->
-    <div class="header-bar">
-        <div class="d-flex align-items-center gap-2.5">
-            <div class="bg-primary text-white rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; font-size: 1.2rem;">
-                <i class="bi bi-water"></i>
+    <header class="bds-topbar bds-topbar-mobile">
+        <div class="bds-topbar-inner">
+            <div class="bds-topbar-left">
+                <div class="bds-brand-mark"><i class="bi bi-water"></i></div>
+                <div>
+                    <div class="bds-brand-label">BanDienScan x CMMS</div>
+                    <div class="bds-topbar-title">Giám Sát Bơm 1-Touch</div>
+                </div>
             </div>
-            <div>
-                <div class="fw-bold text-uppercase text-primary" style="font-size: 0.7rem; letter-spacing: 1px;">BanDienScan x CMMS</div>
-                <div class="fw-black text-dark" style="font-size: 0.95rem;">Giám Sát Bơm 1-Touch</div>
+            <div class="bds-topbar-right">
+                <button class="bds-btn-icon" type="button" id="btnFontScale" title="Phóng to chữ"><span class="fw-bold" id="fontScaleLabel">A</span></button>
+                <button class="bds-btn-icon" onclick="loadPumpData()"><i class="bi bi-arrow-clockwise"></i></button>
             </div>
         </div>
-        <div class="d-flex align-items-center gap-2">
-            <button class="btn btn-light border-2 rounded-circle shadow-sm" type="button" id="btnFontScale" title="Phóng to chữ (bấm để đổi cỡ)" style="width: 40px; height: 40px; padding: 0;"><span class="fw-bold" id="fontScaleLabel">A</span></button>
-            <button class="btn btn-light border-2 rounded-circle shadow-sm" onclick="loadPumpData()"><i class="bi bi-arrow-clockwise text-dark fw-bold"></i></button>
-        </div>
-    </div>
+    </header>
 
     <!-- Alert Box -->
     <div id="alertBox"></div>
