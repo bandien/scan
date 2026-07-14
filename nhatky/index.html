@@ -1004,7 +1004,7 @@
     }
 
     /* ===== Stitch Scan Mobile Design System: dark industrial pass ===== */
-    :root {
+    .dark-mode, [data-bs-theme="dark"] {
       --brand: #0e6efd;
       --brand-2: #b1c5ff;
       --accent: #cf4b00;
@@ -1030,14 +1030,14 @@
 
     html,
     body {
-      background: #10131b;
+      background: var(--page-bg);
       color: var(--ink);
       font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       font-size: 16px;
       letter-spacing: 0;
     }
 
-    body {
+    .dark-mode body, [data-bs-theme="dark"] body {
       background:
         radial-gradient(circle at 100% -10%, rgba(177, 197, 255, .10), transparent 28%),
         linear-gradient(180deg, #10131b 0%, #0b0e16 100%);
