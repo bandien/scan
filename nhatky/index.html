@@ -2530,12 +2530,8 @@
     }
 
     function topLevelHeaderHtml(screen) {
-      let subtitle = "Theo dõi kết quả công việc";
-      if (screen === "loghistory") {
-        subtitle = showTeamLogs ? "Nhật ký của cả tổ" : "Nhật ký cá nhân của bạn";
-      }
       const meta = {
-        loghistory: { icon: "bi-journal-text", title: "Nhật ký đã ghi", subtitle: subtitle },
+        loghistory: { icon: "bi-journal-text", title: "Nhật ký đã ghi", subtitle: "Theo dõi kết quả công việc" },
         stats: { icon: "bi-bar-chart-fill", title: "Báo cáo", subtitle: "Tổng hợp công việc của tổ" },
         personal: { icon: "bi-person-fill", title: "Cá nhân", subtitle: "Tài khoản và tùy chọn" }
       }[screen];
@@ -4373,12 +4369,15 @@
         : logs;
 
       // Filter by employee if showTeamLogs is false
-      const currentEmp = getEmployeeName().toLowerCase().trim();
       if (!showTeamLogs) {
+        const currentEmp = currentUser();
+        const currentFull = currentFullName();
+        const cur1 = normalizePerson(currentEmp);
+        const cur2 = normalizePerson(currentFull);
         scopedLogs = scopedLogs.filter(log => {
-          const emp = (log.employee || "").toLowerCase().trim();
-          const rec = (log.recordedBy || "").toLowerCase().trim();
-          return emp === currentEmp || rec === currentEmp;
+          const emp = normalizePerson(log.employee);
+          const rec = normalizePerson(log.recordedBy);
+          return (cur1 && (emp === cur1 || rec === cur1)) || (cur2 && (emp === cur2 || rec === cur2));
         });
       }
 
