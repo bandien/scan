@@ -58,6 +58,7 @@ function doGet(e) {
       case 'migrateAccounts':   return handleMigrateAccountsEndpoint(); // Migration for Nhatky accounts
       case 'syncERPNext':       return handleSyncERPNext(e);
       case 'testERPNext':       return handleTestERPNext(e);
+      case 'exportAllData':     return handleExportAllData(e);        // Export toan bo cho ERPNext sync
       default:                  return handleGetDevice(e);          // UID lookup
     }
   } catch (err) {

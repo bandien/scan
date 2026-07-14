@@ -6,13 +6,15 @@
     <title>Server Status Monitor | BanDienScan</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link href="css/shared.css" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --text-main: #0f172a;
-            --text-sub: #475569;
-            --border-color: #e2e8f0;
+            --bg-color: var(--bds-bg);
+            --card-bg: var(--bds-surface);
+            --text-main: var(--bds-on-surface);
+            --text-sub: var(--bds-muted);
+            --border-color: var(--bds-line);
             --accent-green: #10b981;
             --accent-red: #ef4444;
             --accent-orange: #f97316;
@@ -27,7 +29,7 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: var(--bds-font);
             min-height: 100vh;
             transition: all 0.3s ease;
         }
@@ -99,26 +101,20 @@
 </head>
 <body>
 
-    <nav class="navbar navbar-custom">
-        <div class="container-fluid d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center gap-2">
-                <div class="bg-primary text-white rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                    <i class="bi bi-cpu-fill fs-5"></i>
-                </div>
+    <nav class="bds-topbar">
+        <div class="bds-topbar-inner">
+            <div class="bds-topbar-left">
+                <div class="bds-brand-mark"><i class="bi bi-cpu-fill fs-5"></i></div>
                 <div>
-                    <span class="fw-bold text-uppercase text-primary block" style="font-size: 0.7rem; letter-spacing: 1px;">BanDienScan Tools</span>
-                    <h5 class="m-0 fw-black text-light-dark" style="font-size: 1.1rem; line-height: 1;">Giám sát Trạng thái Server</h5>
+                    <div class="bds-brand-label">BanDienScan Tools</div>
+                    <h5 class="bds-topbar-title">Giám sát Trạng thái Server</h5>
                 </div>
             </div>
-            <div class="d-flex gap-2">
-                <a href="./" class="btn btn-outline-primary btn-custom d-flex align-items-center gap-1">
-                    <i class="bi bi-house-door-fill"></i> Trang chủ
-                </a>
-                <button class="btn btn-outline-secondary btn-custom" onclick="toggleTheme()" id="themeBtn">
-                    <i class="bi bi-moon-fill"></i>
-                </button>
-                <button class="btn btn-primary btn-custom" onclick="checkAllServers()">
-                    <i class="bi bi-arrow-clockwise me-1"></i> Kiểm tra tất cả
+            <div class="bds-topbar-right">
+                <a href="./" class="bds-btn-home"><i class="bi bi-house-door-fill"></i> Trang chủ</a>
+                <button class="bds-btn-icon" onclick="toggleTheme()" id="themeBtn"><i class="bi bi-moon-fill"></i></button>
+                <button class="bds-btn bds-btn-primary bds-btn-sm" onclick="checkAllServers()">
+                    <i class="bi bi-arrow-clockwise"></i> Kiểm tra
                 </button>
             </div>
         </div>

@@ -7,6 +7,7 @@
   <meta name="description" content="Bảng phân ca tuần cho tổ cơ điện sân golf.">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link href="../css/shared.css" rel="stylesheet">
   <style>
     :root {
       --line: #111;
@@ -230,7 +231,7 @@
 
     @media print {
       body { background: #fff; }
-      .appbar, .toolbar { display: none !important; }
+      .bds-topbar, .toolbar { display: none !important; }
       .shell { max-width: none; padding: 0; }
       .sheet { box-shadow: none; border: 1px solid #000; overflow: visible; }
       table.roster { width: 100%; font-size: 12px; }
@@ -240,17 +241,18 @@
   </style>
 </head>
 <body>
-  <header class="appbar">
-    <div class="shell py-3">
-      <div class="d-flex justify-content-between align-items-center gap-2">
+  <header class="bds-topbar">
+    <div class="bds-topbar-inner" style="max-width:1280px;">
+      <div class="bds-topbar-left">
+        <div class="bds-brand-mark"><i class="bi bi-calendar-range"></i></div>
         <div>
-          <div class="text-primary fw-bold text-uppercase" style="font-size:.72rem;">BanDienScan</div>
-          <h1 class="h5 fw-bold m-0">Quản lý Ca trực - Bảng phân ca tuần</h1>
+          <div class="bds-brand-label">BanDienScan</div>
+          <h1 class="bds-topbar-title">Bảng phân ca tuần tổ cơ điện</h1>
         </div>
-        <div class="d-flex align-items-center gap-2">
-          <button class="btn btn-outline-secondary btn-sm" type="button" id="btnFontScale" title="Phóng to chữ (bấm để đổi cỡ)"><span class="fw-bold" id="fontScaleLabel">A</span></button>
-          <a class="btn btn-outline-primary btn-sm" href="../index.html"><i class="bi bi-house me-1"></i>Trang chính</a>
-        </div>
+      </div>
+      <div class="bds-topbar-right">
+        <button class="bds-btn-icon" type="button" id="btnFontScale" title="Phóng to chữ (bấm để đổi cỡ)"><span class="fw-bold" id="fontScaleLabel">A</span></button>
+        <a class="bds-btn-home" href="../index.html"><i class="bi bi-house"></i> Trang chính</a>
       </div>
     </div>
   </header>

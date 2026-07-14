@@ -6,38 +6,38 @@
 
     <title>BanDienScan | Quản lý Ban điện thông minh</title>
 
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Public+Sans:wght@600&display=swap" rel="stylesheet">
-
+    <link href="css/shared.css" rel="stylesheet">
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <script src="https://unpkg.com/html5-qrcode" defer></script>
     <script src="js/sso.js"></script>
+    <script src="js/api.js"></script>
 
     <style>
         /* ===== Design tokens: "Scan Industrial Utility" (design-system/stitch_scan_mobile_design_system) ===== */
         :root {
-            --siu-bg: #fdfbff;
-            --siu-surface-low: #f3f3f7;
-            --siu-surface: #ffffff;
-            --siu-surface-high: #eeeef3;
-            --siu-surface-highest: #e2e2e6;
-            --siu-on-surface: #1a1c1e;
-            --siu-on-surface-variant: #44474e;
-            --siu-outline: #74777f;
-            --siu-outline-variant: #c2c6d8;
-            --siu-primary: #0057ce;
-            --siu-primary-container: #0e6efd;
-            --siu-secondary-container: #dae2ff;
-            --siu-on-secondary-container: #001d35;
-            --siu-success: #006d3e;
-            --siu-error-container: #ba1a1a;
-            --siu-on-error-container: #ffffff;
-            --siu-tertiary-container: #cf4b00;
-            --siu-tertiary: #7f2b00;
-            --r-sm: 4px; --r-md: 8px; --r-lg: 12px; --r-xl: 24px;
+            --siu-bg: var(--bds-bg);
+            --siu-surface-low: var(--bds-surface-low);
+            --siu-surface: var(--bds-surface);
+            --siu-surface-high: var(--bds-surface-high);
+            --siu-surface-highest: var(--bds-surface-highest);
+            --siu-on-surface: var(--bds-on-surface);
+            --siu-on-surface-variant: var(--bds-on-surface-variant);
+            --siu-outline: var(--bds-outline);
+            --siu-outline-variant: var(--bds-outline-variant);
+            --siu-primary: var(--bds-primary-dark);
+            --siu-primary-container: var(--bds-primary);
+            --siu-secondary-container: var(--bds-primary-light);
+            --siu-on-secondary-container: var(--bds-on-surface);
+            --siu-success: var(--bds-success);
+            --siu-error-container: var(--bds-danger);
+            --siu-on-error-container: var(--bds-on-primary);
+            --siu-tertiary-container: var(--bds-warning-bg);
+            --siu-tertiary: var(--bds-warning-ink);
+            --r-sm: var(--bds-r-sm); --r-md: var(--bds-r-md); --r-lg: var(--bds-r-lg); --r-xl: var(--bds-r-2xl);
             /* Alias tên biến cũ — rule nào còn sót vẫn ra màu dark hợp lệ */
             --glass-bg: var(--siu-surface);
             --primary-grad: var(--siu-primary-container);
@@ -51,7 +51,7 @@
 
         body {
             background: var(--siu-bg);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            font-family: var(--bds-font);
             color: var(--siu-on-surface);
             min-height: 100vh;
         }
