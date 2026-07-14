@@ -323,6 +323,19 @@
         <input type="text" id="usernameInput" class="form-control mb-3" style="border-radius: 12px; padding: 14px 18px;" placeholder="Tên đăng nhập">
         <input type="password" id="passwordInput" class="form-control mb-2" style="border-radius: 12px; padding: 14px 18px;" placeholder="PIN">
         
+        <!-- Suggestions -->
+        <div class="mb-3 text-start mt-2">
+            <label class="text-muted small mb-1 d-block" style="font-weight: 600;">Gợi ý tài khoản:</label>
+            <div class="d-flex flex-wrap gap-1">
+                <button type="button" class="btn btn-sm py-1 px-2" style="font-size: 11px; border-radius: 8px; background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant); color: var(--siu-on-surface);" onclick="fillLogin('thangnq', '12345678')">thangnq</button>
+                <button type="button" class="btn btn-sm py-1 px-2" style="font-size: 11px; border-radius: 8px; background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant); color: var(--siu-on-surface);" onclick="fillLogin('haudv', '12345678')">haudv</button>
+                <button type="button" class="btn btn-sm py-1 px-2" style="font-size: 11px; border-radius: 8px; background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant); color: var(--siu-on-surface);" onclick="fillLogin('hoanghv', '12345678')">hoanghv</button>
+                <button type="button" class="btn btn-sm py-1 px-2" style="font-size: 11px; border-radius: 8px; background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant); color: var(--siu-on-surface);" onclick="fillLogin('phongnd', '12345678')">phongnd</button>
+                <button type="button" class="btn btn-sm py-1 px-2" style="font-size: 11px; border-radius: 8px; background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant); color: var(--siu-on-surface);" onclick="fillLogin('tungnv', '12345678')">tungnv</button>
+                <button type="button" class="btn btn-sm py-1 px-2" style="font-size: 11px; border-radius: 8px; background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant); color: var(--siu-on-surface);" onclick="fillLogin('thuynd', '12345678')">thuynd</button>
+            </div>
+        </div>
+
         <div class="d-flex justify-content-between align-items-center mb-4 ms-1">
             <div class="form-check text-start mb-0">
                 <input class="form-check-input" type="checkbox" id="rememberMe" checked>
@@ -2949,9 +2962,13 @@
             if (result.status === "success") {
                 console.log(`[DEBUG] Login successful. Role: ${result.user.role}`);
                 
+                // Add loginAt timestamp
+                result.user.loginAt = Date.now();
+
                 // Unified SSO for nhatky sub-app
                 localStorage.setItem('bandien_nhatky_employee', result.user.username || result.user.name);
                 localStorage.setItem('bandien_nhatky_teamgroup', result.user.teams || "");
+                localStorage.setItem('bandien_nhatky_login_at', String(Date.now()));
 
                 if (document.getElementById('rememberMe').checked) {
                     localStorage.setItem('currentUser', JSON.stringify(result.user));
@@ -3003,10 +3020,37 @@
         }
     }
 
+    window.fillLogin = function(user, pin) {
+        document.getElementById('usernameInput').value = user;
+        document.getElementById('passwordInput').value = pin;
+    };
+
     window.onload = () => {
         const userStr = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
         if (userStr) {
-            updateUI(JSON.parse(userStr));
+            let parsed = null;
+            try { parsed = JSON.parse(userStr); } catch(e) {}
+            if (parsed && parsed.loginAt) {
+                const now = Date.now();
+                const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+                if (now - parsed.loginAt > thirtyDaysMs) {
+                    console.log("[DEBUG] Session expired (>30 days). Logging out.");
+                    if (window.BD_SSO) {
+                        BD_SSO.logout();
+                    } else {
+                        localStorage.removeItem('currentUser');
+                        sessionStorage.removeItem('currentUser');
+                        localStorage.removeItem('savedUsername');
+                        localStorage.removeItem('savedPassword');
+                        localStorage.removeItem('bandien_nhatky_employee');
+                        localStorage.removeItem('bandien_nhatky_teamgroup');
+                        localStorage.removeItem('bandien_nhatky_login_at');
+                    }
+                    location.reload();
+                    return;
+                }
+            }
+            updateUI(parsed);
             renderScanHistory();
         } else {
             const savedUsername = localStorage.getItem('savedUsername');
