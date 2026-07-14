@@ -1998,13 +1998,19 @@
             <div class="nav-icon-wrapper">
                 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">assignment</span>
             </div>
-            <span>Công việc</span>
+            <span>Kế hoạch</span>
         </button>
         <button class="bottom-nav-item" type="button" data-bottom-screen="loghistory">
             <div class="nav-icon-wrapper">
                 <span class="material-symbols-outlined">history_edu</span>
             </div>
             <span>Nhật ký</span>
+        </button>
+        <button class="bottom-nav-item" type="button" id="btnNavScan">
+            <div class="nav-icon-wrapper">
+                <span class="material-symbols-outlined">qr_code_scanner</span>
+            </div>
+            <span>Quét QR</span>
         </button>
         <button class="bottom-nav-item" type="button" data-bottom-screen="stats">
             <div class="nav-icon-wrapper">
@@ -2671,9 +2677,14 @@
       await loadPlans();
       loadLogs();
       bindEvents();
+      let startScreen = "tasklist";
+      const hash = window.location.hash.substring(1);
+      if (["tasklist", "loghistory", "stats", "personal"].includes(hash)) {
+        startScreen = hash;
+      }
       const initialState = REQUESTED_PLAN_ID && plans.some(plan => plan.id === REQUESTED_PLAN_ID)
         ? { screen: "taskdetail", params: { id: REQUESTED_PLAN_ID } }
-        : { screen: "tasklist", params: {} };
+        : { screen: startScreen, params: {} };
       history.replaceState(initialState, "");
       window.addEventListener("popstate", event => {
         const state = event.state || { screen: "tasklist", params: {} };
@@ -2696,10 +2707,16 @@
 
       document.getElementById("mainBottomNav").addEventListener("click", event => {
         const item = event.target.closest("[data-bottom-screen]");
-        if (!item) return;
-        const target = item.dataset.bottomScreen;
-        if (currentScreen === target) return;
-        navigateTo(target, {});
+        if (item) {
+          const target = item.dataset.bottomScreen;
+          if (currentScreen === target) return;
+          navigateTo(target, {});
+          return;
+        }
+        const scanItem = event.target.closest("#btnNavScan");
+        if (scanItem) {
+          window.location.href = "../index.html";
+        }
       });
 
       ["filterDate", "filterTeam", "filterPerson", "searchBox"].forEach(id => {
