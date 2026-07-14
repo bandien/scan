@@ -9,6 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Public+Sans:wght@600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
     <link href="css/shared.css" rel="stylesheet">
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
@@ -279,8 +280,9 @@
         .bottom-nav-item:active {
             transform: scale(0.97);
         }
-        .bottom-nav-item i {
-            font-size: 20px;
+        .bottom-nav-item .material-symbols-outlined {
+            font-size: 24px;
+            line-height: 1;
             margin-bottom: 2px;
             display: block;
         }
@@ -291,13 +293,13 @@
             background-color: rgba(0, 87, 206, .1);
             color: var(--siu-primary);
             border-radius: 12px;
-            padding: 4px 16px;
+            padding: 6px 16px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
         }
         .bottom-nav-item:not(.active) .nav-icon-wrapper {
-            padding: 4px 16px;
+            padding: 6px 16px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -1612,34 +1614,36 @@
 
     <!-- Unified Bottom Navigation Bar -->
     <nav class="bottom-nav-bar" id="mainBottomNav" style="display: none;">
-        <!-- Tổng quan -->
-        <a class="bottom-nav-item" href="nhatky/baocao_stitch.html">
+        <button class="bottom-nav-item" type="button" onclick="window.location.href='nhatky/index.html#tasklist'">
             <div class="nav-icon-wrapper">
-                <i class="bi bi-grid-fill"></i>
+                <span class="material-symbols-outlined">assignment</span>
             </div>
-            <span>Tổng quan</span>
-        </a>
-        <!-- Công việc -->
-        <a class="bottom-nav-item" href="nhatky/">
+            <span>Kế hoạch</span>
+        </button>
+        <button class="bottom-nav-item" type="button" onclick="window.location.href='nhatky/index.html#loghistory'">
             <div class="nav-icon-wrapper">
-                <i class="bi bi-journal-check"></i>
+                <span class="material-symbols-outlined">history_edu</span>
             </div>
-            <span>Công việc</span>
-        </a>
-        <!-- Tìm kiếm (Active) -->
-        <a class="bottom-nav-item active" href="index.html">
+            <span>Nhật ký</span>
+        </button>
+        <button class="bottom-nav-item active" type="button">
             <div class="nav-icon-wrapper">
-                <i class="bi bi-qr-code-scan"></i>
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">qr_code_scanner</span>
             </div>
-            <span>Tìm kiếm</span>
-        </a>
-        <!-- Nhiều hơn -->
-        <a class="bottom-nav-item" href="nhatky/caidat_stitch.html">
+            <span>Quét QR</span>
+        </button>
+        <button class="bottom-nav-item" type="button" onclick="window.location.href='nhatky/index.html#stats'">
             <div class="nav-icon-wrapper">
-                <i class="bi bi-three-dots"></i>
+                <span class="material-symbols-outlined">analytics</span>
             </div>
-            <span>Nhiều hơn</span>
-        </a>
+            <span>Báo cáo</span>
+        </button>
+        <button class="bottom-nav-item" type="button" onclick="window.location.href='nhatky/index.html#personal'">
+            <div class="nav-icon-wrapper">
+                <span class="material-symbols-outlined">person</span>
+            </div>
+            <span>Cá nhân</span>
+        </button>
     </nav>
 </div>
 
