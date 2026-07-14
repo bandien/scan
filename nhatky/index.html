@@ -2404,6 +2404,7 @@
     let plans = [];
     let logs = [];
     let showAllLogs = false;
+    let showTeamLogs = false;
     let toast;
     let planModal;
     let userModal;
@@ -2485,6 +2486,12 @@
       navigateTo("taskdetail", { id: id });
     }
 
+    window.setLogHistoryScope = function(showTeam) {
+      showTeamLogs = showTeam;
+      renderHeader(currentScreen, currentParams);
+      renderLogHistory(currentParams.planId);
+    };
+
     function weekdayNameVn(iso) {
       const d = new Date((iso || today) + "T00:00:00");
       return WEEK_DAY_NAMES[(d.getDay() + 6) % 7];
@@ -2523,8 +2530,12 @@
     }
 
     function topLevelHeaderHtml(screen) {
+      let subtitle = "Theo dõi kết quả công việc";
+      if (screen === "loghistory") {
+        subtitle = showTeamLogs ? "Nhật ký của cả tổ" : "Nhật ký cá nhân của bạn";
+      }
       const meta = {
-        loghistory: { icon: "bi-journal-text", title: "Nhật ký đã ghi", subtitle: "Theo dõi kết quả công việc" },
+        loghistory: { icon: "bi-journal-text", title: "Nhật ký đã ghi", subtitle: subtitle },
         stats: { icon: "bi-bar-chart-fill", title: "Báo cáo", subtitle: "Tổng hợp công việc của tổ" },
         personal: { icon: "bi-person-fill", title: "Cá nhân", subtitle: "Tài khoản và tùy chọn" }
       }[screen];
@@ -4357,12 +4368,39 @@
     function renderLogHistory(planId) {
       const container = document.getElementById("screen-loghistory");
       const scopedPlan = planId ? plans.find(p => p.id === planId) : null;
-      const scopedLogs = scopedPlan
+      let scopedLogs = scopedPlan
         ? logs.filter(log => isWorkLog(log) && logBelongsToPlan(log, scopedPlan))
         : logs;
 
+      // Filter by employee if showTeamLogs is false
+      const currentEmp = getEmployeeName().toLowerCase().trim();
+      if (!showTeamLogs) {
+        scopedLogs = scopedLogs.filter(log => {
+          const emp = (log.employee || "").toLowerCase().trim();
+          const rec = (log.recordedBy || "").toLowerCase().trim();
+          return emp === currentEmp || rec === currentEmp;
+        });
+      }
+
+      const scopeSelectorHtml = `
+        <div class="mb-3 d-flex gap-2 justify-content-center pt-2">
+          <button class="btn btn-sm ${!showTeamLogs ? 'btn-primary' : 'btn-outline-primary'} rounded-pill px-3 fw-bold" onclick="setLogHistoryScope(false)">
+            <i class="bi bi-person-fill me-1"></i>Nhật ký của tôi
+          </button>
+          <button class="btn btn-sm ${showTeamLogs ? 'btn-primary' : 'btn-outline-primary'} rounded-pill px-3 fw-bold" onclick="setLogHistoryScope(true)">
+            <i class="bi bi-people-fill me-1"></i>Nhật ký của tổ
+          </button>
+        </div>
+      `;
+
       if (scopedLogs.length === 0) {
-        container.innerHTML = `<div class="scroll"><div class="empty-state">Chưa có nhật ký gần đây.</div></div>${logHistoryActionBar(planId)}`;
+        container.innerHTML = `
+          <div class="scroll">
+            ${scopeSelectorHtml}
+            <div class="empty-state">Chưa có nhật ký gần đây.</div>
+          </div>
+          ${logHistoryActionBar(planId)}
+        `;
         return;
       }
 
@@ -4377,6 +4415,7 @@
 
       container.innerHTML = `
         <div class="scroll">
+          ${scopeSelectorHtml}
           ${attentionHtml}
           ${visibleLogs.map(renderLogCard).join("")}
           ${normal.length > RECENT_LOG_LIMIT ? `<button class="btn-outline-more" id="btnToggleLogs" type="button">${showAllLogs ? "Thu gọn" : `Xem thêm (${normal.length - RECENT_LOG_LIMIT})`}</button>` : ""}
