@@ -40,7 +40,29 @@
     var raw = localStorage.getItem(KEYS.user) || sessionStorage.getItem(KEYS.user);
     if (raw) {
       var parsed = safeParse(raw, null);
-      if (parsed) return parsed;
+      if (parsed) {
+        if (parsed.loginAt) {
+          var now = Date.now();
+          var thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+          if (now - parsed.loginAt > thirtyDaysMs) {
+            logout();
+            return null;
+          }
+        }
+        return parsed;
+      }
+    }
+    var loginAtStr = localStorage.getItem('bandien_nhatky_login_at');
+    if (loginAtStr) {
+      var loginAt = parseInt(loginAtStr, 10);
+      if (!isNaN(loginAt)) {
+        var now = Date.now();
+        var thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+        if (now - loginAt > thirtyDaysMs) {
+          logout();
+          return null;
+        }
+      }
     }
     var name = localStorage.getItem(KEYS.nhatkyEmployee);
     if (name) return { username: name, name: name, teams: localStorage.getItem(KEYS.nhatkyTeamGroup) || "" };

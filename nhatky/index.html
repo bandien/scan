@@ -2106,7 +2106,7 @@
     <div class="modal-dialog modal-dialog-centered modal-sm">
       <div class="modal-content">
         <div class="modal-header">
-          <h3 class="modal-title h5"><i class="bi bi-person-circle text-primary me-2"></i>Đăng nhập</h3>
+          <h3 class="modal-title h5"><i class="bi bi-person-circle text-primary me-2"></i>Đăng nhập - Nhật ký công việc</h3>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
         </div>
         <div class="modal-body">
@@ -2121,7 +2121,21 @@
 
           <label class="form-label" for="loginPassword">PIN</label>
           <input class="form-control" id="loginPassword" type="password" placeholder="PIN tài khoản" autocomplete="current-password">
-          <div class="small text-secondary mt-2" id="loginHint">Nhập PIN trong bảng Users để đăng nhập.</div>
+          
+          <!-- Suggestions -->
+          <div class="mb-3 mt-3 text-start">
+            <label class="text-muted small mb-1 d-block" style="font-weight: 600;">Tài khoản nhân viên (Xem công việc):</label>
+            <div class="d-flex flex-wrap gap-1">
+              <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 11px; border-radius: 6px; color: var(--siu-on-surface); border-color: var(--siu-outline-variant); background: var(--siu-surface-high);" onclick="window.fillNhatKyLogin('thangnq', '12345678')">thangnq</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 11px; border-radius: 6px; color: var(--siu-on-surface); border-color: var(--siu-outline-variant); background: var(--siu-surface-high);" onclick="window.fillNhatKyLogin('haudv', '12345678')">haudv</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 11px; border-radius: 6px; color: var(--siu-on-surface); border-color: var(--siu-outline-variant); background: var(--siu-surface-high);" onclick="window.fillNhatKyLogin('hoanghv', '12345678')">hoanghv</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 11px; border-radius: 6px; color: var(--siu-on-surface); border-color: var(--siu-outline-variant); background: var(--siu-surface-high);" onclick="window.fillNhatKyLogin('phongnd', '12345678')">phongnd</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 11px; border-radius: 6px; color: var(--siu-on-surface); border-color: var(--siu-outline-variant); background: var(--siu-surface-high);" onclick="window.fillNhatKyLogin('tungnv', '12345678')">tungnv</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 11px; border-radius: 6px; color: var(--siu-on-surface); border-color: var(--siu-outline-variant); background: var(--siu-surface-high);" onclick="window.fillNhatKyLogin('thuynd', '12345678')">thuynd</button>
+            </div>
+          </div>
+
+          <div class="small text-secondary mt-2" id="loginHint">Xem kế hoạch & nhật ký công việc của nhân viên Ban Điện. Phiên được lưu an toàn trong 30 ngày.</div>
           <div class="small text-danger mt-1 d-none" id="loginError"></div>
         </div>
         <div class="modal-footer flex-column align-items-stretch">
@@ -2588,7 +2602,54 @@
       }
     ];
 
+    window.fillNhatKyLogin = function(user, pin) {
+      document.getElementById("loginName").value = user;
+      document.getElementById("loginPassword").value = pin;
+    };
+
+    function checkSessionExpiry() {
+      const currentUserStr = localStorage.getItem("currentUser");
+      let expired = false;
+      if (currentUserStr) {
+        try {
+          const parsed = JSON.parse(currentUserStr);
+          if (parsed && parsed.loginAt) {
+            const now = Date.now();
+            const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+            if (now - parsed.loginAt > thirtyDaysMs) {
+              expired = true;
+            }
+          }
+        } catch (_) {}
+      }
+
+      const loginAtStr = localStorage.getItem("bandien_nhatky_login_at");
+      if (loginAtStr) {
+        const loginAt = parseInt(loginAtStr, 10);
+        if (!isNaN(loginAt)) {
+          const now = Date.now();
+          const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+          if (now - loginAt > thirtyDaysMs) {
+            expired = true;
+          }
+        }
+      }
+
+      if (expired) {
+        console.log("[DEBUG] Session expired. Clearing credentials.");
+        localStorage.removeItem(STORAGE_KEYS.employee);
+        localStorage.removeItem(STORAGE_KEYS.teams);
+        localStorage.removeItem(STORAGE_KEYS.authToken);
+        localStorage.removeItem("currentUser");
+        sessionStorage.removeItem("currentUser");
+        localStorage.removeItem("savedUsername");
+        localStorage.removeItem("savedPassword");
+        localStorage.removeItem("bandien_nhatky_login_at");
+      }
+    }
+
     document.addEventListener("DOMContentLoaded", async () => {
+      checkSessionExpiry();
       toast = new bootstrap.Toast(document.getElementById("toast"), { delay: 2200 });
       planModal = new bootstrap.Modal(document.getElementById("planModal"));
       userModal = new bootstrap.Modal(document.getElementById("userModal"));
@@ -3279,7 +3340,7 @@
         ? "Chưa có tài khoản? Tạo tài khoản mới"
         : "Đã có tài khoản? Đăng nhập ngay";
       document.getElementById("loginHint").textContent = isLogin
-        ? "Đăng nhập bằng Username + PIN. Phiên được lưu an toàn trên máy này trong 30 ngày."
+        ? "Xem kế hoạch & nhật ký công việc của nhân viên Ban Điện. Phiên được lưu an toàn trong 30 ngày."
         : "Tài khoản được quản lý tập trung trong sheet Users.";
 
       showLoginError("");
@@ -3345,8 +3406,10 @@
           fullName: loggedFullName,
           role: loggedRole,
           teams: loggedTeams,
-          authToken: loggedAuthToken
+          authToken: loggedAuthToken,
+          loginAt: Date.now()
         }));
+        localStorage.setItem("bandien_nhatky_login_at", String(Date.now()));
         sessionStorage.removeItem("currentUser");
         updateUserButton();
         updateAccessGate();
