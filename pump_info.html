@@ -165,6 +165,7 @@
                 <span id="syncStatusBadge" class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-2 py-1 me-1" style="font-size:.75rem; display:none;">
                     <i class="bi bi-cloud-check-fill me-1"></i>Đồng bộ
                 </span>
+                <button type="button" class="bds-btn-icon fw-bold" id="btnFontScale" title="Phóng to chữ"><span id="fontScaleLabel">A</span></button>
                 <a href="index.html" class="bds-btn-icon" title="Trang chủ"><i class="bi bi-house-door-fill"></i></a>
             </div>
         </div>
@@ -917,7 +918,27 @@
         return String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[ch]));
     }
 
+    // ===== Phóng to chữ toàn trang — dùng chung key với màn Cá nhân (nhatky) và
+    // index.html nên cỡ chữ chọn ở trang nào cũng áp dụng đồng bộ mọi trang khác. =====
+    const FONT_SCALE_KEY = 'bandien_nhatky_fontscale';
+    const FONT_SCALES = [100, 115, 130];
+    function applyFontScale() {
+        const scale = parseInt(localStorage.getItem(FONT_SCALE_KEY) || '100', 10);
+        document.documentElement.style.fontSize = scale + '%';
+        const label = document.getElementById('fontScaleLabel');
+        if (label) label.textContent = scale <= 100 ? 'A' : scale <= 115 ? 'A+' : 'A++';
+    }
+    function cycleFontScale() {
+        const current = parseInt(localStorage.getItem(FONT_SCALE_KEY) || '100', 10);
+        const next = FONT_SCALES[(FONT_SCALES.indexOf(current) + 1) % FONT_SCALES.length];
+        localStorage.setItem(FONT_SCALE_KEY, String(next));
+        applyFontScale();
+    }
+
     window.addEventListener('load', async () => {
+        applyFontScale();
+        document.getElementById('btnFontScale').addEventListener('click', cycleFontScale);
+
         await loadServerPumps();
         loadServerTimerSettings();
 

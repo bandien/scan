@@ -402,6 +402,7 @@
                 <span class="badge bg-success-subtle text-success shadow-sm px-2 py-2 rounded-pill" id="syncBadge" style="display: none;" title="Data Synced">
                     <i class="bi bi-cloud-check-fill"></i>
                 </span>
+                <button type="button" class="btn btn-sm rounded-pill border px-2 py-2 fw-bold" style="background: var(--siu-surface-high); color: var(--siu-on-surface); border-color: var(--siu-outline-variant); min-width: 34px;" id="btnFontScale" title="Phóng to chữ"><span id="fontScaleLabel">A</span></button>
           </div>
         </div>
     </div>
@@ -1465,8 +1466,8 @@
                 <li id="menuBatchGen" class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleBatchGenerator()"><i class="bi bi-magic me-2 text-success"></i> Tạo mã hàng loạt</a></li>
                 <li id="menuProjMgr" class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="openProjectManager()"><i class="bi bi-briefcase-fill me-2 text-success"></i> Quản lý Dự án</a></li>
                 <li id="menuLocMgr" class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="openLocationManager()"><i class="bi bi-geo-fill me-2 text-success"></i> Quản lý Địa điểm</a></li>
-                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleDashboard()" id="btn-dashboard"><i class="bi bi-bar-chart-fill me-2 text-primary"></i> Dashboard</a></li>
-                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="nhatky/index.html#stats"><i class="bi bi-bar-chart-fill me-2 text-success"></i> Báo cáo thống kê</a></li>
+                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleDashboard()" id="btn-dashboard"><i class="bi bi-bar-chart-fill me-2 text-primary"></i> Dashboard thiết bị/WO</a></li>
+                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="nhatky/index.html#stats"><i class="bi bi-bar-chart-fill me-2 text-success"></i> Báo cáo công việc tổ</a></li>
                 <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="hengio/"><i class="bi bi-alarm me-2 text-warning"></i> Cài đặt đồng hồ bơm</a></li>
                 <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="print_pumps.html"><i class="bi bi-qr-code me-2 text-primary"></i> In mã QR máy bơm</a></li>
                 <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="phongvan/"><i class="bi bi-person-workspace me-2 text-secondary"></i> Câu hỏi phỏng vấn</a></li>
@@ -1523,7 +1524,30 @@
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.app-version').forEach(el => { el.textContent = CONFIG.version; });
     });
-    
+
+    // ===== Phóng to chữ toàn trang — dùng chung key với màn Cá nhân (nhatky) nên
+    // cỡ chữ chọn ở trang nào cũng áp dụng đồng bộ mọi trang khác. Ưu tiên hiển thị
+    // ngay ở header (không ẩn trong menu) vì đây là 2 trang tác nghiệp chính. =====
+    const FONT_SCALE_KEY = 'bandien_nhatky_fontscale';
+    const FONT_SCALES = [100, 115, 130];
+    function applyFontScale() {
+        const scale = parseInt(localStorage.getItem(FONT_SCALE_KEY) || '100', 10);
+        document.documentElement.style.fontSize = scale + '%';
+        const label = document.getElementById('fontScaleLabel');
+        if (label) label.textContent = scale <= 100 ? 'A' : scale <= 115 ? 'A+' : 'A++';
+    }
+    function cycleFontScale() {
+        const current = parseInt(localStorage.getItem(FONT_SCALE_KEY) || '100', 10);
+        const next = FONT_SCALES[(FONT_SCALES.indexOf(current) + 1) % FONT_SCALES.length];
+        localStorage.setItem(FONT_SCALE_KEY, String(next));
+        applyFontScale();
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+        applyFontScale();
+        const btn = document.getElementById('btnFontScale');
+        if (btn) btn.addEventListener('click', cycleFontScale);
+    });
+
     // Legacy variables (pointing to CONFIG for compatibility)
     const gasUrl = CONFIG.gasUrl;
     const API_TOKEN = CONFIG.apiToken;

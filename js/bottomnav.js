@@ -44,7 +44,7 @@
   const MENU_ADMIN = [
     { icon: 'bi-alarm',    label: 'Cài đặt đồng hồ bơm',   href: root + 'hengio/' },
     { icon: 'bi-qr-code',  label: 'In mã QR máy bơm',      href: root + 'print_pumps.html' },
-    { icon: 'bi-bar-chart-fill', label: 'Báo cáo thống kê', href: root + 'nhatky/index.html#stats' },
+    { icon: 'bi-bar-chart-fill', label: 'Báo cáo công việc tổ', href: root + 'nhatky/index.html#stats' },
     { icon: 'bi-person-workspace', label: 'Câu hỏi phỏng vấn', href: root + 'phongvan/' },
     { icon: 'bi-cpu-fill', label: 'Giám sát Server Uptime', href: root + 'status.html' },
     { icon: 'bi-history',  label: 'Nhật ký Thay đổi',       href: root + 'changelog.html' },
