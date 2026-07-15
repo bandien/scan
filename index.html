@@ -96,6 +96,29 @@
         .chevron-icon { transition: transform 0.2s ease; }
         .dropdown-item[aria-expanded="true"] .chevron-icon { transform: rotate(180deg); }
 
+        /* ===== Wizard (từng bước) cho các form dài: Thêm/Sửa thiết bị, Tạo/Sửa WO ===== */
+        .wizard-dots { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 2px 0 16px; }
+        .wizard-dot {
+            display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px;
+            font-size: 0.74rem; font-weight: 700; color: var(--siu-on-surface-variant);
+            background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant);
+            transition: all 0.2s ease;
+        }
+        .wizard-dot .wizard-dot-num {
+            width: 18px; height: 18px; border-radius: 50%; background: var(--siu-outline-variant);
+            color: var(--siu-on-surface); display: flex; align-items: center; justify-content: center;
+            font-size: 0.68rem; font-weight: 800; flex-shrink: 0;
+        }
+        .wizard-dot.active { background: var(--siu-primary-container); color: #fff; border-color: transparent; }
+        .wizard-dot.active .wizard-dot-num { background: rgba(255,255,255,.3); color: #fff; }
+        .wizard-dot.done { color: var(--siu-success); border-color: var(--siu-success); }
+        .wizard-dot.done .wizard-dot-num { background: var(--siu-success); color: #fff; }
+        .wizard-dot-label { display: none; }
+        @media (min-width: 420px) { .wizard-dot-label { display: inline; } }
+        .wizard-pane { display: none; }
+        .wizard-pane.active { display: block; animation: wizardFadeIn 0.15s ease; }
+        @keyframes wizardFadeIn { from { opacity: 0; transform: translateX(6px); } to { opacity: 1; transform: translateX(0); } }
+
         /* Skeleton Loading Effect (dark shimmer) */
         .skeleton {
             background: var(--siu-surface-high);
@@ -690,83 +713,106 @@
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="woRequestSource" value="Noi bo">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Loại WO (Type)</label>
-                        <select class="form-select rounded-3" id="woType">
-                            <option value="Corrective">Corrective - Sửa chữa</option>
-                            <option value="Preventive">Preventive - Bảo dưỡng</option>
-                            <option value="Emergency">Emergency - Khẩn cấp</option>
-                            <option value="Inspection">Inspection - Kiểm tra</option>
-                        </select>
+                    <div class="wizard-dots">
+                        <span class="wizard-dot" data-step="1"><span class="wizard-dot-num">1</span><span class="wizard-dot-label">Loại & thiết bị</span></span>
+                        <span class="wizard-dot" data-step="2"><span class="wizard-dot-num">2</span><span class="wizard-dot-label">Giao việc</span></span>
+                        <span class="wizard-dot" data-step="3"><span class="wizard-dot-num">3</span><span class="wizard-dot-label">Thời hạn</span></span>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Mức độ ưu tiên (Priority)</label>
-                        <select class="form-select rounded-3" id="woPriority">
-                            <option value="Low">Low - Thấp</option>
-                            <option value="Medium" selected>Medium - Trung bình</option>
-                            <option value="High">High - Cao</option>
-                            <option value="Urgent">Urgent - Khẩn cấp</option>
-                        </select>
+
+                    <!-- Bước 1: Loại & thiết bị -->
+                    <div class="wizard-pane" data-step="1">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Loại WO (Type)</label>
+                            <select class="form-select rounded-3" id="woType">
+                                <option value="Corrective">Corrective - Sửa chữa</option>
+                                <option value="Preventive">Preventive - Bảo dưỡng</option>
+                                <option value="Emergency">Emergency - Khẩn cấp</option>
+                                <option value="Inspection">Inspection - Kiểm tra</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Mức độ ưu tiên (Priority)</label>
+                            <select class="form-select rounded-3" id="woPriority">
+                                <option value="Low">Low - Thấp</option>
+                                <option value="Medium" selected>Medium - Trung bình</option>
+                                <option value="High">High - Cao</option>
+                                <option value="Urgent">Urgent - Khẩn cấp</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Thiết bị (Asset)</label>
+                            <select class="form-select rounded-3" id="woAsset">
+                                <option value="">-- Chọn thiết bị --</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Thiết bị (Asset)</label>
-                        <select class="form-select rounded-3" id="woAsset">
-                            <option value="">-- Chọn thiết bị --</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Giao cho (Assigned To)</label>
-                        <div class="row g-2">
-                            <div class="col-6">
-                                <select class="form-select rounded-3" id="woAssignedDept" onchange="filterAssignedToByDept('woAssignedDept', 'woAssignedTo')">
-                                    <option value="">-- Tất cả tổ --</option>
-                                </select>
-                            </div>
-                            <div class="col-6">
-                                <div id="woAssignedToContainer" class="dropdown w-100">
-                                    <input type="text" class="form-select rounded-3 text-start" id="woAssignedToInput" placeholder="-- Chọn/Tìm --" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" readonly style="cursor: pointer;">
-                                    <input type="hidden" id="woAssignedTo" value="">
-                                    <div class="dropdown-menu p-2 shadow w-100 border-0 rounded-3 mt-1" style="max-height: 300px; overflow-y: auto;">
-                                        <input type="text" class="form-control form-control-sm mb-2 rounded-2" id="woAssignedToSearch" placeholder="Tìm kiếm nhanh..." oninput="searchStaffList('woAssignedToSearch', 'woAssignedTo')">
-                                        <div id="woAssignedToMenu" class="d-flex flex-column gap-1"></div>
+
+                    <!-- Bước 2: Giao việc & mô tả -->
+                    <div class="wizard-pane" data-step="2">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Giao cho (Assigned To)</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <select class="form-select rounded-3" id="woAssignedDept" onchange="filterAssignedToByDept('woAssignedDept', 'woAssignedTo')">
+                                        <option value="">-- Tất cả tổ --</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <div id="woAssignedToContainer" class="dropdown w-100">
+                                        <input type="text" class="form-select rounded-3 text-start" id="woAssignedToInput" placeholder="-- Chọn/Tìm --" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" readonly style="cursor: pointer;">
+                                        <input type="hidden" id="woAssignedTo" value="">
+                                        <div class="dropdown-menu p-2 shadow w-100 border-0 rounded-3 mt-1" style="max-height: 300px; overflow-y: auto;">
+                                            <input type="text" class="form-control form-control-sm mb-2 rounded-2" id="woAssignedToSearch" placeholder="Tìm kiếm nhanh..." oninput="searchStaffList('woAssignedToSearch', 'woAssignedTo')">
+                                            <div id="woAssignedToMenu" class="d-flex flex-column gap-1"></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Mô tả công việc</label>
-                        <textarea class="form-control rounded-3" id="woDescription" rows="3" placeholder="Mô tả chi tiết công việc cần làm..."></textarea>
-                    </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label fw-bold small">Hạn hoàn thành</label>
-                            <input type="date" class="form-control rounded-3" id="woDueDate">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Mô tả công việc</label>
+                            <textarea class="form-control rounded-3" id="woDescription" rows="3" placeholder="Mô tả chi tiết công việc cần làm..."></textarea>
                         </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold small">Chi phí (VND)</label>
-                            <input type="number" class="form-control rounded-3" id="woCost" placeholder="0" min="0" step="1000">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Công việc con (mỗi dòng = 1 mục)</label>
+                            <textarea class="form-control rounded-3" id="woSubTasks" rows="3" placeholder="Kiểm tra nguồn điện&#10;Thay lọc gió&#10;Vệ sinh dàn nóng"></textarea>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Dự án liên kết</label>
-                        <select class="form-select rounded-3" id="woProjectSelect">
-                            <option value="">-- Chon du an --</option>
-                        </select>
-                        <div class="form-check mt-2">
-                            <input class="form-check-input" type="checkbox" id="woProjectNew" onchange="toggleNewProject()">
-                            <label class="form-check-label small">Tao du an moi</label>
+
+                    <!-- Bước 3: Thời hạn & chi phí -->
+                    <div class="wizard-pane" data-step="3">
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Hạn hoàn thành</label>
+                                <input type="date" class="form-control rounded-3" id="woDueDate">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Chi phí (VND)</label>
+                                <input type="number" class="form-control rounded-3" id="woCost" placeholder="0" min="0" step="1000">
+                            </div>
                         </div>
-                        <input type="text" class="form-control rounded-3 mt-2 d-none" id="woProject" placeholder="Nhap ten du an moi...">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Công việc con (mỗi dòng = 1 mục)</label>
-                        <textarea class="form-control rounded-3" id="woSubTasks" rows="3" placeholder="Kiểm tra nguồn điện&#10;Thay lọc gió&#10;Vệ sinh dàn nóng"></textarea>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Dự án liên kết</label>
+                            <select class="form-select rounded-3" id="woProjectSelect">
+                                <option value="">-- Chon du an --</option>
+                            </select>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" id="woProjectNew" onchange="toggleNewProject()">
+                                <label class="form-check-label small">Tao du an moi</label>
+                            </div>
+                            <input type="text" class="form-control rounded-3 mt-2 d-none" id="woProject" placeholder="Nhap ten du an moi...">
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
                     <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-primary rounded-pill px-4" onclick="submitCreateWO()">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4 wizard-btn-back" onclick="wizardBack('createWOModal')" style="display:none;">
+                        <i class="bi bi-arrow-left me-1"></i> Quay lại
+                    </button>
+                    <button type="button" class="btn btn-primary rounded-pill px-4 wizard-btn-next" onclick="wizardNext('createWOModal', document.querySelector('#createWOModal').dataset.wizardStep === '2' ? validateCreateWOStep2 : null)">
+                        Tiếp theo <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+                    <button type="button" class="btn btn-primary rounded-pill px-4 wizard-btn-submit" onclick="submitCreateWO()" style="display:none;">
                         <i class="bi bi-check-lg me-1"></i> Tạo WO
                     </button>
                 </div>
@@ -784,80 +830,103 @@
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="editWoId">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Trạng thái</label>
-                        <select class="form-select rounded-3" id="editWoStatus">
-                            <option value="New">New</option>
-                            <option value="Assigned">Assigned</option>
-                            <option value="In Progress">In Progress</option>
-                            <option value="Done">Done</option>
-                            <option value="Closed">Closed</option>
-                        </select>
+                    <div class="wizard-dots">
+                        <span class="wizard-dot" data-step="1"><span class="wizard-dot-num">1</span><span class="wizard-dot-label">Trạng thái</span></span>
+                        <span class="wizard-dot" data-step="2"><span class="wizard-dot-num">2</span><span class="wizard-dot-label">Giao việc</span></span>
+                        <span class="wizard-dot" data-step="3"><span class="wizard-dot-num">3</span><span class="wizard-dot-label">Thời hạn</span></span>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Loại WO</label>
-                        <select class="form-select rounded-3" id="editWoType">
-                            <option value="Corrective">Corrective</option>
-                            <option value="Preventive">Preventive</option>
-                            <option value="Emergency">Emergency</option>
-                            <option value="Inspection">Inspection</option>
-                        </select>
+
+                    <!-- Bước 1: Trạng thái & loại -->
+                    <div class="wizard-pane" data-step="1">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Trạng thái</label>
+                            <select class="form-select rounded-3" id="editWoStatus">
+                                <option value="New">New</option>
+                                <option value="Assigned">Assigned</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Done">Done</option>
+                                <option value="Closed">Closed</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Loại WO</label>
+                            <select class="form-select rounded-3" id="editWoType">
+                                <option value="Corrective">Corrective</option>
+                                <option value="Preventive">Preventive</option>
+                                <option value="Emergency">Emergency</option>
+                                <option value="Inspection">Inspection</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Mức độ ưu tiên</label>
+                            <select class="form-select rounded-3" id="editWoPriority">
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                                <option value="Urgent">Urgent</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Mức độ ưu tiên</label>
-                        <select class="form-select rounded-3" id="editWoPriority">
-                            <option value="Low">Low</option>
-                            <option value="Medium">Medium</option>
-                            <option value="High">High</option>
-                            <option value="Urgent">Urgent</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Giao cho</label>
-                        <div class="row g-2">
-                            <div class="col-6">
-                                <select class="form-select rounded-3" id="editWoAssignedDept" onchange="filterAssignedToByDept('editWoAssignedDept', 'editWoAssignedTo')">
-                                    <option value="">-- Tất cả tổ --</option>
-                                </select>
-                            </div>
-                            <div class="col-6">
-                                <div id="editWoAssignedToContainer" class="dropdown w-100">
-                                    <input type="text" class="form-select rounded-3 text-start" id="editWoAssignedToInput" placeholder="-- Chọn/Tìm --" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" readonly style="cursor: pointer;">
-                                    <input type="hidden" id="editWoAssignedTo" value="">
-                                    <div class="dropdown-menu p-2 shadow w-100 border-0 rounded-3 mt-1" style="max-height: 300px; overflow-y: auto;">
-                                        <input type="text" class="form-control form-control-sm mb-2 rounded-2" id="editWoAssignedToSearch" placeholder="Tìm kiếm nhanh..." oninput="searchStaffList('editWoAssignedToSearch', 'editWoAssignedTo')">
-                                        <div id="editWoAssignedToMenu" class="d-flex flex-column gap-1"></div>
+
+                    <!-- Bước 2: Giao việc & mô tả -->
+                    <div class="wizard-pane" data-step="2">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Giao cho</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <select class="form-select rounded-3" id="editWoAssignedDept" onchange="filterAssignedToByDept('editWoAssignedDept', 'editWoAssignedTo')">
+                                        <option value="">-- Tất cả tổ --</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <div id="editWoAssignedToContainer" class="dropdown w-100">
+                                        <input type="text" class="form-select rounded-3 text-start" id="editWoAssignedToInput" placeholder="-- Chọn/Tìm --" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" readonly style="cursor: pointer;">
+                                        <input type="hidden" id="editWoAssignedTo" value="">
+                                        <div class="dropdown-menu p-2 shadow w-100 border-0 rounded-3 mt-1" style="max-height: 300px; overflow-y: auto;">
+                                            <input type="text" class="form-control form-control-sm mb-2 rounded-2" id="editWoAssignedToSearch" placeholder="Tìm kiếm nhanh..." oninput="searchStaffList('editWoAssignedToSearch', 'editWoAssignedTo')">
+                                            <div id="editWoAssignedToMenu" class="d-flex flex-column gap-1"></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Mô tả</label>
-                        <textarea class="form-control rounded-3" id="editWoDescription" rows="3"></textarea>
-                    </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label fw-bold small">Hạn hoàn thành</label>
-                            <input type="date" class="form-control rounded-3" id="editWoDueDate">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Mô tả</label>
+                            <textarea class="form-control rounded-3" id="editWoDescription" rows="3"></textarea>
                         </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold small">Chi phí (VND)</label>
-                            <input type="number" class="form-control rounded-3" id="editWoCost" min="0" step="1000">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Công việc con (mỗi dòng = 1 mục)</label>
+                            <textarea class="form-control rounded-3" id="editWoSubTasks" rows="3"></textarea>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Dự án</label>
-                        <input type="text" class="form-control rounded-3" id="editWoProject">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Công việc con (mỗi dòng = 1 mục)</label>
-                        <textarea class="form-control rounded-3" id="editWoSubTasks" rows="3"></textarea>
+
+                    <!-- Bước 3: Thời hạn & chi phí -->
+                    <div class="wizard-pane" data-step="3">
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Hạn hoàn thành</label>
+                                <input type="date" class="form-control rounded-3" id="editWoDueDate">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Chi phí (VND)</label>
+                                <input type="number" class="form-control rounded-3" id="editWoCost" min="0" step="1000">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Dự án</label>
+                            <input type="text" class="form-control rounded-3" id="editWoProject">
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
                     <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-warning rounded-pill px-4" onclick="submitUpdateWO()">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4 wizard-btn-back" onclick="wizardBack('editWOModal')" style="display:none;">
+                        <i class="bi bi-arrow-left me-1"></i> Quay lại
+                    </button>
+                    <button type="button" class="btn btn-warning rounded-pill px-4 wizard-btn-next" onclick="wizardNext('editWOModal')">
+                        Tiếp theo <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+                    <button type="button" class="btn btn-warning rounded-pill px-4 wizard-btn-submit" onclick="submitUpdateWO()" style="display:none;">
                         <i class="bi bi-save me-1"></i> Lưu thay đổi
                     </button>
                 </div>
@@ -874,109 +943,132 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Mã thiết bị (UID)</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="newDevUID" placeholder="VD: HAPU-PUMP-01" oninput="this.value = sanitizeUidString(this.value)">
-                            <button class="btn btn-outline-secondary" type="button" onclick="startScannerForNewDevice()"><i class="bi bi-qr-code-scan"></i></button>
-                        </div>
+                    <div class="wizard-dots">
+                        <span class="wizard-dot" data-step="1"><span class="wizard-dot-num">1</span><span class="wizard-dot-label">Cơ bản</span></span>
+                        <span class="wizard-dot" data-step="2"><span class="wizard-dot-num">2</span><span class="wizard-dot-label">Bảo trì</span></span>
+                        <span class="wizard-dot" data-step="3"><span class="wizard-dot-num">3</span><span class="wizard-dot-label">Phân công</span></span>
                     </div>
                     <datalist id="dlName"></datalist>
                     <datalist id="dlLoc"></datalist>
                     <datalist id="dlManager"></datalist>
                     <datalist id="dlShift"></datalist>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Tên thiết bị</label>
-                        <input type="text" class="form-control rounded-3" id="newDevName" list="dlName" placeholder="VD: Bơm tăng áp">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Vị trí lắp đặt</label>
-                        <select class="form-select rounded-3 mb-2" id="newDevLocSelect" onchange="toggleDropdownOrNew('newDevLocSelect', 'newDevLocTextContainer')">
-                            <!-- Populated dynamically -->
-                        </select>
-                        <div id="newDevLocTextContainer" style="display: none;">
-                            <input type="text" class="form-control rounded-3 mt-1" id="newDevLocText" placeholder="Nhập vị trí mới...">
-                        </div>
-                    </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label fw-bold small">Tổ quản lý</label>
-                            <select class="form-select rounded-3 mb-2" id="newDevManagerSelect" onchange="toggleDropdownOrNew('newDevManagerSelect', 'newDevManagerTextContainer')">
-                                <!-- Populated dynamically -->
-                            </select>
-                            <div id="newDevManagerTextContainer" style="display: none;">
-                                <input type="text" class="form-control rounded-3 mt-1" id="newDevManagerText" placeholder="Nhập tổ quản lý mới...">
+
+                    <!-- Bước 1: Thông tin cơ bản -->
+                    <div class="wizard-pane" data-step="1">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Mã thiết bị (UID)</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="newDevUID" placeholder="VD: HAPU-PUMP-01" oninput="this.value = sanitizeUidString(this.value)">
+                                <button class="btn btn-outline-secondary" type="button" onclick="startScannerForNewDevice()"><i class="bi bi-qr-code-scan"></i></button>
                             </div>
                         </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold small">Ca trực</label>
-                            <div class="d-flex gap-2 mb-2">
-                                <select class="form-select rounded-3" id="newDevShiftSelect">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Tên thiết bị</label>
+                            <input type="text" class="form-control rounded-3" id="newDevName" list="dlName" placeholder="VD: Bơm tăng áp">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Vị trí lắp đặt</label>
+                            <select class="form-select rounded-3 mb-2" id="newDevLocSelect" onchange="toggleDropdownOrNew('newDevLocSelect', 'newDevLocTextContainer')">
+                                <!-- Populated dynamically -->
+                            </select>
+                            <div id="newDevLocTextContainer" style="display: none;">
+                                <input type="text" class="form-control rounded-3 mt-1" id="newDevLocText" placeholder="Nhập vị trí mới...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bước 2: Thông số bảo trì -->
+                    <div class="wizard-pane" data-step="2">
+                        <div class="row g-2 mb-3">
+                            <div class="col-4">
+                                <label class="form-label fw-bold small">Chu kỳ (Ngày)</label>
+                                <input type="number" class="form-control rounded-3 px-2" id="newDevCycle" list="dlCycle" placeholder="VD: 30" onchange="suggestNextMaintenance()">
+                                <datalist id="dlCycle">
+                                    <option value="7">Tuần (7)</option>
+                                    <option value="30">Tháng (30)</option>
+                                    <option value="90">Quý (90)</option>
+                                    <option value="180">Nửa năm (180)</option>
+                                    <option value="365">Năm (365)</option>
+                                </datalist>
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label fw-bold small">Ngày kế tiếp</label>
+                                <input type="date" class="form-control rounded-3 px-2" id="newDevNextMaint">
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label fw-bold small">Báo trước</label>
+                                <input type="number" class="form-control rounded-3 px-2" id="newDevWarning" list="dlWarning" placeholder="VD: 7">
+                                <datalist id="dlWarning">
+                                    <option value="1">1 ngày</option>
+                                    <option value="3">3 ngày</option>
+                                    <option value="7">1 tuần</option>
+                                    <option value="14">2 tuần</option>
+                                    <option value="30">1 tháng</option>
+                                </datalist>
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Ngày sản xuất</label>
+                                <input type="date" class="form-control rounded-3" id="newDevMfg">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Ngày lắp đặt</label>
+                                <input type="date" class="form-control rounded-3" id="newDevInstall">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bước 3: Phân công & liên kết -->
+                    <div class="wizard-pane" data-step="3">
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Tổ quản lý</label>
+                                <select class="form-select rounded-3 mb-2" id="newDevManagerSelect" onchange="toggleDropdownOrNew('newDevManagerSelect', 'newDevManagerTextContainer')">
                                     <!-- Populated dynamically -->
                                 </select>
-                                <button class="btn btn-outline-secondary rounded-3 px-3" type="button" onclick="openShiftManager()" title="Quản lý ca trực">
+                                <div id="newDevManagerTextContainer" style="display: none;">
+                                    <input type="text" class="form-control rounded-3 mt-1" id="newDevManagerText" placeholder="Nhập tổ quản lý mới...">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Ca trực</label>
+                                <div class="d-flex gap-2 mb-2">
+                                    <select class="form-select rounded-3" id="newDevShiftSelect">
+                                        <!-- Populated dynamically -->
+                                    </select>
+                                    <button class="btn btn-outline-secondary rounded-3 px-3" type="button" onclick="openShiftManager()" title="Quản lý ca trực">
+                                        <i class="bi bi-gear-fill"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Dự án liên kết</label>
+                            <div class="d-flex gap-2">
+                                <select class="form-select rounded-3" id="newDevProjectSelect">
+                                    <option value="">-- Chọn dự án --</option>
+                                </select>
+                                <button class="btn btn-outline-secondary rounded-3 px-3" type="button" onclick="openProjectManager()" title="Quản lý dự án">
                                     <i class="bi bi-gear-fill"></i>
                                 </button>
                             </div>
                         </div>
-                    </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-4">
-                            <label class="form-label fw-bold small">Chu kỳ (Ngày)</label>
-                            <input type="number" class="form-control rounded-3 px-2" id="newDevCycle" list="dlCycle" placeholder="VD: 30" onchange="suggestNextMaintenance()">
-                            <datalist id="dlCycle">
-                                <option value="7">Tuần (7)</option>
-                                <option value="30">Tháng (30)</option>
-                                <option value="90">Quý (90)</option>
-                                <option value="180">Nửa năm (180)</option>
-                                <option value="365">Năm (365)</option>
-                            </datalist>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Số Seri (S/N) hãng sản xuất</label>
+                            <input type="text" class="form-control rounded-3" id="newDevSN" placeholder="Nhập số Seri của hãng (nếu có)...">
                         </div>
-                        <div class="col-4">
-                            <label class="form-label fw-bold small">Ngày kế tiếp</label>
-                            <input type="date" class="form-control rounded-3 px-2" id="newDevNextMaint">
-                        </div>
-                        <div class="col-4">
-                            <label class="form-label fw-bold small">Báo trước</label>
-                            <input type="number" class="form-control rounded-3 px-2" id="newDevWarning" list="dlWarning" placeholder="VD: 7">
-                            <datalist id="dlWarning">
-                                <option value="1">1 ngày</option>
-                                <option value="3">3 ngày</option>
-                                <option value="7">1 tuần</option>
-                                <option value="14">2 tuần</option>
-                                <option value="30">1 tháng</option>
-                            </datalist>
-                        </div>
-                    </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label fw-bold small">Ngày sản xuất</label>
-                            <input type="date" class="form-control rounded-3" id="newDevMfg">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold small">Ngày lắp đặt</label>
-                            <input type="date" class="form-control rounded-3" id="newDevInstall">
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Dự án liên kết</label>
-                        <div class="d-flex gap-2">
-                            <select class="form-select rounded-3" id="newDevProjectSelect">
-                                <option value="">-- Chọn dự án --</option>
-                            </select>
-                            <button class="btn btn-outline-secondary rounded-3 px-3" type="button" onclick="openProjectManager()" title="Quản lý dự án">
-                                <i class="bi bi-gear-fill"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Số Seri (S/N) hãng sản xuất</label>
-                        <input type="text" class="form-control rounded-3" id="newDevSN" placeholder="Nhập số Seri của hãng (nếu có)...">
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
                     <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-primary rounded-pill px-4" onclick="submitAddDevice()">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4 wizard-btn-back" onclick="wizardBack('addDeviceModal')" style="display:none;">
+                        <i class="bi bi-arrow-left me-1"></i> Quay lại
+                    </button>
+                    <button type="button" class="btn btn-primary rounded-pill px-4 wizard-btn-next" onclick="wizardNext('addDeviceModal', validateAddDeviceStep1)">
+                        Tiếp theo <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+                    <button type="button" class="btn btn-primary rounded-pill px-4 wizard-btn-submit" onclick="submitAddDevice()" style="display:none;">
                         <i class="bi bi-check-lg me-1"></i> Lưu thiết bị
                     </button>
                 </div>
@@ -993,88 +1085,111 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Mã thiết bị (UID)</label>
-                        <input type="text" class="form-control rounded-3 bg-light" id="editDevUID" readonly>
+                    <div class="wizard-dots">
+                        <span class="wizard-dot" data-step="1"><span class="wizard-dot-num">1</span><span class="wizard-dot-label">Cơ bản</span></span>
+                        <span class="wizard-dot" data-step="2"><span class="wizard-dot-num">2</span><span class="wizard-dot-label">Bảo trì</span></span>
+                        <span class="wizard-dot" data-step="3"><span class="wizard-dot-num">3</span><span class="wizard-dot-label">Phân công</span></span>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Tên thiết bị</label>
-                        <input type="text" class="form-control rounded-3" id="editDevName" placeholder="VD: Bơm tăng áp">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Vị trí lắp đặt</label>
-                        <select class="form-select rounded-3 mb-2" id="editDevLocSelect" onchange="toggleDropdownOrNew('editDevLocSelect', 'editDevLocTextContainer')">
-                            <!-- Populated dynamically -->
-                        </select>
-                        <div id="editDevLocTextContainer" style="display: none;">
-                            <input type="text" class="form-control rounded-3 mt-1" id="editDevLocText" placeholder="Nhập vị trí mới...">
+
+                    <!-- Bước 1: Thông tin cơ bản -->
+                    <div class="wizard-pane" data-step="1">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Mã thiết bị (UID)</label>
+                            <input type="text" class="form-control rounded-3 bg-light" id="editDevUID" readonly>
                         </div>
-                    </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label fw-bold small">Tổ quản lý</label>
-                            <select class="form-select rounded-3 mb-2" id="editDevManagerSelect" onchange="toggleDropdownOrNew('editDevManagerSelect', 'editDevManagerTextContainer')">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Tên thiết bị</label>
+                            <input type="text" class="form-control rounded-3" id="editDevName" placeholder="VD: Bơm tăng áp">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Vị trí lắp đặt</label>
+                            <select class="form-select rounded-3 mb-2" id="editDevLocSelect" onchange="toggleDropdownOrNew('editDevLocSelect', 'editDevLocTextContainer')">
                                 <!-- Populated dynamically -->
                             </select>
-                            <div id="editDevManagerTextContainer" style="display: none;">
-                                <input type="text" class="form-control rounded-3 mt-1" id="editDevManagerText" placeholder="Nhập tổ quản lý mới...">
+                            <div id="editDevLocTextContainer" style="display: none;">
+                                <input type="text" class="form-control rounded-3 mt-1" id="editDevLocText" placeholder="Nhập vị trí mới...">
                             </div>
                         </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold small">Ca trực</label>
-                            <div class="d-flex gap-2 mb-2">
-                                <select class="form-select rounded-3" id="editDevShiftSelect">
+                    </div>
+
+                    <!-- Bước 2: Thông số bảo trì -->
+                    <div class="wizard-pane" data-step="2">
+                        <div class="row g-2 mb-3">
+                            <div class="col-4">
+                                <label class="form-label fw-bold small">Chu kỳ (Ngày)</label>
+                                <input type="number" class="form-control rounded-3 px-2" id="editDevCycle" placeholder="VD: 30" onchange="suggestEditNextMaintenance()">
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label fw-bold small">Ngày kế tiếp</label>
+                                <input type="date" class="form-control rounded-3 px-2" id="editDevNextMaint">
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label fw-bold small">Báo trước</label>
+                                <input type="number" class="form-control rounded-3 px-2" id="editDevWarning" placeholder="VD: 7">
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Ngày sản xuất</label>
+                                <input type="date" class="form-control rounded-3" id="editDevMfg">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Ngày lắp đặt</label>
+                                <input type="date" class="form-control rounded-3" id="editDevInstall">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bước 3: Phân công & liên kết -->
+                    <div class="wizard-pane" data-step="3">
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Tổ quản lý</label>
+                                <select class="form-select rounded-3 mb-2" id="editDevManagerSelect" onchange="toggleDropdownOrNew('editDevManagerSelect', 'editDevManagerTextContainer')">
                                     <!-- Populated dynamically -->
                                 </select>
-                                <button class="btn btn-outline-secondary rounded-3 px-3" type="button" onclick="openShiftManager()" title="Quản lý ca trực">
+                                <div id="editDevManagerTextContainer" style="display: none;">
+                                    <input type="text" class="form-control rounded-3 mt-1" id="editDevManagerText" placeholder="Nhập tổ quản lý mới...">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Ca trực</label>
+                                <div class="d-flex gap-2 mb-2">
+                                    <select class="form-select rounded-3" id="editDevShiftSelect">
+                                        <!-- Populated dynamically -->
+                                    </select>
+                                    <button class="btn btn-outline-secondary rounded-3 px-3" type="button" onclick="openShiftManager()" title="Quản lý ca trực">
+                                        <i class="bi bi-gear-fill"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Dự án liên kết</label>
+                            <div class="d-flex gap-2">
+                                <select class="form-select rounded-3" id="editDevProjectSelect">
+                                    <option value="">-- Chọn dự án --</option>
+                                </select>
+                                <button class="btn btn-outline-secondary rounded-3 px-3" type="button" onclick="openProjectManager()" title="Quản lý dự án">
                                     <i class="bi bi-gear-fill"></i>
                                 </button>
                             </div>
                         </div>
-                    </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-4">
-                            <label class="form-label fw-bold small">Chu kỳ (Ngày)</label>
-                            <input type="number" class="form-control rounded-3 px-2" id="editDevCycle" placeholder="VD: 30" onchange="suggestEditNextMaintenance()">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Số Seri (S/N) hãng sản xuất</label>
+                            <input type="text" class="form-control rounded-3" id="editDevSN" placeholder="Nhập số Seri của hãng (nếu có)...">
                         </div>
-                        <div class="col-4">
-                            <label class="form-label fw-bold small">Ngày kế tiếp</label>
-                            <input type="date" class="form-control rounded-3 px-2" id="editDevNextMaint">
-                        </div>
-                        <div class="col-4">
-                            <label class="form-label fw-bold small">Báo trước</label>
-                            <input type="number" class="form-control rounded-3 px-2" id="editDevWarning" placeholder="VD: 7">
-                        </div>
-                    </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label fw-bold small">Ngày sản xuất</label>
-                            <input type="date" class="form-control rounded-3" id="editDevMfg">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold small">Ngày lắp đặt</label>
-                            <input type="date" class="form-control rounded-3" id="editDevInstall">
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Dự án liên kết</label>
-                        <div class="d-flex gap-2">
-                            <select class="form-select rounded-3" id="editDevProjectSelect">
-                                <option value="">-- Chọn dự án --</option>
-                            </select>
-                            <button class="btn btn-outline-secondary rounded-3 px-3" type="button" onclick="openProjectManager()" title="Quản lý dự án">
-                                <i class="bi bi-gear-fill"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Số Seri (S/N) hãng sản xuất</label>
-                        <input type="text" class="form-control rounded-3" id="editDevSN" placeholder="Nhập số Seri của hãng (nếu có)...">
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
                     <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-warning rounded-pill px-4 text-dark fw-bold" onclick="submitEditDevice()">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4 wizard-btn-back" onclick="wizardBack('editDeviceModal')" style="display:none;">
+                        <i class="bi bi-arrow-left me-1"></i> Quay lại
+                    </button>
+                    <button type="button" class="btn btn-warning rounded-pill px-4 text-dark fw-bold wizard-btn-next" onclick="wizardNext('editDeviceModal', validateEditDeviceStep1)">
+                        Tiếp theo <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+                    <button type="button" class="btn btn-warning rounded-pill px-4 text-dark fw-bold wizard-btn-submit" onclick="submitEditDevice()" style="display:none;">
                         <i class="bi bi-check-lg me-1"></i> Lưu thay đổi
                     </button>
                 </div>
@@ -2611,6 +2726,7 @@
         document.getElementById('woDescription').value = `Bảo trì định kỳ thiết bị ${deviceName} (${uid}) theo lịch PM.`;
         const due = new Date(); due.setDate(due.getDate() + 2);
         document.getElementById('woDueDate').value = due.toISOString().split('T')[0];
+        wizardGoToStep('createWOModal', 1);
         new bootstrap.Modal(document.getElementById('createWOModal')).show();
     }
 
@@ -3945,6 +4061,7 @@
         document.getElementById('woProject').value = '';
         document.getElementById('woProject').classList.add('d-none');
         document.getElementById('woProjectNew').checked = false;
+        wizardGoToStep('createWOModal', 1);
         new bootstrap.Modal(document.getElementById('createWOModal')).show();
         document.getElementById('woRequestSource').value = requestSource || 'Noi bo';
     }
@@ -4029,6 +4146,7 @@
         const dept = s ? s.dept : '';
         renderStaffDropdown('editWoAssignedTo', dept, '');
 
+        wizardGoToStep('editWOModal', 1);
         new bootstrap.Modal(document.getElementById('editWOModal')).show();
     }
 
@@ -4172,9 +4290,62 @@
             });
             
             document.getElementById('newDevUID').value = uid;
+            wizardGoToStep('addDeviceModal', 1);
             new bootstrap.Modal(document.getElementById('addDeviceModal')).show();
             isScanningForNewDevice = false;
         }, (err) => {});
+    }
+
+    // ===== Wizard (từng bước) — dùng chung cho các form dài: Thêm/Sửa thiết bị, Tạo/Sửa WO =====
+    function wizardGoToStep(modalId, step) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+        const panes = Array.from(modal.querySelectorAll('.wizard-pane'));
+        const total = panes.length;
+        step = Math.max(1, Math.min(step, total));
+        panes.forEach(p => p.classList.toggle('active', parseInt(p.dataset.step, 10) === step));
+        modal.querySelectorAll('.wizard-dot').forEach(d => {
+            const s = parseInt(d.dataset.step, 10);
+            d.classList.toggle('active', s === step);
+            d.classList.toggle('done', s < step);
+        });
+        const backBtn = modal.querySelector('.wizard-btn-back');
+        const nextBtn = modal.querySelector('.wizard-btn-next');
+        const submitBtn = modal.querySelector('.wizard-btn-submit');
+        if (backBtn) backBtn.style.display = step > 1 ? 'inline-block' : 'none';
+        if (nextBtn) nextBtn.style.display = step < total ? 'inline-block' : 'none';
+        if (submitBtn) submitBtn.style.display = step === total ? 'inline-block' : 'none';
+        modal.dataset.wizardStep = step;
+        const body = modal.querySelector('.modal-body');
+        if (body) body.scrollTop = 0;
+    }
+    function wizardNext(modalId, validateFn) {
+        if (typeof validateFn === 'function' && !validateFn()) return;
+        const modal = document.getElementById(modalId);
+        const current = parseInt(modal.dataset.wizardStep || '1', 10);
+        wizardGoToStep(modalId, current + 1);
+    }
+    function wizardBack(modalId) {
+        const modal = document.getElementById(modalId);
+        const current = parseInt(modal.dataset.wizardStep || '1', 10);
+        wizardGoToStep(modalId, current - 1);
+    }
+    function validateAddDeviceStep1() {
+        const uid = document.getElementById('newDevUID').value.trim();
+        const name = document.getElementById('newDevName').value.trim();
+        if (!uid || !name) { showToast('Vui lòng nhập Mã thiết bị (UID) và Tên thiết bị', 'warning'); return false; }
+        return true;
+    }
+    function validateEditDeviceStep1() {
+        const uid = document.getElementById('editDevUID').value.trim();
+        const name = document.getElementById('editDevName').value.trim();
+        if (!uid || !name) { showToast('Vui lòng nhập Mã thiết bị (UID) và Tên thiết bị', 'warning'); return false; }
+        return true;
+    }
+    function validateCreateWOStep2() {
+        const desc = document.getElementById('woDescription').value.trim();
+        if (!desc) { showToast('Vui lòng nhập mô tả công việc', 'warning'); return false; }
+        return true;
     }
 
     function showAddDeviceModal() {
@@ -4209,6 +4380,7 @@
         populateAllShiftSelects();
         populateAllProjectSelects();
 
+        wizardGoToStep('addDeviceModal', 1);
         new bootstrap.Modal(document.getElementById('addDeviceModal')).show();
     }
 
@@ -4430,6 +4602,7 @@
             projSel.value = device.project || '';
         }
 
+        wizardGoToStep('editDeviceModal', 1);
         new bootstrap.Modal(document.getElementById('editDeviceModal')).show();
     }
 
