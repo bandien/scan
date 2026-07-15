@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông tin Máy Bơm | BanDienScan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="css/shared.css" rel="stylesheet">
+    <script src="https://unpkg.com/html5-qrcode" defer></script>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <style>
+        body { background: var(--siu-bg); color: var(--siu-on-surface); font-family: var(--bds-font); min-height: 100vh; padding-bottom: 40px; }
+        .app-shell { max-width: 460px; margin: 0 auto; padding: 16px; }
+
+        .card-premium { background: var(--siu-surface); border-radius: var(--r-lg); border: 1px solid var(--siu-outline-variant); overflow: hidden; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+
+        /* ===== Khung quét (đồng bộ với index.html) ===== */
+        .scan-frame {
+            --scan-win: min(240px, calc(100vw - 96px));
+            position: relative; background: #080b12; border-radius: var(--r-lg); overflow: hidden;
+            min-height: min(88vw, 340px); display: none; flex-direction: column;
+            justify-content: center; margin: 4px 0 14px 0; isolation: isolate;
+            border: 1px solid var(--siu-outline-variant);
+        }
+        .scan-frame::before {
+            content: ""; position: absolute; top: 50%; left: 50%;
+            width: var(--scan-win); height: var(--scan-win); transform: translate(-50%, -50%);
+            border-radius: 16px;
+            box-shadow: 0 0 0 9999px rgba(16, 19, 27, 0.72);
+            z-index: 20; pointer-events: none;
+        }
+        #reader #qr-shaded-region { display: none !important; }
+        #reader { width: 100%; min-height: min(88vw, 340px); display: block; background: #000; position: relative; z-index: 10; }
+        .scan-corner { position: absolute; width: 32px; height: 32px; border: 4px solid #b1c5ff; pointer-events: none; z-index: 50; }
+        .scan-corner.tl { top: calc(50% - var(--scan-win)/2); left: calc(50% - var(--scan-win)/2); border-right: 0; border-bottom: 0; border-top-left-radius: 14px; }
+        .scan-corner.tr { top: calc(50% - var(--scan-win)/2); right: calc(50% - var(--scan-win)/2); border-left: 0; border-bottom: 0; border-top-right-radius: 14px; }
+        .scan-corner.bl { bottom: calc(50% - var(--scan-win)/2); left: calc(50% - var(--scan-win)/2); border-right: 0; border-top: 0; border-bottom-left-radius: 14px; }
+        .scan-corner.br { bottom: calc(50% - var(--scan-win)/2); right: calc(50% - var(--scan-win)/2); border-left: 0; border-top: 0; border-bottom-right-radius: 14px; }
+        .scan-line {
+            position: absolute; left: calc(50% - var(--scan-win)/2 + 4px); right: calc(50% - var(--scan-win)/2 + 4px);
+            height: 2px; background: #b1c5ff; box-shadow: 0 0 15px #0e6efd;
+            pointer-events: none; z-index: 50; animation: scanSweep 3s ease-in-out infinite; display: none;
+        }
+        .scan-frame.scanning .scan-line { display: block; }
+        @keyframes scanSweep { 0%,100% { top: 18%; } 50% { top: 82%; } }
+        .scan-controls {
+            position: relative; z-index: 60; display: flex; align-items: center; justify-content: space-between;
+            gap: 12px; padding: 0 24px 18px; margin-top: auto; width: 100%;
+        }
+        .scan-ctrl-btn {
+            width: 46px; height: 46px; border-radius: 50%; border: 1px solid rgba(194, 198, 216, .7);
+            background: #ffffff; color: var(--siu-primary); font-size: 18px;
+            display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, .18);
+        }
+        .scan-ctrl-btn:active { transform: scale(0.95); }
+        .scan-status-pill {
+            background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(194, 198, 216, .8);
+            color: var(--siu-on-surface); border-radius: 999px; padding: 8px 16px;
+            font-size: 12px; font-weight: 800; white-space: nowrap;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, .14);
+        }
+
+        .btn-scan-main {
+            background: var(--siu-primary-container); color: white; border: none; padding: 14px 20px;
+            min-height: 52px; border-radius: var(--r-xl); font-weight: 800; display: flex; align-items: center;
+            justify-content: center; gap: 12px; width: 100%; transition: transform 0.15s ease;
+        }
+        .btn-scan-main:active { transform: scale(0.97); }
+
+        .stat-card { background: var(--siu-surface-high); border-radius: 16px; border: 1px solid var(--siu-outline-variant); padding: 12px; text-align: center; }
+        .info-label { font-size: 0.78rem; font-weight: 700; color: var(--siu-on-surface-variant); margin-bottom: 4px; }
+
+        .badge-status { padding: 8px 16px; border-radius: 50px; font-weight: 800; font-size: 0.82rem; display: inline-flex; align-items: center; gap: 8px; }
+        .badge-running { background: #dcfce7; color: #166534; border: 2px solid #86efac; }
+        .badge-stopped { background: var(--siu-surface-high); color: var(--siu-on-surface-variant); border: 2px solid var(--siu-outline-variant); }
+
+        .timer-box { background: #ecfdf5; border: 2px solid #a7f3d0; border-radius: 16px; padding: 14px; text-align: center; margin-top: 14px; }
+        .timer-val { font-family: monospace; font-size: 1.6rem; font-weight: 900; color: #047857; }
+
+        .btn-action-start { background: #059669; color: white; font-weight: 900; padding: 16px; border-radius: 18px; border: none; width: 100%; font-size: 1.05rem; box-shadow: 0 8px 16px rgba(5,150,105,.25); display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-action-stop { background: #dc2626; color: white; font-weight: 900; padding: 16px; border-radius: 18px; border: none; width: 100%; font-size: 1.05rem; box-shadow: 0 8px 16px rgba(220,38,38,.25); display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-action-start:active, .btn-action-stop:active { transform: scale(0.97); }
+
+        .form-control-siu { background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant); color: var(--siu-on-surface); border-radius: 12px; padding: 12px 14px; font-size: 0.95rem; font-weight: 600; }
+        .form-control-siu:focus { background: var(--siu-surface); border-color: var(--siu-primary); box-shadow: none; }
+
+        .quick-link-btn {
+            display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 14px;
+            background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant);
+            color: var(--siu-on-surface); text-decoration: none; font-weight: 700; font-size: 0.9rem;
+        }
+        .quick-link-btn:active { transform: scale(0.98); }
+        .quick-link-btn i { font-size: 1.15rem; }
+
+        .log-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--siu-outline-variant); }
+        .log-row:last-child { border-bottom: none; }
+        .badge-off { background: var(--siu-surface-high); color: var(--siu-on-surface-variant); padding: 3px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 800; }
+        .badge-auto { background: #fff3cd; color: #664d03; padding: 3px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 800; }
+        .badge-manual { background: #dae2ff; color: #0057ce; padding: 3px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 800; }
+
+        #toastBox { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; flex-direction: column; gap: 8px; width: calc(100% - 32px); max-width: 420px; }
+        .custom-toast { color: white; padding: 12px 18px; border-radius: 12px; font-weight: 700; font-size: 0.88rem; box-shadow: 0 8px 20px rgba(0,0,0,.2); display: flex; align-items: center; gap: 8px; transition: opacity .4s; }
+    </style>
+</head>
+<body>
+
+<div class="app-shell">
+    <header class="bds-topbar bds-topbar-mobile mb-3">
+        <div class="bds-topbar-inner">
+            <div class="bds-topbar-left">
+                <div class="bds-brand-mark"><i class="bi bi-water"></i></div>
+                <div>
+                    <div class="bds-brand-label">BanDienScan</div>
+                    <div class="bds-topbar-title">Thông tin Máy Bơm</div>
+                </div>
+            </div>
+            <div class="bds-topbar-right">
+                <a href="index.html" class="bds-btn-icon" title="Trang chủ"><i class="bi bi-house-door-fill"></i></a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Quét QR & Tìm thiết bị (Manual UID) -->
+    <div class="card-premium p-3" id="scanCard">
+        <div class="fw-bold mb-2" style="font-size: .8rem; color: var(--siu-on-surface-variant);"><i class="bi bi-search me-1"></i>Quét QR &amp; Tìm máy bơm</div>
+        <div class="d-flex gap-2 mb-2">
+            <div class="input-group">
+                <span class="input-group-text border-0" style="border-radius: 12px 0 0 12px; background-color: var(--siu-surface-high) !important;"><i class="bi bi-hash"></i></span>
+                <input type="text" id="manual_pump_id" class="form-control border-0 form-control-siu" style="border-radius: 0 12px 12px 0;" placeholder="Nhập mã bơm (VD: 5 hoặc PUMP_5)...">
+            </div>
+            <button class="btn btn-primary px-3 fw-bold" style="border-radius: 12px; min-width: 56px;" onclick="handleManualEntry()">GO</button>
+        </div>
+        <button class="btn-scan-main" id="startScan"><i class="bi bi-qr-code-scan"></i> QUÉT MÃ QR MÁY BƠM</button>
+    </div>
+
+    <!-- Scan Frame -->
+    <div class="scan-frame" id="scanFrame">
+        <div class="scan-corner tl"></div>
+        <div class="scan-corner tr"></div>
+        <div class="scan-corner bl"></div>
+        <div class="scan-corner br"></div>
+        <div class="scan-line"></div>
+        <div id="reader"></div>
+        <div class="scan-controls">
+            <button class="scan-ctrl-btn" id="torchBtn" style="display:none;" onclick="toggleTorch()" title="Đèn pin"><i class="bi bi-flashlight"></i></button>
+            <span class="scan-status-pill">Đang quét mã bơm...</span>
+            <button class="scan-ctrl-btn text-danger" onclick="stopScanning()" title="Đóng camera"><i class="bi bi-x-lg"></i></button>
+        </div>
+    </div>
+
+    <!-- Đang xem bar -->
+    <div class="d-flex align-items-center justify-content-between mb-2" id="viewingBar" style="display:none !important;">
+        <span class="small fw-bold text-muted"><i class="bi bi-eye-fill me-1"></i>Đang xem: <span id="viewingPumpName">--</span></span>
+        <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="resetToScan()"><i class="bi bi-arrow-repeat me-1"></i>Đổi bơm khác</button>
+    </div>
+
+    <!-- Skeleton -->
+    <div id="skeletonLoader" style="display:none;" class="card-premium p-3">
+        <div class="placeholder-glow">
+            <div class="placeholder col-8 rounded mb-2" style="height: 24px;"></div>
+            <div class="placeholder col-5 rounded mb-3" style="height: 16px;"></div>
+            <div class="placeholder col-12 rounded" style="height: 60px;"></div>
+        </div>
+    </div>
+
+    <!-- Pump Result -->
+    <div id="pumpResult" style="display:none;">
+        <!-- Info Card -->
+        <div class="card-premium p-3">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                    <span class="badge bg-dark px-2 py-1 rounded-2 font-monospace fw-bold mb-2" style="font-size: .72rem;" id="pumpIdBadge">ID: #--</span>
+                    <h2 class="fw-bold mb-1" style="font-size: 1.3rem; color: var(--siu-on-surface);" id="pumpName">--</h2>
+                    <div class="fw-bold" style="font-size: .88rem; color: var(--siu-on-surface-variant);" id="pumpSource"><i class="bi bi-droplet-fill text-primary me-1"></i>Nguồn: --</div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3 mt-2">
+                <span class="text-uppercase fw-bold small" style="color: var(--siu-on-surface-variant);">Trạng thái hiện tại:</span>
+                <div id="statusBadgeContainer"></div>
+            </div>
+
+            <div class="row g-2 pt-3 border-top" style="border-color: var(--siu-outline-variant) !important;">
+                <div class="col-6">
+                    <div class="stat-card">
+                        <div class="info-label"><i class="bi bi-lightning-charge-fill text-warning me-1"></i>Công suất</div>
+                        <div class="fw-bold fs-5" id="pumpFlowRate">-- <span class="fs-6 fw-normal text-muted">m³/h</span></div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="stat-card">
+                        <div class="info-label"><i class="bi bi-clock-history text-info me-1"></i>Thao tác cuối</div>
+                        <div class="fw-bold" style="font-size: .88rem;" id="lastEventTime">--</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="stat-card">
+                        <div class="info-label"><i class="bi bi-cpu text-info me-1"></i>NA111</div>
+                        <div class="fw-bold" id="pumpNa111">--</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="stat-card">
+                        <div class="info-label"><i class="bi bi-hdd-network text-success me-1"></i>Modbus</div>
+                        <div class="fw-bold" id="pumpModbus">--</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="timerContainer" style="display:none;" class="timer-box">
+                <div class="text-uppercase fw-bold small mb-1" style="color: #047857;">⏱️ Máy đang chạy liên tục</div>
+                <div class="timer-val" id="timerDisplay">00:00:00</div>
+                <div class="fw-bold mt-1" style="font-size: .82rem; color: #047857;">Ước tính sản lượng: <span id="estVolume">0 m³</span></div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="card-premium p-3">
+            <div class="fw-bold mb-3" style="font-size: .95rem;"><i class="bi bi-person-badge-fill text-success me-2"></i>Thao tác vận hành</div>
+
+            <div class="mb-2">
+                <label class="info-label">Người vận hành <span class="text-danger">*</span></label>
+                <input type="text" id="operatorInput" class="form-control form-control-siu" placeholder="Nhập tên nhân viên...">
+            </div>
+            <div class="mb-2">
+                <label class="info-label">Thời gian thực hiện</label>
+                <input type="datetime-local" id="eventTimeInput" class="form-control form-control-siu">
+            </div>
+            <div class="mb-3">
+                <label class="info-label">Ghi chú (không bắt buộc)</label>
+                <input type="text" id="notesInput" class="form-control form-control-siu" placeholder="Áp suất, tiếng động máy...">
+            </div>
+
+            <div id="actionButtonContainer" class="mb-3"></div>
+
+            <div class="row g-2">
+                <div class="col-6"><a class="quick-link-btn" id="linkCheckbom" href="#"><i class="bi bi-clipboard2-check text-primary"></i> Tờ check vận hành</a></div>
+                <div class="col-6"><a class="quick-link-btn" id="linkHengio" href="#"><i class="bi bi-alarm text-warning"></i> Cài đặt đồng hồ</a></div>
+            </div>
+        </div>
+
+        <!-- Nhật ký -->
+        <div class="card-premium p-3">
+            <div class="fw-bold mb-2" style="font-size: .95rem;"><i class="bi bi-journal-text text-primary me-2"></i>Nhật ký vận hành gần đây</div>
+            <div id="historyList">
+                <div class="text-center text-muted small py-3"><span class="spinner-border spinner-border-sm me-2"></span>Đang tải nhật ký...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="toastBox"></div>
+
+<script>
+    // Danh mục bơm — fallback khi offline, đồng bộ từ Google Sheets (2026-07-15)
+    let PUMP_DICT = JSON.parse(localStorage.getItem('bds_pumps_dict')) || {
+        "1":  { id: 1,  name: "Bơm 160kW hút từ hồ nhà bảo dưỡng 1",     flowRate: 244,   source: "Hồ nhà bảo dưỡng 1", settingId: "PUMP-160KW-BAO-DUONG-01",     monitorOnly: true,  na111Id: "NA111-02", modbusId: "1"  },
+        "2":  { id: 2,  name: "Bơm hoả tiễn 18,5kW",                       flowRate: 27.95, source: "Hồ nhà bảo dưỡng 1", settingId: "PUMP-HOATIEN-18_5KW_01",     monitorOnly: true,  na111Id: "NA111-02", modbusId: "3"  },
+        "3":  { id: 3,  name: "Bơm hoả tiễn 30kW",                         flowRate: 45.33, source: "Hồ nhà bảo dưỡng 1", settingId: "PUMP-HOATIEN-30KW",          monitorOnly: true,  na111Id: "NA111-02", modbusId: "2"  },
+        "4":  { id: 4,  name: "Bơm hoả tiễn 22kW",                         flowRate: 45.33, source: "Hồ nhà bảo dưỡng 1", settingId: "PUMP-HOATIEN-22KW_01",       monitorOnly: true,  na111Id: "NA111-02", modbusId: "4"  },
+        "5":  { id: 5,  name: "Bơm hoả tiễn 18,5kW",                       flowRate: 27.95, source: "Hồ 3",               settingId: "PUMP-HOATIEN-18_5KW_02",     monitorOnly: true,  na111Id: "NA111-04", modbusId: "7"  },
+        "6":  { id: 6,  name: "Bơm hoả tiễn 22kW",                         flowRate: 45.33, source: "Hồ 3",               settingId: "PUMP-HOATIEN-22KW_02",       monitorOnly: true,  na111Id: "NA111-04", modbusId: "8"  },
+        "7":  { id: 7,  name: "Bơm LK3",  flowRate: 3,  source: "Giếng khoan LK3",  settingId: "PUMP-LK3",  monitorOnly: true, na111Id: "", modbusId: "" },
+        "8":  { id: 8,  name: "Bơm LK4",  flowRate: 4,  source: "Giếng khoan LK4",  settingId: "PUMP-LK4",  monitorOnly: true, na111Id: "", modbusId: "" },
+        "9":  { id: 9,  name: "Bơm LK5",  flowRate: 5,  source: "Giếng khoan LK5",  settingId: "PUMP-LK5",  monitorOnly: true, na111Id: "", modbusId: "" },
+        "10": { id: 10, name: "Bơm LK6",  flowRate: 6,  source: "Giếng khoan LK6",  settingId: "PUMP-LK6",  monitorOnly: true, na111Id: "", modbusId: "" },
+        "11": { id: 11, name: "Bơm LK7",  flowRate: 7,  source: "Giếng khoan LK7",  settingId: "PUMP-LK7",  monitorOnly: true, na111Id: "", modbusId: "" },
+        "12": { id: 12, name: "Bơm LK8",  flowRate: 8,  source: "Giếng khoan LK8",  settingId: "PUMP-LK8",  monitorOnly: true, na111Id: "", modbusId: "" },
+        "13": { id: 13, name: "Bơm LK9",  flowRate: 9,  source: "Giếng khoan LK9",  settingId: "PUMP-LK9",  monitorOnly: true, na111Id: "", modbusId: "" },
+        "14": { id: 14, name: "Bơm LK10", flowRate: 10, source: "Giếng khoan LK10", settingId: "PUMP-LK10", monitorOnly: true, na111Id: "", modbusId: "" },
+        "15": { id: 15, name: "Bơm LK11", flowRate: 11, source: "Giếng khoan LK11", settingId: "PUMP-LK11", monitorOnly: true, na111Id: "", modbusId: "" },
+        "16": { id: 16, name: "Bơm LK12", flowRate: 12, source: "Giếng khoan LK12", settingId: "PUMP-LK12", monitorOnly: true, na111Id: "", modbusId: "" },
+        "17": { id: 17, name: "Bơm LK13", flowRate: 1,  source: "Giếng khoan LK13", settingId: "PUMP-LK13", monitorOnly: true, na111Id: "", modbusId: "" },
+        "18": { id: 18, name: "Bơm LK14", flowRate: 1,  source: "Giếng khoan LK14", settingId: "PUMP-LK14", monitorOnly: true, na111Id: "", modbusId: "" },
+        "19": { id: 19, name: "Bơm LK15", flowRate: 1,  source: "Giếng khoan LK15", settingId: "PUMP-LK15", monitorOnly: true, na111Id: "", modbusId: "" },
+        "20": { id: 20, name: "Bơm hoả tiễn 30kW số 01",                   flowRate: 86,    source: "Hồ trung tâm",      settingId: "PUMP-HO-TRUNG-TAM-01",        monitorOnly: true,  na111Id: "NA111-06", modbusId: "9"  },
+        "21": { id: 21, name: "Bơm hoả tiễn 30kW số 02",                   flowRate: 86,    source: "Hồ trung tâm",      settingId: "PUMP-HO-TRUNG-TAM-02",        monitorOnly: true,  na111Id: "NA111-06", modbusId: "10" },
+        "24": { id: 24, name: "Bơm 160kW số 01 hút từ hồ nước suối Cun",   flowRate: 154,   source: "Hồ nước suối Cun",  settingId: "PUMP-SUOI-CUN-160KW",         monitorOnly: true,  na111Id: "NA111-05", modbusId: "6"  },
+        "25": { id: 25, name: "Bơm tưới cỏ hồ trung tâm (rainbird)",       flowRate: 0,     source: "Hồ trung tâm",      settingId: "PUMP-HO-TRUNG-TAM-RAINBIRD",  monitorOnly: true,  na111Id: "NA111-06", modbusId: "11" },
+        "26": { id: 26, name: "Bơm tưới cỏ hồ 16-17 (rainbird)",           flowRate: 0,     source: "Hồ 16-17",          settingId: "PUMP-HO-16-17-RAINBIRD",      monitorOnly: true,  na111Id: "NA111-07", modbusId: "12" }
+    };
+
+    let currentPump = null;
+    let currentStatus = "STOPPED";
+    let lastEvent = null;
+    let timerInterval = null;
+    let scanner = null;
+    let isScanProcessing = false;
+    let currentVideoTrack = null;
+
+    function showToast(msg, type = 'success') {
+        const box = document.getElementById('toastBox');
+        const toast = document.createElement('div');
+        toast.className = 'custom-toast';
+        toast.style.background = type === 'success' ? '#10b981' : (type === 'warning' ? '#f59e0b' : '#ef4444');
+        toast.innerHTML = `<i class="bi ${type === 'success' ? 'bi-check-circle' : 'bi-exclamation-triangle'}"></i> ${msg}`;
+        box.appendChild(toast);
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 400); }, 3000);
+    }
+
+    function resetToCurrentTime() {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('eventTimeInput').value = now.toISOString().slice(0, 16);
+    }
+
+    async function loadServerPumps() {
+        try {
+            const res = await bdsApiFetch('getPumps');
+            if (res.status === 'success' && Array.isArray(res.data) && res.data.length > 0) {
+                const newDict = {};
+                res.data.forEach(p => { newDict[p.id] = p; });
+                PUMP_DICT = newDict;
+                localStorage.setItem('bds_pumps_dict', JSON.stringify(PUMP_DICT));
+            }
+        } catch (err) {
+            console.warn('Không nạp được danh sách bơm mới, dùng cache/fallback:', err);
+        }
+    }
+
+    // Trích mã bơm từ nội dung QR: hỗ trợ URL (?pumpId=5), "PUMP_5"/"PUMP-5", hoặc số trần
+    function extractPumpId(raw) {
+        if (!raw) return null;
+        const str = String(raw).trim();
+        try {
+            const url = new URL(str);
+            const fromQuery = url.searchParams.get('pumpId') || url.searchParams.get('id');
+            if (fromQuery) return fromQuery;
+        } catch (_) { /* không phải URL, bỏ qua */ }
+        const m = str.match(/PUMP[_-]?(\w+)/i);
+        if (m) return m[1];
+        return str;
+    }
+
+    function handleManualEntry() {
+        const val = document.getElementById('manual_pump_id').value.trim();
+        if (!val) { showToast('Vui lòng nhập mã bơm', 'warning'); return; }
+        loadPump(extractPumpId(val));
+    }
+
+    // ── Quét QR camera (đồng bộ UI với module chính index.html) ──
+    function getScanner() {
+        if (!scanner) scanner = new Html5Qrcode('reader');
+        return scanner;
+    }
+
+    document.getElementById('startScan').addEventListener('click', () => {
+        const reader = document.getElementById('reader');
+        const scanFrame = document.getElementById('scanFrame');
+        const torchBtn = document.getElementById('torchBtn');
+        scanFrame.style.display = 'flex';
+        scanFrame.classList.add('scanning');
+        isScanProcessing = false;
+
+        const s = getScanner();
+        s.start({ facingMode: 'environment' }, {
+            fps: 20,
+            qrbox: (vw, vh) => { const size = Math.max(50, Math.min(260, vw - 20, vh - 20)); return { width: size, height: size }; },
+            aspectRatio: 1.777778,
+            experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+        }, (decodedText) => {
+            if (isScanProcessing) return;
+            isScanProcessing = true;
+            if (navigator.vibrate) navigator.vibrate(100);
+            scanFrame.classList.remove('scanning');
+            scanFrame.style.display = 'none';
+            s.stop().then(() => { isScanProcessing = false; currentVideoTrack = null; })
+                     .catch(() => { isScanProcessing = false; currentVideoTrack = null; });
+            loadPump(extractPumpId(decodedText));
+        }, () => {});
+
+        setTimeout(() => {
+            try {
+                const track = s.getRunningTrack();
+                if (track) {
+                    const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+                    if (capabilities.torch) { torchBtn.style.display = 'block'; currentVideoTrack = track; }
+                }
+            } catch (e) { console.warn('Không lấy được torch capability', e); }
+        }, 1500);
+    });
+
+    function stopScanning() {
+        const scanFrame = document.getElementById('scanFrame');
+        const torchBtn = document.getElementById('torchBtn');
+        scanFrame.classList.remove('scanning');
+        scanFrame.style.display = 'none';
+        torchBtn.style.display = 'none';
+        if (scanner) {
+            scanner.stop().then(() => { isScanProcessing = false; currentVideoTrack = null; }).catch(() => {});
+        }
+    }
+
+    async function toggleTorch() {
+        try {
+            const track = currentVideoTrack;
+            if (!track) return;
+            const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+            if (!capabilities.torch) return;
+            const settings = track.getSettings();
+            await track.applyConstraints({ advanced: [{ torch: !settings.torch }] });
+            document.getElementById('torchBtn').classList.toggle('active', !settings.torch);
+        } catch (e) { console.warn('Torch toggle failed:', e); }
+    }
+
+    // ── Tra cứu & hiển thị thông tin bơm ──
+    function resetToScan() {
+        document.getElementById('pumpResult').style.display = 'none';
+        document.getElementById('viewingBar').style.display = 'none';
+        document.getElementById('scanCard').style.display = 'block';
+        if (timerInterval) clearInterval(timerInterval);
+        history.replaceState(null, '', 'pump_info.html');
+    }
+
+    async function loadPump(idRaw) {
+        if (!idRaw) { showToast('Không nhận diện được mã bơm', 'danger'); return; }
+        const id = String(idRaw).trim();
+
+        document.getElementById('scanCard').style.display = 'none';
+        document.getElementById('pumpResult').style.display = 'none';
+        document.getElementById('skeletonLoader').style.display = 'block';
+
+        currentPump = PUMP_DICT[id] || Object.values(PUMP_DICT).find(p => String(p.id) === id)
+            || { id, name: `Máy Bơm #${id}`, flowRate: 1, source: 'Chưa rõ nguồn', settingId: id, na111Id: '', modbusId: '' };
+
+        if (!PUMP_DICT[id]) showToast(`Bơm mã ${id} chưa có trong danh mục, hiển thị thông tin tối giản`, 'warning');
+
+        history.replaceState(null, '', `pump_info.html?pumpId=${encodeURIComponent(currentPump.id)}`);
+
+        document.getElementById('viewingPumpName').innerText = currentPump.name;
+        document.getElementById('viewingBar').style.display = 'flex';
+
+        document.getElementById('linkCheckbom').href = `checkbom/?pumpId=${currentPump.id}`;
+        document.getElementById('linkHengio').href = `hengio/?settingId=${currentPump.settingId || currentPump.id}`;
+
+        resetToCurrentTime();
+        await loadPumpStatus();
+        loadHistory();
+
+        document.getElementById('skeletonLoader').style.display = 'none';
+        document.getElementById('pumpResult').style.display = 'block';
+    }
+
+    async function loadPumpStatus() {
+        currentStatus = 'STOPPED';
+        lastEvent = null;
+        try {
+            const res = await bdsApiFetch('getMeterStatus', { pumpId: currentPump.id });
+            if (res.status === 'success' && res.lastEvent) {
+                lastEvent = res.lastEvent;
+                currentStatus = lastEvent.action === 'START' ? 'RUNNING' : 'STOPPED';
+            } else {
+                const localState = localStorage.getItem(`pump_state_${currentPump.id}`);
+                if (localState) { const p = JSON.parse(localState); currentStatus = p.status; lastEvent = p.lastEvent; }
+            }
+        } catch (err) {
+            const localState = localStorage.getItem(`pump_state_${currentPump.id}`);
+            if (localState) { const p = JSON.parse(localState); currentStatus = p.status; lastEvent = p.lastEvent; }
+        }
+        renderPumpUI();
+    }
+
+    function renderPumpUI() {
+        document.getElementById('pumpIdBadge').innerText = `ID: #${currentPump.id}`;
+        document.getElementById('pumpName').innerText = currentPump.name;
+        document.getElementById('pumpSource').innerHTML = `<i class="bi bi-droplet-fill text-primary me-1"></i>Nguồn: ${currentPump.source || 'Chưa rõ'}`;
+        document.getElementById('pumpFlowRate').innerHTML = `${currentPump.flowRate ?? '--'} <span class="fs-6 fw-normal text-muted">m³/h</span>`;
+        document.getElementById('pumpNa111').innerText = currentPump.na111Id || 'N/A';
+        document.getElementById('pumpModbus').innerText = currentPump.modbusId || 'N/A';
+
+        if (lastEvent) {
+            const d = new Date(lastEvent.timestamp);
+            const dateStr = d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('lastEventTime').innerText = `${lastEvent.action === 'START' ? 'Bật' : 'Tắt'} lúc ${dateStr}`;
+        } else {
+            document.getElementById('lastEventTime').innerText = 'Chưa có';
+        }
+
+        const statusContainer = document.getElementById('statusBadgeContainer');
+        const btnContainer = document.getElementById('actionButtonContainer');
+        const timerContainer = document.getElementById('timerContainer');
+
+        if (currentStatus === 'RUNNING') {
+            statusContainer.innerHTML = `<span class="badge-status badge-running"><span class="spinner-grow spinner-grow-sm text-success"></span> ĐANG CHẠY</span>`;
+            btnContainer.innerHTML = `<button class="btn-action-stop" onclick="submitAction('STOP')"><i class="bi bi-power fs-4"></i> TẮT MÁY BƠM</button>`;
+            timerContainer.style.display = 'block';
+            startTimer(lastEvent ? lastEvent.timestamp : new Date());
+        } else {
+            statusContainer.innerHTML = `<span class="badge-status badge-stopped"><i class="bi bi-pause-circle-fill"></i> ĐANG DỪNG</span>`;
+            btnContainer.innerHTML = `<button class="btn-action-start" onclick="submitAction('START')"><i class="bi bi-rocket-takeoff-fill fs-4"></i> BẬT MÁY BƠM</button>`;
+            timerContainer.style.display = 'none';
+            if (timerInterval) clearInterval(timerInterval);
+        }
+    }
+
+    function startTimer(startTimeStr) {
+        if (timerInterval) clearInterval(timerInterval);
+        const startMs = new Date(startTimeStr).getTime();
+        function tick() {
+            const diffSec = Math.max(0, Math.floor((Date.now() - startMs) / 1000));
+            const hrs = Math.floor(diffSec / 3600), mins = Math.floor((diffSec % 3600) / 60), secs = diffSec % 60;
+            document.getElementById('timerDisplay').innerText = `${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+            const estVol = ((diffSec / 3600) * (currentPump.flowRate || 0)).toFixed(2);
+            document.getElementById('estVolume').innerText = `${estVol} m³`;
+        }
+        tick();
+        timerInterval = setInterval(tick, 1000);
+    }
+
+    async function submitAction(action) {
+        const operator = document.getElementById('operatorInput').value.trim();
+        const notes = document.getElementById('notesInput').value.trim();
+        const customTimeVal = document.getElementById('eventTimeInput').value;
+
+        if (!operator) { showToast('Vui lòng nhập tên người vận hành', 'warning'); return; }
+        localStorage.setItem('cmms_op_name', operator);
+
+        const selectedDate = customTimeVal ? new Date(customTimeVal) : new Date();
+        const timestampIso = selectedDate.toISOString();
+        const eventData = { action, timestamp: timestampIso, operator, notes };
+        const nextStatus = action === 'START' ? 'RUNNING' : 'STOPPED';
+
+        localStorage.setItem(`pump_state_${currentPump.id}`, JSON.stringify({ status: nextStatus, lastEvent: eventData }));
+
+        try {
+            await bdsApiPost('submitMeterReading', {
+                meterId: `PUMP_${currentPump.id}`,
+                pumpId: currentPump.id,
+                pumpName: currentPump.name,
+                eventAction: action,
+                operator,
+                notes,
+                timestamp: timestampIso
+            });
+
+            currentStatus = nextStatus;
+            lastEvent = eventData;
+            const formattedTime = selectedDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+            showToast(action === 'START'
+                ? `Đã ghi nhận BẬT máy bơm lúc ${formattedTime}`
+                : `Đã TẮT máy bơm lúc ${formattedTime} và lưu nhật ký`);
+            document.getElementById('notesInput').value = '';
+            resetToCurrentTime();
+            loadHistory();
+        } catch (err) {
+            showToast('Đã lưu thao tác trên thiết bị, sẽ đồng bộ khi có mạng', 'warning');
+            currentStatus = nextStatus;
+            lastEvent = eventData;
+        } finally {
+            renderPumpUI();
+        }
+    }
+
+    async function loadHistory() {
+        const el = document.getElementById('historyList');
+        el.innerHTML = '<div class="text-center text-muted small py-3"><span class="spinner-border spinner-border-sm me-2"></span>Đang tải nhật ký...</div>';
+        try {
+            const res = await bdsApiFetch('getPumpChecks', { pumpId: currentPump.id, limit: 15 });
+            if (res.status === 'success' && Array.isArray(res.history)) {
+                if (res.history.length === 0) {
+                    el.innerHTML = '<div class="text-center text-muted small py-3">Chưa có nhật ký vận hành nào.</div>';
+                    return;
+                }
+                el.innerHTML = res.history.map(row => {
+                    const d = new Date(row.timestamp);
+                    const dateStr = d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+                    const timeStr = d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+                    let badgeClass = 'badge-off';
+                    if (row.status === 'Tự động') badgeClass = 'badge-auto';
+                    if (row.status === 'Bằng tay') badgeClass = 'badge-manual';
+                    return `
+                        <div class="log-row">
+                            <div>
+                                <div class="fw-bold" style="font-size:.85rem;">${timeStr} · ${dateStr}</div>
+                                <div class="text-muted" style="font-size:.78rem;">${escapeHtml(row.operator || '--')}${row.notes ? ' · ' + escapeHtml(row.notes) : ''}</div>
+                            </div>
+                            <span class="${badgeClass}">${escapeHtml(row.status || '--')}</span>
+                        </div>`;
+                }).join('');
+            } else {
+                el.innerHTML = `<div class="text-center text-danger small py-3">Lỗi tải nhật ký: ${escapeHtml(res.message || 'Không xác định')}</div>`;
+            }
+        } catch (err) {
+            el.innerHTML = '<div class="text-center text-danger small py-3">Lỗi kết nối, không tải được nhật ký.</div>';
+        }
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[ch]));
+    }
+
+    window.addEventListener('load', async () => {
+        await loadServerPumps();
+        const urlParams = new URLSearchParams(window.location.search);
+        const startId = urlParams.get('pumpId') || urlParams.get('id');
+        const savedOp = localStorage.getItem('cmms_op_name');
+        if (savedOp) document.getElementById('operatorInput').value = savedOp;
+        resetToCurrentTime();
+        if (startId) loadPump(extractPumpId(startId));
+    });
+</script>
+</body>
+</html>

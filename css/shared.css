@@ -74,6 +74,28 @@
   /* --- Transition --- */
   --bds-ease:       0.2s ease;
   --bds-ease-fast:  0.12s ease;
+
+  /* --- Alias "Scan Industrial Utility" (--siu-*) ---
+     Dùng chung cho mọi trang (index, nhatky, ...). Nếu chỉ định nghĩa
+     trong index.html thì các trang con sẽ bị nền trong suốt. */
+  --siu-bg:                   var(--bds-bg);
+  --siu-surface-low:          var(--bds-surface-low);
+  --siu-surface:              var(--bds-surface);
+  --siu-surface-high:         var(--bds-surface-high);
+  --siu-surface-highest:      var(--bds-surface-highest);
+  --siu-on-surface:           var(--bds-on-surface);
+  --siu-on-surface-variant:   var(--bds-on-surface-variant);
+  --siu-outline:              var(--bds-outline);
+  --siu-outline-variant:      var(--bds-outline-variant);
+  --siu-primary:              var(--bds-primary-dark);
+  --siu-primary-container:    var(--bds-primary);
+  --siu-secondary-container:  var(--bds-primary-light);
+  --siu-on-secondary-container: var(--bds-on-surface);
+  --siu-success:              var(--bds-success);
+  --siu-error-container:      var(--bds-danger);
+  --siu-on-error-container:   var(--bds-on-primary);
+  --siu-tertiary-container:   var(--bds-warning-bg);
+  --siu-tertiary:             var(--bds-warning-ink);
 }
 
 

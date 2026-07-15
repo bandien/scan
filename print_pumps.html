@@ -254,7 +254,7 @@
             sheet.innerHTML = "";
 
             list.forEach((pump, idx) => {
-                const targetUrl = `https://bandien.github.io/scan/checkbom/?pumpId=${pump.id}`;
+                const targetUrl = `https://bandien.github.io/scan/pump_info.html?pumpId=${pump.id}`;
                 
                 const label = document.createElement("section");
                 label.className = "label";
@@ -276,7 +276,7 @@
                         <span class="uid">PUMP_${pump.id}</span>
                     </div>
 
-                    <div class="url">/checkbom/?pumpId=${pump.id}</div>
+                    <div class="url">/pump_info.html?pumpId=${pump.id}</div>
                 `;
                 sheet.appendChild(label);
 

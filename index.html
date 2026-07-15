@@ -92,6 +92,10 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
 
+        /* Submenu nhánh trong dropdown (vd: "Quản lý máy bơm") */
+        .chevron-icon { transition: transform 0.2s ease; }
+        .dropdown-item[aria-expanded="true"] .chevron-icon { transform: rotate(180deg); }
+
         /* Skeleton Loading Effect (dark shimmer) */
         .skeleton {
             background: var(--siu-surface-high);
@@ -111,18 +115,22 @@
 
         /* ===== Khung quét theo mockup "Tìm kiếm" ===== */
         .scan-frame {
+            --scan-win: min(284px, calc(100vw - 72px)); /* cạnh cửa sổ quét, co theo màn hình */
             position: relative; background: #080b12; border-radius: var(--r-lg); overflow: hidden;
             min-height: min(100vw, 408px); display: none; flex-direction: column;
             justify-content: center; margin: 10px 0 20px 0; isolation: isolate;
             border: 1px solid var(--siu-outline-variant);
         }
         .scan-frame::before {
-            content: ""; position: absolute; inset: 0;
-            background:
-                linear-gradient(rgba(16, 19, 27, 0.4), rgba(16, 19, 27, 0.4)),
-                radial-gradient(circle at center, transparent 150px, rgba(16, 19, 27, 0.82) 151px);
+            /* Cửa sổ quét vuông bo góc, khớp với 4 góc .scan-corner (284x284) */
+            content: ""; position: absolute; top: 50%; left: 50%;
+            width: var(--scan-win); height: var(--scan-win); transform: translate(-50%, -50%);
+            border-radius: 16px;
+            box-shadow: 0 0 0 9999px rgba(16, 19, 27, 0.72);
             z-index: 20; pointer-events: none;
         }
+        /* Ẩn khung vuông đen mặc định của html5-qrcode — dùng overlay SIU thay thế */
+        #reader #qr-shaded-region { display: none !important; }
         .scan-frame::after {
             content: ""; position: absolute; inset: 0;
             background:
@@ -131,12 +139,12 @@
             opacity: .45; z-index: 5; pointer-events: none;
         }
         .scan-corner { position: absolute; width: 38px; height: 38px; border: 4px solid #b1c5ff; pointer-events: none; z-index: 50; }
-        .scan-corner.tl { top: calc(50% - 142px); left: calc(50% - 142px); border-right: 0; border-bottom: 0; border-top-left-radius: 14px; }
-        .scan-corner.tr { top: calc(50% - 142px); right: calc(50% - 142px); border-left: 0; border-bottom: 0; border-top-right-radius: 14px; }
-        .scan-corner.bl { bottom: calc(50% - 142px); left: calc(50% - 142px); border-right: 0; border-top: 0; border-bottom-left-radius: 14px; }
-        .scan-corner.br { bottom: calc(50% - 142px); right: calc(50% - 142px); border-left: 0; border-top: 0; border-bottom-right-radius: 14px; }
+        .scan-corner.tl { top: calc(50% - var(--scan-win)/2); left: calc(50% - var(--scan-win)/2); border-right: 0; border-bottom: 0; border-top-left-radius: 14px; }
+        .scan-corner.tr { top: calc(50% - var(--scan-win)/2); right: calc(50% - var(--scan-win)/2); border-left: 0; border-bottom: 0; border-top-right-radius: 14px; }
+        .scan-corner.bl { bottom: calc(50% - var(--scan-win)/2); left: calc(50% - var(--scan-win)/2); border-right: 0; border-top: 0; border-bottom-left-radius: 14px; }
+        .scan-corner.br { bottom: calc(50% - var(--scan-win)/2); right: calc(50% - var(--scan-win)/2); border-left: 0; border-top: 0; border-bottom-right-radius: 14px; }
         .scan-line {
-            position: absolute; left: calc(50% - 140px); right: calc(50% - 140px);
+            position: absolute; left: calc(50% - var(--scan-win)/2 + 4px); right: calc(50% - var(--scan-win)/2 + 4px);
             height: 2px; background: #b1c5ff; box-shadow: 0 0 15px #0e6efd;
             pointer-events: none; z-index: 50; animation: scanSweep 3s ease-in-out infinite; display: none;
         }
@@ -371,7 +379,7 @@
                 </span>
                 
                 <div class="dropdown">
-                    <button class="btn btn-sm rounded-pill border px-2 py-2 dropdown-toggle d-flex align-items-center" style="background: var(--siu-surface-high); color: var(--siu-on-surface); border-color: var(--siu-outline-variant);" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button class="btn btn-sm rounded-pill border px-2 py-2 dropdown-toggle d-flex align-items-center" style="background: var(--siu-surface-high); color: var(--siu-on-surface); border-color: var(--siu-outline-variant);" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                         <i class="bi bi-grid text-primary" style="font-size: 18px;"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end rounded-4 mt-2 p-2" style="min-width: 200px; background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant);">
@@ -387,9 +395,20 @@
                         <li><hr class="dropdown-divider opacity-50"></li>
                         <li><a class="dropdown-item rounded-3 py-2" href="architecture.html" target="_blank"><i class="bi bi-diagram-3 me-2 text-secondary"></i> Sơ đồ Hệ thống</a></li>
                         <li><a class="dropdown-item rounded-3 py-2" href="nhatky/"><i class="bi bi-journal-check me-2 text-primary"></i> Nhật ký công việc</a></li>
-                        <li><a class="dropdown-item rounded-3 py-2" href="hengio/"><i class="bi bi-alarm me-2 text-primary"></i> Cài đặt đồng hồ bơm</a></li>
-                        <li><a class="dropdown-item rounded-3 py-2" href="checkbom/"><i class="bi bi-clipboard2-check me-2 text-primary"></i> Tờ check vận hành bơm</a></li>
-                        <li><a class="dropdown-item rounded-3 py-2" href="print_pumps.html"><i class="bi bi-qr-code me-2 text-primary"></i> In mã QR máy bơm</a></li>
+                        <li>
+                            <a class="dropdown-item rounded-3 py-2 d-flex align-items-center justify-content-between" href="#" data-bs-toggle="collapse" data-bs-target="#pumpMenuGroupHeader" aria-expanded="false">
+                                <span><i class="bi bi-water me-2 text-primary"></i> Quản lý máy bơm</span>
+                                <i class="bi bi-chevron-down chevron-icon small"></i>
+                            </a>
+                            <div class="collapse" id="pumpMenuGroupHeader">
+                                <ul class="list-unstyled mb-1">
+                                    <li><a class="dropdown-item rounded-3 py-2 ps-4" href="pump_info.html"><i class="bi bi-qr-code-scan me-2 text-primary"></i> Thông tin máy bơm (Scan)</a></li>
+                                    <li><a class="dropdown-item rounded-3 py-2 ps-4" href="checkbom/"><i class="bi bi-clipboard2-check me-2 text-primary"></i> Tờ check vận hành bơm</a></li>
+                                    <li><a class="dropdown-item rounded-3 py-2 ps-4" href="hengio/"><i class="bi bi-alarm me-2 text-warning"></i> Cài đặt đồng hồ bơm</a></li>
+                                    <li><a class="dropdown-item rounded-3 py-2 ps-4" href="print_pumps.html"><i class="bi bi-qr-code me-2 text-primary"></i> In mã QR máy bơm</a></li>
+                                </ul>
+                            </div>
+                        </li>
                         <li><a class="dropdown-item rounded-3 py-2" href="phongvan/"><i class="bi bi-person-workspace me-2 text-primary"></i> Câu hỏi phỏng vấn</a></li>
                         <li><a class="dropdown-item rounded-3 py-2" href="status.html" target="_blank"><i class="bi bi-cpu-fill me-2 text-success"></i> Giám sát Server Uptime</a></li>
                         <li><a class="dropdown-item rounded-3 py-2" href="changelog.html" target="_blank"><i class="bi bi-history me-2 text-info"></i> Nhật ký Thay đổi (Log)</a></li>
@@ -1633,7 +1652,7 @@
             <span>Quét QR</span>
         </button>
         <div class="dropup" style="flex: 1; display: flex; justify-content: center; align-items: center;">
-            <button class="bottom-nav-item border-0 bg-transparent w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <button class="bottom-nav-item border-0 bg-transparent w-100" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                 <div class="nav-icon-wrapper">
                     <span class="material-symbols-outlined">menu</span>
                 </div>
@@ -1642,9 +1661,20 @@
             <ul class="dropdown-menu dropdown-menu-end mb-2 shadow-lg border-0 rounded-4" style="min-width: 220px; background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant) !important; z-index: 1050;">
                 <li><h6 class="dropdown-header text-muted small fw-bold"><i class="bi bi-grid-fill me-1"></i> MENU TIỆN ÍCH</h6></li>
                 <li><hr class="dropdown-divider opacity-50"></li>
-                <li><a class="dropdown-item rounded-3 py-2" href="checkbom/"><i class="bi bi-clipboard2-check me-2 text-primary"></i> Tờ check vận hành bơm</a></li>
-                <li><a class="dropdown-item rounded-3 py-2" href="print_pumps.html"><i class="bi bi-qr-code me-2 text-primary"></i> In mã QR máy bơm</a></li>
-                <li><a class="dropdown-item rounded-3 py-2" href="hengio/"><i class="bi bi-alarm me-2 text-warning"></i> Cài đặt đồng hồ bơm</a></li>
+                <li>
+                    <a class="dropdown-item rounded-3 py-2 d-flex align-items-center justify-content-between" href="#" data-bs-toggle="collapse" data-bs-target="#pumpMenuGroupBottom" aria-expanded="false">
+                        <span><i class="bi bi-water me-2 text-primary"></i> Quản lý máy bơm</span>
+                        <i class="bi bi-chevron-down chevron-icon small"></i>
+                    </a>
+                    <div class="collapse" id="pumpMenuGroupBottom">
+                        <ul class="list-unstyled mb-1">
+                            <li><a class="dropdown-item rounded-3 py-2 ps-4" href="pump_info.html"><i class="bi bi-qr-code-scan me-2 text-primary"></i> Thông tin máy bơm (Scan)</a></li>
+                            <li><a class="dropdown-item rounded-3 py-2 ps-4" href="checkbom/"><i class="bi bi-clipboard2-check me-2 text-primary"></i> Tờ check vận hành bơm</a></li>
+                            <li><a class="dropdown-item rounded-3 py-2 ps-4" href="hengio/"><i class="bi bi-alarm me-2 text-warning"></i> Cài đặt đồng hồ bơm</a></li>
+                            <li><a class="dropdown-item rounded-3 py-2 ps-4" href="print_pumps.html"><i class="bi bi-qr-code me-2 text-primary"></i> In mã QR máy bơm</a></li>
+                        </ul>
+                    </div>
+                </li>
                 <li><a class="dropdown-item rounded-3 py-2" href="nhatky/index.html#stats"><i class="bi bi-bar-chart-fill me-2 text-success"></i> Báo cáo thống kê</a></li>
                 <li><a class="dropdown-item rounded-3 py-2" href="phanca/"><i class="bi bi-calendar-range me-2 text-info"></i> Phân ca trực</a></li>
                 <li><a class="dropdown-item rounded-3 py-2" href="phongvan/"><i class="bi bi-person-workspace me-2 text-secondary"></i> Câu hỏi phỏng vấn</a></li>
@@ -1814,8 +1844,9 @@
         const s = getScanner();
         s.start({ facingMode: "environment" }, 
         { 
-            fps: 20, 
-            qrbox: {width: 280, height: 180},
+            fps: 20,
+            // Vùng giải mã vuông, tự co theo video để không vượt quá chiều cao khung hình
+            qrbox: (vw, vh) => { const s = Math.max(50, Math.min(280, vw - 20, vh - 20)); return { width: s, height: s }; },
             aspectRatio: 1.777778,
             experimentalFeatures: {
                 useBarCodeDetectorIfSupported: true
@@ -4158,8 +4189,9 @@
         const s = getScanner();
         s.start({ facingMode: "environment" }, 
         { 
-            fps: 20, 
-            qrbox: {width: 280, height: 180}, 
+            fps: 20,
+            // Vùng giải mã vuông, tự co theo video để không vượt quá chiều cao khung hình
+            qrbox: (vw, vh) => { const s = Math.max(50, Math.min(280, vw - 20, vh - 20)); return { width: s, height: s }; },
             aspectRatio: 1.777778,
             experimentalFeatures: {
                 useBarCodeDetectorIfSupported: true
