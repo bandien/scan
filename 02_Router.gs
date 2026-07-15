@@ -523,8 +523,8 @@ function handleSubmitPumpCheck(params) {
   let sheet = ss.getSheetByName("PumpChecks");
   if (!sheet) {
     sheet = ss.insertSheet("PumpChecks");
-    sheet.appendRow(["Timestamp", "PumpID", "PumpName", "Status", "TimerSettings", "Operator", "Notes", "LoggedAt"])
-         .setFontWeight("bold");
+    sheet.appendRow(["Timestamp", "PumpID", "PumpName", "Status", "TimerSettings", "Operator", "Notes", "LoggedAt"]);
+    sheet.getRange("A1:H1").setFontWeight("bold");
   }
 
   const timestamp = params.timestamp ? new Date(params.timestamp) : new Date();
