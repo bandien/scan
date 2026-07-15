@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>In Tem Mã QR Code Máy Bơm | BanDienScan</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --border: #cbd5e1;
+            --text: #0f172a;
+            --muted: #64748b;
+            --blue: #0284c7;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            background: #f8fafc;
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        .toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px 20px;
+            background: white;
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+        }
+        .title { font-weight: 800; font-size: 1.1rem; }
+        .sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+        .controls { display: flex; gap: 8px; align-items: center; }
+        button, a.btn-back {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.88rem;
+        }
+        button.btn-primary-custom {
+            background: var(--blue);
+            color: white;
+            border-color: var(--blue);
+            cursor: pointer;
+        }
+        a.btn-back {
+            background: white;
+            color: var(--text);
+        }
+        .sheet {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 20px;
+            max-width: 1120px;
+            margin: 0 auto;
+        }
+        .label {
+            min-height: 178px;
+            display: grid;
+            grid-template-columns: 108px 1fr;
+            gap: 10px;
+            padding: 10px;
+            background: white;
+            border: 1.5px solid #1e293b;
+            border-radius: 8px;
+            break-inside: avoid;
+            position: relative;
+        }
+        .qr {
+            width: 104px;
+            height: 104px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: #fff;
+        }
+        .qr canvas { width: 96px !important; height: 96px !important; }
+        .brand {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--blue);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+        .name {
+            margin-top: 4px;
+            font-size: 13px;
+            line-height: 1.2;
+            font-weight: 900;
+            color: #0f172a;
+        }
+        .meta {
+            margin-top: 5px;
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.25;
+        }
+        .uid {
+            margin-top: 8px;
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 5px;
+            background: #0f172a;
+            color: white;
+            font-family: Consolas, monospace;
+            font-size: 11px;
+            font-weight: 800;
+        }
+        .type-badge {
+            margin-top: 6px;
+            display: inline-block;
+            color: #0369a1;
+            background: #e0f2fe;
+            border: 1px solid #bae6fd;
+            border-radius: 999px;
+            padding: 1px 7px;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+        .url {
+            grid-column: 1 / -1;
+            margin-top: 4px;
+            font-size: 8px;
+            color: #64748b;
+            overflow-wrap: anywhere;
+            border-top: 1px dashed #cbd5e1;
+            padding-top: 5px;
+            font-family: Consolas, monospace;
+        }
+        @page { size: A4 portrait; margin: 8mm; }
+        @media print {
+            body { background: white; }
+            .toolbar { display: none; }
+            .sheet { max-width: none; padding: 0; gap: 6mm; grid-template-columns: repeat(2, 1fr); }
+            .label { border-radius: 4px; min-height: 45mm; page-break-inside: avoid; }
+            .url { font-size: 7.5px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="toolbar">
+        <div>
+            <div class="title">🖨️ In Tem QR Code Máy Bơm</div>
+            <div class="sub" id="summary">Đang tạo danh sách tem...</div>
+        </div>
+        <div class="controls">
+            <a href="index.html" class="btn-back"><i class="bi bi-house"></i> Trang chủ</a>
+            <button class="btn-primary-custom" onclick="window.print()"><i class="bi bi-printer"></i> In tem QR</button>
+        </div>
+    </div>
+    <main class="sheet" id="sheet"></main>
+
+    <script>
+        const PUMP_DICT = {
+            "1": { id: 1, name: "Bơm 160kW hút từ hồ lán trại", flowRate: 244, source: "Hồ lán trại", settingId: "PUMP-160KW-LAN-TRAI", monitorOnly: true },
+            "2": { id: 2, name: "Bơm hoả tiễn 18,5kW", flowRate: 27.95, source: "Hồ lán trại", settingId: "PUMP-HOATIEN-18_5KW" },
+            "3": { id: 3, name: "Bơm hoả tiễn 30kW", flowRate: 45.33, source: "Hồ lán trại", settingId: "PUMP-HOATIEN-30KW" },
+            "4": { id: 4, name: "Bơm hoả tiễn 22kW", flowRate: 45.33, source: "Hồ lán trại", settingId: "PUMP-HOATIEN-22KW" },
+            "5": { id: 5, name: "Bơm LK1", flowRate: 1, source: "Giếng khoan LK1", settingId: "PUMP-LK1" },
+            "6": { id: 6, name: "Bơm LK2", flowRate: 2, source: "Giếng khoan LK2", settingId: "PUMP-LK2" },
+            "7": { id: 7, name: "Bơm LK3", flowRate: 3, source: "Giếng khoan LK3", settingId: "PUMP-LK3" },
+            "8": { id: 8, name: "Bơm LK4", flowRate: 4, source: "Giếng khoan LK4", settingId: "PUMP-LK4" },
+            "9": { id: 9, name: "Bơm LK5", flowRate: 5, source: "Giếng khoan LK5", settingId: "PUMP-LK5" },
+            "10": { id: 10, name: "Bơm LK6", flowRate: 6, source: "Giếng khoan LK6", settingId: "PUMP-LK6" },
+            "11": { id: 11, name: "Bơm LK7", flowRate: 7, source: "Giếng khoan LK7", settingId: "PUMP-LK7" },
+            "12": { id: 12, name: "Bơm LK8", flowRate: 8, source: "Giếng khoan LK8", settingId: "PUMP-LK8" },
+            "13": { id: 13, name: "Bơm LK9", flowRate: 9, source: "Giếng khoan LK9", settingId: "PUMP-LK9" },
+            "14": { id: 14, name: "Bơm LK10", flowRate: 10, source: "Giếng khoan LK10", settingId: "PUMP-LK10" },
+            "15": { id: 15, name: "Bơm LK11", flowRate: 11, source: "Giếng khoan LK11", settingId: "PUMP-LK11" },
+            "16": { id: 16, name: "Bơm LK12", flowRate: 12, source: "Giếng khoan LK12", settingId: "PUMP-LK12" },
+            "17": { id: 17, name: "Bơm LK13", flowRate: 1, source: "Giếng khoan LK13", settingId: "PUMP-LK13" },
+            "18": { id: 18, name: "Bơm LK14", flowRate: 1, source: "Giếng khoan LK14", settingId: "PUMP-LK14" },
+            "19": { id: 19, name: "Bơm LK15", flowRate: 1, source: "Giếng khoan LK15", settingId: "PUMP-LK15" },
+            "20": { id: 20, name: "Bơm hoả tiễn 30kW số 01", flowRate: 86, source: "Hồ trung tâm", settingId: "PUMP-HO-TRUNG-TAM-01" },
+            "21": { id: 21, name: "Bơm hoả tiễn 30kW số 02", flowRate: 86, source: "Hồ trung tâm", settingId: "PUMP-HO-TRUNG-TAM-02" },
+            "24": { id: 24, name: "Bơm 160kW số 01 hút từ hồ nước mặt ngoài sân", flowRate: 154, source: "Hồ ngoài sân (nước suối)", settingId: "PUMP-SUOI-CUN-160KW", monitorOnly: true },
+            "25": { id: 25, name: "Bơm tưới cỏ hồ trung tâm (rainbird)", flowRate: 0, source: "Hồ trung tâm", settingId: "PUMP-HO-TRUNG-TAM-RAINBIRD" },
+            "26": { id: 26, name: "Bơm tưới cỏ hồ 16-17 (rainbird)", flowRate: 0, source: "Hồ 16-17", settingId: "PUMP-HO-16-17-RAINBIRD" }
+        };
+
+        function renderLabels() {
+            const list = Object.values(PUMP_DICT);
+            document.getElementById("summary").textContent = `${list.length} máy bơm - URL đích: https://bandien.github.io/scan/checkbom/?pumpId=...`;
+            const sheet = document.getElementById("sheet");
+            sheet.innerHTML = "";
+
+            list.forEach((pump, idx) => {
+                const targetUrl = `https://bandien.github.io/scan/checkbom/?pumpId=${pump.id}`;
+                
+                const label = document.createElement("section");
+                label.className = "label";
+                label.innerHTML = `
+                    <div>
+                        <div class="qr" id="qr-${idx}"></div>
+                        <span class="type-badge">${pump.monitorOnly ? 'Chỉ giám sát' : 'Điều khiển'}</span>
+                    </div>
+                    <div>
+                        <div class="brand">BanDienScan x CMMS</div>
+                        <div class="name">${escapeHtml(pump.name)}</div>
+                        <div class="meta">Nguồn: ${escapeHtml(pump.source)}</div>
+                        <div class="meta">Công suất: ${escapeHtml(pump.flowRate)} m³/h</div>
+                        <span class="uid">PUMP_${pump.id}</span>
+                    </div>
+                    <div class="url">${escapeHtml(targetUrl)}</div>
+                `;
+                sheet.appendChild(label);
+
+                QRCode.toCanvas(document.createElement("canvas"), targetUrl, {
+                    width: 96,
+                    margin: 1,
+                    color: { dark: "#0f172a", light: "#ffffff" },
+                }, (err, canvas) => {
+                    const target = document.getElementById(`qr-${idx}`);
+                    if (!target) return;
+                    target.innerHTML = "";
+                    if (err) target.textContent = "QR lỗi";
+                    else target.appendChild(canvas);
+                });
+            });
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? "").replace(/[&<>"']/g, ch => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#039;",
+            }[ch]));
+        }
+
+        renderLabels();
+    </script>
+</body>
+</html>
