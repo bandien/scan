@@ -15,10 +15,13 @@
   --bds-surface-high:       #eeeef3;
   --bds-surface-highest:    #e2e2e6;
 
-  /* --- Colors: Text --- */
-  --bds-on-surface:         #1a1c1e;
-  --bds-on-surface-variant: #44474e;
-  --bds-muted:              #667085;
+  /* --- Colors: Text ---
+     Độ tương phản cao cho ánh sáng ngoài trời (kỹ thuật viên xem máy bơm
+     dưới nắng gắt): chữ chính gần như đen tuyệt đối, chữ phụ/muted cũng
+     đậm hơn nhiều so với mức xám nhạt thông thường. */
+  --bds-on-surface:         #000000;
+  --bds-on-surface-variant: #1e293b;
+  --bds-muted:              #334155;
 
   /* --- Colors: Borders & Outlines --- */
   --bds-outline:            #74777f;
