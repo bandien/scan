@@ -519,7 +519,7 @@
 <script src="../js/api.js"></script>
 <script>
     // PUMP_DICT matches Backend core definitions
-    const PUMP_DICT = {
+    let PUMP_DICT = JSON.parse(localStorage.getItem('bds_pumps_dict')) || {
         "1": { id: 1, name: "Bơm 160kW hút từ hồ lán trại", flowRate: 244, source: "Hồ lán trại", settingId: "PUMP-160KW-LAN-TRAI", monitorOnly: true },
         "2": { id: 2, name: "Bơm hoả tiễn 18,5kW", flowRate: 27.95, source: "Hồ lán trại", settingId: "PUMP-HOATIEN-18_5KW" },
         "3": { id: 3, name: "Bơm hoả tiễn 30kW", flowRate: 45.33, source: "Hồ lán trại", settingId: "PUMP-HOATIEN-30KW" },
@@ -593,6 +593,30 @@
         return "";
     }
 
+    async function loadServerPumps() {
+        try {
+            const res = await bdsApiFetch('getPumps');
+            if (res.status === "success" && Array.isArray(res.data) && res.data.length > 0) {
+                const newDict = {};
+                res.data.forEach(p => {
+                    newDict[p.id] = p;
+                });
+                PUMP_DICT = newDict;
+                localStorage.setItem('bds_pumps_dict', JSON.stringify(PUMP_DICT));
+                
+                const select = document.getElementById('pumpSelect');
+                const currentValue = select.value;
+                initPumpDropdown();
+                if (PUMP_DICT[currentValue]) {
+                    select.value = currentValue;
+                }
+                onPumpChange();
+            }
+        } catch (err) {
+            console.error("Lỗi nạp danh sách bơm từ server:", err);
+        }
+    }
+
     window.onload = async function() {
         applyFontScale();
         document.getElementById('btnFontScale').addEventListener('click', cycleFontScale);
@@ -608,7 +632,12 @@
         
         resetToCurrentTime();
         initPumpDropdown();
-        await loadServerTimerSettings();
+        
+        loadServerPumps().then(() => {
+            loadServerTimerSettings();
+        }).catch(() => {
+            loadServerTimerSettings();
+        });
 
         // Initial sync check
         updateSyncBadge();

@@ -7,6 +7,8 @@
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
     <style>
         :root {
             --border: #cbd5e1;
@@ -166,7 +168,7 @@
     <main class="sheet" id="sheet"></main>
 
     <script>
-        const PUMP_DICT = {
+        let PUMP_DICT = JSON.parse(localStorage.getItem('bds_pumps_dict')) || {
             "1": { id: 1, name: "Bơm 160kW hút từ hồ lán trại", flowRate: 244, source: "Hồ lán trại", settingId: "PUMP-160KW-LAN-TRAI", monitorOnly: true },
             "2": { id: 2, name: "Bơm hoả tiễn 18,5kW", flowRate: 27.95, source: "Hồ lán trại", settingId: "PUMP-HOATIEN-18_5KW" },
             "3": { id: 3, name: "Bơm hoả tiễn 30kW", flowRate: 45.33, source: "Hồ lán trại", settingId: "PUMP-HOATIEN-30KW" },
@@ -244,7 +246,27 @@
             }[ch]));
         }
 
-        window.addEventListener("load", renderLabels);
+        async function loadServerPumps() {
+            try {
+                const res = await bdsApiFetch('getPumps');
+                if (res.status === "success" && Array.isArray(res.data) && res.data.length > 0) {
+                    const newDict = {};
+                    res.data.forEach(p => {
+                        newDict[p.id] = p;
+                    });
+                    PUMP_DICT = newDict;
+                    localStorage.setItem('bds_pumps_dict', JSON.stringify(PUMP_DICT));
+                }
+            } catch (err) {
+                console.error("Lỗi nạp danh sách bơm từ server:", err);
+            }
+        }
+
+        window.addEventListener("load", async () => {
+            renderLabels();
+            await loadServerPumps();
+            renderLabels();
+        });
     </script>
 </body>
 </html>
