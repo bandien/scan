@@ -51,6 +51,7 @@ function doGet(e) {
       case 'getMeterStats':     return handleGetMeterStats(e);      // Phase 11
       case 'getPumpTimerSettings': return handleGetPumpTimerSettings(e);
       case 'getPumpChecks':     return handleGetPumpChecks(e);
+      case 'getMeterStatus':    return handleGetMeterStatus(e);
       case 'getPlans':          return handleGetPlans(e);           // Kế hoạch trang nhatky
       case 'getWorkLogs':       return handleGetWorkLogs(e);        // Nhật ký cả tổ (trang nhatky)
       case 'nhatkyAccounts':    return handleListAccounts(e);       // Danh sách tài khoản trang nhatky
@@ -575,4 +576,37 @@ function handleGetPumpChecks(e) {
     }));
 
   return contentResponse({ status: "success", history });
+}
+
+/** GET: Lấy trạng thái hoạt động hiện tại của máy bơm từ MeterReadings */
+function handleGetMeterStatus(e) {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  const sheet = ss.getSheetByName("MeterReadings");
+  if (!sheet) return contentResponse({ status: "success", lastEvent: null });
+
+  const { pumpId } = e.parameter;
+  if (!pumpId) return contentResponse({ status: "error", message: "Missing pumpId" });
+
+  const targetMeterId = `PUMP_${pumpId}`;
+  const values = sheet.getDataRange().getValues();
+  if (values.length < 2) return contentResponse({ status: "success", lastEvent: null });
+
+  const data = values.slice(1);
+  const pumpReadings = data.filter(r => String(r[1]).trim() === targetMeterId);
+  if (pumpReadings.length === 0) return contentResponse({ status: "success", lastEvent: null });
+
+  const lastRow = pumpReadings[pumpReadings.length - 1];
+  const val = Number(lastRow[2]);
+  const timestamp = lastRow[4] instanceof Date ? lastRow[4].toISOString() : String(lastRow[4] || "");
+  const operator = String(lastRow[5] || "");
+
+  return contentResponse({
+    status: "success",
+    lastEvent: {
+      action: val === 1 ? "START" : "STOP",
+      timestamp: timestamp,
+      operator: operator,
+      notes: val === 1 ? "Bật máy bơm" : "Tắt máy bơm"
+    }
+  });
 }
