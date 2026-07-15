@@ -14,6 +14,29 @@ updated: 2026-06-08
 
 Tất cả các thay đổi và cải tiến của hệ thống Quản lý & Bảo trì Ban điện thông minh (CMMS Mini WebApp) được ghi nhận tại đây theo từng phiên bản.
 
+## [v2.9.0] - 2026-07-15
+### Thêm mới (Added)
+- **Trang Thông tin & Check vận hành bơm (`pump_info.html`):**
+  - Quét QR / nhập mã bơm → hiển thị thông tin bơm, trạng thái chạy/dừng, nút Bật/Tắt, tờ check vận hành (TẮT/TỰ ĐỘNG/BẰNG TAY + cấu hình giờ hẹn Ca 1/Ca 2) và nhật ký gần đây — gộp toàn bộ chức năng của trang `checkbom/` vào một nơi.
+  - Hàng đợi đồng bộ offline dùng chung với checkbom, tự gửi lại khi có mạng; tôn trọng chế độ chỉ giám sát (`monitorOnly`).
+  - Tem QR in từ `print_pumps.html` giờ trỏ thẳng tới trang này; module quét chính ở trang chủ tự nhận diện tem bơm và điều hướng đúng.
+- **Trang Nhật ký Thay đổi (`changelog.html`):** hiển thị nội dung `CHANGELOG.md` dạng timeline phiên bản ngay trên web (khắc phục link menu bị 404).
+- **Phản hồi rung (Haptic feedback):** rung xác nhận khi hoàn tất kiểm tra, lưu thiết bị, tạo/sửa WO (rung 3 nhịp khi chuyển WO sang Done/Closed) và gửi báo cáo check bơm.
+
+### Cập nhật (Updated)
+- **Menu & điều hướng đồng nhất:** bỏ 2 nút menu/tài khoản trùng lặp ở header trang chủ; gom các mục cấu hình vào khối "Dành cho Quản trị" (ẩn với nhân viên thường); thêm nhánh "Quản lý máy bơm".
+- **Form dài chuyển sang Wizard 3 bước:** Thêm/Sửa thiết bị và Tạo/Sửa Work Order chia bước Cơ bản → Bảo trì/Giao việc → Phân công/Thời hạn, đỡ cuộn dài trên điện thoại.
+- **Độ tương phản chữ cao cho ngoài trời:** chữ chính đen tuyệt đối, chữ phụ đậm hơn (từ ~4.7:1 lên ~9.7:1 trên nền trắng) áp dụng toàn app.
+- **Hiệu năng:** Dashboard, Kanban và 3 modal quản trị (Dự án/Ca trực/Địa điểm) tách ra `fragments/` và chỉ nạp khi mở lần đầu, giảm DOM ban đầu của `index.html`.
+
+### Sửa lỗi (Fixed)
+- Menu tiện ích bị nền trong suốt trên trang Nhật ký (thiếu biến CSS `--siu-*` dùng chung).
+- Khung quét camera hiển thị chồng 2 lớp (ô vuông đen của thư viện + vòng tròn tùy chỉnh) — gộp về một khung vuông bo góc duy nhất, vùng giải mã tự co theo màn hình.
+- Ô "Người vận hành" tự điền theo tài khoản đăng nhập thay vì phải gõ lại.
+- Thống nhất số phiên bản về một nguồn (`CONFIG.version`), trước đó lệch nhau giữa màn đăng nhập, menu, `js/config.js` và CHANGELOG.
+
+---
+
 ## [v2.8.0] - 2026-07-03
 ### Thêm mới (Added)
 - **Module Giám sát Server Uptime (`status.html`):**

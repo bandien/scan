@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhật ký Thay đổi (Changelog) | BanDienScan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="css/shared.css" rel="stylesheet">
+    <style>
+        body { background: var(--bds-bg); color: var(--bds-on-surface); font-family: var(--bds-font); min-height: 100vh; padding-bottom: 40px; }
+        .app-shell { max-width: 640px; margin: 0 auto; padding: 16px; }
+
+        .intro-text { color: var(--bds-muted); font-size: .9rem; margin: 4px 0 20px; }
+
+        /* Mỗi phiên bản là một card trên timeline */
+        .ver-card {
+            background: var(--bds-surface); border: 1px solid var(--bds-outline-variant);
+            border-radius: 16px; padding: 18px; margin-bottom: 16px;
+            box-shadow: var(--bds-shadow-sm);
+        }
+        .ver-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+        .ver-badge {
+            font-family: var(--bds-font-mono); font-weight: 800; font-size: .95rem;
+            background: var(--bds-primary); color: #fff; padding: 4px 14px; border-radius: 999px;
+        }
+        .ver-date { color: var(--bds-muted); font-size: .82rem; font-weight: 600; }
+        .ver-latest {
+            background: var(--bds-success-bg); color: var(--bds-success-ink);
+            font-size: .7rem; font-weight: 800; padding: 3px 10px; border-radius: 999px;
+            text-transform: uppercase; letter-spacing: .04em;
+        }
+
+        .cat-heading {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em;
+            padding: 3px 10px; border-radius: 8px; margin: 12px 0 8px;
+        }
+        .cat-added    { background: var(--bds-success-bg); color: var(--bds-success-ink); }
+        .cat-updated  { background: var(--bds-info-bg);    color: var(--bds-info-ink); }
+        .cat-fixed    { background: var(--bds-danger-bg);  color: var(--bds-danger-ink); }
+        .cat-improved { background: var(--bds-warning-bg); color: var(--bds-warning-ink); }
+
+        .ver-card ul { padding-left: 20px; margin-bottom: 6px; }
+        .ver-card li { font-size: .88rem; line-height: 1.55; margin-bottom: 5px; }
+        .ver-card li ul { margin-top: 5px; }
+        .ver-card code {
+            background: var(--bds-surface-high); color: var(--bds-primary-dark);
+            padding: 1px 6px; border-radius: 5px; font-size: .8em;
+        }
+        .ver-card strong { color: var(--bds-on-surface); }
+        .ver-card a { color: var(--bds-primary); }
+    </style>
+</head>
+<body>
+
+<div class="app-shell">
+    <header class="bds-topbar bds-topbar-mobile mb-3">
+        <div class="bds-topbar-inner">
+            <div class="bds-topbar-left">
+                <div class="bds-brand-mark"><i class="bi bi-history"></i></div>
+                <div>
+                    <div class="bds-brand-label">BanDienScan</div>
+                    <div class="bds-topbar-title">Nhật ký Thay đổi</div>
+                </div>
+            </div>
+            <div class="bds-topbar-right">
+                <a class="bds-btn-home" href="index.html"><i class="bi bi-house"></i></a>
+            </div>
+        </div>
+    </header>
+
+    <p class="intro-text"><i class="bi bi-info-circle me-1"></i>Toàn bộ thay đổi và cải tiến của hệ thống, ghi nhận theo từng phiên bản. Nội dung được nạp trực tiếp từ <code>CHANGELOG.md</code>.</p>
+
+    <div id="changelogContainer">
+        <div class="text-center text-muted py-5">
+            <div class="spinner-border spinner-border-sm me-2 text-primary"></div> Đang tải nhật ký thay đổi...
+        </div>
+    </div>
+</div>
+
+<script>
+    // Render CHANGELOG.md thành timeline phiên bản. Chỉ hỗ trợ đúng tập cú pháp
+    // markdown mà file này dùng: frontmatter, ## [vX] - date, ### mục, bullet
+    // lồng 1 cấp, **đậm**, `code`, [link](url).
+    function escapeHtml(s) {
+        return s.replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[ch]));
+    }
+    function inlineMd(s) {
+        return escapeHtml(s)
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/`([^`]+)`/g, '<code>$1</code>')
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+    }
+    function categoryClass(title) {
+        if (/Added|Thêm mới/i.test(title)) return 'cat-added';
+        if (/Updated|Cập nhật/i.test(title)) return 'cat-updated';
+        if (/Fixed|Sửa lỗi/i.test(title)) return 'cat-fixed';
+        if (/Improved|Cải tiến/i.test(title)) return 'cat-improved';
+        return 'cat-updated';
+    }
+    function categoryIcon(cls) {
+        return { 'cat-added': 'bi-plus-circle-fill', 'cat-updated': 'bi-arrow-repeat', 'cat-fixed': 'bi-bug-fill', 'cat-improved': 'bi-stars' }[cls] || 'bi-dot';
+    }
+
+    function renderChangelog(md) {
+        // Bỏ frontmatter YAML nếu có
+        md = md.replace(/^---[\s\S]*?---\s*/, '');
+        const lines = md.split(/\r?\n/);
+        const versions = [];
+        let current = null;
+        let html = '';
+        let listDepth = -1; // -1 = chưa mở ul nào; 0 = cấp 1; 1 = cấp lồng
+
+        const closeLists = (toDepth) => {
+            while (listDepth > toDepth) { html += '</ul>'; listDepth--; }
+        };
+        const flushVersion = () => {
+            if (current) { closeLists(-1); current.html = html; versions.push(current); html = ''; }
+        };
+
+        for (const raw of lines) {
+            const line = raw.replace(/\s+$/, '');
+            const ver = line.match(/^## \[?(v[\d.]+)\]?\s*-?\s*(.*)$/);
+            if (ver) {
+                flushVersion();
+                current = { version: ver[1], date: ver[2].trim(), html: '' };
+                continue;
+            }
+            if (!current) continue; // bỏ qua tiêu đề trang / mô tả đầu file
+            const cat = line.match(/^### (.+)$/);
+            if (cat) {
+                closeLists(-1);
+                const cls = categoryClass(cat[1]);
+                html += `<div class="cat-heading ${cls}"><i class="bi ${categoryIcon(cls)}"></i>${inlineMd(cat[1])}</div>`;
+                continue;
+            }
+            const bullet = line.match(/^(\s*)- (.+)$/);
+            if (bullet) {
+                const depth = bullet[1].length >= 2 ? 1 : 0;
+                if (listDepth < depth) { html += '<ul>'; listDepth++; }
+                else if (listDepth > depth) closeLists(depth);
+                html += `<li>${inlineMd(bullet[2])}</li>`;
+                continue;
+            }
+            if (/^---\s*$/.test(line) || line === '') { continue; }
+        }
+        flushVersion();
+
+        if (versions.length === 0) {
+            return '<div class="text-center text-muted py-5">Chưa có nội dung nhật ký.</div>';
+        }
+        return versions.map((v, i) => `
+            <div class="ver-card">
+                <div class="ver-head">
+                    <span class="ver-badge">${escapeHtml(v.version)}</span>
+                    ${v.date ? `<span class="ver-date"><i class="bi bi-calendar3 me-1"></i>${escapeHtml(v.date)}</span>` : ''}
+                    ${i === 0 ? '<span class="ver-latest">Mới nhất</span>' : ''}
+                </div>
+                ${v.html}
+            </div>`).join('');
+    }
+
+    (async () => {
+        const container = document.getElementById('changelogContainer');
+        try {
+            const res = await fetch('CHANGELOG.md', { cache: 'no-cache' });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            container.innerHTML = renderChangelog(await res.text());
+        } catch (e) {
+            container.innerHTML = `<div class="text-center text-danger py-5 small">
+                <i class="bi bi-wifi-off fs-3 d-block mb-2"></i>
+                Không tải được nhật ký thay đổi. Kiểm tra kết nối mạng rồi tải lại trang.
+            </div>`;
+        }
+    })();
+</script>
+</body>
+</html>

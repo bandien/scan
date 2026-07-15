@@ -382,7 +382,7 @@
             ĐĂNG NHẬP <i class="bi bi-box-arrow-in-right ms-2"></i>
         </button>
         <div id="loginSpinner" class="spinner-border text-primary mt-3" style="display: none;" role="status"></div>
-        <p class="mt-4 mb-0 text-muted" style="font-size: 0.75rem;"><span data-i18n="version">Phiên bản</span> v2.8.0</p>
+        <p class="mt-4 mb-0 text-muted" style="font-size: 0.75rem;"><span data-i18n="version">Phiên bản</span> <span class="app-version"></span></p>
     </div>
 </div>
 
@@ -1493,7 +1493,7 @@
                 <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2 small" href="na111.html" target="_blank"><i class="bi bi-tools me-2 text-warning"></i> Chẩn đoán EBYTE NA111</a></li>
 
                 <li><hr class="dropdown-divider opacity-50"></li>
-                <li class="px-3 py-1 text-center text-muted" style="font-size: 0.72rem; list-style-type: none;"><span data-i18n="version">Phiên bản</span> v2.8.0</li>
+                <li class="px-3 py-1 text-center text-muted" style="font-size: 0.72rem; list-style-type: none;"><span data-i18n="version">Phiên bản</span> <span class="app-version"></span></li>
             </ul>
         </div>
         <button class="bottom-nav-item" type="button" onclick="window.location.href='nhatky/index.html#personal'">
@@ -1534,8 +1534,12 @@
         apiToken: 'HAPU_QR_SECRET_2026',
         appTitle: 'BanDienScan',
         companyName: 'HAPU Complex',
-        version: 'v2.7.0'
+        version: 'v2.9.0' // Nguồn hiển thị duy nhất — các chỗ trong UI render qua class .app-version
     };
+    // Điền số phiên bản vào mọi vị trí hiển thị (màn đăng nhập, cuối menu)
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.app-version').forEach(el => { el.textContent = CONFIG.version; });
+    });
     
     // Legacy variables (pointing to CONFIG for compatibility)
     const gasUrl = CONFIG.gasUrl;
