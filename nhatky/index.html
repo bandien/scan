@@ -3900,15 +3900,22 @@
       const visible = getVisiblePlans("day");
       renderDayLogSummary(visible, selectedDate);
 
+      // Việc tồn từ nhật ký phát sinh (không gắn kế hoạch nào): trước đây chỉ hiện
+      // ở màn "Nhật ký đã ghi" — nhìn màn Kế hoạch tưởng hết việc nhưng vẫn còn tồn.
+      const followups = adhocFollowupLogs();
+
       const attnAll = visible.filter(plan => isAttentionPlan(plan, selectedDate));
       const attnCountEl = document.getElementById("attnCount");
-      attnCountEl.textContent = attnAll.length;
-      attnCountEl.style.display = attnAll.length ? "inline-block" : "none";
+      const attnTotal = attnAll.length + followups.length;
+      attnCountEl.textContent = attnTotal;
+      attnCountEl.style.display = attnTotal ? "inline-block" : "none";
 
       const filtered = applyQuickFilter(visible, selectedDate);
       const body = document.getElementById("taskListBody");
+      const showFollowups = quickFilter !== "done" && followups.length > 0;
+      const followupSection = showFollowups ? followupSectionHtml(followups) : "";
 
-      if (filtered.length === 0) {
+      if (filtered.length === 0 && !followupSection) {
         body.innerHTML = '<div class="vikunja-empty"><i class="bi bi-check2-circle"></i><strong>Không có việc cần xem</strong><div class="small mt-1">Hãy đổi ngày hoặc điều chỉnh bộ lọc.</div></div>';
         return;
       }
@@ -3925,10 +3932,58 @@
 
       body.innerHTML = [
         taskSectionHtml("Cần xử lý ngay", "bi-exclamation-triangle-fill", "attention", attn, selectedDate),
+        followupSection,
         taskSectionHtml("Đang thực hiện", "bi-play-circle-fill", "doing", doing, selectedDate),
         taskSectionHtml("Cần làm", "bi-list-check", "", pending, selectedDate),
         taskSectionHtml("Đã hoàn thành", "bi-check2-circle", "done", done, selectedDate)
       ].join("");
+    }
+
+    // Nhật ký phát sinh còn tồn/đề xuất chưa xử lý xong, không gắn kế hoạch nào —
+    // gom mỗi chuỗi việc một dòng (lấy bản ghi mới nhất) để hiện lên màn Kế hoạch.
+    function adhocFollowupLogs() {
+      const seen = new Set();
+      return logs
+        .filter(log => needsAttention(log) && !(log.planId && plans.some(plan => plan.id === log.planId)))
+        .sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")))
+        .filter(log => {
+          const key = normalizeWorkText(log.selectedTask);
+          if (!key || seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+    }
+
+    function followupSectionHtml(followups) {
+      const rows = followups.map(log => `
+        <article class="vikunja-task is-attention" onclick="continueLog('${escapeAttr(log.id)}')">
+          <button class="vikunja-check attention" type="button" title="Tiếp tục xử lý" aria-label="Tiếp tục xử lý"
+                  onclick="continueLog('${escapeAttr(log.id)}'); event.stopPropagation();">
+            <i class="bi bi-arrow-right-circle"></i>
+          </button>
+          <div class="vikunja-task-content">
+            <h3 class="vikunja-task-title">${escapeHtml(normalizeWorkText(log.selectedTask) || "Việc phát sinh")}</h3>
+            <div class="vikunja-labels"><span class="vikunja-label priority-high">Tồn từ nhật ký</span></div>
+            <div class="vikunja-task-meta">
+              <span><i class="bi bi-calendar-event"></i>${friendlyDate(log.workDate)}</span>
+              ${log.issue || log.nextAction ? `<span class="truncate-meta"><i class="bi bi-exclamation-circle"></i>${escapeHtml(log.issue || log.nextAction)}</span>` : ""}
+            </div>
+          </div>
+          <button class="vikunja-task-open" type="button" title="Tiếp tục xử lý" aria-label="Tiếp tục xử lý"
+                  onclick="continueLog('${escapeAttr(log.id)}'); event.stopPropagation();">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </article>
+      `).join("");
+      return `
+        <section class="vikunja-section">
+          <div class="vikunja-section-head attention">
+            <i class="bi bi-journal-x"></i><span>Việc tồn từ nhật ký</span>
+            <span class="vikunja-section-count">${followups.length}</span>
+          </div>
+          <div class="vikunja-task-list">${rows}</div>
+        </section>
+      `;
     }
 
     // ===== Màn Chi tiết công việc =====
