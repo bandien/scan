@@ -186,7 +186,7 @@
     const API_TOKEN = "HAPU_QR_SECRET_2026";
 
     // Danh mục toàn bộ máy bơm trong cơ sở dữ liệu CMMS Core
-    const PUMP_DICT = {
+    let PUMP_DICT = JSON.parse(localStorage.getItem('bds_pumps_dict')) || {
         "1": { id: 1, name: "Bơm 160kW hút từ hồ lán trại", flowRate: 244, source: "Hồ lán trại" },
         "2": { id: 2, name: "Bơm hoả tiễn 18,5kW", flowRate: 27.95, source: "Hồ lán trại" },
         "3": { id: 3, name: "Bơm hoả tiễn 30kW", flowRate: 45.33, source: "Hồ lán trại" },
@@ -240,7 +240,29 @@
         applyFontScale();
     }
 
-    window.onload = function() {
+    async function loadServerPumps() {
+        try {
+            const res = await fetch(`${GAS_URL}?action=getPumps&token=${API_TOKEN}`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.status === "success" && Array.isArray(data.data) && data.data.length > 0) {
+                    const newDict = {};
+                    data.data.forEach(p => {
+                        newDict[p.id] = p;
+                    });
+                    PUMP_DICT = newDict;
+                    localStorage.setItem('bds_pumps_dict', JSON.stringify(PUMP_DICT));
+                    
+                    currentPump = PUMP_DICT[currentPumpId] || currentPump;
+                    renderUI();
+                }
+            }
+        } catch (err) {
+            console.error("Lỗi nạp danh sách bơm từ server:", err);
+        }
+    }
+
+    window.onload = async function() {
         const urlParams = new URLSearchParams(window.location.search);
         currentPumpId = urlParams.get('pumpId') || urlParams.get('id') || "1";
 
@@ -253,6 +275,7 @@
 
         resetToCurrentTime();
         loadPumpData();
+        await loadServerPumps();
     };
 
     async function loadPumpData() {

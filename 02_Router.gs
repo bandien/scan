@@ -50,6 +50,7 @@ function doGet(e) {
       case 'getMeterHistory':   return handleGetMeterHistory(e);    // Phase 11
       case 'getMeterStats':     return handleGetMeterStats(e);      // Phase 11
       case 'getPumpTimerSettings': return handleGetPumpTimerSettings(e);
+      case 'getPumps':          return handleGetPumps(e);
       case 'getPumpChecks':     return handleGetPumpChecks(e);
       case 'getMeterStatus':    return handleGetMeterStatus(e);
       case 'getPlans':          return handleGetPlans(e);           // Kế hoạch trang nhatky
@@ -115,6 +116,8 @@ function doPost(e) {
       deleteUser:           handleDeleteUser,
       savePumpTimerSetting: handleSavePumpTimerSetting,
       seedPumpTimerSettings: handleSeedPumpTimerSettings,
+      getPumps:             handleGetPumps,
+      savePump:             handleSavePump,
       saveRosterWeek:       handleSaveRosterWeek,       // Bảng phân ca (trang phanca)
       // Masters
       createProject:        handleCreateProject,
@@ -609,4 +612,104 @@ function handleGetMeterStatus(e) {
       notes: val === 1 ? "Bật máy bơm" : "Tắt máy bơm"
     }
   });
+}
+
+// ==========================================
+// DYNAMIC PUMP DIRECTORY CONFIGURATION
+// ==========================================
+function ensurePumpsSheet_() {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  let sheet = ss.getSheetByName("Pumps");
+  const headers = ["ID", "Name", "FlowRate", "Source", "SettingID", "MonitorOnly", "UpdatedAt", "UpdatedBy"];
+  
+  if (!sheet) sheet = ss.insertSheet("Pumps");
+  if (sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight("bold");
+    
+    // Seed with defaults
+    const defaults = [
+      [1, "Bơm 160kW hút từ hồ lán trại", 244, "Hồ lán trại", "PUMP-160KW-LAN-TRAI", "TRUE", new Date(), "Seed"],
+      [2, "Bơm hoả tiễn 18,5kW", 27.95, "Hồ lán trại", "PUMP-HOATIEN-18_5KW", "FALSE", new Date(), "Seed"],
+      [3, "Bơm hoả tiễn 30kW", 45.33, "Hồ lán trại", "PUMP-HOATIEN-30KW", "FALSE", new Date(), "Seed"],
+      [4, "Bơm hoả tiễn 22kW", 45.33, "Hồ lán trại", "PUMP-HOATIEN-22KW", "FALSE", new Date(), "Seed"],
+      [5, "Bơm LK1", 1, "Giếng khoan LK1", "PUMP-LK1", "FALSE", new Date(), "Seed"],
+      [6, "Bơm LK2", 2, "Giếng khoan LK2", "PUMP-LK2", "FALSE", new Date(), "Seed"],
+      [7, "Bơm LK3", 3, "Giếng khoan LK3", "PUMP-LK3", "FALSE", new Date(), "Seed"],
+      [8, "Bơm LK4", 4, "Giếng khoan LK4", "PUMP-LK4", "FALSE", new Date(), "Seed"],
+      [9, "Bơm LK5", 5, "Giếng khoan LK5", "PUMP-LK5", "FALSE", new Date(), "Seed"],
+      [10, "Bơm LK6", 6, "Giếng khoan LK6", "PUMP-LK6", "FALSE", new Date(), "Seed"],
+      [11, "Bơm LK7", 7, "Giếng khoan LK7", "PUMP-LK7", "FALSE", new Date(), "Seed"],
+      [12, "Bơm LK8", 8, "Giếng khoan LK8", "PUMP-LK8", "FALSE", new Date(), "Seed"],
+      [13, "Bơm LK9", 9, "Giếng khoan LK9", "PUMP-LK9", "FALSE", new Date(), "Seed"],
+      [14, "Bơm LK10", 10, "Giếng khoan LK10", "PUMP-LK10", "FALSE", new Date(), "Seed"],
+      [15, "Bơm LK11", 11, "Giếng khoan LK11", "PUMP-LK11", "FALSE", new Date(), "Seed"],
+      [16, "Bơm LK12", 12, "Giếng khoan LK12", "PUMP-LK12", "FALSE", new Date(), "Seed"],
+      [17, "Bơm LK13", 1, "Giếng khoan LK13", "PUMP-LK13", "FALSE", new Date(), "Seed"],
+      [18, "Bơm LK14", 1, "Giếng khoan LK14", "PUMP-LK14", "FALSE", new Date(), "Seed"],
+      [19, "Bơm LK15", 1, "Giếng khoan LK15", "PUMP-LK15", "FALSE", new Date(), "Seed"],
+      [20, "Bơm hoả tiễn 30kW số 01", 86, "Hồ trung tâm", "PUMP-HO-TRUNG-TAM-01", "FALSE", new Date(), "Seed"],
+      [21, "Bơm hoả tiễn 30kW số 02", 86, "Hồ trung tâm", "PUMP-HO-TRUNG-TAM-02", "FALSE", new Date(), "Seed"],
+      [24, "Bơm 160kW số 01 hút từ hồ nước mặt ngoài sân", 154, "Hồ ngoài sân (nước suối)", "PUMP-SUOI-CUN-160KW", "TRUE", new Date(), "Seed"],
+      [25, "Bơm tưới cỏ hồ trung tâm (rainbird)", 0, "Hồ trung tâm", "PUMP-HO-TRUNG-TAM-RAINBIRD", "FALSE", new Date(), "Seed"],
+      [26, "Bơm tưới cỏ hồ 16-17 (rainbird)", 0, "Hồ 16-17", "PUMP-HO-16-17-RAINBIRD", "FALSE", new Date(), "Seed"]
+    ];
+    sheet.getRange(2, 1, defaults.length, defaults[0].length).setValues(defaults);
+  }
+  return sheet;
+}
+
+function handleGetPumps(e) {
+  const sheet = ensurePumpsSheet_();
+  const values = sheet.getDataRange().getValues();
+  const data = [];
+  for (let i = 1; i < values.length; i++) {
+    if (!values[i][0]) continue;
+    data.push({
+      id: Number(values[i][0]),
+      name: String(values[i][1] || ""),
+      flowRate: Number(values[i][2]) || 0,
+      source: String(values[i][3] || ""),
+      settingId: String(values[i][4] || ""),
+      monitorOnly: String(values[i][5]).toUpperCase() === "TRUE"
+    });
+  }
+  return contentResponse({ status: "success", data: data });
+}
+
+function handleSavePump(params) {
+  const item = params.payload || params;
+  const id = Number(item.id);
+  if (!id) return contentResponse({ status: "error", message: "Thiếu ID máy bơm" });
+  if (!item.name) return contentResponse({ status: "error", message: "Thiếu tên máy bơm" });
+
+  const sheet = ensurePumpsSheet_();
+  const values = sheet.getDataRange().getValues();
+  const row = [
+    id,
+    item.name || "",
+    Number(item.flowRate) || 0,
+    item.source || "",
+    item.settingId || "",
+    String(item.monitorOnly).toUpperCase() === "TRUE" ? "TRUE" : "FALSE",
+    new Date(),
+    item.updatedBy || "Web"
+  ];
+
+  let targetRow = -1;
+  for (let i = 1; i < values.length; i++) {
+    if (Number(values[i][0]) === id) {
+      targetRow = i + 1;
+      break;
+    }
+  }
+
+  if (targetRow > 0) {
+    sheet.getRange(targetRow, 1, 1, row.length).setValues([row]);
+    writeAuditLog(item.updatedBy || "Web", "savePump", String(id), "Cập nhật cấu hình máy bơm: " + item.name);
+  } else {
+    sheet.appendRow(row);
+    writeAuditLog(item.updatedBy || "Web", "savePump", String(id), "Thêm mới cấu hình máy bơm: " + item.name);
+  }
+
+  return contentResponse({ status: "success", message: "Đã lưu thông tin máy bơm" });
 }
