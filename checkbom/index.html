@@ -520,7 +520,7 @@
 <script>
     // PUMP_DICT matches Backend core definitions
     const PUMP_DICT = {
-        "1": { id: 1, name: "Bơm 160kW hút từ hồ lán trại", flowRate: 244, source: "Hồ lán trại", settingId: "PUMP-160KW-LAN-TRAI" },
+        "1": { id: 1, name: "Bơm 160kW hút từ hồ lán trại", flowRate: 244, source: "Hồ lán trại", settingId: "PUMP-160KW-LAN-TRAI", monitorOnly: true },
         "2": { id: 2, name: "Bơm hoả tiễn 18,5kW", flowRate: 27.95, source: "Hồ lán trại", settingId: "PUMP-HOATIEN-18_5KW" },
         "3": { id: 3, name: "Bơm hoả tiễn 30kW", flowRate: 45.33, source: "Hồ lán trại", settingId: "PUMP-HOATIEN-30KW" },
         "4": { id: 4, name: "Bơm hoả tiễn 22kW", flowRate: 45.33, source: "Hồ lán trại", settingId: "PUMP-HOATIEN-22KW" },
@@ -541,7 +541,7 @@
         "19": { id: 19, name: "Bơm LK15", flowRate: 1, source: "Giếng khoan LK15", settingId: "PUMP-LK15" },
         "20": { id: 20, name: "Bơm hoả tiễn 30kW số 01", flowRate: 86, source: "Hồ trung tâm", settingId: "PUMP-HO-TRUNG-TAM-01" },
         "21": { id: 21, name: "Bơm hoả tiễn 30kW số 02", flowRate: 86, source: "Hồ trung tâm", settingId: "PUMP-HO-TRUNG-TAM-02" },
-        "24": { id: 24, name: "Bơm 160kW số 01 hút từ hồ nước mặt ngoài sân", flowRate: 154, source: "Hồ ngoài sân (nước suối)", settingId: "PUMP-SUOI-CUN-160KW" },
+        "24": { id: 24, name: "Bơm 160kW số 01 hút từ hồ nước mặt ngoài sân", flowRate: 154, source: "Hồ ngoài sân (nước suối)", settingId: "PUMP-SUOI-CUN-160KW", monitorOnly: true },
         "25": { id: 25, name: "Bơm tưới cỏ hồ trung tâm (rainbird)", flowRate: 0, source: "Hồ trung tâm", settingId: "PUMP-HO-TRUNG-TAM-RAINBIRD" },
         "26": { id: 26, name: "Bơm tưới cỏ hồ 16-17 (rainbird)", flowRate: 0, source: "Hồ 16-17", settingId: "PUMP-HO-16-17-RAINBIRD" }
     };
@@ -552,9 +552,13 @@
     let lastEvent = null;
     let timerInterval = null;
 
-    // Check if URL parameters specify monitorOnly or readOnly
-    const urlParams = new URLSearchParams(window.location.search);
-    const isMonitorOnly = urlParams.get('monitorOnly') === 'true' || urlParams.get('readOnly') === 'true';
+    // Check if URL parameters or selected pump configuration specify monitorOnly
+    function checkMonitorOnly() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlOverride = urlParams.get('monitorOnly') === 'true' || urlParams.get('readOnly') === 'true';
+        const pumpConfig = currentSelectedPump && currentSelectedPump.monitorOnly === true;
+        return urlOverride || pumpConfig;
+    }
 
     // Font Scaling
     const FONT_SCALES = [100, 115, 130];
@@ -1033,14 +1037,18 @@
         const btnContainer = document.getElementById('actionButtonContainer');
         const timerContainer = document.getElementById('timerContainer');
 
-        if (isMonitorOnly) {
+        const isMonitor = checkMonitorOnly();
+
+        if (isMonitor) {
             document.getElementById('pumpControlCardTitle').innerHTML = `<i class="bi bi-display text-info me-1"></i>Giám sát trạng thái bơm`;
+        } else {
+            document.getElementById('pumpControlCardTitle').innerHTML = `<i class="bi bi-cpu-fill text-success me-1"></i>Giám sát & Điều khiển nhanh`;
         }
 
         if (currentStatus === 'RUNNING') {
             statusContainer.innerHTML = `<span class="badge-status badge-running"><span class="spinner-grow spinner-grow-sm text-success" role="status"></span> ĐANG CHẠY</span>`;
             
-            if (isMonitorOnly) {
+            if (isMonitor) {
                 btnContainer.innerHTML = `<div class="text-center text-muted small py-2 fw-medium border-top mt-2"><i class="bi bi-shield-lock-fill me-1"></i>Chế độ chỉ giám sát (Không thể điều khiển)</div>`;
             } else {
                 btnContainer.innerHTML = `
@@ -1054,7 +1062,7 @@
         } else {
             statusContainer.innerHTML = `<span class="badge-status badge-stopped"><i class="bi bi-pause-circle-fill"></i> ĐANG DỪNG</span>`;
             
-            if (isMonitorOnly) {
+            if (isMonitor) {
                 btnContainer.innerHTML = `<div class="text-center text-muted small py-2 fw-medium border-top mt-2"><i class="bi bi-shield-lock-fill me-1"></i>Chế độ chỉ giám sát (Không thể điều khiển)</div>`;
             } else {
                 btnContainer.innerHTML = `
@@ -1090,6 +1098,11 @@
     }
 
     async function submitAction(action) {
+        if (checkMonitorOnly()) {
+            showAlert('danger', 'Lỗi: Máy bơm này đang ở chế độ chỉ giám sát!');
+            return;
+        }
+
         const operator = document.getElementById('operatorInput').value.trim();
         const notes = document.getElementById('notesInput').value.trim();
         const customTimeVal = document.getElementById('eventTimeInput').value;
