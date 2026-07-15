@@ -317,6 +317,9 @@
                 </div>
             </div>
             <div class="bds-topbar-right">
+                <span id="syncStatusBadge" class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-2 py-1 me-1" style="font-size:0.75rem; display: none;">
+                    <i class="bi bi-cloud-check-fill me-1"></i>Đồng bộ
+                </span>
                 <button class="bds-btn-icon" type="button" id="btnFontScale" title="Phóng to chữ"><span class="fw-bold" id="fontScaleLabel">A</span></button>
                 <a class="bds-btn-home" href="../index.html"><i class="bi bi-house"></i></a>
             </div>
@@ -598,6 +601,14 @@
         resetToCurrentTime();
         initPumpDropdown();
         await loadServerTimerSettings();
+
+        // Initial sync check
+        updateSyncBadge();
+        syncOfflineQueue();
+        
+        // Setup listener and auto interval for background sync
+        window.addEventListener('online', syncOfflineQueue);
+        setInterval(syncOfflineQueue, 15000);
     };
 
     function initPumpDropdown() {
@@ -743,7 +754,7 @@
 
         const btnSubmit = document.getElementById('btnSubmit');
         btnSubmit.disabled = true;
-        btnSubmit.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang gửi...`;
+        btnSubmit.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang lưu...`;
 
         let timerSettingsStr = "";
         let on1 = "", off1 = "", on2 = "", off2 = "";
@@ -760,11 +771,14 @@
             timerSettingsStr = parts.join("; ");
         }
 
-        try {
-            // 1. Sync Timer Settings to general config if checked
-            const syncTimer = document.getElementById('syncTimerCheckbox').checked;
-            if (status === 'AUTO' && syncTimer && currentSelectedPump) {
-                await bdsApiPost('savePumpTimerSetting', {
+        const queue = JSON.parse(localStorage.getItem('cmms_pump_check_queue') || '[]');
+
+        // 1. Sync Timer Settings to general config if checked
+        const syncTimer = document.getElementById('syncTimerCheckbox').checked;
+        if (status === 'AUTO' && syncTimer && currentSelectedPump) {
+            queue.push({
+                action: 'savePumpTimerSetting',
+                payload: {
                     settingId: currentSelectedPump.settingId,
                     pumpName: currentSelectedPump.name,
                     location: currentSelectedPump.source,
@@ -774,11 +788,14 @@
                     off2: off2,
                     notes: `Cập nhật từ check sheet bởi ${operator}`,
                     updatedBy: operator
-                });
-            }
+                }
+            });
+        }
 
-            // 2. Submit Pump Check Log
-            const payload = {
+        // 2. Submit Pump Check Log
+        queue.push({
+            action: 'submitPumpCheck',
+            payload: {
                 timestamp: customTime ? new Date(customTime).toISOString() : new Date().toISOString(),
                 pumpId: currentSelectedPump.id,
                 pumpName: currentSelectedPump.name,
@@ -786,35 +803,28 @@
                 timerSettings: timerSettingsStr,
                 operator: operator,
                 notes: notes
-            };
-
-            const res = await bdsApiPost('submitPumpCheck', payload);
-            if (res.status === 'success') {
-                showAlert('success', `🎉 Gửi báo cáo check bơm <strong>${currentSelectedPump.name}</strong> thành công!`);
-                document.getElementById('notesInput').value = '';
-                
-                // Clear active status styling
-                document.querySelectorAll('.status-card').forEach(card => card.classList.remove('active'));
-                document.getElementById('statusInput').value = '';
-                document.getElementById('timerPanel').style.display = 'none';
-                document.getElementById('pumpControlCard').style.display = 'none';
-                
-                resetToCurrentTime();
-                
-                // Reload check history logs
-                loadPumpCheckHistory();
-                
-                // Reload server settings to get the newly updated timer values if updated
-                await loadServerTimerSettings();
-            } else {
-                showAlert('danger', `❌ Lỗi khi gửi: ${res.message || 'Lỗi không xác định'}`);
             }
-        } catch (err) {
-            showAlert('danger', `❌ Không thể kết nối với server: ${err.message || err}`);
-        } finally {
-            btnSubmit.disabled = false;
-            btnSubmit.innerHTML = `<i class="bi bi-check-circle-fill"></i>GỬI BÁO CÁO VẬN HÀNH`;
-        }
+        });
+
+        localStorage.setItem('cmms_pump_check_queue', JSON.stringify(queue));
+
+        // Instant UI feedback and field reset
+        showAlert('success', `🎉 Đã ghi nhận thành công báo cáo check bơm <strong>${currentSelectedPump.name}</strong>! Dữ liệu đang đồng bộ dưới nền.`);
+        document.getElementById('notesInput').value = '';
+        
+        // Clear active status styling
+        document.querySelectorAll('.status-card').forEach(card => card.classList.remove('active'));
+        document.getElementById('statusInput').value = '';
+        document.getElementById('timerPanel').style.display = 'none';
+        document.getElementById('pumpControlCard').style.display = 'none';
+        
+        resetToCurrentTime();
+
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = `<i class="bi bi-check-circle-fill"></i>GỬI BÁO CÁO VẬN HÀNH`;
+
+        // Trigger sync
+        syncOfflineQueue();
     }
     async function loadPumpCheckHistory() {
         if (!currentSelectedPump) return;
@@ -919,6 +929,89 @@
         }
     }
 
+    let isSyncing = false;
+
+    async function syncOfflineQueue() {
+        if (isSyncing) return;
+        if (typeof navigator !== 'undefined' && !navigator.onLine) {
+            updateSyncBadge();
+            return;
+        }
+
+        let queue = JSON.parse(localStorage.getItem('cmms_pump_check_queue') || '[]');
+        if (queue.length === 0) {
+            updateSyncBadge();
+            return;
+        }
+
+        isSyncing = true;
+        updateSyncBadge();
+
+        let failed = false;
+        const remainingQueue = [];
+
+        for (const item of queue) {
+            if (failed) {
+                remainingQueue.push(item);
+                continue;
+            }
+
+            try {
+                if (item.action === 'savePumpTimerSetting') {
+                    const res = await bdsApiPost('savePumpTimerSetting', item.payload);
+                    if (res.status !== 'success') throw new Error(res.message);
+                } else if (item.action === 'submitPumpCheck') {
+                    const res = await bdsApiPost('submitPumpCheck', item.payload);
+                    if (res.status !== 'success') throw new Error(res.message);
+                } else if (item.action === 'submitMeterReading') {
+                    const res = await bdsApiPost('submitMeterReading', item.payload);
+                    if (res.status !== 'success') throw new Error(res.message);
+                }
+            } catch (err) {
+                console.error(`Lỗi đồng bộ tác vụ ${item.action}:`, err);
+                failed = true;
+                remainingQueue.push(item);
+            }
+        }
+
+        localStorage.setItem('cmms_pump_check_queue', JSON.stringify(remainingQueue));
+        isSyncing = false;
+        updateSyncBadge();
+
+        if (!failed) {
+            // Reload history and settings if we synced successfully
+            loadPumpCheckHistory();
+            loadServerTimerSettings();
+        }
+    }
+
+    function updateSyncBadge() {
+        const badge = document.getElementById('syncStatusBadge');
+        if (!badge) return;
+
+        const queue = JSON.parse(localStorage.getItem('cmms_pump_check_queue') || '[]');
+        
+        if (queue.length === 0) {
+            badge.className = "badge rounded-pill bg-success-subtle text-success border border-success-subtle px-2 py-1 me-1";
+            badge.innerHTML = `<i class="bi bi-cloud-check-fill"></i> Đã đồng bộ`;
+            badge.style.display = "inline-flex";
+            // Hide after 3 seconds of showing success
+            setTimeout(() => {
+                const qNow = JSON.parse(localStorage.getItem('cmms_pump_check_queue') || '[]');
+                if (qNow.length === 0) badge.style.display = "none";
+            }, 3000);
+        } else {
+            if (isSyncing) {
+                badge.className = "badge rounded-pill bg-warning-subtle text-warning border border-warning-subtle px-2 py-1 me-1";
+                badge.innerHTML = `<span class="spinner-border spinner-border-sm me-1" style="width:0.8rem; height:0.8rem;"></span> Đang gửi (${queue.length})`;
+            } else {
+                badge.className = "badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 me-1";
+                badge.innerHTML = `<i class="bi bi-cloud-arrow-up-fill"></i> Chờ gửi (${queue.length})`;
+            }
+            badge.style.display = "inline-flex";
+        }
+    }
+
     function renderPumpStatusUI() {
         if (!currentSelectedPump) return;
         
@@ -1009,45 +1102,43 @@
         };
 
         const nextStatus = action === 'START' ? 'RUNNING' : 'STOPPED';
+        
+        // Optimistic UI state update locally immediately
         localStorage.setItem(`pump_state_${currentSelectedPump.id}`, JSON.stringify({
             status: nextStatus,
             lastEvent: eventData
         }));
 
-        try {
-            const payload = {
-                meterId: `PUMP_${currentSelectedPump.id}`,
-                pumpId: currentSelectedPump.id,
-                pumpName: currentSelectedPump.name,
-                value: action === 'START' ? 1 : 0,
-                user: operator,
-                notes: notes || (action === 'START' ? "Bật máy bơm" : "Tắt máy bơm")
-            };
+        currentStatus = nextStatus;
+        lastEvent = eventData;
 
-            const res = await bdsApiPost('submitMeterReading', payload);
+        // Queue action for background sync
+        const queue = JSON.parse(localStorage.getItem('cmms_pump_check_queue') || '[]');
+        const payload = {
+            meterId: `PUMP_${currentSelectedPump.id}`,
+            pumpId: currentSelectedPump.id,
+            pumpName: currentSelectedPump.name,
+            value: action === 'START' ? 1 : 0,
+            user: operator,
+            notes: notes || (action === 'START' ? "Bật máy bơm" : "Tắt máy bơm")
+        };
+        queue.push({
+            action: 'submitMeterReading',
+            payload: payload
+        });
+        localStorage.setItem('cmms_pump_check_queue', JSON.stringify(queue));
 
-            if (res.status === 'success') {
-                currentStatus = nextStatus;
-                lastEvent = eventData;
+        const formattedTime = selectedDate.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+        const msg = action === 'START' 
+            ? `🚀 Đã ghi nhận BẬT máy bơm ${currentSelectedPump.name} lúc ${formattedTime}! Lệnh đang được đồng bộ...` 
+            : `🛑 Đã ghi nhận TẮT máy bơm lúc ${formattedTime}! Lệnh đang được đồng bộ...`;
 
-                const formattedTime = selectedDate.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
-                const msg = action === 'START' 
-                    ? `🚀 Đã ghi nhận BẬT máy bơm ${currentSelectedPump.name} lúc ${formattedTime} thành công!` 
-                    : `🛑 Đã TẮT máy bơm lúc ${formattedTime} thành công và lưu nhật ký!`;
-
-                showAlert('success', msg);
-                document.getElementById('notesInput').value = '';
-                resetToCurrentTime();
-            } else {
-                showAlert('danger', `❌ Lỗi: ${res.message || 'Lỗi không xác định'}`);
-            }
-        } catch (err) {
-            currentStatus = nextStatus;
-            lastEvent = eventData;
-            showAlert('warning', 'Đã lưu thao tác trên thiết bị (ngoại tuyến).');
-        } finally {
-            renderPumpStatusUI();
-        }
+        showAlert('success', msg);
+        document.getElementById('notesInput').value = '';
+        resetToCurrentTime();
+        
+        renderPumpStatusUI();
+        syncOfflineQueue();
     }
     function showAlert(type, msg) {
         const box = document.getElementById('alertBox');
