@@ -154,11 +154,15 @@
       document.getElementById("btnReload").addEventListener("click", () => loadSettings(true));
       settings = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null") || defaults;
       render();
+      highlightAndScrollToPump();
       await loadSettings(false);
     });
 
     async function loadSettings(force) {
-      if (!force && settings.length) render();
+      if (!force && settings.length) {
+        render();
+        highlightAndScrollToPump();
+      }
       const timerList = document.getElementById("timerList");
       if (force || !settings.length) bdsShowLoading(timerList, { type: 'skeleton', count: 2 });
       try {
@@ -167,6 +171,7 @@
           settings = data.data;
           localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
           render();
+          highlightAndScrollToPump();
         } else {
           bdsHideLoading(timerList);
         }
@@ -272,6 +277,27 @@
         document.getElementById(`status-${index}`).textContent = "Lưu cục bộ, chưa đồng bộ";
         showToast("Chưa đồng bộ được");
       }
+    }
+
+    function highlightAndScrollToPump() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetId = urlParams.get('settingId') || urlParams.get('id');
+      if (!targetId) return;
+
+      const forms = document.querySelectorAll('form.timer-card');
+      forms.forEach(form => {
+        const input = form.querySelector('input[name="settingId"]');
+        if (input && input.value === targetId) {
+          form.style.border = '3px solid var(--ok)';
+          form.style.boxShadow = '0 0 15px rgba(16, 185, 129, 0.3)';
+          form.style.borderRadius = '8px';
+          form.style.transition = 'all 0.5s ease';
+          
+          setTimeout(() => {
+            form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 300);
+        }
+      });
     }
 
     function showToast(message) {

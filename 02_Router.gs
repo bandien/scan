@@ -124,6 +124,26 @@ function doPost(e) {
       createLocation:       handleCreateLocation,
       updateLocation:       handleUpdateLocation,
       deleteLocation:       handleDeleteLocation,
+      deletePlan:           handleDeletePlan,
+      nhatkyRegister:       handleNhatKyRegister,
+      nhatkyLogin:          handleNhatKyLogin,
+      nhatkyChangePin:      handleNhatKyChangePin,
+      listUsers:            handleListUsers,
+      saveUser:             handleSaveUser,
+      deleteUser:           handleDeleteUser,
+      savePumpTimerSetting: handleSavePumpTimerSetting,
+      seedPumpTimerSettings: handleSeedPumpTimerSettings,
+      saveRosterWeek:       handleSaveRosterWeek,       // Bảng phân ca (trang phanca)
+      // Masters
+      createProject:        handleCreateProject,
+      updateProject:        handleUpdateProject,
+      deleteProject:        handleDeleteProject,
+      createShift:          handleCreateShift,
+      updateShift:          handleUpdateShift,
+      deleteShift:          handleDeleteShift,
+      createLocation:       handleCreateLocation,
+      updateLocation:       handleUpdateLocation,
+      deleteLocation:       handleDeleteLocation,
       // Auth
       changePassword:       handleChangePassword,
       // Checklists
@@ -134,6 +154,7 @@ function doPost(e) {
       submitMeterReading:   handleSubmitMeterReading,
       createMeterPoint:     handleCreateMeterPoint,
       updateMeterPoint:     handleUpdateMeterPoint,
+      submitPumpCheck:      handleSubmitPumpCheck,
     };
 
     const handler = DISPATCH[params.action];
@@ -492,4 +513,30 @@ function handleSavePumpTimerSetting(params) {
 
   writeAuditLog(item.updatedBy || "Web", "savePumpTimerSetting", settingId, "Cập nhật giờ cài đặt đồng hồ bơm");
   return contentResponse({ status: "success", settingId: settingId });
+}
+
+/** POST: Ghi nhận kiểm tra trạng thái vận hành bơm */
+function handleSubmitPumpCheck(params) {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  let sheet = ss.getSheetByName("PumpChecks");
+  if (!sheet) {
+    sheet = ss.insertSheet("PumpChecks");
+    sheet.appendRow(["Timestamp", "PumpID", "PumpName", "Status", "TimerSettings", "Operator", "Notes", "LoggedAt"])
+         .setFontWeight("bold");
+  }
+
+  const timestamp = params.timestamp ? new Date(params.timestamp) : new Date();
+  sheet.appendRow([
+    timestamp,
+    params.pumpId || "",
+    params.pumpName || "",
+    params.status || "",
+    params.timerSettings || "",
+    params.operator || "",
+    params.notes || "",
+    new Date()
+  ]);
+
+  writeAuditLog(params.operator || "System", "submitPumpCheck", params.pumpId, `Status: ${params.status} | Operator: ${params.operator}`);
+  return contentResponse({ status: "success" });
 }

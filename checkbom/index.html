@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tờ Check Trạng Thái Vận Hành Bơm | BanDienScan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="../css/shared.css" rel="stylesheet">
+    <style>
+        :root {
+            --bds-bg: #f3f4f6;
+            --bds-surface: #ffffff;
+            --bds-on-surface: #1f2937;
+            --bds-muted: #6b7280;
+            --bds-line: #e5e7eb;
+            --bds-primary: #059669;
+            --bds-success: #10b981;
+            --bds-warning: #f59e0b;
+            --bds-danger: #ef4444;
+        }
+
+        body {
+            background-color: var(--bds-bg);
+            color: var(--bds-on-surface);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        .app-shell {
+            max-width: 460px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        .header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            background: #ffffff;
+            border-radius: 20px;
+            border: 2px solid var(--bds-line);
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+
+        .card-custom {
+            background: var(--bds-surface);
+            border-radius: 24px;
+            border: 2px solid var(--bds-line);
+            padding: 22px;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.04);
+            margin-bottom: 20px;
+        }
+
+        .form-control-custom {
+            background: #f9fafb;
+            border: 2px solid #d1d5db;
+            color: var(--bds-on-surface);
+            border-radius: 16px;
+            padding: 14px 18px;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .form-control-custom:focus {
+            background: #ffffff;
+            border-color: var(--bds-primary);
+            color: var(--bds-on-surface);
+            box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1);
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #4b5563;
+            margin-bottom: 6px;
+        }
+
+        /* Segmented cards for status check */
+        .status-options-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .status-card {
+            border: 2px solid var(--bds-line);
+            border-radius: 18px;
+            padding: 14px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #ffffff;
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-card .icon-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .status-card .status-label {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: #4b5563;
+        }
+
+        /* Status Colors */
+        /* 1. OFF */
+        .status-card[data-status="OFF"] .icon-circle {
+            background-color: #fee2e2;
+            color: var(--bds-danger);
+        }
+        .status-card[data-status="OFF"].active {
+            border-color: var(--bds-danger);
+            background-color: #fef2f2;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+        }
+        .status-card[data-status="OFF"].active .status-label {
+            color: var(--bds-danger);
+        }
+
+        /* 2. AUTO */
+        .status-card[data-status="AUTO"] .icon-circle {
+            background-color: #d1fae5;
+            color: var(--bds-primary);
+        }
+        .status-card[data-status="AUTO"].active {
+            border-color: var(--bds-primary);
+            background-color: #ecfdf5;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.15);
+        }
+        .status-card[data-status="AUTO"].active .status-label {
+            color: var(--bds-primary);
+        }
+
+        /* 3. MANUAL */
+        .status-card[data-status="MANUAL"] .icon-circle {
+            background-color: #fef3c7;
+            color: var(--bds-warning);
+        }
+        .status-card[data-status="MANUAL"].active {
+            border-color: var(--bds-warning);
+            background-color: #fffbeb;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+        }
+        .status-card[data-status="MANUAL"].active .status-label {
+            color: var(--bds-warning);
+        }
+
+        .status-card:active {
+            transform: scale(0.95);
+        }
+
+        /* Timer Settings Panel */
+        .timer-settings-panel {
+            background: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            border-radius: 20px;
+            padding: 16px;
+            margin-top: 14px;
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .time-box-wrapper {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 10px 12px;
+            margin-bottom: 10px;
+        }
+
+        .time-input-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .time-picker-custom {
+            border: none;
+            background: transparent;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--bds-on-surface);
+            padding: 2px;
+            width: 100%;
+            outline: none;
+        }
+
+        /* iOS style toggle switch */
+        .form-switch-custom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 12px 14px;
+            margin-top: 12px;
+        }
+
+        .btn-submit-glow {
+            background: var(--bds-primary);
+            color: white;
+            font-weight: 800;
+            padding: 16px;
+            border-radius: 18px;
+            border: none;
+            width: 100%;
+            font-size: 1.1rem;
+            box-shadow: 0 10px 20px rgba(5, 150, 105, 0.2);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-submit-glow:active {
+            transform: scale(0.97);
+            box-shadow: 0 4px 10px rgba(5, 150, 105, 0.15);
+        }
+
+        .btn-submit-glow:disabled {
+            background: #9ca3af;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .btn-now-shortcut {
+            background: #e5e7eb;
+            border: none;
+            color: #4b5563;
+            font-weight: 700;
+            font-size: 0.8rem;
+            border-radius: 8px;
+            padding: 4px 8px;
+            margin-left: 10px;
+        }
+
+        /* Integrated Pump Control Styles */
+        .badge-status {
+            padding: 8px 16px; border-radius: 50px; font-weight: 800; font-size: 0.85rem;
+            display: inline-flex; align-items: center; gap: 8px; letter-spacing: 0.5px;
+        }
+        .badge-running { background: #dcfce7; color: #166534; border: 2px solid #86efac; }
+        .badge-stopped { background: #f1f5f9; color: #475569; border: 2px solid #cbd5e1; }
+        
+        .btn-action-start {
+            background: #059669; color: white; font-weight: 900; padding: 16px;
+            border-radius: 18px; border: none; width: 100%; font-size: 1.1rem;
+            box-shadow: 0 10px 20px rgba(5, 150, 105, 0.2); transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-action-stop {
+            background: #dc2626; color: white; font-weight: 900; padding: 16px;
+            border-radius: 18px; border: none; width: 100%; font-size: 1.1rem;
+            box-shadow: 0 10px 20px rgba(220, 38, 38, 0.2); transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-action-start:active, .btn-action-stop:active { transform: scale(0.96); }
+        
+        .timer-box {
+            background: #ecfdf5; border: 2px solid #a7f3d0;
+            border-radius: 18px; padding: 16px; text-align: center; margin-top: 14px;
+        }
+        .timer-val { font-family: monospace; font-size: 1.8rem; font-weight: 900; color: #047857; }
+        .stat-card { background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0; padding: 12px; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="app-shell">
+    <header class="bds-topbar bds-topbar-mobile">
+        <div class="bds-topbar-inner">
+            <div class="bds-topbar-left">
+                <div class="bds-brand-mark"><i class="bi bi-clipboard2-check-fill"></i></div>
+                <div>
+                    <div class="bds-brand-label">BanDienScan x CMMS</div>
+                    <div class="bds-topbar-title" style="font-size: 1.1rem;">Tờ Check Vận Hành Bơm</div>
+                </div>
+            </div>
+            <div class="bds-topbar-right">
+                <button class="bds-btn-icon" type="button" id="btnFontScale" title="Phóng to chữ"><span class="fw-bold" id="fontScaleLabel">A</span></button>
+                <a class="bds-btn-home" href="../index.html"><i class="bi bi-house"></i></a>
+            </div>
+        </div>
+    </header>
+
+    <div id="alertBox" class="mt-2"></div>
+
+    <!-- Skeleton Loading -->
+    <div id="loadingState" class="text-center py-5">
+        <div class="spinner-border text-success mb-3" style="width: 2.5rem; height: 2.5rem;" role="status"></div>
+        <div class="fw-bold text-secondary">Đang tải cấu hình máy bơm...</div>
+    </div>
+
+    <!-- Main Content Form -->
+    <div id="appContent" style="display: none;">
+        <form id="checkForm" onsubmit="handleFormSubmit(event)">
+            <!-- Select Pump Card -->
+            <div class="card-custom">
+                <div class="mb-3">
+                    <label for="pumpSelect" class="info-label"><i class="bi bi-water text-primary me-1"></i>Chọn máy bơm kiểm tra <span class="text-danger">*</span></label>
+                    <select id="pumpSelect" class="form-select form-control-custom" onchange="onPumpChange()" required>
+                        <!-- Injected dynamically -->
+                    </select>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2 flex-wrap gap-2">
+                    <div class="text-muted small fw-medium" id="pumpDetailsText">
+                        <i class="bi bi-info-circle me-1"></i>Nguồn nước: -- | Công suất: -- m³/h
+                    </div>
+                    <a href="../hengio/" id="editPumpLink" class="text-primary small fw-bold text-decoration-none" target="_blank" style="font-size: 0.8rem; display: none;">
+                        <i class="bi bi-pencil-square me-1"></i>Đổi tên & Hẹn giờ
+                    </a>
+                </div>
+            </div>
+
+            <!-- Integrated Pump Control Card -->
+            <div class="card-custom" id="pumpControlCard">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <label class="info-label mb-0"><i class="bi bi-cpu-fill text-success me-1"></i>Giám sát & Điều khiển nhanh</label>
+                    <div id="statusBadgeContainer">
+                        <!-- Dynamic Badge -->
+                    </div>
+                </div>
+
+                <div class="row g-2 mt-1">
+                    <div class="col-6">
+                        <div class="stat-card">
+                            <div class="info-label text-xs" style="font-size:0.75rem;"><i class="bi bi-clock-history text-info me-1"></i>Thao Tác Cuối</div>
+                            <div class="fw-bold text-dark" style="font-size: 0.85rem;" id="lastEventTime">--</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-card">
+                            <div class="info-label text-xs" style="font-size:0.75rem;"><i class="bi bi-lightning-charge-fill text-warning me-1"></i>Công Suất</div>
+                            <div class="fw-bold text-dark" style="font-size: 0.85rem;" id="pumpFlowRateText">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Timer (Shown when Running) -->
+                <div id="timerContainer" style="display: none;" class="timer-box">
+                    <div class="text-uppercase fw-bold small mb-1" style="color: #047857;">⏱️ MÁY ĐANG CHẠY LIÊN TỤC</div>
+                    <div class="timer-val" id="timerDisplay">00:00:00</div>
+                    <div class="fw-bold text-success mt-1" style="font-size: 0.85rem;">Ước tính sản lượng: <strong class="text-dark" id="estVolume">0 m³</strong></div>
+                </div>
+
+                <!-- Big Action Button Container -->
+                <div id="actionButtonContainer" class="mt-3">
+                    <!-- Action Button injected here -->
+                </div>
+            </div>
+
+            <!-- Status Card Check -->
+            <div class="card-custom">
+                <label class="info-label"><i class="bi bi-activity text-warning me-1"></i>Trạng thái vận hành thực tế <span class="text-danger">*</span></label>
+                
+                <div class="status-options-grid">
+                    <div class="status-card" data-status="OFF" onclick="selectStatus('OFF')">
+                        <div class="icon-circle"><i class="bi bi-power"></i></div>
+                        <div class="status-label">TẮT</div>
+                    </div>
+                    <div class="status-card" data-status="AUTO" onclick="selectStatus('AUTO')">
+                        <div class="icon-circle"><i class="bi bi-cpu"></i></div>
+                        <div class="status-label">TỰ ĐỘNG</div>
+                    </div>
+                    <div class="status-card" data-status="MANUAL" onclick="selectStatus('MANUAL')">
+                        <div class="icon-circle"><i class="bi bi-hand-index-thumb"></i></div>
+                        <div class="status-label">BẰNG TAY</div>
+                    </div>
+                </div>
+
+                <!-- Hidden Input for validation -->
+                <input type="hidden" id="statusInput" required>
+
+                <!-- Dynamic Timer settings panel -->
+                <div class="timer-settings-panel" id="timerPanel">
+                    <div class="fw-bold text-secondary mb-2 small text-uppercase"><i class="bi bi-clock-history me-1"></i>Cấu hình giờ chạy tự động</div>
+                    
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="time-box-wrapper">
+                                <label class="info-label text-success mb-0" style="font-size:0.7rem;">BẬT CA 1</label>
+                                <input type="time" id="timeOn1" class="time-picker-custom">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="time-box-wrapper">
+                                <label class="info-label text-danger mb-0" style="font-size:0.7rem;">TẮT CA 1</label>
+                                <input type="time" id="timeOff1" class="time-picker-custom">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="time-box-wrapper">
+                                <label class="info-label text-success mb-0" style="font-size:0.7rem;">BẬT CA 2</label>
+                                <input type="time" id="timeOn2" class="time-picker-custom">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="time-box-wrapper">
+                                <label class="info-label text-danger mb-0" style="font-size:0.7rem;">TẮT CA 2</label>
+                                <input type="time" id="timeOff2" class="time-picker-custom">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sync back checkbox -->
+                    <div class="form-switch-custom">
+                        <div>
+                            <div class="fw-bold small">Cập nhật giờ cài này</div>
+                            <div class="text-muted" style="font-size:0.75rem;">Lưu làm giờ chạy tự động mặc định</div>
+                        </div>
+                        <div class="form-check form-switch p-0 m-0">
+                            <input class="form-check-input ms-0" type="checkbox" id="syncTimerCheckbox" style="width: 2.5em; height: 1.3em;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Operator and Time Info -->
+            <div class="card-custom">
+                <div class="mb-3">
+                    <label for="operatorInput" class="info-label"><i class="bi bi-person-badge text-success me-1"></i>Họ và tên người thực hiện <span class="text-danger">*</span></label>
+                    <input type="text" id="operatorInput" class="form-control form-control-custom" placeholder="Nhập tên của bạn..." required>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <label for="eventTimeInput" class="info-label"><i class="bi bi-calendar-event text-info me-1"></i>Ngày giờ thực hiện</label>
+                        <button type="button" class="btn-now-shortcut" onclick="resetToCurrentTime()">Bây giờ</button>
+                    </div>
+                    <input type="datetime-local" id="eventTimeInput" class="form-control form-control-custom" required>
+                </div>
+
+                <div class="mb-2">
+                    <label for="notesInput" class="info-label"><i class="bi bi-chat-text text-secondary me-1"></i>Nhận xét / Ghi chú</label>
+                    <input type="text" id="notesInput" class="form-control form-control-custom" placeholder="Nhập áp suất, âm thanh hoặc bất thường nếu có...">
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit-glow" id="btnSubmit">
+                <i class="bi bi-check-circle-fill"></i>GỬI BÁO CÁO VẬN HÀNH
+            </button>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script>
+    // PUMP_DICT matches Backend core definitions
+    const PUMP_DICT = {
+        "1": { id: 1, name: "Bơm 160kW hút từ hồ lán trại", flowRate: 244, source: "Hồ lán trại", settingId: "PUMP-160KW-LAN-TRAI" },
+        "2": { id: 2, name: "Bơm hoả tiễn 18,5kW", flowRate: 27.95, source: "Hồ lán trại", settingId: "PUMP-HOATIEN-18_5KW" },
+        "3": { id: 3, name: "Bơm hoả tiễn 30kW", flowRate: 45.33, source: "Hồ lán trại", settingId: "PUMP-HOATIEN-30KW" },
+        "4": { id: 4, name: "Bơm hoả tiễn 22kW", flowRate: 45.33, source: "Hồ lán trại", settingId: "PUMP-HOATIEN-22KW" },
+        "5": { id: 5, name: "Bơm LK1", flowRate: 1, source: "Giếng khoan LK1", settingId: "PUMP-LK1" },
+        "6": { id: 6, name: "Bơm LK2", flowRate: 2, source: "Giếng khoan LK2", settingId: "PUMP-LK2" },
+        "7": { id: 7, name: "Bơm LK3", flowRate: 3, source: "Giếng khoan LK3", settingId: "PUMP-LK3" },
+        "8": { id: 8, name: "Bơm LK4", flowRate: 4, source: "Giếng khoan LK4", settingId: "PUMP-LK4" },
+        "9": { id: 9, name: "Bơm LK5", flowRate: 5, source: "Giếng khoan LK5", settingId: "PUMP-LK5" },
+        "10": { id: 10, name: "Bơm LK6", flowRate: 6, source: "Giếng khoan LK6", settingId: "PUMP-LK6" },
+        "11": { id: 11, name: "Bơm LK7", flowRate: 7, source: "Giếng khoan LK7", settingId: "PUMP-LK7" },
+        "12": { id: 12, name: "Bơm LK8", flowRate: 8, source: "Giếng khoan LK8", settingId: "PUMP-LK8" },
+        "13": { id: 13, name: "Bơm LK9", flowRate: 9, source: "Giếng khoan LK9", settingId: "PUMP-LK9" },
+        "14": { id: 14, name: "Bơm LK10", flowRate: 10, source: "Giếng khoan LK10", settingId: "PUMP-LK10" },
+        "15": { id: 15, name: "Bơm LK11", flowRate: 11, source: "Giếng khoan LK11", settingId: "PUMP-LK11" },
+        "16": { id: 16, name: "Bơm LK12", flowRate: 12, source: "Giếng khoan LK12", settingId: "PUMP-LK12" },
+        "17": { id: 17, name: "Bơm LK13", flowRate: 1, source: "Giếng khoan LK13", settingId: "PUMP-LK13" },
+        "18": { id: 18, name: "Bơm LK14", flowRate: 1, source: "Giếng khoan LK14", settingId: "PUMP-LK14" },
+        "19": { id: 19, name: "Bơm LK15", flowRate: 1, source: "Giếng khoan LK15", settingId: "PUMP-LK15" },
+        "20": { id: 20, name: "Bơm hoả tiễn 30kW số 01", flowRate: 86, source: "Hồ trung tâm", settingId: "PUMP-HO-TRUNG-TAM-01" },
+        "21": { id: 21, name: "Bơm hoả tiễn 30kW số 02", flowRate: 86, source: "Hồ trung tâm", settingId: "PUMP-HO-TRUNG-TAM-02" },
+        "24": { id: 24, name: "Bơm 160kW số 01 hút từ hồ nước mặt ngoài sân", flowRate: 154, source: "Hồ ngoài sân (nước suối)", settingId: "PUMP-SUOI-CUN-160KW" },
+        "25": { id: 25, name: "Bơm tưới cỏ hồ trung tâm (rainbird)", flowRate: 0, source: "Hồ trung tâm", settingId: "PUMP-HO-TRUNG-TAM-RAINBIRD" },
+        "26": { id: 26, name: "Bơm tưới cỏ hồ 16-17 (rainbird)", flowRate: 0, source: "Hồ 16-17", settingId: "PUMP-HO-16-17-RAINBIRD" }
+    };
+
+    let serverTimerSettings = [];
+    let currentSelectedPump = null;
+    let currentStatus = "STOPPED";
+    let lastEvent = null;
+    let timerInterval = null;
+
+    // Font Scaling
+    const FONT_SCALES = [100, 115, 130];
+    function applyFontScale() {
+        const scale = parseInt(localStorage.getItem('cmms_pump_check_fontscale') || "100", 10);
+        document.documentElement.style.fontSize = scale + "%";
+        document.getElementById("fontScaleLabel").textContent = scale <= 100 ? "A" : scale <= 115 ? "A+" : "A++";
+    }
+    function cycleFontScale() {
+        const current = parseInt(localStorage.getItem('cmms_pump_check_fontscale') || "100", 10);
+        const next = FONT_SCALES[(FONT_SCALES.indexOf(current) + 1) % FONT_SCALES.length];
+        localStorage.setItem('cmms_pump_check_fontscale', String(next));
+        applyFontScale();
+    }
+
+    function resetToCurrentTime() {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('eventTimeInput').value = now.toISOString().slice(0, 16);
+    }
+
+    window.onload = async function() {
+        applyFontScale();
+        document.getElementById('btnFontScale').addEventListener('click', cycleFontScale);
+        
+        // Prefill Operator Name
+        const savedOp = localStorage.getItem('cmms_op_name');
+        if (savedOp) document.getElementById('operatorInput').value = savedOp;
+        
+        resetToCurrentTime();
+        initPumpDropdown();
+        await loadServerTimerSettings();
+    };
+
+    function initPumpDropdown() {
+        const select = document.getElementById('pumpSelect');
+        select.innerHTML = '';
+        
+        Object.values(PUMP_DICT).forEach(pump => {
+            const opt = document.createElement('option');
+            opt.value = pump.id;
+            opt.textContent = `${pump.id}. ${pump.name}`;
+            select.appendChild(opt);
+        });
+
+        // Set default based on URL query
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlPumpId = urlParams.get('pumpId') || urlParams.get('id') || "1";
+        if (PUMP_DICT[urlPumpId]) {
+            select.value = urlPumpId;
+        }
+        
+        onPumpChange();
+    }
+
+    async function loadServerTimerSettings() {
+        try {
+            // Load timer settings from server
+            const res = await bdsApiFetch('getPumpTimerSettings');
+            if (res.status === "success" && Array.isArray(res.data)) {
+                serverTimerSettings = res.data;
+                // Prefill the time inputs for the current selected pump
+                updateTimerInputsFromConfig();
+            }
+        } catch (err) {
+            console.error("Lỗi nạp cấu hình giờ cài từ server:", err);
+        } finally {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('appContent').style.display = 'block';
+        }
+    }
+
+    function onPumpChange() {
+        const select = document.getElementById('pumpSelect');
+        const pumpId = select.value;
+        const pump = PUMP_DICT[pumpId];
+        currentSelectedPump = pump;
+        
+        if (pump) {
+            document.getElementById('pumpDetailsText').innerHTML = 
+                `<i class="bi bi-droplet-fill text-primary me-1"></i>Nguồn: <strong>${pump.source}</strong> | <i class="bi bi-lightning-fill text-warning me-1"></i>Công suất: <strong>${pump.flowRate || '--'}</strong> m³/h`;
+            
+            // Cập nhật link đổi tên & hẹn giờ
+            const editLink = document.getElementById('editPumpLink');
+            if (pump.settingId) {
+                editLink.href = `../hengio/?settingId=${encodeURIComponent(pump.settingId)}`;
+                editLink.style.display = 'inline-block';
+            } else {
+                editLink.style.display = 'none';
+            }
+
+            // Load pump running status and setup timers
+            loadPumpStatusFromServer();
+
+            // Re-apply timers if we already loaded settings from server
+            updateTimerInputsFromConfig();
+        }
+    }
+
+    function updateTimerInputsFromConfig() {
+        if (!currentSelectedPump) return;
+        
+        // Find config matching pump's settingId
+        const config = serverTimerSettings.find(s => s.settingId === currentSelectedPump.settingId);
+        
+        if (config) {
+            document.getElementById('timeOn1').value = normalizeTime(config.on1) || '';
+            document.getElementById('timeOff1').value = normalizeTime(config.off1) || '';
+            document.getElementById('timeOn2').value = normalizeTime(config.on2) || '';
+            document.getElementById('timeOff2').value = normalizeTime(config.off2) || '';
+        } else {
+            // Reset to empty if no config on server
+            document.getElementById('timeOn1').value = '';
+            document.getElementById('timeOff1').value = '';
+            document.getElementById('timeOn2').value = '';
+            document.getElementById('timeOff2').value = '';
+        }
+    }
+
+    function normalizeTime(val) {
+        if (!val) return '';
+        val = val.trim();
+        // If format is like "12:00", it's valid for input type="time"
+        if (/^\d{2}:\d{2}$/.test(val)) return val;
+        // If format is like "8:30" (missing leading zero), add it
+        if (/^\d{1}:\d{2}$/.test(val)) return '0' + val;
+        return '';
+    }
+
+    function selectStatus(status) {
+        // Toggle active class on cards
+        document.querySelectorAll('.status-card').forEach(card => {
+            card.classList.remove('active');
+        });
+        
+        const activeCard = document.querySelector(`.status-card[data-status="${status}"]`);
+        if (activeCard) activeCard.classList.add('active');
+        
+        document.getElementById('statusInput').value = status;
+
+        // Show/hide timer settings if AUTO
+        const timerPanel = document.getElementById('timerPanel');
+        if (status === 'AUTO') {
+            timerPanel.style.display = 'block';
+        } else {
+            timerPanel.style.display = 'none';
+        }
+    }
+
+    async function handleFormSubmit(e) {
+        e.preventDefault();
+        
+        const operator = document.getElementById('operatorInput').value.trim();
+        const status = document.getElementById('statusInput').value;
+        const notes = document.getElementById('notesInput').value.trim();
+        const customTime = document.getElementById('eventTimeInput').value;
+        
+        if (!operator) {
+            showAlert('danger', 'Vui lòng nhập tên người thực hiện!');
+            return;
+        }
+        if (!status) {
+            showAlert('danger', 'Vui lòng chọn trạng thái vận hành!');
+            return;
+        }
+
+        // Save operator name for future visits
+        localStorage.setItem('cmms_op_name', operator);
+
+        const btnSubmit = document.getElementById('btnSubmit');
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang gửi...`;
+
+        let timerSettingsStr = "";
+        let on1 = "", off1 = "", on2 = "", off2 = "";
+
+        if (status === 'AUTO') {
+            on1 = document.getElementById('timeOn1').value;
+            off1 = document.getElementById('timeOff1').value;
+            on2 = document.getElementById('timeOn2').value;
+            off2 = document.getElementById('timeOff2').value;
+            
+            const parts = [];
+            if (on1 || off1) parts.push(`Ca 1: ${on1 || '--'}-${off1 || '--'}`);
+            if (on2 || off2) parts.push(`Ca 2: ${on2 || '--'}-${off2 || '--'}`);
+            timerSettingsStr = parts.join("; ");
+        }
+
+        try {
+            // 1. Sync Timer Settings to general config if checked
+            const syncTimer = document.getElementById('syncTimerCheckbox').checked;
+            if (status === 'AUTO' && syncTimer && currentSelectedPump) {
+                await bdsApiPost('savePumpTimerSetting', {
+                    settingId: currentSelectedPump.settingId,
+                    pumpName: currentSelectedPump.name,
+                    location: currentSelectedPump.source,
+                    on1: on1,
+                    off1: off1,
+                    on2: on2,
+                    off2: off2,
+                    notes: `Cập nhật từ check sheet bởi ${operator}`,
+                    updatedBy: operator
+                });
+            }
+
+            // 2. Submit Pump Check Log
+            const payload = {
+                timestamp: customTime ? new Date(customTime).toISOString() : new Date().toISOString(),
+                pumpId: currentSelectedPump.id,
+                pumpName: currentSelectedPump.name,
+                status: status === 'OFF' ? 'Tắt' : (status === 'AUTO' ? 'Tự động' : 'Bằng tay'),
+                timerSettings: timerSettingsStr,
+                operator: operator,
+                notes: notes
+            };
+
+            const res = await bdsApiPost('submitPumpCheck', payload);
+            if (res.status === 'success') {
+                showAlert('success', `🎉 Gửi báo cáo check bơm <strong>${currentSelectedPump.name}</strong> thành công!`);
+                document.getElementById('notesInput').value = '';
+                
+                // Clear active status styling
+                document.querySelectorAll('.status-card').forEach(card => card.classList.remove('active'));
+                document.getElementById('statusInput').value = '';
+                document.getElementById('timerPanel').style.display = 'none';
+                
+                resetToCurrentTime();
+                // Reload server settings to get the newly updated timer values if updated
+                await loadServerTimerSettings();
+            } else {
+                showAlert('danger', `❌ Lỗi khi gửi: ${res.message || 'Lỗi không xác định'}`);
+            }
+        } catch (err) {
+            showAlert('danger', `❌ Không thể kết nối với server: ${err.message || err}`);
+        } finally {
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = `<i class="bi bi-check-circle-fill"></i>GỬI BÁO CÁO VẬN HÀNH`;
+        }
+    }
+    async function loadPumpStatusFromServer() {
+        if (!currentSelectedPump) return;
+        
+        if (timerInterval) clearInterval(timerInterval);
+        
+        document.getElementById('statusBadgeContainer').innerHTML = 
+            `<span class="badge bg-light text-secondary"><span class="spinner-border spinner-border-sm me-1" style="width:0.8rem; height:0.8rem;"></span> Đang nạp...</span>`;
+        
+        try {
+            const res = await bdsApiFetch('getMeterStatus', { pumpId: currentSelectedPump.id });
+            if (res.status === "success" && res.lastEvent) {
+                lastEvent = res.lastEvent;
+                currentStatus = lastEvent.action === 'START' ? 'RUNNING' : 'STOPPED';
+            } else {
+                const localState = localStorage.getItem(`pump_state_${currentSelectedPump.id}`);
+                if (localState) {
+                    const parsed = JSON.parse(localState);
+                    currentStatus = parsed.status;
+                    lastEvent = parsed.lastEvent;
+                } else {
+                    currentStatus = "STOPPED";
+                    lastEvent = null;
+                }
+            }
+        } catch (err) {
+            const localState = localStorage.getItem(`pump_state_${currentSelectedPump.id}`);
+            if (localState) {
+                const parsed = JSON.parse(localState);
+                currentStatus = parsed.status;
+                lastEvent = parsed.lastEvent;
+            } else {
+                currentStatus = "STOPPED";
+                lastEvent = null;
+            }
+        } finally {
+            renderPumpStatusUI();
+        }
+    }
+
+    function renderPumpStatusUI() {
+        if (!currentSelectedPump) return;
+        
+        document.getElementById('pumpFlowRateText').innerText = `${currentSelectedPump.flowRate || '--'} m³/h`;
+
+        if (lastEvent) {
+            const dateStr = new Date(lastEvent.timestamp).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+            const actionText = lastEvent.action === 'START' ? 'Bật' : 'Tắt';
+            document.getElementById('lastEventTime').innerText = `${actionText} lúc ${dateStr}`;
+        } else {
+            document.getElementById('lastEventTime').innerText = "Chưa có";
+        }
+
+        const statusContainer = document.getElementById('statusBadgeContainer');
+        const btnContainer = document.getElementById('actionButtonContainer');
+        const timerContainer = document.getElementById('timerContainer');
+
+        if (currentStatus === 'RUNNING') {
+            statusContainer.innerHTML = `<span class="badge-status badge-running"><span class="spinner-grow spinner-grow-sm text-success" role="status"></span> ĐANG CHẠY</span>`;
+            btnContainer.innerHTML = `
+                <button type="button" class="btn-action-stop" onclick="submitAction('STOP')">
+                    <i class="bi bi-power fs-5"></i> 🛑 TẮT MÁY BƠM (XÁC NHẬN)
+                </button>`;
+            
+            timerContainer.style.display = 'block';
+            startTimer(lastEvent ? lastEvent.timestamp : new Date());
+        } else {
+            statusContainer.innerHTML = `<span class="badge-status badge-stopped"><i class="bi bi-pause-circle-fill"></i> ĐANG DỪNG</span>`;
+            btnContainer.innerHTML = `
+                <button type="button" class="btn-action-start" onclick="submitAction('START')">
+                    <i class="bi bi-rocket-takeoff-fill fs-5"></i> 🚀 BẮT ĐẦU BẬT MÁY BƠM
+                </button>`;
+            
+            timerContainer.style.display = 'none';
+            if (timerInterval) clearInterval(timerInterval);
+        }
+    }
+
+    function startTimer(startTimeStr) {
+        if (timerInterval) clearInterval(timerInterval);
+        const startMs = new Date(startTimeStr).getTime();
+
+        function tick() {
+            const diffSec = Math.max(0, Math.floor((Date.now() - startMs) / 1000));
+            const hrs = Math.floor(diffSec / 3600);
+            const mins = Math.floor((diffSec % 3600) / 60);
+            const secs = diffSec % 60;
+            
+            document.getElementById('timerDisplay').innerText = 
+                `${hrs.toString().padStart(2,'0')}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+            
+            const estVol = ((diffSec / 3600) * (currentSelectedPump.flowRate || 0)).toFixed(2);
+            document.getElementById('estVolume').innerText = `${estVol} m³`;
+        }
+
+        tick();
+        timerInterval = setInterval(tick, 1000);
+    }
+
+    async function submitAction(action) {
+        const operator = document.getElementById('operatorInput').value.trim();
+        const notes = document.getElementById('notesInput').value.trim();
+        const customTimeVal = document.getElementById('eventTimeInput').value;
+
+        if (!operator) {
+            showAlert('danger', 'Vui lòng điền Họ tên người thực hiện ở bên dưới trước!');
+            document.getElementById('operatorInput').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            document.getElementById('operatorInput').focus();
+            return;
+        }
+
+        localStorage.setItem('cmms_op_name', operator);
+
+        const btnContainer = document.getElementById('actionButtonContainer');
+        btnContainer.innerHTML = `
+            <button class="btn btn-secondary w-100 py-3 rounded-4 fw-bold" disabled>
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang gửi lệnh...
+            </button>`;
+
+        const selectedDate = customTimeVal ? new Date(customTimeVal) : new Date();
+        const timestampIso = selectedDate.toISOString();
+
+        const eventData = {
+            action: action,
+            timestamp: timestampIso,
+            operator: operator,
+            notes: notes
+        };
+
+        const nextStatus = action === 'START' ? 'RUNNING' : 'STOPPED';
+        localStorage.setItem(`pump_state_${currentSelectedPump.id}`, JSON.stringify({
+            status: nextStatus,
+            lastEvent: eventData
+        }));
+
+        try {
+            const payload = {
+                meterId: `PUMP_${currentSelectedPump.id}`,
+                pumpId: currentSelectedPump.id,
+                pumpName: currentSelectedPump.name,
+                value: action === 'START' ? 1 : 0,
+                user: operator,
+                notes: notes || (action === 'START' ? "Bật máy bơm" : "Tắt máy bơm")
+            };
+
+            const res = await bdsApiPost('submitMeterReading', payload);
+
+            if (res.status === 'success') {
+                currentStatus = nextStatus;
+                lastEvent = eventData;
+
+                const formattedTime = selectedDate.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+                const msg = action === 'START' 
+                    ? `🚀 Đã ghi nhận BẬT máy bơm ${currentSelectedPump.name} lúc ${formattedTime} thành công!` 
+                    : `🛑 Đã TẮT máy bơm lúc ${formattedTime} thành công và lưu nhật ký!`;
+
+                showAlert('success', msg);
+                document.getElementById('notesInput').value = '';
+                resetToCurrentTime();
+            } else {
+                showAlert('danger', `❌ Lỗi: ${res.message || 'Lỗi không xác định'}`);
+            }
+        } catch (err) {
+            currentStatus = nextStatus;
+            lastEvent = eventData;
+            showAlert('warning', 'Đã lưu thao tác trên thiết bị (ngoại tuyến).');
+        } finally {
+            renderPumpStatusUI();
+        }
+    }
+    function showAlert(type, msg) {
+        const box = document.getElementById('alertBox');
+        box.innerHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show rounded-4 shadow-sm border-2 fw-medium" role="alert">
+                ${msg}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>`;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+</body>
+</html>
