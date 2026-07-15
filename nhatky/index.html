@@ -2883,6 +2883,12 @@
       if (checkContainer) {
         if (planId && value === "Hoàn thành") {
           checkContainer.style.display = "block";
+          // Việc không có chỉ tiêu khối lượng: ghi "Hoàn thành" gần như luôn có nghĩa
+          // là xong việc → tick sẵn để kế hoạch chuyển "Hoàn thành" đồng bộ với nhật
+          // ký (trước đây quên tick làm 2 màn hiện 2 trạng thái khác nhau). Việc có
+          // chỉ tiêu (planQty) giữ nguyên không tick — tự hoàn thành khi đủ lũy kế.
+          const plan = plans.find(item => item.id === planId);
+          document.getElementById("markPlanDone").checked = Boolean(plan && !(parseFloat(plan.planQty || 0) > 0));
         } else {
           checkContainer.style.display = "none";
           document.getElementById("markPlanDone").checked = false;
