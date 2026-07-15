@@ -288,6 +288,20 @@
         }
         .timer-val { font-family: monospace; font-size: 1.8rem; font-weight: 900; color: #047857; }
         .stat-card { background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0; padding: 12px; text-align: center; }
+
+        /* History log list styling */
+        .table-responsive::-webkit-scrollbar {
+            width: 6px; height: 6px;
+        }
+        .table-responsive::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1; border-radius: 4px;
+        }
+        .table-responsive::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .badge-manual { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-weight: 700; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; }
+        .badge-auto { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; font-weight: 700; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; }
+        .badge-off { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; font-weight: 700; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; }
     </style>
 </head>
 <body>
@@ -466,6 +480,34 @@
                 <i class="bi bi-check-circle-fill"></i>GỬI BÁO CÁO VẬN HÀNH
             </button>
         </form>
+
+        <!-- Pump Checks History Card -->
+        <div class="card-custom mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <label class="info-label mb-0"><i class="bi bi-clock-history text-primary me-1"></i>Nhật ký vận hành & check bơm</label>
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2 py-1" style="font-size:0.75rem;" onclick="loadPumpCheckHistory()">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Làm mới
+                </button>
+            </div>
+
+            <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+                <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                    <thead class="table-light sticky-top" style="z-index: 1;">
+                        <tr>
+                            <th style="min-width: 110px;">Ngày giờ</th>
+                            <th style="min-width: 90px;">Trạng thái</th>
+                            <th style="min-width: 100px;">Người thực hiện</th>
+                            <th style="min-width: 120px;">Chi tiết / Ghi chú</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody">
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">Đang tải nhật ký...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -618,6 +660,9 @@
             // Load pump running status and setup timers
             loadPumpStatusFromServer();
 
+            // Load pump check history logs
+            loadPumpCheckHistory();
+
             // Re-apply timers if we already loaded settings from server
             updateTimerInputsFromConfig();
         }
@@ -751,6 +796,10 @@
                 document.getElementById('timerPanel').style.display = 'none';
                 
                 resetToCurrentTime();
+                
+                // Reload check history logs
+                loadPumpCheckHistory();
+                
                 // Reload server settings to get the newly updated timer values if updated
                 await loadServerTimerSettings();
             } else {
@@ -763,6 +812,70 @@
             btnSubmit.innerHTML = `<i class="bi bi-check-circle-fill"></i>GỬI BÁO CÁO VẬN HÀNH`;
         }
     }
+    async function loadPumpCheckHistory() {
+        if (!currentSelectedPump) return;
+        const tbody = document.getElementById('historyTableBody');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="4" class="text-center text-muted py-4">
+                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Đang nạp nhật ký...
+                </td>
+            </tr>`;
+        
+        try {
+            const res = await bdsApiFetch('getPumpChecks', { pumpId: currentSelectedPump.id, limit: 30 });
+            if (res.status === 'success' && Array.isArray(res.history)) {
+                if (res.history.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">Chưa có nhật ký check bơm nào.</td>
+                        </tr>`;
+                    return;
+                }
+                
+                tbody.innerHTML = res.history.map(row => {
+                    const dateObj = new Date(row.timestamp);
+                    const dateStr = dateObj.toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'});
+                    const timeStr = dateObj.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
+                    const fullDateStr = `${timeStr} ${dateStr}`;
+
+                    let badgeClass = "badge-off";
+                    if (row.status === "Tự động") badgeClass = "badge-auto";
+                    if (row.status === "Bằng tay") badgeClass = "badge-manual";
+
+                    let detailsText = "";
+                    if (row.status === "Tự động") {
+                        detailsText = `<div class="text-warning fw-bold" style="font-size:0.75rem;"><i class="bi bi-clock-history me-1"></i>Giờ cài: ${row.timerSettings || '--'}</div>`;
+                    }
+                    if (row.notes) {
+                        detailsText += `<div class="text-muted mt-1" style="font-size:0.8rem; font-style:italic;">💬 ${row.notes}</div>`;
+                    }
+                    if (!detailsText) {
+                        detailsText = `<span class="text-muted" style="font-size:0.75rem;">Không ghi chú</span>`;
+                    }
+
+                    return `
+                        <tr>
+                            <td><strong class="text-dark">${fullDateStr}</strong></td>
+                            <td><span class="${badgeClass}">${row.status}</span></td>
+                            <td><span class="fw-medium text-secondary">${row.operator}</span></td>
+                            <td>${detailsText}</td>
+                        </tr>`;
+                }).join('');
+            } else {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center text-danger py-4">Lỗi tải dữ liệu: ${res.message || 'Lỗi không xác định'}</td>
+                    </tr>`;
+            }
+        } catch (err) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="text-center text-danger py-4">Lỗi kết nối: ${err.message || err}</td>
+                </tr>`;
+        }
+    }
+
     async function loadPumpStatusFromServer() {
         if (!currentSelectedPump) return;
         

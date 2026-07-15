@@ -50,6 +50,7 @@ function doGet(e) {
       case 'getMeterHistory':   return handleGetMeterHistory(e);    // Phase 11
       case 'getMeterStats':     return handleGetMeterStats(e);      // Phase 11
       case 'getPumpTimerSettings': return handleGetPumpTimerSettings(e);
+      case 'getPumpChecks':     return handleGetPumpChecks(e);
       case 'getPlans':          return handleGetPlans(e);           // Kế hoạch trang nhatky
       case 'getWorkLogs':       return handleGetWorkLogs(e);        // Nhật ký cả tổ (trang nhatky)
       case 'nhatkyAccounts':    return handleListAccounts(e);       // Danh sách tài khoản trang nhatky
@@ -539,4 +540,39 @@ function handleSubmitPumpCheck(params) {
 
   writeAuditLog(params.operator || "System", "submitPumpCheck", params.pumpId, `Status: ${params.status} | Operator: ${params.operator}`);
   return contentResponse({ status: "success" });
+}
+
+/** GET: Tải nhật ký kiểm tra trạng thái vận hành bơm */
+function handleGetPumpChecks(e) {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  const sheet = ss.getSheetByName("PumpChecks");
+  if (!sheet) return contentResponse({ status: "success", history: [] });
+
+  const { pumpId, limit } = e.parameter;
+  const maxRows = parseInt(limit, 10) || 50;
+  const values = sheet.getDataRange().getValues();
+  if (values.length < 2) return contentResponse({ status: "success", history: [] });
+
+  const data = values.slice(1);
+  
+  let filtered = data;
+  if (pumpId) {
+    filtered = data.filter(r => String(r[1]).trim() === String(pumpId).trim());
+  }
+
+  const history = filtered
+    .slice(-maxRows)
+    .reverse()
+    .map(r => ({
+      timestamp: r[0] instanceof Date ? r[0].toISOString() : String(r[0] || ""),
+      pumpId: String(r[1] || ""),
+      pumpName: String(r[2] || ""),
+      status: String(r[3] || ""),
+      timerSettings: String(r[4] || ""),
+      operator: String(r[5] || ""),
+      notes: String(r[6] || ""),
+      loggedAt: r[7] instanceof Date ? r[7].toISOString() : String(r[7] || "")
+    }));
+
+  return contentResponse({ status: "success", history });
 }
