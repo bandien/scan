@@ -102,6 +102,7 @@
         }
         .qr {
             width: 100%;
+            max-height: 200px; /* giới hạn trên màn hình để chữ có đất */
             aspect-ratio: 1;
             display: flex;
             align-items: center;
@@ -109,6 +110,7 @@
             border: 1px solid var(--border);
             border-radius: 10px;
             background: #fff;
+            align-self: center;
         }
         .qr canvas {
             width: 100% !important;
@@ -120,32 +122,33 @@
         .info-block {
             display: flex;
             flex-direction: column;
-            gap: 0;
+            justify-content: space-between;
             flex: 1;
+            padding-top: 6px;
         }
         .name {
-            font-size: 0.95rem;
-            line-height: 1.25;
+            font-size: 1.15rem;
+            line-height: 1.3;
             font-weight: 900;
             color: #0f172a;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
         }
         .meta {
             color: var(--muted);
-            font-size: 0.78rem;
-            line-height: 1.35;
+            font-size: 0.9rem;
+            line-height: 1.5;
             margin-top: 2px;
         }
-        .meta strong { color: #0f172a; }
+        .meta strong { color: #0f172a; font-weight: 700; }
         .uid {
-            margin-top: 8px;
+            margin-top: 10px;
             display: inline-block;
-            padding: 3px 9px;
-            border-radius: 5px;
+            padding: 5px 12px;
+            border-radius: 6px;
             background: #0f172a;
             color: white;
             font-family: Consolas, monospace;
-            font-size: 0.78rem;
+            font-size: 0.92rem;
             font-weight: 800;
         }
         .type-badge {
@@ -154,8 +157,8 @@
             background: #e0f2fe;
             border: 1px solid #bae6fd;
             border-radius: 999px;
-            padding: 2px 8px;
-            font-size: 9px;
+            padding: 3px 10px;
+            font-size: 10px;
             font-weight: 800;
             text-transform: uppercase;
         }
@@ -201,10 +204,13 @@
                 page-break-inside: avoid !important;
             }
             .label.unselected { display: none !important; }
+            /* QR full-width khi in, giới hạn max 75mm để chữ có đất */
+            .qr { max-height: 75mm !important; }
             .qr-block { margin-bottom: 4mm !important; }
-            .name { font-size: 8pt !important; }
-            .meta { font-size: 7pt !important; }
-            .uid { font-size: 7pt !important; padding: 2px 6px !important; }
+            .name { font-size: 10pt !important; line-height: 1.3 !important; }
+            .meta { font-size: 8.5pt !important; line-height: 1.5 !important; margin-top: 1.5mm !important; }
+            .uid { font-size: 8.5pt !important; padding: 2px 7px !important; margin-top: 2mm !important; }
+            .type-badge { font-size: 7pt !important; padding: 1px 6px !important; }
             .url { font-size: 6pt !important; bottom: 4px !important; }
         }
     </style>
