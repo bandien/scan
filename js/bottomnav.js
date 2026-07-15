@@ -39,13 +39,13 @@
   const MENU_DAILY = [
     { icon: 'bi-water',            label: 'Thông tin & Check vận hành bơm', href: root + 'pump_info.html' },
     { icon: 'bi-calendar-range',   label: 'Phân ca trực',                   href: root + 'phanca/' },
-    { icon: 'bi-person-workspace', label: 'Câu hỏi phỏng vấn',              href: root + 'phongvan/' },
     { icon: 'bi-journal-check',    label: 'Nhật ký công việc',              href: root + 'nhatky/' }
   ];
   const MENU_ADMIN = [
     { icon: 'bi-alarm',    label: 'Cài đặt đồng hồ bơm',   href: root + 'hengio/' },
     { icon: 'bi-qr-code',  label: 'In mã QR máy bơm',      href: root + 'print_pumps.html' },
     { icon: 'bi-bar-chart-fill', label: 'Báo cáo thống kê', href: root + 'nhatky/index.html#stats' },
+    { icon: 'bi-person-workspace', label: 'Câu hỏi phỏng vấn', href: root + 'phongvan/' },
     { icon: 'bi-cpu-fill', label: 'Giám sát Server Uptime', href: root + 'status.html' },
     { icon: 'bi-history',  label: 'Nhật ký Thay đổi',       href: root + 'changelog.html' },
     { icon: 'bi-tools',    label: 'Chẩn đoán EBYTE NA111',  href: root + 'na111.html' }
