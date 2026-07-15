@@ -512,8 +512,8 @@
       --warn: #a15c07;
       --warn-bg: #fff2cc;
       --warn-ink: #6c3d00;
-      --ink: #17212b;
-      --muted: #667085;
+      --ink: #000000;
+      --muted: #334155;
       --line: #d8e0e7;
       --surface: #ffffff;
       --surface-soft: #eef7f4;
@@ -564,7 +564,7 @@
       box-shadow: 0 10px 24px rgba(15,107,95,.24);
     }
     .app-title, .header-title { color: #101828; letter-spacing: -.01em; }
-    .header-sub { color: #667085; font-weight: 650; }
+    .header-sub { color: var(--muted); font-weight: 650; }
     .btn-back {
       width: 48px;
       height: 48px;
@@ -717,7 +717,7 @@
       color: #101828;
     }
     .task-row-time {
-      color: #667085;
+      color: var(--muted);
       font-size: .88rem;
       margin-top: 4px;
     }
@@ -734,7 +734,7 @@
       align-items: center;
       justify-content: center;
       font-size: 1rem;
-      color: #667085;
+      color: var(--muted);
     }
 
     .empty-state {
@@ -777,7 +777,7 @@
     }
     .info-card { padding: 15px 16px; }
     .info-label {
-      color: #667085;
+      color: var(--muted);
       font-size: .76rem;
       letter-spacing: .08em;
     }
@@ -924,7 +924,7 @@
     }
     .week-today td { background: #edf7f2; }
     .week-item-task { color: #101828; }
-    .week-item-meta { color: #667085; }
+    .week-item-meta { color: var(--muted); }
 
     .prof-hero {
       background: linear-gradient(135deg, var(--brand), #1b8f76);
@@ -985,7 +985,7 @@
       backdrop-filter: blur(16px);
     }
     .tab {
-      color: #667085;
+      color: var(--muted);
       padding-top: 9px;
       transition: color .12s ease, background .12s ease;
     }
