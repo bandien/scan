@@ -344,12 +344,6 @@
 
 <!-- Login Overlay -->
 <div id="loginOverlay">
-    <div class="d-flex justify-content-end px-3 pt-3" style="position: absolute; top: 0; right: 0; z-index: 10000;">
-        <div class="btn-group btn-group-sm rounded-pill p-1" style="background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant);" id="loginLangToggle">
-            <button class="btn btn-outline-primary border-0 rounded-pill px-3" onclick="setLanguage('vi')" id="login-btn-vi">VN</button>
-            <button class="btn btn-outline-primary border-0 rounded-pill px-3" onclick="setLanguage('en')" id="login-btn-en">EN</button>
-        </div>
-    </div>
     <div class="login-card">
         <div class="logo-box mx-auto mb-3" style="width: 60px; height: 60px; font-size: 28px;"><i class="bi bi-shield-lock"></i></div>
         <h3 class="fw-bold mb-1" style="color: var(--siu-on-surface);">BanDienScan</h3>
@@ -373,7 +367,7 @@
         <div class="d-flex justify-content-between align-items-center mb-4 ms-1">
             <div class="form-check text-start mb-0">
                 <input class="form-check-input" type="checkbox" id="rememberMe" checked>
-                <label class="form-check-label text-muted small" for="rememberMe" data-i18n="remember_me">Ghi nhớ đăng nhập</label>
+                <label class="form-check-label text-muted small" for="rememberMe">Ghi nhớ đăng nhập</label>
             </div>
             <a href="#" class="text-primary small text-decoration-none fw-bold" onclick="alert('Vui lòng liên hệ Quản trị viên (Admin) hoặc Tổ trưởng để được cấp lại PIN mới.'); event.preventDefault();">Quên PIN?</a>
         </div>
@@ -382,7 +376,7 @@
             ĐĂNG NHẬP <i class="bi bi-box-arrow-in-right ms-2"></i>
         </button>
         <div id="loginSpinner" class="spinner-border text-primary mt-3" style="display: none;" role="status"></div>
-        <p class="mt-4 mb-0 text-muted" style="font-size: 0.75rem;"><span data-i18n="version">Phiên bản</span> <span class="app-version"></span></p>
+        <p class="mt-4 mb-0 text-muted" style="font-size: 0.75rem;"><span>Phiên bản</span> <span class="app-version"></span></p>
     </div>
 </div>
 
@@ -412,11 +406,11 @@
         <div class="d-flex gap-2">
             <div class="input-group">
                 <span class="input-group-text border-0 bg-light-subtle text-muted" style="border-radius: 12px 0 0 12px; background-color: var(--siu-surface-high) !important;"><i class="bi bi-search"></i></span>
-                <input type="text" id="manual_uid" class="form-control border-0 bg-light-subtle p-3" style="border-radius: 0 12px 12px 0; background-color: var(--siu-surface-high) !important; font-size: 14px; font-weight: 600; color: var(--siu-on-surface);" placeholder="Nhập mã thiết bị (UID)..." data-i18n-placeholder="placeholder_uid">
+                <input type="text" id="manual_uid" class="form-control border-0 bg-light-subtle p-3" style="border-radius: 0 12px 12px 0; background-color: var(--siu-surface-high) !important; font-size: 14px; font-weight: 600; color: var(--siu-on-surface);" placeholder="Nhập mã thiết bị (UID)...">
             </div>
-            <button class="btn btn-primary px-3 d-flex align-items-center justify-content-center fw-bold" style="border-radius: 12px; min-width: 56px;" onclick="handleManualEntry()" data-i18n="btn_go">GO</button>
+            <button class="btn btn-primary px-3 d-flex align-items-center justify-content-center fw-bold" style="border-radius: 12px; min-width: 56px;" onclick="handleManualEntry()">GỬI</button>
         </div>
-        <button class="btn w-100 mt-3 d-flex align-items-center justify-content-center gap-2 fw-bold text-white" id="startScan" style="background: linear-gradient(135deg, var(--siu-primary), #1c9a7c); border: none; border-radius: 12px; height: 50px;" data-i18n="btn_scan">
+        <button class="btn w-100 mt-3 d-flex align-items-center justify-content-center gap-2 fw-bold text-white" id="startScan" style="background: linear-gradient(135deg, var(--siu-primary), #1c9a7c); border: none; border-radius: 12px; height: 50px;">
             <i class="bi bi-qr-code-scan"></i> QUÉT MÃ QR THIẾT BỊ
         </button>
     </div>
@@ -433,7 +427,7 @@
             <button class="scan-ctrl-btn" id="torchBtn" style="display:none;" onclick="toggleTorch()" title="Đèn pin">
                 <i class="bi bi-flashlight"></i>
             </button>
-            <span class="scan-status-pill" id="scanStatusPill" data-i18n="scanning_status">Đang quét thiết bị...</span>
+            <span class="scan-status-pill" id="scanStatusPill">Đang quét thiết bị...</span>
             <button class="scan-ctrl-btn text-danger" onclick="stopScanning()" title="Đóng camera" id="closeScanBtn">
                 <i class="bi bi-x-lg"></i>
             </button>
@@ -442,8 +436,8 @@
 
     <!-- Lịch sử quét gần đây -->
     <div class="section-heading" id="recentScansHeading" style="display: none;">
-        <h2 data-i18n="recent_scans">Quét gần đây</h2>
-        <button class="link-like" onclick="renderScanHistory(20)" data-i18n="view_all">Xem tất cả</button>
+        <h2>Quét gần đây</h2>
+        <button class="link-like" onclick="renderScanHistory(20)">Xem tất cả</button>
     </div>
     <div id="recentScans"></div>
 
@@ -481,19 +475,19 @@
 
         <div class="mb-3 d-flex gap-2">
             <select class="form-select rounded-3 small" style="background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant); color: var(--siu-on-surface-variant);" id="deviceProjectFilter" onchange="renderDeviceList()" style="max-width: 150px; font-size: 0.8rem;">
-                <option value="" data-i18n="filter_project_all">-- Dự án: Tất cả --</option>
+                <option value="">-- Dự án: Tất cả --</option>
             </select>
             <div class="input-group flex-grow-1">
                 <span class="input-group-text" style="background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant); border-right: 0;"><i class="bi bi-search"></i></span>
-                <input type="text" class="form-control" style="background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant); color: var(--siu-on-surface);" placeholder="Tìm nhanh thiết bị..." id="deviceSearchInput" oninput="renderDeviceList()" data-i18n-placeholder="search_devices_placeholder">
+                <input type="text" class="form-control" style="background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant); color: var(--siu-on-surface);" placeholder="Tìm nhanh thiết bị..." id="deviceSearchInput" oninput="renderDeviceList()">
             </div>
             <div class="dropdown">
                 <button class="btn rounded-3 px-3" style="background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant); color: var(--siu-primary);" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Xuất dữ liệu in nhãn">
                     <i class="bi bi-download"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end rounded-3 mt-1" style="background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant);">
-                    <li><a class="dropdown-item py-2" href="#" onclick="exportLinkWareLiveCSV()"><i class="bi bi-cloud-arrow-up text-primary me-2"></i> <span data-i18n="export_lwl">Xuất cho LinkWare Live</span></a></li>
-                    <li><a class="dropdown-item py-2" href="#" onclick="exportBrotherPrinterCSV()"><i class="bi bi-printer text-success me-2"></i> <span data-i18n="export_brother">Xuất cho máy in Brother</span></a></li>
+                    <li><a class="dropdown-item py-2" href="#" onclick="exportLinkWareLiveCSV()"><i class="bi bi-cloud-arrow-up text-primary me-2"></i> <span>Xuất cho LinkWare Live</span></a></li>
+                    <li><a class="dropdown-item py-2" href="#" onclick="exportBrotherPrinterCSV()"><i class="bi bi-printer text-success me-2"></i> <span>Xuất cho máy in Brother</span></a></li>
                 </ul>
             </div>
         </div>
@@ -1339,7 +1333,7 @@
             <div class="info-header">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill" id="disp_status_badge" data-i18n="badge_active">Active</span>
+                        <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill" id="disp_status_badge">Đang hoạt động</span>
                         <button class="btn btn-sm btn-outline-warning rounded-pill px-2 py-0 ms-2" id="editDeviceBtn" style="display: none; font-size: 0.72rem; border-width: 1px; line-height: 1.2;" onclick="showEditDeviceModal()"><i class="bi bi-pencil-fill me-1"></i>Sửa</button>
                     </div>
                     <span class="text-muted small" id="curr_time"></span>
@@ -1372,7 +1366,7 @@
                 </div>
 
                 <div class="p-3 bg-light-subtle d-flex justify-content-between align-items-center">
-                    <span class="fw-bold small text-uppercase text-secondary" data-i18n="checklist_title">Maintenance Checklist</span>
+                    <span class="fw-bold small text-uppercase text-secondary">DANH MỤC KIỂM TRA</span>
                     <button id="btnManageChecklist" class="btn btn-sm btn-outline-primary rounded-pill py-1 px-3" style="font-size: 0.75rem; display: none;" onclick="openChecklistManager()">
                         <i class="bi bi-gear-fill me-1"></i> Quản lý
                     </button>
@@ -1415,10 +1409,10 @@
                         <div class="text-center text-muted small py-3"><div class="spinner-border spinner-border-sm me-2 text-primary"></div> Đang tải lịch sử...</div>
                     </div>
                 </div>
-                <div class="p-4 border-top"><label class="fw-bold small text-secondary mb-2" data-i18n="field_notes">FIELD NOTES</label><textarea class="form-control border-0 bg-light p-3" id="notes" rows="3" style="border-radius: 12px;" placeholder="Add observations..." data-i18n-placeholder="placeholder_notes"></textarea></div>
+                <div class="p-4 border-top"><label class="fw-bold small text-secondary mb-2">GHI CHÚ</label><textarea class="form-control border-0 bg-light p-3" id="notes" rows="3" style="border-radius: 12px;" placeholder="Nhập quan sát..."></textarea></div>
             </div>
         </div>
-        <button class="btn-submit" onclick="submitData()" data-i18n="btn_complete">COMPLETE INSPECTION <i class="bi bi-check-circle ms-2"></i></button>
+        <button class="btn-submit" onclick="submitData()">XÁC NHẬN HOÀN TẤT <i class="bi bi-check-circle ms-2"></i></button>
     </div>
 
     <!-- Unified Bottom Navigation Bar -->
@@ -1477,7 +1471,7 @@
                 <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2 small" href="na111.html" target="_blank"><i class="bi bi-tools me-2 text-warning"></i> Chẩn đoán EBYTE NA111</a></li>
 
                 <li><hr class="dropdown-divider opacity-50"></li>
-                <li class="px-3 py-1 text-center text-muted" style="font-size: 0.72rem; list-style-type: none;"><span data-i18n="version">Phiên bản</span> <span class="app-version"></span></li>
+                <li class="px-3 py-1 text-center text-muted" style="font-size: 0.72rem; list-style-type: none;"><span>Phiên bản</span> <span class="app-version"></span></li>
             </ul>
         </div>
         <button class="bottom-nav-item" type="button" onclick="window.location.href='nhatky/index.html#personal'">
@@ -1553,53 +1547,6 @@
     const API_TOKEN = CONFIG.apiToken;
     // ==========================================
 
-    const translations = {
-        vi: {
-            app_title: "Hệ thống UID-QR", app_subtitle: "Quản lý bảo trì thông minh",
-            btn_scan: "QUÉT MÃ THIẾT BỊ", placeholder_uid: "Nhập UID tay...", btn_go: "GỬI",
-            badge_active: "Đang hoạt động", checklist_title: "DANH MỤC KIỂM TRA",
-            check1_title: "Nguồn & Pin", check1_desc: "Kiểm tra điện áp",
-            check2_title: "Rung động", check2_desc: "Tiếng ồn & Nhiệt",
-            check3_title: "Vệ sinh", check3_desc: "Làm sạch & Bôi trơn",
-            field_notes: "GHI CHÚ", placeholder_notes: "Nhập quan sát...",
-            btn_complete: "XÁC NHẬN HOÀN TẤT", alert_success: "Đã lưu nhật ký cho {uid}",
-            alert_offline: "Mất mạng! Dữ liệu đã được lưu offline.",
-            alert_sync: "Đã đồng bộ {count} bản ghi offline!",
-            remember_me: "Ghi nhớ đăng nhập", version: "Phiên bản",
-            search_devices_placeholder: "Tìm nhanh thiết bị...",
-            export_lwl: "Xuất cho LinkWare Live (Fluke)",
-            export_brother: "Xuất cho máy in Brother (CSV)",
-            filter_project_all: "-- Dự án: Tất cả --",
-            nav_search: "Tìm kiếm", scanning_pill: "Đang quét thiết bị...",
-            recent_scans: "Lịch sử quét gần đây", view_all: "Xem tất cả", collapse: "Thu gọn",
-            status_active: "HOẠT ĐỘNG", status_incident: "SỰ CỐ", status_maintenance: "BẢO TRÌ", status_unknown: "KHÔNG RÕ",
-            no_recent_scans: "Chưa có lượt quét nào. Quét mã hoặc nhập UID để bắt đầu."
-        },
-        en: {
-            app_title: "UID QR Master", app_subtitle: "Smart Maintenance Management",
-            btn_scan: "SCAN EQUIPMENT", placeholder_uid: "Manual UID...", btn_go: "GO",
-            badge_active: "Active", checklist_title: "Maintenance Checklist",
-            check1_title: "Power & Battery", check1_desc: "Check voltage",
-            check2_title: "Vibration", check2_desc: "Noise & Heat",
-            check3_title: "Cleaning", check3_desc: "Remove dust",
-            field_notes: "NOTES", placeholder_notes: "Observations...",
-            btn_complete: "COMPLETE", alert_success: "Log saved for {uid}",
-            alert_offline: "Offline! Data saved locally.",
-            alert_sync: "Synced {count} offline records!",
-            remember_me: "Remember me", version: "Version",
-            search_devices_placeholder: "Quick search devices...",
-            export_lwl: "Export for LinkWare Live (Fluke)",
-            export_brother: "Export for Brother Printer (CSV)",
-            filter_project_all: "-- All Projects --",
-            nav_search: "Search", scanning_pill: "Scanning device...",
-            recent_scans: "Recent scans", view_all: "View all", collapse: "Collapse",
-            status_active: "ACTIVE", status_incident: "INCIDENT", status_maintenance: "MAINTENANCE", status_unknown: "UNKNOWN",
-            no_recent_scans: "No scans yet. Scan a code or enter a UID to begin."
-        }
-    };
-
-    let currentLang = localStorage.getItem('lang') || 'vi';
-
     function showToast(msg, type='success') {
         const box = document.getElementById('toastBox');
         const toast = document.createElement('div');
@@ -1620,18 +1567,6 @@
         osc.start(); osc.stop(audioCtx.currentTime + 0.1);
     }
 
-    function setLanguage(lang) {
-        currentLang = lang; localStorage.setItem('lang', lang);
-        document.querySelectorAll('[data-i18n]').forEach(el => {
-            const key = el.getAttribute('data-i18n');
-            if (translations[lang][key]) el.innerText = translations[lang][key];
-        });
-        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-            const key = el.getAttribute('data-i18n-placeholder');
-            if (translations[lang][key]) el.placeholder = translations[lang][key];
-        });
-    }
-    setLanguage(currentLang);
 
     function toggleCheck(id) { let cb = document.getElementById(id); cb.checked = !cb.checked; }
 
@@ -1844,7 +1779,7 @@
         if (!filterSel) return;
         
         const currentSel = filterSel.value;
-        filterSel.innerHTML = `<option value="">${currentLang === 'vi' ? '-- Dự án: Tất cả --' : '-- All Projects --'}</option>`;
+        filterSel.innerHTML = `<option value="">-- Dự án: Tất cả --</option>`;
         
         const deviceMap = JSON.parse(localStorage.getItem('localDevicesMap') || '{}');
         const devProjects = new Set();
@@ -2184,7 +2119,7 @@
         });
 
         if (filtered.length === 0) {
-            showToast(currentLang === 'vi' ? 'Không có thiết bị nào để xuất!' : 'No devices to export!', 'error');
+            showToast('Không có thiết bị nào để xuất!', 'error');
             return;
         }
 
@@ -2205,7 +2140,7 @@
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        showToast(currentLang === 'vi' ? 'Đã xuất file CSV cho LinkWare Live!' : 'Exported CSV for LinkWare Live!');
+        showToast('Đã xuất file CSV cho LinkWare Live!');
     }
 
     function exportBrotherPrinterCSV() {
@@ -2235,7 +2170,7 @@
         });
 
         if (filtered.length === 0) {
-            showToast(currentLang === 'vi' ? 'Không có thiết bị nào để xuất!' : 'No devices to export!', 'error');
+            showToast('Không có thiết bị nào để xuất!', 'error');
             return;
         }
 
@@ -2273,7 +2208,7 @@
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        showToast(currentLang === 'vi' ? 'Đã xuất file CSV cho máy in Brother!' : 'Exported CSV for Brother printer!');
+        showToast('Đã xuất file CSV cho máy in Brother!');
     }
 
     function selectDevice(uid) {
@@ -3105,23 +3040,23 @@
             displayList.forEach(item => {
                 let barClass = 'st-unknown';
                 let chipClass = 'st-unknown';
-                let statusLabel = translations[currentLang]?.status_unknown || 'KHÔNG RÕ';
-                
+                let statusLabel = 'KHÔNG RÕ';
+
                 if (item.status === 'active') {
                     barClass = 'st-active';
                     chipClass = 'st-active';
-                    statusLabel = translations[currentLang]?.status_active || 'HOẠT ĐỘNG';
+                    statusLabel = 'HOẠT ĐỘNG';
                 } else if (item.status === 'incident') {
                     barClass = 'st-incident';
                     chipClass = 'st-incident';
-                    statusLabel = translations[currentLang]?.status_incident || 'SỰ CỐ';
+                    statusLabel = 'SỰ CỐ';
                 } else if (item.status === 'maintenance') {
                     barClass = 'st-maintenance';
                     chipClass = 'st-maintenance';
-                    statusLabel = translations[currentLang]?.status_maintenance || 'BẢO TRÌ';
+                    statusLabel = 'BẢO TRÌ';
                 }
-                
-                const timeStr = new Date(item.ts).toLocaleString(currentLang === 'vi' ? 'vi-VN' : 'en-US', {
+
+                const timeStr = new Date(item.ts).toLocaleString('vi-VN', {
                     hour: '2-digit',
                     minute: '2-digit',
                     day: '2-digit',
@@ -3144,10 +3079,10 @@
             const viewAllBtn = heading.querySelector('.link-like');
             if (viewAllBtn) {
                 if (limit > 4) {
-                    viewAllBtn.innerText = translations[currentLang]?.collapse || 'Thu gọn';
+                    viewAllBtn.innerText = 'Thu gọn';
                     viewAllBtn.setAttribute('onclick', 'renderScanHistory(4)');
                 } else {
-                    viewAllBtn.innerText = translations[currentLang]?.view_all || 'Xem tất cả';
+                    viewAllBtn.innerText = 'Xem tất cả';
                     viewAllBtn.setAttribute('onclick', 'renderScanHistory(20)');
                 }
             }
@@ -3375,14 +3310,14 @@
         try {
             await fetch(gasUrl, { method: 'POST', body: JSON.stringify(data) });
             if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Rung báo hoàn tất — phản hồi xúc giác cho kỹ thuật viên hiện trường
-            showToast(translations[currentLang].alert_success.replace('{uid}', uid));
+            showToast(`Đã lưu nhật ký cho ${uid}`);
             updateSyncStatus();
             setTimeout(() => location.reload(), 2000);
         } catch (e) {
             let offline = JSON.parse(localStorage.getItem('offline_logs') || '[]');
             offline.push({ ...data, time: new Date() });
             localStorage.setItem('offline_logs', JSON.stringify(offline));
-            showToast(translations[currentLang].alert_offline, "warning");
+            showToast('Mất mạng! Dữ liệu đã được lưu offline.', "warning");
             updateSyncStatus();
             setTimeout(() => location.reload(), 2000);
         }
