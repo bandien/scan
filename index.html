@@ -1319,23 +1319,6 @@
             </div>
         </div>
     </div>
-    <div class="card-premium p-3 mb-4" id="filterSection">
-        <h6 class="fw-bold mb-2"><i class="bi bi-funnel me-1 text-primary"></i> Lọc thiết bị</h6>
-        <div class="row g-2">
-            <div class="col-6">
-                <select class="form-select form-select-sm rounded-3" id="filterArea" onchange="applyFilters()">
-                    <option value="">Tất cả khu vực</option>
-                </select>
-            </div>
-            <div class="col-6">
-                <select class="form-select form-select-sm rounded-3" id="filterType" onchange="applyFilters()">
-                    <option value="">Tất cả loại máy</option>
-                </select>
-            </div>
-        </div>
-        <div id="filteredDeviceList" style="display: none;" class="mt-2 border-top pt-2"></div>
-    </div>
-
 
 
     <div id="skeletonLoader" style="display: none;">
@@ -2828,7 +2811,6 @@
         });
         document.getElementById('btnManageChecklist').style.display = isAdmin ? 'inline-block' : 'none';
         updateSyncStatus();
-        initFilters();
     }
 
     function doLogout() {
@@ -4289,43 +4271,6 @@
             setTimeout(() => doLogout(), 2000);
         }
     }
-    function initFilters() {
-        const devices = Object.values(JSON.parse(localStorage.getItem('localDevicesMap') || '{}'));
-        const areas = [...new Set(devices.map(d => d.area).filter(Boolean))].sort();
-        const types = [...new Set(devices.map(d => d.equipmentType).filter(Boolean))].sort();
-        const areaSelect = document.getElementById('filterArea');
-        const typeSelect = document.getElementById('filterType');
-        areaSelect.innerHTML = '<option value="">Tất cả khu vực</option>';
-        typeSelect.innerHTML = '<option value="">Tất cả loại máy</option>';
-        areas.forEach(a => { areaSelect.innerHTML += `<option value="${a}">${a}</option>`; });
-        types.forEach(t => { typeSelect.innerHTML += `<option value="${t}">${t}</option>`; });
-    }
-
-    function applyFilters() {
-        const areaVal = document.getElementById('filterArea').value;
-        const typeVal = document.getElementById('filterType').value;
-        const listEl = document.getElementById('filteredDeviceList');
-        if (!areaVal && !typeVal) { listEl.style.display = 'none'; return; }
-
-        let devices = Object.values(JSON.parse(localStorage.getItem('localDevicesMap') || '{}'));
-        if (areaVal) devices = devices.filter(d => d.area === areaVal);
-        if (typeVal) devices = devices.filter(d => d.equipmentType === typeVal);
-
-        listEl.style.display = 'block';
-        if (devices.length === 0) {
-            listEl.innerHTML = '<div class="text-muted small text-center py-2">Không tìm thấy thiết bị</div>';
-            return;
-        }
-        listEl.innerHTML = devices.map(d => `
-            <div class="d-flex justify-content-between align-items-center py-2 border-bottom" style="cursor:pointer;" onclick="fetchData('${d.uid}')">
-                <div>
-                    <div class="fw-bold small">${d.name || d.uid}</div>
-                    <div class="text-muted" style="font-size:0.75rem;"><i class="bi bi-geo-alt me-1"></i>${d.location || '—'}</div>
-                </div>
-                <span class="badge ${d.status === 'OUT' ? 'bg-warning text-dark' : 'bg-success'} rounded-pill" style="font-size:0.65rem;">${d.status || 'IN'}</span>
-            </div>`).join('');
-    }
-
     async function handleInOut(status) {
         const uid = document.getElementById('disp_uid').innerText;
         const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
