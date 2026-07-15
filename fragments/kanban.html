@@ -1,0 +1,17 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold mb-0"><i class="bi bi-kanban"></i> Work Orders</h5>
+    <button class="btn btn-sm btn-primary rounded-pill px-3" onclick="showCreateWOModal()">
+        <i class="bi bi-plus-lg"></i> Tạo WO
+    </button>
+    <div class="d-flex gap-1 mt-2 flex-wrap">
+        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2" onclick="showCreateWOModal('Noi bo phong ban')" title="Noi bo phong ban"><i class="bi bi-building"></i></button>
+        <button class="btn btn-sm btn-outline-warning rounded-pill px-2" onclick="showCreateWOModal('Lanh dao')" title="Tu lanh dao"><i class="bi bi-person-badge"></i></button>
+        <button class="btn btn-sm btn-outline-info rounded-pill px-2" onclick="showCreateWOModal('Bo phan khac')" title="Bo phan khac"><i class="bi bi-people"></i></button>
+        <button class="btn btn-sm btn-outline-danger rounded-pill px-2" onclick="showCreateWOModal('Tong dai')" title="Tong dai tiep nhan"><i class="bi bi-telephone-inbound"></i></button>
+    </div>
+</div>
+<div id="kanbanBoard" class="d-flex gap-3 pb-2" style="overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;">
+    <div class="text-center text-muted p-4 w-100">
+        <div class="spinner-border spinner-border-sm me-2"></div> Đang tải...
+    </div>
+</div>

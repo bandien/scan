@@ -1,0 +1,82 @@
+<div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content rounded-4 border-0 shadow">
+        <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-bold"><i class="bi bi-geo-fill me-2 text-info"></i>Quản lý Địa điểm lắp đặt</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            <!-- Form thêm/sửa địa điểm -->
+            <div id="locationFormContainer" class="p-3 bg-light rounded-4 mb-4 border" style="display: none;">
+                <h6 class="fw-bold mb-3 text-info" id="locationFormTitle"><i class="bi bi-plus-circle me-1"></i>Thêm địa điểm mới</h6>
+                <input type="hidden" id="manageLocUid">
+
+                <!-- Interactive UID Builder -->
+                <div class="mb-3 p-3 rounded-4" style="background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant);">
+                    <label class="form-label fw-bold small text-secondary mb-2"><i class="bi bi-cpu me-1"></i>Trình tạo mã địa điểm (UID Builder)</label>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6 col-sm-3">
+                            <label class="form-label small text-muted mb-1">Tiền tố</label>
+                            <select class="form-select form-select-sm rounded-3 fw-bold" id="locBuilderPrefix" onchange="updateLocUidPreview()">
+                                <option value="LOC">LOC (Địa điểm)</option>
+                                <option value="KV">KV (Khu vực)</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <label class="form-label small text-muted mb-1">Phân khu chính</label>
+                            <input type="text" class="form-control form-control-sm rounded-3 text-uppercase fw-bold" id="locBuilderZone" placeholder="T1, SG, CH..." value="T1" oninput="updateLocUidPreview()">
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <label class="form-label small text-muted mb-1">Phân khu con / Tầng</label>
+                            <input type="text" class="form-control form-control-sm rounded-3 text-uppercase fw-bold" id="locBuilderSubZone" placeholder="01, B1, H05..." value="01" oninput="updateLocUidPreview()">
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <label class="form-label small text-muted mb-1">Số thứ tự</label>
+                            <input type="text" class="form-control form-control-sm rounded-3 text-uppercase fw-bold" id="locBuilderSeq" placeholder="01, 02..." value="01" oninput="updateLocUidPreview()">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label small text-muted mb-1 fw-bold text-info">Mã địa điểm xem trước (Preview UID)</label>
+                        <input type="text" class="form-control rounded-3 font-monospace fw-bold text-primary bg-light" id="locUidPreview" readonly value="LOC.T1.01.01">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold small text-secondary">Tên địa điểm (Tên mô tả)</label>
+                    <input type="text" class="form-control rounded-3" id="manageLocName" placeholder="Ví dụ: Phòng bơm hố số 5, Phòng Kỹ Thuật Tầng Hầm 1">
+                </div>
+                <div class="d-flex gap-2 justify-content-end">
+                    <button class="btn btn-light rounded-pill px-3" onclick="hideLocationForm()">Hủy</button>
+                    <button class="btn btn-info rounded-pill px-3 text-white fw-bold" onclick="submitManageLocation()">Lưu địa điểm</button>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="text-muted small">Danh sách các địa điểm lắp đặt hiện có (loại LOC-/KV-).</span>
+                <button class="btn btn-sm btn-info rounded-pill px-3 text-white" onclick="showAddLocationForm()">
+                    <i class="bi bi-plus-lg"></i> Thêm địa điểm
+                </button>
+            </div>
+
+            <!-- Bảng danh sách địa điểm -->
+            <div class="rounded-4 overflow-hidden" style="background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant);">
+                <div class="table-responsive" style="max-height: 300px;">
+                    <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Mã UID</th>
+                                <th>Tên địa điểm</th>
+                                <th class="text-end pe-3">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="locationManagerTableBody">
+                            <!-- Rendered dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer border-0">
+            <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+        </div>
+    </div>
+</div>

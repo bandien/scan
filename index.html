@@ -447,24 +447,8 @@
     <div id="recentScans"></div>
 
     <!-- Dashboard Section -->
-    <div id="dashboardSection" class="card-premium p-3 mb-4" style="display: none;">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="fw-bold mb-0"><i class="bi bi-bar-chart-fill me-1 text-primary"></i> Analytics Dashboard</h5>
-            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="loadDashboardData(true)">
-                <i class="bi bi-arrow-clockwise"></i>
-            </button>
-        </div>
-        <div class="row g-2 mb-3">
-            <div class="col-6"><div class="bg-primary-subtle rounded-3 p-3 text-center"><div class="fw-bold fs-4" id="kpi-total">—</div><div class="text-muted small">Tổng thiết bị</div></div></div>
-            <div class="col-6"><div class="bg-danger-subtle rounded-3 p-3 text-center"><div class="fw-bold fs-4 text-danger" id="kpi-overdue">—</div><div class="text-muted small">Quá hạn BT</div></div></div>
-            <div class="col-6"><div class="bg-warning-subtle rounded-3 p-3 text-center"><div class="fw-bold fs-4 text-warning" id="kpi-active-wo">—</div><div class="text-muted small">WO đang mở</div></div></div>
-            <div class="col-6"><div class="bg-success-subtle rounded-3 p-3 text-center"><div class="fw-bold fs-4 text-success" id="kpi-done-wo">—</div><div class="text-muted small">WO hoàn thành</div></div></div>
-        </div>
-        <p class="fw-bold small text-muted text-uppercase mb-2">Trạng thái Work Orders</p>
-        <canvas id="assetChart" class="mb-3"></canvas>
-        <p class="fw-bold small text-muted text-uppercase mb-2">Bảo trì theo tháng (6 tháng gần nhất)</p>
-        <canvas id="maintenanceBarChart"></canvas>
-    </div>
+    <!-- Dashboard: HTML nạp động từ fragments/dashboard.html khi bấm mở lần đầu (giảm DOM ban đầu) -->
+    <div id="dashboardSection" class="card-premium p-3 mb-4" style="display: none;"></div>
 
     <!-- Calendar Section -->
     <div id="calendarSection" class="card-premium p-3 mb-4" style="display: none;">
@@ -656,26 +640,8 @@
         </div>
     </div>
 
-    <!-- Kanban Section -->
-    <div id="kanbanSection" class="card-premium p-3 mb-4" style="display: none;">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="fw-bold mb-0"><i class="bi bi-kanban"></i> Work Orders</h5>
-            <button class="btn btn-sm btn-primary rounded-pill px-3" onclick="showCreateWOModal()">
-                <i class="bi bi-plus-lg"></i> Tạo WO
-            </button>
-            <div class="d-flex gap-1 mt-2 flex-wrap">
-                <button class="btn btn-sm btn-outline-secondary rounded-pill px-2" onclick="showCreateWOModal('Noi bo phong ban')" title="Noi bo phong ban"><i class="bi bi-building"></i></button>
-                <button class="btn btn-sm btn-outline-warning rounded-pill px-2" onclick="showCreateWOModal('Lanh dao')" title="Tu lanh dao"><i class="bi bi-person-badge"></i></button>
-                <button class="btn btn-sm btn-outline-info rounded-pill px-2" onclick="showCreateWOModal('Bo phan khac')" title="Bo phan khac"><i class="bi bi-people"></i></button>
-                <button class="btn btn-sm btn-outline-danger rounded-pill px-2" onclick="showCreateWOModal('Tong dai')" title="Tong dai tiep nhan"><i class="bi bi-telephone-inbound"></i></button>
-            </div>
-        </div>
-        <div id="kanbanBoard" class="d-flex gap-3 pb-2" style="overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;">
-            <div class="text-center text-muted p-4 w-100">
-                <div class="spinner-border spinner-border-sm me-2"></div> Đang tải...
-            </div>
-        </div>
-    </div>
+    <!-- Kanban: HTML nạp động từ fragments/kanban.html khi bấm mở lần đầu -->
+    <div id="kanbanSection" class="card-premium p-3 mb-4" style="display: none;"></div>
 
     <!-- WO Detail Modal -->
     <div class="modal fade" id="woDetailModal" tabindex="-1" aria-hidden="true">
@@ -1264,237 +1230,12 @@
         </div>
     </div>
 
-    <!-- Project Manager Modal -->
-    <div class="modal fade" id="projectManagerModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content rounded-4 border-0 shadow">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold"><i class="bi bi-briefcase-fill me-2 text-primary"></i>Quản lý Dự án</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Form thêm/sửa dự án -->
-                    <div id="projectFormContainer" class="p-3 bg-light rounded-4 mb-4 border" style="display: none;">
-                        <h6 class="fw-bold mb-3 text-primary" id="projectFormTitle"><i class="bi bi-plus-circle me-1"></i>Thêm dự án mới</h6>
-                        <input type="hidden" id="manageProjId">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold small">Tên dự án</label>
-                            <input type="text" class="form-control rounded-3" id="manageProjName" placeholder="Ví dụ: Dự án Tòa nhà A">
-                        </div>
-                        <div class="row g-2 mb-3">
-                            <div class="col-6">
-                                <label class="form-label fw-bold small">Trạng thái</label>
-                                <select class="form-select rounded-3" id="manageProjStatus">
-                                    <option value="Active">Hoạt động (Active)</option>
-                                    <option value="Inactive">Tạm ngưng (Inactive)</option>
-                                </select>
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label fw-bold small">Ngày bắt đầu</label>
-                                <input type="date" class="form-control rounded-3" id="manageProjStart">
-                            </div>
-                        </div>
-                        <div class="row g-2 mb-3">
-                            <div class="col-6">
-                                <label class="form-label fw-bold small">Ngày kết thúc</label>
-                                <input type="date" class="form-control rounded-3" id="manageProjEnd">
-                            </div>
-                        </div>
-                        <div class="d-flex gap-2 justify-content-end">
-                            <button class="btn btn-light rounded-pill px-3" onclick="hideProjectForm()">Hủy</button>
-                            <button class="btn btn-primary rounded-pill px-3 text-white fw-bold" onclick="submitManageProject()">Lưu dự án</button>
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="text-muted small">Danh sách các dự án hiện có trên hệ thống.</span>
-                        <button class="btn btn-sm btn-primary rounded-pill px-3" onclick="showAddProjectForm()">
-                            <i class="bi bi-plus-lg"></i> Thêm dự án
-                        </button>
-                    </div>
-
-                    <!-- Bảng danh sách dự án -->
-                    <div class="rounded-4 overflow-hidden" style="background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant);">
-                        <div class="table-responsive" style="max-height: 300px;">
-                            <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th class="ps-3">Mã</th>
-                                        <th>Tên dự án</th>
-                                        <th>Trạng thái</th>
-                                        <th>Ngày BD - KT</th>
-                                        <th class="text-end pe-3">Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="projectManagerTableBody">
-                                    <!-- Rendered dynamically -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Shift Manager Modal -->
-    <div class="modal fade" id="shiftManagerModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content rounded-4 border-0 shadow">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold"><i class="bi bi-clock-history me-2 text-primary"></i>Quản lý Ca trực</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Form thêm/sửa ca trực -->
-                    <div id="shiftFormContainer" class="p-3 bg-light rounded-4 mb-4 border" style="display: none;">
-                        <h6 class="fw-bold mb-3 text-primary" id="shiftFormTitle"><i class="bi bi-plus-circle me-1"></i>Thêm ca trực mới</h6>
-                        <input type="hidden" id="manageShiftId">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold small">Tên ca trực</label>
-                            <input type="text" class="form-control rounded-3" id="manageShiftName" placeholder="Ví dụ: Ca Sáng, Ca Chiều, Ca Hành Chính">
-                        </div>
-                        <div class="row g-2 mb-3">
-                            <div class="col-6">
-                                <label class="form-label fw-bold small">Trạng thái</label>
-                                <select class="form-select rounded-3" id="manageShiftStatus">
-                                    <option value="Active">Hoạt động (Active)</option>
-                                    <option value="Inactive">Tạm ngưng (Inactive)</option>
-                                </select>
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label fw-bold small">Mô tả / Giờ làm việc</label>
-                                <input type="text" class="form-control rounded-3" id="manageShiftDesc" placeholder="Ví dụ: 06:00 - 14:00">
-                            </div>
-                        </div>
-                        <div class="d-flex gap-2 justify-content-end">
-                            <button class="btn btn-light rounded-pill px-3" onclick="hideShiftForm()">Hủy</button>
-                            <button class="btn btn-primary rounded-pill px-3 text-white fw-bold" onclick="submitManageShift()">Lưu ca trực</button>
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="text-muted small">Danh sách các ca trực hiện có trên hệ thống.</span>
-                        <button class="btn btn-sm btn-primary rounded-pill px-3" onclick="showAddShiftForm()">
-                            <i class="bi bi-plus-lg"></i> Thêm ca trực
-                        </button>
-                    </div>
-
-                    <!-- Bảng danh sách ca trực -->
-                    <div class="rounded-4 overflow-hidden" style="background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant);">
-                        <div class="table-responsive" style="max-height: 300px;">
-                            <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th class="ps-3">Mã</th>
-                                        <th>Tên ca trực</th>
-                                        <th>Mô tả / Giờ làm việc</th>
-                                        <th>Trạng thái</th>
-                                        <th class="text-end pe-3">Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="shiftManagerTableBody">
-                                    <!-- Rendered dynamically -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Location Manager Modal -->
-    <div class="modal fade" id="locationManagerModal" tabindex="-1" aria-hidden="true" style="z-index: 1070;">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content rounded-4 border-0 shadow">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold"><i class="bi bi-geo-fill me-2 text-info"></i>Quản lý Địa điểm lắp đặt</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Form thêm/sửa địa điểm -->
-                    <div id="locationFormContainer" class="p-3 bg-light rounded-4 mb-4 border" style="display: none;">
-                        <h6 class="fw-bold mb-3 text-info" id="locationFormTitle"><i class="bi bi-plus-circle me-1"></i>Thêm địa điểm mới</h6>
-                        <input type="hidden" id="manageLocUid">
-                        
-                        <!-- Interactive UID Builder -->
-                        <div class="mb-3 p-3 rounded-4" style="background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant);">
-                            <label class="form-label fw-bold small text-secondary mb-2"><i class="bi bi-cpu me-1"></i>Trình tạo mã địa điểm (UID Builder)</label>
-                            <div class="row g-2 mb-3">
-                                <div class="col-6 col-sm-3">
-                                    <label class="form-label small text-muted mb-1">Tiền tố</label>
-                                    <select class="form-select form-select-sm rounded-3 fw-bold" id="locBuilderPrefix" onchange="updateLocUidPreview()">
-                                        <option value="LOC">LOC (Địa điểm)</option>
-                                        <option value="KV">KV (Khu vực)</option>
-                                    </select>
-                                </div>
-                                <div class="col-6 col-sm-3">
-                                    <label class="form-label small text-muted mb-1">Phân khu chính</label>
-                                    <input type="text" class="form-control form-control-sm rounded-3 text-uppercase fw-bold" id="locBuilderZone" placeholder="T1, SG, CH..." value="T1" oninput="updateLocUidPreview()">
-                                </div>
-                                <div class="col-6 col-sm-3">
-                                    <label class="form-label small text-muted mb-1">Phân khu con / Tầng</label>
-                                    <input type="text" class="form-control form-control-sm rounded-3 text-uppercase fw-bold" id="locBuilderSubZone" placeholder="01, B1, H05..." value="01" oninput="updateLocUidPreview()">
-                                </div>
-                                <div class="col-6 col-sm-3">
-                                    <label class="form-label small text-muted mb-1">Số thứ tự</label>
-                                    <input type="text" class="form-control form-control-sm rounded-3 text-uppercase fw-bold" id="locBuilderSeq" placeholder="01, 02..." value="01" oninput="updateLocUidPreview()">
-                                </div>
-                            </div>
-                            <div>
-                                <label class="form-label small text-muted mb-1 fw-bold text-info">Mã địa điểm xem trước (Preview UID)</label>
-                                <input type="text" class="form-control rounded-3 font-monospace fw-bold text-primary bg-light" id="locUidPreview" readonly value="LOC.T1.01.01">
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold small text-secondary">Tên địa điểm (Tên mô tả)</label>
-                            <input type="text" class="form-control rounded-3" id="manageLocName" placeholder="Ví dụ: Phòng bơm hố số 5, Phòng Kỹ Thuật Tầng Hầm 1">
-                        </div>
-                        <div class="d-flex gap-2 justify-content-end">
-                            <button class="btn btn-light rounded-pill px-3" onclick="hideLocationForm()">Hủy</button>
-                            <button class="btn btn-info rounded-pill px-3 text-white fw-bold" onclick="submitManageLocation()">Lưu địa điểm</button>
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="text-muted small">Danh sách các địa điểm lắp đặt hiện có (loại LOC-/KV-).</span>
-                        <button class="btn btn-sm btn-info rounded-pill px-3 text-white" onclick="showAddLocationForm()">
-                            <i class="bi bi-plus-lg"></i> Thêm địa điểm
-                        </button>
-                    </div>
-
-                    <!-- Bảng danh sách địa điểm -->
-                    <div class="rounded-4 overflow-hidden" style="background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant);">
-                        <div class="table-responsive" style="max-height: 300px;">
-                            <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th class="ps-3">Mã UID</th>
-                                        <th>Tên địa điểm</th>
-                                        <th class="text-end pe-3">Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="locationManagerTableBody">
-                                    <!-- Rendered dynamically -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- 3 modal quản trị dưới đây nạp HTML động từ fragments/*.html khi bấm mở lần
+         đầu (xem openProjectManager/openShiftManager/openLocationManager) — chỉ
+         Admin/Manager mới thấy nút mở nên hầu hết người dùng không bao giờ tải. -->
+    <div class="modal fade" id="projectManagerModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;"></div>
+    <div class="modal fade" id="shiftManagerModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;"></div>
+    <div class="modal fade" id="locationManagerModal" tabindex="-1" aria-hidden="true" style="z-index: 1070;"></div>
 
     <!-- Checklist Manager Modal -->
     <div class="modal fade" id="checklistManagerModal" tabindex="-1" aria-hidden="true">
@@ -2009,13 +1750,41 @@
     let chartInstance = null;
     let barChartInstance = null;
 
-    async function toggleDashboard() {
-        document.getElementById('kanbanSection').style.display = 'none';
-        document.getElementById('calendarSection').style.display = 'none';
-        document.getElementById('deviceListSection').style.display = 'none';
-        const dash = document.getElementById('dashboardSection');
-        if (dash.style.display === 'none') {
-            dash.style.display = 'block';
+    // ===== Nạp động (lazy-load) các khối HTML nặng/hiếm dùng =====
+    // Dashboard, Kanban và 3 modal quản trị (Dự án/Ca trực/Địa điểm) chỉ tồn tại
+    // rỗng trong DOM ban đầu; nội dung thật được fetch() từ fragments/*.html và
+    // nhúng vào đúng lúc người dùng bấm mở lần đầu, giảm HTML/DOM tải sẵn cho
+    // phần lớn người dùng (nhân viên thường) không bao giờ chạm tới các mục này.
+    // onSuccessFnName (tên hàm global, dạng chuỗi) được gọi lại mỗi lần container đã
+    // sẵn sàng — kể cả khi đã có cache từ trước lẫn khi vừa tải xong. Nút "Thử lại"
+    // trong thông báo lỗi gọi thẳng hàm này (KHÔNG gọi lại hàm toggle/open ở trên),
+    // để tránh việc bấm thử lại vô tình đóng luôn khối vừa mở.
+    const _loadedFragments = new Set();
+    async function ensureFragmentLoaded(containerId, url, onSuccessFnName) {
+        const runCallback = () => { if (onSuccessFnName && typeof window[onSuccessFnName] === 'function') window[onSuccessFnName](); };
+        if (_loadedFragments.has(containerId)) { runCallback(); return true; }
+        const container = document.getElementById(containerId);
+        if (!container) return false;
+        container.innerHTML = '<div class="text-center text-muted p-4"><div class="spinner-border spinner-border-sm me-2"></div> Đang tải...</div>';
+        try {
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            container.innerHTML = await res.text();
+            _loadedFragments.add(containerId);
+            runCallback();
+            return true;
+        } catch (e) {
+            container.innerHTML = `<div class="text-center text-danger p-4 small">
+                <i class="bi bi-wifi-off fs-4 d-block mb-2"></i>
+                Không tải được nội dung này. Kiểm tra kết nối mạng rồi thử lại.
+                <br><button class="btn btn-sm btn-outline-secondary rounded-pill mt-2" onclick="ensureFragmentLoaded('${containerId}', '${url}', '${onSuccessFnName || ''}')">Thử lại</button>
+            </div>`;
+            return false;
+        }
+    }
+
+    function _afterDashboardLoaded() {
+        (async () => {
             // Lazy-load Chart.js on first use
             if (!window.Chart) {
                 const s = document.createElement('script');
@@ -2027,6 +1796,17 @@
                 });
             }
             loadDashboardData();
+        })();
+    }
+
+    function toggleDashboard() {
+        document.getElementById('kanbanSection').style.display = 'none';
+        document.getElementById('calendarSection').style.display = 'none';
+        document.getElementById('deviceListSection').style.display = 'none';
+        const dash = document.getElementById('dashboardSection');
+        if (dash.style.display === 'none') {
+            dash.style.display = 'block';
+            ensureFragmentLoaded('dashboardSection', 'fragments/dashboard.html', '_afterDashboardLoaded');
         } else {
             dash.style.display = 'none';
         }
@@ -3662,14 +3442,20 @@
         const section = document.getElementById('kanbanSection');
         if (section.style.display === 'none') {
             section.style.display = 'block';
-            loadKanban();
+            ensureFragmentLoaded('kanbanSection', 'fragments/kanban.html', '_afterKanbanLoaded');
         } else {
             section.style.display = 'none';
         }
     }
+    function _afterKanbanLoaded() { loadKanban(); }
 
     async function loadKanban() {
+        // loadKanban() có thể được gọi từ nơi khác ngoài toggleKanban() (VD: sau khi
+        // tạo WO nhanh từ thẻ thiết bị) trước khi khối Kanban từng được mở — đảm bảo
+        // fragment đã nạp trước khi đụng tới #kanbanBoard.
+        await ensureFragmentLoaded('kanbanSection', 'fragments/kanban.html');
         const board = document.getElementById('kanbanBoard');
+        if (!board) return;
         board.innerHTML = '<div class="text-center text-muted p-4 w-100"><div class="spinner-border spinner-border-sm me-2"></div> Đang tải...</div>';
 
         const cached = localStorage.getItem('localWorkOrders');
@@ -3693,6 +3479,10 @@
 
     function renderKanban(workOrders) {
         const board = document.getElementById('kanbanBoard');
+        // Kanban có thể chưa từng được mở (fragment chưa nạp) khi hàm này được gọi
+        // từ nơi khác (VD: sau khi lưu/xoá WO) — dữ liệu vẫn lưu localStorage bình
+        // thường, chỉ bỏ qua việc vẽ lại board vì không có gì để vẽ vào.
+        if (!board) return;
         board.innerHTML = '';
         WO_STATUSES.forEach(status => {
             const cards = (workOrders || []).filter(wo => wo.status === status);
@@ -4833,6 +4623,9 @@
     }
 
     function openProjectManager() {
+        ensureFragmentLoaded('projectManagerModal', 'fragments/project-manager.html', '_afterProjectManagerLoaded');
+    }
+    function _afterProjectManagerLoaded() {
         hideProjectForm();
         renderProjectManagerList();
         new bootstrap.Modal(document.getElementById('projectManagerModal')).show();
@@ -5058,6 +4851,9 @@
     }
 
     function openShiftManager() {
+        ensureFragmentLoaded('shiftManagerModal', 'fragments/shift-manager.html', '_afterShiftManagerLoaded');
+    }
+    function _afterShiftManagerLoaded() {
         hideShiftForm();
         renderShiftManagerList();
         new bootstrap.Modal(document.getElementById('shiftManagerModal')).show();
@@ -5282,6 +5078,9 @@
     }
 
     function openLocationManager() {
+        ensureFragmentLoaded('locationManagerModal', 'fragments/location-manager.html', '_afterLocationManagerLoaded');
+    }
+    function _afterLocationManagerLoaded() {
         hideLocationForm();
         renderLocationManagerList();
         new bootstrap.Modal(document.getElementById('locationManagerModal')).show();

@@ -1,0 +1,16 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold mb-0"><i class="bi bi-bar-chart-fill me-1 text-primary"></i> Analytics Dashboard</h5>
+    <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="loadDashboardData(true)">
+        <i class="bi bi-arrow-clockwise"></i>
+    </button>
+</div>
+<div class="row g-2 mb-3">
+    <div class="col-6"><div class="bg-primary-subtle rounded-3 p-3 text-center"><div class="fw-bold fs-4" id="kpi-total">—</div><div class="text-muted small">Tổng thiết bị</div></div></div>
+    <div class="col-6"><div class="bg-danger-subtle rounded-3 p-3 text-center"><div class="fw-bold fs-4 text-danger" id="kpi-overdue">—</div><div class="text-muted small">Quá hạn BT</div></div></div>
+    <div class="col-6"><div class="bg-warning-subtle rounded-3 p-3 text-center"><div class="fw-bold fs-4 text-warning" id="kpi-active-wo">—</div><div class="text-muted small">WO đang mở</div></div></div>
+    <div class="col-6"><div class="bg-success-subtle rounded-3 p-3 text-center"><div class="fw-bold fs-4 text-success" id="kpi-done-wo">—</div><div class="text-muted small">WO hoàn thành</div></div></div>
+</div>
+<p class="fw-bold small text-muted text-uppercase mb-2">Trạng thái Work Orders</p>
+<canvas id="assetChart" class="mb-3"></canvas>
+<p class="fw-bold small text-muted text-uppercase mb-2">Bảo trì theo tháng (6 tháng gần nhất)</p>
+<canvas id="maintenanceBarChart"></canvas>

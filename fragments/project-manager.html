@@ -1,0 +1,72 @@
+<div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content rounded-4 border-0 shadow">
+        <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-bold"><i class="bi bi-briefcase-fill me-2 text-primary"></i>Quản lý Dự án</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            <!-- Form thêm/sửa dự án -->
+            <div id="projectFormContainer" class="p-3 bg-light rounded-4 mb-4 border" style="display: none;">
+                <h6 class="fw-bold mb-3 text-primary" id="projectFormTitle"><i class="bi bi-plus-circle me-1"></i>Thêm dự án mới</h6>
+                <input type="hidden" id="manageProjId">
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">Tên dự án</label>
+                    <input type="text" class="form-control rounded-3" id="manageProjName" placeholder="Ví dụ: Dự án Tòa nhà A">
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label fw-bold small">Trạng thái</label>
+                        <select class="form-select rounded-3" id="manageProjStatus">
+                            <option value="Active">Hoạt động (Active)</option>
+                            <option value="Inactive">Tạm ngưng (Inactive)</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label fw-bold small">Ngày bắt đầu</label>
+                        <input type="date" class="form-control rounded-3" id="manageProjStart">
+                    </div>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label fw-bold small">Ngày kết thúc</label>
+                        <input type="date" class="form-control rounded-3" id="manageProjEnd">
+                    </div>
+                </div>
+                <div class="d-flex gap-2 justify-content-end">
+                    <button class="btn btn-light rounded-pill px-3" onclick="hideProjectForm()">Hủy</button>
+                    <button class="btn btn-primary rounded-pill px-3 text-white fw-bold" onclick="submitManageProject()">Lưu dự án</button>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="text-muted small">Danh sách các dự án hiện có trên hệ thống.</span>
+                <button class="btn btn-sm btn-primary rounded-pill px-3" onclick="showAddProjectForm()">
+                    <i class="bi bi-plus-lg"></i> Thêm dự án
+                </button>
+            </div>
+
+            <!-- Bảng danh sách dự án -->
+            <div class="rounded-4 overflow-hidden" style="background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant);">
+                <div class="table-responsive" style="max-height: 300px;">
+                    <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Mã</th>
+                                <th>Tên dự án</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày BD - KT</th>
+                                <th class="text-end pe-3">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="projectManagerTableBody">
+                            <!-- Rendered dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer border-0">
+            <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+        </div>
+    </div>
+</div>
