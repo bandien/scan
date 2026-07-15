@@ -320,6 +320,7 @@
                 <span id="syncStatusBadge" class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-2 py-1 me-1" style="font-size:0.75rem; display: none;">
                     <i class="bi bi-cloud-check-fill me-1"></i>Đồng bộ
                 </span>
+                <button class="bds-btn-icon" type="button" id="btnAdminMenu" title="Cài đặt Admin" style="display: none;"><i class="bi bi-gear-fill"></i></button>
                 <button class="bds-btn-icon" type="button" id="btnFontScale" title="Phóng to chữ"><span class="fw-bold" id="fontScaleLabel">A</span></button>
                 <a class="bds-btn-home" href="../index.html"><i class="bi bi-house"></i></a>
             </div>
@@ -336,9 +337,23 @@
 
     <!-- Main Content Form -->
     <div id="appContent" style="display: none;">
+        <!-- Admin Settings Card -->
+        <div class="card-custom" id="adminSettingsCard" style="display: none; border: 2px solid var(--bds-primary) !important; background-color: #f0fdf4; margin-bottom: 20px;">
+            <h5 class="fw-bold text-primary mb-3"><i class="bi bi-gear-fill me-2"></i>Cài đặt Admin</h5>
+            <div class="form-check form-switch p-0 m-0 d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="fw-bold small">Hiển thị ô chọn máy bơm</div>
+                    <div class="text-muted" style="font-size:0.75rem;">Cho phép chọn hoặc đổi máy bơm khác trên tờ check</div>
+                </div>
+                <div class="form-check form-switch p-0 m-0">
+                    <input class="form-check-input ms-0" type="checkbox" id="togglePumpSelectCheckbox" style="width: 2.5em; height: 1.3em;" checked>
+                </div>
+            </div>
+        </div>
+
         <form id="checkForm" onsubmit="handleFormSubmit(event)">
             <!-- Select Pump Card -->
-            <div class="card-custom">
+            <div class="card-custom" id="pumpSelectCard">
                 <div class="mb-3">
                     <label for="pumpSelect" class="info-label"><i class="bi bi-water text-primary me-1"></i>Chọn máy bơm kiểm tra <span class="text-danger">*</span></label>
                     <select id="pumpSelect" class="form-select form-control-custom" onchange="onPumpChange()" required>
@@ -617,7 +632,66 @@
         }
     }
 
+    function checkAdminAccess() {
+        const raw = localStorage.getItem("currentUser") || sessionStorage.getItem("currentUser");
+        let isAdmin = false;
+        if (raw) {
+            try {
+                const user = JSON.parse(raw);
+                const role = user.role || "";
+                if (role === "Admin" || role === "Manager" || role === "quản lý" || role === "admin" || role === "manager") {
+                    isAdmin = true;
+                }
+            } catch (e) {}
+        }
+        
+        const btnAdmin = document.getElementById('btnAdminMenu');
+        if (isAdmin) {
+            btnAdmin.style.display = 'inline-flex';
+        } else {
+            btnAdmin.style.display = 'none';
+        }
+    }
+
+    function initAdminSettings() {
+        checkAdminAccess();
+        
+        const checkbox = document.getElementById('togglePumpSelectCheckbox');
+        const selectCard = document.getElementById('pumpSelectCard');
+        
+        // Load saved setting
+        const savedSetting = localStorage.getItem('bds_show_pump_select');
+        const showSelect = savedSetting === null ? true : savedSetting === 'true';
+        
+        checkbox.checked = showSelect;
+        if (showSelect) {
+            selectCard.style.display = 'block';
+        } else {
+            selectCard.style.display = 'none';
+        }
+        
+        checkbox.addEventListener('change', function() {
+            localStorage.setItem('bds_show_pump_select', this.checked);
+            if (this.checked) {
+                selectCard.style.display = 'block';
+            } else {
+                selectCard.style.display = 'none';
+            }
+        });
+        
+        // Toggle Admin Settings panel visibility
+        document.getElementById('btnAdminMenu').addEventListener('click', function() {
+            const adminCard = document.getElementById('adminSettingsCard');
+            if (adminCard.style.display === 'none') {
+                adminCard.style.display = 'block';
+            } else {
+                adminCard.style.display = 'none';
+            }
+        });
+    }
+
     window.onload = async function() {
+        initAdminSettings();
         applyFontScale();
         document.getElementById('btnFontScale').addEventListener('click', cycleFontScale);
         
