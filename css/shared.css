@@ -694,3 +694,104 @@
   border-color: var(--bds-primary);
   background: var(--bds-primary-light);
 }
+
+
+/* ===== BOTTOM NAV DÙNG CHUNG (component tự nhúng qua js/bottomnav.js) =====
+   Thanh điều hướng dưới thống nhất cho các trang vệ tinh (pump_info, checkbom,
+   hengio, phanca, phongvan). Không phụ thuộc Bootstrap JS — menu dropup chạy
+   vanilla JS. index.html và nhatky/ có nav riêng gắn logic trang, không dùng bộ này. */
+.bds-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 460px;
+  height: 68px;
+  background: var(--bds-surface);
+  border-top: 1px solid var(--bds-outline-variant);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 1040;
+  padding: 0 8px calc(env(safe-area-inset-bottom, 0px) / 2);
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, .05);
+}
+
+.bds-bottom-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  text-decoration: none;
+  color: var(--bds-on-surface-variant);
+  font-size: 11px;
+  font-weight: 800;
+  background: none;
+  border: none;
+  padding: 4px 0;
+  cursor: pointer;
+  transition: all var(--bds-ease);
+}
+.bds-bottom-nav-item:active { transform: scale(0.97); }
+.bds-bottom-nav-item i { font-size: 22px; line-height: 1; padding: 5px 16px; border-radius: 12px; }
+.bds-bottom-nav-item.active { color: var(--bds-primary); }
+.bds-bottom-nav-item.active i { background: var(--bds-primary-light); }
+
+/* Menu dropup (vanilla) */
+.bds-nav-menu {
+  position: fixed;
+  bottom: 76px;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  width: min(300px, calc(100vw - 24px));
+  background: var(--bds-surface);
+  border: 1px solid var(--bds-outline-variant);
+  border-radius: 16px;
+  box-shadow: var(--bds-shadow-lg);
+  padding: 8px;
+  z-index: 1050;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .15s ease, transform .15s ease;
+  max-height: min(70vh, 480px);
+  overflow-y: auto;
+}
+.bds-nav-menu.open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+.bds-nav-menu-header {
+  font-size: .72rem;
+  font-weight: 800;
+  color: var(--bds-muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  padding: 8px 12px 4px;
+}
+.bds-nav-menu a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--bds-on-surface);
+  text-decoration: none;
+  font-size: .9rem;
+  font-weight: 600;
+}
+.bds-nav-menu a:hover, .bds-nav-menu a:active { background: var(--bds-surface-low); }
+.bds-nav-menu a i { color: var(--bds-primary); font-size: 1.05rem; width: 22px; text-align: center; }
+.bds-nav-menu hr { margin: 6px 8px; border-color: var(--bds-outline-variant); opacity: .6; }
+
+/* Trang gắn nav phải chừa chỗ để nội dung không bị che */
+body.has-bds-bottom-nav { padding-bottom: 96px !important; }
+
+/* Không in thanh điều hướng ra giấy (vd: bảng phân ca) */
+@media print {
+  .bds-bottom-nav, .bds-nav-menu { display: none !important; }
+  body.has-bds-bottom-nav { padding-bottom: 0 !important; }
+}
