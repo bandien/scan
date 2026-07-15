@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thông tin Máy Bơm | BanDienScan</title>
+    <title>Thông tin & Check Vận Hành Bơm | BanDienScan</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -102,6 +102,38 @@
         .badge-auto { background: #fff3cd; color: #664d03; padding: 3px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 800; }
         .badge-manual { background: #dae2ff; color: #0057ce; padding: 3px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 800; }
 
+        /* ===== Tờ check vận hành (gộp từ checkbom) ===== */
+        .status-options-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
+        .status-card {
+            border: 2px solid var(--siu-outline-variant); border-radius: 18px; padding: 14px 8px; text-align: center;
+            cursor: pointer; transition: all .25s cubic-bezier(.4,0,.2,1); background: var(--siu-surface);
+            user-select: none; display: flex; flex-direction: column; align-items: center; gap: 6px;
+        }
+        .status-card .icon-circle { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .status-card .status-label { font-size: .82rem; font-weight: 800; color: var(--siu-on-surface-variant); }
+        .status-card[data-status="OFF"] .icon-circle { background: #fee2e2; color: #ef4444; }
+        .status-card[data-status="OFF"].active { border-color: #ef4444; background: #fef2f2; }
+        .status-card[data-status="OFF"].active .status-label { color: #ef4444; }
+        .status-card[data-status="AUTO"] .icon-circle { background: #d1fae5; color: #059669; }
+        .status-card[data-status="AUTO"].active { border-color: #059669; background: #ecfdf5; }
+        .status-card[data-status="AUTO"].active .status-label { color: #059669; }
+        .status-card[data-status="MANUAL"] .icon-circle { background: #fef3c7; color: #f59e0b; }
+        .status-card[data-status="MANUAL"].active { border-color: #f59e0b; background: #fffbeb; }
+        .status-card[data-status="MANUAL"].active .status-label { color: #f59e0b; }
+        .status-card:active { transform: scale(0.95); }
+
+        .timer-settings-panel { background: var(--siu-surface-high); border: 2px dashed var(--siu-outline-variant); border-radius: 18px; padding: 14px; margin-top: 6px; display: none; }
+        .time-box-wrapper { background: var(--siu-surface); border: 1px solid var(--siu-outline-variant); border-radius: 14px; padding: 10px 12px; margin-bottom: 10px; }
+        .time-picker-custom { border: none; background: transparent; font-weight: 700; font-size: 1.05rem; color: var(--siu-on-surface); padding: 2px; width: 100%; outline: none; }
+        .form-switch-custom { display: flex; align-items: center; justify-content: space-between; background: var(--siu-surface); border: 1px solid var(--siu-outline-variant); border-radius: 14px; padding: 12px 14px; margin-top: 10px; }
+
+        .btn-submit-glow {
+            background: var(--siu-success); color: white; font-weight: 800; padding: 16px; border-radius: 18px;
+            border: none; width: 100%; font-size: 1.02rem; display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-submit-glow:active { transform: scale(0.97); }
+        .btn-submit-glow:disabled { background: #9ca3af; }
+
         #toastBox { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; flex-direction: column; gap: 8px; width: calc(100% - 32px); max-width: 420px; }
         .custom-toast { color: white; padding: 12px 18px; border-radius: 12px; font-weight: 700; font-size: 0.88rem; box-shadow: 0 8px 20px rgba(0,0,0,.2); display: flex; align-items: center; gap: 8px; transition: opacity .4s; }
     </style>
@@ -115,10 +147,13 @@
                 <div class="bds-brand-mark"><i class="bi bi-water"></i></div>
                 <div>
                     <div class="bds-brand-label">BanDienScan</div>
-                    <div class="bds-topbar-title">Thông tin Máy Bơm</div>
+                    <div class="bds-topbar-title">Thông tin &amp; Check Vận Hành Bơm</div>
                 </div>
             </div>
             <div class="bds-topbar-right">
+                <span id="syncStatusBadge" class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-2 py-1 me-1" style="font-size:.75rem; display:none;">
+                    <i class="bi bi-cloud-check-fill me-1"></i>Đồng bộ
+                </span>
                 <a href="index.html" class="bds-btn-icon" title="Trang chủ"><i class="bi bi-house-door-fill"></i></a>
             </div>
         </div>
@@ -218,28 +253,92 @@
             </div>
         </div>
 
-        <!-- Action Buttons -->
+        <!-- Action & Check Form -->
         <div class="card-premium p-3">
             <div class="fw-bold mb-3" style="font-size: .95rem;"><i class="bi bi-person-badge-fill text-success me-2"></i>Thao tác vận hành</div>
 
-            <div class="mb-2">
-                <label class="info-label">Người vận hành <span class="text-danger">*</span></label>
-                <input type="text" id="operatorInput" class="form-control form-control-siu" placeholder="Nhập tên nhân viên...">
-            </div>
-            <div class="mb-2">
-                <label class="info-label">Thời gian thực hiện</label>
-                <input type="datetime-local" id="eventTimeInput" class="form-control form-control-siu">
-            </div>
-            <div class="mb-3">
-                <label class="info-label">Ghi chú (không bắt buộc)</label>
-                <input type="text" id="notesInput" class="form-control form-control-siu" placeholder="Áp suất, tiếng động máy...">
-            </div>
+            <form id="checkForm" onsubmit="handleFormSubmit(event)">
+                <div class="mb-2">
+                    <label class="info-label">Người vận hành <span class="text-danger">*</span></label>
+                    <input type="text" id="operatorInput" class="form-control form-control-siu" placeholder="Nhập tên nhân viên...">
+                </div>
+                <div class="mb-2">
+                    <label class="info-label">Thời gian thực hiện</label>
+                    <input type="datetime-local" id="eventTimeInput" class="form-control form-control-siu">
+                </div>
+                <div class="mb-3">
+                    <label class="info-label">Ghi chú (không bắt buộc)</label>
+                    <input type="text" id="notesInput" class="form-control form-control-siu" placeholder="Áp suất, tiếng động máy...">
+                </div>
 
-            <div id="actionButtonContainer" class="mb-3"></div>
+                <div id="actionButtonContainer" class="mb-3"></div>
 
-            <div class="row g-2">
-                <div class="col-6"><a class="quick-link-btn" id="linkCheckbom" href="#"><i class="bi bi-clipboard2-check text-primary"></i> Tờ check vận hành</a></div>
+                <hr style="border-color: var(--siu-outline-variant);">
+
+                <label class="info-label d-block mb-2"><i class="bi bi-activity text-warning me-1"></i>Trạng thái vận hành thực tế (Tờ check) <span class="text-danger">*</span></label>
+                <div class="status-options-grid">
+                    <div class="status-card" data-status="OFF" onclick="selectStatus('OFF')">
+                        <div class="icon-circle"><i class="bi bi-power"></i></div>
+                        <div class="status-label">TẮT</div>
+                    </div>
+                    <div class="status-card" data-status="AUTO" onclick="selectStatus('AUTO')">
+                        <div class="icon-circle"><i class="bi bi-cpu"></i></div>
+                        <div class="status-label">TỰ ĐỘNG</div>
+                    </div>
+                    <div class="status-card" data-status="MANUAL" onclick="selectStatus('MANUAL')">
+                        <div class="icon-circle"><i class="bi bi-hand-index-thumb"></i></div>
+                        <div class="status-label">BẰNG TAY</div>
+                    </div>
+                </div>
+                <input type="hidden" id="statusInput">
+
+                <div class="timer-settings-panel" id="timerPanel">
+                    <div class="fw-bold mb-2 small text-uppercase" style="color: var(--siu-on-surface-variant);"><i class="bi bi-clock-history me-1"></i>Cấu hình giờ chạy tự động</div>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="time-box-wrapper">
+                                <label class="info-label text-success mb-0" style="font-size:.7rem;">BẬT CA 1</label>
+                                <input type="time" id="timeOn1" class="time-picker-custom">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="time-box-wrapper">
+                                <label class="info-label text-danger mb-0" style="font-size:.7rem;">TẮT CA 1</label>
+                                <input type="time" id="timeOff1" class="time-picker-custom">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="time-box-wrapper">
+                                <label class="info-label text-success mb-0" style="font-size:.7rem;">BẬT CA 2</label>
+                                <input type="time" id="timeOn2" class="time-picker-custom">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="time-box-wrapper">
+                                <label class="info-label text-danger mb-0" style="font-size:.7rem;">TẮT CA 2</label>
+                                <input type="time" id="timeOff2" class="time-picker-custom">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-switch-custom">
+                        <div>
+                            <div class="fw-bold small">Cập nhật giờ cài này</div>
+                            <div class="text-muted" style="font-size:.75rem;">Lưu làm giờ chạy tự động mặc định</div>
+                        </div>
+                        <div class="form-check form-switch p-0 m-0">
+                            <input class="form-check-input ms-0" type="checkbox" id="syncTimerCheckbox" style="width: 2.5em; height: 1.3em;">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit-glow mt-3" id="btnSubmitCheck">
+                    <i class="bi bi-check-circle-fill"></i> GỬI BÁO CÁO CHECK VẬN HÀNH
+                </button>
+            </form>
+
+            <div class="row g-2 mt-3">
                 <div class="col-6"><a class="quick-link-btn" id="linkHengio" href="#"><i class="bi bi-alarm text-warning"></i> Cài đặt đồng hồ</a></div>
+                <div class="col-6"><a class="quick-link-btn" href="print_pumps.html"><i class="bi bi-qr-code text-primary"></i> In mã QR bơm</a></div>
             </div>
         </div>
 
@@ -291,6 +390,8 @@
     let scanner = null;
     let isScanProcessing = false;
     let currentVideoTrack = null;
+    let serverTimerSettings = [];
+    let isSyncing = false;
 
     function showToast(msg, type = 'success') {
         const box = document.getElementById('toastBox');
@@ -434,10 +535,15 @@
         document.getElementById('viewingPumpName').innerText = currentPump.name;
         document.getElementById('viewingBar').style.display = 'flex';
 
-        document.getElementById('linkCheckbom').href = `checkbom/?pumpId=${currentPump.id}`;
         document.getElementById('linkHengio').href = `hengio/?settingId=${currentPump.settingId || currentPump.id}`;
 
+        // Đặt lại form check trạng thái về trạng thái trống cho lượt check mới
+        document.querySelectorAll('.status-card').forEach(card => card.classList.remove('active'));
+        document.getElementById('statusInput').value = '';
+        document.getElementById('timerPanel').style.display = 'none';
+
         resetToCurrentTime();
+        updateTimerInputsFromConfig();
         await loadPumpStatus();
         loadHistory();
 
@@ -484,16 +590,70 @@
         const btnContainer = document.getElementById('actionButtonContainer');
         const timerContainer = document.getElementById('timerContainer');
 
+        const isMonitor = checkMonitorOnly();
+        const monitorNotice = `<div class="text-center text-muted small py-2 fw-medium border-top mt-2" style="border-color: var(--siu-outline-variant) !important;"><i class="bi bi-shield-lock-fill me-1"></i>Chế độ chỉ giám sát (không thể điều khiển)</div>`;
+
         if (currentStatus === 'RUNNING') {
             statusContainer.innerHTML = `<span class="badge-status badge-running"><span class="spinner-grow spinner-grow-sm text-success"></span> ĐANG CHẠY</span>`;
-            btnContainer.innerHTML = `<button class="btn-action-stop" onclick="submitAction('STOP')"><i class="bi bi-power fs-4"></i> TẮT MÁY BƠM</button>`;
+            btnContainer.innerHTML = isMonitor ? monitorNotice
+                : `<button type="button" class="btn-action-stop" onclick="submitAction('STOP')"><i class="bi bi-power fs-4"></i> TẮT MÁY BƠM</button>`;
             timerContainer.style.display = 'block';
             startTimer(lastEvent ? lastEvent.timestamp : new Date());
         } else {
             statusContainer.innerHTML = `<span class="badge-status badge-stopped"><i class="bi bi-pause-circle-fill"></i> ĐANG DỪNG</span>`;
-            btnContainer.innerHTML = `<button class="btn-action-start" onclick="submitAction('START')"><i class="bi bi-rocket-takeoff-fill fs-4"></i> BẬT MÁY BƠM</button>`;
+            btnContainer.innerHTML = isMonitor ? monitorNotice
+                : `<button type="button" class="btn-action-start" onclick="submitAction('START')"><i class="bi bi-rocket-takeoff-fill fs-4"></i> BẬT MÁY BƠM</button>`;
             timerContainer.style.display = 'none';
             if (timerInterval) clearInterval(timerInterval);
+        }
+    }
+
+    function checkMonitorOnly() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlOverride = urlParams.get('monitorOnly') === 'true' || urlParams.get('readOnly') === 'true';
+        return urlOverride || (currentPump && currentPump.monitorOnly === true);
+    }
+
+    function selectStatus(status) {
+        document.querySelectorAll('.status-card').forEach(card => card.classList.remove('active'));
+        const activeCard = document.querySelector(`.status-card[data-status="${status}"]`);
+        if (activeCard) activeCard.classList.add('active');
+        document.getElementById('statusInput').value = status;
+        document.getElementById('timerPanel').style.display = status === 'AUTO' ? 'block' : 'none';
+    }
+
+    function normalizeTime(val) {
+        if (!val) return '';
+        val = val.trim();
+        if (/^\d{2}:\d{2}$/.test(val)) return val;
+        if (/^\d{1}:\d{2}$/.test(val)) return '0' + val;
+        return '';
+    }
+
+    async function loadServerTimerSettings() {
+        try {
+            const res = await bdsApiFetch('getPumpTimerSettings');
+            if (res.status === 'success' && Array.isArray(res.data)) {
+                serverTimerSettings = res.data;
+                updateTimerInputsFromConfig();
+            }
+        } catch (err) {
+            console.warn('Lỗi nạp cấu hình giờ cài từ server:', err);
+        }
+    }
+
+    function updateTimerInputsFromConfig() {
+        if (!currentPump) return;
+        const config = serverTimerSettings.find(s => s.settingId === currentPump.settingId);
+        const on1 = document.getElementById('timeOn1'), off1 = document.getElementById('timeOff1');
+        const on2 = document.getElementById('timeOn2'), off2 = document.getElementById('timeOff2');
+        if (config) {
+            on1.value = normalizeTime(config.on1) || '';
+            off1.value = normalizeTime(config.off1) || '';
+            on2.value = normalizeTime(config.on2) || '';
+            off2.value = normalizeTime(config.off2) || '';
+        } else {
+            on1.value = off1.value = on2.value = off2.value = '';
         }
     }
 
@@ -512,6 +672,8 @@
     }
 
     async function submitAction(action) {
+        if (checkMonitorOnly()) { showToast('Máy bơm này đang ở chế độ chỉ giám sát', 'danger'); return; }
+
         const operator = document.getElementById('operatorInput').value.trim();
         const notes = document.getElementById('notesInput').value.trim();
         const customTimeVal = document.getElementById('eventTimeInput').value;
@@ -525,9 +687,13 @@
         const nextStatus = action === 'START' ? 'RUNNING' : 'STOPPED';
 
         localStorage.setItem(`pump_state_${currentPump.id}`, JSON.stringify({ status: nextStatus, lastEvent: eventData }));
+        currentStatus = nextStatus;
+        lastEvent = eventData;
 
-        try {
-            await bdsApiPost('submitMeterReading', {
+        const queue = JSON.parse(localStorage.getItem('cmms_pump_check_queue') || '[]');
+        queue.push({
+            action: 'submitMeterReading',
+            payload: {
                 meterId: `PUMP_${currentPump.id}`,
                 pumpId: currentPump.id,
                 pumpName: currentPump.name,
@@ -535,23 +701,156 @@
                 operator,
                 notes,
                 timestamp: timestampIso
-            });
+            }
+        });
+        localStorage.setItem('cmms_pump_check_queue', JSON.stringify(queue));
 
-            currentStatus = nextStatus;
-            lastEvent = eventData;
-            const formattedTime = selectedDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-            showToast(action === 'START'
-                ? `Đã ghi nhận BẬT máy bơm lúc ${formattedTime}`
-                : `Đã TẮT máy bơm lúc ${formattedTime} và lưu nhật ký`);
-            document.getElementById('notesInput').value = '';
-            resetToCurrentTime();
+        const formattedTime = selectedDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        showToast(action === 'START'
+            ? `Đã ghi nhận BẬT máy bơm lúc ${formattedTime}, đang đồng bộ...`
+            : `Đã ghi nhận TẮT máy bơm lúc ${formattedTime}, đang đồng bộ...`);
+        document.getElementById('notesInput').value = '';
+        resetToCurrentTime();
+        renderPumpUI();
+        syncOfflineQueue();
+    }
+
+    async function handleFormSubmit(e) {
+        e.preventDefault();
+        if (!currentPump) return;
+
+        const operator = document.getElementById('operatorInput').value.trim();
+        const status = document.getElementById('statusInput').value;
+        const notes = document.getElementById('notesInput').value.trim();
+        const customTime = document.getElementById('eventTimeInput').value;
+
+        if (!operator) {
+            showToast('Vui lòng nhập tên người thực hiện', 'warning');
+            document.getElementById('operatorInput').focus();
+            return;
+        }
+        if (!status) { showToast('Vui lòng chọn trạng thái vận hành thực tế', 'warning'); return; }
+
+        localStorage.setItem('cmms_op_name', operator);
+
+        const btnSubmit = document.getElementById('btnSubmitCheck');
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang lưu...`;
+
+        let timerSettingsStr = '';
+        let on1 = '', off1 = '', on2 = '', off2 = '';
+        if (status === 'AUTO') {
+            on1 = document.getElementById('timeOn1').value;
+            off1 = document.getElementById('timeOff1').value;
+            on2 = document.getElementById('timeOn2').value;
+            off2 = document.getElementById('timeOff2').value;
+            const parts = [];
+            if (on1 || off1) parts.push(`Ca 1: ${on1 || '--'}-${off1 || '--'}`);
+            if (on2 || off2) parts.push(`Ca 2: ${on2 || '--'}-${off2 || '--'}`);
+            timerSettingsStr = parts.join('; ');
+        }
+
+        const queue = JSON.parse(localStorage.getItem('cmms_pump_check_queue') || '[]');
+
+        const syncTimer = document.getElementById('syncTimerCheckbox').checked;
+        if (status === 'AUTO' && syncTimer) {
+            queue.push({
+                action: 'savePumpTimerSetting',
+                payload: {
+                    settingId: currentPump.settingId,
+                    pumpName: currentPump.name,
+                    location: currentPump.source,
+                    on1, off1, on2, off2,
+                    notes: `Cập nhật từ check sheet bởi ${operator}`,
+                    updatedBy: operator
+                }
+            });
+        }
+
+        queue.push({
+            action: 'submitPumpCheck',
+            payload: {
+                timestamp: customTime ? new Date(customTime).toISOString() : new Date().toISOString(),
+                pumpId: currentPump.id,
+                pumpName: currentPump.name,
+                status: status === 'OFF' ? 'Tắt' : (status === 'AUTO' ? 'Tự động' : 'Bằng tay'),
+                timerSettings: timerSettingsStr,
+                operator,
+                notes
+            }
+        });
+
+        localStorage.setItem('cmms_pump_check_queue', JSON.stringify(queue));
+
+        showToast(`Đã ghi nhận báo cáo check bơm ${currentPump.name}, đang đồng bộ...`);
+        document.getElementById('notesInput').value = '';
+        document.querySelectorAll('.status-card').forEach(card => card.classList.remove('active'));
+        document.getElementById('statusInput').value = '';
+        document.getElementById('timerPanel').style.display = 'none';
+        resetToCurrentTime();
+
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = `<i class="bi bi-check-circle-fill"></i> GỬI BÁO CÁO CHECK VẬN HÀNH`;
+
+        syncOfflineQueue();
+        loadHistory();
+    }
+
+    async function syncOfflineQueue() {
+        if (isSyncing) return;
+        if (typeof navigator !== 'undefined' && !navigator.onLine) { updateSyncBadge(); return; }
+
+        let queue = JSON.parse(localStorage.getItem('cmms_pump_check_queue') || '[]');
+        if (queue.length === 0) { updateSyncBadge(); return; }
+
+        isSyncing = true;
+        updateSyncBadge();
+
+        let failed = false;
+        const remainingQueue = [];
+        for (const item of queue) {
+            if (failed) { remainingQueue.push(item); continue; }
+            try {
+                const res = await bdsApiPost(item.action, item.payload);
+                if (res.status !== 'success') throw new Error(res.message);
+            } catch (err) {
+                console.error(`Lỗi đồng bộ tác vụ ${item.action}:`, err);
+                failed = true;
+                remainingQueue.push(item);
+            }
+        }
+
+        localStorage.setItem('cmms_pump_check_queue', JSON.stringify(remainingQueue));
+        isSyncing = false;
+        updateSyncBadge();
+
+        if (!failed) {
             loadHistory();
-        } catch (err) {
-            showToast('Đã lưu thao tác trên thiết bị, sẽ đồng bộ khi có mạng', 'warning');
-            currentStatus = nextStatus;
-            lastEvent = eventData;
-        } finally {
-            renderPumpUI();
+            loadServerTimerSettings();
+        }
+    }
+
+    function updateSyncBadge() {
+        const badge = document.getElementById('syncStatusBadge');
+        if (!badge) return;
+        const queue = JSON.parse(localStorage.getItem('cmms_pump_check_queue') || '[]');
+
+        if (queue.length === 0) {
+            badge.className = 'badge rounded-pill bg-success-subtle text-success border border-success-subtle px-2 py-1 me-1';
+            badge.innerHTML = `<i class="bi bi-cloud-check-fill"></i> Đã đồng bộ`;
+            badge.style.display = 'inline-flex';
+            setTimeout(() => {
+                const qNow = JSON.parse(localStorage.getItem('cmms_pump_check_queue') || '[]');
+                if (qNow.length === 0) badge.style.display = 'none';
+            }, 3000);
+        } else if (isSyncing) {
+            badge.className = 'badge rounded-pill bg-warning-subtle text-warning border border-warning-subtle px-2 py-1 me-1';
+            badge.innerHTML = `<span class="spinner-border spinner-border-sm me-1" style="width:.8rem;height:.8rem;"></span> Đang gửi (${queue.length})`;
+            badge.style.display = 'inline-flex';
+        } else {
+            badge.className = 'badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 me-1';
+            badge.innerHTML = `<i class="bi bi-cloud-arrow-up-fill"></i> Chờ gửi (${queue.length})`;
+            badge.style.display = 'inline-flex';
         }
     }
 
@@ -595,12 +894,19 @@
 
     window.addEventListener('load', async () => {
         await loadServerPumps();
+        loadServerTimerSettings();
+
         const urlParams = new URLSearchParams(window.location.search);
         const startId = urlParams.get('pumpId') || urlParams.get('id');
         const savedOp = localStorage.getItem('cmms_op_name');
         if (savedOp) document.getElementById('operatorInput').value = savedOp;
         resetToCurrentTime();
         if (startId) loadPump(extractPumpId(startId));
+
+        updateSyncBadge();
+        syncOfflineQueue();
+        window.addEventListener('online', syncOfflineQueue);
+        setInterval(syncOfflineQueue, 15000);
     });
 </script>
 </body>
