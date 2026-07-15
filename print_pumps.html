@@ -151,17 +151,7 @@
             font-size: 0.92rem;
             font-weight: 800;
         }
-        .type-badge {
-            display: inline-block;
-            color: #0369a1;
-            background: #e0f2fe;
-            border: 1px solid #bae6fd;
-            border-radius: 999px;
-            padding: 3px 10px;
-            font-size: 10px;
-            font-weight: 800;
-            text-transform: uppercase;
-        }
+
         .url {
             position: absolute;
             bottom: 6px;
@@ -210,7 +200,6 @@
             .name { font-size: 10pt !important; line-height: 1.3 !important; }
             .meta { font-size: 8.5pt !important; line-height: 1.5 !important; margin-top: 1.5mm !important; }
             .uid { font-size: 8.5pt !important; padding: 2px 7px !important; margin-top: 2mm !important; }
-            .type-badge { font-size: 7pt !important; padding: 1px 6px !important; }
             .url { font-size: 6pt !important; bottom: 4px !important; }
         }
     </style>
@@ -276,7 +265,6 @@
 
                     <div class="qr-block">
                         <div class="qr" id="qr-${idx}"></div>
-                        <span class="type-badge">${pump.monitorOnly ? 'Chỉ giám sát' : 'Điều khiển'}</span>
                     </div>
 
                     <div class="info-block">
