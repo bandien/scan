@@ -1855,8 +1855,9 @@
             isScanProcessing = true;
             playBeep();
             if (navigator.vibrate) navigator.vibrate(100); // Haptic feedback
+            if (redirectIfPumpQrUrl(uid)) return;
             document.getElementById('disp_uid').innerText = uid;
-            reader.style.display = 'none'; 
+            reader.style.display = 'none';
             torchBtn.style.display = 'none';
             scanFrame.classList.remove('scanning');
             scanFrame.style.display = 'none';
@@ -1907,12 +1908,28 @@
         }
     }
 
+    // Mã QR dán trên máy bơm mã hoá cả đường dẫn tới pump_info.html (không phải
+    // UID thiết bị thường). Nếu phát hiện, điều hướng thẳng tới trang đó thay vì
+    // tra cứu trong danh sách thiết bị (sẽ báo "không có trong bộ nhớ tạm").
+    function redirectIfPumpQrUrl(raw) {
+        const text = String(raw || '').trim();
+        try {
+            const url = new URL(text, window.location.href);
+            if (/\/pump_info\.html$/i.test(url.pathname)) {
+                window.location.href = url.href;
+                return true;
+            }
+        } catch (_) { /* không phải URL hợp lệ, coi như UID thường */ }
+        return false;
+    }
+
     function handleManualEntry() {
         const uid = document.getElementById('manual_uid').value.trim();
-        if (uid) { 
-            document.getElementById('disp_uid').innerText = uid; 
+        if (uid) {
+            if (redirectIfPumpQrUrl(uid)) return;
+            document.getElementById('disp_uid').innerText = uid;
             stopScanning();
-            fetchData(uid); 
+            fetchData(uid);
         }
     }
 
