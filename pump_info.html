@@ -805,6 +805,7 @@
 
         localStorage.setItem('cmms_pump_check_queue', JSON.stringify(queue));
 
+        if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Rung báo hoàn tất — phản hồi xúc giác cho kỹ thuật viên hiện trường
         showToast(`Đã ghi nhận báo cáo check bơm ${currentPump.name}, đang đồng bộ...`);
         document.getElementById('notesInput').value = '';
         document.querySelectorAll('.status-card').forEach(card => card.classList.remove('active'));

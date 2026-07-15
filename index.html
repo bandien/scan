@@ -3584,6 +3584,7 @@
         };
         try {
             await fetch(gasUrl, { method: 'POST', body: JSON.stringify(data) });
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Rung báo hoàn tất — phản hồi xúc giác cho kỹ thuật viên hiện trường
             showToast(translations[currentLang].alert_success.replace('{uid}', uid));
             updateSyncStatus();
             setTimeout(() => location.reload(), 2000);
@@ -4107,6 +4108,7 @@
         };
         try {
             await fetch(gasUrl, { method: 'POST', body: JSON.stringify(payload) });
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Rung báo hoàn tất
             bootstrap.Modal.getInstance(document.getElementById('createWOModal')).hide();
             showToast('Đã tạo Work Order mới!');
             setTimeout(() => loadKanban(), 1500);
@@ -4189,6 +4191,11 @@
         showToast('Đang lưu thay đổi...');
         try {
             await fetch(gasUrl, { method: 'POST', body: JSON.stringify(payload) });
+            if (navigator.vibrate) {
+                // Đánh dấu Hoàn thành/Đóng WO rung mạnh hơn (3 nhịp) để cảm nhận rõ "xong việc"
+                const isWoComplete = payload.status === 'Done' || payload.status === 'Closed';
+                navigator.vibrate(isWoComplete ? [100, 50, 100, 50, 100] : [100, 50, 100]);
+            }
             bootstrap.Modal.getInstance(document.getElementById('editWOModal')).hide();
 
             // Update local cache
@@ -4427,6 +4434,7 @@
             });
             const result = await res.json();
             if (result.status === 'success') {
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Rung báo hoàn tất
                 showToast('Đã thêm thiết bị thành công!', 'success');
                 bootstrap.Modal.getInstance(document.getElementById('addDeviceModal')).hide();
                 // Add it to local storage right away to avoid reload
@@ -4648,6 +4656,7 @@
             });
             const result = await res.json();
             if (result.status === 'success') {
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Rung báo hoàn tất
                 showToast('Đã cập nhật thiết bị thành công!', 'success');
                 bootstrap.Modal.getInstance(document.getElementById('editDeviceModal')).hide();
                 
