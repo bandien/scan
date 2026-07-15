@@ -2026,26 +2026,22 @@
             <ul class="dropdown-menu dropdown-menu-end mb-2 shadow-lg border-0 rounded-4" style="min-width: 220px; background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant) !important; z-index: 1050;">
                 <li><h6 class="dropdown-header text-muted small fw-bold"><i class="bi bi-grid-fill me-1"></i> MENU TIỆN ÍCH</h6></li>
                 <li><hr class="dropdown-divider opacity-50"></li>
-                <li>
-                    <a class="dropdown-item rounded-3 py-2 d-flex align-items-center justify-content-between text-decoration-none" href="#" data-bs-toggle="collapse" data-bs-target="#pumpMenuGroupNhatky" aria-expanded="false">
-                        <span><i class="bi bi-water me-2 text-primary"></i> Quản lý máy bơm</span>
-                        <i class="bi bi-chevron-down chevron-icon small"></i>
-                    </a>
-                    <div class="collapse" id="pumpMenuGroupNhatky">
-                        <ul class="list-unstyled mb-1">
-                            <li><a class="dropdown-item rounded-3 py-2 ps-4 text-decoration-none" href="../pump_info.html"><i class="bi bi-qr-code-scan me-2 text-primary"></i> Thông tin & Check vận hành bơm</a></li>
-                            <li><a class="dropdown-item rounded-3 py-2 ps-4 text-decoration-none" href="../hengio/"><i class="bi bi-alarm me-2 text-warning"></i> Cài đặt đồng hồ bơm</a></li>
-                            <li><a class="dropdown-item rounded-3 py-2 ps-4 text-decoration-none" href="../print_pumps.html"><i class="bi bi-qr-code me-2 text-primary"></i> In mã QR máy bơm</a></li>
-                        </ul>
-                    </div>
-                </li>
+                <li><a class="dropdown-item rounded-3 py-2 text-decoration-none" href="../pump_info.html"><i class="bi bi-water me-2 text-primary"></i> Thông tin & Check vận hành bơm</a></li>
                 <li><a class="dropdown-item rounded-3 py-2 text-decoration-none" href="#" data-bottom-screen="stats"><i class="bi bi-bar-chart-fill me-2 text-success"></i> Báo cáo thống kê</a></li>
                 <li><a class="dropdown-item rounded-3 py-2 text-decoration-none" href="../phanca/"><i class="bi bi-calendar-range me-2 text-info"></i> Phân ca trực</a></li>
                 <li><a class="dropdown-item rounded-3 py-2 text-decoration-none" href="../phongvan/"><i class="bi bi-person-workspace me-2 text-secondary"></i> Câu hỏi phỏng vấn</a></li>
-                <li><hr class="dropdown-divider opacity-50"></li>
-                <li><a class="dropdown-item rounded-3 py-2 small text-decoration-none" href="../status.html" target="_blank"><i class="bi bi-cpu-fill me-2 text-success"></i> Giám sát Server Uptime</a></li>
-                <li><a class="dropdown-item rounded-3 py-2 small text-decoration-none" href="../changelog.html" target="_blank"><i class="bi bi-history me-2 text-info"></i> Nhật ký Thay đổi</a></li>
-                <li><a class="dropdown-item rounded-3 py-2 small text-decoration-none" href="../na111.html" target="_blank"><i class="bi bi-tools me-2 text-warning"></i> Chẩn đoán EBYTE NA111</a></li>
+
+                <!-- ===== Dành cho Quản trị — chỉ hiện với Role Admin/Manager, cùng luật
+                     canManageUsers() với index.html (xem updateAccessGate()) ===== -->
+                <li id="adminMenuHeaderNhatky" class="admin-menu-item" style="display:none;">
+                    <hr class="dropdown-divider opacity-50">
+                    <h6 class="dropdown-header text-muted small fw-bold"><i class="bi bi-shield-lock-fill me-1"></i> DÀNH CHO QUẢN TRỊ</h6>
+                </li>
+                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2 text-decoration-none" href="../hengio/"><i class="bi bi-alarm me-2 text-warning"></i> Cài đặt đồng hồ bơm</a></li>
+                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2 text-decoration-none" href="../print_pumps.html"><i class="bi bi-qr-code me-2 text-primary"></i> In mã QR máy bơm</a></li>
+                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2 small text-decoration-none" href="../status.html" target="_blank"><i class="bi bi-cpu-fill me-2 text-success"></i> Giám sát Server Uptime</a></li>
+                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2 small text-decoration-none" href="../changelog.html" target="_blank"><i class="bi bi-history me-2 text-info"></i> Nhật ký Thay đổi</a></li>
+                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2 small text-decoration-none" href="../na111.html" target="_blank"><i class="bi bi-tools me-2 text-warning"></i> Chẩn đoán EBYTE NA111</a></li>
             </ul>
         </div>
         <button class="bottom-nav-item" type="button" data-bottom-screen="personal">
@@ -3346,6 +3342,13 @@
       document.getElementById("accessGateMessage").textContent = currentUser()
         ? "Tài khoản của bạn chưa được phân nhóm tổ. Vui lòng liên hệ quản trị viên để được phân tổ."
         : "Vui lòng đăng nhập tài khoản đã được phân nhóm tổ để xem nội dung này.";
+
+      // Khối "Dành cho Quản trị" trong menu Menu tiện ích — cùng luật phân quyền
+      // (Admin/Manager) với index.html, ẩn hoàn toàn với tài khoản nhân viên thường.
+      const isAdmin = canManageUsers();
+      document.querySelectorAll(".admin-menu-item").forEach(el => {
+        el.style.display = isAdmin ? "block" : "none";
+      });
     }
 
     function updateUserButton() {
