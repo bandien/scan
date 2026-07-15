@@ -374,60 +374,11 @@
             </div>
           </div>
           <div class="header-right d-flex align-items-center gap-2">
+                <!-- Menu tiện ích & tài khoản đã chuyển xuống tab "Menu" / "Cá nhân" ở
+                     thanh điều hướng dưới, đồng nhất với các màn hình chính khác. -->
                 <span class="badge bg-success-subtle text-success shadow-sm px-2 py-2 rounded-pill" id="syncBadge" style="display: none;" title="Data Synced">
                     <i class="bi bi-cloud-check-fill"></i>
                 </span>
-                
-                <div class="dropdown">
-                    <button class="btn btn-sm rounded-pill border px-2 py-2 dropdown-toggle d-flex align-items-center" style="background: var(--siu-surface-high); color: var(--siu-on-surface); border-color: var(--siu-outline-variant);" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
-                        <i class="bi bi-grid text-primary" style="font-size: 18px;"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end rounded-4 mt-2 p-2" style="min-width: 200px; background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant);">
-                        <li id="menuAddDevice" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="showAddDeviceModal()"><i class="bi bi-plus-square-dotted me-2 text-success"></i> Thêm thiết bị mới</a></li>
-                        <li id="menuBatchGen" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleBatchGenerator()"><i class="bi bi-magic me-2 text-success"></i> Tạo mã hàng loạt</a></li>
-                        <li id="menuProjMgr" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="openProjectManager()"><i class="bi bi-briefcase-fill me-2 text-success"></i> Quản lý Dự án</a></li>
-                        <li id="menuShiftRoster" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="phanca/"><i class="bi bi-table me-2 text-success"></i> Bảng phân ca tuần</a></li>
-                        <li id="menuLocMgr" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="openLocationManager()"><i class="bi bi-geo-fill me-2 text-success"></i> Quản lý Địa điểm</a></li>
-                        <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleDeviceList()" id="btn-device-list"><i class="bi bi-cpu me-2 text-primary"></i> Thiết bị của tôi</a></li>
-                        <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleCalendar()" id="btn-calendar"><i class="bi bi-calendar-event me-2 text-primary"></i> Lịch Bảo Trì</a></li>
-                        <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleKanban()" id="btn-kanban"><i class="bi bi-kanban me-2 text-primary"></i> Kanban WO</a></li>
-                        <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleDashboard()" id="btn-dashboard"><i class="bi bi-bar-chart-fill me-2 text-primary"></i> Dashboard</a></li>
-                        <li><hr class="dropdown-divider opacity-50"></li>
-                        <li><a class="dropdown-item rounded-3 py-2" href="architecture.html" target="_blank"><i class="bi bi-diagram-3 me-2 text-secondary"></i> Sơ đồ Hệ thống</a></li>
-                        <li><a class="dropdown-item rounded-3 py-2" href="nhatky/"><i class="bi bi-journal-check me-2 text-primary"></i> Nhật ký công việc</a></li>
-                        <li>
-                            <a class="dropdown-item rounded-3 py-2 d-flex align-items-center justify-content-between" href="#" data-bs-toggle="collapse" data-bs-target="#pumpMenuGroupHeader" aria-expanded="false">
-                                <span><i class="bi bi-water me-2 text-primary"></i> Quản lý máy bơm</span>
-                                <i class="bi bi-chevron-down chevron-icon small"></i>
-                            </a>
-                            <div class="collapse" id="pumpMenuGroupHeader">
-                                <ul class="list-unstyled mb-1">
-                                    <li><a class="dropdown-item rounded-3 py-2 ps-4" href="pump_info.html"><i class="bi bi-qr-code-scan me-2 text-primary"></i> Thông tin & Check vận hành bơm</a></li>
-                                    <li><a class="dropdown-item rounded-3 py-2 ps-4" href="hengio/"><i class="bi bi-alarm me-2 text-warning"></i> Cài đặt đồng hồ bơm</a></li>
-                                    <li><a class="dropdown-item rounded-3 py-2 ps-4" href="print_pumps.html"><i class="bi bi-qr-code me-2 text-primary"></i> In mã QR máy bơm</a></li>
-                                </ul>
-                            </div>
-                        </li>
-                        <li><a class="dropdown-item rounded-3 py-2" href="phongvan/"><i class="bi bi-person-workspace me-2 text-primary"></i> Câu hỏi phỏng vấn</a></li>
-                        <li><a class="dropdown-item rounded-3 py-2" href="status.html" target="_blank"><i class="bi bi-cpu-fill me-2 text-success"></i> Giám sát Server Uptime</a></li>
-                        <li><a class="dropdown-item rounded-3 py-2" href="changelog.html" target="_blank"><i class="bi bi-history me-2 text-info"></i> Nhật ký Thay đổi (Log)</a></li>
-                        <li><a class="dropdown-item rounded-3 py-2" href="na111.html" target="_blank"><i class="bi bi-tools me-2 text-warning"></i> Chẩn đoán EBYTE NA111</a></li>
-                        <li><hr class="dropdown-divider opacity-50"></li>
-                        <li class="px-3 py-1 text-center text-muted" style="font-size: 0.72rem; list-style-type: none;"><span data-i18n="version">Phiên bản</span> v2.8.0</li>
-                    </ul>
-                </div>
-
-                <div class="dropdown" id="userBadge" style="display: none;">
-                    <button class="btn btn-sm rounded-pill border px-2 py-2 dropdown-toggle d-flex align-items-center" style="background: var(--siu-surface-high); color: var(--siu-on-surface); border-color: var(--siu-outline-variant);" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-person-circle text-primary" style="font-size: 18px;"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end" style="min-width: 180px; background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant);">
-                        <li><h6 class="dropdown-header" id="userRoleDisplay"><i class="bi bi-briefcase me-1"></i> Role</h6></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" onclick="showChangePasswordModal()"><i class="bi bi-key me-2"></i>Đổi PIN</a></li>
-                        <li><a class="dropdown-item text-danger" href="#" onclick="doLogout()"><i class="bi bi-box-arrow-left me-2"></i>Đăng xuất</a></li>
-                    </ul>
-                </div>
           </div>
         </div>
     </div>
@@ -1660,6 +1611,15 @@
             <ul class="dropdown-menu dropdown-menu-end mb-2 shadow-lg border-0 rounded-4" style="min-width: 220px; background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant) !important; z-index: 1050;">
                 <li><h6 class="dropdown-header text-muted small fw-bold"><i class="bi bi-grid-fill me-1"></i> MENU TIỆN ÍCH</h6></li>
                 <li><hr class="dropdown-divider opacity-50"></li>
+                <li id="menuAddDevice" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="showAddDeviceModal()"><i class="bi bi-plus-square-dotted me-2 text-success"></i> Thêm thiết bị mới</a></li>
+                <li id="menuBatchGen" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleBatchGenerator()"><i class="bi bi-magic me-2 text-success"></i> Tạo mã hàng loạt</a></li>
+                <li id="menuProjMgr" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="openProjectManager()"><i class="bi bi-briefcase-fill me-2 text-success"></i> Quản lý Dự án</a></li>
+                <li id="menuLocMgr" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="openLocationManager()"><i class="bi bi-geo-fill me-2 text-success"></i> Quản lý Địa điểm</a></li>
+                <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleDeviceList()" id="btn-device-list"><i class="bi bi-cpu me-2 text-primary"></i> Thiết bị của tôi</a></li>
+                <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleCalendar()" id="btn-calendar"><i class="bi bi-calendar-event me-2 text-primary"></i> Lịch Bảo Trì</a></li>
+                <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleKanban()" id="btn-kanban"><i class="bi bi-kanban me-2 text-primary"></i> Kanban WO</a></li>
+                <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleDashboard()" id="btn-dashboard"><i class="bi bi-bar-chart-fill me-2 text-primary"></i> Dashboard</a></li>
+                <li><hr class="dropdown-divider opacity-50"></li>
                 <li>
                     <a class="dropdown-item rounded-3 py-2 d-flex align-items-center justify-content-between" href="#" data-bs-toggle="collapse" data-bs-target="#pumpMenuGroupBottom" aria-expanded="false">
                         <span><i class="bi bi-water me-2 text-primary"></i> Quản lý máy bơm</span>
@@ -1677,9 +1637,12 @@
                 <li><a class="dropdown-item rounded-3 py-2" href="phanca/"><i class="bi bi-calendar-range me-2 text-info"></i> Phân ca trực</a></li>
                 <li><a class="dropdown-item rounded-3 py-2" href="phongvan/"><i class="bi bi-person-workspace me-2 text-secondary"></i> Câu hỏi phỏng vấn</a></li>
                 <li><hr class="dropdown-divider opacity-50"></li>
+                <li><a class="dropdown-item rounded-3 py-2 small" href="architecture.html" target="_blank"><i class="bi bi-diagram-3 me-2 text-secondary"></i> Sơ đồ Hệ thống</a></li>
                 <li><a class="dropdown-item rounded-3 py-2 small" href="status.html" target="_blank"><i class="bi bi-cpu-fill me-2 text-success"></i> Giám sát Server Uptime</a></li>
                 <li><a class="dropdown-item rounded-3 py-2 small" href="changelog.html" target="_blank"><i class="bi bi-history me-2 text-info"></i> Nhật ký Thay đổi</a></li>
                 <li><a class="dropdown-item rounded-3 py-2 small" href="na111.html" target="_blank"><i class="bi bi-tools me-2 text-warning"></i> Chẩn đoán EBYTE NA111</a></li>
+                <li><hr class="dropdown-divider opacity-50"></li>
+                <li class="px-3 py-1 text-center text-muted" style="font-size: 0.72rem; list-style-type: none;"><span data-i18n="version">Phiên bản</span> v2.8.0</li>
             </ul>
         </div>
         <button class="bottom-nav-item" type="button" onclick="window.location.href='nhatky/index.html#personal'">
@@ -2961,9 +2924,6 @@
         document.getElementById('loginOverlay').style.display = 'none';
         document.getElementById('appShell').style.display = 'block';
         document.getElementById('mainBottomNav').style.display = 'flex';
-        document.getElementById('userBadge').style.display = 'inline-block';
-        document.getElementById('userNameDisplay').innerText = user.name;
-        document.getElementById('userRoleDisplay').innerHTML = '<i class="bi bi-briefcase me-1"></i> ' + (user.role || 'User');
         if (user.role === 'Admin' || user.role === 'Manager') {
             document.getElementById('menuAddDevice').style.display = 'block';
             document.getElementById('menuBatchGen').style.display = 'block';
