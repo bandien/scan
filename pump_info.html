@@ -106,21 +106,31 @@
         .status-options-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
         .status-card {
             border: 2px solid var(--siu-outline-variant); border-radius: 18px; padding: 14px 8px; text-align: center;
-            cursor: pointer; transition: all .25s cubic-bezier(.4,0,.2,1); background: var(--siu-surface);
+            cursor: pointer; transition: all .2s cubic-bezier(.4,0,.2,1); background: var(--siu-surface);
             user-select: none; display: flex; flex-direction: column; align-items: center; gap: 6px;
         }
-        .status-card .icon-circle { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
-        .status-card .status-label { font-size: .82rem; font-weight: 800; color: var(--siu-on-surface-variant); }
-        .status-card[data-status="OFF"] .icon-circle { background: #fee2e2; color: #ef4444; }
-        .status-card[data-status="OFF"].active { border-color: #ef4444; background: #fef2f2; }
-        .status-card[data-status="OFF"].active .status-label { color: #ef4444; }
-        .status-card[data-status="AUTO"] .icon-circle { background: #d1fae5; color: #059669; }
-        .status-card[data-status="AUTO"].active { border-color: #059669; background: #ecfdf5; }
-        .status-card[data-status="AUTO"].active .status-label { color: #059669; }
-        .status-card[data-status="MANUAL"] .icon-circle { background: #fef3c7; color: #f59e0b; }
-        .status-card[data-status="MANUAL"].active { border-color: #f59e0b; background: #fffbeb; }
-        .status-card[data-status="MANUAL"].active .status-label { color: #f59e0b; }
+        .status-card .icon-circle { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: all .2s ease; }
+        .status-card .status-label { font-size: .82rem; font-weight: 800; color: var(--siu-on-surface-variant); transition: color .2s ease; }
         .status-card:active { transform: scale(0.95); }
+
+        /* Trạng thái nghỉ: viền + icon nhuốm màu theo nhóm để phân biệt ngay từ đầu */
+        .status-card[data-status="OFF"] { border-color: #fecaca; background: #fff5f5; }
+        .status-card[data-status="OFF"] .icon-circle { background: #fee2e2; color: #dc2626; }
+        .status-card[data-status="AUTO"] { border-color: #a7f3d0; background: #f0fdf9; }
+        .status-card[data-status="AUTO"] .icon-circle { background: #d1fae5; color: #059669; }
+        .status-card[data-status="MANUAL"] { border-color: #fde68a; background: #fffbeb; }
+        .status-card[data-status="MANUAL"] .icon-circle { background: #fef3c7; color: #d97706; }
+
+        /* Trạng thái đã chọn: tô đặc màu, chữ/icon trắng để nổi bật rõ ràng */
+        .status-card[data-status="OFF"].active { border-color: #dc2626; background: #dc2626; box-shadow: 0 6px 16px rgba(220,38,38,.28); }
+        .status-card[data-status="OFF"].active .icon-circle { background: rgba(255,255,255,.25); color: #fff; }
+        .status-card[data-status="OFF"].active .status-label { color: #fff; }
+        .status-card[data-status="AUTO"].active { border-color: #059669; background: #059669; box-shadow: 0 6px 16px rgba(5,150,105,.28); }
+        .status-card[data-status="AUTO"].active .icon-circle { background: rgba(255,255,255,.25); color: #fff; }
+        .status-card[data-status="AUTO"].active .status-label { color: #fff; }
+        .status-card[data-status="MANUAL"].active { border-color: #d97706; background: #d97706; box-shadow: 0 6px 16px rgba(217,119,6,.28); }
+        .status-card[data-status="MANUAL"].active .icon-circle { background: rgba(255,255,255,.25); color: #fff; }
+        .status-card[data-status="MANUAL"].active .status-label { color: #fff; }
 
         .timer-settings-panel { background: var(--siu-surface-high); border: 2px dashed var(--siu-outline-variant); border-radius: 18px; padding: 14px; margin-top: 6px; display: none; }
         .time-box-wrapper { background: var(--siu-surface); border: 1px solid var(--siu-outline-variant); border-radius: 14px; padding: 10px 12px; margin-bottom: 10px; }
