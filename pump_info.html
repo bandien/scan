@@ -144,7 +144,8 @@
         .btn-submit-glow:active { transform: scale(0.97); }
         .btn-submit-glow:disabled { background: #9ca3af; }
 
-        #toastBox { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; flex-direction: column; gap: 8px; width: calc(100% - 32px); max-width: 420px; }
+        /* bottom 88px để toast nổi phía trên thanh điều hướng dưới (68px) */
+        #toastBox { position: fixed; bottom: 88px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; flex-direction: column; gap: 8px; width: calc(100% - 32px); max-width: 420px; }
         .custom-toast { color: white; padding: 12px 18px; border-radius: 12px; font-weight: 700; font-size: 0.88rem; box-shadow: 0 8px 20px rgba(0,0,0,.2); display: flex; align-items: center; gap: 8px; transition: opacity .4s; }
     </style>
 </head>
@@ -938,5 +939,6 @@
         setInterval(syncOfflineQueue, 15000);
     });
 </script>
+<script src="js/bottomnav.js" data-root="./"></script>
 </body>
 </html>
