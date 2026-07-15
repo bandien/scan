@@ -321,7 +321,6 @@
                     <i class="bi bi-cloud-check-fill me-1"></i>Đồng bộ
                 </span>
                 <button class="bds-btn-icon" type="button" id="btnAdminMenu" title="Cài đặt Admin" style="display: none;"><i class="bi bi-gear-fill"></i></button>
-                <button class="bds-btn-icon" type="button" id="btnFontScale" title="Phóng to chữ"><span class="fw-bold" id="fontScaleLabel">A</span></button>
                 <a class="bds-btn-home" href="../index.html"><i class="bi bi-house"></i></a>
             </div>
         </div>
@@ -583,20 +582,6 @@
         return urlOverride || pumpConfig;
     }
 
-    // Font Scaling
-    const FONT_SCALES = [100, 115, 130];
-    function applyFontScale() {
-        const scale = parseInt(localStorage.getItem('cmms_pump_check_fontscale') || "100", 10);
-        document.documentElement.style.fontSize = scale + "%";
-        document.getElementById("fontScaleLabel").textContent = scale <= 100 ? "A" : scale <= 115 ? "A+" : "A++";
-    }
-    function cycleFontScale() {
-        const current = parseInt(localStorage.getItem('cmms_pump_check_fontscale') || "100", 10);
-        const next = FONT_SCALES[(FONT_SCALES.indexOf(current) + 1) % FONT_SCALES.length];
-        localStorage.setItem('cmms_pump_check_fontscale', String(next));
-        applyFontScale();
-    }
-
     function resetToCurrentTime() {
         const now = new Date();
         now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -713,9 +698,7 @@
 
     window.onload = async function() {
         initAdminSettings();
-        applyFontScale();
-        document.getElementById('btnFontScale').addEventListener('click', cycleFontScale);
-        
+
         // Prefill Operator Name
         const loggedInUser = getLoggedInUser();
         if (loggedInUser) {
