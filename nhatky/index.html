@@ -4135,7 +4135,9 @@
           <button class="link-button" type="button" onclick="navigateTo('loghistory', {planId:'${escapeAttr(plan.id)}'})"><i class="bi bi-clock-history me-1"></i>Xem nhật ký đã ghi</button>
         </div>
         <div class="action-bar">
-          <button class="btn-done" type="button" onclick="handleTaskAction('${escapeAttr(plan.id)}','Hoàn thành')"><i class="bi bi-journal-plus"></i>Ghi nhật ký cho việc này</button>
+          <!-- Cùng quy tắc preset với nút nhanh ở danh sách việc (taskRowHtml):
+               chưa bắt đầu → "Đang làm", đang làm/đã xong → "Hoàn thành" -->
+          <button class="btn-done" type="button" onclick="handleTaskAction('${escapeAttr(plan.id)}','${plan.status === "Đang làm" || plan.status === "Hoàn thành" ? "Hoàn thành" : "Đang làm"}')"><i class="bi bi-journal-plus"></i>Ghi nhật ký cho việc này</button>
         </div>
       `;
       refreshTaskAssigneeEditor();
