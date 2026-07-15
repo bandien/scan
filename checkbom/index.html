@@ -527,13 +527,31 @@
         document.getElementById('eventTimeInput').value = now.toISOString().slice(0, 16);
     }
 
+    function getLoggedInUser() {
+        try {
+            const raw = localStorage.getItem("currentUser") || sessionStorage.getItem("currentUser");
+            if (raw) {
+                const user = JSON.parse(raw);
+                return user.fullName || user.name || user.username || "";
+            }
+        } catch (e) {
+            console.error("Lỗi lấy thông tin đăng nhập:", e);
+        }
+        return "";
+    }
+
     window.onload = async function() {
         applyFontScale();
         document.getElementById('btnFontScale').addEventListener('click', cycleFontScale);
         
         // Prefill Operator Name
-        const savedOp = localStorage.getItem('cmms_op_name');
-        if (savedOp) document.getElementById('operatorInput').value = savedOp;
+        const loggedInUser = getLoggedInUser();
+        if (loggedInUser) {
+            document.getElementById('operatorInput').value = loggedInUser;
+        } else {
+            const savedOp = localStorage.getItem('cmms_op_name');
+            if (savedOp) document.getElementById('operatorInput').value = savedOp;
+        }
         
         resetToCurrentTime();
         initPumpDropdown();
