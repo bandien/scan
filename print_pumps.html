@@ -61,23 +61,25 @@
             background: white;
             color: var(--text);
         }
+        /* === SHEET GRID === */
         .sheet {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+            gap: 16px;
             padding: 20px;
-            max-width: 1000px;
+            max-width: 900px;
             margin: 0 auto;
         }
+
+        /* === LABEL CARD (vertical stack) === */
         .label {
-            min-height: 240px;
             display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 16px;
+            flex-direction: column;
+            align-items: stretch;
+            padding: 12px 12px 28px 12px;
             background: white;
             border: 2px solid #1e293b;
-            border-radius: 16px;
+            border-radius: 14px;
             break-inside: avoid;
             position: relative;
             box-sizing: border-box;
@@ -88,54 +90,65 @@
             background: #f8fafc;
             opacity: 0.5;
         }
-        .label.unselected .qr {
-            opacity: 0.2;
+        .label.unselected .qr { opacity: 0.2; }
+
+        /* === QR BLOCK (top, full-width) === */
+        .qr-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 10px;
         }
         .qr {
-            width: 168px;
-            height: 168px;
+            width: 100%;
+            aspect-ratio: 1;
             display: flex;
             align-items: center;
             justify-content: center;
             border: 1px solid var(--border);
             border-radius: 10px;
             background: #fff;
-            flex-shrink: 0;
         }
-        .qr canvas { width: 160px !important; height: 160px !important; }
-        .brand {
-            font-size: 10px;
-            font-weight: 800;
-            color: var(--blue);
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
+        .qr canvas {
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
+        }
+
+        /* === INFO BLOCK (bottom) === */
+        .info-block {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            flex: 1;
         }
         .name {
-            margin-top: 4px;
-            font-size: 1.1rem;
+            font-size: 0.95rem;
             line-height: 1.25;
             font-weight: 900;
             color: #0f172a;
+            margin-bottom: 5px;
         }
         .meta {
-            margin-top: 6px;
             color: var(--muted);
-            font-size: 0.95rem;
-            line-height: 1.3;
+            font-size: 0.78rem;
+            line-height: 1.35;
+            margin-top: 2px;
         }
+        .meta strong { color: #0f172a; }
         .uid {
-            margin-top: 10px;
+            margin-top: 8px;
             display: inline-block;
-            padding: 4px 10px;
-            border-radius: 6px;
+            padding: 3px 9px;
+            border-radius: 5px;
             background: #0f172a;
             color: white;
             font-family: Consolas, monospace;
-            font-size: 0.95rem;
+            font-size: 0.78rem;
             font-weight: 800;
         }
         .type-badge {
-            margin-top: 8px;
             display: inline-block;
             color: #0369a1;
             background: #e0f2fe;
@@ -145,53 +158,54 @@
             font-size: 9px;
             font-weight: 800;
             text-transform: uppercase;
-            text-align: center;
-            width: 100%;
         }
         .url {
             position: absolute;
-            bottom: 8px;
-            left: 16px;
-            right: 16px;
-            font-size: 8.5px;
-            color: #64748b;
+            bottom: 6px;
+            left: 12px;
+            right: 12px;
+            font-size: 7.5px;
+            color: #94a3b8;
             overflow-wrap: anywhere;
-            border-top: 1px dashed #cbd5e1;
-            padding-top: 5px;
+            border-top: 1px dashed #e2e8f0;
+            padding-top: 4px;
             font-family: Consolas, monospace;
         }
-        
-        /* Non-printable element helper class */
+
         @media print {
             .no-print { display: none !important; }
         }
 
+        /* A4: 190mm × 277mm usable (margin 10mm)
+           2 cols × 2 rows, gap 8mm
+           → each label: 91mm × 134.5mm
+           → QR target: ~83mm
+        */
         @page { size: A4 portrait; margin: 10mm; }
         @media print {
-            body { background: white !important; padding: 0 !important; }
+            body { background: white !important; }
             .toolbar { display: none !important; }
             .sheet {
                 max-width: none !important;
                 width: 100% !important;
                 padding: 0 !important;
                 margin: 0 !important;
-                gap: 10mm !important;
+                gap: 8mm !important;
                 grid-template-columns: repeat(2, 1fr) !important;
             }
             .label {
-                height: 125mm !important;
-                border: 2px solid #000000 !important;
-                border-radius: 12px !important;
-                padding-bottom: 35px !important;
+                height: 134mm !important;
+                border: 1.5px solid #000 !important;
+                border-radius: 6px !important;
+                padding: 5mm 5mm 10mm 5mm !important;
                 page-break-inside: avoid !important;
             }
-            .label.unselected {
-                display: none !important;
-            }
-            .url {
-                bottom: 8px !important;
-                font-size: 8px !important;
-            }
+            .label.unselected { display: none !important; }
+            .qr-block { margin-bottom: 4mm !important; }
+            .name { font-size: 8pt !important; }
+            .meta { font-size: 7pt !important; }
+            .uid { font-size: 7pt !important; padding: 2px 6px !important; }
+            .url { font-size: 6pt !important; bottom: 4px !important; }
         }
     </style>
 </head>
@@ -250,34 +264,29 @@
                 label.className = "label";
                 label.id = `label-${pump.id}`;
                 label.innerHTML = `
-                    <div class="position-absolute top-0 end-0 p-3 no-print">
-                        <input type="checkbox" class="form-check-input card-checkbox" checked data-id="${pump.id}" onchange="toggleSelect(${pump.id})" style="transform: scale(1.6); cursor: pointer;">
+                    <div class="position-absolute top-0 end-0 p-2 no-print" style="z-index:2;">
+                        <input type="checkbox" class="form-check-input card-checkbox" checked data-id="${pump.id}" onchange="toggleSelect(${pump.id})" style="transform: scale(1.5); cursor: pointer;">
                     </div>
-                    
-                    <div class="d-flex flex-column align-items-center gap-2" style="width: 168px;">
+
+                    <div class="qr-block">
                         <div class="qr" id="qr-${idx}"></div>
                         <span class="type-badge">${pump.monitorOnly ? 'Chỉ giám sát' : 'Điều khiển'}</span>
                     </div>
-                    
-                    <div class="d-flex flex-column justify-content-between flex-grow-1" style="height: 168px; padding: 4px 0 10px 0;">
-                        <div>
-                            <div class="name">${escapeHtml(pump.name)}</div>
-                            <div class="meta"><i class="bi bi-droplet-fill text-primary me-1"></i>Nguồn: <strong>${escapeHtml(pump.source)}</strong></div>
-                            <div class="meta"><i class="bi bi-lightning-fill text-warning me-1"></i>Công suất: <strong>${escapeHtml(pump.flowRate)}</strong> m³/h</div>
-                            <div class="meta"><i class="bi bi-cpu text-info me-1"></i>NA111: <strong>${escapeHtml(pump.na111Id || 'N/A')}</strong></div>
-                            <div class="meta"><i class="bi bi-hdd-network text-success me-1"></i>Modbus ID: <strong>${escapeHtml(pump.modbusId || 'N/A')}</strong></div>
-                        </div>
-                        <div>
-                            <span class="uid">PUMP_${pump.id}</span>
-                        </div>
+
+                    <div class="info-block">
+                        <div class="name">${escapeHtml(pump.name)}</div>
+                        <div class="meta"><i class="bi bi-droplet-fill text-primary me-1"></i>Nguồn: <strong>${escapeHtml(pump.source)}</strong></div>
+                        <div class="meta"><i class="bi bi-lightning-fill text-warning me-1"></i>Công suất: <strong>${escapeHtml(pump.flowRate)}</strong> m³/h</div>
+                        <div class="meta"><i class="bi bi-cpu text-info me-1"></i>NA111: <strong>${escapeHtml(pump.na111Id || 'N/A')}</strong> &nbsp;|&nbsp; <i class="bi bi-hdd-network text-success me-1"></i>Modbus: <strong>${escapeHtml(pump.modbusId || 'N/A')}</strong></div>
+                        <span class="uid">PUMP_${pump.id}</span>
                     </div>
-                    
+
                     <div class="url">/checkbom/?pumpId=${pump.id}</div>
                 `;
                 sheet.appendChild(label);
 
                 QRCode.toCanvas(document.createElement("canvas"), targetUrl, {
-                    width: 160,
+                    width: 320,
                     margin: 1,
                     color: { dark: "#0f172a", light: "#ffffff" },
                 }, (err, canvas) => {
@@ -285,7 +294,12 @@
                     if (!target) return;
                     target.innerHTML = "";
                     if (err) target.textContent = "QR lỗi";
-                    else target.appendChild(canvas);
+                    else {
+                        canvas.style.width = "100%";
+                        canvas.style.height = "100%";
+                        canvas.style.display = "block";
+                        target.appendChild(canvas);
+                    }
                 });
             });
             updateSummary();
