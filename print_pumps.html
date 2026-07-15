@@ -67,28 +67,28 @@
             margin: 0 auto;
         }
         .label {
-            min-height: 178px;
+            min-height: 200px;
             display: grid;
-            grid-template-columns: 108px 1fr;
-            gap: 10px;
-            padding: 10px;
+            grid-template-columns: 140px 1fr;
+            gap: 12px;
+            padding: 12px;
             background: white;
-            border: 1.5px solid #1e293b;
-            border-radius: 8px;
+            border: 2px solid #1e293b;
+            border-radius: 12px;
             break-inside: avoid;
             position: relative;
         }
         .qr {
-            width: 104px;
-            height: 104px;
+            width: 136px;
+            height: 136px;
             display: flex;
             align-items: center;
             justify-content: center;
             border: 1px solid var(--border);
-            border-radius: 6px;
+            border-radius: 8px;
             background: #fff;
         }
-        .qr canvas { width: 96px !important; height: 96px !important; }
+        .qr canvas { width: 128px !important; height: 128px !important; }
         .brand {
             font-size: 10px;
             font-weight: 800;
@@ -216,12 +216,12 @@
                         <div class="meta">Công suất: ${escapeHtml(pump.flowRate)} m³/h</div>
                         <span class="uid">PUMP_${pump.id}</span>
                     </div>
-                    <div class="url">${escapeHtml(targetUrl)}</div>
+                    <div class="url">/checkbom/?pumpId=${pump.id}</div>
                 `;
                 sheet.appendChild(label);
 
                 QRCode.toCanvas(document.createElement("canvas"), targetUrl, {
-                    width: 96,
+                    width: 128,
                     margin: 1,
                     color: { dark: "#0f172a", light: "#ffffff" },
                 }, (err, canvas) => {
@@ -244,7 +244,7 @@
             }[ch]));
         }
 
-        renderLabels();
+        window.addEventListener("load", renderLabels);
     </script>
 </body>
 </html>
