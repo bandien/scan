@@ -354,11 +354,19 @@
         <form id="checkForm" onsubmit="handleFormSubmit(event)">
             <!-- Select Pump Card -->
             <div class="card-custom" id="pumpSelectCard">
-                <div class="mb-3">
+                <!-- Dropdown selector (shown/hidden by admin settings) -->
+                <div class="mb-3" id="pumpSelectWrapper">
                     <label for="pumpSelect" class="info-label"><i class="bi bi-water text-primary me-1"></i>Chọn máy bơm kiểm tra <span class="text-danger">*</span></label>
                     <select id="pumpSelect" class="form-select form-control-custom" onchange="onPumpChange()" required>
                         <!-- Injected dynamically -->
                     </select>
+                </div>
+                <!-- Read-only display (shown when dropdown selector is hidden) -->
+                <div class="mb-3" id="pumpReadOnlyNameWrapper" style="display: none;">
+                    <label class="info-label"><i class="bi bi-water text-primary me-1"></i>Máy bơm kiểm tra</label>
+                    <div class="form-control form-control-custom bg-light border-0 fw-bold text-dark" id="pumpReadOnlyName" style="padding: 14px 18px;">
+                        --
+                    </div>
                 </div>
                 <div class="d-flex justify-content-between align-items-center mt-2 flex-wrap gap-2">
                     <div class="text-muted small fw-medium" id="pumpDetailsText">
@@ -653,30 +661,43 @@
         }
     }
 
+    function applyPumpSelectVisibility(showSelect) {
+        const selectWrapper = document.getElementById('pumpSelectWrapper');
+        const readOnlyWrapper = document.getElementById('pumpReadOnlyNameWrapper');
+        const select = document.getElementById('pumpSelect');
+        const readOnlyName = document.getElementById('pumpReadOnlyName');
+        
+        if (showSelect) {
+            if (selectWrapper) selectWrapper.style.display = 'block';
+            if (readOnlyWrapper) readOnlyWrapper.style.display = 'none';
+        } else {
+            if (selectWrapper) selectWrapper.style.display = 'none';
+            if (readOnlyWrapper) readOnlyWrapper.style.display = 'block';
+            
+            // Set the read-only name based on currently selected option
+            if (select && select.options[select.selectedIndex]) {
+                readOnlyName.textContent = select.options[select.selectedIndex].textContent;
+            } else if (currentSelectedPump) {
+                readOnlyName.textContent = `${currentSelectedPump.id}. ${currentSelectedPump.name}`;
+            }
+        }
+    }
+
     function initAdminSettings() {
         checkAdminAccess();
         
         const checkbox = document.getElementById('togglePumpSelectCheckbox');
-        const selectCard = document.getElementById('pumpSelectCard');
         
         // Load saved setting
         const savedSetting = localStorage.getItem('bds_show_pump_select');
         const showSelect = savedSetting === null ? true : savedSetting === 'true';
         
         checkbox.checked = showSelect;
-        if (showSelect) {
-            selectCard.style.display = 'block';
-        } else {
-            selectCard.style.display = 'none';
-        }
+        applyPumpSelectVisibility(showSelect);
         
         checkbox.addEventListener('change', function() {
             localStorage.setItem('bds_show_pump_select', this.checked);
-            if (this.checked) {
-                selectCard.style.display = 'block';
-            } else {
-                selectCard.style.display = 'none';
-            }
+            applyPumpSelectVisibility(this.checked);
         });
         
         // Toggle Admin Settings panel visibility
@@ -769,6 +790,12 @@
         if (pump) {
             document.getElementById('pumpDetailsText').innerHTML = 
                 `<i class="bi bi-droplet-fill text-primary me-1"></i>Nguồn: <strong>${pump.source}</strong> | <i class="bi bi-lightning-fill text-warning me-1"></i>Công suất: <strong>${pump.flowRate || '--'}</strong> m³/h`;
+            
+            // Cập nhật tên hiển thị read-only
+            const readOnlyName = document.getElementById('pumpReadOnlyName');
+            if (readOnlyName) {
+                readOnlyName.textContent = `${pump.id}. ${pump.name}`;
+            }
             
             // Cập nhật link đổi tên & hẹn giờ
             const editLink = document.getElementById('editPumpLink');
