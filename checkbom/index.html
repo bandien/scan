@@ -358,7 +358,7 @@
             <!-- Integrated Pump Control Card -->
             <div class="card-custom" id="pumpControlCard" style="display: none;">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <label class="info-label mb-0"><i class="bi bi-cpu-fill text-success me-1"></i>Giám sát & Điều khiển nhanh</label>
+                    <label class="info-label mb-0" id="pumpControlCardTitle"><i class="bi bi-cpu-fill text-success me-1"></i>Giám sát & Điều khiển nhanh</label>
                     <div id="statusBadgeContainer">
                         <!-- Dynamic Badge -->
                     </div>
@@ -551,6 +551,10 @@
     let currentStatus = "STOPPED";
     let lastEvent = null;
     let timerInterval = null;
+
+    // Check if URL parameters specify monitorOnly or readOnly
+    const urlParams = new URLSearchParams(window.location.search);
+    const isMonitorOnly = urlParams.get('monitorOnly') === 'true' || urlParams.get('readOnly') === 'true';
 
     // Font Scaling
     const FONT_SCALES = [100, 115, 130];
@@ -1029,21 +1033,35 @@
         const btnContainer = document.getElementById('actionButtonContainer');
         const timerContainer = document.getElementById('timerContainer');
 
+        if (isMonitorOnly) {
+            document.getElementById('pumpControlCardTitle').innerHTML = `<i class="bi bi-display text-info me-1"></i>Giám sát trạng thái bơm`;
+        }
+
         if (currentStatus === 'RUNNING') {
             statusContainer.innerHTML = `<span class="badge-status badge-running"><span class="spinner-grow spinner-grow-sm text-success" role="status"></span> ĐANG CHẠY</span>`;
-            btnContainer.innerHTML = `
-                <button type="button" class="btn-action-stop" onclick="submitAction('STOP')">
-                    <i class="bi bi-power fs-5"></i> 🛑 TẮT MÁY BƠM (XÁC NHẬN)
-                </button>`;
+            
+            if (isMonitorOnly) {
+                btnContainer.innerHTML = `<div class="text-center text-muted small py-2 fw-medium border-top mt-2"><i class="bi bi-shield-lock-fill me-1"></i>Chế độ chỉ giám sát (Không thể điều khiển)</div>`;
+            } else {
+                btnContainer.innerHTML = `
+                    <button type="button" class="btn-action-stop" onclick="submitAction('STOP')">
+                        <i class="bi bi-power fs-5"></i> 🛑 TẮT MÁY BƠM (XÁC NHẬN)
+                    </button>`;
+            }
             
             timerContainer.style.display = 'block';
             startTimer(lastEvent ? lastEvent.timestamp : new Date());
         } else {
             statusContainer.innerHTML = `<span class="badge-status badge-stopped"><i class="bi bi-pause-circle-fill"></i> ĐANG DỪNG</span>`;
-            btnContainer.innerHTML = `
-                <button type="button" class="btn-action-start" onclick="submitAction('START')">
-                    <i class="bi bi-rocket-takeoff-fill fs-5"></i> 🚀 BẮT ĐẦU BẬT MÁY BƠM
-                </button>`;
+            
+            if (isMonitorOnly) {
+                btnContainer.innerHTML = `<div class="text-center text-muted small py-2 fw-medium border-top mt-2"><i class="bi bi-shield-lock-fill me-1"></i>Chế độ chỉ giám sát (Không thể điều khiển)</div>`;
+            } else {
+                btnContainer.innerHTML = `
+                    <button type="button" class="btn-action-start" onclick="submitAction('START')">
+                        <i class="bi bi-rocket-takeoff-fill fs-5"></i> 🚀 BẮT ĐẦU BẬT MÁY BƠM
+                    </button>`;
+            }
             
             timerContainer.style.display = 'none';
             if (timerInterval) clearInterval(timerInterval);
