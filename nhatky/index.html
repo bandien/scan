@@ -1903,10 +1903,10 @@
 
             <div class="field">
               <label class="field-lb" for="teams">Việc của tổ nào</label>
+              <!-- Danh sách tổ do refreshTeamOptions() đổ từ SUPPORTED_TEAMS —
+                   một nguồn duy nhất, không hardcode lặp ở đây -->
               <select class="form-select" id="teams" required>
                 <option value="">— Chọn tổ thực hiện —</option>
-                <option>Tổ cơ điện</option>
-                <option>Tổ điện nước</option>
               </select>
             </div>
 
@@ -3348,8 +3348,14 @@
       const select = document.getElementById("teams");
       if (!select) return;
       const options = allowedTeams();
-      select.innerHTML = '<option value="">— Chọn tổ thực hiện —</option>' + options.map(team => `<option>${escapeHtml(team)}</option>`).join("");
-      select.value = selected && options.includes(selected) ? selected : (options.length === 1 ? options[0] : "");
+      // Kế hoạch thuộc tổ ngoài danh sách tổ của người ghi: vẫn thêm tổ đó vào
+      // dropdown và chọn sẵn — trước đây bị prefill rỗng lặng lẽ, nhật ký mất
+      // thông tin tổ của kế hoạch mà người ghi không hay biết.
+      const extra = selected && !options.includes(selected) ? [selected] : [];
+      select.innerHTML = '<option value="">— Chọn tổ thực hiện —</option>'
+        + options.map(team => `<option>${escapeHtml(team)}</option>`).join("")
+        + extra.map(team => `<option>${escapeHtml(team)}</option>`).join("");
+      select.value = selected ? selected : (options.length === 1 ? options[0] : "");
     }
 
     // Không có tài khoản, hoặc tài khoản chưa được phân nhóm tổ → chưa cho xem nhật ký/kế hoạch
