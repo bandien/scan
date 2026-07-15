@@ -3728,29 +3728,32 @@
     function renderDayLogSummary(visible, selectedDate) {
       const summary = document.getElementById("dayLogSummary");
       if (!summary) return;
-      const active = visible.filter(plan => plan.status !== "Hoàn thành");
-      if (active.length === 0) {
+      // Đếm trên TOÀN BỘ việc thuộc ngày (kể cả đã hoàn thành) để tiến độ chỉ tăng
+      // dần lên 100%; trước đây việc hoàn thành rời khỏi cả tử lẫn mẫu số nên thanh
+      // tiến độ tụt ngược khi làm xong việc và biến mất hẳn khi xong hết.
+      if (visible.length === 0) {
         summary.style.display = "none";
         return;
       }
       summary.style.display = "flex";
-      const complete = active.filter(plan => {
+      const complete = visible.filter(plan => {
+        if (plan.status === "Hoàn thành") return true;
         const coverage = planLogCoverage(plan, selectedDate);
         return coverage.done >= coverage.total;
       }).length;
-      const missing = active.length - complete;
-      const percent = active.length ? Math.round((complete / active.length) * 100) : 0;
+      const missing = visible.length - complete;
+      const percent = Math.round((complete / visible.length) * 100);
       summary.className = "day-log-summary vikunja-day-progress";
       summary.innerHTML = `
         <div class="vikunja-day-progress-head">
           <strong>Tiến độ nhật ký ${shortDateVn(selectedDate)}</strong>
-          <span>${complete}/${active.length} việc</span>
+          <span>${complete}/${visible.length} việc</span>
         </div>
         <div class="vikunja-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}" aria-label="Tiến độ ghi nhật ký">
           <span class="vikunja-progress-value" style="width:${percent}%"></span>
         </div>
         <div class="vikunja-progress-note ${missing ? "attention" : ""}">
-          ${missing ? `Còn ${missing} việc chưa ghi đủ nhật ký.` : "Đã ghi đủ nhật ký cho các việc đang theo dõi."}
+          ${missing ? `Còn ${missing} việc chưa ghi đủ nhật ký.` : "Đã ghi đủ nhật ký cho mọi việc trong ngày ✓"}
         </div>
       `;
     }
@@ -3774,6 +3777,18 @@
       return plan.status === "Cần hỗ trợ" || isCarryOver(plan, selectedDate);
     }
 
+    // Việc đã hoàn thành vẫn thuộc về ngày trong khung lịch của nó (nhắc → deadline).
+    // Không có điều kiện này thì việc vừa đánh dấu xong biến mất khỏi danh sách ngày,
+    // làm mục "Đã hoàn thành", chip lọc "Xong", ô "Đã xong" (màn Cá nhân) và thanh
+    // tiến độ nhật ký đều rỗng/tụt ngược.
+    function isDoneOnDate(plan, iso) {
+      return Boolean(iso && plan.status === "Hoàn thành" && planReminder(plan) <= iso && iso <= planDeadline(plan));
+    }
+
+    function isPlanOfDate(plan, iso) {
+      return isDueForReview(plan, iso) || isCarryOver(plan, iso) || isDoneOnDate(plan, iso);
+    }
+
     function getVisiblePlans(mode) {
       mode = mode || "day";
       const date = document.getElementById("filterDate").value;
@@ -3795,9 +3810,9 @@
       }
 
       return plans.filter(plan => {
-        const byDate = !date || isDueForReview(plan, date);
-        // Chỉ hiện lại vào ngày nhắc/xem lại; việc quá deadline cuối vẫn cảnh báo tồn
-        return (byDate || isCarryOver(plan, date)) && matchesFilters(plan);
+        // Chỉ hiện lại vào ngày nhắc/xem lại; việc quá deadline cuối vẫn cảnh báo tồn;
+        // việc đã xong vẫn hiện trong khung ngày của nó (xem isPlanOfDate)
+        return (!date || isPlanOfDate(plan, date)) && matchesFilters(plan);
       });
     }
 
@@ -4689,7 +4704,7 @@
       const role = currentRole();
       const shift = defaultShift();
       const shiftRange = SHIFT_RANGES[shift] || "";
-      const todays = plans.filter(plan => isDueForReview(plan, today) || isCarryOver(plan, today));
+      const todays = plans.filter(plan => isPlanOfDate(plan, today));
       const doneCount = todays.filter(p => p.status === "Hoàn thành").length;
       const attnCount = todays.filter(p => isAttentionPlan(p, today)).length;
       const scale = parseInt(localStorage.getItem(STORAGE_KEYS.fontScale) || "100", 10);
