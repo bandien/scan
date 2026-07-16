@@ -14,6 +14,30 @@ updated: 2026-06-08
 
 Tất cả các thay đổi và cải tiến của hệ thống Quản lý & Bảo trì Ban điện thông minh (CMMS Mini WebApp) được ghi nhận tại đây theo từng phiên bản.
 
+## [v2.11.0] - 2026-07-16
+### Thêm mới (Added)
+- **PWA — cài ứng dụng ra màn hình chính, dùng được khi sóng yếu ngoài sân golf**: thêm `manifest.json`, `sw.js` (Service Worker) và `js/pwa.js`, áp dụng cho 8 trang tác nghiệp (`index.html`, `pump_info.html`, `meter.html`, `sangolf/`, `phanca/`, `hengio/`, `phongvan/`, `nhatky/`).
+  - Chiến lược cache: API GAS (`script.google.com`) không bao giờ cache — dữ liệu vận hành luôn phải mới nhất; trang & tài nguyên cùng gốc (HTML, `css/`, `js/`) dùng network-first (ưu tiên bản mới, rơi về cache khi mất mạng); thư viện CDN (Bootstrap, icon, font — URL đã ghim version) dùng cache-first.
+  - Menu tiện ích (`js/bottomnav.js`) thêm mục "Cài đặt ứng dụng" gọi prompt cài đặt native của trình duyệt; tự động hướng dẫn thao tác tay cho trình duyệt không hỗ trợ (Safari iOS).
+  - Icon ứng dụng mới (`icons/`, `favicon.ico`) theo màu thương hiệu hiện có (#059669).
+  - Không đổi giao diện/thương hiệu riêng của `nhatky/index.html` (theme xanh dương #0e6efd, icon "BD" sẵn có) — chỉ bổ sung khả năng cài đặt/offline.
+
+## [v2.10.1] - 2026-07-16
+### Sửa lỗi (Fixed)
+- **`meter.html` viết lại toàn bộ** — trước đây gửi kiểu `no-cors` "bắn rồi quên": luôn báo thành công kể cả khi mất mạng/backend lỗi, không có hàng đợi offline, danh mục 22 đồng hồ hardcode trong file, trỏ vào deployment GAS cũ.
+  - Chuyển sang `js/config.js` + `js/api.js` dùng chung (retry tự động, phát hiện cold-start).
+  - Đọc danh mục đồng hồ từ API `getMeterPoints` (cache localStorage, chọn qua dropdown nhóm Điện/Nước hoặc nhập tay UID) thay vì hardcode.
+  - Hàng đợi offline giống `pump_info.html`: mỗi lượt chốt chỉ số lưu localStorage trước, đồng bộ ngầm khi có mạng, có badge trạng thái Đang gửi/Chờ gửi/Đã đồng bộ.
+  - Thêm lịch sử chốt chỉ số gần đây (API `getMeterHistory`) và bottom-nav.
+- **`checkbom/` chuyển thành trang chuyển hướng** sang `pump_info.html` (giữ nguyên `pumpId`/`id` trên URL) — tránh 2 giao diện cùng ghi 1 loại dữ liệu sau khi đã gộp chức năng từ v2.9.0.
+
+### Cập nhật (Updated)
+- **Tên người thực hiện dùng 1 nguồn duy nhất**: thêm `BD_SSO.getOperatorName()`/`setOperatorName()` vào `js/sso.js` (ưu tiên tài khoản đăng nhập → PIN nhatky → tên gõ tay), áp dụng cho `pump_info.html`, `meter.html`, `sangolf/`. Trước đây mỗi trang tự đọc key khác nhau nên cùng 1 người có thể ra nhiều tên khác nhau trong dữ liệu.
+- **`phanca/` chuyển sang `js/api.js` dùng chung** thay vì tự viết `fetch` trần — có retry + phát hiện cold-start khi GAS khởi động chậm sáng sớm.
+- **Gộp nút phóng to chữ (A/A+/A++) vào `js/fontscale.js` dùng chung**, áp dụng cho `index.html`, `pump_info.html`, `meter.html`, `phanca/`, `hengio/`, thêm mới cho `sangolf/`. Phát hiện `phanca/` và `hengio/` trước đó dùng key localStorage riêng (`bandien_phanca_fontscale`, `bandien_hengio_fontscale`) không đồng bộ với phần còn lại của app — nay dùng chung 1 key.
+- **Hiện số phiên bản ở menu mọi trang vệ tinh** (`js/bottomnav.js`) — trước đây chỉ `index.html` biết đang chạy bản nào.
+- Thêm link **Checklist Cơ Điện Sân Golf** vào menu chính `index.html` (trước đó chỉ có trong menu các trang vệ tinh).
+
 ## [v2.10.0] - 2026-07-16
 ### Thêm mới (Added)
 - **Checklist Cơ Điện Sân Golf (`sangolf/index.html` + `19_GolfChecklist.gs`):** số hóa sổ vận hành giấy `ChecklistCoDienSanGolf.xlsx` cho Tổ Cơ Điện Sân Golf Kỳ Sơn Montana.

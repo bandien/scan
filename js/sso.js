@@ -73,6 +73,21 @@
     return Boolean(getUser());
   }
 
+  // Nguồn tên người thực hiện duy nhất cho các trang ghi dữ liệu tại hiện
+  // trường (pump_info, meter, sangolf...). Thứ tự ưu tiên: tài khoản đăng
+  // nhập chính > tài khoản PIN nhatky > tên gõ tay lần trước (cmms_op_name).
+  // Trước đây mỗi trang tự đọc 1 trong 3 nguồn này riêng lẻ nên cùng một
+  // người có thể xuất hiện dưới nhiều tên khác nhau trong dữ liệu.
+  function getOperatorName() {
+    var user = getUser();
+    if (user) return user.fullName || user.name || user.username || '';
+    return localStorage.getItem('cmms_op_name') || '';
+  }
+
+  function setOperatorName(name) {
+    if (name) localStorage.setItem('cmms_op_name', name);
+  }
+
   function requireLogin(redirectUrl) {
     var user = getUser();
     if (user) return user;
@@ -135,6 +150,8 @@
     logout: logout,
     pendingSyncCount: pendingSyncCount,
     markSynced: markSynced,
-    lastSync: lastSync
+    lastSync: lastSync,
+    getOperatorName: getOperatorName,
+    setOperatorName: setOperatorName
   };
 })();

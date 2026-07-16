@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checklist Cơ Điện Sân Golf | BanDienScan</title>
+    <link rel="manifest" href="../manifest.json">
+    <meta name="theme-color" content="#059669">
+    <link rel="icon" href="../favicon.ico">
+    <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -165,6 +169,7 @@
                 <div class="app-title"><i class="bi bi-flag-fill text-success me-1"></i>Checklist Cơ Điện Sân Golf</div>
                 <div class="app-sub">Tổ Cơ Điện · Sân Golf Kỳ Sơn Montana</div>
             </div>
+            <button type="button" class="bds-btn-icon fw-bold me-2" id="btnFontScale" title="Phóng to chữ"><span id="fontScaleLabel">A</span></button>
             <span id="syncIndicator" class="sync-dot sync-ok" title="Đã đồng bộ"></span>
         </div>
 
@@ -238,6 +243,8 @@
 <script src="../js/config.js"></script>
 <script src="../js/api.js"></script>
 <script src="../js/sso.js"></script>
+<script src="../js/fontscale.js"></script>
+<script src="../js/pwa.js" data-root="../"></script>
 <script>
 // =============================================================================
 // sangolf — Checklist Cơ Điện Sân Golf (local-first, autosave)
@@ -245,7 +252,6 @@
 // =============================================================================
 
 const LS_TEMPLATES = 'golf_templates_v1';
-const LS_OPERATOR  = 'cmms_op_name';           // dùng chung key với checkbom
 const LS_RUN_PREFIX = 'golf_run_';             // + runId → draft local
 
 const TEMPLATE_ORDER = ['ca_sang', 'ca_toi', 'tuan', 'thang'];
@@ -261,10 +267,9 @@ const $ = id => document.getElementById(id);
 const todayStr = () => new Date().toLocaleDateString('sv-SE'); // yyyy-MM-dd giờ địa phương
 const esc = s => { const d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; };
 
+// Nguồn tên người thực hiện dùng chung toàn hệ thống (js/sso.js).
 function getOperator() {
-    const u = window.BD_SSO && BD_SSO.getUser();
-    if (u) return u.fullName || u.name || u.username || '';
-    return localStorage.getItem(LS_OPERATOR) || '';
+    return window.BD_SSO ? BD_SSO.getOperatorName() : '';
 }
 
 function selectedDate() { return $('datePicker').value || todayStr(); }
@@ -779,10 +784,11 @@ function shiftDate(days) {
 document.addEventListener('DOMContentLoaded', () => {
     $('datePicker').value = todayStr();
     $('operatorInput').value = getOperator();
-    $('operatorInput').addEventListener('input', e => localStorage.setItem(LS_OPERATOR, e.target.value.trim()));
+    $('operatorInput').addEventListener('input', e => BD_SSO.setOperatorName(e.target.value.trim()));
     loadTemplates();
     loadRuns();
 });
 </script>
+<script src="../js/bottomnav.js" data-root="../"></script>
 </body>
 </html>

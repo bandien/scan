@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thông tin & Check Vận Hành Bơm | BanDienScan</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#059669">
+    <link rel="icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -11,6 +15,9 @@
     <script src="https://unpkg.com/html5-qrcode" defer></script>
     <script src="js/config.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/sso.js"></script>
+    <script src="js/fontscale.js"></script>
+    <script src="js/pwa.js" data-root="./"></script>
     <style>
         body { background: var(--siu-bg); color: var(--siu-on-surface); font-family: var(--bds-font); min-height: 100vh; padding-bottom: 40px; }
         .app-shell { max-width: 460px; margin: 0 auto; padding: 16px; }
@@ -415,17 +422,10 @@
         setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 400); }, 3000);
     }
 
+    // Nguồn tên người thực hiện dùng chung toàn hệ thống (js/sso.js) — ưu tiên
+    // tài khoản đăng nhập, sau đó PIN nhatky, cuối cùng tên gõ tay lần trước.
     function getLoggedInUser() {
-        try {
-            const raw = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
-            if (raw) {
-                const user = JSON.parse(raw);
-                return user.fullName || user.name || user.username || '';
-            }
-        } catch (e) {
-            console.error('Lỗi lấy thông tin đăng nhập:', e);
-        }
-        return '';
+        return window.BD_SSO ? BD_SSO.getOperatorName() : '';
     }
 
     function resetToCurrentTime() {
@@ -704,7 +704,7 @@
         const customTimeVal = document.getElementById('eventTimeInput').value;
 
         if (!operator) { showToast('Vui lòng nhập tên người vận hành', 'warning'); return; }
-        localStorage.setItem('cmms_op_name', operator);
+        BD_SSO.setOperatorName(operator);
 
         const selectedDate = customTimeVal ? new Date(customTimeVal) : new Date();
         const timestampIso = selectedDate.toISOString();
@@ -756,7 +756,7 @@
         }
         if (!status) { showToast('Vui lòng chọn trạng thái vận hành thực tế', 'warning'); return; }
 
-        localStorage.setItem('cmms_op_name', operator);
+        BD_SSO.setOperatorName(operator);
 
         const btnSubmit = document.getElementById('btnSubmitCheck');
         btnSubmit.disabled = true;
@@ -918,39 +918,13 @@
         return String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[ch]));
     }
 
-    // ===== Phóng to chữ toàn trang — dùng chung key với màn Cá nhân (nhatky) và
-    // index.html nên cỡ chữ chọn ở trang nào cũng áp dụng đồng bộ mọi trang khác. =====
-    const FONT_SCALE_KEY = 'bandien_nhatky_fontscale';
-    const FONT_SCALES = [100, 115, 130];
-    function applyFontScale() {
-        const scale = parseInt(localStorage.getItem(FONT_SCALE_KEY) || '100', 10);
-        document.documentElement.style.fontSize = scale + '%';
-        const label = document.getElementById('fontScaleLabel');
-        if (label) label.textContent = scale <= 100 ? 'A' : scale <= 115 ? 'A+' : 'A++';
-    }
-    function cycleFontScale() {
-        const current = parseInt(localStorage.getItem(FONT_SCALE_KEY) || '100', 10);
-        const next = FONT_SCALES[(FONT_SCALES.indexOf(current) + 1) % FONT_SCALES.length];
-        localStorage.setItem(FONT_SCALE_KEY, String(next));
-        applyFontScale();
-    }
-
     window.addEventListener('load', async () => {
-        applyFontScale();
-        document.getElementById('btnFontScale').addEventListener('click', cycleFontScale);
-
         await loadServerPumps();
         loadServerTimerSettings();
 
         const urlParams = new URLSearchParams(window.location.search);
         const startId = urlParams.get('pumpId') || urlParams.get('id');
-        const loggedInUser = getLoggedInUser();
-        if (loggedInUser) {
-            document.getElementById('operatorInput').value = loggedInUser;
-        } else {
-            const savedOp = localStorage.getItem('cmms_op_name');
-            if (savedOp) document.getElementById('operatorInput').value = savedOp;
-        }
+        document.getElementById('operatorInput').value = getLoggedInUser();
         resetToCurrentTime();
         if (startId) loadPump(extractPumpId(startId));
 
