@@ -1240,6 +1240,19 @@
       color: var(--ink);
     }
     .task-more-menu .dropdown-divider { border-color: var(--line); }
+
+    /* ===== Màn "Hôm nay ai làm gì" ===== */
+    .people-group { margin-bottom: 12px; }
+    .people-rows { display: flex; flex-direction: column; }
+    .people-row {
+      display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+      background: none; border: 0; border-top: 1px solid var(--line);
+      padding: 10px 14px; cursor: pointer;
+    }
+    .people-row:active { background: var(--surface-high); }
+    .people-row .badge-soft { margin-left: auto; flex-shrink: 0; font-size: .8rem; padding: 4px 10px; }
+    .people-row-task { font-weight: 700; color: var(--ink); font-size: .96rem; line-height: 1.3; }
+    .people-row-meta { color: var(--muted); font-size: .82rem; margin-top: 2px; }
     .a11y-chip,
     .qc,
     .link-button {
@@ -1866,6 +1879,7 @@
             <div class="dropdown">
               <button class="task-toolbar-button" type="button" id="btnTaskMore" data-bs-toggle="dropdown" aria-expanded="false" title="Thao tác khác" aria-label="Thao tác khác"><i class="bi bi-three-dots-vertical"></i></button>
               <ul class="dropdown-menu dropdown-menu-end task-more-menu" aria-labelledby="btnTaskMore">
+                <li><button class="dropdown-item" id="btnViewPeople" type="button"><i class="bi bi-people"></i>Hôm nay ai làm gì</button></li>
                 <li><button class="dropdown-item" id="btnViewWeek" type="button"><i class="bi bi-calendar-week"></i>Lịch tuần</button></li>
                 <li><button class="dropdown-item" id="btnReload" type="button"><i class="bi bi-arrow-clockwise"></i>Nạp lại dữ liệu</button></li>
                 <li><hr class="dropdown-divider"></li>
@@ -2008,6 +2022,9 @@
 
       <!-- Màn phụ: Tuần -->
       <section class="screen" data-screen="week" id="screen-week"></section>
+
+      <!-- Màn phụ: Hôm nay ai làm gì -->
+      <section class="screen" data-screen="people" id="screen-people"></section>
 
       <!-- Màn phụ: Thống kê cả tổ -->
       <section class="screen" data-screen="stats" id="screen-stats"></section>
@@ -2506,6 +2523,7 @@
       else if (screen === "logentry") renderLogEntry(params);
       else if (screen === "loghistory") renderLogHistory(params.planId);
       else if (screen === "week") renderWeekScreen();
+      else if (screen === "people") renderPeopleScreen();
       else if (screen === "stats") renderStatsScreen();
       else if (screen === "personal") renderPersonalScreen();
       else if (screen === "usermanagement") renderUserManagementScreen();
@@ -2618,6 +2636,7 @@
         return plan ? `Nhật ký: ${escapeHtml(plan.task || "")}` : "Nhật ký gần đây";
       }
       if (screen === "week") return "Lịch tuần này";
+      if (screen === "people") return selectedTaskDate() === today ? "Hôm nay ai làm gì" : `Ai làm gì ngày ${shortDateVn(selectedTaskDate())}`;
       if (screen === "stats") return "Báo cáo tổ";
       if (screen === "usermanagement") return "Quản lý người dùng";
       return "Nhật ký công việc";
@@ -2789,6 +2808,7 @@
         renderPlans();
       });
       document.getElementById("btnViewWeek").addEventListener("click", () => navigateTo("week", {}));
+      document.getElementById("btnViewPeople").addEventListener("click", () => navigateTo("people", {}));
       document.getElementById("btnReload").addEventListener("click", async () => {
         const btn = document.getElementById("btnReload");
         btn.disabled = true;
@@ -4683,6 +4703,102 @@
           <table class="week-table"><tbody>${body}</tbody></table>
         </div>
       `;
+    }
+
+    // ===== Màn "Hôm nay ai làm gì" =====
+    // Nhóm việc trong ngày theo từng người thực hiện. Phân biệt rõ 2 loại "đang
+    // làm": việc đang làm TRONG NGÀY (badge xanh "Đang làm hôm nay") và việc TỒN
+    // kéo dài nhiều ngày — quá deadline chưa xong (badge vàng "Tồn N ngày").
+    function daysLate(plan, iso) {
+      const ms = new Date(iso + "T00:00:00") - new Date(planDeadline(plan) + "T00:00:00");
+      return Math.max(1, Math.round(ms / 86400000));
+    }
+
+    function peoplePlanChip(plan, iso) {
+      if (plan.status === "Hoàn thành") return '<span class="badge-soft badge-done">Hoàn thành</span>';
+      if (plan.status === "Cần hỗ trợ") return '<span class="badge-soft badge-high">Cần hỗ trợ</span>';
+      if (isCarryOver(plan, iso)) return `<span class="badge-soft badge-mid">Tồn ${daysLate(plan, iso)} ngày</span>`;
+      if (plan.status === "Đang làm") return '<span class="badge-soft badge-doing">Đang làm hôm nay</span>';
+      return '<span class="badge-soft badge-open">Chưa bắt đầu</span>';
+    }
+
+    // Thứ tự hàng trong nhóm: cần chú ý trước, rồi đang làm, chưa bắt đầu, xong cuối
+    function peoplePlanOrder(plan, iso) {
+      if (plan.status === "Cần hỗ trợ") return 0;
+      if (isCarryOver(plan, iso)) return 1;
+      if (plan.status === "Đang làm") return 2;
+      if (plan.status !== "Hoàn thành") return 3;
+      return 4;
+    }
+
+    const PEOPLE_UNASSIGNED = "— Chưa phân công —";
+
+    function renderPeopleScreen() {
+      const container = document.getElementById("screen-people");
+      const iso = selectedTaskDate();
+      const visible = getVisiblePlans("day");
+
+      const buckets = new Map();
+      visible.forEach(plan => {
+        const people = splitAssignees(plan.assignee);
+        (people.length ? people : [PEOPLE_UNASSIGNED]).forEach(name => {
+          const key = normalizePerson(name);
+          if (!buckets.has(key)) buckets.set(key, { name, items: [] });
+          buckets.get(key).items.push(plan);
+        });
+      });
+
+      if (buckets.size === 0) {
+        container.innerHTML = '<div class="scroll"><div class="empty-state">Không có việc nào trong ngày này.</div></div>';
+        return;
+      }
+
+      const hasAttention = group => group.items.some(plan => plan.status === "Cần hỗ trợ" || isCarryOver(plan, iso));
+      const groups = [...buckets.values()].sort((a, b) => {
+        const attnDiff = (hasAttention(a) ? 0 : 1) - (hasAttention(b) ? 0 : 1);
+        if (attnDiff) return attnDiff;
+        if (a.name === PEOPLE_UNASSIGNED) return 1;
+        if (b.name === PEOPLE_UNASSIGNED) return -1;
+        return a.name.localeCompare(b.name, "vi");
+      });
+
+      const html = groups.map(group => {
+        const doneCount = group.items.filter(plan => plan.status === "Hoàn thành").length;
+        const carryCount = group.items.filter(plan => plan.status !== "Hoàn thành" && isCarryOver(plan, iso)).length;
+        const summary = [`${group.items.length} việc`, doneCount ? `${doneCount} xong` : "", carryCount ? `${carryCount} tồn` : ""].filter(Boolean).join(" · ");
+        const rows = group.items
+          .slice()
+          .sort((a, b) => peoplePlanOrder(a, iso) - peoplePlanOrder(b, iso) || (a.time || "").localeCompare(b.time || ""))
+          .map(plan => {
+            const entries = planLogsForDate(plan, iso);
+            const logged = group.name === PEOPLE_UNASSIGNED
+              ? entries.length > 0
+              : entries.some(log => normalizePerson(log.employee) === normalizePerson(group.name));
+            const where = [plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ");
+            return `
+              <button class="people-row" type="button" onclick="openTaskDetail('${escapeAttr(plan.id)}')">
+                <div class="min-w-0">
+                  <div class="people-row-task">${escapeHtml(plan.task || "Chưa đặt tên công việc")}</div>
+                  <div class="people-row-meta">${plan.time ? escapeHtml(plan.time) + (where ? " · " : "") : ""}${where}${logged ? ' · <span class="text-success fw-bold"><i class="bi bi-journal-check"></i> đã ghi NK</span>' : ""}</div>
+                </div>
+                ${peoplePlanChip(plan, iso)}
+              </button>`;
+          }).join("");
+        return `
+          <div class="panel people-group">
+            <div class="panel-header d-flex align-items-center justify-content-between gap-2">
+              <h3 class="h6 m-0 fw-bold text-truncate"><i class="bi bi-person-fill text-brand me-1"></i>${escapeHtml(group.name)}</h3>
+              <span class="small text-secondary flex-shrink-0">${summary}</span>
+            </div>
+            <div class="people-rows">${rows}</div>
+          </div>`;
+      }).join("");
+
+      container.innerHTML = `
+        <div class="scroll">
+          <div class="week-label">${iso === today ? "Hôm nay" : weekdayNameVn(iso) + ", " + shortDateVn(iso)} — ${groups.length} người có việc</div>
+          ${html}
+        </div>`;
     }
 
     // ===== Màn Thống kê cả tổ =====
