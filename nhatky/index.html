@@ -111,15 +111,19 @@
       transform: translateX(-50%);
       width: 100%;
       max-width: 440px;
-      height: 72px;
+      height: calc(72px + env(safe-area-inset-bottom));
+      padding-bottom: env(safe-area-inset-bottom);
       background: var(--surface);
       border-top: 1px solid var(--line);
       display: flex;
       justify-content: space-around;
       align-items: center;
       z-index: 1040;
-      padding: 0 8px;
+      padding: 0 8px env(safe-area-inset-bottom) 8px;
       box-shadow: 0 -4px 10px rgba(0,0,0,.05);
+    }
+    body.has-bottom-nav #appContent {
+      padding-bottom: calc(72px + env(safe-area-inset-bottom));
     }
     .bottom-nav-item {
       flex: 1;
@@ -385,6 +389,43 @@
     .info-value { font-size: 1.25rem; font-weight: 800; line-height: 1.3; }
     .info-value.normal { font-size: 1.05rem; font-weight: 600; }
     .person-chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    /* ===== Bước thực hiện (chia nhỏ việc nhiều người/nhiều giai đoạn) ===== */
+    .step-list { display: flex; flex-direction: column; gap: 8px; }
+    .step-row {
+      display: flex; align-items: flex-start; gap: 8px; border: 2px solid var(--line);
+      border-radius: 12px; padding: 10px; background: #fff;
+    }
+    .step-row.done { background: var(--done-bg); border-color: #bfe4cf; }
+    .step-check {
+      flex-shrink: 0; width: 36px; height: 36px; border-radius: 999px; border: 2px solid var(--line);
+      background: #fff; color: var(--muted); font-size: 1.1rem; display: inline-flex;
+      align-items: center; justify-content: center;
+    }
+    .step-check.done { background: var(--done); border-color: var(--done); color: #fff; }
+    .step-body { flex: 1; min-width: 0; }
+    .step-title { font-weight: 700; color: var(--ink); cursor: pointer; }
+    .step-row.done .step-title { text-decoration: line-through; color: var(--muted); }
+    .step-assignees { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; margin-top: 6px; }
+    .step-chip {
+      display: inline-flex; align-items: center; gap: 4px; background: var(--surface-soft);
+      border: 1px solid #93cdae; color: var(--brand-2); border-radius: 999px;
+      padding: 3px 8px; font-size: .8rem; font-weight: 700;
+    }
+    .step-chip button { border: 0; background: none; color: inherit; padding: 0 2px; line-height: 1; font-size: .95rem; }
+    .step-add-select {
+      border: 1px dashed var(--line); border-radius: 999px; background: #fff; color: var(--brand);
+      font-size: .8rem; font-weight: 700; padding: 3px 8px; max-width: 130px;
+    }
+    .step-done-note { font-size: .78rem; color: var(--done); margin-top: 4px; }
+    .step-actions { flex-shrink: 0; display: flex; flex-direction: column; gap: 6px; }
+    .step-icon-btn {
+      width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--line);
+      background: var(--surface-high); color: var(--brand); font-size: .95rem;
+    }
+    .step-icon-btn:active { transform: scale(.95); }
+    .vikunja-label.step-progress-label { border-color: #93cdae; background: var(--surface-soft); color: var(--brand-2); }
+    .vikunja-label.step-progress-label i { margin-right: 3px; }
 
     /* ===== Badge / person-chip ===== */
     .person-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; background: var(--surface-soft); border: 2px solid #93cdae; color: var(--brand-2); border-radius: 999px; padding: 6px 12px; font-size: .95rem; font-weight: 700; }
@@ -1504,7 +1545,8 @@
     }
     .bottom-nav-bar {
       max-width: 440px;
-      height: 72px;
+      height: calc(72px + env(safe-area-inset-bottom));
+      padding-bottom: env(safe-area-inset-bottom);
       background: var(--surface);
     }
     .bottom-nav-item { color: var(--muted); }
@@ -1945,6 +1987,7 @@
 
           <form id="logForm">
             <input type="hidden" id="planId">
+            <input type="hidden" id="stepId">
             <input type="hidden" id="progress" value="Hoàn thành">
             <input type="hidden" id="quantity" value="">
             <input type="hidden" id="quantityUnit" value="">
@@ -2575,6 +2618,7 @@
       const tabbar = document.getElementById("mainBottomNav");
       const topLevel = isTopLevelScreen(screen, params);
       tabbar.style.display = topLevel ? "flex" : "none";
+      document.body.classList.toggle("has-bottom-nav", topLevel);
       tabbar.querySelectorAll("[data-bottom-screen]").forEach(item => {
         const active = item.dataset.bottomScreen === screen;
         item.classList.toggle("active", active);
@@ -2939,9 +2983,12 @@
       });
 
       const planId = document.getElementById("planId").value;
+      const stepId = document.getElementById("stepId") ? document.getElementById("stepId").value : "";
       const checkContainer = document.getElementById("planCompleteCheckContainer");
       if (checkContainer) {
-        if (planId && value === "Hoàn thành") {
+        // Ghi nhật ký cho MỘT BƯỚC: bước tự đánh dấu xong khi lưu (xem submitLog),
+        // không cần/không nên hỏi "Kết thúc việc này" (đó là cho cả kế hoạch)
+        if (planId && value === "Hoàn thành" && !stepId) {
           checkContainer.style.display = "block";
           // Việc không có chỉ tiêu khối lượng: ghi "Hoàn thành" gần như luôn có nghĩa
           // là xong việc → tick sẵn để kế hoạch chuyển "Hoàn thành" đồng bộ với nhật
@@ -3226,8 +3273,10 @@
       }
       payload.syncStatus = "syncing";
       const index = plans.findIndex(item => item.id === payload.id);
-      // Giữ lũy kế đã tính (server sẽ tính lại chính xác ở lần nạp sau)
+      // Giữ lũy kế đã tính (server sẽ tính lại chính xác ở lần nạp sau) và các
+      // bước thực hiện — form Sửa việc không có ô sửa bước nên không được ghi đè
       if (index >= 0 && plans[index].doneQty) payload.doneQty = plans[index].doneQty;
+      if (index >= 0 && plans[index].steps) payload.steps = plans[index].steps;
       if (index >= 0) plans[index] = payload; else plans.push(payload);
       localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
       planModal.hide();
@@ -3923,6 +3972,8 @@
       if (doing) labels.push('<span class="vikunja-label status-doing">Đang làm</span>');
       if (display.team && plan.team) labels.push(`<span class="vikunja-label">${escapeHtml(plan.team)}</span>`);
       if (display.type && plan.type) labels.push(`<span class="vikunja-label">${escapeHtml(plan.type)}</span>`);
+      const steps = planSteps(plan);
+      if (steps.length) labels.push(`<span class="vikunja-label step-progress-label"><i class="bi bi-list-check"></i>${steps.filter(s => s.done).length}/${steps.length} bước</span>`);
       const syncIcon = planSyncIcon(plan);
       return `
         <article class="vikunja-task ${stateClass}" onclick="openTaskDetail('${escapeAttr(plan.id)}')">
@@ -4166,6 +4217,7 @@
           <div class="info-label"><i class="bi bi-sigma"></i>Khối lượng</div>
           <div class="info-value normal">${qtyBadge || "Chưa có dữ liệu"}</div>
         </div>` : "";
+      const stepsCard = stepsCardHtml(plan);
       const sourceCard = plan.sourceText ? `
         <div class="info-card">
           <div class="info-label"><i class="bi bi-chat-quote-fill"></i>Nguồn ${escapeHtml(plan.source || "Zalo Web")}</div>
@@ -4192,6 +4244,7 @@
             <div class="info-label"><i class="bi bi-people-fill"></i>Ai làm</div>
             ${peopleHtml}
           </div>
+          ${stepsCard}
           ${qtyCard}
           ${sourceCard}
           <button class="link-button" type="button" onclick="navigateTo('loghistory', {planId:'${escapeAttr(plan.id)}'})"><i class="bi bi-clock-history me-1"></i>Xem nhật ký đã ghi</button>
@@ -4223,6 +4276,148 @@
       navigateTo("logentry", { planId: id, presetProgress: presetProgress });
     }
 
+    // ===== Bước thực hiện (việc nhiều người/nhiều giai đoạn) =====
+    // Lưu trong plan.steps dạng JSON: [{id,title,assignees:[...],done,doneAt,doneBy}]
+    // — cùng kiểu subTasks của Work Order bên index.html, không cần bảng riêng.
+    function planSteps(plan) {
+      if (!plan || !plan.steps) return [];
+      try {
+        const parsed = JSON.parse(plan.steps);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (e) { return []; }
+    }
+
+    // Mọi thay đổi bước đi qua đây: cập nhật local ngay, đồng bộ nền, vẽ lại
+    // màn Chi tiết nếu đang mở — cùng cơ chế syncPlanInBackground của cả kế hoạch
+    function updatePlanSteps(planId, mutateFn) {
+      const plan = plans.find(item => item.id === planId);
+      if (!plan) return;
+      const steps = planSteps(plan);
+      mutateFn(steps);
+      plan.steps = JSON.stringify(steps);
+      plan.syncStatus = "syncing";
+      // Tất cả bước đã xong → việc coi như hoàn thành; có bước chưa xong mà việc
+      // đang ghi "Hoàn thành" thì lùi lại "Đang làm" cho khớp thực tế
+      if (steps.length > 0) {
+        plan.status = steps.every(s => s.done) ? "Hoàn thành" : (plan.status === "Cần hỗ trợ" ? "Cần hỗ trợ" : "Đang làm");
+      }
+      localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
+      if (currentScreen === "taskdetail" && currentParams.id === planId) renderTaskDetail(planId);
+      else render();
+      syncPlanInBackground(plan);
+    }
+
+    window.addStep = function (planId) {
+      const title = prompt("Tên bước mới:");
+      if (!title || !title.trim()) return;
+      updatePlanSteps(planId, steps => {
+        steps.push({
+          id: "STEP-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+          title: title.trim(), assignees: [], done: false, doneAt: "", doneBy: ""
+        });
+      });
+    };
+
+    window.renameStep = function (planId, stepId) {
+      const plan = plans.find(item => item.id === planId);
+      const step = plan && planSteps(plan).find(s => s.id === stepId);
+      if (!step) return;
+      const title = prompt("Tên bước:", step.title || "");
+      if (title === null || !title.trim()) return;
+      updatePlanSteps(planId, steps => {
+        const s = steps.find(x => x.id === stepId);
+        if (s) s.title = title.trim();
+      });
+    };
+
+    window.deleteStep = function (planId, stepId) {
+      if (!confirm("Xoá bước này?")) return;
+      updatePlanSteps(planId, steps => {
+        const index = steps.findIndex(s => s.id === stepId);
+        if (index >= 0) steps.splice(index, 1);
+      });
+    };
+
+    window.toggleStepDone = function (planId, stepId) {
+      updatePlanSteps(planId, steps => {
+        const step = steps.find(s => s.id === stepId);
+        if (!step) return;
+        step.done = !step.done;
+        step.doneAt = step.done ? new Date().toISOString() : "";
+        step.doneBy = step.done ? currentUser() : "";
+      });
+    };
+
+    window.addStepAssignee = function (planId, stepId, rawName) {
+      let name = rawName;
+      if (name === "__other__") name = prompt("Tên người thực hiện:") || "";
+      if (!name || !name.trim()) return;
+      updatePlanSteps(planId, steps => {
+        const step = steps.find(s => s.id === stepId);
+        if (!step) return;
+        if (!step.assignees) step.assignees = [];
+        if (!step.assignees.some(n => normalizePerson(n) === normalizePerson(name))) step.assignees.push(name.trim());
+      });
+    };
+
+    window.removeStepAssignee = function (planId, stepId, name) {
+      updatePlanSteps(planId, steps => {
+        const step = steps.find(s => s.id === stepId);
+        if (!step) return;
+        step.assignees = (step.assignees || []).filter(n => normalizePerson(n) !== normalizePerson(name));
+      });
+    };
+
+    function stepAssigneeEditorHtml(planId, step) {
+      const names = step.assignees || [];
+      const chips = names.map(name => `
+        <span class="step-chip">${escapeHtml(name)}<button type="button" aria-label="Bỏ ${escapeAttr(name)}" onclick="event.stopPropagation(); removeStepAssignee('${escapeAttr(planId)}','${escapeAttr(step.id)}','${escapeAttr(name)}')">&times;</button></span>
+      `).join("");
+      const taken = new Set(names.map(normalizePerson));
+      const options = knownPeopleNames().filter(n => !taken.has(normalizePerson(n)));
+      const select = `
+        <select class="step-add-select" onclick="event.stopPropagation()" onchange="addStepAssignee('${escapeAttr(planId)}','${escapeAttr(step.id)}', this.value); this.value='';">
+          <option value="">+ Thêm người</option>
+          ${options.map(n => `<option value="${escapeAttr(n)}">${escapeHtml(n)}</option>`).join("")}
+          <option value="__other__">➕ Nhập tên khác...</option>
+        </select>`;
+      return `<div class="step-assignees">${chips}${select}</div>`;
+    }
+
+    function stepRowHtml(plan, step) {
+      return `
+        <div class="step-row${step.done ? " done" : ""}">
+          <button class="step-check${step.done ? " done" : ""}" type="button"
+                  title="${step.done ? "Bỏ đánh dấu xong" : "Đánh dấu xong"}"
+                  onclick="toggleStepDone('${escapeAttr(plan.id)}','${escapeAttr(step.id)}')">
+            <i class="bi ${step.done ? "bi-check-lg" : "bi-circle"}"></i>
+          </button>
+          <div class="step-body min-w-0">
+            <div class="step-title" onclick="renameStep('${escapeAttr(plan.id)}','${escapeAttr(step.id)}')">${escapeHtml(step.title || "Bước chưa đặt tên")}</div>
+            ${stepAssigneeEditorHtml(plan.id, step)}
+            ${step.done && step.doneBy ? `<div class="step-done-note"><i class="bi bi-check2-circle me-1"></i>${escapeHtml(step.doneBy)} đã xong${step.doneAt ? " · " + friendlyDate(step.doneAt.slice(0, 10)) : ""}</div>` : ""}
+          </div>
+          <div class="step-actions">
+            ${!step.done ? `<button class="step-icon-btn" type="button" title="Ghi nhật ký bước này" onclick="navigateTo('logentry', {planId:'${escapeAttr(plan.id)}', stepId:'${escapeAttr(step.id)}', presetProgress:'Hoàn thành'})"><i class="bi bi-journal-plus"></i></button>` : ""}
+            <button class="step-icon-btn text-danger" type="button" title="Xoá bước" onclick="deleteStep('${escapeAttr(plan.id)}','${escapeAttr(step.id)}')"><i class="bi bi-trash"></i></button>
+          </div>
+        </div>`;
+    }
+
+    function stepsCardHtml(plan) {
+      const steps = planSteps(plan);
+      const doneCount = steps.filter(s => s.done).length;
+      return `
+        <div class="info-card">
+          <div class="d-flex align-items-center justify-content-between gap-2">
+            <div class="info-label mb-0"><i class="bi bi-list-check"></i>Các bước thực hiện${steps.length ? ` (${doneCount}/${steps.length})` : ""}</div>
+            <button class="btn btn-sm btn-outline-primary rounded-pill" type="button" onclick="addStep('${escapeAttr(plan.id)}')"><i class="bi bi-plus-lg"></i> Thêm bước</button>
+          </div>
+          ${steps.length ? `<div class="step-list mt-2">${steps.map(step => stepRowHtml(plan, step)).join("")}</div>`
+            : `<div class="small text-secondary mt-2">Việc có nhiều người/nhiều giai đoạn — chia nhỏ thành từng bước để mỗi người đánh dấu và ghi nhật ký riêng bước của mình.</div>`}
+        </div>`;
+    }
+
     // ===== Màn Ghi nhật ký (Phương án A) =====
     function syncQuantityDisplay() {
       const val = parseFloat(document.getElementById("quantity").value) || 0;
@@ -4238,22 +4433,28 @@
       syncQuantityDisplay();
     }
 
-    function prefillLogForm(plan, presetProgress) {
+    function prefillLogForm(plan, presetProgress, step) {
       document.getElementById("planId").value = plan.id;
+      document.getElementById("stepId").value = step ? step.id : "";
       // Ngày ghi ưu tiên ngày đang xem nếu đó là ngày nhắc/quá hạn; nếu không dùng hôm nay hoặc ngày nhắc
       const viewedDate = document.getElementById("filterDate").value;
       document.getElementById("workDate").value = (viewedDate && (planReminder(plan) === viewedDate || isCarryOver(plan, viewedDate))) ? viewedDate
         : (planReminder(plan) <= today ? today : planReminder(plan));
-      document.getElementById("selectedTask").value = `${plan.time || ""} | ${plan.area || ""} | ${plan.asset || ""}: ${plan.task || ""}`.trim();
+      const taskLine = `${plan.time || ""} | ${plan.area || ""} | ${plan.asset || ""}: ${plan.task || ""}`.trim();
+      document.getElementById("selectedTask").value = step ? `${taskLine} — Bước: ${step.title || ""}` : taskLine;
       refreshTeamOptions(plan.team);
       setProgress(presetProgress || "Hoàn thành");
       document.getElementById("startTime").value = roundQuarter(currentTime());
-      renderPeopleResults(plan.assignee);
+      // Bước có người riêng → đánh giá kết quả theo người của BƯỚC, không phải cả việc
+      const resultPeople = step ? (step.assignees || []).join(", ") : plan.assignee;
+      renderPeopleResults(resultPeople);
       const hasPlanQuantity = Boolean(plan.planQty || plan.unit);
-      if (!String(plan.assignee || "").trim()) toggleQuantityFields(hasPlanQuantity);
+      if (!String(resultPeople || "").trim()) toggleQuantityFields(hasPlanQuantity);
       document.getElementById("quantityUnit").value = plan.unit || "";
       const note = document.getElementById("planCumNote");
-      if (plan.doneQty || plan.planQty) {
+      // Lũy kế khối lượng là của cả kế hoạch, không tách theo bước → chỉ hiện khi
+      // ghi nhật ký cho cả việc để tránh gây hiểu nhầm là lũy kế riêng của bước
+      if (!step && (plan.doneQty || plan.planQty)) {
         const unitTxt = plan.unit ? " " + plan.unit : "";
         note.textContent = plan.planQty
           ? `Lũy kế đã ghi: ${plan.doneQty || 0}/${plan.planQty}${unitTxt} — nhập thêm số lượng hôm nay để cộng dồn`
@@ -4270,13 +4471,14 @@
       const ctxCard = document.getElementById("logContextCard");
       const adhocField = document.getElementById("adhocTaskField");
       const plan = params.planId ? plans.find(item => item.id === params.planId) : null;
+      const step = plan && params.stepId ? planSteps(plan).find(s => s.id === params.stepId) : null;
 
       if (plan) {
         ctxCard.style.display = "";
         adhocField.classList.add("d-none");
         document.getElementById("logContextWhere").innerHTML = `<i class="bi bi-geo-alt-fill"></i> ${[plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ")}${plan.time ? " · " + escapeHtml(plan.time) : ""}`;
-        document.getElementById("logContextWhat").textContent = plan.task || "";
-        prefillLogForm(plan, params.presetProgress || "Hoàn thành");
+        document.getElementById("logContextWhat").textContent = step ? `${plan.task || ""} — Bước: ${step.title || ""}` : (plan.task || "");
+        prefillLogForm(plan, params.presetProgress || "Hoàn thành", step);
       } else {
         ctxCard.style.display = "none";
         adhocField.classList.remove("d-none");
@@ -4360,6 +4562,7 @@
       }
       const base = {
         planId: document.getElementById("planId").value,
+        stepId: document.getElementById("stepId").value,
         workDate: document.getElementById("workDate").value,
         shift: document.getElementById("shift").value,
         progress: document.getElementById("progress").value,
@@ -4405,7 +4608,7 @@
       localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
       showAllLogs = false;
       const markPlanDone = document.getElementById("markPlanDone") ? document.getElementById("markPlanDone").checked : false;
-      updatePlanStatus(base.planId, base.progress, markPlanDone);
+      updatePlanStatus(base.planId, base.progress, markPlanDone, base.stepId, recordedBy);
       clearForm();
       lastAddedLogId = newLogs[0].id;
       render();
@@ -4442,10 +4645,23 @@
       }
     }
 
-    function updatePlanStatus(planId, logProgress, markPlanDone) {
+    function updatePlanStatus(planId, logProgress, markPlanDone, stepId, recordedBy) {
       if (!planId) return;
       const plan = plans.find(item => item.id === planId);
       if (!plan) return;
+
+      // Ghi nhật ký cho một bước cụ thể + kết quả "Hoàn thành" → đánh dấu đúng
+      // bước đó xong (không hỏi qua checkbox "Kết thúc việc này" — xem setProgress)
+      const steps = planSteps(plan);
+      if (stepId && logProgress === "Hoàn thành") {
+        const step = steps.find(s => s.id === stepId);
+        if (step) {
+          step.done = true;
+          step.doneAt = new Date().toISOString();
+          step.doneBy = recordedBy || "";
+          plan.steps = JSON.stringify(steps);
+        }
+      }
 
       let nextStatus = "Đang làm";
       if (logProgress === "Cần hỗ trợ") {
@@ -4453,12 +4669,17 @@
       } else if (logProgress === "Đang làm") {
         nextStatus = "Đang làm";
       } else if (logProgress === "Hoàn thành") {
-        const done = parseFloat(plan.doneQty || 0);
-        const target = parseFloat(plan.planQty || 0);
-        if (markPlanDone || (target > 0 && done >= target)) {
-          nextStatus = "Hoàn thành";
+        if (steps.length > 0) {
+          // Việc chia bước: chỉ coi là Hoàn thành khi TẤT CẢ bước đã xong
+          nextStatus = steps.every(s => s.done) ? "Hoàn thành" : "Đang làm";
         } else {
-          nextStatus = "Đang làm";
+          const done = parseFloat(plan.doneQty || 0);
+          const target = parseFloat(plan.planQty || 0);
+          if (markPlanDone || (target > 0 && done >= target)) {
+            nextStatus = "Hoàn thành";
+          } else {
+            nextStatus = "Đang làm";
+          }
         }
       }
 
@@ -4471,6 +4692,7 @@
     function clearForm() {
       document.getElementById("logForm").reset();
       document.getElementById("planId").value = "";
+      document.getElementById("stepId").value = "";
       document.getElementById("workDate").value = document.getElementById("filterDate").value || today;
       document.getElementById("shift").value = defaultShift();
       refreshTeamOptions();
@@ -4837,6 +5059,14 @@
       return '<span class="badge-soft badge-open">Chưa bắt đầu</span>';
     }
 
+    // Việc có chia bước: bước đang dở dang (chưa xong) của người đó — không phải
+    // trạng thái cả kế hoạch, để khớp đúng yêu cầu "lọc đến bước dở dang đang làm"
+    function peopleStepChip(plan, iso) {
+      if (plan.status === "Cần hỗ trợ") return '<span class="badge-soft badge-high">Cần hỗ trợ</span>';
+      if (isCarryOver(plan, iso)) return `<span class="badge-soft badge-mid">Tồn ${daysLate(plan, iso)} ngày</span>`;
+      return '<span class="badge-soft badge-doing">Đang làm bước</span>';
+    }
+
     // Thứ tự hàng trong nhóm: cần chú ý trước, rồi đang làm, chưa bắt đầu, xong cuối
     function peoplePlanOrder(plan, iso) {
       if (plan.status === "Cần hỗ trợ") return 0;
@@ -4846,7 +5076,32 @@
       return 4;
     }
 
+    function peopleItemOrder(item, iso) {
+      if (item.step) return item.plan.status === "Cần hỗ trợ" ? 0 : (isCarryOver(item.plan, iso) ? 1 : 2);
+      return peoplePlanOrder(item.plan, iso);
+    }
+
     const PEOPLE_UNASSIGNED = "— Chưa phân công —";
+
+    // Việc không chia bước → 1 mục {plan, step:null} như cũ. Việc có chia bước →
+    // chỉ trả về các BƯỚC CHƯA XONG (bước đã xong không hiện — đúng yêu cầu lọc
+    // "đến bước dở dang đang thực hiện"); khi hết bước dở dang, việc coi như xong
+    // và tự biến mất khỏi màn này.
+    function planWorkItems(plan) {
+      const steps = planSteps(plan);
+      if (steps.length === 0) return [{ plan, step: null }];
+      return steps.filter(s => !s.done).map(step => ({ plan, step }));
+    }
+
+    function workItemAssignees(item) {
+      if (item.step) return (item.step.assignees || []).filter(Boolean);
+      return splitAssignees(item.plan.assignee);
+    }
+
+    function stepLoggedToday(plan, step, iso, personName) {
+      return logs.some(log => log.workDate === iso && log.planId === plan.id && log.stepId === step.id &&
+        (personName === PEOPLE_UNASSIGNED || normalizePerson(log.employee) === normalizePerson(personName)));
+    }
 
     function renderPeopleScreen() {
       const container = document.getElementById("screen-people");
@@ -4855,11 +5110,13 @@
 
       const buckets = new Map();
       visible.forEach(plan => {
-        const people = splitAssignees(plan.assignee);
-        (people.length ? people : [PEOPLE_UNASSIGNED]).forEach(name => {
-          const key = normalizePerson(name);
-          if (!buckets.has(key)) buckets.set(key, { name, items: [] });
-          buckets.get(key).items.push(plan);
+        planWorkItems(plan).forEach(item => {
+          const people = workItemAssignees(item);
+          (people.length ? people : [PEOPLE_UNASSIGNED]).forEach(name => {
+            const key = normalizePerson(name);
+            if (!buckets.has(key)) buckets.set(key, { name, items: [] });
+            buckets.get(key).items.push(item);
+          });
         });
       });
 
@@ -4868,7 +5125,7 @@
         return;
       }
 
-      const hasAttention = group => group.items.some(plan => plan.status === "Cần hỗ trợ" || isCarryOver(plan, iso));
+      const hasAttention = group => group.items.some(item => item.plan.status === "Cần hỗ trợ" || isCarryOver(item.plan, iso));
       const groups = [...buckets.values()].sort((a, b) => {
         const attnDiff = (hasAttention(a) ? 0 : 1) - (hasAttention(b) ? 0 : 1);
         if (attnDiff) return attnDiff;
@@ -4878,25 +5135,38 @@
       });
 
       const html = groups.map(group => {
-        const doneCount = group.items.filter(plan => plan.status === "Hoàn thành").length;
-        const carryCount = group.items.filter(plan => plan.status !== "Hoàn thành" && isCarryOver(plan, iso)).length;
-        const summary = [`${group.items.length} việc`, doneCount ? `${doneCount} xong` : "", carryCount ? `${carryCount} tồn` : ""].filter(Boolean).join(" · ");
+        const doneCount = group.items.filter(item => !item.step && item.plan.status === "Hoàn thành").length;
+        const carryCount = group.items.filter(item => item.plan.status !== "Hoàn thành" && isCarryOver(item.plan, iso)).length;
+        const stepCount = group.items.filter(item => item.step).length;
+        const summary = [`${group.items.length} việc`, stepCount ? `${stepCount} bước dở dang` : "", doneCount ? `${doneCount} xong` : "", carryCount ? `${carryCount} tồn` : ""].filter(Boolean).join(" · ");
         const rows = group.items
           .slice()
-          .sort((a, b) => peoplePlanOrder(a, iso) - peoplePlanOrder(b, iso) || (a.time || "").localeCompare(b.time || ""))
-          .map(plan => {
-            const entries = planLogsForDate(plan, iso);
-            const logged = group.name === PEOPLE_UNASSIGNED
-              ? entries.length > 0
-              : entries.some(log => normalizePerson(log.employee) === normalizePerson(group.name));
+          .sort((a, b) => peopleItemOrder(a, iso) - peopleItemOrder(b, iso) || (a.plan.time || "").localeCompare(b.plan.time || ""))
+          .map(item => {
+            const plan = item.plan, step = item.step;
+            let logged;
+            if (step) {
+              logged = stepLoggedToday(plan, step, iso, group.name);
+            } else {
+              const entries = planLogsForDate(plan, iso);
+              logged = group.name === PEOPLE_UNASSIGNED
+                ? entries.length > 0
+                : entries.some(log => normalizePerson(log.employee) === normalizePerson(group.name));
+            }
             const where = [plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ");
+            const taskLabel = step
+              ? `${escapeHtml(plan.task || "Chưa đặt tên công việc")} <span class="text-secondary fw-normal">— ${escapeHtml(step.title || "")}</span>`
+              : escapeHtml(plan.task || "Chưa đặt tên công việc");
+            const onClick = step
+              ? `navigateTo('logentry', {planId:'${escapeAttr(plan.id)}', stepId:'${escapeAttr(step.id)}', presetProgress:'Hoàn thành'})`
+              : `openTaskDetail('${escapeAttr(plan.id)}')`;
             return `
-              <button class="people-row" type="button" onclick="openTaskDetail('${escapeAttr(plan.id)}')">
+              <button class="people-row" type="button" onclick="${onClick}" title="${step ? "Bấm để ghi nhật ký bước này" : "Bấm để xem chi tiết"}">
                 <div class="min-w-0">
-                  <div class="people-row-task">${escapeHtml(plan.task || "Chưa đặt tên công việc")}</div>
+                  <div class="people-row-task">${taskLabel}</div>
                   <div class="people-row-meta">${plan.time ? escapeHtml(plan.time) + (where ? " · " : "") : ""}${where}${logged ? ' · <span class="text-success fw-bold"><i class="bi bi-journal-check"></i> đã ghi NK</span>' : ""}</div>
                 </div>
-                ${peoplePlanChip(plan, iso)}
+                ${step ? peopleStepChip(plan, iso) : peoplePlanChip(plan, iso)}
               </button>`;
           }).join("");
         return `
