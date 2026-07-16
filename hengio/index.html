@@ -48,6 +48,37 @@
     }
     .small-muted { color: var(--muted); font-size: .82rem; }
     .status-line { min-height: 22px; color: var(--muted); font-size: .86rem; }
+    .summary-card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+    }
+    .message-box {
+      width: 100%;
+      min-height: 108px;
+      border: 1px solid #cfd8e3;
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: #f8fafc;
+      color: var(--ink);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: .9rem;
+      resize: vertical;
+      white-space: pre-wrap;
+    }
+    .runtime-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 4px 10px;
+      background: #e7f6ef;
+      color: #08734b;
+      font-weight: 800;
+      font-size: .82rem;
+    }
 
     @media (max-width: 640px) {
       .shell { padding: 10px; }
@@ -74,6 +105,20 @@
   </header>
 
   <main class="shell">
+    <section class="summary-card">
+      <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+        <div>
+          <h2 class="h6 fw-bold m-0">Tin nhắn gửi nhân viên</h2>
+          <div class="small-muted">Tự tính tổng thời gian chạy trong ngày, bấm copy để gửi Zalo/nhóm ca.</div>
+        </div>
+        <button class="btn btn-success btn-sm flex-shrink-0" type="button" id="btnCopyAll">
+          <i class="bi bi-clipboard-check me-1"></i>Copy tất cả
+        </button>
+      </div>
+      <textarea class="message-box" id="allMessage" readonly></textarea>
+      <div class="small-muted mt-2" id="totalRuntime"></div>
+    </section>
+
     <section class="panel mb-3">
       <div class="panel-head">
         <div class="d-flex justify-content-between align-items-center gap-2">
@@ -152,6 +197,7 @@
 
       toast = new bootstrap.Toast(document.getElementById("toast"), { delay: 2200 });
       document.getElementById("btnReload").addEventListener("click", () => loadSettings(true));
+      document.getElementById("btnCopyAll").addEventListener("click", () => copyText(document.getElementById("allMessage").value));
       settings = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null") || defaults;
       render();
       highlightAndScrollToPump();
@@ -186,6 +232,7 @@
     }
 
     function render() {
+      renderSummary();
       document.getElementById("timerList").innerHTML = settings.map((item, index) => `
         <form class="timer-card" data-index="${index}" onsubmit="saveSetting(event, ${index})">
           <input type="hidden" name="settingId" value="${escapeAttr(item.settingId)}">
@@ -194,7 +241,18 @@
               <div class="fw-bold">${escapeHtml(item.pumpName)}</div>
               <div class="small-muted">${escapeHtml(item.location || "")}</div>
             </div>
-            <span class="badge text-bg-light border">${escapeHtml(item.settingId)}</span>
+            <div class="text-end">
+              <span class="runtime-pill" id="runtime-${index}"><i class="bi bi-stopwatch"></i>${escapeHtml(formatMinutes(dailyRuntimeMinutes(item)))}/ngày</span>
+              <div class="mt-1"><span class="badge text-bg-light border">${escapeHtml(item.settingId)}</span></div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Tin nhắn copy gửi nhân viên</label>
+            <textarea class="message-box" readonly id="message-${index}">${escapeHtml(scheduleMessage(item))}</textarea>
+            <button class="btn btn-outline-success btn-sm mt-2" type="button" onclick="copyText(document.getElementById('message-${index}').value)">
+              <i class="bi bi-clipboard me-1"></i>Copy tin nhắn
+            </button>
           </div>
 
           <div class="row g-2">
@@ -259,6 +317,11 @@
 
       settings[index] = { ...settings[index], ...payload };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+      renderSummary();
+      const messageEl = document.getElementById(`message-${index}`);
+      if (messageEl) messageEl.value = scheduleMessage(settings[index]);
+      const runtimeEl = document.getElementById(`runtime-${index}`);
+      if (runtimeEl) runtimeEl.innerHTML = `<i class="bi bi-stopwatch"></i>${escapeHtml(formatMinutes(dailyRuntimeMinutes(settings[index])))}/ngày`;
 
       try {
         const res = await fetch(GAS_URL, {
@@ -276,6 +339,85 @@
       } catch (error) {
         document.getElementById(`status-${index}`).textContent = "Lưu cục bộ, chưa đồng bộ";
         showToast("Chưa đồng bộ được");
+      }
+    }
+
+    function renderSummary() {
+      const total = settings.reduce((sum, item) => sum + dailyRuntimeMinutes(item), 0);
+      const message = [
+        `LỊCH CHẠY BƠM TRONG NGÀY`,
+        `Tổng thời gian chạy: ${formatMinutes(total)}`,
+        ``,
+        ...settings.map((item, index) => `${index + 1}. ${scheduleMessage(item)}`)
+      ].join("\n");
+      const allMessage = document.getElementById("allMessage");
+      const totalRuntime = document.getElementById("totalRuntime");
+      if (allMessage) allMessage.value = message;
+      if (totalRuntime) totalRuntime.textContent = `Tổng toàn bộ: ${formatMinutes(total)} trong ngày`;
+    }
+
+    function scheduleMessage(item) {
+      const slots = [
+        timeSlotText("Khung 1", item.on1, item.off1),
+        timeSlotText("Khung 2", item.on2, item.off2)
+      ].filter(Boolean);
+      return [
+        `${item.pumpName || "Bơm"}${item.location ? " - " + item.location : ""}`,
+        slots.length ? slots.join("\n") : "Chưa cài khung giờ chạy",
+        `Tổng chạy/ngày: ${formatMinutes(dailyRuntimeMinutes(item))}`,
+        item.notes ? `Ghi chú: ${item.notes}` : ""
+      ].filter(Boolean).join("\n");
+    }
+
+    function timeSlotText(label, on, off) {
+      if (!on && !off) return "";
+      if (!on || !off) return `${label}: ${on || "--:--"} - ${off || "--:--"} (chưa đủ giờ)`;
+      return `${label}: ${on} - ${off} (${formatMinutes(durationMinutes(on, off))})`;
+    }
+
+    function durationMinutes(start, end) {
+      const startMin = parseTimeMinutes(start);
+      const endMin = parseTimeMinutes(end);
+      if (startMin === null || endMin === null) return 0;
+      let diff = endMin - startMin;
+      if (diff < 0) diff += 24 * 60;
+      return diff;
+    }
+
+    function dailyRuntimeMinutes(item) {
+      return durationMinutes(item.on1, item.off1) + durationMinutes(item.on2, item.off2);
+    }
+
+    function parseTimeMinutes(value) {
+      const match = /^(\d{1,2}):(\d{2})$/.exec(String(value || "").trim());
+      if (!match) return null;
+      const hour = Number(match[1]);
+      const minute = Number(match[2]);
+      if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
+      return hour * 60 + minute;
+    }
+
+    function formatMinutes(totalMinutes) {
+      const minutes = Math.max(0, Math.round(Number(totalMinutes) || 0));
+      const h = Math.floor(minutes / 60);
+      const m = minutes % 60;
+      if (h && m) return `${h} giờ ${m} phút`;
+      if (h) return `${h} giờ`;
+      return `${m} phút`;
+    }
+
+    async function copyText(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast("Đã copy tin nhắn");
+      } catch (error) {
+        const temp = document.createElement("textarea");
+        temp.value = text;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand("copy");
+        temp.remove();
+        showToast("Đã copy tin nhắn");
       }
     }
 
