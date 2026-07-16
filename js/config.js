@@ -9,7 +9,7 @@ const CONFIG = {
   apiToken:    'HAPU_QR_SECRET_2026',
   appTitle:    'BanDienScan',
   companyName: 'HAPU Complex',
-  version:     'v2.9.0', // Giữ đồng bộ với CONFIG inline trong index.html và mục mới nhất của CHANGELOG.md
+  version:     'v2.10.0', // Giữ đồng bộ với CONFIG inline trong index.html và mục mới nhất của CHANGELOG.md
   // Thời gian giữ localStorage trước khi force-refresh (giờ)
   cacheMaxAge: 24,
 };

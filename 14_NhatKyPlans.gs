@@ -88,12 +88,15 @@ function formatPlanDate_(value) {
 function handleGetPlans(e) {
   const user = e && e.parameter ? e.parameter.user : "";
   const userTeams = typeof getUserTeams_ === "function" ? getUserTeams_(user) : "";
+  const userRole = typeof getUserRole_ === "function" ? getUserRole_(user) : "";
 
   const sheet = ensurePlansSheet_();
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return contentResponse({ status: "success", plans: [] });
 
-  const isPrivileged = typeof isPrivilegedTeams_ === "function" && isPrivilegedTeams_(userTeams);
+  const isPrivileged =
+    (typeof isPrivilegedRole_ === "function" && isPrivilegedRole_(userRole)) ||
+    (typeof isPrivilegedTeams_ === "function" && isPrivilegedTeams_(userTeams));
   // Không có tài khoản, hoặc tài khoản chưa được phân nhóm tổ → không trả về kế hoạch nào
   if (!isPrivileged && (!userTeams || userTeams === "- Chưa phân tổ -")) {
     return contentResponse({ status: "success", plans: [] });
@@ -154,9 +157,19 @@ function handleSavePlan(params) {
   const payload = params.payload || {};
   const date = formatPlanDate_(payload.date);
   const task = String(payload.task || "").trim();
+  const actor = String(payload.updatedBy || "").trim();
+  const actorTeams = typeof getUserTeams_ === "function" ? getUserTeams_(actor) : "";
+  const actorRole = typeof getUserRole_ === "function" ? getUserRole_(actor) : "";
+  const isPrivileged =
+    (typeof isPrivilegedRole_ === "function" && isPrivilegedRole_(actorRole)) ||
+    (typeof isPrivilegedTeams_ === "function" && isPrivilegedTeams_(actorTeams));
+  const requestedTeam = String(payload.team || "").trim();
 
   if (!date) return contentResponse({ status: "error", message: "Thiếu ngày kế hoạch" });
   if (!task) return contentResponse({ status: "error", message: "Thiếu nội dung công việc" });
+  if (!isPrivileged && (typeof userCanAccessTeam_ !== "function" || !userCanAccessTeam_(actorTeams, requestedTeam))) {
+    return contentResponse({ status: "error", message: "Tổ không thuộc quyền của tài khoản" });
+  }
 
   const sheet = ensurePlansSheet_();
   const planId = String(payload.id || "").trim() || ("PLAN-" + date.replace(/-/g, "") + "-" + new Date().getTime());
@@ -231,13 +244,23 @@ function incrementPlanDoneQty_(planId, qty) {
 function handleDeletePlan(params) {
   const planId = String((params.payload && params.payload.id) || params.id || "").trim();
   if (!planId) return contentResponse({ status: "error", message: "Thiếu PlanID" });
+  const actor = String((params.payload && params.payload.updatedBy) || params.updatedBy || "").trim();
+  const actorTeams = typeof getUserTeams_ === "function" ? getUserTeams_(actor) : "";
+  const actorRole = typeof getUserRole_ === "function" ? getUserRole_(actor) : "";
+  const isPrivileged =
+    (typeof isPrivilegedRole_ === "function" && isPrivilegedRole_(actorRole)) ||
+    (typeof isPrivilegedTeams_ === "function" && isPrivilegedTeams_(actorTeams));
 
   const sheet = ensurePlansSheet_();
   const rowIndex = findPlanRow_(sheet, planId);
   if (rowIndex < 2) return contentResponse({ status: "error", message: "Không tìm thấy kế hoạch: " + planId });
+  const planTeam = String(sheet.getRange(rowIndex, 4).getValue() || "").trim();
+  if (!isPrivileged && (typeof userCanAccessTeam_ !== "function" || !userCanAccessTeam_(actorTeams, planTeam))) {
+    return contentResponse({ status: "error", message: "Tổ không thuộc quyền của tài khoản" });
+  }
 
   sheet.deleteRow(rowIndex);
-  writeAuditLog((params.payload && params.payload.updatedBy) || "nhatky", "deletePlan", planId, "Xóa kế hoạch");
+  writeAuditLog(actor || "nhatky", "deletePlan", planId, "Xóa kế hoạch");
   return contentResponse({ status: "success", planId: planId });
 }
 

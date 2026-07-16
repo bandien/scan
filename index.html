@@ -57,7 +57,7 @@
             min-height: 100vh;
         }
 
-        .app-shell { max-width: 440px; margin: 0 auto; padding: 76px 16px 92px 16px; }
+        .app-shell { max-width: 440px; margin: 0 auto; padding: 76px 16px calc(92px + env(safe-area-inset-bottom)) 16px; }
 
         .header-section {
             position: fixed; top: 0; left: 50%; transform: translateX(-50%);
@@ -284,7 +284,8 @@
             transform: translateX(-50%);
             width: 100%;
             max-width: 440px;
-            height: 72px;
+            height: calc(72px + env(safe-area-inset-bottom));
+            padding-bottom: env(safe-area-inset-bottom);
             background: var(--siu-surface);
             border-top: 1px solid var(--siu-outline-variant);
             display: flex;
@@ -1512,7 +1513,7 @@
         apiToken: 'HAPU_QR_SECRET_2026',
         appTitle: 'BanDienScan',
         companyName: 'HAPU Complex',
-        version: 'v2.9.0' // Nguồn hiển thị duy nhất — các chỗ trong UI render qua class .app-version
+        version: 'v2.10.0' // Nguồn hiển thị duy nhất — các chỗ trong UI render qua class .app-version
     };
     // Điền số phiên bản vào mọi vị trí hiển thị (màn đăng nhập, cuối menu)
     document.addEventListener('DOMContentLoaded', () => {

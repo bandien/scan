@@ -16,10 +16,10 @@ if (duplicates.length) {
   throw new Error(`Duplicate HTML ids: ${[...new Set(duplicates)].join(", ")}`);
 }
 
-const requiredIds = ["screen-tasklist", "filterDate", "taskListBody", "btnQuickLog"];
+const requiredIds = ["screen-people", "filterDate", "peopleBody", "btnQuickLog"];
 const missing = requiredIds.filter(id => !ids.includes(id));
 if (missing.length) {
-  throw new Error(`Missing task-list ids: ${missing.join(", ")}`);
+  throw new Error(`Missing people-screen ids: ${missing.join(", ")}`);
 }
 
 console.log(JSON.stringify({ file, inlineScriptsChecked: scripts.length, htmlIdsChecked: ids.length }));

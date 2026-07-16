@@ -88,6 +88,16 @@ function getUserTeams_(username) {
   return String(sheet.getRange(rowIndex, schema.teamsIndex + 1).getValue() || "").trim();
 }
 
+function getUserRole_(username) {
+  const sheet = getSheet(SHEETS.USERS);
+  if (!username) return "";
+  const rowIndex = findAccountRow_(sheet, username);
+  if (rowIndex === 0) return "";
+  const data = sheet.getDataRange().getValues();
+  const schema = typeof getUsersSchema_ === "function" ? getUsersSchema_(data) : { roleIndex: 2 };
+  return String(sheet.getRange(rowIndex, schema.roleIndex + 1).getValue() || "").trim();
+}
+
 function splitTeams_(value) {
   return String(value || "").split(/[,;|]/).map(function(team) { return team.trim(); }).filter(Boolean);
 }
@@ -97,6 +107,15 @@ function isPrivilegedTeams_(value) {
     const normalized = team.toLowerCase();
     return team === "*" || normalized === "admin";
   });
+}
+
+function isPrivilegedRole_(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+  return normalized === "admin" || normalized === "manager";
+}
+
+function isPrivilegedUser_(username) {
+  return isPrivilegedRole_(getUserRole_(username)) || isPrivilegedTeams_(getUserTeams_(username));
 }
 
 function userCanAccessTeam_(userTeams, requestedTeam) {

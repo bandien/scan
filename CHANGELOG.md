@@ -14,6 +14,16 @@ updated: 2026-06-08
 
 Tất cả các thay đổi và cải tiến của hệ thống Quản lý & Bảo trì Ban điện thông minh (CMMS Mini WebApp) được ghi nhận tại đây theo từng phiên bản.
 
+## [v2.10.0] - 2026-07-16
+### Thêm mới (Added)
+- **Checklist Cơ Điện Sân Golf (`sangolf/index.html` + `19_GolfChecklist.gs`):** số hóa sổ vận hành giấy `ChecklistCoDienSanGolf.xlsx` cho Tổ Cơ Điện Sân Golf Kỳ Sơn Montana.
+  - 4 mẫu checklist: Ca Sáng (18 mục), Ca Tối (16 mục), Kiểm Tra Tuần — thứ Hai (14 mục), Kiểm Tra Tháng — ngày 1 (22 mục); tổng 70 hạng mục seed tự động vào sheet `GolfChecklistTemplates` (sửa mẫu chỉ cần sửa sheet, không cần deploy lại).
+  - 6 kiểu nhập liệu: Đạt/Không đạt/Bỏ qua, số đo (cách tràn cm, nhiệt độ ℃, Volt, pH, kWh...), giờ bật, cặp giờ bật/tắt, văn bản, nhóm nhiều trường con (5 hồ, 3 bơm 160kW, 3 suối trang trí).
+  - Cảnh báo vượt ngưỡng ngay khi gõ số (gia nhiệt <45℃, nối đất >4Ω, pH ngoài 6,5–7,5...) — ô nhập tô đỏ.
+  - Autosave local-first: mỗi thao tác lưu localStorage tức thì, đồng bộ ngầm lên sheet `GolfChecklistRuns` (1 lượt/mẫu/ngày, không tạo trùng); mất mạng không mất dữ liệu.
+  - Quy trình bàn giao ca: chốt ca (kèm nội dung bàn giao + gửi cảnh báo Telegram) → ca sau thấy banner và bấm xác nhận nhận bàn giao; lượt đã xác nhận bị khóa không sửa được.
+  - API mới: `getGolfTemplates`, `getGolfRuns` (GET) · `saveGolfRun`, `submitGolfRun`, `confirmGolfHandover`, `seedGolfTemplates` (POST).
+
 ## [v2.9.0] - 2026-07-15
 ### Thêm mới (Added)
 - **Trang Thông tin & Check vận hành bơm (`pump_info.html`):**
