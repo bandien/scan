@@ -343,17 +343,15 @@
     }
 
     function renderSummary() {
-      const total = settings.reduce((sum, item) => sum + dailyRuntimeMinutes(item), 0);
       const message = [
         `LỊCH CHẠY BƠM TRONG NGÀY`,
-        `Tổng thời gian chạy: ${formatMinutes(total)}`,
         ``,
         ...settings.map((item, index) => `${index + 1}. ${scheduleMessage(item)}`)
       ].join("\n");
       const allMessage = document.getElementById("allMessage");
       const totalRuntime = document.getElementById("totalRuntime");
       if (allMessage) allMessage.value = message;
-      if (totalRuntime) totalRuntime.textContent = `Tổng toàn bộ: ${formatMinutes(total)} trong ngày`;
+      if (totalRuntime) totalRuntime.textContent = "Không cộng gộp nhiều bơm; xem tổng chạy/ngày riêng trong từng bơm.";
     }
 
     function scheduleMessage(item) {
