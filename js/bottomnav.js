@@ -29,8 +29,6 @@
   }
 
   const TABS = [
-    { key: 'plan',     icon: 'bi-clipboard-check', label: 'Kế hoạch', href: root + 'nhatky/index.html#tasklist' },
-    { key: 'log',      icon: 'bi-journal-text',    label: 'Nhật ký',  href: root + 'nhatky/index.html#loghistory' },
     { key: 'scan',     icon: 'bi-qr-code-scan',    label: 'Quét QR',  href: root + 'index.html' },
     { key: 'menu',     icon: 'bi-list',            label: 'Menu',     href: null },
     { key: 'personal', icon: 'bi-person',          label: 'Cá nhân',  href: root + 'nhatky/index.html#personal' }
@@ -39,10 +37,11 @@
   const MENU_DAILY = [
     { icon: 'bi-water',            label: 'Thông tin & Check vận hành bơm', href: root + 'pump_info.html' },
     { icon: 'bi-flag-fill',        label: 'Checklist Cơ Điện Sân Golf',     href: root + 'sangolf/' },
-    { icon: 'bi-calendar-range',   label: 'Phân ca trực',                   href: root + 'phanca/' },
-    { icon: 'bi-journal-check',    label: 'Nhật ký công việc',              href: root + 'nhatky/' }
+    { icon: 'bi-calendar-range',   label: 'Phân ca trực',                   href: root + 'phanca/' }
   ];
   const MENU_ADMIN = [
+    { icon: 'bi-clipboard-check', label: 'Kế hoạch công việc', href: root + 'nhatky/index.html#people' },
+    { icon: 'bi-journal-text',    label: 'Nhật ký công việc',  href: root + 'nhatky/index.html#loghistory' },
     { icon: 'bi-alarm',    label: 'Cài đặt đồng hồ bơm',   href: root + 'hengio/' },
     { icon: 'bi-qr-code',  label: 'In mã QR máy bơm',      href: root + 'print_pumps.html' },
     { icon: 'bi-bar-chart-fill', label: 'Báo cáo công việc tổ', href: root + 'nhatky/index.html#stats' },

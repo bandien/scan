@@ -2112,21 +2112,19 @@
 
       <!-- Màn quản lý Users: chỉ Admin / Manager -->
       <section class="screen" data-screen="usermanagement" id="screen-usermanagement"></section>
+
+      <!-- Màn trống theo yêu cầu -->
+      <section class="screen" data-screen="blank" id="screen-blank">
+        <div class="scroll d-flex align-items-center justify-content-center" style="min-height: 50dvh;">
+          <div class="text-center text-muted py-5">
+            <span class="material-symbols-outlined fs-1 opacity-25">draft</span>
+            <p class="mt-2 small fw-bold text-uppercase tracking-wider">Trang trống</p>
+          </div>
+        </div>
+      </section>
     </div>
 
     <nav class="bottom-nav-bar" id="mainBottomNav" style="display: none;" role="navigation" aria-label="Điều hướng chính">
-        <button class="bottom-nav-item active" type="button" data-bottom-screen="people" aria-current="page">
-            <div class="nav-icon-wrapper">
-                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">groups</span>
-            </div>
-            <span>Công việc</span>
-        </button>
-        <button class="bottom-nav-item" type="button" data-bottom-screen="loghistory">
-            <div class="nav-icon-wrapper">
-                <span class="material-symbols-outlined">history_edu</span>
-            </div>
-            <span>Nhật ký</span>
-        </button>
         <button class="bottom-nav-item" type="button" id="btnNavScan">
             <div class="nav-icon-wrapper">
                 <span class="material-symbols-outlined">qr_code_scanner</span>
@@ -2153,6 +2151,8 @@
                     <hr class="dropdown-divider opacity-50">
                     <h6 class="dropdown-header text-muted small fw-bold"><i class="bi bi-shield-lock-fill me-1"></i> DÀNH CHO QUẢN TRỊ</h6>
                 </li>
+                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2 text-decoration-none" href="#" data-bottom-screen="people"><i class="bi bi-clipboard-check me-2 text-info"></i> Kế hoạch công việc</a></li>
+                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2 text-decoration-none" href="#" data-bottom-screen="loghistory"><i class="bi bi-journal-text me-2 text-info"></i> Nhật ký công việc</a></li>
                 <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2 text-decoration-none" href="../hengio/"><i class="bi bi-alarm me-2 text-warning"></i> Cài đặt đồng hồ bơm</a></li>
                 <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2 text-decoration-none" href="../print_pumps.html"><i class="bi bi-qr-code me-2 text-primary"></i> In mã QR máy bơm</a></li>
                 <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2 text-decoration-none" href="../phongvan/"><i class="bi bi-person-workspace me-2 text-secondary"></i> Câu hỏi phỏng vấn</a></li>
@@ -2531,9 +2531,9 @@
     let managedActorRole = "";
 
     // ===== Điều hướng màn hình (router nhỏ gọn, không reload trang) =====
-    let currentScreen = "people";
+    let currentScreen = "blank";
     let currentParams = {};
-    const TOP_LEVEL_SCREENS = ["people", "loghistory", "stats", "personal"];
+    const TOP_LEVEL_SCREENS = ["blank", "people", "loghistory", "stats", "personal"];
 
     function isTopLevelScreen(screen, params) {
       return TOP_LEVEL_SCREENS.includes(screen) && !(screen === "loghistory" && params && params.planId);
@@ -2640,6 +2640,7 @@
 
     function topLevelHeaderHtml(screen) {
       const meta = {
+        blank: { icon: "bi-lightning-charge-fill", title: "Nhật ký công việc", subtitle: "Ban Điện Scan" },
         loghistory: { icon: "bi-journal-text", title: "Nhật ký đã ghi", subtitle: "Theo dõi kết quả công việc" },
         stats: { icon: "bi-bar-chart-fill", title: "Báo cáo", subtitle: "Tổng hợp công việc của tổ" },
         personal: { icon: "bi-person-fill", title: "Cá nhân", subtitle: "Tài khoản và tùy chọn" }
@@ -2792,15 +2793,17 @@
       loadStaff();
       loadLogs();
       bindEvents();
-      let startScreen = "people";
+      let startScreen = "blank";
       const hash = window.location.hash.substring(1);
-      if (["people", "loghistory", "stats", "personal"].includes(hash)) {
+      if (["blank", "people", "loghistory", "stats", "personal"].includes(hash)) {
         startScreen = hash;
+      } else if (hash === "tasklist") {
+        startScreen = "people";
       }
       const initialState = { screen: startScreen, params: {} };
       history.replaceState(initialState, "");
       window.addEventListener("popstate", event => {
-        const state = event.state || { screen: "people", params: {} };
+        const state = event.state || { screen: "blank", params: {} };
         activateScreen(state.screen, state.params);
       });
       activateScreen(initialState.screen, initialState.params);
