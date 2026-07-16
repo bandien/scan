@@ -1316,7 +1316,7 @@
     }
     .task-more-menu .dropdown-divider { border-color: var(--line); }
 
-    /* ===== Màn "Hôm nay ai làm gì" ===== */
+    /* ===== Màn "Công việc" ===== */
     .people-group { margin-bottom: 12px; }
     .people-rows { display: flex; flex-direction: column; }
     .people-row {
@@ -2058,7 +2058,7 @@
       <!-- Màn phụ: Tuần -->
       <section class="screen" data-screen="week" id="screen-week"></section>
 
-      <!-- Màn 1: Hôm nay ai làm gì (trang chủ) -->
+      <!-- Màn 1: Công việc (trang chủ) -->
       <section class="screen" data-screen="people" id="screen-people">
         <div class="task-top-controls">
           <div class="date-bar" aria-label="Chọn ngày xem công việc">
@@ -2104,7 +2104,7 @@
             <div class="nav-icon-wrapper">
                 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">groups</span>
             </div>
-            <span>Hôm nay</span>
+            <span>Công việc</span>
         </button>
         <button class="bottom-nav-item" type="button" data-bottom-screen="loghistory">
             <div class="nav-icon-wrapper">
@@ -2590,7 +2590,7 @@
 
     function taskListTitle() {
       const selectedDate = selectedTaskDate();
-      return selectedDate === today ? "Hôm nay ai làm gì" : `Ai làm gì ngày ${shortDateVn(selectedDate)}`;
+      return selectedDate === today ? "Công việc" : `Công việc ngày ${shortDateVn(selectedDate)}`;
     }
 
     function taskListSubtitle() {
@@ -2656,7 +2656,7 @@
         return plan ? `Nhật ký: ${escapeHtml(plan.task || "")}` : "Nhật ký gần đây";
       }
       if (screen === "week") return "Lịch tuần này";
-      if (screen === "people") return selectedTaskDate() === today ? "Hôm nay ai làm gì" : `Ai làm gì ngày ${shortDateVn(selectedTaskDate())}`;
+      if (screen === "people") return selectedTaskDate() === today ? "Công việc" : `Công việc ngày ${shortDateVn(selectedTaskDate())}`;
       if (screen === "stats") return "Báo cáo tổ";
       if (screen === "usermanagement") return "Quản lý người dùng";
       return "Nhật ký công việc";
@@ -4845,7 +4845,7 @@
       `;
     }
 
-    // ===== Màn "Hôm nay ai làm gì" =====
+    // ===== Màn "Công việc" =====
     // Nhóm việc trong ngày theo từng người thực hiện. Phân biệt rõ 2 loại "đang
     // làm": việc đang làm TRONG NGÀY (badge xanh "Đang làm hôm nay") và việc TỒN
     // kéo dài nhiều ngày — quá deadline chưa xong (badge vàng "Tồn N ngày").
