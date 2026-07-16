@@ -1965,7 +1965,7 @@
             </div>
 
             <div class="field">
-              <div class="field-lb">Kết quả — chạm chọn</div>
+              <div class="field-lb">Trạng thái việc</div>
               <div id="progressChips" class="seg">
                 <button class="opt" type="button" data-value="Hoàn thành"><i class="bi bi-check2-circle"></i>Hoàn thành</button>
                 <button class="opt" type="button" data-value="Đang làm"><i class="bi bi-arrow-repeat"></i>Đang làm</button>
@@ -1987,7 +1987,7 @@
             </div>
 
             <div class="field">
-              <div class="field-lb">Ghi chú nhanh — chọn mẫu</div>
+              <div class="field-lb">Kết quả nhanh</div>
               <div class="quick-chips" id="resultChips">
                 <button class="qc" type="button" data-fill="Không phát hiện bất thường">Không bất thường</button>
                 <button class="qc" type="button" data-fill="Có bất thường, cần theo dõi">Còn theo dõi</button>
@@ -2001,13 +2001,6 @@
               <div class="field-lb"><i class="bi bi-people"></i>Kết quả từng người tham gia</div>
               <div class="d-flex flex-column gap-2" id="peopleResultRows"></div>
               <div class="small text-secondary mt-1">Ghi riêng nội dung thực hiện của từng nhân viên</div>
-            </div>
-
-            <div class="field">
-              <div class="field-lb">Ảnh</div>
-              <div class="media-row">
-                <button class="media-btn" type="button" id="btnAttachPhoto"><i class="bi bi-camera-fill"></i>Chụp ảnh</button>
-              </div>
             </div>
 
             <details class="extra-details">
@@ -2041,6 +2034,12 @@
                 <div class="col-12">
                   <label class="form-label" for="nextAction">Làm tiếp</label>
                   <input class="form-control" id="nextAction" placeholder="Ví dụ: thay bóng, đặt vật tư, kiểm tra lại sau mưa...">
+                </div>
+                <div class="col-12">
+                  <div class="field-lb">Ảnh</div>
+                  <div class="media-row">
+                    <button class="media-btn" type="button" id="btnAttachPhoto"><i class="bi bi-camera-fill"></i>Chụp ảnh</button>
+                  </div>
                 </div>
               </div>
             </details>
@@ -2254,25 +2253,13 @@
           <div class="modal-body">
             <input type="hidden" id="planFormId">
             <div class="row g-2">
-              <div class="col-4">
-                <label class="form-label" for="planDate">Ngày bắt đầu</label>
-                <input class="form-control" id="planDate" type="date" required>
-              </div>
-              <div class="col-4">
-                <label class="form-label" for="planFollowUpDate">Ngày xem lại</label>
-                <input class="form-control" id="planFollowUpDate" type="date">
-              </div>
-              <div class="col-4">
-                <label class="form-label" for="planDateEnd">Hạn cuối</label>
-                <input class="form-control" id="planDateEnd" type="date">
+              <div class="col-12">
+                <label class="form-label" for="planTask">Nội dung công việc</label>
+                <textarea class="form-control" id="planTask" rows="3" placeholder="Ghi đúng chỉ đạo: việc gì cần làm, tiêu chí xong..." required></textarea>
               </div>
               <div class="col-6">
-                <label class="form-label" for="planTimeFrom">Khung giờ</label>
-                <div class="d-flex align-items-center gap-1">
-                  <select class="form-select" id="planTimeFrom" title="Từ giờ"></select>
-                  <span class="text-secondary">-</span>
-                  <select class="form-select" id="planTimeTo" title="Đến giờ"></select>
-                </div>
+                <label class="form-label" for="planDate">Ngày làm</label>
+                <input class="form-control" id="planDate" type="date" required>
               </div>
               <div class="col-6">
                 <label class="form-label" for="planTeam">Tổ/ca</label>
@@ -2284,51 +2271,70 @@
                 <select class="form-select" id="planPersonSelect"></select>
                 <div class="d-flex flex-wrap gap-1 mt-2" id="planPersonChips"></div>
               </div>
-              <div class="col-6">
-                <label class="form-label" for="planArea">Khu vực</label>
-                <input class="form-control" id="planArea" list="planAreaSuggestions" placeholder="Tầng hầm B1">
-                <datalist id="planAreaSuggestions"></datalist>
-              </div>
-              <div class="col-6">
-                <label class="form-label" for="planAsset">Thiết bị</label>
-                <input class="form-control" id="planAsset" list="planAssetSuggestions" placeholder="Tủ MSB-B1">
-                <datalist id="planAssetSuggestions"></datalist>
-              </div>
               <div class="col-12">
-                <label class="form-label" for="planTask">Nội dung công việc</label>
-                <textarea class="form-control" id="planTask" rows="3" placeholder="Việc cần làm, tiêu chí hoàn thành..." required></textarea>
-              </div>
-              <div class="col-6">
-                <label class="form-label" for="planQty">Số lượng <span class="fw-normal text-secondary">(nếu có)</span></label>
-                <input class="form-control" id="planQty" type="number" inputmode="decimal" step="any" min="0" placeholder="vd: 140">
-              </div>
-              <div class="col-6">
-                <label class="form-label" for="planUnit">Đơn vị</label>
-                <input class="form-control" id="planUnit" placeholder="vd: m, cái, bộ...">
-              </div>
-              <div class="col-4">
-                <label class="form-label" for="planType">Phân loại</label>
-                <select class="form-select" id="planType">
-                  <option selected>Kế hoạch</option>
-                  <option>Phát sinh</option>
-                </select>
-              </div>
-              <div class="col-4">
-                <label class="form-label" for="planPriority">Mức ưu tiên</label>
-                <select class="form-select" id="planPriority">
-                  <option>Cao</option>
-                  <option selected>Trung bình</option>
-                  <option>Thấp</option>
-                </select>
-              </div>
-              <div class="col-4">
-                <label class="form-label" for="planStatus">Trạng thái</label>
-                <select class="form-select" id="planStatus">
-                  <option selected>Chưa làm</option>
-                  <option>Đang làm</option>
-                  <option>Hoàn thành</option>
-                  <option>Cần hỗ trợ</option>
-                </select>
+                <details class="extra-details">
+                  <summary>Chi tiết thêm</summary>
+                  <div class="row g-2 mt-1">
+                    <div class="col-6">
+                      <label class="form-label" for="planArea">Khu vực</label>
+                      <input class="form-control" id="planArea" list="planAreaSuggestions" placeholder="Tầng hầm B1">
+                      <datalist id="planAreaSuggestions"></datalist>
+                    </div>
+                    <div class="col-6">
+                      <label class="form-label" for="planAsset">Thiết bị</label>
+                      <input class="form-control" id="planAsset" list="planAssetSuggestions" placeholder="Tủ MSB-B1">
+                      <datalist id="planAssetSuggestions"></datalist>
+                    </div>
+                    <div class="col-6">
+                      <label class="form-label" for="planTimeFrom">Khung giờ</label>
+                      <div class="d-flex align-items-center gap-1">
+                        <select class="form-select" id="planTimeFrom" title="Từ giờ"></select>
+                        <span class="text-secondary">-</span>
+                        <select class="form-select" id="planTimeTo" title="Đến giờ"></select>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <label class="form-label" for="planDateEnd">Hạn cuối</label>
+                      <input class="form-control" id="planDateEnd" type="date">
+                    </div>
+                    <div class="col-6">
+                      <label class="form-label" for="planFollowUpDate">Ngày nhắc lại</label>
+                      <input class="form-control" id="planFollowUpDate" type="date">
+                    </div>
+                    <div class="col-6">
+                      <label class="form-label" for="planPriority">Ưu tiên</label>
+                      <select class="form-select" id="planPriority">
+                        <option>Cao</option>
+                        <option selected>Trung bình</option>
+                        <option>Thấp</option>
+                      </select>
+                    </div>
+                    <div class="col-6">
+                      <label class="form-label" for="planQty">Số lượng <span class="fw-normal text-secondary">(nếu có)</span></label>
+                      <input class="form-control" id="planQty" type="number" inputmode="decimal" step="any" min="0" placeholder="vd: 140">
+                    </div>
+                    <div class="col-6">
+                      <label class="form-label" for="planUnit">Đơn vị</label>
+                      <input class="form-control" id="planUnit" placeholder="vd: m, cái, bộ...">
+                    </div>
+                    <div class="col-6">
+                      <label class="form-label" for="planType">Phân loại</label>
+                      <select class="form-select" id="planType">
+                        <option selected>Kế hoạch</option>
+                        <option>Phát sinh</option>
+                      </select>
+                    </div>
+                    <div class="col-6">
+                      <label class="form-label" for="planStatus">Trạng thái</label>
+                      <select class="form-select" id="planStatus">
+                        <option selected>Chưa làm</option>
+                        <option>Đang làm</option>
+                        <option>Hoàn thành</option>
+                        <option>Cần hỗ trợ</option>
+                      </select>
+                    </div>
+                  </div>
+                </details>
               </div>
             </div>
           </div>
