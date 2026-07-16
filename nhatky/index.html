@@ -1319,15 +1319,23 @@
     /* ===== Màn "Công việc" ===== */
     .people-group { margin-bottom: 12px; }
     .people-rows { display: flex; flex-direction: column; }
+    .people-row-wrap {
+      display: grid; grid-template-columns: minmax(0, 1fr) 44px; align-items: stretch;
+      border-top: 1px solid var(--line);
+    }
     .people-row {
       display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
-      background: none; border: 0; border-top: 1px solid var(--line);
+      background: none; border: 0;
       padding: 10px 14px; cursor: pointer;
     }
-    .people-row:active { background: var(--surface-high); }
+    .people-row:active, .people-detail-btn:active { background: var(--surface-high); }
     .people-row .badge-soft { margin-left: auto; flex-shrink: 0; font-size: .8rem; padding: 4px 10px; }
     .people-row-task { font-weight: 700; color: var(--ink); font-size: .96rem; line-height: 1.3; }
     .people-row-meta { color: var(--muted); font-size: .82rem; margin-top: 2px; }
+    .people-detail-btn {
+      width: 44px; border: 0; background: none; color: var(--muted);
+      display: inline-flex; align-items: center; justify-content: center; font-size: 1.15rem;
+    }
     .a11y-chip,
     .qc,
     .link-button {
@@ -4974,15 +4982,20 @@
               : escapeHtml(plan.task || "Chưa đặt tên công việc");
             const onClick = step
               ? `navigateTo('logentry', {planId:'${escapeAttr(plan.id)}', stepId:'${escapeAttr(step.id)}', presetProgress:'Hoàn thành'})`
-              : `openTaskDetail('${escapeAttr(plan.id)}')`;
+              : `navigateTo('logentry', {planId:'${escapeAttr(plan.id)}', presetProgress:'Hoàn thành'})`;
             return `
-              <button class="people-row" type="button" onclick="${onClick}" title="${step ? "Bấm để ghi nhật ký bước này" : "Bấm để xem chi tiết"}">
-                <div class="min-w-0">
-                  <div class="people-row-task">${taskLabel}</div>
-                  <div class="people-row-meta">${plan.time ? escapeHtml(plan.time) + (where ? " · " : "") : ""}${where}${logged ? ' · <span class="text-success fw-bold"><i class="bi bi-journal-check"></i> đã ghi NK</span>' : ""}</div>
-                </div>
-                ${step ? peopleStepChip(plan, iso) : peoplePlanChip(plan, iso)}
-              </button>`;
+              <div class="people-row-wrap">
+                <button class="people-row" type="button" onclick="${onClick}" title="${step ? "Ghi nhật ký bước này" : "Ghi nhật ký việc này"}">
+                  <div class="min-w-0">
+                    <div class="people-row-task">${taskLabel}</div>
+                    <div class="people-row-meta">${plan.time ? escapeHtml(plan.time) + (where ? " · " : "") : ""}${where}${logged ? ' · <span class="text-success fw-bold"><i class="bi bi-journal-check"></i> đã ghi NK</span>' : ""}</div>
+                  </div>
+                  ${step ? peopleStepChip(plan, iso) : peoplePlanChip(plan, iso)}
+                </button>
+                <button class="people-detail-btn" type="button" onclick="openTaskDetail('${escapeAttr(plan.id)}')" title="Chi tiết / chia bước" aria-label="Chi tiết / chia bước">
+                  <i class="bi bi-three-dots-vertical"></i>
+                </button>
+              </div>`;
           }).join("");
         return `
           <div class="panel people-group">
