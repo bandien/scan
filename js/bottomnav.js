@@ -38,6 +38,7 @@
 
   const MENU_DAILY = [
     { icon: 'bi-water',            label: 'Thông tin & Check vận hành bơm', href: root + 'pump_info.html' },
+    { icon: 'bi-flag-fill',        label: 'Checklist Cơ Điện Sân Golf',     href: root + 'sangolf/' },
     { icon: 'bi-calendar-range',   label: 'Phân ca trực',                   href: root + 'phanca/' },
     { icon: 'bi-journal-check',    label: 'Nhật ký công việc',              href: root + 'nhatky/' }
   ];
@@ -55,6 +56,30 @@
     return items.map(m => `<a href="${m.href}"><i class="bi ${m.icon}"></i>${m.label}</a>`).join('');
   }
 
+  // "Cài đặt ứng dụng" gọi prompt cài PWA (js/pwa.js) thay vì điều hướng —
+  // chỉ hiện khi pwa.js đã nạp trên trang. iOS Safari không bắn được sự kiện
+  // cài đặt nên luôn hướng dẫn thao tác tay khi trình duyệt không hỗ trợ prompt.
+  function notify(msg) {
+    if (typeof window.bdsShowToast === 'function') window.bdsShowToast(msg, 'warning', 5000);
+    else alert(msg);
+  }
+  async function handleInstallClick(e) {
+    e.preventDefault();
+    if (window.BD_PWA && BD_PWA.canInstall()) {
+      await BD_PWA.promptInstall();
+    } else {
+      notify('Mở menu trình duyệt (⋮ hoặc nút Chia sẻ) và chọn "Thêm vào Màn hình chính" để cài ứng dụng.');
+    }
+  }
+
+  // Hiện số phiên bản cuối menu — trước đây chỉ index.html biết đang chạy bản
+  // nào, các trang vệ tinh không có cách nào tra cứu khi cần hỗ trợ từ xa.
+  function versionFooter() {
+    const version = (typeof CONFIG !== 'undefined' && CONFIG.version) || '';
+    if (!version) return '';
+    return `<div class="px-3 py-1 text-center text-muted" style="font-size:.72rem;">Phiên bản ${version}</div>`;
+  }
+
   function build() {
     document.body.classList.add('has-bds-bottom-nav');
 
@@ -66,7 +91,9 @@
       menuLinks(MENU_DAILY) +
       (isAdmin()
         ? `<hr><div class="bds-nav-menu-header"><i class="bi bi-shield-lock-fill me-1"></i> Dành cho quản trị</div>` + menuLinks(MENU_ADMIN)
-        : '');
+        : '') +
+      `<hr><a href="#" id="bdsInstallAppBtn"><i class="bi bi-download"></i>Cài đặt ứng dụng</a>` +
+      versionFooter();
 
     const nav = document.createElement('nav');
     nav.className = 'bds-bottom-nav';
@@ -90,6 +117,7 @@
     document.addEventListener('click', (e) => {
       if (menu.classList.contains('open') && !menu.contains(e.target)) menu.classList.remove('open');
     });
+    document.getElementById('bdsInstallAppBtn').addEventListener('click', handleInstallClick);
   }
 
   if (document.readyState === 'loading') {

@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cài đặt đồng hồ bơm | BanDienScan</title>
   <meta name="description" content="Lưu giờ cài đặt đồng hồ chạy bơm vào Google Sheet.">
+  <link rel="manifest" href="../manifest.json">
+  <meta name="theme-color" content="#059669">
+  <link rel="icon" href="../favicon.ico">
+  <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -146,6 +150,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="../js/api.js"></script>
+  <script src="../js/fontscale.js"></script>
+  <script src="../js/pwa.js" data-root="../"></script>
   <script>
     const GAS_URL = "https://script.google.com/macros/s/AKfycbzW4TxDarLBOpZvO8hnE0R65IsCd95a5l-XPASjUmZNuefH5MiWMs8lCpLpggzFwyXK/exec";
     const API_TOKEN = "HAPU_QR_SECRET_2026";
@@ -176,25 +182,7 @@
     let settings = [];
     let toast;
 
-    // Phóng to chữ toàn trang cho nhân viên lớn tuổi / mắt kém — mọi cỡ chữ
-    // dùng rem nên chỉ cần đổi font-size gốc; mức chọn lưu theo máy.
-    const FONT_SCALES = [100, 115, 130];
-    function applyFontScale() {
-      const scale = parseInt(localStorage.getItem("bandien_hengio_fontscale") || "100", 10);
-      document.documentElement.style.fontSize = scale + "%";
-      document.getElementById("fontScaleLabel").textContent = scale <= 100 ? "A" : scale <= 115 ? "A+" : "A++";
-    }
-    function cycleFontScale() {
-      const current = parseInt(localStorage.getItem("bandien_hengio_fontscale") || "100", 10);
-      const next = FONT_SCALES[(FONT_SCALES.indexOf(current) + 1) % FONT_SCALES.length];
-      localStorage.setItem("bandien_hengio_fontscale", String(next));
-      applyFontScale();
-    }
-
     document.addEventListener("DOMContentLoaded", async () => {
-      applyFontScale();
-      document.getElementById("btnFontScale").addEventListener("click", cycleFontScale);
-
       toast = new bootstrap.Toast(document.getElementById("toast"), { delay: 2200 });
       document.getElementById("btnReload").addEventListener("click", () => loadSettings(true));
       document.getElementById("btnCopyAll").addEventListener("click", () => copyText(document.getElementById("allMessage").value));

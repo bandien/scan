@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>BanDienScan | Quản lý Ban điện thông minh</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#059669">
+    <link rel="icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -16,6 +20,8 @@
     <script src="https://unpkg.com/html5-qrcode" defer></script>
     <script src="js/sso.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/fontscale.js"></script>
+    <script src="js/pwa.js" data-root="./"></script>
 
     <style>
         /* ===== Design tokens: "Scan Industrial Utility" (design-system/stitch_scan_mobile_design_system) ===== */
@@ -1450,6 +1456,7 @@
                 <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleCalendar()" id="btn-calendar"><i class="bi bi-calendar-event me-2 text-primary"></i> Lịch Bảo Trì</a></li>
                 <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleKanban()" id="btn-kanban"><i class="bi bi-kanban me-2 text-primary"></i> Kanban WO</a></li>
                 <li><a class="dropdown-item rounded-3 py-2" href="pump_info.html"><i class="bi bi-water me-2 text-primary"></i> Thông tin & Check vận hành bơm</a></li>
+                <li><a class="dropdown-item rounded-3 py-2" href="sangolf/"><i class="bi bi-flag-fill me-2 text-success"></i> Checklist Cơ Điện Sân Golf</a></li>
                 <li><a class="dropdown-item rounded-3 py-2" href="phanca/"><i class="bi bi-calendar-range me-2 text-info"></i> Phân ca trực</a></li>
 
                 <!-- ===== Dành cho Quản trị — chỉ hiện với Role Admin/Manager (xem updateUI()) ===== -->
@@ -1513,35 +1520,14 @@
         apiToken: 'HAPU_QR_SECRET_2026',
         appTitle: 'BanDienScan',
         companyName: 'HAPU Complex',
-        version: 'v2.10.0' // Nguồn hiển thị duy nhất — các chỗ trong UI render qua class .app-version
+        version: 'v2.11.0' // Nguồn hiển thị duy nhất — các chỗ trong UI render qua class .app-version
     };
     // Điền số phiên bản vào mọi vị trí hiển thị (màn đăng nhập, cuối menu)
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.app-version').forEach(el => { el.textContent = CONFIG.version; });
     });
 
-    // ===== Phóng to chữ toàn trang — dùng chung key với màn Cá nhân (nhatky) nên
-    // cỡ chữ chọn ở trang nào cũng áp dụng đồng bộ mọi trang khác. Ưu tiên hiển thị
-    // ngay ở header (không ẩn trong menu) vì đây là 2 trang tác nghiệp chính. =====
-    const FONT_SCALE_KEY = 'bandien_nhatky_fontscale';
-    const FONT_SCALES = [100, 115, 130];
-    function applyFontScale() {
-        const scale = parseInt(localStorage.getItem(FONT_SCALE_KEY) || '100', 10);
-        document.documentElement.style.fontSize = scale + '%';
-        const label = document.getElementById('fontScaleLabel');
-        if (label) label.textContent = scale <= 100 ? 'A' : scale <= 115 ? 'A+' : 'A++';
-    }
-    function cycleFontScale() {
-        const current = parseInt(localStorage.getItem(FONT_SCALE_KEY) || '100', 10);
-        const next = FONT_SCALES[(FONT_SCALES.indexOf(current) + 1) % FONT_SCALES.length];
-        localStorage.setItem(FONT_SCALE_KEY, String(next));
-        applyFontScale();
-    }
-    document.addEventListener('DOMContentLoaded', () => {
-        applyFontScale();
-        const btn = document.getElementById('btnFontScale');
-        if (btn) btn.addEventListener('click', cycleFontScale);
-    });
+    // Phóng to chữ: js/fontscale.js tự áp dụng + gắn sự kiện cho #btnFontScale khi tải trang.
 
     // Legacy variables (pointing to CONFIG for compatibility)
     const gasUrl = CONFIG.gasUrl;

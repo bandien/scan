@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Bảng phân ca tổ cơ điện sân golf | BanDienScan</title>
   <meta name="description" content="Bảng phân ca tuần cho tổ cơ điện sân golf.">
+  <link rel="manifest" href="../manifest.json">
+  <meta name="theme-color" content="#059669">
+  <link rel="icon" href="../favicon.ico">
+  <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
   <link href="../css/shared.css" rel="stylesheet">
@@ -370,6 +374,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/fontscale.js"></script>
+  <script src="../js/pwa.js" data-root="../"></script>
   <script>
     const STORAGE_KEY = "bandien_shift_roster_v1";
     const HISTORY_KEY = "bandien_shift_roster_weeks_v1";
@@ -407,25 +414,7 @@
     let state;
     let toast;
 
-    // Phóng to chữ toàn trang cho nhân viên lớn tuổi / mắt kém — mức tối đa
-    // giữ vừa phải (130%) để không vỡ layout bảng phân ca dạng lưới cố định.
-    const FONT_SCALES = [100, 115, 130];
-    function applyFontScale() {
-      const scale = parseInt(localStorage.getItem("bandien_phanca_fontscale") || "100", 10);
-      document.documentElement.style.fontSize = scale + "%";
-      document.getElementById("fontScaleLabel").textContent = scale <= 100 ? "A" : scale <= 115 ? "A+" : "A++";
-    }
-    function cycleFontScale() {
-      const current = parseInt(localStorage.getItem("bandien_phanca_fontscale") || "100", 10);
-      const next = FONT_SCALES[(FONT_SCALES.indexOf(current) + 1) % FONT_SCALES.length];
-      localStorage.setItem("bandien_phanca_fontscale", String(next));
-      applyFontScale();
-    }
-
     document.addEventListener("DOMContentLoaded", async () => {
-      applyFontScale();
-      document.getElementById("btnFontScale").addEventListener("click", cycleFontScale);
-
       toast = new bootstrap.Toast(document.getElementById("toast"), { delay: 1800 });
       if (!canManageRoster()) {
         document.getElementById("accessDenied").style.display = "block";
@@ -588,25 +577,19 @@
       switchWeek(formatISODate(date));
     }
 
+    // Dùng js/api.js dùng chung (retry tự động + phát hiện cold-start GAS)
+    // thay vì fetch trần trước đây — mất mạng sáng sớm không còn ra trắng trang.
     async function apiGet(action, params) {
-      if (typeof gasUrl === "undefined") return null;
       try {
-        const query = new URLSearchParams({ action, token: API_TOKEN, ...params });
-        const res = await fetch(`${gasUrl}?${query.toString()}`);
-        return await res.json();
+        return await bdsApiFetch(action, params);
       } catch (_) {
         return null;
       }
     }
 
     async function apiPost(action, payload) {
-      if (typeof gasUrl === "undefined") return null;
       try {
-        const res = await fetch(gasUrl, {
-          method: "POST",
-          body: JSON.stringify({ action, token: API_TOKEN, ...payload })
-        });
-        return await res.json();
+        return await bdsApiPost(action, payload);
       } catch (_) {
         return null;
       }
