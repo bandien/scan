@@ -1424,18 +1424,6 @@
 
     <!-- Unified Bottom Navigation Bar -->
     <nav class="bottom-nav-bar" id="mainBottomNav" style="display: none;">
-        <button class="bottom-nav-item" type="button" onclick="window.location.href='nhatky/index.html#tasklist'">
-            <div class="nav-icon-wrapper">
-                <span class="material-symbols-outlined">assignment</span>
-            </div>
-            <span>Kế hoạch</span>
-        </button>
-        <button class="bottom-nav-item" type="button" onclick="window.location.href='nhatky/index.html#loghistory'">
-            <div class="nav-icon-wrapper">
-                <span class="material-symbols-outlined">history_edu</span>
-            </div>
-            <span>Nhật ký</span>
-        </button>
         <button class="bottom-nav-item active" type="button">
             <div class="nav-icon-wrapper">
                 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">qr_code_scanner</span>
@@ -1464,6 +1452,8 @@
                     <hr class="dropdown-divider opacity-50">
                     <h6 class="dropdown-header text-muted small fw-bold"><i class="bi bi-shield-lock-fill me-1"></i> DÀNH CHO QUẢN TRỊ</h6>
                 </li>
+                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="nhatky/index.html#people"><i class="bi bi-clipboard-check me-2 text-info"></i> Kế hoạch công việc</a></li>
+                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="nhatky/index.html#loghistory"><i class="bi bi-journal-text me-2 text-info"></i> Nhật ký công việc</a></li>
                 <li id="menuAddDevice" class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="showAddDeviceModal()"><i class="bi bi-plus-square-dotted me-2 text-success"></i> Thêm thiết bị mới</a></li>
                 <li id="menuBatchGen" class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleBatchGenerator()"><i class="bi bi-magic me-2 text-success"></i> Tạo mã hàng loạt</a></li>
                 <li id="menuProjMgr" class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="openProjectManager()"><i class="bi bi-briefcase-fill me-2 text-success"></i> Quản lý Dự án</a></li>
