@@ -1428,6 +1428,13 @@
       box-shadow: none;
       font-weight: 800;
     }
+    /* Nút "Ghi nhật ký phát sinh" — bỏ đổ bóng riêng, không ảnh hưởng các
+       nút .btn-main khác (Ghi nhật ký mới, Hoàn thành...). Đặc trưng cao
+       hơn mọi rule .btn-main/.action-bar .btn-main ở trên để luôn thắng
+       bất kể thứ tự khai báo trong file. */
+    .action-bar .btn-main.btn-no-shadow {
+      box-shadow: none;
+    }
     .btn-main,
     .action-bar .btn-main,
     .stitch-btn-primary {
@@ -4594,7 +4601,7 @@
       }
       return `
         <div class="action-bar">
-          <button class="btn-main" type="button" onclick="navigateTo('logentry', {})"><i class="bi bi-journal-plus"></i>Ghi nhật ký phát sinh</button>
+          <button class="btn-main btn-no-shadow" type="button" onclick="navigateTo('logentry', {})"><i class="bi bi-journal-plus"></i>Ghi nhật ký phát sinh</button>
         </div>`;
     }
 
