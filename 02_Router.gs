@@ -179,7 +179,7 @@ function ensureWorkLogsSheet_() {
   const headers = [
     "LogID","CreatedAt","WorkDate","Employee","Shift","Progress",
     "StartTime","EndTime","Task","Result","Issue","NextAction","PlanID","SyncStatus",
-    "Rating","RecordedBy","Quantity","Unit","Teams"
+    "Rating","RecordedBy","Quantity","Unit","Teams","StepID"
   ];
 
   if (!sheet) sheet = ss.insertSheet("WorkLogs");
@@ -198,6 +198,10 @@ function ensureWorkLogsSheet_() {
       sheet.getRange(1, 18).setValue("Unit").setFontWeight("bold");
     }
     sheet.getRange(1, 19).setValue("Teams").setFontWeight("bold");
+    if (String(sheet.getRange(1, 20).getValue()).trim() === "") {
+      // Nhật ký ghi cho một bước cụ thể của kế hoạch (nhatky/index.html — steps)
+      sheet.getRange(1, 20).setValue("StepID").setFontWeight("bold");
+    }
   }
   return sheet;
 }
@@ -221,7 +225,7 @@ function handleGetWorkLogs(e) {
   const cutoff = Utilities.formatDate(new Date(Date.now() - days * 86400000), Session.getScriptTimeZone(), "yyyy-MM-dd");
   const maxRows = 400;
   const startRow = Math.max(2, lastRow - maxRows + 1);
-  const rows = sheet.getRange(startRow, 1, lastRow - startRow + 1, 19).getValues();
+  const rows = sheet.getRange(startRow, 1, lastRow - startRow + 1, 20).getValues();
 
   const logs = [];
   rows.forEach(function(r) {
@@ -254,6 +258,7 @@ function handleGetWorkLogs(e) {
       quantity: r[16] === "" || r[16] === null ? "" : Number(r[16]),
       unit: String(r[17] || ""),
       teams: String(r[18] || ""),
+      stepId: String(r[19] || ""),
       syncStatus: "synced"
     });
   });
@@ -307,7 +312,8 @@ function handleCreateWorkLog(params) {
     payload.recordedBy || "",
     payload.quantity === 0 || payload.quantity ? payload.quantity : "",
     payload.unit || "",
-    requestedTeam
+    requestedTeam,
+    payload.stepId || ""
   ]);
 
   // Cập nhật tăng dần lũy kế vào dòng kế hoạch (Incremental Update)
