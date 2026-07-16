@@ -54,6 +54,8 @@ function doGet(e) {
       case 'getPumpChecks':     return handleGetPumpChecks(e);
       case 'getMeterStatus':    return handleGetMeterStatus(e);
       case 'getPlans':          return handleGetPlans(e);           // Kế hoạch trang nhatky
+      case 'getGolfTemplates':  return handleGetGolfTemplates(e);   // Checklist sân golf (trang sangolf)
+      case 'getGolfRuns':       return handleGetGolfRuns(e);        // Checklist sân golf (trang sangolf)
       case 'getWorkLogs':       return handleGetWorkLogs(e);        // Nhật ký cả tổ (trang nhatky)
       case 'nhatkyAccounts':    return handleListAccounts(e);       // Danh sách tài khoản trang nhatky
       case 'tempDumpDevices':   return handleTempDumpDevices(e);
@@ -160,6 +162,11 @@ function doPost(e) {
       createMeterPoint:     handleCreateMeterPoint,
       updateMeterPoint:     handleUpdateMeterPoint,
       submitPumpCheck:      handleSubmitPumpCheck,
+      // Checklist sân golf (trang sangolf)
+      saveGolfRun:          handleSaveGolfRun,
+      submitGolfRun:        handleSubmitGolfRun,
+      confirmGolfHandover:  handleConfirmGolfHandover,
+      seedGolfTemplates:    handleSeedGolfTemplates,
     };
 
     const handler = DISPATCH[params.action];
@@ -210,12 +217,15 @@ function ensureWorkLogsSheet_() {
 function handleGetWorkLogs(e) {
   const user = e && e.parameter ? e.parameter.user : "";
   const userTeams = typeof getUserTeams_ === "function" ? getUserTeams_(user) : "";
+  const userRole = typeof getUserRole_ === "function" ? getUserRole_(user) : "";
 
   const sheet = ensureWorkLogsSheet_();
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return contentResponse({ status: "success", logs: [] });
 
-  const isPrivileged = typeof isPrivilegedTeams_ === "function" && isPrivilegedTeams_(userTeams);
+  const isPrivileged =
+    (typeof isPrivilegedRole_ === "function" && isPrivilegedRole_(userRole)) ||
+    (typeof isPrivilegedTeams_ === "function" && isPrivilegedTeams_(userTeams));
   // Không có tài khoản, hoặc tài khoản chưa được phân nhóm tổ → không trả về nhật ký nào
   if (!isPrivileged && (!userTeams || userTeams === "- Chưa phân tổ -")) {
     return contentResponse({ status: "success", logs: [] });
@@ -288,8 +298,12 @@ function handleCreateWorkLog(params) {
   
   const user = payload.recordedBy || employee;
   const userTeams = typeof getUserTeams_ === "function" ? getUserTeams_(user) : "";
+  const userRole = typeof getUserRole_ === "function" ? getUserRole_(user) : "";
   const requestedTeam = String(payload.teams || "").trim();
-  if (typeof userCanAccessTeam_ !== "function" || !userCanAccessTeam_(userTeams, requestedTeam)) {
+  const isPrivileged =
+    (typeof isPrivilegedRole_ === "function" && isPrivilegedRole_(userRole)) ||
+    (typeof isPrivilegedTeams_ === "function" && isPrivilegedTeams_(userTeams));
+  if (!isPrivileged && (typeof userCanAccessTeam_ !== "function" || !userCanAccessTeam_(userTeams, requestedTeam))) {
     return contentResponse({ status: "error", message: "Tổ không thuộc quyền của tài khoản" });
   }
 

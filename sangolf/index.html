@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist Cơ Điện Sân Golf | BanDienScan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="../css/shared.css" rel="stylesheet">
+    <style>
+        :root {
+            --bds-bg: #f3f4f6;
+            --bds-surface: #ffffff;
+            --bds-on-surface: #0f172a;
+            --bds-muted: #64748b;
+            --bds-line: #e5e7eb;
+            --bds-primary: #059669;
+            --bds-success: #10b981;
+            --bds-warning: #f59e0b;
+            --bds-danger: #ef4444;
+        }
+
+        body {
+            background-color: var(--bds-bg);
+            color: var(--bds-on-surface);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            padding-bottom: 90px;
+        }
+
+        .app-shell { max-width: 520px; margin: 0 auto; padding: 16px; }
+
+        .header-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 18px; background: #fff; border-radius: 20px;
+            border: 2px solid var(--bds-line); margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+        .header-bar .app-title { font-weight: 800; font-size: 1rem; }
+        .header-bar .app-sub { font-size: 0.75rem; color: var(--bds-muted); font-weight: 600; }
+
+        .card-custom {
+            background: var(--bds-surface); border-radius: 20px;
+            border: 2px solid var(--bds-line); padding: 18px;
+            box-shadow: 0 10px 25px rgba(15,23,42,0.04); margin-bottom: 14px;
+        }
+
+        /* ── Home: template cards ── */
+        .tpl-card { cursor: pointer; transition: transform .15s ease, border-color .15s ease; }
+        .tpl-card:active { transform: scale(0.98); }
+        .tpl-card.dimmed { opacity: 0.6; }
+        .tpl-card .tpl-name { font-weight: 800; font-size: 1rem; }
+        .tpl-card .tpl-meta { font-size: 0.78rem; color: var(--bds-muted); font-weight: 600; }
+        .status-chip {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 0.72rem; font-weight: 800; padding: 4px 10px; border-radius: 999px;
+        }
+        .chip-none      { background: #f1f5f9; color: #64748b; }
+        .chip-draft     { background: #fef3c7; color: #92400e; }
+        .chip-submitted { background: #dbeafe; color: #1d4ed8; }
+        .chip-confirmed { background: #d1fae5; color: #047857; }
+        .chip-due       { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+
+        .pending-banner {
+            background: #eff6ff; border: 2px solid #bfdbfe; border-radius: 16px;
+            padding: 12px 14px; margin-bottom: 14px; font-size: 0.85rem; font-weight: 600;
+        }
+
+        /* ── Run view ── */
+        .section-title {
+            font-size: 0.8rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.04em; color: var(--bds-primary);
+            margin: 20px 4px 10px; display: flex; gap: 8px; align-items: center;
+        }
+        .item-card {
+            background: #fff; border: 2px solid var(--bds-line); border-radius: 16px;
+            padding: 14px; margin-bottom: 10px;
+        }
+        .item-card.done { border-color: #a7f3d0; background: #f6fefb; }
+        .item-card.warn { border-color: #fecaca; background: #fef8f8; }
+        .item-label { font-weight: 700; font-size: 0.92rem; line-height: 1.35; }
+        .item-note-hint { font-size: 0.75rem; color: var(--bds-muted); margin-top: 3px; }
+
+        .check-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+        .check-btn {
+            border: 2px solid var(--bds-line); border-radius: 12px; padding: 9px 4px;
+            text-align: center; font-weight: 800; font-size: 0.8rem; cursor: pointer;
+            background: #fff; user-select: none; transition: all .15s ease;
+        }
+        .check-btn.on-ok   { background: #059669; border-color: #059669; color: #fff; }
+        .check-btn.on-ng   { background: #ef4444; border-color: #ef4444; color: #fff; }
+        .check-btn.on-skip { background: #64748b; border-color: #64748b; color: #fff; }
+
+        .num-wrap { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+        .num-input {
+            flex: 1; border: 2px solid #d1d5db; border-radius: 12px; padding: 10px 14px;
+            font-weight: 700; font-size: 1.05rem; width: 100%;
+        }
+        .num-input:focus { outline: none; border-color: var(--bds-primary); }
+        .num-input.bad { border-color: var(--bds-danger); background: #fef2f2; color: #b91c1c; }
+        .unit-tag { font-weight: 800; color: var(--bds-muted); font-size: 0.9rem; min-width: 34px; }
+
+        .sub-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+        .sub-label { flex: 1; font-size: 0.82rem; font-weight: 600; color: #334155; }
+        .time-input {
+            border: 2px solid #d1d5db; border-radius: 10px; padding: 7px 8px;
+            font-weight: 700; font-size: 0.9rem; width: 106px;
+        }
+        .time-input:focus { outline: none; border-color: var(--bds-primary); }
+        .sub-num { width: 96px; flex: none; padding: 7px 10px; font-size: 0.95rem; }
+
+        .text-input {
+            width: 100%; border: 2px solid #d1d5db; border-radius: 12px; padding: 10px 14px;
+            font-weight: 600; font-size: 0.9rem; margin-top: 10px; min-height: 64px;
+        }
+        .text-input:focus { outline: none; border-color: var(--bds-primary); }
+
+        .note-toggle { border: none; background: none; color: var(--bds-muted); font-size: 1rem; padding: 2px 6px; }
+        .note-input {
+            width: 100%; border: 2px dashed #d1d5db; border-radius: 10px;
+            padding: 7px 12px; font-size: 0.85rem; margin-top: 8px;
+        }
+        .note-input:focus { outline: none; border-color: var(--bds-warning); }
+
+        .threshold-warn { font-size: 0.75rem; color: var(--bds-danger); font-weight: 700; margin-top: 6px; }
+
+        /* Progress bar sticky */
+        .progress-sticky {
+            position: sticky; top: 0; z-index: 20; background: var(--bds-bg);
+            padding: 10px 0 8px; margin: -6px 0 6px;
+        }
+        .progress-track { background: #e2e8f0; border-radius: 999px; height: 10px; overflow: hidden; }
+        .progress-fill { background: var(--bds-primary); height: 100%; border-radius: 999px; transition: width .3s ease; }
+        .progress-label { font-size: 0.75rem; font-weight: 800; color: var(--bds-muted); margin-top: 5px; display: flex; justify-content: space-between; }
+
+        .btn-submit-glow {
+            width: 100%; border: none; border-radius: 16px; padding: 15px;
+            background: linear-gradient(135deg, #059669, #10b981); color: #fff;
+            font-weight: 800; font-size: 1rem; display: flex; align-items: center;
+            justify-content: center; gap: 8px;
+            box-shadow: 0 10px 22px rgba(5,150,105,0.3);
+        }
+        .btn-submit-glow:disabled { opacity: 0.55; box-shadow: none; }
+
+        .sync-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+        .sync-ok { background: #10b981; }
+        .sync-pending { background: #f59e0b; animation: pulse 1.2s infinite; }
+        @keyframes pulse { 50% { opacity: 0.35; } }
+
+        .readonly-lock input, .readonly-lock textarea, .readonly-lock .check-btn { pointer-events: none; opacity: 0.85; }
+
+        .date-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+        .date-nav input { flex: 1; border: 2px solid var(--bds-line); border-radius: 14px; padding: 10px 12px; font-weight: 700; }
+        .date-nav button { border: 2px solid var(--bds-line); background: #fff; border-radius: 12px; width: 42px; height: 42px; }
+    </style>
+</head>
+<body>
+<div class="app-shell">
+
+    <!-- ═══════════ HOME VIEW ═══════════ -->
+    <div id="homeView">
+        <div class="header-bar">
+            <div>
+                <div class="app-title"><i class="bi bi-flag-fill text-success me-1"></i>Checklist Cơ Điện Sân Golf</div>
+                <div class="app-sub">Tổ Cơ Điện · Sân Golf Kỳ Sơn Montana</div>
+            </div>
+            <span id="syncIndicator" class="sync-dot sync-ok" title="Đã đồng bộ"></span>
+        </div>
+
+        <div class="card-custom" style="padding:14px 18px;">
+            <label class="fw-bold small text-secondary mb-1"><i class="bi bi-person-badge text-success me-1"></i>Người thực hiện</label>
+            <input type="text" id="operatorInput" class="num-input" style="margin-top:2px;" placeholder="Nhập họ tên của bạn...">
+        </div>
+
+        <div class="date-nav">
+            <button onclick="shiftDate(-1)"><i class="bi bi-chevron-left"></i></button>
+            <input type="date" id="datePicker" onchange="onDateChange()">
+            <button onclick="shiftDate(1)"><i class="bi bi-chevron-right"></i></button>
+        </div>
+
+        <div id="pendingBanners"></div>
+        <div id="templateCards">
+            <div class="text-center text-muted py-5"><div class="spinner-border spinner-border-sm me-2"></div>Đang tải mẫu checklist...</div>
+        </div>
+    </div>
+
+    <!-- ═══════════ RUN VIEW ═══════════ -->
+    <div id="runView" style="display:none;">
+        <div class="header-bar">
+            <button onclick="backHome()" style="border:none;background:none;font-size:1.3rem;padding:0 8px 0 0;"><i class="bi bi-arrow-left"></i></button>
+            <div style="flex:1;">
+                <div class="app-title" id="runTitle">—</div>
+                <div class="app-sub" id="runSub">—</div>
+            </div>
+            <span id="runSyncIndicator" class="sync-dot sync-ok"></span>
+        </div>
+
+        <div class="progress-sticky">
+            <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+            <div class="progress-label">
+                <span id="progressText">0/0 mục</span>
+                <span id="runStatusChip"></span>
+            </div>
+        </div>
+
+        <div id="runBody"></div>
+
+        <div id="submitArea" class="mt-3"></div>
+    </div>
+</div>
+
+<!-- ═══════════ SUBMIT MODAL ═══════════ -->
+<div class="modal fade" id="submitModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:20px;">
+            <div class="modal-header border-0 pb-0">
+                <h6 class="fw-bold mb-0"><i class="bi bi-clipboard-check text-success me-1"></i>Chốt ca & bàn giao</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="submitSummary" class="mb-3 small"></div>
+                <label class="fw-bold small text-secondary">Nội dung bàn giao cho ca sau</label>
+                <textarea id="handoverNoteInput" class="text-input" style="margin-top:4px;" placeholder="Sự cố, việc dở dang, đề nghị ca sau..."></textarea>
+                <label class="fw-bold small text-secondary mt-2">Người nhận bàn giao (nếu biết)</label>
+                <input type="text" id="handoverToInput" class="num-input" style="margin-top:4px;" placeholder="Họ tên người ca sau...">
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button class="btn-submit-glow" id="btnConfirmSubmit" onclick="doSubmitRun()">
+                    <i class="bi bi-check-circle-fill"></i>XÁC NHẬN CHỐT CA
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/sso.js"></script>
+<script>
+// =============================================================================
+// sangolf — Checklist Cơ Điện Sân Golf (local-first, autosave)
+// Backend: 19_GolfChecklist.gs · Kế hoạch: docs/PLAN_ChecklistGolf_SoHoa.md
+// =============================================================================
+
+const LS_TEMPLATES = 'golf_templates_v1';
+const LS_OPERATOR  = 'cmms_op_name';           // dùng chung key với checkbom
+const LS_RUN_PREFIX = 'golf_run_';             // + runId → draft local
+
+const TEMPLATE_ORDER = ['ca_sang', 'ca_toi', 'tuan', 'thang'];
+const TEMPLATE_ICONS = { ca_sang: 'bi-sunrise', ca_toi: 'bi-moon-stars', tuan: 'bi-calendar-week', thang: 'bi-calendar-month' };
+
+let templates = [];          // flat items từ backend
+let serverRuns = {};         // runId → run object (theo ngày đang chọn + hôm trước)
+let currentRun = null;       // {runId, templateId, date, status, items:{}, dirty}
+let saveTimer = null;
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const todayStr = () => new Date().toLocaleDateString('sv-SE'); // yyyy-MM-dd giờ địa phương
+const esc = s => { const d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; };
+
+function getOperator() {
+    const u = window.BD_SSO && BD_SSO.getUser();
+    if (u) return u.fullName || u.name || u.username || '';
+    return localStorage.getItem(LS_OPERATOR) || '';
+}
+
+function selectedDate() { return $('datePicker').value || todayStr(); }
+
+function golfRunId(templateId, date) { return 'GOLF-' + templateId + '-' + date.replace(/-/g, ''); }
+
+function prevDate(dateStr) {
+    const d = new Date(dateStr + 'T12:00:00');
+    d.setDate(d.getDate() - 1);
+    return d.toLocaleDateString('sv-SE');
+}
+
+function isDue(templateId, dateStr) {
+    const d = new Date(dateStr + 'T12:00:00');
+    if (templateId === 'tuan')  return d.getDay() === 1;      // thứ Hai
+    if (templateId === 'thang') return d.getDate() === 1;     // ngày 1
+    return true;                                              // ca hàng ngày
+}
+
+function parseThreshold(spec) {
+    if (!spec) return null;
+    const m = String(spec).match(/^(min|max|range):([\d.,-]+)$/);
+    if (!m) return null;
+    if (m[1] === 'range') {
+        const parts = m[2].split('-').map(Number);
+        return { type: 'range', lo: parts[0], hi: parts[1] };
+    }
+    return { type: m[1], val: Number(m[2]) };
+}
+
+function violates(spec, value) {
+    const t = parseThreshold(spec);
+    if (!t || value === '' || value == null || isNaN(Number(value))) return false;
+    const v = Number(value);
+    if (t.type === 'min') return v < t.val;
+    if (t.type === 'max') return v > t.val;
+    return v < t.lo || v > t.hi;
+}
+
+// ─── Templates ──────────────────────────────────────────────────────────────
+function templateItems(templateId) {
+    return templates
+        .filter(x => x.templateId === templateId)
+        .sort((a, b) => a.section === b.section ? a.order - b.order : (a.section < b.section ? -1 : 1));
+}
+function templateName(templateId) {
+    const it = templates.find(x => x.templateId === templateId);
+    return it ? it.templateName : templateId;
+}
+
+async function loadTemplates() {
+    const cached = localStorage.getItem(LS_TEMPLATES);
+    if (cached) {
+        try { templates = JSON.parse(cached).items || []; } catch (_) {}
+        if (templates.length) renderHome();
+    }
+    try {
+        const res = await bdsApiFetch('getGolfTemplates');
+        if (res.status === 'success' && Array.isArray(res.items) && res.items.length) {
+            templates = res.items;
+            localStorage.setItem(LS_TEMPLATES, JSON.stringify({ items: templates, at: Date.now() }));
+            renderHome();
+        }
+    } catch (err) {
+        if (!templates.length) {
+            $('templateCards').innerHTML = '';
+            bdsShowError('templateCards', 'Không tải được mẫu checklist', loadTemplates);
+        }
+    }
+}
+
+// ─── Runs (server + local draft merge) ──────────────────────────────────────
+function localDraft(runId) {
+    try { return JSON.parse(localStorage.getItem(LS_RUN_PREFIX + runId)); } catch (_) { return null; }
+}
+function saveLocalDraft(run) {
+    localStorage.setItem(LS_RUN_PREFIX + run.runId, JSON.stringify(run));
+}
+
+async function loadRuns() {
+    const date = selectedDate();
+    try {
+        const res = await bdsApiFetch('getGolfRuns', { from: prevDate(date), to: date });
+        if (res.status === 'success') {
+            serverRuns = {};
+            (res.runs || []).forEach(r => {
+                try { r.itemsObj = r.items ? JSON.parse(r.items) : {}; } catch (_) { r.itemsObj = {}; }
+                serverRuns[r.runId] = r;
+            });
+        }
+    } catch (_) { /* offline — dùng draft local */ }
+    renderHome();
+}
+
+// Trạng thái hiển thị của 1 mẫu trong ngày: kết hợp server + draft local
+function runStateFor(templateId, date) {
+    const runId = golfRunId(templateId, date);
+    const server = serverRuns[runId];
+    const draft = localDraft(runId);
+    const items = (draft && draft.dirty) ? draft.items : (server ? server.itemsObj : (draft ? draft.items : {}));
+    const status = server ? server.status : (draft ? 'draft' : '');
+    const total = countTotal(templateId);
+    const done = countDone(templateId, items || {});
+    return { runId, status, items: items || {}, done, total, server, draft };
+}
+
+function countTotal(templateId) { return templateItems(templateId).length; }
+
+function itemIsDone(item, val) {
+    if (!val) return false;
+    if (item.inputType === 'check') return !!val.status;
+    if (item.inputType === 'group') {
+        const v = val.value || {};
+        return Object.values(v).some(x => x !== '' && x != null && !(typeof x === 'object' && !x.on && !x.off));
+    }
+    return val.value !== '' && val.value != null;
+}
+function countDone(templateId, items) {
+    return templateItems(templateId).filter(it => itemIsDone(it, items[it.itemId])).length;
+}
+
+// ─── HOME render ────────────────────────────────────────────────────────────
+function statusChip(state) {
+    if (state.status === 'confirmed') return '<span class="status-chip chip-confirmed"><i class="bi bi-check-circle-fill"></i>Đã xác nhận</span>';
+    if (state.status === 'submitted') return '<span class="status-chip chip-submitted"><i class="bi bi-send-check"></i>Đã chốt — chờ ca sau</span>';
+    if (state.status === 'draft' || state.done > 0) return '<span class="status-chip chip-draft"><i class="bi bi-pencil"></i>Đang làm ' + state.done + '/' + state.total + '</span>';
+    return '<span class="status-chip chip-none">Chưa bắt đầu</span>';
+}
+
+function renderHome() {
+    if (!templates.length) return;
+    const date = selectedDate();
+    const cards = TEMPLATE_ORDER.filter(t => templates.some(x => x.templateId === t)).map(tid => {
+        const due = isDue(tid, date);
+        const state = runStateFor(tid, date);
+        const dueBadge = tid === 'tuan' ? '<span class="status-chip chip-due">Thứ Hai</span>'
+                        : tid === 'thang' ? '<span class="status-chip chip-due">Ngày 1</span>' : '';
+        return `
+        <div class="card-custom tpl-card ${due ? '' : 'dimmed'}" onclick="openRun('${tid}')">
+            <div class="d-flex align-items-center gap-3">
+                <div style="font-size:1.6rem;color:var(--bds-primary);"><i class="bi ${TEMPLATE_ICONS[tid] || 'bi-clipboard'}"></i></div>
+                <div class="flex-grow-1">
+                    <div class="tpl-name">${esc(templateName(tid))}</div>
+                    <div class="tpl-meta">${state.total} hạng mục ${due ? '' : '· không bắt buộc hôm nay'}</div>
+                </div>
+                <i class="bi bi-chevron-right text-muted"></i>
+            </div>
+            <div class="mt-2 d-flex gap-2 flex-wrap">${statusChip(state)} ${dueBadge}</div>
+        </div>`;
+    }).join('');
+    $('templateCards').innerHTML = cards;
+    renderPendingBanners();
+}
+
+// Bàn giao chờ xác nhận: run submitted của hôm nay hoặc hôm trước
+function renderPendingBanners() {
+    const me = getOperator();
+    const banners = Object.values(serverRuns)
+        .filter(r => r.status === 'submitted')
+        .map(r => `
+        <div class="pending-banner">
+            <i class="bi bi-bell-fill text-primary me-1"></i>
+            <b>${esc(templateName(r.templateId))}</b> ngày ${esc(r.date)} do <b>${esc(r.operator)}</b> đã chốt.
+            ${r.handoverNote ? '<div class="mt-1 text-secondary">📝 ' + esc(r.handoverNote) + '</div>' : ''}
+            <button class="btn btn-sm btn-primary rounded-pill mt-2 fw-bold" onclick="confirmHandover('${r.runId}')">
+                <i class="bi bi-check2-circle me-1"></i>Xác nhận nhận bàn giao
+            </button>
+        </div>`).join('');
+    $('pendingBanners').innerHTML = banners;
+}
+
+async function confirmHandover(runId) {
+    const me = getOperator();
+    if (!me) { bdsShowToast('Nhập tên người thực hiện trước', 'warning'); $('operatorInput').focus(); return; }
+    try {
+        const res = await bdsApiPost('confirmGolfHandover', { payload: { runId, confirmedBy: me } });
+        if (res.status === 'success') {
+            bdsShowToast('Đã xác nhận nhận bàn giao');
+            await loadRuns();
+        }
+    } catch (err) { bdsShowToast('Lỗi: ' + err.message, 'danger'); }
+}
+
+// ─── RUN view ───────────────────────────────────────────────────────────────
+function openRun(templateId) {
+    const date = selectedDate();
+    const state = runStateFor(templateId, date);
+    currentRun = {
+        runId: state.runId, templateId, date,
+        status: state.status || 'draft',
+        items: JSON.parse(JSON.stringify(state.items || {})),
+        dirty: !!(state.draft && state.draft.dirty)
+    };
+    $('homeView').style.display = 'none';
+    $('runView').style.display = '';
+    $('runTitle').textContent = templateName(templateId);
+    $('runSub').textContent = 'Ngày ' + date + (getOperator() ? ' · ' + getOperator() : '');
+    renderRunBody();
+    window.scrollTo(0, 0);
+}
+
+function backHome() {
+    flushSave();
+    currentRun = null;
+    $('runView').style.display = 'none';
+    $('homeView').style.display = '';
+    loadRuns();
+}
+
+function isLocked() {
+    return currentRun && (currentRun.status === 'submitted' || currentRun.status === 'confirmed');
+}
+
+function renderRunBody() {
+    const items = templateItems(currentRun.templateId);
+    let html = '', lastSection = '';
+    items.forEach(it => {
+        if (it.section !== lastSection) {
+            lastSection = it.section;
+            html += `<div class="section-title"><span>${esc(it.section)}.</span> ${esc(it.sectionTitle)}</div>`;
+        }
+        html += renderItem(it);
+    });
+    $('runBody').innerHTML = `<div class="${isLocked() ? 'readonly-lock' : ''}">${html}</div>`;
+    renderSubmitArea();
+    updateProgress();
+}
+
+function itemVal(itemId) {
+    if (!currentRun.items[itemId]) currentRun.items[itemId] = {};
+    return currentRun.items[itemId];
+}
+
+function renderItem(it) {
+    const val = currentRun.items[it.itemId] || {};
+    const done = itemIsDone(it, val);
+    const warn = hasViolation(it, val);
+    let body = '';
+
+    if (it.inputType === 'check') {
+        const s = val.status || '';
+        body = `<div class="check-btns">
+            <div class="check-btn ${s === 'ok' ? 'on-ok' : ''}" onclick="setCheck('${it.itemId}','ok')"><i class="bi bi-check-lg"></i> ĐẠT</div>
+            <div class="check-btn ${s === 'ng' ? 'on-ng' : ''}" onclick="setCheck('${it.itemId}','ng')"><i class="bi bi-x-lg"></i> KHÔNG ĐẠT</div>
+            <div class="check-btn ${s === 'skip' ? 'on-skip' : ''}" onclick="setCheck('${it.itemId}','skip')"><i class="bi bi-dash-lg"></i> BỎ QUA</div>
+        </div>`;
+    } else if (it.inputType === 'number') {
+        const bad = violates(it.threshold, val.value);
+        body = `<div class="num-wrap">
+            <input type="number" inputmode="decimal" step="any" class="num-input ${bad ? 'bad' : ''}" data-main="1"
+                value="${val.value != null ? esc(val.value) : ''}" placeholder="Nhập số đo..."
+                oninput="setValue('${it.itemId}', this.value)">
+            <span class="unit-tag">${esc(it.unit)}</span>
+        </div>
+        ${it.threshold ? '<div class="threshold-warn" style="display:' + (bad ? '' : 'none') + ';"><i class="bi bi-exclamation-triangle-fill"></i> Vượt ngưỡng cho phép (' + esc(it.threshold) + ')</div>' : ''}`;
+    } else if (it.inputType === 'time') {
+        body = `<div class="num-wrap"><input type="time" class="time-input" value="${esc(val.value || '')}"
+            onchange="setValue('${it.itemId}', this.value)"></div>`;
+    } else if (it.inputType === 'timerange') {
+        const v = val.value || {};
+        body = `<div class="sub-row">
+            <span class="sub-label text-success fw-bold">Giờ bật</span>
+            <input type="time" class="time-input" value="${esc(v.on || '')}" onchange="setRange('${it.itemId}','on',this.value)">
+            <span class="sub-label text-danger fw-bold" style="flex:none;">Giờ tắt</span>
+            <input type="time" class="time-input" value="${esc(v.off || '')}" onchange="setRange('${it.itemId}','off',this.value)">
+        </div>`;
+    } else if (it.inputType === 'text') {
+        body = `<textarea class="text-input" placeholder="Ghi nội dung..."
+            oninput="setValue('${it.itemId}', this.value)">${esc(val.value || '')}</textarea>`;
+    } else if (it.inputType === 'group') {
+        const v = val.value || {};
+        body = (it.fields || []).map(f => {
+            if (f.type === 'timerange') {
+                const fv = v[f.key] || {};
+                return `<div class="sub-row"><span class="sub-label">${esc(f.label)}</span>
+                    <input type="time" class="time-input" value="${esc(fv.on || '')}" onchange="setGroupRange('${it.itemId}','${f.key}','on',this.value)">
+                    <input type="time" class="time-input" value="${esc(fv.off || '')}" onchange="setGroupRange('${it.itemId}','${f.key}','off',this.value)">
+                </div>`;
+            }
+            if (f.type === 'time') {
+                return `<div class="sub-row"><span class="sub-label">${esc(f.label)}</span>
+                    <input type="time" class="time-input" value="${esc(v[f.key] || '')}" onchange="setGroup('${it.itemId}','${f.key}',this.value)">
+                </div>`;
+            }
+            if (f.type === 'number') {
+                const bad = violates(f.threshold, v[f.key]);
+                return `<div class="sub-row"><span class="sub-label">${esc(f.label)}</span>
+                    <input type="number" inputmode="decimal" step="any" class="num-input sub-num ${bad ? 'bad' : ''}" data-fkey="${esc(f.key)}"
+                        value="${v[f.key] != null ? esc(v[f.key]) : ''}" oninput="setGroup('${it.itemId}','${f.key}',this.value)">
+                    <span class="unit-tag">${esc(f.unit || '')}</span>
+                </div>`;
+            }
+            return `<div class="sub-row"><span class="sub-label">${esc(f.label)}</span>
+                <input type="text" class="num-input sub-num" style="width:140px;"
+                    value="${esc(v[f.key] || '')}" oninput="setGroup('${it.itemId}','${f.key}',this.value)">
+            </div>`;
+        }).join('');
+    }
+
+    return `
+    <div class="item-card ${done ? 'done' : ''} ${warn ? 'warn' : ''}" id="item-${it.itemId}">
+        <div class="d-flex justify-content-between align-items-start gap-2">
+            <div class="item-label">${esc(it.label)}</div>
+            <button class="note-toggle" onclick="toggleNote('${it.itemId}')" title="Ghi chú"><i class="bi bi-chat-text"></i></button>
+        </div>
+        ${it.note ? '<div class="item-note-hint"><i class="bi bi-info-circle me-1"></i>' + esc(it.note) + '</div>' : ''}
+        ${body}
+        <input type="text" class="note-input" id="note-${it.itemId}" placeholder="Ghi chú thêm..."
+            style="display:${val.note ? '' : 'none'};" value="${esc(val.note || '')}"
+            oninput="setNote('${it.itemId}', this.value)">
+    </div>`;
+}
+
+function hasViolation(it, val) {
+    if (!val) return false;
+    if (it.inputType === 'check') return val.status === 'ng';
+    if (it.inputType === 'number') return violates(it.threshold, val.value);
+    if (it.inputType === 'group') {
+        const v = val.value || {};
+        return (it.fields || []).some(f => f.type === 'number' && violates(f.threshold, v[f.key]));
+    }
+    return false;
+}
+
+// ─── Input handlers ─────────────────────────────────────────────────────────
+function afterChange(itemId) {
+    currentRun.dirty = true;
+    saveLocalDraft(currentRun);
+    refreshItemCard(itemId);
+    updateProgress();
+    scheduleSync();
+}
+function setCheck(itemId, status) {
+    if (isLocked()) return;
+    const v = itemVal(itemId);
+    v.status = (v.status === status) ? '' : status;
+    afterChange(itemId);
+}
+function setValue(itemId, value) { itemVal(itemId).value = value; afterChange(itemId); }
+function setRange(itemId, key, value) {
+    const v = itemVal(itemId);
+    if (typeof v.value !== 'object' || v.value == null) v.value = {};
+    v.value[key] = value;
+    afterChange(itemId);
+}
+function setGroup(itemId, fieldKey, value) {
+    const v = itemVal(itemId);
+    if (typeof v.value !== 'object' || v.value == null) v.value = {};
+    v.value[fieldKey] = value;
+    afterChange(itemId);
+}
+function setGroupRange(itemId, fieldKey, sub, value) {
+    const v = itemVal(itemId);
+    if (typeof v.value !== 'object' || v.value == null) v.value = {};
+    if (typeof v.value[fieldKey] !== 'object' || v.value[fieldKey] == null) v.value[fieldKey] = {};
+    v.value[fieldKey][sub] = value;
+    afterChange(itemId);
+}
+function setNote(itemId, value) { itemVal(itemId).note = value; currentRun.dirty = true; saveLocalDraft(currentRun); scheduleSync(); }
+function toggleNote(itemId) {
+    const el = $('note-' + itemId);
+    el.style.display = el.style.display === 'none' ? '' : 'none';
+    if (el.style.display === '') el.focus();
+}
+
+// Cập nhật viền card + số đo đỏ mà không re-render toàn trang (giữ focus input)
+function refreshItemCard(itemId) {
+    const it = templates.find(x => x.templateId === currentRun.templateId && x.itemId === itemId);
+    const card = $('item-' + itemId);
+    if (!it || !card) return;
+    const val = currentRun.items[itemId];
+    card.classList.toggle('done', itemIsDone(it, val));
+    card.classList.toggle('warn', hasViolation(it, val));
+    if (it.inputType === 'check') {
+        const s = (val && val.status) || '';
+        card.querySelectorAll('.check-btn').forEach((btn, i) => {
+            btn.classList.toggle('on-ok',   i === 0 && s === 'ok');
+            btn.classList.toggle('on-ng',   i === 1 && s === 'ng');
+            btn.classList.toggle('on-skip', i === 2 && s === 'skip');
+        });
+    } else if (it.inputType === 'number') {
+        const bad = violates(it.threshold, val && val.value);
+        const inp = card.querySelector('.num-input[data-main]');
+        if (inp) inp.classList.toggle('bad', bad);
+        const warnEl = card.querySelector('.threshold-warn');
+        if (warnEl) warnEl.style.display = bad ? '' : 'none';
+    } else if (it.inputType === 'group') {
+        const v = (val && val.value) || {};
+        (it.fields || []).forEach(f => {
+            if (f.type !== 'number' || !f.threshold) return;
+            const inp = card.querySelector('.num-input[data-fkey="' + f.key + '"]');
+            if (inp) inp.classList.toggle('bad', violates(f.threshold, v[f.key]));
+        });
+    }
+}
+
+function updateProgress() {
+    const total = countTotal(currentRun.templateId);
+    const done = countDone(currentRun.templateId, currentRun.items);
+    $('progressFill').style.width = total ? (done / total * 100) + '%' : '0%';
+    $('progressText').textContent = done + '/' + total + ' mục';
+    const chips = { draft: '', submitted: '<span class="status-chip chip-submitted">Đã chốt ca</span>', confirmed: '<span class="status-chip chip-confirmed">Đã xác nhận</span>' };
+    $('runStatusChip').innerHTML = chips[currentRun.status] || '';
+}
+
+function renderSubmitArea() {
+    if (currentRun.status === 'confirmed') {
+        $('submitArea').innerHTML = '<div class="pending-banner" style="background:#d1fae5;border-color:#a7f3d0;"><i class="bi bi-patch-check-fill text-success me-1"></i>Đã hoàn tất và được xác nhận bàn giao.</div>';
+    } else if (currentRun.status === 'submitted') {
+        $('submitArea').innerHTML = '<div class="pending-banner"><i class="bi bi-send-check text-primary me-1"></i>Đã chốt ca — chờ ca sau xác nhận nhận bàn giao.</div>';
+    } else {
+        $('submitArea').innerHTML = `<button class="btn-submit-glow" onclick="openSubmitModal()"><i class="bi bi-clipboard-check-fill"></i>CHỐT CA & BÀN GIAO</button>`;
+    }
+}
+
+// ─── Autosave / sync ────────────────────────────────────────────────────────
+function scheduleSync() {
+    setSyncDot('pending');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(flushSave, 2500);
+}
+
+async function flushSave() {
+    clearTimeout(saveTimer);
+    if (!currentRun || !currentRun.dirty || isLocked()) return;
+    const op = getOperator();
+    try {
+        const res = await bdsApiPost('saveGolfRun', { payload: {
+            runId: currentRun.runId, date: currentRun.date, templateId: currentRun.templateId,
+            operator: op, updatedBy: op, items: JSON.stringify(currentRun.items)
+        }});
+        if (res.status === 'success') {
+            currentRun.dirty = false;
+            saveLocalDraft(currentRun);
+            setSyncDot('ok');
+        }
+    } catch (_) {
+        setSyncDot('pending'); // offline — draft đã nằm trong localStorage, thử lại sau
+    }
+}
+
+function setSyncDot(state) {
+    ['syncIndicator', 'runSyncIndicator'].forEach(id => {
+        const el = $(id);
+        if (!el) return;
+        el.className = 'sync-dot ' + (state === 'ok' ? 'sync-ok' : 'sync-pending');
+        el.title = state === 'ok' ? 'Đã đồng bộ' : 'Đang chờ đồng bộ...';
+    });
+}
+
+window.addEventListener('online', flushSave);
+
+// ─── Submit / chốt ca ───────────────────────────────────────────────────────
+function openSubmitModal() {
+    const op = getOperator();
+    if (!op) { bdsShowToast('Nhập tên người thực hiện ở màn hình chính trước', 'warning'); return; }
+    const total = countTotal(currentRun.templateId);
+    const done = countDone(currentRun.templateId, currentRun.items);
+    const ngItems = templateItems(currentRun.templateId)
+        .filter(it => hasViolation(it, currentRun.items[it.itemId]))
+        .map(it => it.section + '.' + it.label);
+    $('submitSummary').innerHTML =
+        `<div class="fw-bold">Hoàn thành: ${done}/${total} mục ${done < total ? '<span class="text-warning">(còn thiếu ' + (total - done) + ')</span>' : '✅'}</div>` +
+        (ngItems.length ? '<div class="text-danger mt-1"><b>⚠ Không đạt / vượt ngưỡng:</b><br>' + ngItems.map(esc).join('<br>') + '</div>' : '');
+    // Gợi ý nội dung bàn giao từ mục text "bàn giao" nếu có
+    const hoItem = templateItems(currentRun.templateId).find(it => it.inputType === 'text' && /bàn giao/i.test(it.label));
+    if (hoItem) {
+        const v = currentRun.items[hoItem.itemId];
+        if (v && v.value && !$('handoverNoteInput').value) $('handoverNoteInput').value = v.value;
+    }
+    new bootstrap.Modal($('submitModal')).show();
+}
+
+async function doSubmitRun() {
+    const btn = $('btnConfirmSubmit');
+    btn.disabled = true;
+    const op = getOperator();
+    try {
+        await flushSave();
+        const res = await bdsApiPost('submitGolfRun', { payload: {
+            runId: currentRun.runId, date: currentRun.date, templateId: currentRun.templateId,
+            operator: op, updatedBy: op,
+            items: JSON.stringify(currentRun.items),
+            handoverNote: $('handoverNoteInput').value.trim(),
+            handoverTo: $('handoverToInput').value.trim()
+        }});
+        if (res.status === 'success') {
+            currentRun.status = 'submitted';
+            currentRun.dirty = false;
+            saveLocalDraft(currentRun);
+            bootstrap.Modal.getInstance($('submitModal')).hide();
+            bdsShowToast('Đã chốt ca thành công');
+            renderRunBody();
+        }
+    } catch (err) {
+        bdsShowToast('Lỗi chốt ca: ' + err.message, 'danger');
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+// ─── Home nav ───────────────────────────────────────────────────────────────
+function onDateChange() { loadRuns(); }
+function shiftDate(days) {
+    const d = new Date(selectedDate() + 'T12:00:00');
+    d.setDate(d.getDate() + days);
+    $('datePicker').value = d.toLocaleDateString('sv-SE');
+    loadRuns();
+}
+
+// ─── Init ───────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    $('datePicker').value = todayStr();
+    $('operatorInput').value = getOperator();
+    $('operatorInput').addEventListener('input', e => localStorage.setItem(LS_OPERATOR, e.target.value.trim()));
+    loadTemplates();
+    loadRuns();
+});
+</script>
+</body>
+</html>
