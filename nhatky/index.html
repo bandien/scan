@@ -465,6 +465,40 @@
     .week-item-meta { color: var(--muted); font-weight: 600; font-size: .82rem; }
     .week-item .badge-soft { margin-left: auto; flex-shrink: 0; }
 
+    /* ===== Lịch tuần chế độ "xếp": dời việc, cân tải, thêm nhanh ===== */
+    .week-item-wrap { display: flex; align-items: stretch; gap: 6px; }
+    .week-item-wrap .week-item { flex: 1; min-width: 0; }
+    .week-item-wrap.moving .week-item { outline: 2px dashed var(--doing); outline-offset: 2px; }
+    .week-move-btn {
+      flex-shrink: 0; width: 40px; border: 1px solid var(--line); border-radius: 10px;
+      background: var(--surface-high); color: var(--muted); font-size: .95rem;
+    }
+    .week-move-btn:active { background: var(--surface-container-highest); }
+    .week-move-banner {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      background: var(--doing-bg); border: 2px solid #bddcff; color: var(--doing);
+      border-radius: 12px; padding: 10px 12px; margin: 0 16px 10px; font-size: .92rem;
+      position: sticky; top: 0; z-index: 5;
+    }
+    .week-drop-btn {
+      width: 100%; min-height: 46px; border: 2px dashed var(--doing);
+      background: var(--doing-bg); color: var(--doing); border-radius: 12px;
+      font-weight: 800; margin-bottom: 8px; font-size: .92rem;
+    }
+    .week-drop-btn:active { transform: scale(.98); }
+    .week-add-btn {
+      margin-top: 6px; width: 34px; height: 34px; border-radius: 10px;
+      border: 1px dashed var(--line); background: var(--surface); color: var(--brand);
+      font-size: .95rem; display: inline-flex; align-items: center; justify-content: center;
+    }
+    .week-add-btn:active { background: var(--surface-high); }
+    .week-load { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+    .week-load-chip {
+      font-size: .72rem; font-weight: 700; padding: 2px 8px; border-radius: 999px;
+      background: var(--surface-high); color: var(--muted); border: 1px solid var(--line);
+    }
+    .week-load-chip.overload { background: #fff1f0; color: var(--danger); border-color: #ffd0cc; }
+
     .metric-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
     .metric { min-height: 84px; padding: 14px; border: 2px solid var(--line); border-radius: 10px; background: #fff; }
     .metric strong { display: block; font-size: 1.8rem; line-height: 1.1; }
@@ -2510,6 +2544,7 @@
     function activateScreen(screen, params) {
       currentScreen = screen;
       currentParams = params || {};
+      if (screen !== "week") weekMovePlanId = null; // rời màn tuần thì thoát chế độ dời việc
       document.querySelectorAll(".screen").forEach(el => el.classList.toggle("active", el.dataset.screen === screen));
       renderHeader(screen, currentParams);
       updateTabbar(screen, currentParams);
@@ -3096,13 +3131,15 @@
       renderPlanPersonSelect();
     }
 
-    function openPlanModal(id) {
+    function openPlanModal(id, presetDate) {
       const plan = id ? plans.find(item => item.id === id) : null;
+      // presetDate: nút "+" trên ô ngày của Lịch tuần truyền sẵn ngày của ô đó
+      const newPlanDate = presetDate || document.getElementById("filterDate").value || today;
       document.getElementById("planModalTitle").textContent = plan ? "Sửa việc" : "Thêm việc";
       document.getElementById("btnDeletePlan").style.display = plan ? "inline-block" : "none";
       document.getElementById("planFormId").value = plan ? plan.id : "";
-      document.getElementById("planDate").value = plan ? (plan.date || today) : (document.getElementById("filterDate").value || today);
-      document.getElementById("planFollowUpDate").value = plan ? (plan.followUpDate || plan.date || today) : (document.getElementById("filterDate").value || today);
+      document.getElementById("planDate").value = plan ? (plan.date || today) : newPlanDate;
+      document.getElementById("planFollowUpDate").value = plan ? (plan.followUpDate || plan.date || today) : newPlanDate;
       document.getElementById("planDateEnd").value = plan ? (plan.dateEnd || "") : "";
       // Khung giờ lưu dạng "07:30-09:30" → tách vào 2 ô chọn giờ tròn 15'
       const timeParts = plan && plan.time ? plan.time.split("-").map(part => part.trim()) : [];
@@ -4668,31 +4705,108 @@
       return "st-open";
     }
 
+    // ===== Lịch tuần: xem + XẾP (dời việc, cân tải, thêm nhanh) =====
+    // Dời việc 2 chạm: bấm nút mũi tên trên việc → các ô ngày hiện nút nhận →
+    // bấm ngày muốn chuyển. Không kéo-thả vì thao tác chạm ngoài hiện trường.
+    let weekMovePlanId = null;
+
+    window.startMovePlan = function (id) {
+      weekMovePlanId = id;
+      renderWeekScreen();
+    };
+    window.cancelMovePlan = function () {
+      weekMovePlanId = null;
+      renderWeekScreen();
+    };
+    window.movePlanToDate = function (iso) {
+      const plan = plans.find(item => item.id === weekMovePlanId);
+      weekMovePlanId = null;
+      if (!plan) { renderWeekScreen(); return; }
+      const oldDate = plan.date || today;
+      if (iso !== oldDate) {
+        // Dời cả cụm ngày (bắt đầu / ngày nhắc / deadline) theo cùng khoảng cách
+        // để việc nhiều ngày giữ nguyên độ dài đợt
+        const delta = Math.round((new Date(iso + "T00:00:00") - new Date(oldDate + "T00:00:00")) / 86400000);
+        const shiftDate = value => {
+          const d = new Date(value + "T00:00:00");
+          d.setDate(d.getDate() + delta);
+          return toIsoDate(d);
+        };
+        if (plan.dateEnd) plan.dateEnd = shiftDate(plan.dateEnd);
+        if (plan.followUpDate) plan.followUpDate = shiftDate(plan.followUpDate);
+        plan.date = iso;
+        plan.updatedBy = localStorage.getItem(STORAGE_KEYS.employee) || plan.updatedBy || "";
+        plan.syncStatus = "syncing";
+        localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
+        showToast(`Đã dời "${plan.task || "việc"}" sang ${weekdayNameVn(iso)} ${shortDateVn(iso)}`);
+        syncPlanInBackground(plan);
+      }
+      renderWeekScreen();
+    };
+
     function renderWeekScreen() {
       const container = document.getElementById("screen-week");
       const visible = getVisiblePlans("week");
       const days = weekDates(document.getElementById("filterDate").value);
       const label = `Tuần ${shortDateVn(days[0])} - ${shortDateVn(days[6])}`;
+      const movingPlan = weekMovePlanId ? plans.find(item => item.id === weekMovePlanId) : null;
+
+      const moveBanner = movingPlan ? `
+        <div class="week-move-banner">
+          <div class="min-w-0"><i class="bi bi-arrows-move me-1"></i>Đang dời: <strong>${escapeHtml(movingPlan.task || "việc")}</strong> — chạm vào ngày muốn chuyển tới</div>
+          <button class="btn btn-sm btn-light fw-bold flex-shrink-0" type="button" onclick="cancelMovePlan()">Hủy</button>
+        </div>` : "";
+
       const body = days.map((iso, index) => {
         const dayPlans = visible
           .filter(plan => planReminder(plan) === iso || (iso === days[0] && planReminder(plan) < days[0] && plan.status !== "Hoàn thành"))
           .sort((a, b) => (a.time || "").localeCompare(b.time || ""));
+
+        // Tải theo người trong ngày (chỉ đếm việc chưa xong) — nhìn nhanh chỗ dồn việc
+        const loadCounts = new Map();
+        dayPlans.filter(plan => plan.status !== "Hoàn thành").forEach(plan => {
+          const people = splitAssignees(plan.assignee);
+          (people.length ? people : ["Chưa PC"]).forEach(name => loadCounts.set(name, (loadCounts.get(name) || 0) + 1));
+        });
+        const loadHtml = loadCounts.size ? `
+          <div class="week-load">${[...loadCounts.entries()]
+            .sort((a, b) => b[1] - a[1])
+            .map(([name, count]) => `<span class="week-load-chip${count >= 3 ? " overload" : ""}" title="${escapeAttr(name)}: ${count} việc chưa xong${count >= 3 ? " — đang dồn tải" : ""}">${escapeHtml(name)} ×${count}</span>`)
+            .join("")}</div>` : "";
+
         const items = dayPlans.map(plan => `
-          <button class="week-item ${weekItemClass(plan.status)}" type="button" onclick="openTaskDetail('${escapeAttr(plan.id)}')" title="Bấm để xem chi tiết">
-            <div class="week-item-main">
-              <div class="week-item-task">${escapeHtml(plan.task || "")}</div>
-              <div class="week-item-meta">${planMetaLine(plan, iso, true)}${[plan.area, plan.asset].filter(Boolean).length ? " · " + [plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ") : ""}${plan.type === "Phát sinh" ? ' · <span class="text-warning fw-bold">Phát sinh</span>' : ""}</div>
-            </div>
-            ${statusBadge(plan.status)}
-          </button>
+          <div class="week-item-wrap${plan.id === weekMovePlanId ? " moving" : ""}">
+            <button class="week-item ${weekItemClass(plan.status)}" type="button" onclick="openTaskDetail('${escapeAttr(plan.id)}')" title="Bấm để xem chi tiết">
+              <div class="week-item-main">
+                <div class="week-item-task">${escapeHtml(plan.task || "")}</div>
+                <div class="week-item-meta">${planMetaLine(plan, iso, true)}${[plan.area, plan.asset].filter(Boolean).length ? " · " + [plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ") : ""}${plan.type === "Phát sinh" ? ' · <span class="text-warning fw-bold">Phát sinh</span>' : ""}</div>
+              </div>
+              ${statusBadge(plan.status)}
+            </button>
+            ${plan.status !== "Hoàn thành" && !movingPlan ? `
+              <button class="week-move-btn" type="button" title="Dời sang ngày khác" aria-label="Dời sang ngày khác" onclick="startMovePlan('${escapeAttr(plan.id)}')">
+                <i class="bi bi-arrows-move"></i>
+              </button>` : ""}
+          </div>
         `).join("");
+
+        const dropBtn = movingPlan && iso !== (movingPlan.date || today) ? `
+          <button class="week-drop-btn" type="button" onclick="movePlanToDate('${iso}')">
+            <i class="bi bi-box-arrow-in-down me-1"></i>Chuyển tới ${WEEK_DAY_NAMES[index]} ${shortDateVn(iso)}
+          </button>` : "";
+
         return `
           <tr${iso === today ? ' class="week-today"' : ""}>
             <td class="day-cell">
               <div class="fw-bold">${WEEK_DAY_NAMES[index]}</div>
               <div class="small text-secondary">${shortDateVn(iso)}${iso === today ? " · Hôm nay" : ""}</div>
+              <button class="week-add-btn" type="button" title="Thêm kế hoạch ngày này" aria-label="Thêm kế hoạch ngày này" onclick="openPlanModal(null, '${iso}')"><i class="bi bi-plus-lg"></i></button>
             </td>
-            <td><div class="week-items">${items || '<span class="text-secondary small">Không có việc</span>'}</div></td>
+            <td>
+              ${dropBtn}
+              ${loadHtml}
+              <div class="week-items">${items || '<span class="text-secondary small">Không có việc</span>'}</div>
+            </td>
           </tr>
         `;
       }).join("");
@@ -4700,6 +4814,7 @@
       container.innerHTML = `
         <div class="scroll">
           <div class="week-label">${label}</div>
+          ${moveBanner}
           <table class="week-table"><tbody>${body}</tbody></table>
         </div>
       `;
