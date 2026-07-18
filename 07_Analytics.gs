@@ -75,6 +75,17 @@ function handleGetInventory(e) {
 }
 
 function handleGetStaff(e) {
+  const apiToken = e && e.parameter ? String(e.parameter.token || "").trim() : "";
+  const authToken = e && e.parameter ? String(e.parameter.authToken || "").trim() : "";
+
+  // Step 4: AuthToken Session Verification
+  if (authToken && typeof getNhatKySessionUsername_ === "function") {
+    const sessionUser = getNhatKySessionUsername_(authToken);
+    if (!sessionUser) {
+      return contentResponse({ status: "error", message: "Phiên làm việc hết hạn hoặc AuthToken không hợp lệ. Vui lòng đăng nhập lại." });
+    }
+  }
+
   const sheet = getSheet(SHEETS.USERS || "Users");
   if (!sheet) return contentResponse({ status: "error", message: "Users sheet not found" });
   const data = sheet.getDataRange().getValues();
@@ -88,6 +99,7 @@ function handleGetStaff(e) {
     ? String(e.parameter.labels).split(",").map(function(s) { return s.trim().toLowerCase(); }).filter(Boolean)
     : [];
 
+  // Step 2: STRICT PIN EXCLUSION - Only public fields are mapped
   let staff = data.slice(1).filter(function(row) {
     return String(row[schema.usernameIndex] || "").trim();
   }).map(function(row) {
