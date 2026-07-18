@@ -138,4 +138,99 @@ function handleGetStaff(e) {
   return contentResponse({ status: "success", staff });
 }
 
+// ===== 4. Quản lý Danh Bạ Cá Nhân (Personal Phonebook) =====
+function handleGetPersonalContacts(e) {
+  const username = e && e.parameter ? String(e.parameter.username || "").trim().toLowerCase() : "";
+  if (!username) return contentResponse({ status: "error", message: "Username required" });
+
+  const sheet = getSheet("PersonalContacts");
+  if (!sheet) return contentResponse({ status: "success", contacts: [] });
+
+  const data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return contentResponse({ status: "success", contacts: [] });
+
+  const contacts = [];
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    const owner = String(row[1] || "").trim().toLowerCase();
+    if (owner === username) {
+      contacts.push({
+        id: String(row[0] || "").trim(),
+        ownerUsername: String(row[1] || "").trim(),
+        fullName: String(row[2] || "").trim(),
+        phone: String(row[3] || "").trim(),
+        deptOrNote: String(row[4] || "").trim(),
+        email: String(row[5] || "").trim(),
+        updatedAt: String(row[6] || "").trim()
+      });
+    }
+  }
+  return contentResponse({ status: "success", contacts });
+}
+
+function handleSavePersonalContact(e) {
+  let body = {};
+  try {
+    body = JSON.parse(e.postData.contents);
+  } catch(err) {}
+
+  const contact = body.contact || {};
+  const ownerUsername = String(contact.ownerUsername || body.username || "").trim();
+  const fullName = String(contact.fullName || "").trim();
+  const phone = String(contact.phone || "").trim();
+  const deptOrNote = String(contact.deptOrNote || "").trim();
+  const email = String(contact.email || "").trim();
+  const id = String(contact.id || ("PC-" + Date.now())).trim();
+
+  if (!ownerUsername || !fullName) {
+    return contentResponse({ status: "error", message: "ownerUsername & fullName are required" });
+  }
+
+  const sheet = getSheet("PersonalContacts");
+  if (!sheet) return contentResponse({ status: "error", message: "PersonalContacts sheet not found" });
+
+  const data = sheet.getDataRange().getValues();
+  let foundIndex = -1;
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === id || (String(data[i][1]).trim().toLowerCase() === ownerUsername.toLowerCase() && String(data[i][2]).trim().toLowerCase() === fullName.toLowerCase())) {
+      foundIndex = i + 1;
+      break;
+    }
+  }
+
+  const now = new Date().toISOString();
+  const rowValue = [id, ownerUsername, fullName, phone, deptOrNote, email, now];
+
+  if (foundIndex > 0) {
+    sheet.getRange(foundIndex, 1, 1, 7).setValues([rowValue]);
+  } else {
+    sheet.appendRow(rowValue);
+  }
+
+  return contentResponse({ status: "success", message: "Đã lưu liên hệ cá nhân", contact: { id, ownerUsername, fullName, phone, deptOrNote, email, updatedAt: now } });
+}
+
+function handleDeletePersonalContact(e) {
+  let body = {};
+  try {
+    body = JSON.parse(e.postData.contents);
+  } catch(err) {}
+
+  const id = String(body.id || (e.parameter ? e.parameter.id : "")).trim();
+  if (!id) return contentResponse({ status: "error", message: "Contact ID required" });
+
+  const sheet = getSheet("PersonalContacts");
+  if (!sheet) return contentResponse({ status: "error", message: "PersonalContacts sheet not found" });
+
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === id) {
+      sheet.deleteRow(i + 1);
+      return contentResponse({ status: "success", message: "Đã xóa liên hệ cá nhân" });
+    }
+  }
+
+  return contentResponse({ status: "error", message: "Không tìm thấy liên hệ để xóa" });
+}
+
 

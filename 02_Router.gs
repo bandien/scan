@@ -40,6 +40,9 @@ function doGet(e) {
       // getWorkOrders: đã gỡ — WorkOrders được thay bằng NhatKyPlans (xem 20_MigrateWorkOrders.gs)
       case 'getInventory':      return handleGetInventory(e);
       case 'getStaff':          return handleGetStaff(e);
+      case 'getPersonalContacts':    return handleGetPersonalContacts(e);
+      case 'savePersonalContact':   return handleSavePersonalContact(e);
+      case 'deletePersonalContact': return handleDeletePersonalContact(e);
       case 'getProjects':       return handleGetProjects(e);
       case 'getShifts':         return handleGetShifts(e);
       case 'getRosterStaff':    return handleGetRosterStaff(e);      // Bảng phân ca (trang phanca)
