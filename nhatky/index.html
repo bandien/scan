@@ -5617,6 +5617,19 @@
 
       const headerHtml = `
         <div class="zalo-contact-header">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="fw-bold text-primary" style="font-size: 0.95rem;">
+              <i class="bi bi-person-lines-fill me-1"></i> Danh bạ nhân sự
+            </div>
+            <div class="d-flex gap-1">
+              <button class="btn btn-sm btn-primary py-1 px-2" style="font-size: 11px; border-radius: 14px;" onclick="openUserEditor('')">
+                <i class="bi bi-person-plus-fill me-1"></i> + Thêm thành viên
+              </button>
+              <button class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 11px; border-radius: 14px;" onclick="navigateTo('usermanagement', {})">
+                <i class="bi bi-gear-fill me-1"></i> Quản lý nhóm
+              </button>
+            </div>
+          </div>
           <div class="zalo-search-box">
             <i class="bi bi-search"></i>
             <input type="search" value="${escapeAttr(zaloSearchQuery)}" placeholder="Tìm kiếm nhân sự, tổ nhóm, SĐT..." oninput="filterZaloContacts(this.value)">
@@ -5643,10 +5656,10 @@
         const phoneDigits = phone.replace(/\D/g, "");
         const dept = person.dept || person.username || "Ban Điện";
         const username = person.username || person.id || "";
-        const adminActions = isAdmin ? `
+        const adminActions = `
           <button class="btn btn-sm text-secondary p-1" title="Sửa tổ / thông tin" onclick="event.stopPropagation(); openUserEditor('${escapeAttr(username)}')"><i class="bi bi-pencil-fill"></i></button>
           <button class="btn btn-sm text-danger p-1" title="Xóa khỏi nhóm" onclick="event.stopPropagation(); deleteManagedUser('${escapeAttr(username)}')"><i class="bi bi-trash-fill"></i></button>
-        ` : '';
+        `;
 
         return `<article class="contact-row" role="button" tabindex="0" onclick="navigateTo('contactdetail',{name:'${escapeAttr(name)}'})" onkeydown="if(event.key==='Enter')navigateTo('contactdetail',{name:'${escapeAttr(name)}'})">
           <div class="contact-avatar">${initial}</div>
@@ -6130,9 +6143,21 @@
       };
     }
 
-    function openUserEditor(username) {
+    async function openUserEditor(username) {
+      if (!managedUsers || managedUsers.length === 0) {
+        try {
+          showToast("Đang nạp dữ liệu quản lý...");
+          const data = await postUserAdminAction("listUsers", {});
+          managedUsers = Array.isArray(data.users) ? data.users : [];
+          managedUserRoles = Array.isArray(data.roles) ? data.roles : ["User", "Manager", "Admin"];
+          managedTeamOptions = Array.isArray(data.teamOptions) ? data.teamOptions : ["Tổ cơ điện", "Tổ điện nước", "Tổ PCCC", "Tổ điều hòa", "Tổ vận hành"];
+          managedActorRole = data.actorRole || currentRole();
+        } catch (e) {
+          console.warn("Could not load managedUsers:", e.message);
+        }
+      }
       const user = username ? managedUsers.find(item => item.username === username) : null;
-      document.getElementById("userModalTitle").textContent = user ? "Sửa người dùng" : "Thêm người dùng";
+      document.getElementById("userModalTitle").textContent = user ? "Sửa thông tin / Tổ nhóm" : "Thêm thành viên mới";
       document.getElementById("userOriginalUsername").value = user ? user.username : "";
       document.getElementById("userFullName").value = user ? user.fullName || "" : "";
       document.getElementById("userUsername").value = user ? user.username : "";
