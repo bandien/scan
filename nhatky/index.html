@@ -5702,6 +5702,27 @@
       }
     };
 
+    // ===== ERP Partners Sync Module (kh_ncc) =====
+    function getStoredErpPartners() {
+      try {
+        const raw = localStorage.getItem('bds_erp_partners');
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) { return []; }
+    }
+
+    async function syncErpPartnersFromSheet() {
+      try {
+        const gasUrl = getGasUrl();
+        if (!gasUrl) return;
+        const res = await fetch(gasUrl + '?action=getPartners&token=HAPU_QR_SECRET_2026');
+        const data = await res.json();
+        if (data.status === 'success' && Array.isArray(data.partners)) {
+          localStorage.setItem('bds_erp_partners', JSON.stringify(data.partners));
+          if (currentZaloTab === 'erp_partners') renderContactsScreen();
+        }
+      } catch (e) { console.warn("ERP partners sync warning:", e); }
+    }
+
     function renderContactsScreen() {
       const container = document.getElementById("screen-contacts");
       if (!container) return;
@@ -5712,11 +5733,13 @@
       const userDept = (curUser.teams || curUser.dept || '').toLowerCase();
       const userRole = (curUser.role || '').toLowerCase();
 
-      // Trigger background sync for personal contacts
+      // Trigger background syncs
       syncPersonalContactsFromSheet(curUsername);
+      syncErpPartnersFromSheet();
 
       let contacts = staffDirectory.slice().sort((a, b) => String(a.name || a.username).localeCompare(String(b.name || b.username), "vi"));
       const myPrivateContacts = getStoredPersonalContacts(curUsername);
+      const erpPartners = getStoredErpPartners();
 
       if (zaloSearchQuery) {
         contacts = contacts.filter(p => {
@@ -5739,11 +5762,14 @@
         <div class="zalo-contact-header">
           <div class="zalo-search-box">
             <i class="bi bi-search"></i>
-            <input type="search" value="${escapeAttr(zaloSearchQuery)}" placeholder="Tìm kiếm nhân sự, tổ nhóm, SĐT..." oninput="filterZaloContacts(this.value)">
+            <input type="search" value="${escapeAttr(zaloSearchQuery)}" placeholder="Tìm kiếm nhân sự, đối tác, tổ nhóm, SĐT..." oninput="filterZaloContacts(this.value)">
           </div>
           <div class="zalo-tab-pills">
             <button type="button" class="zalo-tab-btn ${currentZaloTab === 'same_team' ? 'active' : ''}" onclick="setZaloContactTab('same_team')">
               <i class="bi bi-people-fill"></i> Nhóm cùng tổ <span class="badge bg-secondary">${sameTeamContacts.length}</span>
+            </button>
+            <button type="button" class="zalo-tab-btn ${currentZaloTab === 'erp_partners' ? 'active' : ''}" onclick="setZaloContactTab('erp_partners')">
+              <i class="bi bi-building-fill text-info"></i> Đối tác & NCC <span class="badge bg-secondary">${erpPartners.length}</span>
             </button>
             <button type="button" class="zalo-tab-btn ${currentZaloTab === 'my_private' ? 'active' : ''}" onclick="setZaloContactTab('my_private')">
               <i class="bi bi-star-fill text-warning"></i> Cá nhân của tôi <span class="badge bg-secondary">${myPrivateContacts.length}</span>
@@ -5790,6 +5816,37 @@
       if (currentZaloTab === 'same_team') {
         const rows = sameTeamContacts.map(buildRowHtml).join('');
         bodyHtml = `<div class="contacts-list">${rows || '<div class="empty-state">Không có nhân sự trong tổ.</div>'}</div>`;
+
+      } else if (currentZaloTab === 'erp_partners') {
+        let filteredPartners = erpPartners;
+        if (zaloSearchQuery) {
+          filteredPartners = erpPartners.filter(p => {
+            const haystack = [p.name, p.contactPerson, p.phone, p.loai, p.address, p.taxCode].join(' ').toLowerCase();
+            return haystack.includes(zaloSearchQuery);
+          });
+        }
+
+        const rows = filteredPartners.map(p => {
+          const name = p.name || p.contactPerson || "Đối tác ERP";
+          const initial = escapeHtml((name.trim().charAt(0) || "?").toUpperCase());
+          const phone = contactPhone(p.phone);
+          const phoneDigits = phone.replace(/\D/g, "");
+          const meta = [p.loai, p.contactPerson, p.phone, p.address].filter(Boolean).join(" · ");
+
+          return `<article class="contact-row">
+            <div class="contact-avatar" style="background: linear-gradient(145deg, #0984e3, #6c5ce7);">${initial}</div>
+            <div class="contact-main">
+              <div class="contact-name">${escapeHtml(name)} <span class="badge bg-info text-dark ms-1" style="font-size:10px;">${escapeHtml(p.loai || "Đối tác")}</span></div>
+              <div class="contact-meta">${escapeHtml(meta)}</div>
+            </div>
+            <div class="contact-actions">
+              ${phone ? `<a href="tel:${escapeAttr(phone)}" title="Gọi ${escapeAttr(name)}"><i class="bi bi-telephone-fill"></i></a>
+              <a class="zalo" href="https://zalo.me/${escapeAttr(phoneDigits)}" target="_blank" rel="noopener" title="Nhắn Zalo"><i class="bi bi-chat-dots-fill"></i></a>` : '<span class="contact-no-phone">Chưa có SĐT</span>'}
+            </div>
+          </article>`;
+        }).join('');
+
+        bodyHtml = `<div class="contacts-list">${rows || '<div class="empty-state">Không tìm thấy dữ liệu đối tác / nhà cung cấp ERP.</div>'}</div>`;
 
       } else if (currentZaloTab === 'my_private') {
         const rows = myPrivateContacts.map(item => {

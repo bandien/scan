@@ -138,6 +138,47 @@ function handleGetStaff(e) {
   return contentResponse({ status: "success", staff });
 }
 
+// ===== 5. Quản lý Đối Tác & NCC ERP (kh_ncc) =====
+function handleGetPartners(e) {
+  const sheet = getSheet("kh_ncc");
+  if (!sheet) return contentResponse({ status: "success", partners: [] });
+
+  const data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return contentResponse({ status: "success", partners: [] });
+
+  const partners = [];
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    const id = String(row[0] || "").trim();
+    const loai = String(row[1] || "ĐốiTác").trim();
+    const name = String(row[2] || "").trim();
+    const contactPerson = String(row[3] || "").trim();
+    const phone = String(row[4] || "").trim();
+    const email = String(row[5] || "").trim();
+    const taxCode = String(row[6] || "").trim();
+    const address = String(row[7] || "").trim();
+    const labels = String(row[row.length - 1] || "").trim();
+
+    if (name || contactPerson || phone) {
+      partners.push({
+        id: id || ("PARTNER-" + i),
+        partyId: "PT-PARTNER-" + i,
+        loai: loai,
+        name: name || contactPerson,
+        fullName: name,
+        contactPerson: contactPerson,
+        phone: phone,
+        email: email,
+        taxCode: taxCode,
+        address: address,
+        labels: labels || (loai + ", Public"),
+        role: "SUPPLIER"
+      });
+    }
+  }
+  return contentResponse({ status: "success", partners });
+}
+
 // ===== 4. Quản lý Danh Bạ Cá Nhân (Personal Phonebook) =====
 function handleGetPersonalContacts(e) {
   const username = e && e.parameter ? String(e.parameter.username || "").trim().toLowerCase() : "";
