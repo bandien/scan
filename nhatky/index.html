@@ -5634,12 +5634,20 @@
           </div>
         </div>`;
 
+      const isAdmin = canManageUsers();
+
       function buildRowHtml(person) {
         const name = person.name || person.username || "Nhân viên";
         const initial = escapeHtml((name.trim().charAt(0) || "?").toUpperCase());
         const phone = contactPhone(person.phone);
         const phoneDigits = phone.replace(/\D/g, "");
         const dept = person.dept || person.username || "Ban Điện";
+        const username = person.username || person.id || "";
+        const adminActions = isAdmin ? `
+          <button class="btn btn-sm text-secondary p-1" title="Sửa tổ / thông tin" onclick="event.stopPropagation(); openUserEditor('${escapeAttr(username)}')"><i class="bi bi-pencil-fill"></i></button>
+          <button class="btn btn-sm text-danger p-1" title="Xóa khỏi nhóm" onclick="event.stopPropagation(); deleteManagedUser('${escapeAttr(username)}')"><i class="bi bi-trash-fill"></i></button>
+        ` : '';
+
         return `<article class="contact-row" role="button" tabindex="0" onclick="navigateTo('contactdetail',{name:'${escapeAttr(name)}'})" onkeydown="if(event.key==='Enter')navigateTo('contactdetail',{name:'${escapeAttr(name)}'})">
           <div class="contact-avatar">${initial}</div>
           <div class="contact-main">
@@ -5649,6 +5657,7 @@
           <div class="contact-actions">
             ${phone ? `<a href="tel:${escapeAttr(phone)}" onclick="event.stopPropagation()" title="Gọi ${escapeAttr(name)}" aria-label="Gọi ${escapeAttr(name)}"><i class="bi bi-telephone-fill"></i></a>
             <a class="zalo" href="https://zalo.me/${escapeAttr(phoneDigits)}" onclick="event.stopPropagation()" target="_blank" rel="noopener" title="Nhắn Zalo cho ${escapeAttr(name)}" aria-label="Nhắn Zalo cho ${escapeAttr(name)}"><i class="bi bi-chat-dots-fill"></i></a>` : '<span class="contact-no-phone">Chưa có SĐT</span>'}
+            ${adminActions}
           </div>
         </article>`;
       }
@@ -5670,10 +5679,14 @@
         let groupsHtml = '';
         groupMap.forEach((members, gName) => {
           const rows = members.map(buildRowHtml).join('');
+          const addMemberBtn = isAdmin ? `<button class="btn btn-sm btn-outline-primary py-0 px-2 ms-2" style="font-size:11px; border-radius:12px;" onclick="event.stopPropagation(); openUserEditor('')"><i class="bi bi-person-plus-fill"></i> Thêm thành viên</button>` : '';
           groupsHtml += `
             <div class="zalo-group-card mb-2">
               <div class="zalo-group-header">
-                <span><i class="bi bi-folder-fill text-primary me-2"></i> ${escapeHtml(gName)}</span>
+                <div class="d-flex align-items-center">
+                  <span><i class="bi bi-folder-fill text-primary me-2"></i> ${escapeHtml(gName)}</span>
+                  ${addMemberBtn}
+                </div>
                 <span class="badge bg-light text-dark border">${members.length} thành viên</span>
               </div>
               <div class="contacts-list">${rows}</div>
