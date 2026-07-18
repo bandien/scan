@@ -2076,6 +2076,85 @@
     }
     .contact-actions a.zalo { background: #e7f1ff; color: #0068ff; }
     .contact-no-phone { color: var(--bds-muted); font-size: .72rem; }
+    /* Zalo Style Contact Tabs */
+    .zalo-contact-header {
+      background: var(--bds-surface);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      padding: 10px 14px 8px 14px;
+      border-bottom: 1px solid var(--bds-line);
+    }
+    .zalo-search-box {
+      position: relative;
+      margin-bottom: 8px;
+    }
+    .zalo-search-box i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #8a94a6;
+      font-size: 0.92rem;
+    }
+    .zalo-search-box input {
+      width: 100%;
+      padding: 7px 12px 7px 34px;
+      border-radius: 20px;
+      border: 1px solid var(--bds-line, #e0e0e0);
+      background: var(--bds-surface-variant, #f0f2f5);
+      color: var(--bds-on-surface);
+      font-size: 0.88rem;
+      outline: none;
+    }
+    .zalo-tab-pills {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+    .zalo-tab-pills::-webkit-scrollbar { display: none; }
+    .zalo-tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 12px;
+      border-radius: 18px;
+      border: 1px solid var(--bds-line, #ddd);
+      background: var(--bds-surface, #fff);
+      color: var(--bds-on-surface, #333);
+      font-size: 0.82rem;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .zalo-tab-btn.active {
+      background: #0068ff;
+      color: #fff;
+      border-color: #0068ff;
+    }
+    .zalo-tab-btn .badge {
+      font-size: 0.72rem;
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+    .zalo-tab-btn.active .badge {
+      background: rgba(255, 255, 255, 0.25) !important;
+      color: #fff !important;
+    }
+    .zalo-group-header {
+      padding: 10px 14px 6px 14px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #0068ff;
+      background: var(--bds-surface-variant, #f4f6f9);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 0.5px solid var(--bds-line);
+    }
     .personal-sync-state {
       align-items: center;
       display: flex;
@@ -5495,28 +5574,119 @@
         ${html}`;
     }
 
+    let currentZaloTab = 'same_team';
+    let zaloSearchQuery = '';
+
+    window.setZaloContactTab = function(tabKey) {
+      currentZaloTab = tabKey;
+      renderContactsScreen();
+    };
+
+    window.filterZaloContacts = function(query) {
+      zaloSearchQuery = (query || '').trim().toLowerCase();
+      renderContactsScreen();
+    };
+
     function renderContactsScreen() {
       const container = document.getElementById("screen-contacts");
       if (!container) return;
-      const contacts = staffDirectory.slice().sort((a, b) => String(a.name || a.username).localeCompare(String(b.name || b.username), "vi"));
-      const rows = contacts.map(person => {
+
+      const userStr = localStorage.getItem(STORAGE_KEYS.currentUser || 'currentUser');
+      const curUser = userStr ? JSON.parse(userStr) : {};
+      const userDept = (curUser.teams || curUser.dept || '').toLowerCase();
+      const userRole = (curUser.role || '').toLowerCase();
+
+      let contacts = staffDirectory.slice().sort((a, b) => String(a.name || a.username).localeCompare(String(b.name || b.username), "vi"));
+
+      if (zaloSearchQuery) {
+        contacts = contacts.filter(p => {
+          const name = String(p.name || p.username || '').toLowerCase();
+          const phone = String(p.phone || '').toLowerCase();
+          const dept = String(p.dept || '').toLowerCase();
+          return name.includes(zaloSearchQuery) || phone.includes(zaloSearchQuery) || dept.includes(zaloSearchQuery);
+        });
+      }
+
+      const sameTeamContacts = contacts.filter(p => {
+        const dept = String(p.dept || '').toLowerCase();
+        const pos = String(p.position || p.role || '').toLowerCase();
+        const isLeader = pos === 'admin' || pos === 'manager' || pos.includes('trưởng') || pos.includes('phó') || dept === '*';
+        const isSame = userDept && (dept.includes(userDept) || userDept.includes(dept));
+        return isLeader || isSame;
+      });
+
+      const headerHtml = `
+        <div class="zalo-contact-header">
+          <div class="zalo-search-box">
+            <i class="bi bi-search"></i>
+            <input type="search" value="${escapeAttr(zaloSearchQuery)}" placeholder="Tìm kiếm nhân sự, tổ nhóm, SĐT..." oninput="filterZaloContacts(this.value)">
+          </div>
+          <div class="zalo-tab-pills">
+            <button type="button" class="zalo-tab-btn ${currentZaloTab === 'same_team' ? 'active' : ''}" onclick="setZaloContactTab('same_team')">
+              <i class="bi bi-people-fill"></i> Nhóm cùng tổ <span class="badge bg-secondary">${sameTeamContacts.length}</span>
+            </button>
+            <button type="button" class="zalo-tab-btn ${currentZaloTab === 'groups' ? 'active' : ''}" onclick="setZaloContactTab('groups')">
+              <i class="bi bi-diagram-3-fill"></i> Danh sách nhóm
+            </button>
+            <button type="button" class="zalo-tab-btn ${currentZaloTab === 'all' ? 'active' : ''}" onclick="setZaloContactTab('all')">
+              <i class="bi bi-person-lines-fill"></i> Tất cả <span class="badge bg-secondary">${contacts.length}</span>
+            </button>
+          </div>
+        </div>`;
+
+      function buildRowHtml(person) {
         const name = person.name || person.username || "Nhân viên";
         const initial = escapeHtml((name.trim().charAt(0) || "?").toUpperCase());
         const phone = contactPhone(person.phone);
         const phoneDigits = phone.replace(/\D/g, "");
+        const dept = person.dept || person.username || "Ban Điện";
         return `<article class="contact-row" role="button" tabindex="0" onclick="navigateTo('contactdetail',{name:'${escapeAttr(name)}'})" onkeydown="if(event.key==='Enter')navigateTo('contactdetail',{name:'${escapeAttr(name)}'})">
           <div class="contact-avatar">${initial}</div>
           <div class="contact-main">
             <div class="contact-name">${escapeHtml(name)}</div>
-            <div class="contact-meta">${escapeHtml(person.dept || person.username || "Ban Điện")}${phone ? ` · ${escapeHtml(phone)}` : ""}</div>
+            <div class="contact-meta">${escapeHtml(dept)}${phone ? ` · ${escapeHtml(phone)}` : ""}</div>
           </div>
           <div class="contact-actions">
             ${phone ? `<a href="tel:${escapeAttr(phone)}" onclick="event.stopPropagation()" title="Gọi ${escapeAttr(name)}" aria-label="Gọi ${escapeAttr(name)}"><i class="bi bi-telephone-fill"></i></a>
             <a class="zalo" href="https://zalo.me/${escapeAttr(phoneDigits)}" onclick="event.stopPropagation()" target="_blank" rel="noopener" title="Nhắn Zalo cho ${escapeAttr(name)}" aria-label="Nhắn Zalo cho ${escapeAttr(name)}"><i class="bi bi-chat-dots-fill"></i></a>` : '<span class="contact-no-phone">Chưa có SĐT</span>'}
           </div>
         </article>`;
-      }).join("");
-      container.innerHTML = `<div class="contacts-list">${rows || '<div class="empty-state">Chưa có dữ liệu danh bạ.</div>'}</div>`;
+      }
+
+      let bodyHtml = '';
+
+      if (currentZaloTab === 'same_team') {
+        const rows = sameTeamContacts.map(buildRowHtml).join('');
+        bodyHtml = `<div class="contacts-list">${rows || '<div class="empty-state">Không có nhân sự trong tổ.</div>'}</div>`;
+
+      } else if (currentZaloTab === 'groups') {
+        const groupMap = new Map();
+        contacts.forEach(p => {
+          const gName = (p.dept || 'Khác').trim();
+          if (!groupMap.has(gName)) groupMap.set(gName, []);
+          groupMap.get(gName).push(p);
+        });
+
+        let groupsHtml = '';
+        groupMap.forEach((members, gName) => {
+          const rows = members.map(buildRowHtml).join('');
+          groupsHtml += `
+            <div class="zalo-group-card mb-2">
+              <div class="zalo-group-header">
+                <span><i class="bi bi-folder-fill text-primary me-2"></i> ${escapeHtml(gName)}</span>
+                <span class="badge bg-light text-dark border">${members.length} thành viên</span>
+              </div>
+              <div class="contacts-list">${rows}</div>
+            </div>`;
+        });
+        bodyHtml = `<div class="py-2">${groupsHtml || '<div class="empty-state">Chưa phân nhóm.</div>'}</div>`;
+
+      } else {
+        const rows = contacts.map(buildRowHtml).join('');
+        bodyHtml = `<div class="contacts-list">${rows || '<div class="empty-state">Chưa có dữ liệu danh bạ.</div>'}</div>`;
+      }
+
+      container.innerHTML = headerHtml + bodyHtml;
     }
 
     function contactPlans(name) {
