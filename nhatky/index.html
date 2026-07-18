@@ -5588,16 +5588,116 @@
       renderContactsScreen();
     };
 
+    // ===== Personal Contacts Storage & Sync Module =====
+    function getStoredPersonalContacts(username) {
+      if (!username) return [];
+      try {
+        const raw = localStorage.getItem('bds_my_contacts_' + username);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) { return []; }
+    }
+
+    function saveStoredPersonalContacts(username, list) {
+      if (!username) return;
+      try {
+        localStorage.setItem('bds_my_contacts_' + username, JSON.stringify(list || []));
+      } catch (e) {}
+    }
+
+    async function syncPersonalContactsFromSheet(username) {
+      if (!username) return;
+      try {
+        const gasUrl = getGasUrl();
+        if (!gasUrl) return;
+        const res = await fetch(gasUrl + '?action=getPersonalContacts&token=HAPU_QR_SECRET_2026&username=' + encodeURIComponent(username));
+        const data = await res.json();
+        if (data.status === 'success' && Array.isArray(data.contacts)) {
+          saveStoredPersonalContacts(username, data.contacts);
+          if (currentZaloTab === 'my_private') renderContactsScreen();
+        }
+      } catch (e) { console.warn("Personal contacts sync warning:", e); }
+    }
+
+    window.openPersonalContactModal = function(id) {
+      const curUser = currentUser() || {};
+      const username = curUser.username || 'user';
+      const contacts = getStoredPersonalContacts(username);
+      const item = id ? contacts.find(c => c.id === id) : null;
+
+      const name = prompt("Nhập Họ và tên liên hệ cá nhân:", item ? item.fullName : "");
+      if (name === null || !name.trim()) return;
+      const phone = prompt("Nhập Số điện thoại:", item ? item.phone : "");
+      if (phone === null) return;
+      const note = prompt("Nhập Đơn vị / Ghi chú cá nhân:", item ? item.deptOrNote : "");
+      if (note === null) return;
+
+      const newItem = {
+        id: item ? item.id : ('PC-' + Date.now()),
+        ownerUsername: username,
+        fullName: name.trim(),
+        phone: phone.trim(),
+        deptOrNote: note.trim(),
+        updatedAt: new Date().toISOString()
+      };
+
+      if (item) {
+        const idx = contacts.findIndex(c => c.id === id);
+        if (idx >= 0) contacts[idx] = newItem;
+      } else {
+        contacts.unshift(newItem);
+      }
+
+      // Save locally (0ms)
+      saveStoredPersonalContacts(username, contacts);
+      showToast("Đã lưu liên hệ cá nhân!");
+      renderContactsScreen();
+
+      // Post to Google Sheet in background
+      const gasUrl = getGasUrl();
+      if (gasUrl) {
+        fetch(gasUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ action: 'savePersonalContact', token: 'HAPU_QR_SECRET_2026', contact: newItem })
+        }).catch(err => console.warn("Background sheet sync failed:", err));
+      }
+    };
+
+    window.deletePersonalContactItem = function(id) {
+      if (!confirm("Xóa liên hệ cá nhân này?")) return;
+      const curUser = currentUser() || {};
+      const username = curUser.username || 'user';
+      let contacts = getStoredPersonalContacts(username);
+      contacts = contacts.filter(c => c.id !== id);
+      saveStoredPersonalContacts(username, contacts);
+      showToast("Đã xóa liên hệ cá nhân!");
+      renderContactsScreen();
+
+      const gasUrl = getGasUrl();
+      if (gasUrl) {
+        fetch(gasUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ action: 'deletePersonalContact', token: 'HAPU_QR_SECRET_2026', id: id })
+        }).catch(err => console.warn("Background sheet delete failed:", err));
+      }
+    };
+
     function renderContactsScreen() {
       const container = document.getElementById("screen-contacts");
       if (!container) return;
 
       const userStr = localStorage.getItem(STORAGE_KEYS.currentUser || 'currentUser');
       const curUser = userStr ? JSON.parse(userStr) : {};
+      const curUsername = curUser.username || 'user';
       const userDept = (curUser.teams || curUser.dept || '').toLowerCase();
       const userRole = (curUser.role || '').toLowerCase();
 
+      // Trigger background sync for personal contacts
+      syncPersonalContactsFromSheet(curUsername);
+
       let contacts = staffDirectory.slice().sort((a, b) => String(a.name || a.username).localeCompare(String(b.name || b.username), "vi"));
+      const myPrivateContacts = getStoredPersonalContacts(curUsername);
 
       if (zaloSearchQuery) {
         contacts = contacts.filter(p => {
@@ -5625,6 +5725,9 @@
           <div class="zalo-tab-pills">
             <button type="button" class="zalo-tab-btn ${currentZaloTab === 'same_team' ? 'active' : ''}" onclick="setZaloContactTab('same_team')">
               <i class="bi bi-people-fill"></i> Nhóm cùng tổ <span class="badge bg-secondary">${sameTeamContacts.length}</span>
+            </button>
+            <button type="button" class="zalo-tab-btn ${currentZaloTab === 'my_private' ? 'active' : ''}" onclick="setZaloContactTab('my_private')">
+              <i class="bi bi-star-fill text-warning"></i> Cá nhân của tôi <span class="badge bg-secondary">${myPrivateContacts.length}</span>
             </button>
             <button type="button" class="zalo-tab-btn ${currentZaloTab === 'groups' ? 'active' : ''}" onclick="setZaloContactTab('groups')">
               <i class="bi bi-diagram-3-fill"></i> Danh sách nhóm
@@ -5668,6 +5771,37 @@
       if (currentZaloTab === 'same_team') {
         const rows = sameTeamContacts.map(buildRowHtml).join('');
         bodyHtml = `<div class="contacts-list">${rows || '<div class="empty-state">Không có nhân sự trong tổ.</div>'}</div>`;
+
+      } else if (currentZaloTab === 'my_private') {
+        const rows = myPrivateContacts.map(item => {
+          const name = item.fullName || "Liên hệ cá nhân";
+          const initial = escapeHtml((name.trim().charAt(0) || "?").toUpperCase());
+          const phone = contactPhone(item.phone);
+          const phoneDigits = phone.replace(/\D/g, "");
+          const note = item.deptOrNote || "Ghi chú riêng";
+
+          return `<article class="contact-row">
+            <div class="contact-avatar" style="background: linear-gradient(145deg, #f39c12, #d35400);">${initial}</div>
+            <div class="contact-main">
+              <div class="contact-name">${escapeHtml(name)} <span class="badge bg-warning text-dark ms-1" style="font-size:10px;">Riêng tư</span></div>
+              <div class="contact-meta">${escapeHtml(note)}${phone ? ` · ${escapeHtml(phone)}` : ""}</div>
+            </div>
+            <div class="contact-actions">
+              ${phone ? `<a href="tel:${escapeAttr(phone)}" title="Gọi ${escapeAttr(name)}"><i class="bi bi-telephone-fill"></i></a>
+              <a class="zalo" href="https://zalo.me/${escapeAttr(phoneDigits)}" target="_blank" rel="noopener" title="Nhắn Zalo"><i class="bi bi-chat-dots-fill"></i></a>` : ''}
+              <button class="btn btn-sm text-secondary p-1" title="Sửa" onclick="openPersonalContactModal('${escapeAttr(item.id)}')"><i class="bi bi-pencil-fill"></i></button>
+              <button class="btn btn-sm text-danger p-1" title="Xóa" onclick="deletePersonalContactItem('${escapeAttr(item.id)}')"><i class="bi bi-trash-fill"></i></button>
+            </div>
+          </article>`;
+        }).join('');
+
+        const addPrivateBtn = `<div class="p-2 border-bottom text-center bg-light">
+          <button class="btn btn-sm btn-warning text-dark fw-bold rounded-pill px-3 py-1" onclick="openPersonalContactModal('')">
+            <i class="bi bi-plus-circle-fill me-1"></i> + Thêm liên hệ cá nhân mới
+          </button>
+        </div>`;
+
+        bodyHtml = addPrivateBtn + `<div class="contacts-list">${rows || '<div class="empty-state">Bạn chưa lưu số cá nhân nào.<br>Bấm "+ Thêm liên hệ cá nhân mới" để bắt đầu lưu.</div>'}</div>`;
 
       } else if (currentZaloTab === 'groups') {
         const groupMap = new Map();
