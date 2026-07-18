@@ -19,7 +19,7 @@
             --accent-red: #ef4444;
             --accent-orange: #f97316;
         }
-        [data-theme="dark"] {
+        [data-bs-theme="dark"], .dark-mode {
             --bg-color: #0b1329;
             --card-bg: #131a30;
             --text-main: #f8fafc;
@@ -94,31 +94,12 @@
             padding: 10px;
             font-size: 0.8rem;
         }
-        [data-theme="dark"] .log-container {
+        [data-bs-theme="dark"] .log-container, .dark-mode .log-container {
             background-color: rgba(0, 0, 0, 0.2);
         }
-    </style>
+    <script src="js/app-header.js" data-title="Giám sát Trạng thái Server" data-sub="BanDienScan" data-icon="bi-cpu-fill" data-back="index.html"></script>
 </head>
 <body>
-
-    <nav class="bds-topbar">
-        <div class="bds-topbar-inner">
-            <div class="bds-topbar-left">
-                <div class="bds-brand-mark"><i class="bi bi-cpu-fill fs-5"></i></div>
-                <div>
-                    <div class="bds-brand-label">BanDienScan Tools</div>
-                    <h5 class="bds-topbar-title">Giám sát Trạng thái Server</h5>
-                </div>
-            </div>
-            <div class="bds-topbar-right">
-                <a href="./" class="bds-btn-home"><i class="bi bi-house-door-fill"></i> Trang chủ</a>
-                <button class="bds-btn-icon" onclick="toggleTheme()" id="themeBtn"><i class="bi bi-moon-fill"></i></button>
-                <button class="bds-btn bds-btn-primary bds-btn-sm" onclick="checkAllServers()">
-                    <i class="bi bi-arrow-clockwise"></i> Kiểm tra
-                </button>
-            </div>
-        </div>
-    </nav>
 
     <div class="container py-4">
         <!-- Add New Server Modal Trigger & Info -->
@@ -212,32 +193,10 @@
             // Initialize Bootstrap Modal
             serverModalObj = new bootstrap.Modal(document.getElementById('serverModal'));
 
-            // Apply theme
-            const currentTheme = localStorage.getItem("theme") || "light";
-            document.documentElement.setAttribute("data-theme", currentTheme);
-            updateThemeButton(currentTheme);
-
             renderServers();
             renderLogs();
             checkAllServers();
         };
-
-        function toggleTheme() {
-            const html = document.documentElement;
-            const newTheme = html.getAttribute("data-theme") === "dark" ? "light" : "dark";
-            html.setAttribute("data-theme", newTheme);
-            localStorage.setItem("theme", newTheme);
-            updateThemeButton(newTheme);
-        }
-
-        function updateThemeButton(theme) {
-            const btn = document.getElementById("themeBtn");
-            if (theme === "dark") {
-                btn.innerHTML = '<i class="bi bi-sun-fill text-warning"></i>';
-            } else {
-                btn.innerHTML = '<i class="bi bi-moon-fill"></i>';
-            }
-        }
 
         function renderServers() {
             const grid = document.getElementById("serversGrid");
@@ -490,5 +449,6 @@
             pingServer(targetId);
         };
     </script>
+    <script src="js/bottomnav.js" data-root="./"></script>
 </body>
 </html>

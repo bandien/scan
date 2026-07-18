@@ -9,29 +9,29 @@
 /* ===== 1. DESIGN TOKENS ===== */
 :root {
   /* --- Colors: Surface & Background (Light mode) --- */
-  --bds-bg:                 #f8fafc;
+  --bds-bg:                 #f2f2f7;
   --bds-surface:            #ffffff;
-  --bds-surface-low:        #f3f3f7;
-  --bds-surface-high:       #eeeef3;
-  --bds-surface-highest:    #e2e2e6;
+  --bds-surface-low:        #f2f2f7;
+  --bds-surface-high:       #e5e5ea;
+  --bds-surface-highest:    #d1d1d6;
 
   /* --- Colors: Text ---
      Độ tương phản cao cho ánh sáng ngoài trời (kỹ thuật viên xem máy bơm
      dưới nắng gắt): chữ chính gần như đen tuyệt đối, chữ phụ/muted cũng
      đậm hơn nhiều so với mức xám nhạt thông thường. */
-  --bds-on-surface:         #000000;
-  --bds-on-surface-variant: #1e293b;
-  --bds-muted:              #334155;
+  --bds-on-surface:         #1c1c1e;
+  --bds-on-surface-variant: #3a3a3c;
+  --bds-muted:              #6e6e73;
 
   /* --- Colors: Borders & Outlines --- */
-  --bds-outline:            #74777f;
-  --bds-outline-variant:    #c2c6d8;
-  --bds-line:               #d9e1e8;
+  --bds-outline:            #8e8e93;
+  --bds-outline-variant:    #d1d1d6;
+  --bds-line:               rgba(60, 60, 67, .18);
 
   /* --- Colors: Primary (Blue — from design.md) --- */
-  --bds-primary:            #0e6efd;
-  --bds-primary-dark:       #0057ce;
-  --bds-primary-light:      #dae2ff;
+  --bds-primary:            #007aff;
+  --bds-primary-dark:       #0066cc;
+  --bds-primary-light:      #e8f2ff;
   --bds-on-primary:         #ffffff;
 
   /* --- Colors: Semantic --- */
@@ -101,17 +101,227 @@
   --siu-tertiary:             var(--bds-warning-ink);
 }
 
+[data-bs-theme="dark"], .dark-mode {
+  --bds-bg: #000000;
+  --bds-surface: #1c1c1e;
+  --bds-surface-low: #2c2c2e;
+  --bds-surface-high: #3a3a3c;
+  --bds-surface-highest: #48484a;
+  --bds-on-surface: #f5f5f7;
+  --bds-on-surface-variant: #ebebf5;
+  --bds-muted: #aeaeb2;
+  --bds-outline: #636366;
+  --bds-outline-variant: #3a3a3c;
+  --bds-line: rgba(84, 84, 88, .65);
+  --bds-primary: #0a84ff;
+  --bds-primary-dark: #409cff;
+  --bds-primary-light: rgba(10, 132, 255, .18);
+}
+
 
 /* ===== 2. COMMON BASE STYLES ===== */
 
+/* ===== Modern Glassmorphism App Header (.app-header) ===== */
+.app-header {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  background: rgba(249, 249, 249, .82);
+  backdrop-filter: saturate(180%) blur(24px);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+  border-bottom: .5px solid var(--bds-line);
+  flex-shrink: 0;
+  z-index: 1020;
+  transition: all 0.25s ease;
+  box-shadow: none;
+}
+[data-bs-theme="dark"] .app-header, .dark-mode .app-header {
+  background: rgba(28, 28, 30, .82);
+  border-bottom-color: var(--bds-line);
+  box-shadow: none;
+}
+.header-inner { display: flex; align-items: center; gap: 10px; min-height: 64px; padding: 9px 14px; justify-content: space-between; }
+.header-inner-back { justify-content: flex-start; }
+.header-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.header-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.header-titles { min-width: 0; }
+.app-title { margin: 0; font-size: 1.06rem; font-weight: 700; line-height: 1.2; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif; letter-spacing: -.015em; color: var(--bds-on-surface); }
+.header-sub { font-size: .75rem; font-weight: 500; color: var(--bds-muted); margin-top: 2px; }
+.brand-mark {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: linear-gradient(145deg, #37a7ff, var(--bds-primary-dark));
+  color: #fff; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 1.05rem; flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0, 122, 255, .24);
+}
+.btn-back {
+  width: 36px; height: 40px; border-radius: 12px;
+  border: 0; background: transparent;
+  font-size: 1.35rem; display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0; color: var(--bds-primary); cursor: pointer; padding: 0; text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: none;
+}
+.btn-back:active { transform: scale(0.92); }
+.header-title { font-weight: 800; font-size: 1.12rem; line-height: 1.25; flex: 1; min-width: 0; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; color: var(--bds-on-surface); }
+.sync-pill { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: .82rem; padding: 5px 12px; border-radius: 999px; background: var(--bds-success-bg); color: var(--bds-success); border: 1px solid rgba(27, 94, 32, 0.2); }
+.sync-pill.offline { background: var(--bds-warning-bg); color: var(--bds-warning-ink); border: 1px solid rgba(138, 90, 0, 0.3); }
+.app-header-action {
+  align-items: center;
+  background: var(--bds-surface-low);
+  border: 0;
+  border-radius: 50%;
+  color: var(--bds-primary);
+  display: inline-flex;
+  font-size: 1rem;
+  height: 36px;
+  justify-content: center;
+  text-decoration: none;
+  width: 36px;
+}
+.app-header-action:active { opacity: .55; transform: scale(.94); }
+.app-header-personal { background: var(--bds-primary); color: #fff; }
+[data-header-extra] { align-items: center; display: inline-flex; gap: 4px; }
+.app-header-detail-mode .app-header-home,
+.app-header-detail-mode .app-header-personal { display: none; }
+.app-header-call { background: #34c759; color: #fff; }
+.app-header-zalo { background: #0068ff; color: #fff; }
+.app-header-edit { background: var(--bds-surface-high); color: var(--bds-on-surface-variant); }
+.app-header-search-mode {
+  background: #0068ff;
+  border-bottom: 0;
+  box-shadow: 0 2px 10px rgba(0, 73, 184, .2);
+}
+[data-bs-theme="dark"] .app-header-search-mode,
+.dark-mode .app-header-search-mode { background: #075dcc; }
+.app-header-search-mode .header-inner { gap: 10px; min-height: 58px; padding: 8px 12px; }
+.app-header-search {
+  align-items: center;
+  background: rgba(255, 255, 255, .18);
+  border-radius: 9px;
+  color: rgba(255, 255, 255, .88);
+  display: flex;
+  flex: 1;
+  gap: 9px;
+  min-width: 0;
+  padding: 0 12px;
+}
+.app-header-search input {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: #fff;
+  font-size: .94rem;
+  height: 40px;
+  min-width: 0;
+  outline: 0;
+  padding: 0;
+  width: 100%;
+}
+.app-header-search input::placeholder { color: rgba(255, 255, 255, .78); }
+.app-header-search-actions { align-items: center; display: flex; flex-shrink: 0; gap: 2px; }
+.app-header-search-action {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: #fff;
+  display: inline-flex;
+  font-size: 1.25rem;
+  height: 40px;
+  justify-content: center;
+  padding: 0;
+  text-decoration: none;
+  width: 40px;
+}
+.app-header-search-action:active { opacity: .6; transform: scale(.94); }
+.app-header [hidden] { display: none !important; }
+
+/* Search + QR card dùng chung cho trang quét thiết bị và quét máy bơm. */
+.bds-scan-card {
+  background: var(--bds-surface);
+  border: 0;
+  border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+  margin-bottom: 16px;
+  padding: 16px;
+  overflow: hidden;
+}
+.bds-scan-row { display: flex; gap: 8px; }
+.bds-scan-input-group {
+  align-items: center;
+  background: var(--bds-surface-low);
+  border-radius: 14px;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+.bds-scan-input-icon {
+  color: var(--bds-muted);
+  display: inline-flex;
+  padding: 0 0 0 14px;
+}
+.bds-scan-input {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: var(--bds-on-surface) !important;
+  font-size: 14px;
+  font-weight: 600;
+  min-height: 54px;
+  min-width: 0;
+  padding: 12px 14px;
+  width: 100%;
+}
+.bds-scan-submit {
+  align-items: center;
+  background: var(--bds-primary);
+  border: 0;
+  border-radius: 14px;
+  color: #fff;
+  display: inline-flex;
+  font-weight: 800;
+  justify-content: center;
+  min-width: 58px;
+  padding: 0 14px;
+}
+.bds-scan-primary {
+  align-items: center;
+  background: linear-gradient(135deg, var(--bds-primary-dark), #1c9a7c);
+  border: 0;
+  border-radius: 14px;
+  color: #fff;
+  display: flex;
+  font-weight: 800;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 16px;
+  min-height: 52px;
+  padding: 12px 16px;
+  width: 100%;
+}
+.bds-scan-submit:active,
+.bds-scan-primary:active { transform: scale(.97); }
+
 /* Topbar — Header chung cho mọi trang */
 .bds-topbar {
-  background: var(--bds-surface);
-  border-bottom: 1px solid var(--bds-line);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   position: sticky;
   top: 0;
   z-index: 1030;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  transition: all 0.25s ease;
+}
+
+[data-bs-theme="dark"] .bds-topbar, .dark-mode .bds-topbar {
+  background: rgba(18, 21, 31, 0.88);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .bds-topbar-inner {
@@ -127,7 +337,7 @@
 .bds-topbar-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   min-width: 0;
 }
 
@@ -140,17 +350,17 @@
 
 /* Brand mark — Logo icon */
 .bds-brand-mark {
-  width: 42px;
-  height: 42px;
-  border-radius: var(--bds-r-md);
-  background: var(--bds-primary);
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--bds-primary), #1c9a7c);
   color: #fff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(14, 110, 253, 0.2);
+  box-shadow: 0 4px 12px rgba(15, 107, 95, 0.25);
 }
 
 .bds-brand-label {
@@ -697,65 +907,97 @@
 
 
 /* ===== BOTTOM NAV DÙNG CHUNG (component tự nhúng qua js/bottomnav.js) =====
-   Thanh điều hướng dưới thống nhất cho các trang vệ tinh (pump_info, checkbom,
-   hengio, phanca, phongvan). Không phụ thuộc Bootstrap JS — menu dropup chạy
-   vanilla JS. index.html và nhatky/ có nav riêng gắn logic trang, không dùng bộ này. */
+   Thanh điều hướng dưới thống nhất, không phụ thuộc Bootstrap JS; menu dropup
+   chạy bằng JavaScript thuần. */
+/* ===== Modern Floating Bottom Navigation Bar dùng chung (.bds-bottom-nav) ===== */
 .bds-bottom-nav {
   position: fixed;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
-  max-width: 460px;
-  height: 68px;
-  background: var(--bds-surface);
-  border-top: 1px solid var(--bds-outline-variant);
+  max-width: 440px;
+  height: calc(64px + env(safe-area-inset-bottom));
+  background: rgba(249, 249, 249, .86);
+  backdrop-filter: saturate(180%) blur(24px);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+  border: 0;
+  border-top: .5px solid var(--bds-line);
+  border-radius: 0;
   display: flex;
   justify-content: space-around;
   align-items: center;
   z-index: 1040;
-  padding: 0 8px calc(env(safe-area-inset-bottom, 0px) / 2);
-  box-shadow: 0 -4px 10px rgba(0, 0, 0, .05);
+  padding: 0 6px env(safe-area-inset-bottom);
+  box-shadow: none;
+  transition: all 0.25s ease;
+}
+
+[data-bs-theme="dark"] .bds-bottom-nav, .dark-mode .bds-bottom-nav {
+  background: rgba(28, 28, 30, .86);
+  border-color: var(--bds-line);
+  box-shadow: none;
 }
 
 .bds-bottom-nav-item {
-  flex: 1;
+  flex: 0 0 25%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 2px;
   text-decoration: none;
-  color: var(--bds-on-surface-variant);
-  font-size: 11px;
-  font-weight: 800;
+  color: var(--bds-muted);
+  font-size: 10px;
+  font-weight: 600;
   background: none;
   border: none;
   padding: 4px 0;
   cursor: pointer;
+  border-radius: 16px;
   transition: all var(--bds-ease);
 }
-.bds-bottom-nav-item:active { transform: scale(0.97); }
-.bds-bottom-nav-item i { font-size: 22px; line-height: 1; padding: 5px 16px; border-radius: 12px; }
+.bds-bottom-nav-item:active { transform: scale(0.92); }
+.bds-bottom-nav-item i { font-size: 21px; line-height: 1; padding: 3px 12px; border-radius: 14px; transition: all 0.2s ease; }
 .bds-bottom-nav-item.active { color: var(--bds-primary); }
-.bds-bottom-nav-item.active i { background: var(--bds-primary-light); }
+.bds-bottom-nav-item.active i { background: transparent; color: var(--bds-primary); }
+
+.bds-bottom-nav-scan-btn {
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  width: auto;
+  height: auto;
+  border-radius: 16px;
+  background: transparent;
+  color: var(--bds-primary) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none;
+  border: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+.bds-bottom-nav-scan-btn:active { transform: scale(0.9); }
 
 /* Menu dropup (vanilla) */
 .bds-nav-menu {
   position: fixed;
-  bottom: 76px;
+  bottom: calc(74px + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%) translateY(8px);
-  width: min(300px, calc(100vw - 24px));
+  width: min(310px, calc(100vw - 24px));
   background: var(--bds-surface);
-  border: 1px solid var(--bds-outline-variant);
-  border-radius: 16px;
-  box-shadow: var(--bds-shadow-lg);
-  padding: 8px;
+  border: .5px solid var(--bds-line);
+  border-radius: 22px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .18);
+  padding: 10px;
   z-index: 1050;
   opacity: 0;
   pointer-events: none;
-  transition: opacity .15s ease, transform .15s ease;
+  transition: opacity .18s ease, transform .18s ease;
   max-height: min(70vh, 480px);
   overflow-y: auto;
 }
@@ -763,6 +1005,13 @@
   opacity: 1;
   pointer-events: auto;
   transform: translateX(-50%) translateY(0);
+}
+body.bds-menu-open::before {
+  background: rgba(0, 0, 0, .22);
+  content: "";
+  inset: 0;
+  position: fixed;
+  z-index: 1045;
 }
 .bds-nav-menu-header {
   font-size: .72rem;
@@ -777,7 +1026,7 @@
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: 12px;
   color: var(--bds-on-surface);
   text-decoration: none;
   font-size: .9rem;
@@ -785,10 +1034,27 @@
 }
 .bds-nav-menu a:hover, .bds-nav-menu a:active { background: var(--bds-surface-low); }
 .bds-nav-menu a i { color: var(--bds-primary); font-size: 1.05rem; width: 22px; text-align: center; }
+.bds-nav-menu-action {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 12px;
+  color: var(--bds-on-surface);
+  display: flex;
+  font-size: .9rem;
+  font-weight: 600;
+  gap: 10px;
+  padding: 10px 12px;
+  text-align: left;
+  width: 100%;
+}
+.bds-nav-menu-action:hover, .bds-nav-menu-action:active { background: var(--bds-surface-low); }
+.bds-nav-menu-action i { font-size: 1.05rem; text-align: center; width: 22px; }
+.bds-nav-menu-logout { color: var(--bds-danger); }
 .bds-nav-menu hr { margin: 6px 8px; border-color: var(--bds-outline-variant); opacity: .6; }
 
 /* Trang gắn nav phải chừa chỗ để nội dung không bị che */
-body.has-bds-bottom-nav { padding-bottom: 96px !important; }
+body.has-bds-bottom-nav { padding-bottom: calc(78px + env(safe-area-inset-bottom)) !important; }
 
 /* Không in thanh điều hướng ra giấy (vd: bảng phân ca) */
 @media print {

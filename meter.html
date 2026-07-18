@@ -55,29 +55,11 @@
         /* Phóng to chữ cho nhân viên lớn tuổi — dùng chung key với pump_info/nhatky */
         #toastBox { position: fixed; bottom: 88px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; flex-direction: column; gap: 8px; width: calc(100% - 32px); max-width: 420px; }
         .custom-toast { color: white; padding: 12px 18px; border-radius: 12px; font-weight: 700; font-size: 0.88rem; box-shadow: 0 8px 20px rgba(0,0,0,.2); display: flex; align-items: center; gap: 8px; transition: opacity .4s; }
-    </style>
+    <script src="js/app-header.js" data-title="Chốt Chỉ Số Đồng Hồ" data-sub="BanDienScan" data-icon="bi-speedometer2" data-back="index.html"></script>
 </head>
 <body>
 
-<div class="app-shell">
-    <header class="bds-topbar bds-topbar-mobile mb-3">
-        <div class="bds-topbar-inner">
-            <div class="bds-topbar-left">
-                <div class="bds-brand-mark" id="headerIcon"><i class="bi bi-speedometer2"></i></div>
-                <div>
-                    <div class="bds-brand-label">BanDienScan</div>
-                    <div class="bds-topbar-title">Chốt Chỉ Số Đồng Hồ</div>
-                </div>
-            </div>
-            <div class="bds-topbar-right">
-                <span id="syncStatusBadge" class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-2 py-1 me-1" style="font-size:.75rem; display:none;">
-                    <i class="bi bi-cloud-check-fill me-1"></i>Đồng bộ
-                </span>
-                <button type="button" class="bds-btn-icon fw-bold" id="btnFontScale" title="Phóng to chữ"><span id="fontScaleLabel">A</span></button>
-                <a href="index.html" class="bds-btn-icon" title="Trang chủ"><i class="bi bi-house-door-fill"></i></a>
-            </div>
-        </div>
-    </header>
+<div class="app-shell" style="padding-top: 16px;">
 
     <!-- Tìm đồng hồ -->
     <div class="card-premium" id="pickerCard">

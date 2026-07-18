@@ -37,7 +37,7 @@ function doGet(e) {
       case 'setupHeaders':      return handleSetupHeaders(e);
       case 'login':             return handleLogin(e);
       case 'getDeviceHistory':  return handleGetDeviceHistory(e);
-      case 'getWorkOrders':     return handleGetWorkOrders(e);
+      // getWorkOrders: đã gỡ — WorkOrders được thay bằng NhatKyPlans (xem 20_MigrateWorkOrders.gs)
       case 'getInventory':      return handleGetInventory(e);
       case 'getStaff':          return handleGetStaff(e);
       case 'getProjects':       return handleGetProjects(e);
@@ -98,11 +98,9 @@ function doPost(e) {
       createDevicesBatch:   handleCreateDevicesBatch,
       updateDevice:         handleUpdateDevice,
       logInOut:             handleLogInOut,
-      // Work Orders
-      createWO:             handleCreateWO,
-      updateWOStatus:       handleUpdateWOStatus,
-      updateWO:             handleUpdateWO,
-      deleteWO:             handleDeleteWO,
+      // Work Orders: đã gỡ route tạo/sửa mới — thay bằng NhatKyPlans (xem 20_MigrateWorkOrders.gs).
+      // Các handler cũ (handleCreateWO/handleUpdateWO/handleUpdateWOStatus/handleDeleteWO) vẫn còn
+      // trong 05_WorkOrders.gs nhưng không còn action nào gọi tới.
       // Daily work logs
       createWorkLog:        handleCreateWorkLog,
       seedWorkLogsDemo:     handleSeedWorkLogsDemo,

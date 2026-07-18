@@ -2845,7 +2845,9 @@
                 localStorage.setItem('localUsers', JSON.stringify(result.users || []));
                 // Preload staff list for AssignedTo dropdown
                 if (result.users && result.users.length > 0) {
-                    fetch(`${gasUrl}?action=getStaff&token=${API_TOKEN}`)
+                    const uRole = result.user ? (result.user.role || 'User') : '';
+                    const uTeam = result.user ? (result.user.teams || result.user.dept || '') : '';
+                    fetch(`${gasUrl}?action=getStaff&token=${API_TOKEN}&role=${encodeURIComponent(uRole)}&team=${encodeURIComponent(uTeam)}`)
                         .then(r => r.json())
                         .then(d => { if (d.status === 'success') localStorage.setItem('localStaff', JSON.stringify(d.staff || [])); })
                         .catch(() => {});

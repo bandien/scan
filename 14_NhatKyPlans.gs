@@ -15,7 +15,8 @@ function ensurePlansSheet_() {
     "PlanID","Date","Time","Team","Area","Asset","Task",
     "Assignee","Priority","Status","UpdatedAt","UpdatedBy",
     "Watcher","Collaborators","DateEnd","Type","PlanQty","Unit",
-    "DoneQty","FollowUpDate","Source","SourceText","Steps"
+    "DoneQty","FollowUpDate","Source","SourceText","Steps",
+    "Labels","AssetUID","CreatedAt","Cost","PartsUsed","Project"
   ];
 
   if (!sheet) sheet = ss.insertSheet("NhatKyPlans");
@@ -55,6 +56,14 @@ function ensurePlansSheet_() {
       // [{id, title, assignees, done, doneAt, doneBy}] (cùng pattern subTasks của WO)
       sheet.getRange(1, 23).setValue("Steps").setFontWeight("bold");
     }
+    if (String(sheet.getRange(1, 24).getValue()).trim() === "") {
+      // Labels: nhãn đa chọn tự do (vd "Cần hỗ trợ", "Đã chốt sổ") — tách state khỏi cờ cảnh báo
+      sheet.getRange(1, 24).setValue("Labels").setFontWeight("bold");
+    }
+    if (String(sheet.getRange(1, 25).getValue()).trim() === "") {
+      // AssetUID/CreatedAt/Cost/PartsUsed/Project: phục vụ hợp nhất dữ liệu từ WorkOrders
+      sheet.getRange(1, 25, 1, 5).setValues([["AssetUID", "CreatedAt", "Cost", "PartsUsed", "Project"]]).setFontWeight("bold");
+    }
   }
   // Date/Time/DateEnd lưu dạng text để trả về đúng chuỗi yyyy-MM-dd / HH:mm-HH:mm
   sheet.getRange("B:C").setNumberFormat("@");
@@ -85,6 +94,37 @@ function formatPlanDate_(value) {
   return String(value || "").trim();
 }
 
+// Trạng thái hợp lệ hiện hành. "Cần hỗ trợ" là giá trị legacy (trước khi tách state/label) —
+// được quy đổi sang state "Đang làm" + label "Cần hỗ trợ" thay vì là 1 state riêng.
+const PLAN_VALID_STATUSES = ["Chưa làm", "Đang làm", "Hoàn thành", "Đã hủy"];
+const PLAN_VALID_PRIORITIES = ["Khẩn cấp", "Cao", "Trung bình", "Thấp", "Không có"];
+const PLAN_LEGACY_STATUS_LABEL_MAP = { "Cần hỗ trợ": { status: "Đang làm", label: "Cần hỗ trợ" } };
+
+// Quy đổi 1 giá trị status: giá trị legacy → {status hợp lệ, label bổ sung nếu có}.
+// Áp dụng ở cả đường đọc (handleGetPlans) và đường ghi (handleSavePlan) để không phụ
+// thuộc thứ tự deploy backend/frontend, và không cần ghi đè hàng loạt lên sheet cũ.
+function normalizePlanStatus_(status) {
+  const raw = String(status || "").trim();
+  const legacy = PLAN_LEGACY_STATUS_LABEL_MAP[raw];
+  if (legacy) return { status: legacy.status, extraLabel: legacy.label };
+  return { status: raw, extraLabel: null };
+}
+
+function parsePlanLabels_(raw) {
+  return String(raw || "").split(",").map(function(s) { return s.trim(); }).filter(Boolean);
+}
+
+// Validate payload trước khi ghi. Chấp nhận status legacy (đã quy đổi trước khi validate).
+function validatePlanPayload_(status, priority) {
+  if (status && !PLAN_VALID_STATUSES.includes(status)) {
+    return "Status phải là: " + PLAN_VALID_STATUSES.join(", ");
+  }
+  if (priority && !PLAN_VALID_PRIORITIES.includes(priority)) {
+    return "Priority phải là: " + PLAN_VALID_PRIORITIES.join(", ");
+  }
+  return null;
+}
+
 function handleGetPlans(e) {
   const user = e && e.parameter ? e.parameter.user : "";
   const userTeams = typeof getUserTeams_ === "function" ? getUserTeams_(user) : "";
@@ -103,7 +143,7 @@ function handleGetPlans(e) {
   }
 
   let totals = null; // Lazy-load only when some plan rows have empty DoneQty
-  const rows = sheet.getRange(2, 1, lastRow - 1, 23).getValues();
+  const rows = sheet.getRange(2, 1, lastRow - 1, 29).getValues();
   const plans = rows
     .filter(function(r) {
       if (String(r[0]).trim() === "") return false;
@@ -125,6 +165,9 @@ function handleGetPlans(e) {
       } else {
         doneQtyVal = Number(doneQtyVal);
       }
+      const normalized = normalizePlanStatus_(r[9]);
+      const labels = parsePlanLabels_(r[23]);
+      if (normalized.extraLabel && !labels.includes(normalized.extraLabel)) labels.push(normalized.extraLabel);
       return {
         id: id,
         date: formatPlanDate_(r[1]),
@@ -135,7 +178,7 @@ function handleGetPlans(e) {
         task: String(r[6] || ""),
         assignee: String(r[7] || ""),
         priority: String(r[8] || ""),
-        status: String(r[9] || ""),
+        status: normalized.status,
         watcher: String(r[12] || ""),
         collaborators: String(r[13] || ""),
         dateEnd: formatPlanDate_(r[14]),
@@ -146,7 +189,13 @@ function handleGetPlans(e) {
         followUpDate: formatPlanDate_(r[19]),
         source: String(r[20] || ""),
         sourceText: String(r[21] || ""),
-        steps: String(r[22] || "")
+        steps: String(r[22] || ""),
+        labels: labels,
+        assetUID: String(r[24] || ""),
+        createdAt: r[25] instanceof Date ? r[25].toISOString() : String(r[25] || ""),
+        cost: r[26] === "" || r[26] === null ? "" : Number(r[26]),
+        partsUsed: String(r[27] || ""),
+        project: String(r[28] || "")
       };
     });
 
@@ -171,15 +220,26 @@ function handleSavePlan(params) {
     return contentResponse({ status: "error", message: "Tổ không thuộc quyền của tài khoản" });
   }
 
+  // Quy đổi status legacy (vd client cũ gửi "Cần hỗ trợ") trước khi validate/ghi
+  const normalizedStatus = normalizePlanStatus_(payload.status || "Chưa làm");
+  const validationError = validatePlanPayload_(normalizedStatus.status, payload.priority);
+  if (validationError) return contentResponse({ status: "error", message: validationError });
+
   const sheet = ensurePlansSheet_();
   const planId = String(payload.id || "").trim() || ("PLAN-" + date.replace(/-/g, "") + "-" + new Date().getTime());
-  
+
   const rowIndex = findPlanRow_(sheet, planId);
   // Preserve current DoneQty in the sheet or set to 0 for new plans
   let doneQty = 0;
   let preservedSource = "";
   let preservedSourceText = "";
   let preservedSteps = "";
+  let preservedLabels = "";
+  let preservedAssetUID = "";
+  let preservedCreatedAt = "";
+  let preservedCost = "";
+  let preservedPartsUsed = "";
+  let preservedProject = "";
   if (rowIndex > 0) {
     doneQty = sheet.getRange(rowIndex, 19).getValue();
     if (doneQty === "" || doneQty === null) doneQty = 0;
@@ -187,6 +247,21 @@ function handleSavePlan(params) {
     preservedSource = String(sourceValues[0] || "");
     preservedSourceText = String(sourceValues[1] || "");
     preservedSteps = String(sheet.getRange(rowIndex, 23).getValue() || "");
+    const extraValues = sheet.getRange(rowIndex, 24, 1, 6).getValues()[0];
+    preservedLabels = String(extraValues[0] || "");
+    preservedAssetUID = String(extraValues[1] || "");
+    preservedCreatedAt = extraValues[2] || "";
+    preservedCost = extraValues[3];
+    preservedPartsUsed = String(extraValues[4] || "");
+    preservedProject = String(extraValues[5] || "");
+  }
+
+  // Nếu payload gửi labels, cộng dồn thêm extraLabel (vd "Cần hỗ trợ" từ status legacy) tránh mất cờ cảnh báo
+  let labelsOut = payload.labels === undefined ? preservedLabels : parsePlanLabels_(payload.labels).join(", ");
+  if (normalizedStatus.extraLabel) {
+    const labelsArr = parsePlanLabels_(labelsOut);
+    if (!labelsArr.includes(normalizedStatus.extraLabel)) labelsArr.push(normalizedStatus.extraLabel);
+    labelsOut = labelsArr.join(", ");
   }
 
   const row = [
@@ -199,7 +274,7 @@ function handleSavePlan(params) {
     task,
     String(payload.assignee || ""),
     String(payload.priority || ""),
-    String(payload.status || "Chưa làm"),
+    normalizedStatus.status,
     new Date(),
     String(payload.updatedBy || ""),
     String(payload.watcher || ""),
@@ -212,7 +287,13 @@ function handleSavePlan(params) {
     formatPlanDate_(payload.followUpDate),
     payload.source === undefined ? preservedSource : String(payload.source || ""),
     payload.sourceText === undefined ? preservedSourceText : String(payload.sourceText || ""),
-    payload.steps === undefined ? preservedSteps : String(payload.steps || "")
+    payload.steps === undefined ? preservedSteps : String(payload.steps || ""),
+    labelsOut,
+    payload.assetUID === undefined ? preservedAssetUID : String(payload.assetUID || ""),
+    rowIndex > 0 ? preservedCreatedAt : new Date(),
+    payload.cost === undefined ? preservedCost : (payload.cost === "" ? "" : Number(payload.cost)),
+    payload.partsUsed === undefined ? preservedPartsUsed : String(payload.partsUsed || ""),
+    payload.project === undefined ? preservedProject : String(payload.project || "")
   ];
 
   if (rowIndex > 0) {

@@ -52,24 +52,11 @@
         .ver-card strong { color: var(--bds-on-surface); }
         .ver-card a { color: var(--bds-primary); }
     </style>
+    <script src="js/app-header.js" data-title="Nhật ký Thay đổi" data-sub="BanDienScan" data-icon="bi-history" data-back="index.html"></script>
 </head>
 <body>
 
-<div class="app-shell">
-    <header class="bds-topbar bds-topbar-mobile mb-3">
-        <div class="bds-topbar-inner">
-            <div class="bds-topbar-left">
-                <div class="bds-brand-mark"><i class="bi bi-history"></i></div>
-                <div>
-                    <div class="bds-brand-label">BanDienScan</div>
-                    <div class="bds-topbar-title">Nhật ký Thay đổi</div>
-                </div>
-            </div>
-            <div class="bds-topbar-right">
-                <a class="bds-btn-home" href="index.html"><i class="bi bi-house"></i></a>
-            </div>
-        </div>
-    </header>
+<div class="app-shell" style="padding-top: 16px;">
 
     <p class="intro-text"><i class="bi bi-info-circle me-1"></i>Toàn bộ thay đổi và cải tiến của hệ thống, ghi nhận theo từng phiên bản. Nội dung được nạp trực tiếp từ <code>CHANGELOG.md</code>.</p>
 
@@ -176,5 +163,6 @@
         }
     })();
 </script>
+<script src="js/bottomnav.js" data-root="./"></script>
 </body>
 </html>

@@ -18,3 +18,6 @@ style.css
 status.html
 data/**
 start_ngrok.js
+sw.js
+manifest.json
+favicon.ico

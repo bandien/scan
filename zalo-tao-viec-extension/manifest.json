@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Zalo → Nhật ký công việc",
+  "version": "1.0.0",
+  "description": "Tạo nhanh công việc Nhật ký từ từng tin nhắn trên Zalo Web.",
+  "permissions": ["storage", "tabs"],
+  "host_permissions": [
+    "https://script.google.com/*",
+    "https://script.googleusercontent.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://chat.zalo.me/*"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "Zalo → Nhật ký công việc"
+  }
+}

@@ -58,6 +58,12 @@ Giao diện đi theo dạng App Shell với chiều rộng tối đa là `460px`
 Hệ thống sử dụng các font mặc định của hệ điều hành di động (San Francisco, Segoe UI, Roboto) để tối ưu hóa hiệu năng tải và giữ cảm giác thân thuộc với người dùng. Cỡ chữ to hơn thông thường (font gốc 1.05rem) cùng với độ đậm (Font Weight) lớn giúp nhân viên đọc lướt nhanh nội dung công việc.
 
 ## Hình khối & Bo góc (Shapes & Borders)
-- **Bo góc 16px (ROUND_SIXTEEN):** Sử dụng rộng rãi cho các App Shell, các thẻ danh sách công việc (`.a11y-list`), các nút bấm lớn (`.btn-main`).
-- **Bo góc 999px (ROUND_FULL):** Áp dụng cho các badge trạng thái (`.badge-soft`) và chip người thực hiện (`.person-chip`).
-- **Đường viền dày (2px - 3px):** Tất cả các khung nhập liệu và nút bấm đều có đường viền đậm nét (`#c7ccd1` hoặc màu chữ chính) nhằm định hình rõ khu vực tương tác xúc giác.
+- **Bo góc 16px / 24px:** Sử dụng rộng rãi cho các App Shell, các thẻ Stitch Job Card (`.stitch-card`), các nút bấm lớn (`.btn-main`).
+- **Bo góc 999px (ROUND_FULL):** Áp dụng cho các badge trạng thái (`.badge-soft`, `.stitch-badge`), nút lọc nhanh (`.a11y-chip`) và chip người thực hiện (`.person-chip`).
+- **Đường viền & Thanh chỉ báo độ ưu tiên:** Thẻ Stitch Job Card tích hợp thanh accent màu bên trái (`.stitch-card-bar`) giúp nhận biết nhanh mức độ ưu tiên (Khẩn cấp: đỏ, Cao: cam, Trung bình: xanh), kết hợp các nút bấm cảm ứng to (Min-height 44px - 52px) phục vụ thao tác ngoài hiện trường.
+
+## Tính năng giao diện mới (Redesign 2026)
+- **Live Search & Quick Filter Chips:** Thanh tìm kiếm tức thì kết hợp dải chip lọc nhanh (Tất cả, Chưa xong, Cần hỗ trợ, Việc của tôi) phản hồi 0.01s.
+- **Kanban Board & List Mode:** Chuyển đổi linh hoạt giữa Dạng thẻ danh sách (Mobile List View) và Cột bảng Kanban theo trạng thái (Chưa làm | Đang làm | Hoàn thành | Đã hủy).
+- **Subtask Progress Checklist:** Hiển thị tiến độ hoàn thành các bước chi tiết (`2/4 bước`) trực tiếp trên thẻ công việc.
+

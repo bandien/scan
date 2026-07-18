@@ -1,6 +1,8 @@
-
-# Local tool config (contains local-only permissions, example commands with tokens)
+# Local tool config
 .claude/
-
-# Local design-sync bookkeeping (project id, timestamps) - not needed in git history
 .design-sync/
+
+# Secrets and temp audit data
+*secret*.json
+kh_ncc_raw.json
+audit_duplicates_report.json
