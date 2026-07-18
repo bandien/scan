@@ -56,7 +56,12 @@
       backEl.hidden = !hasBack;
       backEl.setAttribute('href', nextBackUrl || '#');
     }
-    if (extraEl) extraEl.innerHTML = next.extraHtml || '';
+    if (extraEl) {
+      extraEl.innerHTML = next.extraHtml || '';
+      const hideDefault = Boolean(next.hideDefaultActions || next.extraHtml);
+      const defaultActions = headerElement.querySelectorAll('.app-header-home, .app-header-personal');
+      defaultActions.forEach(btn => { btn.hidden = hideDefault; });
+    }
     const searchMode = next.mode === 'search';
     titleViews.forEach(view => { view.hidden = searchMode; });
     searchViews.forEach(view => { view.hidden = !searchMode; });

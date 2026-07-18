@@ -2991,6 +2991,7 @@
         meta.subtitle = [detailContact.dept, detailContact.phone].filter(Boolean).join(" · ") || "Thông tin nhân viên";
         meta.icon = "bi-person-fill";
       }
+      const contactsAction = screen === "contacts" ? '<button class="btn btn-sm btn-primary rounded-pill px-2.5 py-1 text-nowrap" type="button" title="Thêm danh bạ mới" style="font-size:12px; font-weight:600;" onclick="openUserEditor(\'\')"><i class="bi bi-person-plus-fill me-1"></i>+ Thêm danh bạ</button>' : "";
       const personalAction = screen === "personal" ? '<button class="app-header-action" type="button" title="Cài đặt" aria-label="Cài đặt" onclick="settingsModalInstance.show()"><i class="bi bi-gear-fill"></i></button>' : "";
       window.BDSAppHeader.update({
         title: meta.title,
@@ -2999,7 +3000,7 @@
         mode: screen === "people" ? "search" : "title",
         searchPlaceholder: "Tìm công việc, vị trí, người làm",
         onBack: isDetail ? goBack : null,
-        extraHtml: editPlanId ? taskHeaderActions(detailPlan) : screen === "contactdetail" ? contactHeaderActions(params.name) : personalAction
+        extraHtml: editPlanId ? taskHeaderActions(detailPlan) : screen === "contactdetail" ? contactHeaderActions(params.name) : screen === "contacts" ? contactsAction : personalAction
       });
       updateSyncStatus();
     }
@@ -5617,19 +5618,6 @@
 
       const headerHtml = `
         <div class="zalo-contact-header">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <div class="fw-bold text-primary" style="font-size: 0.95rem;">
-              <i class="bi bi-person-lines-fill me-1"></i> Danh bạ nhân sự
-            </div>
-            <div class="d-flex gap-1">
-              <button class="btn btn-sm btn-primary py-1 px-2" style="font-size: 11px; border-radius: 14px;" onclick="openUserEditor('')">
-                <i class="bi bi-person-plus-fill me-1"></i> + Thêm thành viên
-              </button>
-              <button class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 11px; border-radius: 14px;" onclick="navigateTo('usermanagement', {})">
-                <i class="bi bi-gear-fill me-1"></i> Quản lý nhóm
-              </button>
-            </div>
-          </div>
           <div class="zalo-search-box">
             <i class="bi bi-search"></i>
             <input type="search" value="${escapeAttr(zaloSearchQuery)}" placeholder="Tìm kiếm nhân sự, tổ nhóm, SĐT..." oninput="filterZaloContacts(this.value)">
