@@ -80,16 +80,20 @@ function handleGetStaff(e) {
   const data = sheet.getDataRange().getValues();
   const schema = typeof getUsersSchema_ === "function"
     ? getUsersSchema_(data)
-    : { usernameIndex: 0, roleIndex: 2, teamsIndex: 3, phoneIndex: 7, fullNameIndex: 8 };
+    : { usernameIndex: 0, roleIndex: 2, teamsIndex: 3, phoneIndex: 7, fullNameIndex: 8, labelsIndex: 9 };
 
   const requestingRole = e && e.parameter ? String(e.parameter.role || "").trim() : "";
   const requestingDept = e && e.parameter ? String(e.parameter.dept || e.parameter.team || "").trim().toLowerCase() : "";
+  const requestingLabels = e && e.parameter && e.parameter.labels
+    ? String(e.parameter.labels).split(",").map(function(s) { return s.trim().toLowerCase(); }).filter(Boolean)
+    : [];
 
   let staff = data.slice(1).filter(function(row) {
     return String(row[schema.usernameIndex] || "").trim();
   }).map(function(row) {
     const username = String(row[schema.usernameIndex] || "").trim();
     const fullName = schema.fullNameIndex >= 0 ? String(row[schema.fullNameIndex] || "").trim() : "";
+    const labels = schema.labelsIndex >= 0 ? String(row[schema.labelsIndex] || "").trim() : "";
     return {
       id: username,
       username: username,
@@ -97,21 +101,29 @@ function handleGetStaff(e) {
       fullName: fullName,
       position: String(row[schema.roleIndex] || "User").trim(),
       dept: String(row[schema.teamsIndex] || "").trim(),
-      phone: schema.phoneIndex >= 0 ? String(row[schema.phoneIndex] || "").trim() : ""
+      phone: schema.phoneIndex >= 0 ? String(row[schema.phoneIndex] || "").trim() : "",
+      labels: labels || (String(row[schema.teamsIndex] || "") + ", Public")
     };
   });
 
-  // Fast & lightweight filtering for regular Staff
+  // Label-Based & Role-Based Access Control filtering
   if (requestingRole === "User" || requestingRole === "Staff") {
     staff = staff.filter(function(person) {
       const pos = person.position.toLowerCase();
       const personDept = person.dept.toLowerCase();
+      const personLabels = (person.labels || "").toLowerCase();
+
       const isLeader = pos === "admin" || pos === "manager" || person.dept === "*";
       const isSameTeam = requestingDept && (personDept.includes(requestingDept) || requestingDept.includes(personDept));
-      return isLeader || isSameTeam;
+      const hasMatchingLabel = requestingLabels.length > 0 && requestingLabels.some(function(lbl) {
+        return lbl === "*" || personLabels.includes(lbl);
+      });
+
+      return isLeader || isSameTeam || hasMatchingLabel;
     });
   }
 
   return contentResponse({ status: "success", staff });
 }
+
 
