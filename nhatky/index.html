@@ -5588,6 +5588,25 @@
       renderContactsScreen();
     };
 
+    window.toggleZaloGroup = function(gId) {
+      const body = document.getElementById('zalo-group-body-' + gId);
+      const icon = document.getElementById('zalo-group-icon-' + gId);
+      if (body) {
+        const isHidden = body.hidden;
+        body.hidden = !isHidden;
+        if (icon) {
+          icon.className = isHidden ? 'bi bi-chevron-up text-primary ms-1' : 'bi bi-chevron-down text-secondary ms-1';
+        }
+      }
+    };
+
+    window.toggleAllZaloGroups = function(expand) {
+      const bodies = document.querySelectorAll('[id^="zalo-group-body-"]');
+      const icons = document.querySelectorAll('[id^="zalo-group-icon-"]');
+      bodies.forEach(b => { b.hidden = !expand; });
+      icons.forEach(i => { i.className = expand ? 'bi bi-chevron-up text-primary ms-1' : 'bi bi-chevron-down text-secondary ms-1'; });
+    };
+
     // ===== Personal Contacts Storage & Sync Module =====
     function getStoredPersonalContacts(username) {
       if (!username) return [];
@@ -5812,22 +5831,41 @@
         });
 
         let groupsHtml = '';
+        let groupIdx = 0;
         groupMap.forEach((members, gName) => {
+          groupIdx++;
+          const gId = 'g_' + groupIdx;
           const rows = members.map(buildRowHtml).join('');
-          const addMemberBtn = isAdmin ? `<button class="btn btn-sm btn-outline-primary py-0 px-2 ms-2" style="font-size:11px; border-radius:12px;" onclick="event.stopPropagation(); openUserEditor('')"><i class="bi bi-person-plus-fill"></i> Thêm thành viên</button>` : '';
+          const addMemberBtn = isAdmin ? `<button class="btn btn-sm btn-outline-primary py-0 px-2 ms-2" style="font-size:11px; border-radius:12px;" onclick="event.stopPropagation(); openUserEditor('')"><i class="bi bi-person-plus-fill"></i> + Thêm</button>` : '';
+
+          // Group starts collapsed by default for compact view
           groupsHtml += `
-            <div class="zalo-group-card mb-2">
-              <div class="zalo-group-header">
-                <div class="d-flex align-items-center">
-                  <span><i class="bi bi-folder-fill text-primary me-2"></i> ${escapeHtml(gName)}</span>
+            <div class="zalo-group-card mb-2 border rounded shadow-sm overflow-hidden">
+              <div class="zalo-group-header user-select-none p-2 bg-white" style="cursor: pointer;" onclick="toggleZaloGroup('${gId}')">
+                <div class="d-flex align-items-center flex-grow-1 min-w-0 me-2">
+                  <i class="bi bi-folder-fill text-primary me-2 fs-5 flex-shrink-0"></i>
+                  <span class="fw-bold text-dark text-truncate" style="font-size:0.9rem;">${escapeHtml(gName)}</span>
                   ${addMemberBtn}
                 </div>
-                <span class="badge bg-light text-dark border">${members.length} thành viên</span>
+                <div class="d-flex align-items-center flex-shrink-0">
+                  <span class="badge bg-light text-dark border rounded-pill me-1" style="font-size:0.75rem;">${members.length} nhân sự</span>
+                  <i class="bi bi-chevron-down text-secondary ms-1" id="zalo-group-icon-${gId}" style="font-size:0.85rem; transition: transform 0.2s;"></i>
+                </div>
               </div>
-              <div class="contacts-list">${rows}</div>
+              <div class="contacts-list border-top" id="zalo-group-body-${gId}" hidden>${rows}</div>
             </div>`;
         });
-        bodyHtml = `<div class="py-2">${groupsHtml || '<div class="empty-state">Chưa phân nhóm.</div>'}</div>`;
+
+        const toolbarHtml = `
+          <div class="px-3 py-2 bg-light border-bottom d-flex justify-content-between align-items-center" style="font-size: 0.8rem;">
+            <span class="text-secondary fw-semibold"><i class="bi bi-diagram-3 me-1"></i> ${groupMap.size} nhóm / ${contacts.length} nhân sự</span>
+            <div>
+              <button type="button" class="btn btn-sm btn-link p-0 me-3 text-decoration-none fw-bold" onclick="toggleAllZaloGroups(true)"><i class="bi bi-arrows-expand me-1"></i> Mở tất cả</button>
+              <button type="button" class="btn btn-sm btn-link p-0 text-secondary text-decoration-none fw-bold" onclick="toggleAllZaloGroups(false)"><i class="bi bi-arrows-collapse me-1"></i> Thu gọn tất cả</button>
+            </div>
+          </div>`;
+
+        bodyHtml = toolbarHtml + `<div class="p-2 bg-body-tertiary">${groupsHtml || '<div class="empty-state">Chưa phân nhóm.</div>'}</div>`;
 
       } else {
         const rows = contacts.map(buildRowHtml).join('');
