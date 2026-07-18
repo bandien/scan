@@ -39,7 +39,10 @@
   function bind() {
     apply();
     const btn = document.getElementById('btnFontScale');
-    if (btn) btn.addEventListener('click', cycle);
+    if (btn && btn.dataset.fontScaleBound !== 'true') {
+      btn.addEventListener('click', cycle);
+      btn.dataset.fontScaleBound = 'true';
+    }
   }
 
   root.BD_FontScale = { KEY, SCALES, LABELS, getScale, apply, cycle, bind };

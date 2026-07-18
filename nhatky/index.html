@@ -25,9 +25,14 @@
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
-  <link href="../css/shared.css" rel="stylesheet">
+  <link href="../css/shared.css?v=20260718-zalo7" rel="stylesheet">
   <script src="../js/config.js" defer></script>
+  <script src="../js/sso.js"></script>
+  <script src="../js/app-header.js?v=20260718-zalo7" data-root="../" data-title="Công việc" data-sub="BanDienScan" data-icon="bi-clipboard-check"></script>
   <style>
     /* Submenu nhánh trong dropdown (vd: "Quản lý máy bơm") */
     .chevron-icon { transition: transform 0.2s ease; }
@@ -58,8 +63,8 @@
       min-height: 100dvh;
       background: #d8dade;
       color: var(--ink);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      font-size: 1.05rem;
+      font-family: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 1rem;
     }
     .min-w-0 { min-width: 0; }
     .text-brand { color: var(--brand); }
@@ -67,28 +72,13 @@
     /* ===== App shell: fluid trên điện thoại, cột giữa trang trên màn rộng ===== */
     .app-shell {
       width: 100%; max-width: 460px; margin: 0 auto;
-      min-height: 100dvh; background: var(--page-bg);
+      min-height: calc(100dvh - 69px); background: var(--page-bg);
       display: flex; flex-direction: column; overflow-x: hidden;
     }
     @media (min-width: 700px) {
       body { padding: 24px 12px; }
       .app-shell { min-height: calc(100dvh - 48px); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.18); overflow: hidden; }
     }
-
-    /* ===== Header (2 chế độ: trang chủ / quay lại) ===== */
-    .app-header { background: var(--surface); border-bottom: 2px solid var(--line); flex-shrink: 0; position: sticky; top: 0; z-index: 20; }
-    .header-inner { display: flex; align-items: center; gap: 10px; padding: 12px 16px; justify-content: space-between; }
-    .header-inner-back { justify-content: flex-start; }
-    .header-left { display: flex; align-items: center; gap: 10px; }
-    .header-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .header-titles { min-width: 0; }
-    .app-title { margin: 0; font-size: 1.25rem; font-weight: 800; line-height: 1.2; }
-    .header-sub { font-size: .85rem; font-weight: 700; color: var(--muted); margin-top: 1px; }
-    .brand-mark { width: 48px; height: 48px; border-radius: 10px; background: var(--brand); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
-    .btn-back { width: 52px; height: 52px; border-radius: 14px; border: 3px solid var(--ink); background: #fff; font-size: 1.35rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--ink); cursor: pointer; padding: 0; }
-    .header-title { font-weight: 800; font-size: 1.15rem; line-height: 1.25; flex: 1; min-width: 0; }
-    .sync-pill { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; font-size: .9rem; padding: 6px 10px; border-radius: 999px; background: var(--done-bg); color: var(--done); }
-    .sync-pill.offline { background: var(--warn-bg); color: var(--warn-ink); border: 2px solid #8a5a00; }
 
     /* ===== Screens ===== */
     #appContent { display: flex; flex-direction: column; flex: 1; min-height: 0; }
@@ -102,73 +92,7 @@
     .btn-done { width: 100%; min-height: 60px; border-radius: 16px; border: none; background: var(--done); color: #fff; font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 8px 20px rgba(0,0,0,.22); cursor: pointer; }
     .link-button { background: none; border: 0; color: var(--brand); font-weight: 700; font-size: 1rem; min-height: 46px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 6px; cursor: pointer; text-decoration: underline; width: 100%; }
 
-    /* ===== Tab bar dưới cùng ===== */
-    .tabbar { display: none; background: #fff; border-top: 2px solid var(--line); flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom); }
-    /* ===== Bottom Navigation Bar ===== */
-    .bottom-nav-bar {
-      position: fixed;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
-      max-width: 440px;
-      height: calc(72px + env(safe-area-inset-bottom));
-      padding-bottom: env(safe-area-inset-bottom);
-      background: var(--surface);
-      border-top: 1px solid var(--line);
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      z-index: 1040;
-      padding: 0 8px env(safe-area-inset-bottom) 8px;
-      box-shadow: 0 -4px 10px rgba(0,0,0,.05);
-    }
-    body.has-bottom-nav #appContent {
-      padding-bottom: calc(72px + env(safe-area-inset-bottom));
-    }
-    .bottom-nav-item {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 800;
-      transition: all 0.2s ease;
-      background: none;
-      border: none;
-      padding: 4px 0;
-      min-width: 0;
-    }
-    .bottom-nav-item:active {
-        transform: scale(0.97);
-    }
-    .bottom-nav-item .material-symbols-outlined {
-      font-size: 24px;
-      line-height: 1;
-      margin-bottom: 2px;
-      display: block;
-    }
-    .bottom-nav-item.active {
-      color: var(--brand);
-    }
-    .bottom-nav-item.active .nav-icon-wrapper {
-      background: rgba(11,77,94,.1);
-      color: var(--brand);
-      border-radius: 12px;
-      padding: 6px 16px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .bottom-nav-item:not(.active) .nav-icon-wrapper {
-      padding: 6px 16px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
+    /* Tabbar cũ đã thay bằng component js/bottomnav.js. */
     .tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 0 7px; font-size: .72rem; font-weight: 800; color: #7a848a; background: none; border: 0; cursor: pointer; }
     .tab i { font-size: 1.4rem; }
     .tab.on { color: var(--brand); }
@@ -439,6 +363,20 @@
     .badge-open { background: #edf3f6; color: #475467; border-color: var(--line); }
     .badge-doing { background: var(--doing-bg); color: var(--doing); border-color: #bddcff; }
     .badge-done { background: var(--done-bg); color: var(--done); border-color: #bfe4cf; }
+    .badge-urgent { background: #ffe4e0; color: #b42318; border-color: #ffb4a8; }
+    .badge-none { background: #f2f4f7; color: #667085; border-color: #e4e7ec; }
+    .badge-cancelled { background: #f2f4f7; color: #667085; border-color: #e4e7ec; }
+
+    /* Nhãn (labels) — bảng màu cố định, gán tất định theo hash tên trong labelColorClass() */
+    .label-chip { padding: 3px 10px; font-size: .78rem; font-weight: 600; }
+    .label-c1 { background: #eef4ff; color: #3538cd; border-color: #c7d7fe; }
+    .label-c2 { background: #fdf2fa; color: #c11574; border-color: #fcceee; }
+    .label-c3 { background: #ecfdf3; color: #067647; border-color: #abefc6; }
+    .label-c4 { background: #fff6ed; color: #b93815; border-color: #f9dbaf; }
+    .label-c5 { background: #f4f3ff; color: #5925dc; border-color: #d9d6fe; }
+    .label-c6 { background: #fef3f2; color: #b42318; border-color: #fecdca; }
+    .label-c7 { background: #f0f9ff; color: #026aa2; border-color: #b9e6fe; }
+    .label-c8 { background: #f8f9fc; color: #363f72; border-color: #d5d9eb; }
 
     /* ===== Log card (nhật ký) ===== */
     .log-card { border: 2px solid var(--line); border-radius: 10px; padding: 12px; background: #fbfcfe; border-left: 6px solid #cbd5e1; margin-bottom: 10px; }
@@ -502,6 +440,7 @@
     .week-item.st-doing { border-left-color: var(--doing); }
     .week-item.st-help { border-left-color: var(--danger); }
     .week-item.st-open { border-left-color: #94a3b8; }
+    .week-item.st-cancelled { border-left-color: #94a3b8; opacity: .6; }
     .week-item-main { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 2px; }
     .week-item-task { color: var(--brand); font-weight: 700; font-size: 1rem; }
     .week-item-meta { color: var(--muted); font-weight: 600; font-size: .82rem; }
@@ -515,6 +454,18 @@
       flex-shrink: 0; width: 40px; border: 1px solid var(--line); border-radius: 10px;
       background: var(--surface-high); color: var(--muted); font-size: .95rem;
     }
+
+    /* ===== Bảng (Kanban) — màn Kế hoạch công việc, nhóm theo trạng thái ===== */
+    .task-toolbar-button.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+    .board-columns { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; }
+    .board-column { flex: 0 0 250px; width: 250px; display: flex; flex-direction: column; background: var(--surface-soft); border-radius: 12px; padding: 8px; max-height: calc(100dvh - 240px); }
+    .board-column-head { display: flex; justify-content: space-between; align-items: center; font-weight: 800; color: var(--muted); padding: 4px 6px 8px; font-size: .88rem; text-transform: uppercase; letter-spacing: .03em; }
+    .board-column-count { background: var(--surface-high); border-radius: 999px; padding: 1px 8px; font-size: .78rem; }
+    .board-column-body { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; }
+    .board-column-empty { color: var(--muted); font-size: .85rem; text-align: center; padding: 12px 4px; }
+    .board-card { display: block; width: 100%; text-align: left; border: 1px solid var(--line); border-radius: 10px; padding: 10px; background: #fff; cursor: pointer; }
+    .board-card-task { font-weight: 700; color: var(--ink); font-size: .92rem; margin-bottom: 2px; }
+    .board-card-meta { color: var(--muted); font-size: .78rem; }
     .week-move-btn:active { background: var(--surface-container-highest); }
     .week-move-banner {
       display: flex; align-items: center; justify-content: space-between; gap: 10px;
@@ -643,44 +594,6 @@
         border-radius: 28px;
         box-shadow: 0 24px 70px rgba(16, 24, 40, .24);
       }
-    }
-
-    .app-header {
-      background: rgba(255,255,255,.9);
-      border-bottom: 1px solid rgba(216,224,231,.75);
-      box-shadow: 0 8px 24px rgba(16,24,40,.06);
-      backdrop-filter: blur(16px);
-    }
-
-    .header-inner { padding: 14px 16px 12px; }
-    .brand-mark {
-      width: 46px;
-      height: 46px;
-      border-radius: 18px;
-      background: linear-gradient(135deg, var(--brand), #1c9a7c);
-      box-shadow: 0 10px 24px rgba(15,107,95,.24);
-    }
-    .app-title, .header-title { color: #101828; letter-spacing: -.01em; }
-    .header-sub { color: var(--muted); font-weight: 650; }
-    .btn-back {
-      width: 48px;
-      height: 48px;
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      background: #fff;
-      color: var(--brand);
-      box-shadow: var(--shadow-sm);
-    }
-    .sync-pill {
-      background: #edf7f2;
-      color: var(--brand);
-      border: 1px solid #c6e7d7;
-      box-shadow: none;
-    }
-    .sync-pill.offline {
-      background: #fff7e6;
-      color: var(--warn);
-      border: 1px solid #ffd28a;
     }
 
     .scroll { padding: 14px 16px 22px; }
@@ -902,6 +815,9 @@
     .badge-open { background: #f2f4f7; color: #475467; border-color: #e4e7ec; }
     .badge-doing { background: var(--doing-bg); color: var(--doing); border-color: #c7ddff; }
     .badge-done { background: var(--done-bg); color: var(--done); border-color: #bee5cf; }
+    .badge-urgent { background: #ffe4e0; color: #b42318; border-color: #ffb4a8; }
+    .badge-none { background: #f2f4f7; color: #667085; border-color: #e4e7ec; }
+    .badge-cancelled { background: #f2f4f7; color: #667085; border-color: #e4e7ec; }
 
     .ctx-card {
       background: linear-gradient(135deg, #eaf7f2, #ffffff);
@@ -1162,25 +1078,12 @@
       }
     }
 
-    .app-header,
-    .tabbar,
-    .bottom-nav-bar {
-      background: var(--surface);
-      border-color: var(--line);
-      box-shadow: none;
-      backdrop-filter: none;
-    }
-
-    .header-inner { padding: 12px 16px; min-height: 64px; }
-    .brand-mark,
     .status-dot {
       border-radius: 16px;
       background: var(--brand);
       color: #fff;
       box-shadow: none;
     }
-    .app-title,
-    .header-title,
     .task-row-title,
     .info-value,
     .ctx-what,
@@ -1188,7 +1091,6 @@
       color: var(--ink);
       letter-spacing: 0;
     }
-    .header-sub,
     .task-row-time,
     .info-label,
     .week-item-meta,
@@ -1197,7 +1099,6 @@
     .form-text {
       color: var(--muted) !important;
     }
-    .btn-back,
     .btn-icon-sm {
       min-width: 52px;
       width: 52px;
@@ -1208,17 +1109,6 @@
       color: var(--ink);
       box-shadow: none;
     }
-    .sync-pill {
-      background: var(--done-bg);
-      color: #8ee0b6;
-      border: 1px solid rgba(45, 138, 95, .45);
-    }
-    .sync-pill.offline {
-      background: rgba(255, 181, 153, .16);
-      color: var(--warn);
-      border-color: rgba(255, 181, 153, .42);
-    }
-
     .date-bar {
       padding: 12px 16px 4px;
       gap: 8px;
@@ -1559,19 +1449,6 @@
     .action-bar {
       background: linear-gradient(transparent, rgba(16, 19, 27, .98) 35%);
     }
-    .bottom-nav-bar {
-      max-width: 440px;
-      height: calc(72px + env(safe-area-inset-bottom));
-      padding-bottom: env(safe-area-inset-bottom);
-      background: var(--surface);
-    }
-    .bottom-nav-item { color: var(--muted); }
-    .bottom-nav-item.active { color: var(--brand); }
-    .bottom-nav-item.active .nav-icon-wrapper {
-      background: rgba(11,77,94,.1);
-      color: var(--brand);
-    }
-
     .user-admin-toolbar {
       display: flex;
       gap: 8px;
@@ -1934,12 +1811,339 @@
       #screen-people .task-quick-log span { display: none; }
       #screen-people .task-quick-log { width: 50px; padding: 0; }
     }
+
+    /* ===== App Store refresh ===== */
+    :root {
+      --brand: var(--bds-primary);
+      --brand-2: #5856d6;
+      --page-bg: var(--bds-bg);
+      --surface: var(--bds-surface);
+      --surface-high: var(--bds-surface-low);
+      --surface-soft: var(--bds-primary-light);
+      --line: var(--bds-line);
+      --ink: var(--bds-on-surface);
+      --muted: var(--bds-muted);
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, .04);
+      --shadow-md: 0 8px 28px rgba(0, 0, 0, .08);
+    }
+    body,
+    .dark-mode body,
+    [data-bs-theme="dark"] body {
+      background: var(--bds-bg);
+      color: var(--bds-on-surface);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
+    }
+    .app-shell {
+      background: var(--bds-bg);
+      border: 0;
+      box-shadow: none;
+      max-width: 440px;
+    }
+    #screen-people .task-top-controls {
+      background: var(--bds-bg);
+      border: 0;
+      box-shadow: none;
+      padding-top: 10px;
+    }
+    #screen-people .date-bar {
+      background: var(--bds-surface);
+      border: 0;
+      border-radius: 18px;
+      box-shadow: var(--shadow-sm);
+      margin: 0 16px 8px;
+      padding: 8px;
+    }
+    #screen-people .date-input,
+    #screen-people #taskSearchInput {
+      background: var(--bds-surface-low);
+      border: 0 !important;
+      border-radius: 12px !important;
+      box-shadow: none !important;
+      color: var(--bds-on-surface);
+    }
+    #screen-people .filters-bar {
+      background: transparent;
+      border: 0;
+      padding: 6px 16px 12px;
+    }
+    .a11y-chip {
+      background: var(--bds-surface-high);
+      border: 0;
+      border-radius: 999px;
+      color: var(--bds-on-surface-variant);
+      font-weight: 600;
+    }
+    .a11y-chip.active {
+      background: var(--bds-primary);
+      color: #fff;
+      box-shadow: none;
+    }
+    .list-scroll { padding: 0 16px 96px; }
+    .task-row,
+    .vikunja-task {
+      background: var(--bds-surface);
+      border: 0 !important;
+      border-radius: 18px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 10px;
+      min-height: 76px;
+      overflow: hidden;
+    }
+    .task-row::before,
+    .vikunja-task::before { border-radius: 18px 0 0 18px; }
+    .task-row-title,
+    .vikunja-task-title { color: var(--bds-on-surface); font-size: 1rem; font-weight: 700; }
+    .task-row-time,
+    .vikunja-task-meta { color: var(--bds-muted) !important; font-size: .82rem; font-weight: 500; }
+    .day-log-summary,
+    .ctx-card,
+    .panel,
+    .metric-card,
+    .week-item,
+    .personal-card {
+      background: var(--bds-surface);
+      border: 0;
+      border-radius: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    .field,
+    .extra-details {
+      background: var(--bds-surface);
+      border: 0;
+      border-radius: 18px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 12px;
+      padding: 14px;
+    }
+    .form-control,
+    .form-select,
+    .ta {
+      background-color: var(--bds-surface-low);
+      border: 0;
+      border-radius: 12px;
+      color: var(--bds-on-surface);
+      min-height: 46px;
+    }
+    .form-control:focus,
+    .form-select:focus,
+    .ta:focus { box-shadow: 0 0 0 3px rgba(0, 122, 255, .18); }
+    .action-bar {
+      background: rgba(242, 242, 247, .84);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-top: .5px solid var(--bds-line);
+    }
+    [data-bs-theme="dark"] .action-bar,
+    .dark-mode .action-bar { background: rgba(0, 0, 0, .78); }
+    .btn-main,
+    .btn-done,
+    .task-quick-log {
+      background: var(--bds-primary);
+      border-radius: 14px;
+      box-shadow: none;
+      font-weight: 700;
+    }
+    .mrow {
+      background: var(--bds-surface);
+      border-bottom: .5px solid var(--bds-line);
+      color: var(--bds-on-surface);
+      font-weight: 600;
+    }
+    .mrow i.lead { color: var(--bds-primary); }
+    .mrow i.tail { color: var(--bds-muted); }
+
+    /* ===== Zalo mobile language ===== */
+    #screen-people .task-top-controls > .px-3 { display: none; }
+    #screen-people .task-top-controls {
+      background: var(--bds-surface);
+      padding-top: 8px;
+    }
+    #screen-people .date-bar {
+      border-bottom: .5px solid var(--bds-line);
+      border-radius: 0;
+      box-shadow: none;
+      margin: 0;
+      padding: 6px 12px 10px;
+    }
+    #screen-people .filters-bar {
+      background: var(--bds-surface);
+      border-bottom: 6px solid var(--bds-bg);
+      padding: 8px 12px 10px;
+    }
+    .a11y-chip { border-radius: 8px; min-height: 34px; }
+    .list-scroll {
+      background: var(--bds-surface);
+      padding: 0 0 86px;
+    }
+    .vikunja-section { margin: 0; }
+    .vikunja-section-head {
+      background: var(--bds-bg);
+      border: 0;
+      color: var(--bds-muted);
+      padding: 8px 14px;
+    }
+    .vikunja-task-list { background: var(--bds-surface); border: 0; border-radius: 0; }
+    .task-row,
+    .vikunja-task {
+      background: var(--bds-surface);
+      border-bottom: .5px solid var(--bds-line) !important;
+      border-radius: 0;
+      box-shadow: none;
+      margin: 0;
+      min-height: 76px;
+      padding-bottom: 11px;
+      padding-top: 11px;
+    }
+    .task-row::before,
+    .vikunja-task::before { border-radius: 0; width: 3px; }
+    .vikunja-check {
+      background: linear-gradient(145deg, #38a3ff, #0068ff);
+      border: 0;
+      border-radius: 50%;
+      color: #fff;
+      height: 44px;
+      width: 44px;
+    }
+    .vikunja-task.is-attention .vikunja-check { background: linear-gradient(145deg, #ff9f43, #ff6b00); }
+    .vikunja-task.is-done .vikunja-check { background: #34c759; }
+    .vikunja-task-title {
+      font-size: .98rem;
+      line-height: 1.3;
+      margin-bottom: 4px;
+    }
+    .vikunja-task-meta {
+      color: var(--bds-muted) !important;
+      font-size: .79rem;
+      line-height: 1.35;
+    }
+    .vikunja-label {
+      border: 0;
+      border-radius: 5px;
+      font-size: .68rem;
+      font-weight: 600;
+    }
+    .vikunja-task-open { color: var(--bds-muted); }
+    .day-log-summary {
+      border-radius: 0;
+      box-shadow: none;
+      margin: 0;
+      padding: 10px 14px;
+    }
+    .prof-hero {
+      background: #0068ff;
+      color: #fff;
+    }
+    .prof-hero .prof-role { color: rgba(255, 255, 255, .8); }
+    .prof-hero .avatar { background: #fff; color: #0068ff; }
+    .menu { border-radius: 12px; overflow: hidden; }
+    .mrow { min-height: 54px; padding: 13px 15px; }
+    .app-header #syncBadge { display: none !important; }
+    .contacts-list { background: var(--bds-surface); flex: 1; padding-bottom: 86px; }
+    .contact-row {
+      align-items: center;
+      border-bottom: .5px solid var(--bds-line);
+      display: flex;
+      gap: 12px;
+      min-height: 72px;
+      padding: 10px 14px;
+    }
+    .contact-avatar {
+      align-items: center;
+      background: linear-gradient(145deg, #38a3ff, #0068ff);
+      border-radius: 50%;
+      color: #fff;
+      display: flex;
+      flex: 0 0 46px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      height: 46px;
+      justify-content: center;
+    }
+    .contact-main { flex: 1; min-width: 0; }
+    .contact-name { color: var(--bds-on-surface); font-size: .98rem; font-weight: 700; }
+    .contact-meta { color: var(--bds-muted); font-size: .78rem; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .contact-actions { align-items: center; display: flex; flex-shrink: 0; gap: 7px; }
+    .contact-actions a {
+      align-items: center;
+      background: #e8f8ed;
+      border-radius: 50%;
+      color: #20a647;
+      display: flex;
+      height: 36px;
+      justify-content: center;
+      text-decoration: none;
+      width: 36px;
+    }
+    .contact-actions a.zalo { background: #e7f1ff; color: #0068ff; }
+    .contact-no-phone { color: var(--bds-muted); font-size: .72rem; }
+    .personal-sync-state {
+      align-items: center;
+      display: flex;
+      gap: 12px;
+      min-height: 54px;
+      padding: 13px 15px;
+    }
+    .personal-sync-state > i { color: #20a647; font-size: 1.3rem; width: 28px; text-align: center; }
+    .personal-sync-state.pending > i { color: #ff9500; }
+    .personal-sync-state .sync-copy { flex: 1; }
+    .personal-sync-state .sync-title { color: var(--bds-on-surface); font-weight: 600; }
+    .personal-sync-state .sync-note { color: var(--bds-muted); font-size: .76rem; }
+    .contact-profile-strip {
+      align-items: center;
+      background: var(--bds-surface);
+      border-bottom: 7px solid var(--bds-bg);
+      display: flex;
+      gap: 12px;
+      padding: 14px;
+    }
+    .contact-avatar.large { flex-basis: 56px; font-size: 1.25rem; height: 56px; width: 56px; }
+    .contact-profile-strip > div:nth-child(2) { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+    .contact-profile-strip strong { color: var(--bds-on-surface); font-size: 1.02rem; }
+    .contact-profile-strip span { color: var(--bds-muted); font-size: .8rem; margin-top: 3px; }
+    .contact-profile-strip button {
+      background: #e7f1ff; border: 0; border-radius: 50%; color: #0068ff; font-size: 1.1rem; height: 38px; width: 38px;
+    }
+    .contact-work-heading {
+      align-items: center; background: var(--bds-surface); color: var(--bds-on-surface); display: flex; justify-content: space-between; padding: 12px 14px 8px;
+    }
+    .contact-work-heading span { background: var(--bds-surface-high); border-radius: 999px; color: var(--bds-muted); font-size: .72rem; padding: 2px 8px; }
+    .contact-work-list { background: var(--bds-surface); }
+    .contact-work-row {
+      align-items: center; background: var(--bds-surface); border: 0; border-bottom: .5px solid var(--bds-line); color: inherit; display: flex; gap: 11px; min-height: 72px; padding: 10px 14px; text-align: left; width: 100%;
+    }
+    .contact-work-icon {
+      align-items: center; background: #e7f1ff; border-radius: 50%; color: #0068ff; display: flex; flex: 0 0 42px; height: 42px; justify-content: center;
+    }
+    .contact-work-icon.attention { background: #fff0e5; color: #ff6b00; }
+    .contact-work-main { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+    .contact-work-main strong { color: var(--bds-on-surface); font-size: .92rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .contact-work-main small { color: var(--bds-muted); font-size: .76rem; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .contact-work-side { align-items: flex-end; color: var(--bds-muted); display: flex; flex-direction: column; gap: 5px; }
+    .contact-log-heading { border-top: 7px solid var(--bds-bg); padding-top: 12px; }
+    .contact-log-list { background: var(--bds-surface); padding-bottom: 86px; }
+    .contact-log-row {
+      align-items: center; background: var(--bds-surface); border: 0; border-bottom: .5px solid var(--bds-line); color: inherit; display: flex; gap: 11px; min-height: 70px; padding: 10px 14px; text-align: left; width: 100%;
+    }
+    .contact-log-row:disabled { opacity: 1; }
+    .contact-log-icon {
+      align-items: center; background: #eaf8f3; border-radius: 50%; color: #149b74; display: flex; flex: 0 0 42px; height: 42px; justify-content: center;
+    }
+    .contact-log-main { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+    .contact-log-main strong { color: var(--bds-on-surface); font-size: .9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .contact-log-main small { color: var(--bds-muted); font-size: .76rem; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .contact-log-main em { color: #149b74; font-size: .72rem; font-style: normal; margin-top: 3px; }
+    .contact-log-arrow { color: var(--bds-muted); font-size: .8rem; }
+    .contact-info-hero { align-items: center; display: flex; flex-direction: column; gap: 5px; padding: 8px 0 18px; }
+    .contact-info-hero span { color: var(--bds-muted); font-size: .8rem; }
+    .contact-info-list { background: var(--bds-surface-low); border-radius: 14px; overflow: hidden; }
+    .contact-info-list > div { align-items: center; border-bottom: .5px solid var(--bds-line); display: flex; justify-content: space-between; padding: 12px 14px; }
+    .contact-info-list > div:last-child { border-bottom: 0; }
+    .contact-info-list span { color: var(--bds-muted); font-size: .82rem; }
+    .contact-info-list strong { color: var(--bds-on-surface); font-size: .86rem; text-align: right; }
   </style>
 </head>
-<body class="light-mode" data-bs-theme="light">
+<body>
   <div class="app-shell">
-    <header class="app-header" id="appHeader"></header>
-
     <section class="access-gate-panel d-none" id="accessGatePanel">
       <i class="bi bi-shield-lock text-secondary" style="font-size:2rem;"></i>
       <h2 class="h5 fw-bold mt-2 mb-1">Chưa thể xem nhật ký / việc</h2>
@@ -2082,9 +2286,23 @@
             <button class="btn-icon-sm" id="btnNextDay" type="button" title="Ngày sau" aria-label="Ngày sau"><i class="bi bi-chevron-right"></i></button>
             <button class="btn-icon-sm" id="btnToday" type="button" title="Về hôm nay" aria-label="Về hôm nay"><i class="bi bi-calendar-check"></i></button>
           </div>
+          <div class="px-3 pt-2 pb-1">
+            <div class="position-relative">
+              <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+              <input type="search" id="taskSearchInput" class="form-control form-control-sm ps-5 pe-4 rounded-pill border-1" placeholder="Tìm tên việc, vị trí, người làm..." aria-label="Tìm kiếm công việc">
+              <button type="button" id="btnClearSearch" class="btn btn-sm btn-link text-muted position-absolute top-50 end-0 translate-middle-y me-2 d-none" style="text-decoration:none;"><i class="bi bi-x-circle-fill"></i></button>
+            </div>
+          </div>
           <div class="filters-bar">
-            <button class="task-toolbar-button" type="button" id="btnOpenFilters" title="Tìm kiếm và bộ lọc" aria-label="Tìm kiếm và bộ lọc"><i class="bi bi-funnel"></i></button>
-            <div class="dropdown ms-auto">
+            <div class="quick-filter-scroll">
+              <button class="a11y-chip active" type="button" data-quick-filter="all">Tất cả</button>
+              <button class="a11y-chip" type="button" data-quick-filter="open">Chưa xong</button>
+              <button class="a11y-chip warn" type="button" data-quick-filter="help">Cần hỗ trợ <span class="chip-count" id="helpChipCount" style="display:none">0</span></button>
+              <button class="a11y-chip" type="button" data-quick-filter="mine">Việc của tôi</button>
+            </div>
+            <button class="task-toolbar-button flex-shrink-0" type="button" id="btnOpenFilters" title="Bộ lọc nâng cao" aria-label="Bộ lọc nâng cao"><i class="bi bi-funnel"></i></button>
+            <button class="task-toolbar-button flex-shrink-0" type="button" id="btnToggleBoard" title="Đổi dạng xem Danh sách/Bảng" aria-label="Đổi dạng xem Danh sách/Bảng"><i class="bi bi-kanban"></i></button>
+            <div class="dropdown ms-auto flex-shrink-0">
               <button class="task-toolbar-button" type="button" id="btnTaskMore" data-bs-toggle="dropdown" aria-expanded="false" title="Thao tác khác" aria-label="Thao tác khác"><i class="bi bi-three-dots-vertical"></i></button>
               <ul class="dropdown-menu dropdown-menu-end task-more-menu" aria-labelledby="btnTaskMore">
                 <li><button class="dropdown-item" id="btnViewWeek" type="button"><i class="bi bi-calendar-week"></i>Lịch tuần</button></li>
@@ -2107,6 +2325,10 @@
       <!-- Màn phụ: Thống kê cả tổ -->
       <section class="screen" data-screen="stats" id="screen-stats"></section>
 
+      <!-- Danh bạ nhân viên từ backend Users/getStaff -->
+      <section class="screen" data-screen="contacts" id="screen-contacts"></section>
+      <section class="screen" data-screen="contactdetail" id="screen-contactdetail"></section>
+
       <!-- Màn 5: Cá nhân -->
       <section class="screen" data-screen="personal" id="screen-personal"></section>
 
@@ -2124,50 +2346,6 @@
       </section>
     </div>
 
-    <nav class="bottom-nav-bar" id="mainBottomNav" style="display: none;" role="navigation" aria-label="Điều hướng chính">
-        <button class="bottom-nav-item" type="button" id="btnNavScan">
-            <div class="nav-icon-wrapper">
-                <span class="material-symbols-outlined">qr_code_scanner</span>
-            </div>
-            <span>Quét QR</span>
-        </button>
-        <div class="dropup" style="flex: 1; display: flex; justify-content: center; align-items: center;">
-            <button class="bottom-nav-item border-0 bg-transparent w-100" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
-                <div class="nav-icon-wrapper">
-                    <span class="material-symbols-outlined">menu</span>
-                </div>
-                <span>Menu</span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end mb-2 shadow-lg border-0 rounded-4" style="min-width: 220px; background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant) !important; z-index: 1050;">
-                <li><h6 class="dropdown-header text-muted small fw-bold"><i class="bi bi-grid-fill me-1"></i> MENU TIỆN ÍCH</h6></li>
-                <li><hr class="dropdown-divider opacity-50"></li>
-                <li><a class="dropdown-item rounded-3 py-2 text-decoration-none" href="../pump_info.html"><i class="bi bi-water me-2 text-primary"></i> Thông tin & Check vận hành bơm</a></li>
-                <li><a class="dropdown-item rounded-3 py-2 text-decoration-none" href="#" data-bottom-screen="stats"><i class="bi bi-bar-chart-fill me-2 text-success"></i> Báo cáo công việc tổ</a></li>
-                <li><a class="dropdown-item rounded-3 py-2 text-decoration-none" href="../phanca/"><i class="bi bi-calendar-range me-2 text-info"></i> Phân ca trực</a></li>
-
-                <!-- ===== Dành cho Quản trị — chỉ hiện với Role Admin/Manager, cùng luật
-                     canManageUsers() với index.html (xem updateAccessGate()) ===== -->
-                <li id="adminMenuHeaderNhatky" class="admin-menu-item" style="display:none;">
-                    <hr class="dropdown-divider opacity-50">
-                    <h6 class="dropdown-header text-muted small fw-bold"><i class="bi bi-shield-lock-fill me-1"></i> DÀNH CHO QUẢN TRỊ</h6>
-                </li>
-                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2 text-decoration-none" href="#" data-bottom-screen="people"><i class="bi bi-clipboard-check me-2 text-info"></i> Kế hoạch công việc</a></li>
-                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2 text-decoration-none" href="#" data-bottom-screen="loghistory"><i class="bi bi-journal-text me-2 text-info"></i> Nhật ký công việc</a></li>
-                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2 text-decoration-none" href="../hengio/"><i class="bi bi-alarm me-2 text-warning"></i> Cài đặt đồng hồ bơm</a></li>
-                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2 text-decoration-none" href="../print_pumps.html"><i class="bi bi-qr-code me-2 text-primary"></i> In mã QR máy bơm</a></li>
-                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2 text-decoration-none" href="../phongvan/"><i class="bi bi-person-workspace me-2 text-secondary"></i> Câu hỏi phỏng vấn</a></li>
-                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2 small text-decoration-none" href="../status.html" target="_blank"><i class="bi bi-cpu-fill me-2 text-success"></i> Giám sát Server Uptime</a></li>
-                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2 small text-decoration-none" href="../changelog.html" target="_blank"><i class="bi bi-history me-2 text-info"></i> Nhật ký Thay đổi</a></li>
-                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2 small text-decoration-none" href="../na111.html" target="_blank"><i class="bi bi-tools me-2 text-warning"></i> Chẩn đoán EBYTE NA111</a></li>
-            </ul>
-        </div>
-        <button class="bottom-nav-item" type="button" data-bottom-screen="personal">
-            <div class="nav-icon-wrapper">
-                <span class="material-symbols-outlined">person</span>
-            </div>
-            <span>Cá nhân</span>
-        </button>
-    </nav>
   </div>
 
   <!-- Offcanvas bộ lọc nâng cao -->
@@ -2268,6 +2446,7 @@
         <form id="planForm">
           <div class="modal-body">
             <input type="hidden" id="planFormId">
+            <input type="hidden" id="planFormAssetUID">
             <div class="row g-2">
               <div class="col-12">
                 <label class="form-label" for="planTask">Nội dung công việc</label>
@@ -2320,9 +2499,11 @@
                     <div class="col-6">
                       <label class="form-label" for="planPriority">Ưu tiên</label>
                       <select class="form-select" id="planPriority">
+                        <option>Khẩn cấp</option>
                         <option>Cao</option>
                         <option selected>Trung bình</option>
                         <option>Thấp</option>
+                        <option>Không có</option>
                       </select>
                     </div>
                     <div class="col-6">
@@ -2346,8 +2527,20 @@
                         <option selected>Chưa làm</option>
                         <option>Đang làm</option>
                         <option>Hoàn thành</option>
-                        <option>Cần hỗ trợ</option>
+                        <option>Đã hủy</option>
                       </select>
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label" for="planLabelInput">Nhãn</label>
+                      <div class="d-flex flex-wrap gap-1 mb-2" id="planLabelChips"></div>
+                      <div class="d-flex gap-1">
+                        <input class="form-control" id="planLabelInput" list="planLabelSuggestions" placeholder="vd: Cần hỗ trợ, An toàn...">
+                        <datalist id="planLabelSuggestions">
+                          <option value="Cần hỗ trợ">
+                          <option value="Đã chốt sổ">
+                        </datalist>
+                        <button class="btn btn-outline-secondary" type="button" id="btnAddPlanLabel"><i class="bi bi-plus-lg"></i></button>
+                      </div>
                     </div>
                   </div>
                 </details>
@@ -2492,6 +2685,7 @@
       teams: "bandien_nhatky_teams",
       employees: "bandien_nhatky_employees",
       staff: "bandien_nhatky_staff_v2",
+      staffDirectory: "bandien_nhatky_staff_directory_v1",
       fontScale: "bandien_nhatky_fontscale",
       authToken: "bandien_nhatky_auth_token"
     };
@@ -2505,6 +2699,10 @@
     // Lấy ngày theo giờ địa phương (toISOString là UTC → sai ngày lúc 0h-7h sáng VN)
     const today = toIsoDate(new Date());
     const REQUESTED_PLAN_ID = new URLSearchParams(window.location.search).get("plan") || "";
+    // Prefill khi mở từ nút "Tạo WO bảo trì" của thiết bị đã quét ở trang chính (index.html)
+    const PREFILL_ASSET_UID = new URLSearchParams(window.location.search).get("prefillAssetUID") || "";
+    const PREFILL_ASSET_NAME = new URLSearchParams(window.location.search).get("prefillAssetName") || "";
+    const PREFILL_TASK = new URLSearchParams(window.location.search).get("prefillTask") || "";
     const RECENT_LOG_LIMIT = 3;
     const DEFAULT_SYNC = {
       url: typeof CONFIG !== "undefined" ? CONFIG.gasUrl : "https://script.google.com/macros/s/AKfycbzW4TxDarLBOpZvO8hnE0R65IsCd95a5l-XPASjUmZNuefH5MiWMs8lCpLpggzFwyXK/exec",
@@ -2523,7 +2721,10 @@
     let filterOffcanvasInstance;
     let lastAddedLogId = null;
     let staffList = [];   // tên nhân viên từ backend (getStaff) cho dropdown
+    let staffDirectory = []; // hồ sơ đầy đủ: username, tên, tổ, số điện thoại
+    let peopleViewMode = "list"; // "list" | "board" — dạng xem màn Kế hoạch công việc
     let planPeople = [];  // người thực hiện đang chọn trong modal kế hoạch
+    let planLabels = [];  // nhãn đang chọn trong modal kế hoạch (vd "Cần hỗ trợ", "Đã chốt sổ")
     let taskDetailPeople = []; // người thực hiện đang chọn tại màn chi tiết
     let managedUsers = [];
     let managedUserRoles = [];
@@ -2533,7 +2734,7 @@
     // ===== Điều hướng màn hình (router nhỏ gọn, không reload trang) =====
     let currentScreen = "blank";
     let currentParams = {};
-    const TOP_LEVEL_SCREENS = ["blank", "people", "loghistory", "stats", "personal"];
+    const TOP_LEVEL_SCREENS = ["blank", "people", "loghistory", "stats", "contacts", "personal"];
 
     function isTopLevelScreen(screen, params) {
       return TOP_LEVEL_SCREENS.includes(screen) && !(screen === "loghistory" && params && params.planId);
@@ -2567,6 +2768,8 @@
       else if (screen === "week") renderWeekScreen();
       else if (screen === "people") renderPeopleScreen();
       else if (screen === "stats") renderStatsScreen();
+      else if (screen === "contacts") renderContactsScreen();
+      else if (screen === "contactdetail") renderContactDetailScreen(params.name);
       else if (screen === "personal") renderPersonalScreen();
       else if (screen === "usermanagement") renderUserManagementScreen();
     }
@@ -2579,16 +2782,11 @@
     }
 
     function updateTabbar(screen, params) {
-      const tabbar = document.getElementById("mainBottomNav");
       const topLevel = isTopLevelScreen(screen, params);
-      tabbar.style.display = topLevel ? "flex" : "none";
-      document.body.classList.toggle("has-bottom-nav", topLevel);
-      tabbar.querySelectorAll("[data-bottom-screen]").forEach(item => {
-        const active = item.dataset.bottomScreen === screen;
-        item.classList.toggle("active", active);
-        if (active) item.setAttribute("aria-current", "page");
-        else item.removeAttribute("aria-current");
-      });
+      if (!window.BDSBottomNav) return;
+      window.BDSBottomNav.setVisible(topLevel);
+      const key = screen === "people" ? "plan" : screen === "loghistory" ? "log" : screen === "contacts" ? "contacts" : screen === "personal" ? "personal" : "";
+      window.BDSBottomNav.setActive(key);
     }
 
     function openTaskDetail(id) {
@@ -2621,59 +2819,11 @@
       return `${weekdayNameVn(selectedDate)}, ${formatDateVn(selectedDate)} · ${defaultShift()}`;
     }
 
-    function homeHeaderHtml() {
-      return `
-        <div class="header-inner">
-          <div class="header-left min-w-0">
-            <div class="brand-mark flex-shrink-0"><i class="bi bi-lightning-charge-fill"></i></div>
-            <div class="header-titles min-w-0">
-              <div class="app-title text-truncate">${escapeHtml(taskListTitle())}</div>
-              <div class="header-sub text-truncate">${escapeHtml(taskListSubtitle())}</div>
-            </div>
-          </div>
-          <div class="header-right">
-            <span class="sync-pill" id="syncBadge" style="display:none"></span>
-          </div>
-        </div>
-      `;
-    }
-
-    function topLevelHeaderHtml(screen) {
-      const meta = {
-        blank: { icon: "bi-lightning-charge-fill", title: "Nhật ký công việc", subtitle: "Ban Điện Scan" },
-        loghistory: { icon: "bi-journal-text", title: "Nhật ký đã ghi", subtitle: "Theo dõi kết quả công việc" },
-        stats: { icon: "bi-bar-chart-fill", title: "Báo cáo", subtitle: "Tổng hợp công việc của tổ" },
-        personal: { icon: "bi-person-fill", title: "Cá nhân", subtitle: "Tài khoản và tùy chọn" }
-      }[screen];
-      if (!meta) return homeHeaderHtml();
-      return `
-        <div class="header-inner">
-          <div class="header-left min-w-0">
-            <div class="brand-mark flex-shrink-0"><i class="bi ${meta.icon}"></i></div>
-            <div class="header-titles min-w-0">
-              <div class="app-title text-truncate">${meta.title}</div>
-              <div class="header-sub text-truncate">${meta.subtitle}</div>
-            </div>
-          </div>
-          <div class="header-right">
-            <span class="sync-pill" id="syncBadge" style="display:none"></span>
-          </div>
-        </div>
-      `;
-    }
-
-    function backHeaderHtml(title, editPlanId) {
-      return `
-        <div class="header-inner header-inner-back">
-          <button class="btn-back" id="btnBack" type="button" title="Quay lại"><i class="bi bi-arrow-left"></i></button>
-          <div class="header-title text-truncate">${title}</div>
-          ${editPlanId ? `<button class="btn-back" id="btnHeaderEdit" type="button" title="Sửa việc" onclick="openPlanModal('${escapeAttr(editPlanId)}')"><i class="bi bi-pencil"></i></button>` : ""}
-        </div>
-      `;
-    }
-
     function screenTitle(screen, params) {
-      if (screen === "taskdetail") return "Chi tiết công việc";
+      if (screen === "taskdetail") {
+        const plan = params && params.id ? plans.find(item => item.id === params.id) : null;
+        return plan && plan.task ? plan.task : "Chi tiết công việc";
+      }
       if (screen === "logentry") return "Ghi nhật ký";
       if (screen === "loghistory") {
         const plan = params.planId ? plans.find(p => p.id === params.planId) : null;
@@ -2682,20 +2832,97 @@
       if (screen === "week") return "Lịch tuần này";
       if (screen === "people") return selectedTaskDate() === today ? "Công việc" : `Công việc ngày ${shortDateVn(selectedTaskDate())}`;
       if (screen === "stats") return "Báo cáo tổ";
+      if (screen === "contactdetail") return params && params.name ? params.name : "Thông tin nhân viên";
       if (screen === "usermanagement") return "Quản lý người dùng";
       return "Nhật ký công việc";
     }
 
+    function finalStepHandler(plan) {
+      if (!plan) return "";
+      const steps = planSteps(plan);
+      const finalStep = steps.length ? steps[steps.length - 1] : null;
+      const stepNames = finalStep && Array.isArray(finalStep.assignees) ? finalStep.assignees.filter(Boolean) : [];
+      const names = stepNames.length ? stepNames : splitAssignees(plan.assignee);
+      return names.length ? String(names[names.length - 1]).trim() : "";
+    }
+
+    function staffContact(name) {
+      const target = normalizePerson(name);
+      if (!target) return null;
+      const all = staffDirectory.concat((managedUsers || []).map(user => ({
+        username: user.username,
+        name: user.fullName || user.name,
+        phone: user.phone,
+        dept: user.teams
+      })));
+      return all.find(person => target === normalizePerson(person.name) || target === normalizePerson(person.username)) || null;
+    }
+
+    function contactPhone(value) {
+      const raw = String(value || "").trim();
+      if (!raw) return "";
+      const plus = raw.startsWith("+") ? "+" : "";
+      const digits = raw.replace(/\D/g, "");
+      return digits ? plus + digits : "";
+    }
+
+    function taskHeaderActions(plan) {
+      if (!plan) return "";
+      const handler = finalStepHandler(plan);
+      const contact = staffContact(handler);
+      const phone = contactPhone(contact && contact.phone);
+      const contactButtons = phone ? `
+        <a class="app-header-action app-header-call" href="tel:${escapeAttr(phone)}" title="Gọi ${escapeAttr(handler)}" aria-label="Gọi ${escapeAttr(handler)}"><i class="bi bi-telephone-fill"></i></a>
+        <a class="app-header-action app-header-zalo" href="https://zalo.me/${escapeAttr(phone.replace(/\D/g, ""))}" target="_blank" rel="noopener" title="Nhắn Zalo cho ${escapeAttr(handler)}" aria-label="Nhắn Zalo cho ${escapeAttr(handler)}"><i class="bi bi-chat-dots-fill"></i></a>` : "";
+      return contactButtons + `<button class="app-header-action app-header-edit" type="button" title="Sửa việc" aria-label="Sửa việc" onclick="openPlanModal('${escapeAttr(plan.id)}')"><i class="bi bi-pencil-fill"></i></button>`;
+    }
+
+    function contactHeaderActions(name) {
+      const contact = staffContact(name);
+      if (!contact) return "";
+      const phone = contactPhone(contact.phone);
+      const phoneDigits = phone.replace(/\D/g, "");
+      return `${phone ? `
+        <a class="app-header-action app-header-call" href="tel:${escapeAttr(phone)}" title="Gọi ${escapeAttr(contact.name || name)}" aria-label="Gọi ${escapeAttr(contact.name || name)}"><i class="bi bi-telephone-fill"></i></a>
+        <a class="app-header-action app-header-zalo" href="https://zalo.me/${escapeAttr(phoneDigits)}" target="_blank" rel="noopener" title="Nhắn Zalo" aria-label="Nhắn Zalo cho ${escapeAttr(contact.name || name)}"><i class="bi bi-chat-dots-fill"></i></a>` : ""}
+        <button class="app-header-action app-header-edit" type="button" title="Xem thêm thông tin" aria-label="Xem thêm thông tin" onclick="openContactInfo('${escapeAttr(contact.name || name)}')"><i class="bi bi-three-dots"></i></button>`;
+    }
+
     function renderHeader(screen, params) {
-      const header = document.getElementById("appHeader");
-      header.style.display = "";
-      if (screen === "people") {
-        header.innerHTML = homeHeaderHtml();
-      } else if (isTopLevelScreen(screen, params)) {
-        header.innerHTML = topLevelHeaderHtml(screen);
-      } else {
-        header.innerHTML = backHeaderHtml(screenTitle(screen, params), screen === "taskdetail" ? params.id : "");
+      if (!window.BDSAppHeader) return;
+      const meta = screen === "people"
+        ? { icon: "bi-clipboard-check", title: taskListTitle(), subtitle: taskListSubtitle() }
+        : ({
+            blank: { icon: "bi-lightning-charge-fill", title: "Nhật ký công việc", subtitle: "BanDienScan" },
+            loghistory: { icon: "bi-journal-text", title: "Nhật ký đã ghi", subtitle: "Theo dõi kết quả công việc" },
+            stats: { icon: "bi-bar-chart-fill", title: "Báo cáo", subtitle: "Tổng hợp công việc của tổ" },
+            contacts: { icon: "bi-person-lines-fill", title: "Danh bạ", subtitle: "Nhân viên và người phụ trách" },
+            personal: { icon: "bi-person-fill", title: "Cá nhân", subtitle: "Tài khoản và tùy chọn" }
+          }[screen] || { icon: "bi-journal-text", title: screenTitle(screen, params), subtitle: "BanDienScan" });
+      const isDetail = !isTopLevelScreen(screen, params);
+      const editPlanId = screen === "taskdetail" ? params.id : "";
+      const detailPlan = editPlanId ? plans.find(item => item.id === editPlanId) : null;
+      if (detailPlan) {
+        meta.title = detailPlan.task || "Chi tiết công việc";
+        const handler = finalStepHandler(detailPlan);
+        meta.subtitle = handler ? `Bước cuối · ${handler}` : "Chi tiết công việc";
       }
+      const detailContact = screen === "contactdetail" ? staffContact(params.name) : null;
+      if (detailContact) {
+        meta.title = detailContact.name || detailContact.username || "Nhân viên";
+        meta.subtitle = [detailContact.dept, detailContact.phone].filter(Boolean).join(" · ") || "Thông tin nhân viên";
+        meta.icon = "bi-person-fill";
+      }
+      const personalAction = screen === "personal" ? '<button class="app-header-action" type="button" title="Cài đặt" aria-label="Cài đặt" onclick="settingsModalInstance.show()"><i class="bi bi-gear-fill"></i></button>' : "";
+      window.BDSAppHeader.update({
+        title: meta.title,
+        subtitle: meta.subtitle,
+        icon: meta.icon,
+        mode: screen === "people" ? "search" : "title",
+        searchPlaceholder: "Tìm công việc, vị trí, người làm",
+        onBack: isDetail ? goBack : null,
+        extraHtml: editPlanId ? taskHeaderActions(detailPlan) : screen === "contactdetail" ? contactHeaderActions(params.name) : personalAction
+      });
       updateSyncStatus();
     }
 
@@ -2703,25 +2930,59 @@
       {
         id: "PLAN-DEMO-01",
         date: today,
+        followUpDate: today,
         time: "07:30-09:30",
         team: "Tổ điện",
         area: "Tầng hầm B1",
-        asset: "Tủ MSB-B1",
-        task: "Kiểm tra nhanh nhiệt độ đầu cốt, vệ sinh mặt tủ, ghi nhận bất thường.",
-        assignee: "Ca trực sáng",
-        priority: "Cao",
-        status: "Chưa làm"
+        asset: "Tủ MSB-B1 (UID: TB-MSB01)",
+        task: "Kiểm tra nhiệt độ đầu cốt, vệ sinh khoang tủ MSB, ghi nhận bất thường.",
+        assignee: "Thắng NQ, Hậu DV",
+        priority: "Khẩn cấp",
+        status: "Đang làm",
+        labels: ["Cần hỗ trợ"],
+        steps: JSON.stringify([
+          { id: "s1", title: "Đo nhiệt độ camera nhiệt các Aptomat nhánh", done: true, doneBy: "Thắng NQ" },
+          { id: "s2", title: "Siết lại các bu-lông thanh cái bị lỏng", done: false, doneBy: "" },
+          { id: "s3", title: "Dọn vệ sinh hút bụi khoang tủ bên dưới", done: false, doneBy: "" }
+        ])
       },
       {
         id: "PLAN-DEMO-02",
         date: today,
+        followUpDate: today,
+        time: "09:30-11:30",
+        team: "Tổ điện",
+        area: "Phòng bơm P1",
+        asset: "Tủ điều khiển bơm cấp nước (UID: TB-BOM02)",
+        task: "Kiểm tra đèn báo, contactor, chuyển đổi chế độ Auto/Manual và đo dòng điện chạy.",
+        assignee: "Hoàng HV",
+        priority: "Cao",
+        status: "Chưa làm"
+      },
+      {
+        id: "PLAN-DEMO-03",
+        date: today,
+        followUpDate: today,
         time: "13:30-15:00",
-        team: "Tổ vận hành",
-        area: "Sân vườn",
-        asset: "Chiếu sáng cảnh quan",
-        task: "Kiểm tra đèn lỗi, CB nhánh và danh sách vị trí cần thay.",
-        assignee: "Ca trực chiều",
+        team: "Tổ điện",
+        area: "Cảnh quan Sân vườn",
+        asset: "Hệ thống chiếu sáng đêm",
+        task: "Kiểm tra đèn đường lỗi, hẹn giờ Timer tủ chiếu sáng và ghi danh sách vị trí thay bóng.",
+        assignee: "Phong ND",
         priority: "Trung bình",
+        status: "Hoàn thành"
+      },
+      {
+        id: "PLAN-DEMO-04",
+        date: today,
+        followUpDate: today,
+        time: "15:00-16:30",
+        team: "Tổ cơ điện",
+        area: "Trạm biến áp TBA-01",
+        asset: "Máy phát điện dự phòng 1000kVA",
+        task: "Kiểm tra mức dầu, nước làm mát, điện áp ắc quy và tình trạng sẵn sàng chạy thử.",
+        assignee: "Tùng NV",
+        priority: "Cao",
         status: "Chưa làm"
       }
     ];
@@ -2793,13 +3054,14 @@
       loadStaff();
       loadLogs();
       bindEvents();
-      let startScreen = "blank";
+      let startScreen = "people";
       const hash = window.location.hash.substring(1);
-      if (["blank", "people", "loghistory", "stats", "personal"].includes(hash)) {
+      if (["people", "loghistory", "stats", "contacts", "personal"].includes(hash)) {
         startScreen = hash;
       } else if (hash === "tasklist") {
         startScreen = "people";
       }
+      if (PREFILL_ASSET_UID || PREFILL_ASSET_NAME) startScreen = "people";
       const initialState = { screen: startScreen, params: {} };
       history.replaceState(initialState, "");
       window.addEventListener("popstate", event => {
@@ -2818,6 +3080,9 @@
         activateScreen(planState.screen, planState.params);
       } else {
         render();
+        if ((PREFILL_ASSET_UID || PREFILL_ASSET_NAME) && hasTeamAccess()) {
+          openPlanModal(null, null, { uid: PREFILL_ASSET_UID, name: PREFILL_ASSET_NAME, task: PREFILL_TASK });
+        }
       }
       loadServerLogs();
       retryPendingLogs();
@@ -2825,31 +3090,56 @@
     });
 
     function bindEvents() {
-      document.getElementById("appHeader").addEventListener("click", event => {
-        if (event.target.closest("#btnBack")) goBack();
+      window.addEventListener("bds:navigate", event => {
+        const target = event.detail && event.detail.screen;
+        if (!target || currentScreen === target) return;
+        navigateTo(target, {});
       });
-
-      document.getElementById("mainBottomNav").addEventListener("click", event => {
-        const item = event.target.closest("[data-bottom-screen]");
-        if (item) {
-          const target = item.dataset.bottomScreen;
-          if (currentScreen === target) return;
-          navigateTo(target, {});
-          return;
-        }
-        const scanItem = event.target.closest("#btnNavScan");
-        if (scanItem) {
-          window.location.href = "../index.html";
-        }
+      window.addEventListener("bds:search", event => {
+        const search = document.getElementById("taskSearchInput");
+        if (!search) return;
+        search.value = (event.detail && event.detail.query) || "";
+        const clear = document.getElementById("btnClearSearch");
+        if (clear) clear.classList.toggle("d-none", !search.value);
+        if (currentScreen === "people") renderPeopleScreen();
       });
 
       ["filterDate", "filterTeam", "filterPerson", "searchBox"].forEach(id => {
-        document.getElementById(id).addEventListener("input", () => {
-          if (currentScreen !== "people") return;
-          if (id === "filterDate") renderHeader("people", {});
-          renderPeopleScreen();
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener("input", () => {
+            if (currentScreen !== "people") return;
+            if (id === "filterDate") renderHeader("people", {});
+            renderPeopleScreen();
+          });
+        }
+      });
+
+      const searchInput = document.getElementById("taskSearchInput");
+      const clearSearchBtn = document.getElementById("btnClearSearch");
+      if (searchInput) {
+        searchInput.addEventListener("input", () => {
+          if (clearSearchBtn) clearSearchBtn.classList.toggle("d-none", !searchInput.value);
+          if (currentScreen === "people") renderPeopleScreen();
+        });
+      }
+      if (clearSearchBtn) {
+        clearSearchBtn.addEventListener("click", () => {
+          if (searchInput) searchInput.value = "";
+          clearSearchBtn.classList.add("d-none");
+          if (currentScreen === "people") renderPeopleScreen();
+        });
+      }
+
+      document.querySelectorAll(".quick-filter-scroll .a11y-chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+          document.querySelectorAll(".quick-filter-scroll .a11y-chip").forEach(c => c.classList.remove("active"));
+          chip.classList.add("active");
+          activeQuickFilter = chip.dataset.quickFilter || "all";
+          if (currentScreen === "people") renderPeopleScreen();
         });
       });
+
       document.getElementById("btnPrevDay").addEventListener("click", () => shiftFilterDate(-1));
       document.getElementById("btnNextDay").addEventListener("click", () => shiftFilterDate(1));
       document.getElementById("btnToday").addEventListener("click", () => {
@@ -2871,6 +3161,7 @@
         }
       });
       document.getElementById("btnOpenFilters").addEventListener("click", () => filterOffcanvasInstance.show());
+      document.getElementById("btnToggleBoard").addEventListener("click", togglePeopleViewMode);
 
       document.getElementById("logForm").addEventListener("submit", submitLog);
       document.getElementById("btnQuickLog").addEventListener("click", () => navigateTo("logentry", {}));
@@ -2884,6 +3175,21 @@
       document.getElementById("planPersonChips").addEventListener("click", event => {
         const btn = event.target.closest("button[data-name]");
         if (btn) removePlanPerson(btn.dataset.name);
+      });
+      document.getElementById("planLabelChips").addEventListener("click", event => {
+        const btn = event.target.closest("button[data-label]");
+        if (btn) removePlanLabel(btn.dataset.label);
+      });
+      document.getElementById("btnAddPlanLabel").addEventListener("click", () => {
+        const input = document.getElementById("planLabelInput");
+        addPlanLabel(input.value);
+        input.value = "";
+      });
+      document.getElementById("planLabelInput").addEventListener("keydown", event => {
+        if (event.key !== "Enter") return;
+        event.preventDefault();
+        addPlanLabel(event.target.value);
+        event.target.value = "";
       });
       document.getElementById("btnDeletePlan").addEventListener("click", deletePlanFromModal);
       document.getElementById("userForm").addEventListener("submit", saveManagedUser);
@@ -3042,7 +3348,6 @@
         plans = fallbackPlans;
         if (listBody) {
           bdsHideLoading(listBody);
-          bdsShowError(listBody, 'Không thể kết nối với server. Đang sử dụng dữ liệu mặc định.', () => loadPlans(true), { type: 'card' });
         }
       }
 
@@ -3086,11 +3391,27 @@
     // (action=getStaff), cache lại; backend lỗi thì dùng cache/tên đã gặp
     async function loadStaff() {
       staffList = JSON.parse(localStorage.getItem(STORAGE_KEYS.staff) || "[]");
+      staffDirectory = JSON.parse(localStorage.getItem(STORAGE_KEYS.staffDirectory) || "[]");
       try {
-        const data = await bdsApiFetch('getStaff', {}, { timeout: 10000, retries: 2 });
+        const userStr = localStorage.getItem("currentUser");
+        const curUser = userStr ? JSON.parse(userStr) : {};
+        const data = await bdsApiFetch('getStaff', { role: curUser.role || '', team: curUser.teams || curUser.dept || '' }, { timeout: 10000, retries: 2 });
         if (data.status === "success" && Array.isArray(data.staff)) {
-          staffList = data.staff.map(person => String(person.name || "").trim()).filter(Boolean).sort();
+          staffDirectory = data.staff.map(person => ({
+            username: String(person.username || person.id || "").trim(),
+            name: String(person.fullName || person.name || person.username || "").trim(),
+            phone: String(person.phone || "").trim(),
+            dept: String(person.dept || "").trim()
+          })).filter(person => person.name || person.username);
+          staffList = staffDirectory.map(person => person.name || person.username).filter(Boolean).sort();
           localStorage.setItem(STORAGE_KEYS.staff, JSON.stringify(staffList));
+          localStorage.setItem(STORAGE_KEYS.staffDirectory, JSON.stringify(staffDirectory));
+          if (currentScreen === "taskdetail") renderHeader(currentScreen, currentParams);
+          if (currentScreen === "contacts") renderContactsScreen();
+          if (currentScreen === "contactdetail") {
+            renderHeader(currentScreen, currentParams);
+            renderContactDetailScreen(currentParams.name);
+          }
           if (document.getElementById("taskAssigneeSelect")) refreshTaskAssigneeEditor();
           if (document.getElementById("planPersonSelect")) renderPlanPersonSelect();
         }
@@ -3141,13 +3462,35 @@
       renderPlanPersonSelect();
     }
 
-    function openPlanModal(id, presetDate) {
+    function renderPlanLabelChips() {
+      document.getElementById("planLabelChips").innerHTML = planLabels.map(name => `
+        <span class="person-chip">${escapeHtml(name)}
+          <button type="button" data-label="${escapeAttr(name)}" title="Bỏ ${escapeAttr(name)}"><i class="bi bi-x"></i></button>
+        </span>
+      `).join("");
+    }
+
+    function addPlanLabel(name) {
+      const cleaned = String(name || "").trim();
+      if (!cleaned || planLabels.includes(cleaned)) return;
+      planLabels.push(cleaned);
+      renderPlanLabelChips();
+    }
+
+    function removePlanLabel(name) {
+      planLabels = planLabels.filter(label => label !== name);
+      renderPlanLabelChips();
+    }
+
+    function openPlanModal(id, presetDate, presetAsset) {
       const plan = id ? plans.find(item => item.id === id) : null;
       // presetDate: nút "+" trên ô ngày của Lịch tuần truyền sẵn ngày của ô đó
+      // presetAsset: {uid, name} khi mở từ nút "Tạo WO bảo trì" của thiết bị đã quét
       const newPlanDate = presetDate || document.getElementById("filterDate").value || today;
       document.getElementById("planModalTitle").textContent = plan ? "Sửa việc" : "Thêm việc";
       document.getElementById("btnDeletePlan").style.display = plan ? "inline-block" : "none";
       document.getElementById("planFormId").value = plan ? plan.id : "";
+      document.getElementById("planFormAssetUID").value = plan ? (plan.assetUID || "") : (presetAsset ? presetAsset.uid || "" : "");
       document.getElementById("planDate").value = plan ? (plan.date || today) : newPlanDate;
       document.getElementById("planFollowUpDate").value = plan ? (plan.followUpDate || plan.date || today) : newPlanDate;
       document.getElementById("planDateEnd").value = plan ? (plan.dateEnd || "") : "";
@@ -3160,9 +3503,11 @@
       planPeople = plan ? String(plan.assignee || "").split(",").map(name => name.trim()).filter(Boolean) : [];
       renderPlanPersonChips();
       renderPlanPersonSelect();
+      planLabels = plan ? (plan.labels || []).slice() : [];
+      renderPlanLabelChips();
       document.getElementById("planArea").value = plan ? (plan.area || "") : "";
-      document.getElementById("planAsset").value = plan ? (plan.asset || "") : "";
-      document.getElementById("planTask").value = plan ? (plan.task || "") : "";
+      document.getElementById("planAsset").value = plan ? (plan.asset || "") : (presetAsset ? presetAsset.name || "" : "");
+      document.getElementById("planTask").value = plan ? (plan.task || "") : (presetAsset ? presetAsset.task || "" : "");
       document.getElementById("planQty").value = plan && (plan.planQty === 0 || plan.planQty) ? plan.planQty : "";
       document.getElementById("planUnit").value = plan ? (plan.unit || "") : "";
       document.getElementById("planType").value = plan ? (plan.type || "Kế hoạch") : "Kế hoạch";
@@ -3227,6 +3572,8 @@
         type: document.getElementById("planType").value,
         priority: document.getElementById("planPriority").value,
         status: document.getElementById("planStatus").value,
+        labels: planLabels.join(", "),
+        assetUID: document.getElementById("planFormAssetUID").value.trim(),
         updatedBy: currentUser()
       };
       if (!payload.team && !canManageUsers()) {
@@ -3351,6 +3698,18 @@
       updateUserButton();
     }
 
+    function allowedTeams() {
+      if (canManageUsers() || !currentUser()) return SUPPORTED_TEAMS.slice();
+      const assigned = currentTeams().split(/[,;|]/).map(team => team.trim()).filter(Boolean);
+      if (assigned.some(team => team === "*" || team.toLowerCase() === "admin")) return SUPPORTED_TEAMS.slice();
+      const matched = SUPPORTED_TEAMS.filter(team => assigned.includes(team));
+      return matched.length ? matched : SUPPORTED_TEAMS.slice();
+    }
+
+    function hasTeamAccess() {
+      return true;
+    }
+
     // ===== Phóng to chữ toàn trang: mọi cỡ chữ dùng rem nên chỉ cần
     // đổi font-size gốc; mức chọn lưu theo máy =====
     const FONT_SCALES = [100, 115, 130];
@@ -3432,24 +3791,23 @@
       const select = document.getElementById("teams");
       if (!select) return;
       const options = allowedTeams();
-      // Kế hoạch thuộc tổ ngoài danh sách tổ của người ghi: vẫn thêm tổ đó vào
-      // dropdown và chọn sẵn — trước đây bị prefill rỗng lặng lẽ, nhật ký mất
-      // thông tin tổ của kế hoạch mà người ghi không hay biết.
-      const extra = selected && !options.includes(selected) ? [selected] : [];
+      const userTeamList = currentTeams().split(/[,;|]/).map(team => team.trim()).filter(Boolean);
+      const userDefaultTeam = userTeamList.length && userTeamList[0] !== "*" ? userTeamList[0] : "";
+
+      const targetTeam = selected || userDefaultTeam || (options.length === 1 ? options[0] : (options.length > 0 ? options[0] : ""));
+      const extra = targetTeam && !options.includes(targetTeam) ? [targetTeam] : [];
+
       select.innerHTML = '<option value="">— Chọn tổ thực hiện —</option>'
         + options.map(team => `<option>${escapeHtml(team)}</option>`).join("")
         + extra.map(team => `<option>${escapeHtml(team)}</option>`).join("");
-      select.value = selected ? selected : (options.length === 1 ? options[0] : "");
+      select.value = targetTeam;
     }
 
-    // Không có tài khoản, hoặc tài khoản chưa được phân nhóm tổ → chưa cho xem nhật ký/kế hoạch
-    function hasTeamAccess() {
-      if (!currentUser()) return false;
-      return allowedTeams().length > 0 || canManageUsers();
-    }
+    // Cho phép tất cả người dùng (kể cả chưa đăng nhập) xem giao diện Kế hoạch & Nhật ký dạng Demo / Khách
 
     function updateAccessGate() {
       const ok = hasTeamAccess();
+      if (window.BDSBottomNav) window.BDSBottomNav.refreshSession();
       document.getElementById("appContent").classList.toggle("d-none", !ok);
       document.getElementById("accessGatePanel").classList.toggle("d-none", ok);
       document.getElementById("accessGateMessage").textContent = currentUser()
@@ -3816,6 +4174,18 @@
       return "";
     }
 
+    // Nhãn (labels) có thể tới từ backend dạng mảng, hoặc từ cache cũ/optimistic dạng
+    // chuỗi phân tách dấu phẩy — chuẩn hóa về mảng để mọi chỗ dùng đều nhất quán.
+    function planLabelsList(plan) {
+      const raw = plan && plan.labels;
+      if (Array.isArray(raw)) return raw;
+      return String(raw || "").split(",").map(s => s.trim()).filter(Boolean);
+    }
+
+    function planHasLabel(plan, label) {
+      return planLabelsList(plan).includes(label);
+    }
+
     // Tồn = đã qua deadline cuối mà chưa hoàn thành
     function isCarryOver(plan, selectedDate) {
       return Boolean(selectedDate && plan.date && planDeadline(plan) < selectedDate && plan.status !== "Hoàn thành");
@@ -3826,7 +4196,7 @@
     }
 
     function isAttentionPlan(plan, selectedDate) {
-      return plan.status === "Cần hỗ trợ" || isCarryOver(plan, selectedDate);
+      return planHasLabel(plan, "Cần hỗ trợ") || isCarryOver(plan, selectedDate);
     }
 
     // Việc đã hoàn thành vẫn thuộc về ngày trong khung lịch của nó (nhắc → deadline).
@@ -3841,18 +4211,37 @@
       return isDueForReview(plan, iso) || isCarryOver(plan, iso) || isDoneOnDate(plan, iso);
     }
 
+    let activeQuickFilter = "all"; // "all" | "open" | "help" | "mine"
+
     function getVisiblePlans(mode) {
       mode = mode || "day";
       const date = document.getElementById("filterDate").value;
-      const team = document.getElementById("filterTeam").value;
-      const query = document.getElementById("searchBox").value.trim().toLowerCase();
-      const person = document.getElementById("filterPerson").value;
+      const teamEl = document.getElementById("filterTeam");
+      const team = teamEl ? teamEl.value : "";
+      const searchBox = document.getElementById("searchBox");
+      const taskSearchInput = document.getElementById("taskSearchInput");
+      const query = ((taskSearchInput && taskSearchInput.value) || (searchBox && searchBox.value) || "").trim().toLowerCase();
+      const personEl = document.getElementById("filterPerson");
+      const person = personEl ? personEl.value : "";
+      const user = currentUser();
+      const userNorm = normalizePerson(user);
 
       const matchesFilters = plan => {
         const byTeam = !team || plan.team === team;
         const byPerson = !person || planPeopleNames(plan).some(name => normalizePerson(name) === normalizePerson(person));
-        const haystack = [plan.area, plan.asset, plan.task, plan.assignee, plan.priority, plan.status, plan.type].join(" ").toLowerCase();
-        return byTeam && byPerson && (!query || haystack.includes(query));
+        const haystack = [plan.area, plan.asset, plan.task, plan.assignee, plan.priority, plan.status, plan.type, plan.assetUID, ...(plan.labels || [])].join(" ").toLowerCase();
+        const byQuery = !query || haystack.includes(query);
+
+        let byQuick = true;
+        if (activeQuickFilter === "open") {
+          byQuick = plan.status !== "Hoàn thành" && plan.status !== "Đã hủy";
+        } else if (activeQuickFilter === "help") {
+          byQuick = planHasLabel(plan, "Cần hỗ trợ") || plan.priority === "Khẩn cấp" || plan.status === "Cần hỗ trợ";
+        } else if (activeQuickFilter === "mine") {
+          byQuick = userNorm && planPeopleNames(plan).some(name => normalizePerson(name) === userNorm);
+        }
+
+        return byTeam && byPerson && byQuery && byQuick;
       };
 
       if (mode === "week") {
@@ -4001,8 +4390,9 @@
         container.innerHTML = '<div class="scroll"><div class="empty-state">Không tìm thấy việc này.</div></div>';
         return;
       }
+      if (currentScreen === "taskdetail") renderHeader("taskdetail", { id: id });
       const selectedDate = document.getElementById("filterDate").value || today;
-      const help = plan.status === "Cần hỗ trợ";
+      const help = planHasLabel(plan, "Cần hỗ trợ");
       const carry = isCarryOver(plan, selectedDate);
       let banner = "";
       if (help) {
@@ -4040,7 +4430,7 @@
           <div class="info-card">
             <div class="info-label"><i class="bi bi-lightning-charge-fill"></i>Việc gì</div>
             <div class="info-value">${escapeHtml(plan.task || "")}</div>
-            <div class="d-flex flex-wrap gap-2 mt-2">${priorityBadge(plan.priority)}${typeBadge(plan)}${statusBadge(plan.status)}</div>
+            <div class="d-flex flex-wrap gap-2 mt-2">${priorityBadge(plan.priority)}${typeBadge(plan)}${statusBadge(plan.status)}${labelBadges(plan)}</div>
           </div>
           <div class="info-card">
             <div class="info-label"><i class="bi bi-geo-alt-fill"></i>Ở đâu</div>
@@ -4108,7 +4498,7 @@
       // Tất cả bước đã xong → việc coi như hoàn thành; có bước chưa xong mà việc
       // đang ghi "Hoàn thành" thì lùi lại "Đang làm" cho khớp thực tế
       if (steps.length > 0) {
-        plan.status = steps.every(s => s.done) ? "Hoàn thành" : (plan.status === "Cần hỗ trợ" ? "Cần hỗ trợ" : "Đang làm");
+        plan.status = steps.every(s => s.done) ? "Hoàn thành" : "Đang làm";
       }
       localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
       if (currentScreen === "taskdetail" && currentParams.id === planId) renderTaskDetail(planId);
@@ -4492,8 +4882,11 @@
       }
 
       let nextStatus = "Đang làm";
+      // "Cần hỗ trợ" không còn là 1 state — chỉ gắn thêm label, tiến độ vẫn coi là "Đang làm"
+      let addLabel = null;
       if (logProgress === "Cần hỗ trợ") {
-        nextStatus = "Cần hỗ trợ";
+        nextStatus = "Đang làm";
+        addLabel = "Cần hỗ trợ";
       } else if (logProgress === "Đang làm") {
         nextStatus = "Đang làm";
       } else if (logProgress === "Hoàn thành") {
@@ -4512,6 +4905,11 @@
       }
 
       plan.status = nextStatus;
+      if (addLabel) {
+        const labels = planLabelsList(plan);
+        if (!labels.includes(addLabel)) labels.push(addLabel);
+        plan.labels = labels;
+      }
       localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
       // Đồng bộ trạng thái mới lên Sheets, lỗi thì thôi (log đã lưu riêng)
       postPlanAction("savePlan", plan).catch(() => {});
@@ -4749,10 +5147,11 @@
     // ===== Màn Tuần =====
     const WEEK_DAY_NAMES = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật"];
 
-    function weekItemClass(status) {
-      if (status === "Hoàn thành") return "st-done";
-      if (status === "Đang làm") return "st-doing";
-      if (status === "Cần hỗ trợ") return "st-help";
+    function weekItemClass(plan) {
+      if (plan.status === "Hoàn thành") return "st-done";
+      if (plan.status === "Đã hủy") return "st-cancelled";
+      if (planHasLabel(plan, "Cần hỗ trợ")) return "st-help";
+      if (plan.status === "Đang làm") return "st-doing";
       return "st-open";
     }
 
@@ -4827,7 +5226,7 @@
 
         const items = dayPlans.map(plan => `
           <div class="week-item-wrap${plan.id === weekMovePlanId ? " moving" : ""}">
-            <button class="week-item ${weekItemClass(plan.status)}" type="button" onclick="openTaskDetail('${escapeAttr(plan.id)}')" title="Bấm để xem chi tiết">
+            <button class="week-item ${weekItemClass(plan)}" type="button" onclick="openTaskDetail('${escapeAttr(plan.id)}')" title="Bấm để xem chi tiết">
               <div class="week-item-main">
                 <div class="week-item-task">${escapeHtml(plan.task || "")}</div>
                 <div class="week-item-meta">${planMetaLine(plan, iso, true)}${[plan.area, plan.asset].filter(Boolean).length ? " · " + [plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ") : ""}${plan.type === "Phát sinh" ? ' · <span class="text-warning fw-bold">Phát sinh</span>' : ""}</div>
@@ -4882,7 +5281,7 @@
 
     function peoplePlanChip(plan, iso) {
       if (plan.status === "Hoàn thành") return '<span class="badge-soft badge-done">Hoàn thành</span>';
-      if (plan.status === "Cần hỗ trợ") return '<span class="badge-soft badge-high">Cần hỗ trợ</span>';
+      if (planHasLabel(plan, "Cần hỗ trợ")) return '<span class="badge-soft badge-high">Cần hỗ trợ</span>';
       if (isCarryOver(plan, iso)) return `<span class="badge-soft badge-mid">Tồn ${daysLate(plan, iso)} ngày</span>`;
       if (plan.status === "Đang làm") return '<span class="badge-soft badge-doing">Đang làm hôm nay</span>';
       return '<span class="badge-soft badge-open">Chưa bắt đầu</span>';
@@ -4891,14 +5290,14 @@
     // Việc có chia bước: bước đang dở dang (chưa xong) của người đó — không phải
     // trạng thái cả kế hoạch, để khớp đúng yêu cầu "lọc đến bước dở dang đang làm"
     function peopleStepChip(plan, iso) {
-      if (plan.status === "Cần hỗ trợ") return '<span class="badge-soft badge-high">Cần hỗ trợ</span>';
+      if (planHasLabel(plan, "Cần hỗ trợ")) return '<span class="badge-soft badge-high">Cần hỗ trợ</span>';
       if (isCarryOver(plan, iso)) return `<span class="badge-soft badge-mid">Tồn ${daysLate(plan, iso)} ngày</span>`;
       return '<span class="badge-soft badge-doing">Đang làm bước</span>';
     }
 
     // Thứ tự hàng trong nhóm: cần chú ý trước, rồi đang làm, chưa bắt đầu, xong cuối
     function peoplePlanOrder(plan, iso) {
-      if (plan.status === "Cần hỗ trợ") return 0;
+      if (planHasLabel(plan, "Cần hỗ trợ")) return 0;
       if (isCarryOver(plan, iso)) return 1;
       if (plan.status === "Đang làm") return 2;
       if (plan.status !== "Hoàn thành") return 3;
@@ -4906,7 +5305,7 @@
     }
 
     function peopleItemOrder(item, iso) {
-      if (item.step) return item.plan.status === "Cần hỗ trợ" ? 0 : (isCarryOver(item.plan, iso) ? 1 : 2);
+      if (item.step) return planHasLabel(item.plan, "Cần hỗ trợ") ? 0 : (isCarryOver(item.plan, iso) ? 1 : 2);
       return peoplePlanOrder(item.plan, iso);
     }
 
@@ -4932,11 +5331,59 @@
         (personName === PEOPLE_UNASSIGNED || normalizePerson(log.employee) === normalizePerson(personName)));
     }
 
+    // Trạng thái theo đúng thứ tự cột Bảng (Kanban) — nhóm việc theo state thay vì theo người
+    const PLAN_BOARD_STATES = ["Chưa làm", "Đang làm", "Hoàn thành", "Đã hủy"];
+
+    function togglePeopleViewMode() {
+      peopleViewMode = peopleViewMode === "board" ? "list" : "board";
+      document.getElementById("btnToggleBoard").classList.toggle("active", peopleViewMode === "board");
+      renderPeopleScreen();
+    }
+
+    function boardCardHtml(plan) {
+      const meta = [plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ");
+      return `
+        <button type="button" class="board-card" onclick="openTaskDetail('${escapeAttr(plan.id)}')">
+          <div class="board-card-task">${escapeHtml(plan.task || "")}</div>
+          ${meta ? `<div class="board-card-meta">${meta}</div>` : ""}
+          <div class="d-flex flex-wrap gap-1 mt-1">${priorityBadge(plan.priority)}${labelBadges(plan)}</div>
+        </button>
+      `;
+    }
+
+    function renderPeopleBoard(container, visible) {
+      if (visible.length === 0) {
+        container.innerHTML = '<div class="empty-state">Không có việc nào trong ngày này.</div>';
+        return;
+      }
+      const columns = PLAN_BOARD_STATES.map(state => ({
+        state,
+        items: visible.filter(plan => plan.status === state)
+      }));
+      container.innerHTML = `
+        <div class="board-columns">
+          ${columns.map(col => `
+            <div class="board-column">
+              <div class="board-column-head"><span>${escapeHtml(col.state)}</span><span class="board-column-count">${col.items.length}</span></div>
+              <div class="board-column-body">
+                ${col.items.length ? col.items.map(boardCardHtml).join("") : '<div class="board-column-empty">Không có việc</div>'}
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
     function renderPeopleScreen() {
       const container = document.getElementById("peopleBody");
       const iso = selectedTaskDate();
       const visible = getVisiblePlans("day");
       renderDayLogSummary(visible, iso);
+
+      if (peopleViewMode === "board") {
+        renderPeopleBoard(container, visible);
+        return;
+      }
 
       const buckets = new Map();
       visible.forEach(plan => {
@@ -4960,7 +5407,7 @@
         return;
       }
 
-      const hasAttention = group => group.items.some(item => item.plan.status === "Cần hỗ trợ" || isCarryOver(item.plan, iso));
+      const hasAttention = group => group.items.some(item => planHasLabel(item.plan, "Cần hỗ trợ") || isCarryOver(item.plan, iso));
       const groups = [...buckets.values()].sort((a, b) => {
         const attnDiff = (hasAttention(a) ? 0 : 1) - (hasAttention(b) ? 0 : 1);
         if (attnDiff) return attnDiff;
@@ -4995,18 +5442,42 @@
             const onClick = step
               ? `navigateTo('logentry', {planId:'${escapeAttr(plan.id)}', stepId:'${escapeAttr(step.id)}', presetProgress:'Hoàn thành'})`
               : `navigateTo('logentry', {planId:'${escapeAttr(plan.id)}', presetProgress:'Hoàn thành'})`;
+
+            const priorityBarClass = plan.priority === "Khẩn cấp" || planHasLabel(plan, "Cần hỗ trợ") ? "stitch-bar-high"
+              : plan.priority === "Cao" ? "stitch-bar-medium" : "stitch-bar-low";
+
+            const priorityBadgeClass = plan.priority === "Khẩn cấp" || planHasLabel(plan, "Cần hỗ trợ") ? "stitch-badge-high"
+              : plan.priority === "Cao" ? "stitch-badge-medium" : "stitch-badge-low";
+
+            const steps = planSteps(plan);
+            const doneSteps = steps.filter(s => s.done).length;
+            const stepsProgressHtml = steps.length > 0
+              ? `<div class="mt-2 text-muted small"><i class="bi bi-list-check me-1"></i>Tiến độ bước: ${doneSteps}/${steps.length}</div>`
+              : "";
+
             return `
-              <div class="people-row-wrap">
-                <button class="people-row" type="button" onclick="${onClick}" title="${step ? "Ghi nhật ký bước này" : "Ghi nhật ký việc này"}">
-                  <div class="min-w-0">
-                    <div class="people-row-task">${taskLabel}</div>
-                    <div class="people-row-meta">${plan.time ? escapeHtml(plan.time) + (where ? " · " : "") : ""}${where}${logged ? ' · <span class="text-success fw-bold"><i class="bi bi-journal-check"></i> đã ghi NK</span>' : ""}</div>
+              <div class="stitch-card mb-2">
+                <div class="stitch-card-bar ${priorityBarClass}"></div>
+                <div class="stitch-card-header mb-1">
+                  <span class="stitch-badge ${priorityBadgeClass}">
+                    ${escapeHtml(plan.priority || "Trung bình")}
+                  </span>
+                  <div class="d-flex align-items-center gap-1">
+                    ${step ? peopleStepChip(plan, iso) : peoplePlanChip(plan, iso)}
+                    ${logged ? '<span class="badge-soft badge-done ms-1" style="font-size:10px;"><i class="bi bi-check-circle-fill"></i> Đã NK</span>' : ''}
                   </div>
-                  ${step ? peopleStepChip(plan, iso) : peoplePlanChip(plan, iso)}
-                </button>
-                <button class="people-detail-btn" type="button" onclick="openTaskDetail('${escapeAttr(plan.id)}')" title="Chi tiết / chia bước" aria-label="Chi tiết / chia bước">
-                  <i class="bi bi-three-dots-vertical"></i>
-                </button>
+                </div>
+                <div class="stitch-title fs-6 mb-1" onclick="${onClick}" style="cursor:pointer;" title="${step ? "Ghi nhật ký bước này" : "Ghi nhật ký việc này"}">${taskLabel}</div>
+                <div class="stitch-location small mb-2"><i class="bi bi-geo-alt me-1"></i>${where || "Chưa chọn vị trí"}${plan.time ? ' · <i class="bi bi-clock me-1"></i>' + escapeHtml(plan.time) : ''}</div>
+                ${stepsProgressHtml}
+                <div class="d-flex align-items-center gap-2 mt-2 pt-2 border-top border-light">
+                  <button type="button" class="btn btn-sm btn-outline-primary flex-grow-1 py-1 rounded-3 font-weight-bold" onclick="${onClick}">
+                    <i class="bi bi-journal-plus me-1"></i> Ghi nhật ký
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary px-3 py-1 rounded-3" onclick="openTaskDetail('${escapeAttr(plan.id)}')" title="Chi tiết công việc">
+                    <i class="bi bi-info-circle me-1"></i> Chi tiết
+                  </button>
+                </div>
               </div>`;
           }).join("");
         return `
@@ -5023,6 +5494,110 @@
         <div class="week-label">${iso === today ? "Hôm nay" : weekdayNameVn(iso) + ", " + shortDateVn(iso)} — ${groups.length} người có việc</div>
         ${followupSection}
         ${html}`;
+    }
+
+    function renderContactsScreen() {
+      const container = document.getElementById("screen-contacts");
+      if (!container) return;
+      const contacts = staffDirectory.slice().sort((a, b) => String(a.name || a.username).localeCompare(String(b.name || b.username), "vi"));
+      const rows = contacts.map(person => {
+        const name = person.name || person.username || "Nhân viên";
+        const initial = escapeHtml((name.trim().charAt(0) || "?").toUpperCase());
+        const phone = contactPhone(person.phone);
+        const phoneDigits = phone.replace(/\D/g, "");
+        return `<article class="contact-row" role="button" tabindex="0" onclick="navigateTo('contactdetail',{name:'${escapeAttr(name)}'})" onkeydown="if(event.key==='Enter')navigateTo('contactdetail',{name:'${escapeAttr(name)}'})">
+          <div class="contact-avatar">${initial}</div>
+          <div class="contact-main">
+            <div class="contact-name">${escapeHtml(name)}</div>
+            <div class="contact-meta">${escapeHtml(person.dept || person.username || "Ban Điện")}${phone ? ` · ${escapeHtml(phone)}` : ""}</div>
+          </div>
+          <div class="contact-actions">
+            ${phone ? `<a href="tel:${escapeAttr(phone)}" onclick="event.stopPropagation()" title="Gọi ${escapeAttr(name)}" aria-label="Gọi ${escapeAttr(name)}"><i class="bi bi-telephone-fill"></i></a>
+            <a class="zalo" href="https://zalo.me/${escapeAttr(phoneDigits)}" onclick="event.stopPropagation()" target="_blank" rel="noopener" title="Nhắn Zalo cho ${escapeAttr(name)}" aria-label="Nhắn Zalo cho ${escapeAttr(name)}"><i class="bi bi-chat-dots-fill"></i></a>` : '<span class="contact-no-phone">Chưa có SĐT</span>'}
+          </div>
+        </article>`;
+      }).join("");
+      container.innerHTML = `<div class="contacts-list">${rows || '<div class="empty-state">Chưa có dữ liệu danh bạ.</div>'}</div>`;
+    }
+
+    function contactPlans(name) {
+      const target = normalizePerson(name);
+      return plans.filter(plan => planPeopleNames(plan).some(person => normalizePerson(person) === target));
+    }
+
+    function contactLogs(contact) {
+      const identities = new Set([
+        normalizePerson(contact && contact.name),
+        normalizePerson(contact && contact.username)
+      ].filter(Boolean));
+      return logs.filter(log => identities.has(normalizePerson(log.recordedBy)) || identities.has(normalizePerson(log.employee)))
+        .sort((a, b) => String(b.createdAt || b.workDate || "").localeCompare(String(a.createdAt || a.workDate || "")));
+    }
+
+    function renderContactDetailScreen(name) {
+      const container = document.getElementById("screen-contactdetail");
+      const contact = staffContact(name);
+      if (!contact) {
+        container.innerHTML = '<div class="empty-state">Không tìm thấy thông tin nhân viên.</div>';
+        return;
+      }
+      renderHeader("contactdetail", { name: contact.name || name });
+      const assignedPlans = contactPlans(contact.name || name).sort((a, b) => String(a.dateEnd || a.date || "").localeCompare(String(b.dateEnd || b.date || "")));
+      const activePlans = assignedPlans.filter(plan => plan.status !== "Hoàn thành" && plan.status !== "Đã hủy");
+      const writtenLogs = contactLogs(contact).slice(0, 30);
+      const rows = activePlans.map(plan => `
+        <button class="contact-work-row" type="button" onclick="openTaskDetail('${escapeAttr(plan.id)}')">
+          <span class="contact-work-icon ${isAttentionPlan(plan, today) ? 'attention' : ''}"><i class="bi bi-clipboard-check-fill"></i></span>
+          <span class="contact-work-main"><strong>${escapeHtml(plan.task || "Công việc")}</strong><small>${escapeHtml([plan.area, plan.asset].filter(Boolean).join(" · ") || plan.team || "Chưa có vị trí")}</small></span>
+          <span class="contact-work-side"><small>${plan.time ? escapeHtml(plan.time.split("-")[0]) : ""}</small><i class="bi bi-chevron-right"></i></span>
+        </button>`).join("");
+      const logRows = writtenLogs.map(log => {
+        const linked = log.planId && plans.some(plan => plan.id === log.planId);
+        return `<button class="contact-log-row" type="button" ${linked ? `onclick="navigateTo('loghistory',{planId:'${escapeAttr(log.planId)}'})"` : 'disabled'}>
+          <span class="contact-log-icon"><i class="bi bi-journal-check"></i></span>
+          <span class="contact-log-main">
+            <strong>${escapeHtml(normalizeWorkText(log.selectedTask) || "Nhật ký công việc")}</strong>
+            <small>${escapeHtml(log.result || log.issue || "Đã ghi nhận kết quả công việc")}</small>
+            <span><i class="bi bi-calendar3"></i> ${escapeHtml(friendlyDate(log.workDate))}${log.startTime ? ` · ${escapeHtml(log.startTime)}` : ""} ${log.progress ? ` · ${escapeHtml(log.progress)}` : ""}</span>
+          </span>
+          ${linked ? '<i class="bi bi-chevron-right contact-log-arrow"></i>' : ''}
+        </button>`;
+      }).join("");
+      container.innerHTML = `
+        <div class="contact-profile-strip">
+          <div class="contact-avatar large">${escapeHtml(((contact.name || contact.username || "?").charAt(0)).toUpperCase())}</div>
+          <div><strong>${escapeHtml(contact.name || contact.username)}</strong><span>${escapeHtml(contact.dept || "Ban Điện")}</span></div>
+          <button type="button" onclick="openContactInfo('${escapeAttr(contact.name || name)}')"><i class="bi bi-info-circle-fill"></i></button>
+        </div>
+        <div class="contact-work-heading"><strong>Việc đang tham gia</strong><span>${activePlans.length}</span></div>
+        <div class="contact-work-list">${rows || '<div class="empty-state">Hiện không có việc đang thực hiện.</div>'}</div>
+        <div class="contact-work-heading contact-log-heading"><strong>Nhật ký đã ghi</strong><span>${writtenLogs.length}</span></div>
+        <div class="contact-log-list">${logRows || '<div class="empty-state">Chưa có nhật ký công việc.</div>'}</div>`;
+    }
+
+    function openContactInfo(name) {
+      const contact = staffContact(name);
+      if (!contact) return;
+      const assignedPlans = contactPlans(contact.name || name);
+      const activeCount = assignedPlans.filter(plan => plan.status !== "Hoàn thành" && plan.status !== "Đã hủy").length;
+      let modalEl = document.getElementById("contactInfoModal");
+      if (!modalEl) {
+        modalEl = document.createElement("div");
+        modalEl.className = "modal fade";
+        modalEl.id = "contactInfoModal";
+        modalEl.tabIndex = -1;
+        modalEl.innerHTML = '<div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h3 class="modal-title h5">Thông tin cá nhân</h3><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div><div class="modal-body" id="contactInfoBody"></div></div></div>';
+        document.body.appendChild(modalEl);
+      }
+      document.getElementById("contactInfoBody").innerHTML = `
+        <div class="contact-info-hero"><div class="contact-avatar large">${escapeHtml(((contact.name || contact.username || "?").charAt(0)).toUpperCase())}</div><strong>${escapeHtml(contact.name || contact.username)}</strong><span>@${escapeHtml(contact.username || "")}</span></div>
+        <div class="contact-info-list">
+          <div><span>Tổ/Bộ phận</span><strong>${escapeHtml(contact.dept || "Chưa cập nhật")}</strong></div>
+          <div><span>Số điện thoại</span><strong>${escapeHtml(contact.phone || "Chưa cập nhật")}</strong></div>
+          <div><span>Việc đang tham gia</span><strong>${activeCount}</strong></div>
+          <div><span>Tổng việc liên quan</span><strong>${assignedPlans.length}</strong></div>
+        </div>`;
+      bootstrap.Modal.getOrCreateInstance ? bootstrap.Modal.getOrCreateInstance(modalEl).show() : new bootstrap.Modal(modalEl).show();
     }
 
     // ===== Màn Thống kê cả tổ =====
@@ -5073,7 +5648,7 @@
           s.total++;
           if (plan.status === "Hoàn thành") s.done++;
           else if (plan.status === "Đang làm") s.doing++;
-          else if (plan.status === "Cần hỗ trợ" || isCarryOver(plan, selectedDate)) s.help++;
+          else if (planHasLabel(plan, "Cần hỗ trợ") || isCarryOver(plan, selectedDate)) s.help++;
         });
       });
 
@@ -5123,6 +5698,7 @@
       const attnCount = todays.filter(p => isAttentionPlan(p, today)).length;
       const scale = parseInt(localStorage.getItem(STORAGE_KEYS.fontScale) || "100", 10);
       const scaleLabel = FONT_SCALE_LABELS[scale] || "Thường";
+      const darkMode = document.documentElement.classList.contains("dark-mode");
 
       container.innerHTML = `
         <div class="prof-hero">
@@ -5153,9 +5729,14 @@
           </div>
           <div class="section-label">Tùy chọn</div>
           <div class="menu mb-3">
+            <div class="personal-sync-state" id="personalSyncBadge">
+              <i class="bi bi-cloud-check-fill"></i>
+              <div class="sync-copy"><div class="sync-title">Đã đồng bộ</div><div class="sync-note">Dữ liệu đã được lưu lên hệ thống</div></div>
+            </div>
             <button class="mrow" type="button" id="btnPersonalFilters"><i class="bi bi-funnel lead"></i>Bộ lọc nâng cao<i class="bi bi-chevron-right tail"></i></button>
             <button class="mrow" type="button" id="btnPersonalSettings"><i class="bi bi-gear lead"></i>Cấu hình đồng bộ<i class="bi bi-chevron-right tail"></i></button>
             <button class="mrow" type="button" id="btnPersonalFontScale"><i class="bi bi-fonts lead"></i>Cỡ chữ: ${scaleLabel}<i class="bi bi-chevron-right tail"></i></button>
+            <button class="mrow" type="button" id="btnPersonalTheme"><i class="bi ${darkMode ? 'bi-sun-fill' : 'bi-moon-stars-fill'} lead"></i>Giao diện: ${darkMode ? 'Tối' : 'Sáng'}<i class="bi bi-chevron-right tail"></i></button>
           </div>
           <div class="section-label">Tài khoản</div>
           <div class="menu">
@@ -5168,11 +5749,12 @@
       if (manageUsersButton) manageUsersButton.addEventListener("click", () => navigateTo("usermanagement", {}));
       document.getElementById("btnOpenScan").addEventListener("click", () => { window.location.href = "../index.html"; });
       document.getElementById("btnPersonalFilters").addEventListener("click", () => filterOffcanvasInstance.show());
-      document.getElementById("btnTaskDisplaySettings").addEventListener("click", openTaskDisplaySettings);
       document.getElementById("btnPersonalSettings").addEventListener("click", () => settingsModalInstance.show());
       document.getElementById("btnPersonalFontScale").addEventListener("click", () => { cycleFontScale(); renderPersonalScreen(); });
+      document.getElementById("btnPersonalTheme").addEventListener("click", () => { toggleDarkMode(); renderPersonalScreen(); });
       document.getElementById("btnChangePin").addEventListener("click", openChangePinModal);
       document.getElementById("btnPersonalLogout").addEventListener("click", logout);
+      updateSyncStatus();
     }
 
     function openChangePinModal() {
@@ -5428,15 +6010,36 @@
 
     // ===== Badge dùng chung =====
     function priorityBadge(value) {
-      const normalized = value || "Thấp";
-      const cls = normalized === "Cao" ? "badge-high" : normalized === "Trung bình" ? "badge-mid" : "badge-low";
+      const normalized = value || "Trung bình";
+      const cls = normalized === "Khẩn cấp" ? "badge-urgent"
+        : normalized === "Cao" ? "badge-high"
+        : normalized === "Trung bình" ? "badge-mid"
+        : normalized === "Không có" ? "badge-none"
+        : "badge-low";
       return `<span class="badge-soft ${cls}">${escapeHtml(normalized)}</span>`;
     }
 
     function statusBadge(value) {
       const normalized = value || "Chưa làm";
-      const cls = normalized === "Hoàn thành" ? "badge-done" : normalized === "Đang làm" ? "badge-doing" : normalized === "Cần hỗ trợ" ? "badge-high" : "badge-open";
+      const cls = normalized === "Hoàn thành" ? "badge-done"
+        : normalized === "Đang làm" ? "badge-doing"
+        : normalized === "Đã hủy" ? "badge-cancelled"
+        : "badge-open";
       return `<span class="badge-soft ${cls}">${escapeHtml(normalized)}</span>`;
+    }
+
+    // Bảng màu cố định cho label — tất định theo hash tên, không cần màn quản lý label riêng
+    const LABEL_COLOR_CLASSES = ["label-c1", "label-c2", "label-c3", "label-c4", "label-c5", "label-c6", "label-c7", "label-c8"];
+    function labelColorClass(name) {
+      let hash = 0;
+      for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+      return LABEL_COLOR_CLASSES[hash % LABEL_COLOR_CLASSES.length];
+    }
+
+    function labelBadges(plan) {
+      const labels = planLabelsList(plan);
+      if (!labels.length) return "";
+      return labels.map(name => `<span class="badge-soft label-chip ${labelColorClass(name)}">${escapeHtml(name)}</span>`).join(" ");
     }
 
     function shortDateVn(isoDate) {
@@ -5467,20 +6070,26 @@
 
     function updateSyncStatus() {
       const syncBadge = document.getElementById("syncBadge");
-      if (!syncBadge) return;
-
       const pendingPlansCount = plans.filter(p => p.syncStatus === "pending" || p.syncStatus === "syncing").length;
       const pendingLogsCount = logs.filter(l => l.syncStatus !== "synced" && (l.syncStatus === "pending" || l.syncStatus === "syncing" || l.syncStatus === "local")).length;
       const totalPending = pendingPlansCount + pendingLogsCount;
 
-      if (totalPending > 0) {
+      if (syncBadge && totalPending > 0) {
         syncBadge.style.display = "inline-flex";
         syncBadge.classList.add("offline");
         syncBadge.innerHTML = `<i class="bi bi-cloud-arrow-up-fill"></i> ${totalPending}`;
         syncBadge.title = `Có ${totalPending} mục đang chờ đồng bộ lên Google Sheets`;
-      } else {
+      } else if (syncBadge) {
         syncBadge.style.display = "none";
         syncBadge.classList.remove("offline");
+      }
+
+      const personalBadge = document.getElementById("personalSyncBadge");
+      if (personalBadge) {
+        personalBadge.classList.toggle("pending", totalPending > 0);
+        personalBadge.innerHTML = totalPending > 0
+          ? `<i class="bi bi-cloud-arrow-up-fill"></i><div class="sync-copy"><div class="sync-title">Chờ đồng bộ</div><div class="sync-note">${totalPending} mục đang chờ gửi lên hệ thống</div></div>`
+          : '<i class="bi bi-cloud-check-fill"></i><div class="sync-copy"><div class="sync-title">Đã đồng bộ</div><div class="sync-note">Dữ liệu đã được lưu lên hệ thống</div></div>';
       }
     }
 
@@ -5522,5 +6131,6 @@
       return escapeHtml(value).replace(/`/g, "&#096;");
     }
   </script>
+  <script src="../js/bottomnav.js?v=20260718-zalo7" data-root="../" data-active="plan" data-spa="true" data-hidden="true"></script>
 </body>
 </html>

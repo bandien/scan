@@ -130,6 +130,22 @@ function handleExportAllData(e) {
     }
   } catch (_) { result.meterReadings = []; }
 
+  // 9. NhatKyPlans (Kế hoạch/Nhật ký công việc — hợp nhất từ WorkOrders, xem 20_MigrateWorkOrders.gs)
+  try {
+    const planSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("NhatKyPlans");
+    if (planSheet && planSheet.getLastRow() >= 2) {
+      const data = planSheet.getDataRange().getValues();
+      const headers = data[0].map(h => String(h).trim());
+      result.nhatKyPlans = data.slice(1).filter(r => r[0]).map(r => {
+        const row = {};
+        headers.forEach((h, i) => { row[h] = r[i] !== undefined ? r[i] : ""; });
+        return row;
+      });
+    } else {
+      result.nhatKyPlans = [];
+    }
+  } catch (_) { result.nhatKyPlans = []; }
+
   // Metadata
   const elapsed = (new Date() - startTime) / 1000;
   result.meta = {
@@ -144,6 +160,7 @@ function handleExportAllData(e) {
       auditLog:      result.auditLog.length,
       meterPoints:   result.meterPoints.length,
       meterReadings: result.meterReadings.length,
+      nhatKyPlans:   result.nhatKyPlans.length,
     }
   };
 

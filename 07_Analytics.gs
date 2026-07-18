@@ -81,7 +81,11 @@ function handleGetStaff(e) {
   const schema = typeof getUsersSchema_ === "function"
     ? getUsersSchema_(data)
     : { usernameIndex: 0, roleIndex: 2, teamsIndex: 3, phoneIndex: 7, fullNameIndex: 8 };
-  const staff = data.slice(1).filter(function(row) {
+
+  const requestingRole = e && e.parameter ? String(e.parameter.role || "").trim() : "";
+  const requestingDept = e && e.parameter ? String(e.parameter.dept || e.parameter.team || "").trim().toLowerCase() : "";
+
+  let staff = data.slice(1).filter(function(row) {
     return String(row[schema.usernameIndex] || "").trim();
   }).map(function(row) {
     const username = String(row[schema.usernameIndex] || "").trim();
@@ -96,5 +100,18 @@ function handleGetStaff(e) {
       phone: schema.phoneIndex >= 0 ? String(row[schema.phoneIndex] || "").trim() : ""
     };
   });
+
+  // Fast & lightweight filtering for regular Staff
+  if (requestingRole === "User" || requestingRole === "Staff") {
+    staff = staff.filter(function(person) {
+      const pos = person.position.toLowerCase();
+      const personDept = person.dept.toLowerCase();
+      const isLeader = pos === "admin" || pos === "manager" || person.dept === "*";
+      const isSameTeam = requestingDept && (personDept.includes(requestingDept) || requestingDept.includes(personDept));
+      return isLeader || isSameTeam;
+    });
+  }
+
   return contentResponse({ status: "success", staff });
 }
+

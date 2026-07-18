@@ -1,0 +1,78 @@
+.bandien-zalo-floating-btn {
+  position: fixed;
+  z-index: 2147483647;
+  appearance: none;
+  border: 0;
+  border-radius: 7px;
+  padding: 6px 10px;
+  background: #f97316;
+  color: #fff;
+  font: 600 12px/1.25 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  box-shadow: 0 4px 10px rgba(124, 45, 18, .35);
+  cursor: pointer;
+  transition: background .15s, transform .15s;
+}
+
+.bandien-zalo-floating-btn:hover { background: #ea580c; transform: translateY(-1px); }
+.bandien-zalo-floating-btn:disabled { opacity: .65; cursor: wait; transform: none; }
+
+.bandien-zalo-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(15, 23, 42, .55);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.bandien-zalo-dialog {
+  width: min(430px, 100%);
+  max-height: calc(100vh - 36px);
+  overflow: auto;
+  box-sizing: border-box;
+  padding: 20px;
+  border-radius: 14px;
+  background: #fff;
+  color: #172033;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, .3);
+}
+
+.bandien-zalo-dialog h2 { margin: 0 0 6px; font-size: 20px; }
+.bandien-zalo-dialog p { margin: 0 0 15px; color: #64748b; font-size: 13px; }
+.bandien-zalo-dialog label { display: block; margin: 11px 0 5px; font-size: 13px; font-weight: 650; }
+.bandien-zalo-dialog input,
+.bandien-zalo-dialog select,
+.bandien-zalo-dialog textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 9px 10px;
+  background: #fff;
+  color: #172033;
+  font: inherit;
+}
+.bandien-zalo-dialog textarea { min-height: 92px; resize: vertical; }
+.bandien-zalo-error { min-height: 18px; margin-top: 8px; color: #dc2626; font-size: 13px; }
+.bandien-zalo-buttons { display: flex; justify-content: flex-end; gap: 8px; margin-top: 15px; }
+.bandien-zalo-buttons button { border: 0; border-radius: 8px; padding: 9px 13px; font-weight: 650; cursor: pointer; }
+.bandien-zalo-cancel { background: #e2e8f0; color: #334155; }
+.bandien-zalo-submit { background: #f97316; color: #fff; }
+.bandien-zalo-submit:disabled { opacity: .6; cursor: wait; }
+
+.bandien-zalo-toast {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 2147483647;
+  max-width: 360px;
+  padding: 11px 14px;
+  border-radius: 9px;
+  background: #166534;
+  color: #fff;
+  font: 600 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, .24);
+}
+.bandien-zalo-toast.error { background: #b91c1c; }
