@@ -138,6 +138,57 @@ function handleGetStaff(e) {
   return contentResponse({ status: "success", staff });
 }
 
+// ===== 6. Backend API Unified ERP Party Model (handleGetErpParties) =====
+function handleGetErpParties(e) {
+  const staffRes = handleGetStaff(e);
+  const partnerRes = handleGetPartners(e);
+
+  let staffList = [];
+  let partnerList = [];
+
+  try {
+    const sObj = JSON.parse(staffRes.getContent());
+    if (sObj.status === "success" && Array.isArray(sObj.staff)) {
+      staffList = sObj.staff.map(function(s, idx) {
+        return {
+          partyId: "PT-EMP-" + (s.username || idx),
+          name: s.fullName || s.name || s.username,
+          phone: s.phone || "",
+          deptOrCompany: s.dept || "Ban Điện",
+          position: s.position || "Staff",
+          roles: ["EMPLOYEE"],
+          labels: String(s.labels || s.dept || "Public").split(/[,;]/).map(function(x){ return x.trim(); }).filter(Boolean),
+          type: "STAFF"
+        };
+      });
+    }
+  } catch(err) {}
+
+  try {
+    const pObj = JSON.parse(partnerRes.getContent());
+    if (pObj.status === "success" && Array.isArray(pObj.partners)) {
+      partnerList = pObj.partners.map(function(p, idx) {
+        return {
+          partyId: p.partyId || ("PT-PARTNER-" + idx),
+          name: p.name || p.fullName || p.contactPerson,
+          phone: p.phone || "",
+          email: p.email || "",
+          address: p.address || "",
+          taxCode: p.taxCode || "",
+          deptOrCompany: p.loai || "Đối tác / NCC",
+          contactPerson: p.contactPerson || "",
+          roles: [p.loai ? p.loai.toUpperCase() : "SUPPLIER"],
+          labels: String(p.labels || p.loai || "Public").split(/[,;]/).map(function(x){ return x.trim(); }).filter(Boolean),
+          type: "PARTNER"
+        };
+      });
+    }
+  } catch(err) {}
+
+  const parties = staffList.concat(partnerList);
+  return contentResponse({ status: "success", count: parties.length, parties: parties });
+}
+
 // ===== 5. Quản lý Đối Tác & NCC ERP (kh_ncc) =====
 function handleGetPartners(e) {
   const sheet = getSheet("kh_ncc");

@@ -41,6 +41,7 @@ function doGet(e) {
       case 'getInventory':      return handleGetInventory(e);
       case 'getStaff':          return handleGetStaff(e);
       case 'getPartners':       return handleGetPartners(e);
+      case 'getErpParties':     return handleGetErpParties(e);
       case 'getPersonalContacts':    return handleGetPersonalContacts(e);
       case 'savePersonalContact':   return handleSavePersonalContact(e);
       case 'deletePersonalContact': return handleDeletePersonalContact(e);
