@@ -5740,9 +5740,9 @@
       const userRole = (curUser.role || '').toLowerCase();
       const isAdmin = canManageUsers() || userRole === 'admin' || userRole === 'manager';
 
-      // Non-admin staff default away from erp_partners
-      if (!isAdmin && currentZaloTab === 'erp_partners') {
-        currentZaloTab = 'my_private';
+      // Non-admin staff default to 'all' so they see contacts matching tag pills directly
+      if (!isAdmin) {
+        currentZaloTab = 'all';
       }
 
       // Background syncs
@@ -5822,22 +5822,13 @@
         return isLeader || isSame;
       });
 
-      // Render Header Tabs
+      // Render Header Tabs (Only for Admin/Manager)
       const erpTabHtml = isAdmin ? `
         <button type="button" class="zalo-tab-btn ${currentZaloTab === 'erp_partners' ? 'active' : ''}" onclick="setZaloContactTab('erp_partners')">
           <i class="bi bi-building-fill text-info"></i> Đối tác & NCC <span class="badge bg-secondary">${erpPartners.length}</span>
         </button>` : '';
 
-      const headerHtml = `
-        <div class="zalo-contact-header" style="background:#fff; border-bottom:1px solid #e9ecef;">
-          <div class="zalo-search-box">
-            <i class="bi bi-search"></i>
-            <input type="search" value="${escapeAttr(zaloSearchQuery)}" placeholder="Tìm kiếm danh bạ, nhãn/tag, SĐT..." oninput="filterZaloContacts(this.value)">
-          </div>
-          <div class="zalo-tag-bar d-flex align-items-center gap-1 overflow-x-auto py-1 px-2 border-bottom" style="scrollbar-width: none;">
-            <span class="small text-secondary flex-shrink-0 me-1" style="font-size:11px; font-weight:600;"><i class="bi bi-tags-fill text-primary"></i> Tag:</span>
-            ${tagPillsHtml}
-          </div>
+      const tabPillsBarHtml = isAdmin ? `
           <div class="zalo-tab-pills">
             <button type="button" class="zalo-tab-btn ${currentZaloTab === 'my_private' ? 'active' : ''}" onclick="setZaloContactTab('my_private')">
               <i class="bi bi-star-fill text-warning"></i> Cá nhân của tôi <span class="badge bg-warning text-dark fw-bold">${myPrivateContacts.length}</span>
@@ -5852,7 +5843,19 @@
             <button type="button" class="zalo-tab-btn ${currentZaloTab === 'all' ? 'active' : ''}" onclick="setZaloContactTab('all')">
               <i class="bi bi-person-lines-fill"></i> Tất cả danh bạ <span class="badge bg-secondary">${contacts.length}</span>
             </button>
+          </div>` : '';
+
+      const headerHtml = `
+        <div class="zalo-contact-header" style="background:#fff; border-bottom:1px solid #e9ecef;">
+          <div class="zalo-search-box">
+            <i class="bi bi-search"></i>
+            <input type="search" value="${escapeAttr(zaloSearchQuery)}" placeholder="Tìm kiếm danh bạ, nhãn/tag, SĐT..." oninput="filterZaloContacts(this.value)">
           </div>
+          <div class="zalo-tag-bar d-flex align-items-center gap-1 overflow-x-auto py-1 px-2 border-bottom" style="scrollbar-width: none;">
+            <span class="small text-secondary flex-shrink-0 me-1" style="font-size:11px; font-weight:600;"><i class="bi bi-tags-fill text-primary"></i> Tag:</span>
+            ${tagPillsHtml}
+          </div>
+          ${tabPillsBarHtml}
         </div>`;
 
       function buildRowHtml(person) {
