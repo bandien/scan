@@ -138,6 +138,15 @@ function handleGetStaff(e) {
   return contentResponse({ status: "success", staff });
 }
 
+function normalizePhone_(phoneStr) {
+  if (!phoneStr) return "";
+  let digits = String(phoneStr).replace(/\D/g, "");
+  if (digits.indexOf("84") === 0 && digits.length > 9) {
+    digits = "0" + digits.substring(2);
+  }
+  return digits;
+}
+
 // ===== 6. Backend API Unified ERP Party Model (handleGetErpParties) =====
 function handleGetErpParties(e) {
   const staffRes = handleGetStaff(e);
@@ -185,7 +194,59 @@ function handleGetErpParties(e) {
     }
   } catch(err) {}
 
-  const parties = staffList.concat(partnerList);
+  // Deduplicate and Merge Staff & Partner records by normalized phone number
+  const partyMap = {};
+  const unmergedParties = [];
+
+  function mergeLabels(arr1, arr2) {
+    const set = {};
+    (arr1 || []).concat(arr2 || []).forEach(function(l) {
+      if (l) set[l] = true;
+    });
+    return Object.keys(set);
+  }
+
+  function mergeRoles(arr1, arr2) {
+    const set = {};
+    (arr1 || []).concat(arr2 || []).forEach(function(r) {
+      if (r) set[r] = true;
+    });
+    return Object.keys(set);
+  }
+
+  // 1. Map staffList by phone
+  staffList.forEach(function(s) {
+    const phoneKey = normalizePhone_(s.phone);
+    if (phoneKey && phoneKey.length >= 9) {
+      partyMap[phoneKey] = s;
+    } else {
+      unmergedParties.push(s);
+    }
+  });
+
+  // 2. Iterate partnerList and merge or insert
+  partnerList.forEach(function(p) {
+    const phoneKey = normalizePhone_(p.phone);
+    if (phoneKey && phoneKey.length >= 9 && partyMap[phoneKey]) {
+      // Merge into existing Staff record
+      const existing = partyMap[phoneKey];
+      existing.roles = mergeRoles(existing.roles, p.roles);
+      existing.labels = mergeLabels(existing.labels, p.labels);
+      if (p.email && !existing.email) existing.email = p.email;
+      if (p.address && !existing.address) existing.address = p.address;
+      if (p.taxCode && !existing.taxCode) existing.taxCode = p.taxCode;
+      if (p.contactPerson && !existing.contactPerson) existing.contactPerson = p.contactPerson;
+      if (p.name && existing.name !== p.name && !existing.partnerName) existing.partnerName = p.name;
+      existing.type = "HYBRID";
+      existing.isMerged = true;
+    } else if (phoneKey && phoneKey.length >= 9) {
+      partyMap[phoneKey] = p;
+    } else {
+      unmergedParties.push(p);
+    }
+  });
+
+  const parties = Object.keys(partyMap).map(function(k) { return partyMap[k]; }).concat(unmergedParties);
   return contentResponse({ status: "success", count: parties.length, parties: parties });
 }
 
@@ -323,6 +384,51 @@ function handleDeletePersonalContact(e) {
   }
 
   return contentResponse({ status: "error", message: "Không tìm thấy liên hệ để xóa" });
+}
+
+// ===== 7. Utility to Clean Duplicates from kh_ncc according to SSOT =====
+function handleCleanupDuplicateErpParties(e) {
+  const staffRes = handleGetStaff(e);
+  let staffList = [];
+  try {
+    const sObj = JSON.parse(staffRes.getContent());
+    if (sObj.status === "success" && Array.isArray(sObj.staff)) {
+      staffList = sObj.staff;
+    }
+  } catch(err) {}
+
+  const staffPhones = {};
+  staffList.forEach(function(s) {
+    const pk = normalizePhone_(s.phone);
+    if (pk && pk.length >= 9) staffPhones[pk] = s.name || s.fullName || s.username;
+  });
+
+  const sheet = getSheet("kh_ncc");
+  if (!sheet) return contentResponse({ status: "success", message: "kh_ncc sheet không tồn tại", removed: [] });
+
+  const data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return contentResponse({ status: "success", message: "kh_ncc không có dữ liệu", removed: [] });
+
+  const removed = [];
+  // Loop backwards to safely delete rows
+  for (let i = data.length - 1; i >= 1; i--) {
+    const row = data[i];
+    const pName = String(row[2] || row[3] || "").trim();
+    const phone = String(row[4] || "").trim();
+    const pk = normalizePhone_(phone);
+
+    if (pk && staffPhones[pk]) {
+      removed.push({ row: i + 1, name: pName, phone: phone, matchedStaff: staffPhones[pk] });
+      sheet.deleteRow(i + 1);
+    }
+  }
+
+  return contentResponse({
+    status: "success",
+    message: `Đã dọn dẹp ${removed.length} dòng trùng lặp trong kh_ncc theo nguyên tắc SSOT.`,
+    removedCount: removed.length,
+    removed: removed
+  });
 }
 
 

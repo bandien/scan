@@ -1,4 +1,5 @@
 (() => {
+  if (typeof window === "undefined" || typeof document === "undefined") return;
   "use strict";
 
   const STORE_KEY = "bandienZaloJournal";

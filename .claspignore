@@ -1,9 +1,18 @@
-# Ignore sync-service and dependency folders
+# Ignore non-GAS folders
 sync-service/**
 node_modules/**
 .git/**
 brain/**
 docs/**
+design-system/**
+fragments/**
+phanca/**
+phongvan/**
+checkbom/**
+hengio/**
+ sangolf/**
+nhatky/**
+tools/**
 *.bak
 *.url
 *.md
@@ -13,6 +22,7 @@ Backend.gs.bak
 
 # Frontend JS modules (GitHub Pages only — không push lên GAS)
 js/**
+css/**
 style.css
 *.jsx
 status.html
