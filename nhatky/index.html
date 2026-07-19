@@ -2991,7 +2991,7 @@
         meta.subtitle = [detailContact.dept, detailContact.phone].filter(Boolean).join(" · ") || "Thông tin nhân viên";
         meta.icon = "bi-person-fill";
       }
-      const contactsAction = screen === "contacts" ? '<button class="btn btn-sm btn-primary rounded-pill px-2.5 py-1 text-nowrap" type="button" title="Thêm danh bạ mới" style="font-size:12px; font-weight:600;" onclick="openUserEditor(\'\')"><i class="bi bi-person-plus-fill me-1"></i>+ Thêm danh bạ</button>' : "";
+      const contactsAction = (screen === "contacts" && canManageUsers()) ? '<button class="btn btn-sm btn-primary rounded-pill px-2.5 py-1 text-nowrap" type="button" title="Thêm danh bạ mới" style="font-size:12px; font-weight:600;" onclick="openUserEditor(\'\')"><i class="bi bi-person-plus-fill me-1"></i>+ Thêm danh bạ</button>' : "";
       const personalAction = screen === "personal" ? '<button class="app-header-action" type="button" title="Cài đặt" aria-label="Cài đặt" onclick="settingsModalInstance.show()"><i class="bi bi-gear-fill"></i></button>' : "";
       window.BDSAppHeader.update({
         title: meta.title,
@@ -3480,7 +3480,9 @@
             username: String(person.username || person.id || "").trim(),
             name: String(person.fullName || person.name || person.username || "").trim(),
             phone: String(person.phone || "").trim(),
-            dept: String(person.dept || "").trim()
+            dept: String(person.dept || "").trim(),
+            position: String(person.position || "").trim(),
+            labels: String(person.labels || person.dept || "Public").trim()
           })).filter(person => person.name || person.username);
           staffList = staffDirectory.map(person => person.name || person.username).filter(Boolean).sort();
           localStorage.setItem(STORAGE_KEYS.staff, JSON.stringify(staffList));
@@ -5575,8 +5577,9 @@
         ${html}`;
     }
 
-    let currentZaloTab = 'same_team';
+    let currentZaloTab = 'my_private';
     let zaloSearchQuery = '';
+    let currentTagFilter = 'all';
 
     window.setZaloContactTab = function(tabKey) {
       currentZaloTab = tabKey;
@@ -5585,6 +5588,11 @@
 
     window.filterZaloContacts = function(query) {
       zaloSearchQuery = (query || '').trim().toLowerCase();
+      renderContactsScreen();
+    };
+
+    window.setContactTagFilter = function(tag) {
+      currentTagFilter = tag || 'all';
       renderContactsScreen();
     };
 
@@ -5666,12 +5674,10 @@
         contacts.unshift(newItem);
       }
 
-      // Save locally (0ms)
       saveStoredPersonalContacts(username, contacts);
       showToast("Đã lưu liên hệ cá nhân!");
       renderContactsScreen();
 
-      // Post to Google Sheet in background
       const gasUrl = getGasUrl();
       if (gasUrl) {
         fetch(gasUrl, {
@@ -5727,26 +5733,84 @@
       const container = document.getElementById("screen-contacts");
       if (!container) return;
 
-      const userStr = localStorage.getItem(STORAGE_KEYS.currentUser || 'currentUser');
+      const userStr = localStorage.getItem(STORAGE_KEYS.currentUser || 'currentUser') || localStorage.getItem('currentUser');
       const curUser = userStr ? JSON.parse(userStr) : {};
       const curUsername = curUser.username || 'user';
       const userDept = (curUser.teams || curUser.dept || '').toLowerCase();
       const userRole = (curUser.role || '').toLowerCase();
+      const isAdmin = canManageUsers() || userRole === 'admin' || userRole === 'manager';
 
-      // Trigger background syncs
+      // Non-admin staff default away from erp_partners
+      if (!isAdmin && currentZaloTab === 'erp_partners') {
+        currentZaloTab = 'my_private';
+      }
+
+      // Background syncs
       syncPersonalContactsFromSheet(curUsername);
-      syncErpPartnersFromSheet();
+      if (isAdmin) syncErpPartnersFromSheet();
 
-      let contacts = staffDirectory.slice().sort((a, b) => String(a.name || a.username).localeCompare(String(b.name || b.username), "vi"));
+      let baseContacts = staffDirectory.slice().sort((a, b) => String(a.name || a.username).localeCompare(String(b.name || b.username), "vi"));
       const myPrivateContacts = getStoredPersonalContacts(curUsername);
       const erpPartners = getStoredErpPartners();
 
+      // User Label-based Permission Filtering
+      const userLabels = (curUser.labels || curUser.teams || curUser.dept || '').split(/[,;]/).map(s => s.trim().toLowerCase()).filter(Boolean);
+      if (!isAdmin && userLabels.length > 0 && !userLabels.includes('*')) {
+        baseContacts = baseContacts.filter(p => {
+          const pLabels = (p.labels || p.dept || '').toLowerCase();
+          const pDept = (p.dept || '').toLowerCase();
+          const pPos = (p.position || p.role || '').toLowerCase();
+          const isLeader = pPos === 'admin' || pPos === 'manager' || pPos.includes('trưởng') || pPos.includes('phó') || pDept === '*';
+          const isPublic = pLabels.includes('public') || pLabels.includes('chung');
+          const isSameLabel = userLabels.some(lbl => pLabels.includes(lbl) || pDept.includes(lbl));
+          return isLeader || isPublic || isSameLabel;
+        });
+      }
+
+      // Compute dynamic tag counts (hides tags with count === 0)
+      const tagMap = new Map();
+      baseContacts.forEach(p => {
+        const rawLabels = [(p.labels || ''), (p.dept || '')].join(',').split(/[,;]/).map(s => s.trim()).filter(Boolean);
+        const uniqueSet = new Set(rawLabels);
+        uniqueSet.forEach(tag => {
+          tagMap.set(tag, (tagMap.get(tag) || 0) + 1);
+        });
+      });
+
+      const activeTagList = Array.from(tagMap.entries())
+        .filter(([tag, count]) => count > 0)
+        .sort((a, b) => b[1] - a[1]);
+
+      const tagPills = [{ tag: 'all', label: 'Tất cả Nhãn', count: baseContacts.length }].concat(
+        activeTagList.map(([tag, count]) => ({ tag: tag, label: tag, count: count }))
+      );
+
+      const tagPillsHtml = tagPills.map(item => {
+        const isActive = currentTagFilter === item.tag;
+        const badgeClass = isActive ? 'bg-white text-primary' : 'bg-secondary-subtle text-dark border';
+        return `<button type="button" class="btn btn-sm ${isActive ? 'btn-primary' : 'btn-outline-secondary'} rounded-pill px-2.5 py-0.5 text-nowrap" style="font-size:11px; font-weight:600;" onclick="setContactTagFilter('${escapeAttr(item.tag)}')">
+          ${escapeHtml(item.label)} <span class="badge ${badgeClass} ms-0.5" style="font-size:10px;">${item.count}</span>
+        </button>`;
+      }).join('');
+
+      // Filter baseContacts by active tag filter
+      let contacts = baseContacts;
+      if (currentTagFilter && currentTagFilter !== 'all') {
+        const filterKey = currentTagFilter.toLowerCase();
+        contacts = baseContacts.filter(p => {
+          const haystack = [(p.labels || ''), (p.dept || ''), (p.position || '')].join(' ').toLowerCase();
+          return haystack.includes(filterKey);
+        });
+      }
+
+      // Search Query Filter
       if (zaloSearchQuery) {
         contacts = contacts.filter(p => {
           const name = String(p.name || p.username || '').toLowerCase();
           const phone = String(p.phone || '').toLowerCase();
           const dept = String(p.dept || '').toLowerCase();
-          return name.includes(zaloSearchQuery) || phone.includes(zaloSearchQuery) || dept.includes(zaloSearchQuery);
+          const labels = String(p.labels || '').toLowerCase();
+          return name.includes(zaloSearchQuery) || phone.includes(zaloSearchQuery) || dept.includes(zaloSearchQuery) || labels.includes(zaloSearchQuery);
         });
       }
 
@@ -5758,32 +5822,38 @@
         return isLeader || isSame;
       });
 
+      // Render Header Tabs
+      const erpTabHtml = isAdmin ? `
+        <button type="button" class="zalo-tab-btn ${currentZaloTab === 'erp_partners' ? 'active' : ''}" onclick="setZaloContactTab('erp_partners')">
+          <i class="bi bi-building-fill text-info"></i> Đối tác & NCC <span class="badge bg-secondary">${erpPartners.length}</span>
+        </button>` : '';
+
       const headerHtml = `
-        <div class="zalo-contact-header">
+        <div class="zalo-contact-header" style="background:#fff; border-bottom:1px solid #e9ecef;">
           <div class="zalo-search-box">
             <i class="bi bi-search"></i>
-            <input type="search" value="${escapeAttr(zaloSearchQuery)}" placeholder="Tìm kiếm nhân sự, đối tác, tổ nhóm, SĐT..." oninput="filterZaloContacts(this.value)">
+            <input type="search" value="${escapeAttr(zaloSearchQuery)}" placeholder="Tìm kiếm danh bạ, nhãn/tag, SĐT..." oninput="filterZaloContacts(this.value)">
+          </div>
+          <div class="zalo-tag-bar d-flex align-items-center gap-1 overflow-x-auto py-1 px-2 border-bottom" style="scrollbar-width: none;">
+            <span class="small text-secondary flex-shrink-0 me-1" style="font-size:11px; font-weight:600;"><i class="bi bi-tags-fill text-primary"></i> Tag:</span>
+            ${tagPillsHtml}
           </div>
           <div class="zalo-tab-pills">
-            <button type="button" class="zalo-tab-btn ${currentZaloTab === 'same_team' ? 'active' : ''}" onclick="setZaloContactTab('same_team')">
-              <i class="bi bi-people-fill"></i> Nhóm cùng tổ <span class="badge bg-secondary">${sameTeamContacts.length}</span>
-            </button>
-            <button type="button" class="zalo-tab-btn ${currentZaloTab === 'erp_partners' ? 'active' : ''}" onclick="setZaloContactTab('erp_partners')">
-              <i class="bi bi-building-fill text-info"></i> Đối tác & NCC <span class="badge bg-secondary">${erpPartners.length}</span>
-            </button>
             <button type="button" class="zalo-tab-btn ${currentZaloTab === 'my_private' ? 'active' : ''}" onclick="setZaloContactTab('my_private')">
-              <i class="bi bi-star-fill text-warning"></i> Cá nhân của tôi <span class="badge bg-secondary">${myPrivateContacts.length}</span>
+              <i class="bi bi-star-fill text-warning"></i> Cá nhân của tôi <span class="badge bg-warning text-dark fw-bold">${myPrivateContacts.length}</span>
             </button>
+            <button type="button" class="zalo-tab-btn ${currentZaloTab === 'same_team' ? 'active' : ''}" onclick="setZaloContactTab('same_team')">
+              <i class="bi bi-people-fill"></i> Nhóm <span class="badge bg-secondary">${sameTeamContacts.length}</span>
+            </button>
+            ${erpTabHtml}
             <button type="button" class="zalo-tab-btn ${currentZaloTab === 'groups' ? 'active' : ''}" onclick="setZaloContactTab('groups')">
-              <i class="bi bi-diagram-3-fill"></i> Danh sách nhóm
+              <i class="bi bi-diagram-3-fill"></i> Tổ / Phòng ban
             </button>
             <button type="button" class="zalo-tab-btn ${currentZaloTab === 'all' ? 'active' : ''}" onclick="setZaloContactTab('all')">
-              <i class="bi bi-person-lines-fill"></i> Tất cả <span class="badge bg-secondary">${contacts.length}</span>
+              <i class="bi bi-person-lines-fill"></i> Tất cả danh bạ <span class="badge bg-secondary">${contacts.length}</span>
             </button>
           </div>
         </div>`;
-
-      const isAdmin = canManageUsers();
 
       function buildRowHtml(person) {
         const name = person.name || person.username || "Nhân viên";
@@ -5791,16 +5861,17 @@
         const phone = contactPhone(person.phone);
         const phoneDigits = phone.replace(/\D/g, "");
         const dept = person.dept || person.username || "Ban Điện";
+        const labelBadge = person.labels ? `<span class="badge bg-light text-primary border me-1" style="font-size:10px;">${escapeHtml(person.labels)}</span>` : '';
         const username = person.username || person.id || "";
-        const adminActions = `
+        const adminActions = isAdmin ? `
           <button class="btn btn-sm text-secondary p-1" title="Sửa tổ / thông tin" onclick="event.stopPropagation(); openUserEditor('${escapeAttr(username)}')"><i class="bi bi-pencil-fill"></i></button>
           <button class="btn btn-sm text-danger p-1" title="Xóa khỏi nhóm" onclick="event.stopPropagation(); deleteManagedUser('${escapeAttr(username)}')"><i class="bi bi-trash-fill"></i></button>
-        `;
+        ` : '';
 
         return `<article class="contact-row" role="button" tabindex="0" onclick="navigateTo('contactdetail',{name:'${escapeAttr(name)}'})" onkeydown="if(event.key==='Enter')navigateTo('contactdetail',{name:'${escapeAttr(name)}'})">
           <div class="contact-avatar">${initial}</div>
           <div class="contact-main">
-            <div class="contact-name">${escapeHtml(name)}</div>
+            <div class="contact-name">${escapeHtml(name)} ${labelBadge}</div>
             <div class="contact-meta">${escapeHtml(dept)}${phone ? ` · ${escapeHtml(phone)}` : ""}</div>
           </div>
           <div class="contact-actions">
@@ -5813,11 +5884,45 @@
 
       let bodyHtml = '';
 
-      if (currentZaloTab === 'same_team') {
-        const rows = sameTeamContacts.map(buildRowHtml).join('');
-        bodyHtml = `<div class="contacts-list">${rows || '<div class="empty-state">Không có nhân sự trong tổ.</div>'}</div>`;
+      if (currentZaloTab === 'my_private') {
+        const rows = myPrivateContacts.map(item => {
+          const name = item.fullName || "Liên hệ cá nhân";
+          const initial = escapeHtml((name.trim().charAt(0) || "?").toUpperCase());
+          const phone = contactPhone(item.phone);
+          const phoneDigits = phone.replace(/\D/g, "");
+          const note = item.deptOrNote || "Ghi chú riêng";
+          const personalAdminActions = isAdmin ? `
+            <button class="btn btn-sm text-secondary p-1" title="Sửa" onclick="openPersonalContactModal('${escapeAttr(item.id)}')"><i class="bi bi-pencil-fill"></i></button>
+            <button class="btn btn-sm text-danger p-1" title="Xóa" onclick="deletePersonalContactItem('${escapeAttr(item.id)}')"><i class="bi bi-trash-fill"></i></button>
+          ` : '';
 
-      } else if (currentZaloTab === 'erp_partners') {
+          return `<article class="contact-row">
+            <div class="contact-avatar" style="background: linear-gradient(145deg, #f39c12, #d35400);">${initial}</div>
+            <div class="contact-main">
+              <div class="contact-name">${escapeHtml(name)} <span class="badge bg-warning text-dark ms-1" style="font-size:10px;"><i class="bi bi-lock-fill"></i> Cá nhân</span></div>
+              <div class="contact-meta">${escapeHtml(note)}${phone ? ` · ${escapeHtml(phone)}` : ""}</div>
+            </div>
+            <div class="contact-actions">
+              ${phone ? `<a href="tel:${escapeAttr(phone)}" title="Gọi ${escapeAttr(name)}"><i class="bi bi-telephone-fill"></i></a>
+              <a class="zalo" href="https://zalo.me/${escapeAttr(phoneDigits)}" target="_blank" rel="noopener" title="Nhắn Zalo"><i class="bi bi-chat-dots-fill"></i></a>` : ''}
+              ${personalAdminActions}
+            </div>
+          </article>`;
+        }).join('');
+
+        const addPrivateBtn = isAdmin ? `<div class="p-2.5 border-bottom text-center bg-warning-subtle">
+          <button class="btn btn-sm btn-warning text-dark fw-bold rounded-pill px-3 py-1 shadow-sm" onclick="openPersonalContactModal('')">
+            <i class="bi bi-plus-circle-fill me-1"></i> + Thêm liên hệ cá nhân mới
+          </button>
+        </div>` : '';
+
+        bodyHtml = addPrivateBtn + `<div class="contacts-list">${rows || '<div class="empty-state">Chưa có liên hệ cá nhân nào.</div>'}</div>`;
+
+      } else if (currentZaloTab === 'same_team') {
+        const rows = sameTeamContacts.map(buildRowHtml).join('');
+        bodyHtml = `<div class="contacts-list">${rows || '<div class="empty-state">Không tìm thấy nhân sự cùng tổ / nhãn.</div>'}</div>`;
+
+      } else if (currentZaloTab === 'erp_partners' && isAdmin) {
         let filteredPartners = erpPartners;
         if (zaloSearchQuery) {
           filteredPartners = erpPartners.filter(p => {
@@ -5847,37 +5952,6 @@
         }).join('');
 
         bodyHtml = `<div class="contacts-list">${rows || '<div class="empty-state">Không tìm thấy dữ liệu đối tác / nhà cung cấp ERP.</div>'}</div>`;
-
-      } else if (currentZaloTab === 'my_private') {
-        const rows = myPrivateContacts.map(item => {
-          const name = item.fullName || "Liên hệ cá nhân";
-          const initial = escapeHtml((name.trim().charAt(0) || "?").toUpperCase());
-          const phone = contactPhone(item.phone);
-          const phoneDigits = phone.replace(/\D/g, "");
-          const note = item.deptOrNote || "Ghi chú riêng";
-
-          return `<article class="contact-row">
-            <div class="contact-avatar" style="background: linear-gradient(145deg, #f39c12, #d35400);">${initial}</div>
-            <div class="contact-main">
-              <div class="contact-name">${escapeHtml(name)} <span class="badge bg-warning text-dark ms-1" style="font-size:10px;">Riêng tư</span></div>
-              <div class="contact-meta">${escapeHtml(note)}${phone ? ` · ${escapeHtml(phone)}` : ""}</div>
-            </div>
-            <div class="contact-actions">
-              ${phone ? `<a href="tel:${escapeAttr(phone)}" title="Gọi ${escapeAttr(name)}"><i class="bi bi-telephone-fill"></i></a>
-              <a class="zalo" href="https://zalo.me/${escapeAttr(phoneDigits)}" target="_blank" rel="noopener" title="Nhắn Zalo"><i class="bi bi-chat-dots-fill"></i></a>` : ''}
-              <button class="btn btn-sm text-secondary p-1" title="Sửa" onclick="openPersonalContactModal('${escapeAttr(item.id)}')"><i class="bi bi-pencil-fill"></i></button>
-              <button class="btn btn-sm text-danger p-1" title="Xóa" onclick="deletePersonalContactItem('${escapeAttr(item.id)}')"><i class="bi bi-trash-fill"></i></button>
-            </div>
-          </article>`;
-        }).join('');
-
-        const addPrivateBtn = `<div class="p-2 border-bottom text-center bg-light">
-          <button class="btn btn-sm btn-warning text-dark fw-bold rounded-pill px-3 py-1" onclick="openPersonalContactModal('')">
-            <i class="bi bi-plus-circle-fill me-1"></i> + Thêm liên hệ cá nhân mới
-          </button>
-        </div>`;
-
-        bodyHtml = addPrivateBtn + `<div class="contacts-list">${rows || '<div class="empty-state">Bạn chưa lưu số cá nhân nào.<br>Bấm "+ Thêm liên hệ cá nhân mới" để bắt đầu lưu.</div>'}</div>`;
 
       } else if (currentZaloTab === 'groups') {
         const groupMap = new Map();

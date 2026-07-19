@@ -22,18 +22,20 @@ const SHEET_ID = MANUAL_SHEET_ID
 
 // Tên các Sheet chuẩn — dùng hằng số để tránh typo
 const SHEETS = {
-  DEVICES:      "Devices",
-  LOGS:         "Logs",
-  USERS:        "Users",
-  CHECKLISTS:   "Checklists",
-  WORK_ORDERS:  "WorkOrders",
-  AUDIT_LOG:    "AuditLog",
-  PROJECTS:     "Projects",
-  SHIFTS:       "Shifts",
-  INVENTORY:    "Inventory",
-  STAFF:        "Users",
-  METER_POINTS: "MeterPoints",      // Phase 11
-  METER_READINGS: "MeterReadings",  // Phase 11
+  DEVICES:           "Devices",
+  LOGS:              "Logs",
+  USERS:             "Users",
+  CHECKLISTS:        "Checklists",
+  WORK_ORDERS:       "WorkOrders",
+  AUDIT_LOG:         "AuditLog",
+  PROJECTS:          "Projects",
+  SHIFTS:            "Shifts",
+  INVENTORY:         "Inventory",
+  STAFF:             "Users",
+  METER_POINTS:      "MeterPoints",      // Phase 11
+  METER_READINGS:    "MeterReadings",    // Phase 11
+  KH_NCC:            "kh_ncc",           // ERP Partners / Suppliers
+  PERSONAL_CONTACTS: "PersonalContacts", // Personal phonebook
 };
 
 // ==========================================

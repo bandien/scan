@@ -45,6 +45,10 @@ function setupAllSheets() {
   ensureSheet(ss, SHEETS.SHIFTS, ["ShiftID","Name","Description","Status"]);
   ensureSheet(ss, SHEETS.INVENTORY, ["PartCode","Name","Stock","MinStock","Unit"]);
 
+  // ERP Party Master Sheets (SSOT)
+  ensureSheet(ss, SHEETS.KH_NCC, ["ID","Loai","Name","ContactPerson","Phone","Email","TaxCode","Address","Labels"]);
+  ensureSheet(ss, SHEETS.PERSONAL_CONTACTS, ["ID","OwnerUsername","FullName","Phone","DeptOrNote","Email","UpdatedAt"]);
+
   // Phase 11 — Metering
   setupMeteringSheets(ss);
 
