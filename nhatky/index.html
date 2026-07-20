@@ -2411,8 +2411,6 @@
       <!-- Màn 5: Cá nhân -->
       <section class="screen" data-screen="personal" id="screen-personal"></section>
 
-      <!-- Màn quản lý Users: chỉ Admin / Manager -->
-      <section class="screen" data-screen="usermanagement" id="screen-usermanagement"></section>
 
       <!-- Màn trống theo yêu cầu -->
       <section class="screen" data-screen="blank" id="screen-blank">
@@ -2491,11 +2489,12 @@
           <div class="mb-3 mt-3 text-start">
             <label class="text-muted small mb-1 d-block" style="font-weight: 600;">Tài khoản nhân viên (Xem công việc):</label>
             <div class="d-flex flex-wrap gap-1">
-              <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 11px; border-radius: 6px; color: var(--siu-on-surface); border-color: var(--siu-outline-variant); background: var(--siu-surface-high);" onclick="window.fillNhatKyLogin('thangnq', '12345678')">thangnq</button>
-              <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 11px; border-radius: 6px; color: var(--siu-on-surface); border-color: var(--siu-outline-variant); background: var(--siu-surface-high);" onclick="window.fillNhatKyLogin('haudv', '12345678')">haudv</button>
-              <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 11px; border-radius: 6px; color: var(--siu-on-surface); border-color: var(--siu-outline-variant); background: var(--siu-surface-high);" onclick="window.fillNhatKyLogin('hoanghv', '12345678')">hoanghv</button>
-              <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 11px; border-radius: 6px; color: var(--siu-on-surface); border-color: var(--siu-outline-variant); background: var(--siu-surface-high);" onclick="window.fillNhatKyLogin('phongnd', '12345678')">phongnd</button>
-              <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 11px; border-radius: 6px; color: var(--siu-on-surface); border-color: var(--siu-outline-variant); background: var(--siu-surface-high);" onclick="window.fillNhatKyLogin('thuynd', '12345678')">thuynd</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 11px; border-radius: 6px; color: var(--siu-on-surface); border-color: var(--siu-outline-variant); background: var(--siu-surface-high);" onclick="window.fillNhatKyLogin('thangnq', '1234')">thangnq</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 11px; border-radius: 6px; color: var(--siu-on-surface); border-color: var(--siu-outline-variant); background: var(--siu-surface-high);" onclick="window.fillNhatKyLogin('haimx', '1234')">haimx</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 11px; border-radius: 6px; color: var(--siu-on-surface); border-color: var(--siu-outline-variant); background: var(--siu-surface-high);" onclick="window.fillNhatKyLogin('haudv', '1234')">haudv</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 11px; border-radius: 6px; color: var(--siu-on-surface); border-color: var(--siu-outline-variant); background: var(--siu-surface-high);" onclick="window.fillNhatKyLogin('hoanghv', '1234')">hoanghv</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 11px; border-radius: 6px; color: var(--siu-on-surface); border-color: var(--siu-outline-variant); background: var(--siu-surface-high);" onclick="window.fillNhatKyLogin('phongnd', '1234')">phongnd</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 11px; border-radius: 6px; color: var(--siu-on-surface); border-color: var(--siu-outline-variant); background: var(--siu-surface-high);" onclick="window.fillNhatKyLogin('thuynd', '1234')">thuynd</button>
             </div>
           </div>
 
@@ -2665,12 +2664,12 @@
     </div>
   </div>
 
-  <!-- Modal: thêm/sửa người dùng -->
+  <!-- Modal: thêm/sửa danh bạ -->
   <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h3 class="modal-title h5" id="userModalTitle">Thêm người dùng</h3>
+          <h3 class="modal-title h5" id="userModalTitle">Thêm danh bạ</h3>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
         </div>
         <form id="userForm">
@@ -2705,12 +2704,20 @@
                 <label class="form-label" for="userNote">Ghi chú</label>
                 <textarea class="form-control" id="userNote" rows="2"></textarea>
               </div>
+              <div class="col-6">
+                <label class="form-label" for="userUpdatedAt">Cập nhật lúc</label>
+                <input class="form-control" id="userUpdatedAt" type="datetime-local">
+              </div>
+              <div class="col-6">
+                <label class="form-label" for="userUpdatedBy">Cập nhật bởi</label>
+                <input class="form-control" id="userUpdatedBy" autocomplete="off">
+              </div>
               <div class="col-12 d-none text-danger small" id="userFormError"></div>
             </div>
           </div>
           <div class="modal-footer">
             <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Đóng</button>
-            <button class="btn btn-primary" type="submit" id="btnSaveUser"><i class="bi bi-check2-circle me-1"></i>Lưu người dùng</button>
+            <button class="btn btn-primary" type="submit" id="btnSaveUser"><i class="bi bi-check2-circle me-1"></i>Lưu danh bạ</button>
           </div>
         </form>
       </div>
@@ -2774,6 +2781,13 @@
         String(d.getDate()).padStart(2, "0");
     }
 
+    function toDateTimeLocalValue(value) {
+      if (!value) return "";
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return "";
+      return toIsoDate(d) + "T" + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+    }
+
     // Lấy ngày theo giờ địa phương (toISOString là UTC → sai ngày lúc 0h-7h sáng VN)
     const today = toIsoDate(new Date());
     const REQUESTED_PLAN_ID = new URLSearchParams(window.location.search).get("plan") || "";
@@ -2819,6 +2833,7 @@
     }
 
     function navigateTo(screen, params) {
+      if (screen === "usermanagement") screen = "contacts";
       params = params || {};
       history.pushState({ screen: screen, params: params }, "");
       activateScreen(screen, params);
@@ -2829,6 +2844,7 @@
     }
 
     function activateScreen(screen, params) {
+      if (screen === "usermanagement") screen = "contacts";
       currentScreen = screen;
       currentParams = params || {};
       if (screen !== "week") weekMovePlanId = null; // rời màn tuần thì thoát chế độ dời việc
@@ -2849,7 +2865,6 @@
       else if (screen === "contacts") renderContactsScreen();
       else if (screen === "contactdetail") renderContactDetailScreen(params.name);
       else if (screen === "personal") renderPersonalScreen();
-      else if (screen === "usermanagement") renderUserManagementScreen();
     }
 
     // Làm mới màn đang mở sau khi dữ liệu đổi (đồng bộ nền, lưu...) — không
@@ -2911,7 +2926,6 @@
       if (screen === "people") return selectedTaskDate() === today ? "Công việc" : `Công việc ngày ${shortDateVn(selectedTaskDate())}`;
       if (screen === "stats") return "Báo cáo tổ";
       if (screen === "contactdetail") return params && params.name ? params.name : "Thông tin nhân viên";
-      if (screen === "usermanagement") return "Quản lý người dùng";
       return "Nhật ký công việc";
     }
 
@@ -3243,7 +3257,7 @@
       document.getElementById("btnToggleBoard").addEventListener("click", togglePeopleViewMode);
 
       document.getElementById("logForm").addEventListener("submit", submitLog);
-      document.getElementById("btnQuickLog").addEventListener("click", () => navigateTo("logentry", {}));
+      document.getElementById("btnQuickLog").addEventListener("click", () => openPlanModal(null, null, null, { type: "Phát sinh", quick: true }));
       document.getElementById("btnAddPlan").addEventListener("click", () => openPlanModal(null));
       document.getElementById("planForm").addEventListener("submit", submitPlanForm);
       document.getElementById("planPersonSelect").addEventListener("change", event => {
@@ -3563,12 +3577,13 @@
       renderPlanLabelChips();
     }
 
-    function openPlanModal(id, presetDate, presetAsset) {
+    function openPlanModal(id, presetDate, presetAsset, options) {
+      options = options || {};
       const plan = id ? plans.find(item => item.id === id) : null;
       // presetDate: nút "+" trên ô ngày của Lịch tuần truyền sẵn ngày của ô đó
       // presetAsset: {uid, name} khi mở từ nút "Tạo WO bảo trì" của thiết bị đã quét
       const newPlanDate = presetDate || document.getElementById("filterDate").value || today;
-      document.getElementById("planModalTitle").textContent = plan ? "Sửa việc" : "Thêm việc";
+      document.getElementById("planModalTitle").textContent = plan ? "Sửa việc" : (options.quick ? "Ghi nhanh việc phát sinh" : "Thêm việc");
       document.getElementById("btnDeletePlan").style.display = plan ? "inline-block" : "none";
       document.getElementById("planFormId").value = plan ? plan.id : "";
       document.getElementById("planFormAssetUID").value = plan ? (plan.assetUID || "") : (presetAsset ? presetAsset.uid || "" : "");
@@ -3582,6 +3597,10 @@
       const teamOptions = allowedTeams();
       document.getElementById("planTeam").value = plan ? (plan.team || "") : (teamOptions.length === 1 ? teamOptions[0] : "");
       planPeople = plan ? String(plan.assignee || "").split(",").map(name => name.trim()).filter(Boolean) : [];
+      if (!plan && options.quick) {
+        const self = currentFullName() || currentUser();
+        planPeople = self ? [self] : [];
+      }
       renderPlanPersonChips();
       renderPlanPersonSelect();
       planLabels = plan ? (plan.labels || []).slice() : [];
@@ -3591,9 +3610,9 @@
       document.getElementById("planTask").value = plan ? (plan.task || "") : (presetAsset ? presetAsset.task || "" : "");
       document.getElementById("planQty").value = plan && (plan.planQty === 0 || plan.planQty) ? plan.planQty : "";
       document.getElementById("planUnit").value = plan ? (plan.unit || "") : "";
-      document.getElementById("planType").value = plan ? (plan.type || "Kế hoạch") : "Kế hoạch";
+      document.getElementById("planType").value = plan ? (plan.type || "Kế hoạch") : (options.type || "Kế hoạch");
       document.getElementById("planPriority").value = plan ? (plan.priority || "Trung bình") : "Trung bình";
-      document.getElementById("planStatus").value = plan ? (plan.status || "Chưa làm") : "Chưa làm";
+      document.getElementById("planStatus").value = plan ? (plan.status || "Chưa làm") : (options.quick ? "Đang làm" : "Chưa làm");
 
       // Gợi ý chọn nhanh từ các giá trị đã nhập ở những kế hoạch trước
       fillSuggestions("planTeamSuggestions", plans.map(p => p.team));
@@ -5083,7 +5102,7 @@
       }
       return `
         <div class="action-bar">
-          <button class="btn-main btn-no-shadow" type="button" onclick="navigateTo('logentry', {})"><i class="bi bi-journal-plus"></i>Ghi nhật ký phát sinh</button>
+          <button class="btn-main btn-no-shadow" type="button" onclick="openPlanModal(null, null, null, { type: 'Phát sinh', quick: true })"><i class="bi bi-plus-square"></i>Tạo việc phát sinh</button>
         </div>`;
     }
 
@@ -5729,6 +5748,54 @@
       } catch (e) { console.warn("ERP partners sync warning:", e); }
     }
 
+    function escapeVCardValue(value) {
+      return String(value || "")
+        .replace(/\\/g, "\\\\")
+        .replace(/\r?\n/g, "\\n")
+        .replace(/;/g, "\\;")
+        .replace(/,/g, "\\,");
+    }
+
+    window.downloadStaffContacts = function() {
+      if (!canManageUsers() && !["admin", "manager"].includes(String(currentRole() || "").toLowerCase())) {
+        showToast("Bạn không có quyền tải danh bạ.");
+        return;
+      }
+
+      const contacts = (staffDirectory || []).filter(person => person && (person.name || person.username));
+      if (!contacts.length) {
+        showToast("Chưa có dữ liệu danh bạ để tải.");
+        return;
+      }
+
+      const cards = contacts.map(person => {
+        const name = person.name || person.username || "Nhân viên";
+        const phone = contactPhone(person.phone);
+        const organization = [person.dept, person.position].filter(Boolean).join(" - ");
+        return [
+          "BEGIN:VCARD",
+          "VERSION:3.0",
+          "FN;CHARSET=UTF-8:" + escapeVCardValue(name),
+          "N;CHARSET=UTF-8:" + escapeVCardValue(name) + ";;;;",
+          phone ? "TEL;TYPE=CELL:" + phone : "",
+          organization ? "ORG;CHARSET=UTF-8:" + escapeVCardValue(organization) : "",
+          person.username ? "NOTE;CHARSET=UTF-8:Tài khoản: " + escapeVCardValue(person.username) : "",
+          "END:VCARD"
+        ].filter(Boolean).join("\r\n");
+      }).join("\r\n");
+
+      const blob = new Blob(["\uFEFF" + cards], { type: "text/vcard;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "danh-ba-nhan-su-" + toIsoDate(new Date()) + ".vcf";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      showToast("Đã tải " + contacts.length + " liên hệ về máy.");
+    };
+
     function renderContactsScreen() {
       const container = document.getElementById("screen-contacts");
       if (!container) return;
@@ -5847,6 +5914,11 @@
 
       const headerHtml = `
         <div class="zalo-contact-header" style="background:#fff; border-bottom:1px solid #e9ecef;">
+          ${isAdmin ? `<div class="d-flex justify-content-end px-2 pt-2">
+            <button type="button" class="btn btn-sm btn-outline-primary fw-semibold" onclick="downloadStaffContacts()" title="Tải danh bạ nhân sự về máy dạng vCard">
+              <i class="bi bi-download me-1"></i>Tải danh bạ (.vcf)
+            </button>
+          </div>` : ''}
           <div class="zalo-search-box">
             <i class="bi bi-search"></i>
             <input type="search" value="${escapeAttr(zaloSearchQuery)}" placeholder="Tìm kiếm danh bạ, nhãn/tag, SĐT..." oninput="filterZaloContacts(this.value)">
@@ -6207,11 +6279,6 @@
             <div class="metric"><div class="n">${doneCount}</div><div class="l">Đã xong</div></div>
             <div class="metric${attnCount ? " hi" : ""}"><div class="n">${attnCount}</div><div class="l">Cần xử lý</div></div>
           </div>
-          ${canManageUsers() ? `
-          <div class="section-label">Quản lý</div>
-          <div class="menu mb-3">
-            <button class="mrow" type="button" id="btnManageUsers"><i class="bi bi-people lead"></i>Quản lý người dùng<i class="bi bi-chevron-right tail"></i></button>
-          </div>` : ""}
           <div class="section-label">Ứng dụng</div>
           <div class="menu mb-3">
             <button class="mrow" type="button" id="btnOpenScan"><i class="bi bi-qr-code-scan lead"></i>Quét / tìm thiết bị<i class="bi bi-box-arrow-up-right tail"></i></button>
@@ -6234,8 +6301,6 @@
           </div>
         </div>
       `;
-      const manageUsersButton = document.getElementById("btnManageUsers");
-      if (manageUsersButton) manageUsersButton.addEventListener("click", () => navigateTo("usermanagement", {}));
       document.getElementById("btnOpenScan").addEventListener("click", () => { window.location.href = "../index.html"; });
       document.getElementById("btnPersonalFilters").addEventListener("click", () => filterOffcanvasInstance.show());
       document.getElementById("btnPersonalSettings").addEventListener("click", () => settingsModalInstance.show());
@@ -6397,6 +6462,7 @@
       list.innerHTML = visible.map(user => {
         const encoded = escapeAttr(encodeURIComponent(user.username));
         const roleClass = user.role === "Admin" ? "badge-high" : user.role === "Manager" ? "badge-mid" : "badge-low";
+        const updatedMeta = [user.updatedAt ? toDateTimeLocalValue(user.updatedAt).replace("T", " ") : "", user.updatedBy ? "bởi " + user.updatedBy : ""].filter(Boolean).join(" · ");
         return `
           <article class="user-card">
             <div class="user-card-head">
@@ -6409,6 +6475,7 @@
               <span class="badge-soft ${roleClass}">${escapeHtml(user.role)}</span>
             </div>
             ${user.note ? `<div class="user-card-meta mt-2">${escapeHtml(user.note)}</div>` : ""}
+            ${updatedMeta ? `<div class="user-card-meta mt-2"><i class="bi bi-clock-history me-1"></i>${escapeHtml(updatedMeta)}</div>` : ""}
             <div class="user-card-actions">
               <button type="button" data-edit-user="${encoded}"><i class="bi bi-pencil me-1"></i>Sửa</button>
               ${user.canDelete ? `<button class="danger" type="button" data-delete-user="${encoded}"><i class="bi bi-trash me-1"></i>Xóa</button>` : ""}
@@ -6451,15 +6518,17 @@
         }
       }
       const user = username ? managedUsers.find(item => item.username === username) : null;
-      document.getElementById("userModalTitle").textContent = user ? "Sửa thông tin / Tổ nhóm" : "Thêm thành viên mới";
+      document.getElementById("userModalTitle").textContent = user ? "Sửa danh bạ" : "Thêm danh bạ mới";
       document.getElementById("userOriginalUsername").value = user ? user.username : "";
       document.getElementById("userFullName").value = user ? user.fullName || "" : "";
       document.getElementById("userUsername").value = user ? user.username : "";
-      document.getElementById("userPin").value = "";
+      document.getElementById("userPin").value = user ? user.pin || "" : "";
       document.getElementById("userPin").required = !user;
-      document.getElementById("userPinHint").textContent = user ? "(bỏ trống để giữ PIN cũ)" : "(bắt buộc)";
+      document.getElementById("userPinHint").textContent = user ? "(đang hiển thị PIN hiện tại)" : "(bắt buộc)";
       document.getElementById("userPhone").value = user ? user.phone || "" : "";
       document.getElementById("userNote").value = user ? user.note || "" : "";
+      document.getElementById("userUpdatedAt").value = user ? toDateTimeLocalValue(user.updatedAt) : "";
+      document.getElementById("userUpdatedBy").value = user ? user.updatedBy || "" : "";
       document.getElementById("userFormError").classList.add("d-none");
       const roleSelect = document.getElementById("userRole");
       roleSelect.innerHTML = managedUserRoles.map(role => `<option>${escapeHtml(role)}</option>`).join("");
@@ -6481,15 +6550,19 @@
         role: document.getElementById("userRole").value,
         teams: teams.join(", "),
         phone: document.getElementById("userPhone").value.trim(),
-        note: document.getElementById("userNote").value.trim()
+        note: document.getElementById("userNote").value.trim(),
+        updatedAt: document.getElementById("userUpdatedAt").value,
+        updatedBy: document.getElementById("userUpdatedBy").value.trim()
       };
       button.disabled = true;
       errorBox.classList.add("d-none");
       try {
         const data = await postUserAdminAction("saveUser", { user: payload });
         userModal.hide();
-        showToast(data.message || "Đã lưu người dùng");
-        await renderUserManagementScreen();
+        showToast(data.message || "Đã lưu danh bạ");
+        await loadStaff();
+        if (currentScreen === "contactdetail") renderContactDetailScreen(payload.fullName || payload.username);
+        else renderContactsScreen();
       } catch (error) {
         errorBox.textContent = error.message;
         errorBox.classList.remove("d-none");
@@ -6499,11 +6572,12 @@
     }
 
     async function deleteManagedUser(username) {
-      if (!confirm(`Xóa tài khoản “${username}”? Thao tác này không thể hoàn tác.`)) return;
+      if (!confirm(`Xóa danh bạ “${username}”? Thao tác này không thể hoàn tác.`)) return;
       try {
         const data = await postUserAdminAction("deleteUser", { username: username });
-        showToast(data.message || "Đã xóa tài khoản");
-        await renderUserManagementScreen();
+        showToast(data.message || "Đã xóa danh bạ");
+        await loadStaff();
+        renderContactsScreen();
       } catch (error) {
         alert(error.message);
       }
