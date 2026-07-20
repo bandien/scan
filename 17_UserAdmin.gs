@@ -36,12 +36,23 @@ function userAdminRecord_(row, schema) {
   return {
     username: String(row[schema.usernameIndex] || "").trim(),
     fullName: schema.fullNameIndex >= 0 ? String(row[schema.fullNameIndex] || "").trim() : "",
+    pin: String(row[schema.pinIndex] || "").trim(),
     role: normalizeUserRole_(row[schema.roleIndex]),
     teams: String(row[schema.teamsIndex] || "").trim(),
     note: schema.noteIndex >= 0 ? String(row[schema.noteIndex] || "").trim() : "",
     phone: schema.phoneIndex >= 0 ? String(row[schema.phoneIndex] || "").trim() : "",
+    updatedAt: schema.updatedAtIndex >= 0 ? row[schema.updatedAtIndex] : "",
+    updatedBy: schema.updatedByIndex >= 0 ? String(row[schema.updatedByIndex] || "").trim() : "",
     hasPin: Boolean(String(row[schema.pinIndex] || "").trim())
   };
+}
+
+function parseUserAdminDate_(value) {
+  if (Object.prototype.toString.call(value) === "[object Date]" && !isNaN(value.getTime())) return value;
+  const text = String(value || "").trim();
+  if (!text) return "";
+  const date = new Date(text);
+  return isNaN(date.getTime()) ? text : date;
 }
 
 function getUserManagerActor_(params) {
@@ -171,7 +182,9 @@ function handleSaveUser(params) {
       role: normalizeUserRole_(input.role),
       teams: splitTeams_(input.teams).filter(function(team, index, all) { return all.indexOf(team) === index; }).join(", "),
       phone: String(input.phone || "").trim(),
-      note: String(input.note || "").trim()
+      note: String(input.note || "").trim(),
+      updatedAt: input.updatedAt,
+      updatedBy: String(input.updatedBy || "").trim()
     };
 
     const validationError = validateManagedUser_(context.actor, user);
@@ -208,8 +221,8 @@ function handleSaveUser(params) {
     row[context.schema.roleIndex] = user.role;
     row[context.schema.teamsIndex] = user.teams;
     if (context.schema.noteIndex >= 0) row[context.schema.noteIndex] = user.note;
-    if (context.schema.updatedAtIndex >= 0) row[context.schema.updatedAtIndex] = new Date();
-    if (context.schema.updatedByIndex >= 0) row[context.schema.updatedByIndex] = context.actor.username;
+    if (context.schema.updatedAtIndex >= 0) row[context.schema.updatedAtIndex] = parseUserAdminDate_(user.updatedAt) || new Date();
+    if (context.schema.updatedByIndex >= 0) row[context.schema.updatedByIndex] = user.updatedBy || context.actor.username;
     if (context.schema.phoneIndex >= 0) row[context.schema.phoneIndex] = user.phone;
     if (context.schema.fullNameIndex >= 0) row[context.schema.fullNameIndex] = user.fullName;
     context.sheet.getRange(rowIndex, 1, 1, lastColumn).setValues([row]);

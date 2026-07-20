@@ -79,7 +79,6 @@
     { icon: 'bi-calendar-range',   label: 'Phân ca trực Ban Điện',          href: root + 'phanca/' }
   ];
   const MENU_ADMIN = [
-    { icon: 'bi-people-fill',     label: 'Quản lý tài khoản Users', href: root + 'nhatky/index.html#usermanagement' },
     { icon: 'bi-alarm',            label: 'Cài đặt đồng hồ bơm',      href: root + 'hengio/' },
     { icon: 'bi-qr-code',          label: 'In mã QR máy bơm',         href: root + 'print_pumps.html' },
     { icon: 'bi-person-workspace', label: 'Câu hỏi phỏng vấn',        href: root + 'phongvan/' },
