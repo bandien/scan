@@ -14,6 +14,20 @@ updated: 2026-06-08
 
 Tất cả các thay đổi và cải tiến của hệ thống Quản lý & Bảo trì Ban điện thông minh (CMMS Mini WebApp) được ghi nhận tại đây theo từng phiên bản.
 
+## [v2.12.4] - 2026-07-22
+### Cập nhật (Updated)
+- **Rà tiếp 3 màn cốt lõi cho sát mockup "gọn nhẹ" (`nhatky/index.html`)** — nối tiếp v2.12.3:
+  - **Trang chủ (A)**: thanh công cụ rút còn đúng như mockup — **1 ô tìm kiếm lớn + 1 nút chọn ngày gọn trên cùng 1 dòng**; bỏ nút chuyển ngày ‹ › và nút "về hôm nay" (chọn ngày trực tiếp trong ô ngày).
+  - **Chi tiết việc (B)**: **bỏ hẳn bố cục cũ, dựng lại theo mockup** — các mục phẳng đánh số trong 1 sheet: **① Việc & chỉ đạo** (gộp việc/nơi/giờ/người giao/tiêu chí/khối lượng thành các dòng kv + trích dẫn chỉ đạo) · **② Ai làm** · **③ Giai đoạn & bước** · **④ Nhật ký & phát sinh** — thêm **dòng thời gian nhật ký ngay trong màn** (gộp cả mốc bàn giao, có ảnh, đề xuất, tồn tại), thay cho việc phải mở màn nhật ký riêng. Hàng nút **Nhận việc / Bàn giao / Nghiệm thu·Chốt sổ** kiểu `.d-actions`; nút "Ghi nhật ký cho việc này" vẫn giữ ở thanh dưới cố định (thao tác chính hằng ngày).
+  - Chỉ đổi lớp trình bày, không đổi logic nghiệp vụ; verify Chrome thật (Playwright) cả Trang chủ + Chi tiết (việc có giai đoạn & nhật ký), 0 lỗi.
+
+> ⚠️ Ghi chú phiên bản: mục **v2.12.2** ngay dưới (tính năng "Tên thường gọi"/`getShortName`) trùng số với bản v2.12.2 đã commit trước đó ("Dọn đầu Trang chủ", ở dưới nữa). Cân nhắc đổi số một trong hai để nhật ký khỏi lặp.
+
+## [v2.12.2] - 2026-07-22
+### Thêm mới (Added)
+- **Cột Tên thường gọi (`shortName` / `commonName`)**: bổ sung cột "Tên thường gọi" vào schema sheet `Users`, API quản lý tài khoản (`17_UserAdmin.gs`) và xác thực đăng nhập (`03_Auth.gs`, `15_NhatKyAuth.gs`).
+- **Hiển thị Dashboard ngắn gọn (`nhatky/index.html`)**: bổ sung hàm `getShortName(fullName)` tự động ưu tiên tên thường gọi từ danh bạ/tài khoản (vd: "Chiến", "Cường", "Dũng", "Huy pb", "Huy đh") hoặc quy đổi tên dài tiếng Việt thành dạng rút gọn ("Nguyễn Quốc Thắng" → "Thắng NQ", "Đinh Văn Hậu" → "Hậu DV"). Áp dụng trực tiếp lên dòng công việc Dashboard, badge nhân sự và danh sách gán bước.
+
 ## [v2.12.0] - 2026-07-21
 ### Thêm mới (Added)
 - **Vòng đời công việc & Bảng "Hôm nay" (`nhatky/index.html`)**: màn Việc của tôi nhóm theo Cần xử lý tiếp → Đang thực hiện → Chờ nghiệm thu → Kế hoạch trong ngày → Lịch sắp tới 7 ngày → Đã hoàn thành/Chốt sổ, thay vì nhóm theo người. Badge vòng đời (Tiếp nhận/Đã lên KH/Đang làm/Cần hỗ trợ/Bàn giao/Chờ nghiệm thu/Xong kỹ thuật/Đã chốt sổ/Đã hủy) suy ra được từ dữ liệu cũ, không cần migrate.

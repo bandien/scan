@@ -1198,20 +1198,11 @@
       padding: 10px 12px;
     }
     .d-toolbar .d-search { flex: 1; min-width: 0; }
-    .d-toolbar .date-bar {
-      display: flex;
-      align-items: center;
-      gap: 2px;
-      padding: 0;
-      flex-shrink: 0;
-    }
+    .d-toolbar .date-bar { flex-shrink: 0; padding: 0; }
     .d-toolbar .date-bar .date-input {
-      width: 116px;
-      min-height: 40px;
-      padding-left: 6px;
-      padding-right: 4px;
+      width: auto; min-height: 40px; font-weight: 700; color: var(--brand);
+      border-radius: 11px; padding: 6px 10px;
     }
-    .d-toolbar .btn-icon-sm { width: 34px; min-width: 34px; }
     .task-top-controls .date-bar {
       padding-bottom: 8px;
     }
@@ -2325,6 +2316,42 @@
     .d-lab { font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
     .d-lab i { color: var(--brand); }
     .d-sec.d-warn { border-left: 4px solid var(--warn-ink); }
+    /* Chi tiết theo mockup B: nhãn đánh số, kv, trích dẫn, timeline, hàng nút */
+    .d-lab .n {
+      flex-shrink: 0; width: 18px; height: 18px; border-radius: 999px; background: var(--brand);
+      color: #fff; font-size: .72rem; font-weight: 800; display: inline-flex; align-items: center;
+      justify-content: center; letter-spacing: 0;
+    }
+    .kv { font-size: .86rem; color: var(--ink); line-height: 1.5; }
+    .kv .k { color: var(--muted); font-weight: 700; }
+    .quote {
+      font-size: .86rem; font-style: italic; color: #3a444c; border-left: 3px solid var(--brand);
+      padding: 3px 0 3px 11px; margin-top: 8px; white-space: pre-wrap;
+    }
+    /* Hàng nút hành động (Bàn giao / Nghiệm thu) — kiểu mockup .d-actions */
+    .d-actions { display: flex; gap: 8px; padding: 14px 16px; border-top: 1px solid var(--line); flex-wrap: wrap; }
+    .d-act {
+      flex: 1; min-width: 130px; text-align: center; font-size: .9rem; font-weight: 800;
+      padding: 11px; border-radius: 11px; border: 1.5px solid var(--line); background: #fff; color: var(--ink);
+    }
+    .d-act.ghost { color: var(--warn-ink); border-color: #e3d3a8; }
+    .d-act.ack { color: var(--brand); border-color: #9dc0c6; }
+    .d-act.go { background: var(--done); border-color: var(--done); color: #fff; }
+    .d-act:active { transform: scale(.98); }
+    /* Timeline nhật ký & phát sinh */
+    .tl { position: relative; padding-left: 16px; margin-top: 2px; }
+    .tl::before { content: ""; position: absolute; left: 4px; top: 6px; bottom: 6px; width: 2px; background: #e6eaec; }
+    .tl-item { position: relative; padding: 2px 0 11px; }
+    .tl-item::before { content: ""; position: absolute; left: -14px; top: 5px; width: 9px; height: 9px; border-radius: 50%; background: var(--brand); border: 2px solid #fff; }
+    .tl-item.hand::before { background: var(--warn-ink); }
+    .tl-when { font-size: .74rem; font-weight: 700; color: var(--muted); }
+    .tl-txt { font-size: .87rem; line-height: 1.4; color: var(--ink); margin-top: 1px; }
+    .tl-txt b { color: var(--brand); }
+    .tl-tag { font-size: .66rem; font-weight: 800; text-transform: uppercase; padding: 1px 6px; border-radius: 4px; background: #f4ead2; color: var(--warn-ink); margin-left: 5px; }
+    .tl-sub { font-size: .8rem; color: var(--muted); margin-top: 2px; }
+    .tl-sub.warn { color: var(--warn-ink); }
+    .tl-more { font-size: .8rem; color: var(--muted); padding-left: 16px; }
+    .tl-empty { font-size: .86rem; color: var(--muted); }
   </style>
 </head>
 <body>
@@ -2473,10 +2500,7 @@
               <button type="button" id="btnClearSearch" class="btn btn-sm btn-link text-muted position-absolute top-50 end-0 translate-middle-y me-2 d-none" style="text-decoration:none;"><i class="bi bi-x-circle-fill"></i></button>
             </div>
             <div class="date-bar" aria-label="Chọn ngày xem công việc">
-              <button class="btn-icon-sm" id="btnPrevDay" type="button" title="Ngày trước" aria-label="Ngày trước"><i class="bi bi-chevron-left"></i></button>
               <input class="date-input" id="filterDate" type="date" aria-label="Ngày đang xem">
-              <button class="btn-icon-sm" id="btnNextDay" type="button" title="Ngày sau" aria-label="Ngày sau"><i class="bi bi-chevron-right"></i></button>
-              <button class="btn-icon-sm" id="btnToday" type="button" title="Về hôm nay" aria-label="Về hôm nay"><i class="bi bi-calendar-check"></i></button>
             </div>
           </div>
         </div>
@@ -3419,13 +3443,6 @@
         });
       });
 
-      document.getElementById("btnPrevDay").addEventListener("click", () => shiftFilterDate(-1));
-      document.getElementById("btnNextDay").addEventListener("click", () => shiftFilterDate(1));
-      document.getElementById("btnToday").addEventListener("click", () => {
-        document.getElementById("filterDate").value = today;
-        renderHeader("people", {});
-        renderPeopleScreen();
-      });
       document.getElementById("logForm").addEventListener("submit", submitLog);
       document.getElementById("btnQuickLog").addEventListener("click", () => openPlanModal(""));
       document.getElementById("planForm").addEventListener("submit", submitPlanForm);
@@ -3657,11 +3674,52 @@
       }
     }
 
+    function getShortName(fullName) {
+      if (!fullName) return "";
+      const raw = String(fullName).trim();
+      if (!raw) return "";
+
+      const person = staffDirectory.find(p =>
+        (p.name && p.name.toLowerCase() === raw.toLowerCase()) ||
+        (p.username && p.username.toLowerCase() === raw.toLowerCase()) ||
+        (p.shortName && p.shortName.toLowerCase() === raw.toLowerCase())
+      );
+      if (person && person.shortName) return person.shortName;
+
+      const parts = raw.split(/\s+/);
+      if (parts.length <= 2) return raw;
+
+      const mainName = parts[parts.length - 1];
+      const initials = parts.slice(0, parts.length - 1).map(p => p.charAt(0).toUpperCase()).join("");
+      return `${mainName} ${initials}`;
+    }
+
     // Danh sách nhân viên cho dropdown "Người thực hiện": lấy từ sheet Staff
     // (action=getStaff), cache lại; backend lỗi thì dùng cache/tên đã gặp
     async function loadStaff() {
       staffList = JSON.parse(localStorage.getItem(STORAGE_KEYS.staff) || "[]");
       staffDirectory = JSON.parse(localStorage.getItem(STORAGE_KEYS.staffDirectory) || "[]");
+
+      // Tự nạp danh bạ chuẩn hóa địa phương nếu chưa có cache
+      if (!staffDirectory.length) {
+        try {
+          const res = await fetch("../danhba_chuan_hoa.json", { cache: "no-cache" });
+          if (res.ok) {
+            const list = await res.json();
+            staffDirectory = list.map(person => ({
+              username: String(person.id || person.empId || "").trim(),
+              name: String(person.fullName || "").trim(),
+              shortName: String(person.commonName || "").trim(),
+              phone: String(person.phone || "").trim(),
+              dept: String(person.dept || person.toNhom || "").trim(),
+              position: String(person.chucDanh || "").trim(),
+              labels: String(person.toNhom || person.dept || "Public").trim()
+            })).filter(p => p.name);
+            staffList = staffDirectory.map(p => p.name).filter(Boolean).sort();
+          }
+        } catch (_) {}
+      }
+
       try {
         const userStr = localStorage.getItem("currentUser");
         const curUser = userStr ? JSON.parse(userStr) : {};
@@ -3670,6 +3728,7 @@
           staffDirectory = data.staff.map(person => ({
             username: String(person.username || person.id || "").trim(),
             name: String(person.fullName || person.name || person.username || "").trim(),
+            shortName: String(person.shortName || person.commonName || person.short_name || "").trim(),
             phone: String(person.phone || "").trim(),
             dept: String(person.dept || "").trim(),
             position: String(person.position || "").trim(),
@@ -4498,7 +4557,7 @@
           badgeStyle = 'background: #faf5ff; color: #6b21a8; border: 1px solid #e9d5ff;';
           roleText = 'Nghiệm thu';
         }
-        return `<span class="badge me-1 font-weight-bold" style="${badgeStyle} font-size:11px; padding:3px 6px;" title="${roleText}"><span style="font-size:10px;">${icon}</span> ${escapeHtml(p.name)}</span>`;
+        return `<span class="badge me-1 font-weight-bold" style="${badgeStyle} font-size:11px; padding:3px 6px;" title="${roleText} (${escapeAttr(p.name)})"><span style="font-size:10px;">${icon}</span> ${escapeHtml(getShortName(p.name))}</span>`;
       }).join('');
     }
 
@@ -4586,6 +4645,57 @@
         entries.some(log => normalizePerson(log.employee) === normalizePerson(person))
       ).length;
       return { done, total: people.length, entries };
+    }
+
+    // Ảnh của 1 nhật ký (lưu dạng chuỗi JSON trong log.photos) — về mảng {url,by,at}
+    function logPhotoList(log) {
+      if (!log || !log.photos) return [];
+      try {
+        const p = typeof log.photos === "string" ? JSON.parse(log.photos) : log.photos;
+        return Array.isArray(p) ? p : [];
+      } catch (e) { return []; }
+    }
+
+    // Dòng thời gian nhật ký + mốc bàn giao — mục "Nhật ký & phát sinh" trong Chi tiết
+    // (mockup B mục 3). Gộp các bản ghi nhật ký của việc và mốc bàn giao vào 1 timeline
+    // gọn; hiển thị tối đa 6 mục gần nhất, còn lại xem ở màn Nhật ký đầy đủ.
+    function planTimelineHtml(plan) {
+      const items = logs
+        .filter(l => isWorkLog(l) && logBelongsToPlan(l, plan))
+        .map(log => ({
+          key: String(log.workDate || "") + " " + String(log.startTime || "00:00"),
+          when: friendlyDate(log.workDate) + (log.startTime ? " " + log.startTime : ""),
+          who: log.employee || "",
+          text: log.result || log.selectedTask || "",
+          next: log.nextAction || "", issue: log.issue || "",
+          photos: logPhotoList(log), hand: false, tag: ""
+        }));
+      const ho = planHandover(plan);
+      if (ho && ho.at) {
+        const recv = ho.toType === "shift" ? (ho.toTeam || "ca/tổ") : (ho.toUser || "người nhận");
+        items.push({
+          key: String(ho.at).slice(0, 10) + " " + String(ho.at).slice(11, 16),
+          when: friendlyDate(String(ho.at).slice(0, 10)) + " " + String(ho.at).slice(11, 16),
+          who: ho.fromUser || "",
+          text: "Bàn giao cho " + recv + (ho.progressNote ? ": " + ho.progressNote : ""),
+          next: ho.pending || "", issue: ho.risk || "",
+          photos: Array.isArray(ho.photos) ? ho.photos : [], hand: true, tag: "Bàn giao"
+        });
+      }
+      if (items.length === 0) {
+        return `<div class="tl-empty">Chưa có nhật ký. Bấm “Ghi nhật ký cho việc này” để ghi lần đầu.</div>`;
+      }
+      items.sort((a, b) => b.key.localeCompare(a.key));
+      const shown = items.slice(0, 6);
+      return `<div class="tl">${shown.map(it => `
+        <div class="tl-item${it.hand ? " hand" : ""}">
+          <div class="tl-when">${escapeHtml(it.when)}${it.who ? " · " + escapeHtml(it.who) : ""}</div>
+          <div class="tl-txt">${it.tag ? `<b>${escapeHtml(it.text)}</b><span class="tl-tag">${escapeHtml(it.tag)}</span>` : escapeHtml(it.text)}</div>
+          ${it.next ? `<div class="tl-sub"><i class="bi bi-lightbulb me-1"></i>${escapeHtml(it.next)}</div>` : ""}
+          ${it.issue ? `<div class="tl-sub warn"><i class="bi bi-exclamation-triangle me-1"></i>${escapeHtml(it.issue)}</div>` : ""}
+          ${photoThumbsHtml(it.photos)}
+        </div>`).join("")}</div>
+        ${items.length > shown.length ? `<div class="tl-more">… và ${items.length - shown.length} mục nữa</div>` : ""}`;
     }
 
     function logCoverageBadge(plan, date) {
@@ -4843,63 +4953,51 @@
         </div>`;
 
       const qtyBadge = doneQtyBadge(plan);
-      const qtyCard = (plan.planQty || plan.unit) ? `
-        <div class="d-sec">
-          <div class="d-lab"><i class="bi bi-sigma"></i>Khối lượng</div>
-          <div class="info-value normal">${qtyBadge || "Chưa có dữ liệu"}</div>
-        </div>` : "";
       // Có plan.phases (đã "nâng cấp") → card Giai đoạn thay card Bước phẳng cũ
       const stepsCard = planPhases(plan).length > 0 ? phasesCardHtml(plan) : stepsCardHtml(plan);
-      const sourceCard = plan.sourceText ? `
-        <div class="d-sec">
-          <div class="d-lab"><i class="bi bi-chat-quote-fill"></i>Nguồn ${escapeHtml(plan.source || "Zalo Web")}</div>
-          <div class="info-value normal" style="white-space:pre-wrap">${escapeHtml(plan.sourceText)}</div>
-        </div>` : "";
       const handoverCard = handoverCardHtml(plan);
       const canClose = plan.status === "Hoàn thành" && !planHasLabel(plan, "Đã chốt sổ");
       const needsAck = (plan.source === "directive" || plan.assignedBy) && !plan.acknowledgedAt;
-      const p3ActionsCard = `
-        <div class="d-sec">
-          <div class="d-lab"><i class="bi bi-signpost-2-fill"></i>Bàn giao / Nghiệm thu</div>
-          <div class="d-flex flex-wrap gap-2">
-            ${needsAck ? `<button class="btn btn-sm btn-outline-primary rounded-pill" type="button" onclick="acknowledgePlan('${escapeAttr(plan.id)}')"><i class="bi bi-check2 me-1"></i>Xác nhận nhận việc</button>` : ""}
-            <button class="btn btn-sm btn-outline-warning rounded-pill" type="button" onclick="openHandoverModal('${escapeAttr(plan.id)}')"><i class="bi bi-arrow-repeat me-1"></i>Bàn giao việc</button>
-            ${canClose ? `<button class="btn btn-sm btn-success rounded-pill" type="button" onclick="closePlanReview('${escapeAttr(plan.id)}')"><i class="bi bi-check2-circle me-1"></i>Nghiệm thu · Chốt sổ</button>` : ""}
-          </div>
-        </div>`;
+      const whereText = [plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ");
 
+      // Chi tiết dựng theo mockup "gọn nhẹ" B: các mục phẳng đánh số trong 1 sheet
+      // (1 Việc & chỉ đạo · 2 Ai làm · 3 Giai đoạn & bước · 4 Nhật ký & phát sinh) +
+      // hàng nút d-actions (Bàn giao / Nghiệm thu·Chốt sổ). Nút "Ghi nhật ký" giữ ở
+      // thanh dưới cố định vì đây là thao tác chính hằng ngày của nhân viên.
       container.innerHTML = `
         <div class="scroll">
           ${banner}
           ${handoverCard}
           <div class="d-sheet">
             <div class="d-sec">
-              <div class="d-lab"><i class="bi bi-lightning-charge-fill"></i>Việc gì</div>
+              <div class="d-lab"><span class="n">1</span>Việc &amp; chỉ đạo</div>
               <div class="info-value">${escapeHtml(plan.task || "")}</div>
               <div class="d-flex flex-wrap gap-2 mt-2">${priorityBadge(plan.priority)}${typeBadge(plan)}${statusBadge(plan.status)}${labelBadges(plan)}</div>
-              ${plan.assignedBy ? `<div class="small text-secondary mt-2"><i class="bi bi-person-badge me-1"></i>Chỉ đạo từ: <b>${escapeHtml(plan.assignedBy)}</b></div>` : ""}
-              ${plan.doneCriteria ? `<div class="small text-secondary mt-1"><i class="bi bi-check2-square me-1"></i>Tiêu chí hoàn thành: ${escapeHtml(plan.doneCriteria)}</div>` : ""}
+              <div class="kv mt-2"><span class="k"><i class="bi bi-geo-alt-fill me-1"></i>Ở đâu:</span> ${whereText || "chưa xác định"}</div>
+              <div class="kv"><span class="k"><i class="bi bi-clock-fill me-1"></i>Khi nào:</span> ${planMetaLine(plan, selectedDate, false) || "chưa xếp giờ"}</div>
+              ${plan.assignedBy ? `<div class="kv"><span class="k"><i class="bi bi-person-badge me-1"></i>Giao:</span> ${escapeHtml(plan.assignedBy)}</div>` : ""}
+              ${plan.sourceText ? `<div class="quote">${escapeHtml(plan.sourceText)}</div>` : ""}
+              ${plan.doneCriteria ? `<div class="kv"><span class="k"><i class="bi bi-check2-square me-1"></i>Tiêu chí xong:</span> ${escapeHtml(plan.doneCriteria)}</div>` : ""}
+              ${(plan.planQty || plan.unit) ? `<div class="kv"><span class="k"><i class="bi bi-sigma me-1"></i>Khối lượng:</span> ${qtyBadge || "—"}</div>` : ""}
               ${photoThumbsHtml(planPhotos(plan))}
               <button class="link-button-sm mt-2" type="button" onclick="attachPlanPhoto('${escapeAttr(plan.id)}')"><i class="bi bi-camera me-1"></i>Đính ảnh (chỉ đạo/kế hoạch)</button>
             </div>
             <div class="d-sec">
-              <div class="d-lab"><i class="bi bi-geo-alt-fill"></i>Ở đâu</div>
-              <div class="info-value">${[plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ") || "Chưa xác định"}</div>
-            </div>
-            <div class="d-sec">
-              <div class="d-lab"><i class="bi bi-clock-fill"></i>Khi nào</div>
-              <div class="info-value normal">${planMetaLine(plan, selectedDate, false) || "Chưa xếp giờ"}</div>
-            </div>
-            <div class="d-sec">
-              <div class="d-lab"><i class="bi bi-people-fill"></i>Ai làm</div>
+              <div class="d-lab"><span class="n">2</span>Ai làm</div>
               ${peopleHtml}
             </div>
             ${stepsCard}
-            ${qtyCard}
-            ${sourceCard}
-            ${p3ActionsCard}
+            <div class="d-sec">
+              <div class="d-lab"><span class="n">4</span>Nhật ký &amp; phát sinh</div>
+              ${planTimelineHtml(plan)}
+              <button class="link-button-sm mt-2" type="button" onclick="navigateTo('loghistory', {planId:'${escapeAttr(plan.id)}'})"><i class="bi bi-clock-history me-1"></i>Xem tất cả nhật ký</button>
+            </div>
+            <div class="d-actions">
+              ${needsAck ? `<button class="d-act ack" type="button" onclick="acknowledgePlan('${escapeAttr(plan.id)}')"><i class="bi bi-check2 me-1"></i>Nhận việc</button>` : ""}
+              <button class="d-act ghost" type="button" onclick="openHandoverModal('${escapeAttr(plan.id)}')"><i class="bi bi-arrow-repeat me-1"></i>Bàn giao</button>
+              ${canClose ? `<button class="d-act go" type="button" onclick="closePlanReview('${escapeAttr(plan.id)}')"><i class="bi bi-check2-circle me-1"></i>Nghiệm thu · Chốt sổ</button>` : ""}
+            </div>
           </div>
-          <button class="link-button" type="button" onclick="navigateTo('loghistory', {planId:'${escapeAttr(plan.id)}'})"><i class="bi bi-clock-history me-1"></i>Xem nhật ký đã ghi</button>
         </div>
         <div class="action-bar">
           <!-- Nhân viên thường ghi sau khi làm xong: mặc định Hoàn thành, có thể đổi chip nếu còn dở/cần hỗ trợ. -->
@@ -5061,7 +5159,7 @@
       return `
         <div class="d-sec">
           <div class="d-flex align-items-center justify-content-between gap-2">
-            <div class="d-lab mb-0"><i class="bi bi-list-check"></i>Các bước thực hiện${steps.length ? ` (${doneCount}/${steps.length})` : ""}</div>
+            <div class="d-lab mb-0"><span class="n">3</span>Các bước thực hiện${steps.length ? ` (${doneCount}/${steps.length})` : ""}</div>
             <button class="btn btn-sm btn-outline-primary rounded-pill" type="button" onclick="addStep('${escapeAttr(plan.id)}')"><i class="bi bi-plus-lg"></i> Thêm bước</button>
           </div>
           ${steps.length ? `<div class="step-list mt-2">${steps.map(step => stepRowHtml(plan, step)).join("")}</div>`
@@ -5339,7 +5437,7 @@
       return `
         <div class="d-sec">
           <div class="d-flex align-items-center justify-content-between gap-2">
-            <div class="d-lab mb-0"><i class="bi bi-diagram-3-fill"></i>Giai đoạn &amp; bước${totalSteps ? ` — GĐ ${currentIndex + 1}/${phases.length} · ${doneSteps}/${totalSteps} bước` : ` (${phases.length})`}</div>
+            <div class="d-lab mb-0"><span class="n">3</span>Giai đoạn &amp; bước${totalSteps ? ` — GĐ ${currentIndex + 1}/${phases.length} · ${doneSteps}/${totalSteps} bước` : ` (${phases.length})`}</div>
             <button class="btn btn-sm btn-outline-primary rounded-pill" type="button" onclick="addPhase('${escapeAttr(plan.id)}')"><i class="bi bi-plus-lg"></i> Thêm giai đoạn</button>
           </div>
           <div class="mt-2">${phases.map(phase => phaseCardBodyHtml(plan, phase, current && phase.id === current.id)).join("")}</div>
