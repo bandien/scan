@@ -4,6 +4,8 @@
 > Đọc kèm: [`docs/PhanTich_NghiepVu_TrangQuanLyCongViec_v1.md`](./PhanTich_NghiepVu_TrangQuanLyCongViec_v1.md) (phân tích đầy đủ).
 > Mockup UI (bản gọn nhẹ): **https://claude.ai/code/artifact/ea0e52f5-f72d-415b-9e6a-55c4d1dd8b14**
 > Ngày: 2026-07-21 · Trạng thái: **P1 ✅ · P2 ✅ · P3 ✅ — cả 3 giai đoạn code xong, CẦN deploy lại Apps Script + test tay trên trình duyệt thật trước khi coi là hoàn tất**
+>
+> **Cập nhật 2026-07-21 (v2.12.1):** P1 (làm bởi phiên trước) code theo style thẻ Bootstrap sẵn có của app, KHÔNG theo đúng mockup "gọn nhẹ" ở trên. Người dùng đối chiếu ảnh mockup với ảnh chụp thật, phát hiện lệch → đã build lại Trang chủ (dòng phẳng + chấm màu, nhóm theo mục) và Chi tiết (1 sheet liền, kẻ mảnh) đúng theo mockup, verify bằng Chrome thật (Playwright). Không đổi logic nghiệp vụ, chỉ đổi lớp trình bày. Xem CHANGELOG [v2.12.1].
 
 ---
 

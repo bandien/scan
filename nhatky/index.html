@@ -2257,6 +2257,39 @@
     .border-purple { border-color: #c084fc !important; }
     .dash-job-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
     .dash-job-card:active { transform: scale(0.985); }
+
+    /* ===== Trang chủ gọn nhẹ: dòng phẳng + chấm màu (thay thẻ dash-job-card) ===== */
+    .dash-group { margin-top: 16px; }
+    .dash-group:first-child { margin-top: 0; }
+    .dash-group-head { display: flex; align-items: center; gap: 8px; padding: 2px 2px 8px; }
+    .dash-group-head .gd { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .dash-group-head .gt { font-size: .8rem; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; color: var(--ink); }
+    .dash-group-head .gc { margin-left: auto; font-size: .76rem; font-weight: 700; color: var(--muted); }
+    .dash-list { background: #fff; border: 1px solid var(--line); border-radius: 13px; overflow: hidden; }
+    .dash-row {
+      display: flex; align-items: center; gap: 10px; padding: 11px 12px;
+      border-top: 1px solid var(--line); cursor: pointer;
+    }
+    .dash-row:first-child { border-top: 0; }
+    .dash-row:active { background: rgba(0,0,0,.035); }
+    .dash-row .rd { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; margin-top: 6px; align-self: flex-start; }
+    .dash-row .rmain { min-width: 0; flex: 1; }
+    .dash-row .rt { font-size: .93rem; font-weight: 700; line-height: 1.32; color: var(--ink); }
+    .dash-row .rm { font-size: .78rem; color: var(--muted); margin-top: 2px; display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+    .dash-row .rm .sep { opacity: .5; }
+    .dash-row .rm .star { color: var(--brand); font-weight: 800; }
+    .dash-row .rm .hint { color: var(--warn-ink); font-weight: 700; }
+    .dash-row .chev { color: #c7cdd2; font-size: 1.05rem; flex: 0 0 auto; }
+
+    /* ===== Chi tiết gọn nhẹ: 1 sheet liền, mục ngăn kẻ mảnh (thay từng .info-card
+       riêng có viền+shadow). Class riêng (không đụng .info-card dùng chung với
+       .ctx-card/.metric/.panel/.log-card ở nơi khác) để không ảnh hưởng màn khác. */
+    .d-sheet { background: #fff; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; margin-bottom: 12px; }
+    .d-sec { padding: 14px 16px; border-top: 1px solid var(--line); }
+    .d-sec:first-child { border-top: 0; }
+    .d-lab { font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .d-lab i { color: var(--brand); }
+    .d-sec.d-warn { border-left: 4px solid var(--warn-ink); }
   </style>
 </head>
 <body>
@@ -4847,24 +4880,24 @@
 
       const qtyBadge = doneQtyBadge(plan);
       const qtyCard = (plan.planQty || plan.unit) ? `
-        <div class="info-card">
-          <div class="info-label"><i class="bi bi-sigma"></i>Khối lượng</div>
+        <div class="d-sec">
+          <div class="d-lab"><i class="bi bi-sigma"></i>Khối lượng</div>
           <div class="info-value normal">${qtyBadge || "Chưa có dữ liệu"}</div>
         </div>` : "";
       // Có plan.phases (đã "nâng cấp") → card Giai đoạn thay card Bước phẳng cũ
       const stepsCard = planPhases(plan).length > 0 ? phasesCardHtml(plan) : stepsCardHtml(plan);
       const sourceCard = plan.sourceText ? `
-        <div class="info-card">
-          <div class="info-label"><i class="bi bi-chat-quote-fill"></i>Nguồn ${escapeHtml(plan.source || "Zalo Web")}</div>
+        <div class="d-sec">
+          <div class="d-lab"><i class="bi bi-chat-quote-fill"></i>Nguồn ${escapeHtml(plan.source || "Zalo Web")}</div>
           <div class="info-value normal" style="white-space:pre-wrap">${escapeHtml(plan.sourceText)}</div>
         </div>` : "";
       const handoverCard = handoverCardHtml(plan);
       const canClose = plan.status === "Hoàn thành" && !planHasLabel(plan, "Đã chốt sổ");
       const needsAck = (plan.source === "directive" || plan.assignedBy) && !plan.acknowledgedAt;
       const p3ActionsCard = `
-        <div class="info-card">
-          <div class="info-label"><i class="bi bi-signpost-2-fill"></i>Bàn giao / Nghiệm thu</div>
-          <div class="d-flex flex-wrap gap-2 mt-2">
+        <div class="d-sec">
+          <div class="d-lab"><i class="bi bi-signpost-2-fill"></i>Bàn giao / Nghiệm thu</div>
+          <div class="d-flex flex-wrap gap-2">
             ${needsAck ? `<button class="btn btn-sm btn-outline-primary rounded-pill" type="button" onclick="acknowledgePlan('${escapeAttr(plan.id)}')"><i class="bi bi-check2 me-1"></i>Xác nhận nhận việc</button>` : ""}
             <button class="btn btn-sm btn-outline-warning rounded-pill" type="button" onclick="openHandoverModal('${escapeAttr(plan.id)}')"><i class="bi bi-arrow-repeat me-1"></i>Bàn giao việc</button>
             ${canClose ? `<button class="btn btn-sm btn-success rounded-pill" type="button" onclick="closePlanReview('${escapeAttr(plan.id)}')"><i class="bi bi-check2-circle me-1"></i>Nghiệm thu · Chốt sổ</button>` : ""}
@@ -4875,31 +4908,33 @@
         <div class="scroll">
           ${banner}
           ${handoverCard}
-          <div class="info-card">
-            <div class="info-label"><i class="bi bi-lightning-charge-fill"></i>Việc gì</div>
-            <div class="info-value">${escapeHtml(plan.task || "")}</div>
-            <div class="d-flex flex-wrap gap-2 mt-2">${priorityBadge(plan.priority)}${typeBadge(plan)}${statusBadge(plan.status)}${labelBadges(plan)}</div>
-            ${plan.assignedBy ? `<div class="small text-secondary mt-2"><i class="bi bi-person-badge me-1"></i>Chỉ đạo từ: <b>${escapeHtml(plan.assignedBy)}</b></div>` : ""}
-            ${plan.doneCriteria ? `<div class="small text-secondary mt-1"><i class="bi bi-check2-square me-1"></i>Tiêu chí hoàn thành: ${escapeHtml(plan.doneCriteria)}</div>` : ""}
-            ${photoThumbsHtml(planPhotos(plan))}
-            <button class="link-button-sm mt-2" type="button" onclick="attachPlanPhoto('${escapeAttr(plan.id)}')"><i class="bi bi-camera me-1"></i>Đính ảnh (chỉ đạo/kế hoạch)</button>
+          <div class="d-sheet">
+            <div class="d-sec">
+              <div class="d-lab"><i class="bi bi-lightning-charge-fill"></i>Việc gì</div>
+              <div class="info-value">${escapeHtml(plan.task || "")}</div>
+              <div class="d-flex flex-wrap gap-2 mt-2">${priorityBadge(plan.priority)}${typeBadge(plan)}${statusBadge(plan.status)}${labelBadges(plan)}</div>
+              ${plan.assignedBy ? `<div class="small text-secondary mt-2"><i class="bi bi-person-badge me-1"></i>Chỉ đạo từ: <b>${escapeHtml(plan.assignedBy)}</b></div>` : ""}
+              ${plan.doneCriteria ? `<div class="small text-secondary mt-1"><i class="bi bi-check2-square me-1"></i>Tiêu chí hoàn thành: ${escapeHtml(plan.doneCriteria)}</div>` : ""}
+              ${photoThumbsHtml(planPhotos(plan))}
+              <button class="link-button-sm mt-2" type="button" onclick="attachPlanPhoto('${escapeAttr(plan.id)}')"><i class="bi bi-camera me-1"></i>Đính ảnh (chỉ đạo/kế hoạch)</button>
+            </div>
+            <div class="d-sec">
+              <div class="d-lab"><i class="bi bi-geo-alt-fill"></i>Ở đâu</div>
+              <div class="info-value">${[plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ") || "Chưa xác định"}</div>
+            </div>
+            <div class="d-sec">
+              <div class="d-lab"><i class="bi bi-clock-fill"></i>Khi nào</div>
+              <div class="info-value normal">${planMetaLine(plan, selectedDate, false) || "Chưa xếp giờ"}</div>
+            </div>
+            <div class="d-sec">
+              <div class="d-lab"><i class="bi bi-people-fill"></i>Ai làm</div>
+              ${peopleHtml}
+            </div>
+            ${stepsCard}
+            ${qtyCard}
+            ${sourceCard}
+            ${p3ActionsCard}
           </div>
-          <div class="info-card">
-            <div class="info-label"><i class="bi bi-geo-alt-fill"></i>Ở đâu</div>
-            <div class="info-value">${[plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ") || "Chưa xác định"}</div>
-          </div>
-          <div class="info-card">
-            <div class="info-label"><i class="bi bi-clock-fill"></i>Khi nào</div>
-            <div class="info-value normal">${planMetaLine(plan, selectedDate, false) || "Chưa xếp giờ"}</div>
-          </div>
-          <div class="info-card">
-            <div class="info-label"><i class="bi bi-people-fill"></i>Ai làm</div>
-            ${peopleHtml}
-          </div>
-          ${stepsCard}
-          ${qtyCard}
-          ${sourceCard}
-          ${p3ActionsCard}
           <button class="link-button" type="button" onclick="navigateTo('loghistory', {planId:'${escapeAttr(plan.id)}'})"><i class="bi bi-clock-history me-1"></i>Xem nhật ký đã ghi</button>
         </div>
         <div class="action-bar">
@@ -5060,9 +5095,9 @@
       const steps = planSteps(plan);
       const doneCount = steps.filter(s => s.done).length;
       return `
-        <div class="info-card">
+        <div class="d-sec">
           <div class="d-flex align-items-center justify-content-between gap-2">
-            <div class="info-label mb-0"><i class="bi bi-list-check"></i>Các bước thực hiện${steps.length ? ` (${doneCount}/${steps.length})` : ""}</div>
+            <div class="d-lab mb-0"><i class="bi bi-list-check"></i>Các bước thực hiện${steps.length ? ` (${doneCount}/${steps.length})` : ""}</div>
             <button class="btn btn-sm btn-outline-primary rounded-pill" type="button" onclick="addStep('${escapeAttr(plan.id)}')"><i class="bi bi-plus-lg"></i> Thêm bước</button>
           </div>
           ${steps.length ? `<div class="step-list mt-2">${steps.map(step => stepRowHtml(plan, step)).join("")}</div>`
@@ -5338,9 +5373,9 @@
       const current = firstDoing || firstTodo || phases[phases.length - 1];
       const currentIndex = current ? phases.findIndex(p => p.id === current.id) : -1;
       return `
-        <div class="info-card">
+        <div class="d-sec">
           <div class="d-flex align-items-center justify-content-between gap-2">
-            <div class="info-label mb-0"><i class="bi bi-diagram-3-fill"></i>Giai đoạn &amp; bước${totalSteps ? ` — GĐ ${currentIndex + 1}/${phases.length} · ${doneSteps}/${totalSteps} bước` : ` (${phases.length})`}</div>
+            <div class="d-lab mb-0"><i class="bi bi-diagram-3-fill"></i>Giai đoạn &amp; bước${totalSteps ? ` — GĐ ${currentIndex + 1}/${phases.length} · ${doneSteps}/${totalSteps} bước` : ` (${phases.length})`}</div>
             <button class="btn btn-sm btn-outline-primary rounded-pill" type="button" onclick="addPhase('${escapeAttr(plan.id)}')"><i class="bi bi-plus-lg"></i> Thêm giai đoạn</button>
           </div>
           <div class="mt-2">${phases.map(phase => phaseCardBodyHtml(plan, phase, current && phase.id === current.id)).join("")}</div>
@@ -5578,13 +5613,15 @@
       if (!ho || ho.accepted) return "";
       const recipient = ho.toType === "shift" ? `Ca/tổ ${escapeHtml(ho.toTeam || "")}` : escapeHtml(ho.toUser || "");
       return `
-        <div class="info-card" style="border-left: 4px solid var(--warn-ink);">
-          <div class="info-label"><i class="bi bi-arrow-repeat"></i>Đang bàn giao cho ${recipient}</div>
-          ${ho.progressNote ? `<div class="info-value normal">${escapeHtml(ho.progressNote)}</div>` : ""}
-          ${ho.pending ? `<div class="small text-warning-emphasis fw-bold mt-1"><i class="bi bi-exclamation-triangle me-1"></i>Cần xử lý tiếp: ${escapeHtml(ho.pending)}</div>` : ""}
-          ${ho.risk ? `<div class="small text-danger mt-1"><i class="bi bi-shield-exclamation me-1"></i>${escapeHtml(ho.risk)}</div>` : ""}
-          ${photoThumbsHtml(ho.photos)}
-          <button class="btn btn-sm btn-primary rounded-pill mt-2" type="button" onclick="acceptHandover('${escapeAttr(plan.id)}')"><i class="bi bi-check2-circle me-1"></i>Nhận bàn giao</button>
+        <div class="d-sheet">
+          <div class="d-sec d-warn">
+            <div class="d-lab"><i class="bi bi-arrow-repeat"></i>Đang bàn giao cho ${recipient}</div>
+            ${ho.progressNote ? `<div class="info-value normal">${escapeHtml(ho.progressNote)}</div>` : ""}
+            ${ho.pending ? `<div class="small text-warning-emphasis fw-bold mt-1"><i class="bi bi-exclamation-triangle me-1"></i>Cần xử lý tiếp: ${escapeHtml(ho.pending)}</div>` : ""}
+            ${ho.risk ? `<div class="small text-danger mt-1"><i class="bi bi-shield-exclamation me-1"></i>${escapeHtml(ho.risk)}</div>` : ""}
+            ${photoThumbsHtml(ho.photos)}
+            <button class="btn btn-sm btn-primary rounded-pill mt-2" type="button" onclick="acceptHandover('${escapeAttr(plan.id)}')"><i class="bi bi-check2-circle me-1"></i>Nhận bàn giao</button>
+          </div>
         </div>`;
     }
 
@@ -6469,65 +6506,78 @@
         return;
       }
 
-      function renderJobCardHtml(plan, isUpcoming) {
+      // Người gọn: ★ chủ trì · ○ phối hợp · 👁 nghiệm thu — không dùng badge to
+      function compactPeopleText(plan) {
+        const people = ensurePlanPeople(plan);
+        if (!people.length) return "";
+        const icon = { lead: "★", support: "○", reviewer: "👁" };
+        return people.map(p => `<span class="${p.role === 'lead' ? 'star' : ''}">${icon[p.role] || "○"}${escapeHtml(p.name)}</span>`).join(" ");
+      }
+
+      // "GĐ x/y" nếu đã dùng giai đoạn, "n/m bước" nếu vẫn dùng bước phẳng cũ
+      function compactPhaseProgressText(plan) {
+        const phases = planPhases(plan);
+        if (phases.length === 0) {
+          const steps = planSteps(plan);
+          if (!steps.length) return "";
+          return `${steps.filter(s => s.done).length}/${steps.length} bước`;
+        }
+        const sorted = phases.slice().sort((a, b) => (a.order || 0) - (b.order || 0));
+        const firstDoing = sorted.find(p => p.status === "doing");
+        const firstTodo = sorted.find(p => p.status !== "done");
+        const current = firstDoing || firstTodo || sorted[sorted.length - 1];
+        const idx = current ? sorted.findIndex(p => p.id === current.id) + 1 : sorted.length;
+        return `GĐ ${idx}/${sorted.length}`;
+      }
+
+      // Gợi ý ngắn lý do việc nằm trong nhóm "Cần xử lý tiếp" — chỉ hiện khi có
+      // thông tin thực sự hữu ích (khẩn cấp / đang chờ ai nhận bàn giao / quá hạn)
+      function rowHintText(plan, lc, isoDate) {
+        if (lc === "handover") {
+          const ho = planHandover(plan);
+          if (ho && !ho.accepted) return "⇄ " + (ho.toType === "shift" ? `Chờ ${ho.toTeam || "ca sau"} nhận` : `Chờ ${ho.toUser || "người nhận"}`);
+          if (isCarryOver(plan, isoDate)) return "Quá hạn xem lại";
+        }
+        if (plan.priority === "Khẩn cấp") return "Khẩn cấp";
+        if (lc === "closed") return "Đã chốt sổ";
+        return "";
+      }
+
+      function renderJobRowHtml(plan, isUpcoming) {
         const lc = getPlanLifecycle(plan, iso);
         const cfg = LIFECYCLE_CONFIG[lc] || LIFECYCLE_CONFIG.planned;
-        const where = [plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ");
-        const steps = planSteps(plan);
-        const doneSteps = steps.filter(s => s.done).length;
-        const stepsProgressHtml = steps.length > 0
-          ? `<span class="badge bg-light text-dark border ms-2" style="font-size:10px;"><i class="bi bi-list-check me-1"></i>${doneSteps}/${steps.length} bước</span>`
-          : "";
-        const dateTag = isUpcoming ? `<span class="badge bg-primary-subtle text-primary border-primary me-1"><i class="bi bi-calendar-event me-1"></i>${shortDateVn(plan.date)}</span>` : "";
-
-        const logOnClick = `navigateTo('logentry', {planId:'${escapeAttr(plan.id)}', presetProgress:'Hoàn thành'})`;
-
+        const peopleText = compactPeopleText(plan);
+        const phaseText = compactPhaseProgressText(plan);
+        const hint = rowHintText(plan, lc, iso);
+        const dateTag = isUpcoming ? shortDateVn(plan.date) : "";
+        const metaParts = [
+          dateTag,
+          peopleText,
+          phaseText ? escapeHtml(phaseText) : "",
+          hint ? `<span class="hint">${escapeHtml(hint)}</span>` : ""
+        ].filter(Boolean);
         return `
-          <div class="dash-job-card shadow-sm mb-2 rounded-3 p-3 bg-white border border-light position-relative" style="border-left: 5px solid ${cfg.dot} !important;">
-            <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
-              <div class="d-flex align-items-center flex-wrap gap-1 min-w-0">
-                ${dateTag}
-                ${renderLifecycleBadge(lc)}
-                ${priorityBadge(plan.priority)}
-                ${labelBadges(plan)}
-              </div>
-              <span class="small text-muted flex-shrink-0"><i class="bi bi-clock me-1"></i>${escapeHtml(plan.time || 'Cả ngày')}</span>
+          <div class="dash-row" onclick="openTaskDetail('${escapeAttr(plan.id)}')">
+            <i class="rd" style="background:${cfg.dot}"></i>
+            <div class="rmain">
+              <div class="rt">${escapeHtml(plan.task || 'Chưa đặt tên công việc')}</div>
+              <div class="rm">${metaParts.map((m, i) => (i > 0 ? '<span class="sep">·</span>' : '') + `<span>${m}</span>`).join('')}</div>
             </div>
-            <div class="fw-bold fs-6 text-dark mb-1 d-flex align-items-center justify-content-between" onclick="openTaskDetail('${escapeAttr(plan.id)}')" style="cursor:pointer;">
-              <span class="text-truncate">${escapeHtml(plan.task || 'Chưa đặt tên công việc')}</span>
-              ${stepsProgressHtml}
-            </div>
-            <div class="d-flex align-items-center justify-content-between gap-2 mt-2 pt-2 border-top border-light small">
-              <div class="d-flex align-items-center flex-wrap gap-1">
-                ${renderPlanPeopleBadgesHtml(plan)}
-              </div>
-              <div class="text-secondary text-truncate" style="max-width: 180px;">
-                <i class="bi bi-geo-alt me-1"></i>${where || 'Chưa chọn vị trí'}
-              </div>
-            </div>
-            <div class="d-flex align-items-center gap-2 mt-2 pt-2 border-top border-light">
-              <button type="button" class="btn btn-sm btn-outline-primary flex-grow-1 py-1 rounded-3 font-weight-bold" onclick="${logOnClick}">
-                <i class="bi bi-journal-plus me-1"></i> Ghi nhật ký
-              </button>
-              <button type="button" class="btn btn-sm btn-outline-secondary px-3 py-1 rounded-3" onclick="openTaskDetail('${escapeAttr(plan.id)}')" title="Chi tiết công việc">
-                <i class="bi bi-info-circle me-1"></i> Chi tiết
-              </button>
-            </div>
+            <i class="bi bi-chevron-right chev"></i>
           </div>`;
       }
 
-      function renderSectionHtml(title, iconClass, headerBgClass, countBadgeClass, items, isUpcoming = false) {
+      function renderGroupHtml(title, dotColor, items, isUpcoming = false) {
         if (!items || items.length === 0) return '';
-        const cards = items.map(p => renderJobCardHtml(p, isUpcoming)).join('');
+        const rows = items.map(p => renderJobRowHtml(p, isUpcoming)).join('');
         return `
-          <div class="dash-section mb-3">
-            <div class="dash-section-head d-flex align-items-center justify-content-between p-2 px-3 rounded-3 mb-2 ${headerBgClass}">
-              <div class="fw-bold fs-6 d-flex align-items-center gap-2">
-                <i class="bi ${iconClass}"></i> ${title}
-              </div>
-              <span class="badge ${countBadgeClass} rounded-pill px-2 py-1">${items.length}</span>
+          <div class="dash-group">
+            <div class="dash-group-head">
+              <i class="gd" style="background:${dotColor}"></i>
+              <span class="gt">${title}</span>
+              <span class="gc">${items.length}</span>
             </div>
-            <div class="dash-section-body">${cards}</div>
+            <div class="dash-list">${rows}</div>
           </div>`;
       }
 
@@ -6536,12 +6586,12 @@
           <i class="bi bi-calendar3 me-1"></i>${iso === today ? "Hôm nay (" + formatDateVn(iso) + ")" : weekdayNameVn(iso) + ", " + shortDateVn(iso)} — ${visible.length} việc trong ngày
         </div>
         ${followupSection}
-        ${renderSectionHtml("CẦN XỬ LÝ TIẾP (Tồn / Bàn giao / Hỗ trợ)", "bi-exclamation-triangle-fill text-danger", "bg-danger-subtle text-danger border border-danger-subtle", "bg-danger text-white", needsAttentionPlans)}
-        ${renderSectionHtml("ĐANG THỰC HIỆN", "bi-play-circle-fill text-primary", "bg-primary-subtle text-primary border border-primary-subtle", "bg-primary text-white", doingPlans)}
-        ${renderSectionHtml("CHỜ NGHIỆM THU", "bi-clipboard-check-fill text-purple", "bg-purple-subtle text-purple border border-purple-subtle", "bg-purple text-white", reviewPlans)}
-        ${renderSectionHtml("KẾ HOẠCH TRONG NGÀY", "bi-calendar-check text-info", "bg-info-subtle text-info border border-info-subtle", "bg-info text-white", otherPlanned)}
-        ${renderSectionHtml("LỊCH SẮP TỚI (7 NGÀY)", "bi-calendar-week-fill text-success", "bg-success-subtle text-success border border-success-subtle", "bg-success text-white", upcomingPlans, true)}
-        ${renderSectionHtml("ĐÃ HOÀN THÀNH / CHỐT SỔ", "bi-check-circle-fill text-secondary", "bg-secondary-subtle text-secondary border border-secondary-subtle", "bg-secondary text-white", donePlans)}
+        ${renderGroupHtml("Cần xử lý tiếp", LIFECYCLE_CONFIG.handover.dot, needsAttentionPlans)}
+        ${renderGroupHtml("Đang làm", LIFECYCLE_CONFIG.doing.dot, doingPlans)}
+        ${renderGroupHtml("Chờ nghiệm thu", LIFECYCLE_CONFIG.review.dot, reviewPlans)}
+        ${renderGroupHtml("Kế hoạch trong ngày", LIFECYCLE_CONFIG.planned.dot, otherPlanned)}
+        ${renderGroupHtml("Lịch sắp tới · 7 ngày", "var(--brand)", upcomingPlans, true)}
+        ${renderGroupHtml("Đã hoàn thành / Chốt sổ", LIFECYCLE_CONFIG.closed.dot, donePlans)}
       `;
 
       container.innerHTML = html;

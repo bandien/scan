@@ -34,6 +34,13 @@ Tất cả các thay đổi và cải tiến của hệ thống Quản lý & B�
 - **Màn Chi tiết việc (và thực chất là mọi màn hình) trắng trơn, treo trình duyệt** — phát hiện sau khi deploy qua kiểm thử Chrome thật: `renderPeopleScreen()` gọi nhầm `shiftFilterDate(7)` (hàm vốn dùng cho nút chuyển ngày, có side-effect tự render lại chính màn đó) để tính "7 ngày sau", tạo vòng lặp gọi lẫn nhau tới tràn stack (`Maximum call stack size exceeded`) mỗi lần `render()` chạy. Đã thay bằng phép cộng ngày thuần, không còn side-effect.
 - **Chữ "+ Gán người (Tổ...)" trong picker gán người ở bước tràn/đè lên mũi tên dropdown** khi tên tổ dài — rút gọn còn "+ Gán người", tên tổ chuyển sang tooltip (`title`).
 
+## [v2.12.1] - 2026-07-21
+### Cập nhật (Updated)
+- **Trang chủ & Chi tiết việc đổi sang giao diện "gọn nhẹ"** đúng mockup đã duyệt (thay style thẻ Bootstrap nhiều viền/badge của bản v2.12.0):
+  - **Trang chủ**: mỗi việc là 1 dòng phẳng (chấm màu theo vòng đời + tên việc + dòng phụ gọn: người ★/○, tiến độ "GĐ x/y", gợi ý ngắn nếu cần chú ý) thay cho thẻ card riêng có badge/viền/nút — nhóm theo mục vẫn giữ (Cần xử lý tiếp/Đang làm/Chờ nghiệm thu/Kế hoạch trong ngày/Lịch sắp tới/Đã hoàn thành).
+  - **Chi tiết việc**: gộp toàn bộ mục (Việc gì, Ở đâu, Khi nào, Ai làm, Giai đoạn & bước, Khối lượng, Nguồn, Bàn giao/Nghiệm thu) vào **1 sheet liền**, ngăn cách bằng đường kẻ mảnh thay vì mỗi mục 1 hộp riêng có viền/bóng đổ.
+  - Không đổi logic nghiệp vụ (giai đoạn, ảnh, bàn giao, chốt sổ) — chỉ đổi lớp trình bày.
+
 ## [v2.11.0] - 2026-07-16
 ### Thêm mới (Added)
 - **PWA — cài ứng dụng ra màn hình chính, dùng được khi sóng yếu ngoài sân golf**: thêm `manifest.json`, `sw.js` (Service Worker) và `js/pwa.js`, áp dụng cho 8 trang tác nghiệp (`index.html`, `pump_info.html`, `meter.html`, `sangolf/`, `phanca/`, `hengio/`, `phongvan/`, `nhatky/`).
