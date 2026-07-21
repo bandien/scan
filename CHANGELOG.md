@@ -14,6 +14,12 @@ updated: 2026-06-08
 
 Tất cả các thay đổi và cải tiến của hệ thống Quản lý & Bảo trì Ban điện thông minh (CMMS Mini WebApp) được ghi nhận tại đây theo từng phiên bản.
 
+## [v2.12.5] - 2026-07-22
+### Cập nhật (Updated)
+- **Chi tiết việc — nút hành động đúng mockup (`nhatky/index.html`)**:
+  - Mục **④ Nhật ký & phát sinh** thêm nút **＋ Ghi nhật ký** (nổi) ngay trong mục, cạnh "Xem tất cả" — không phải kéo xuống thanh dưới.
+  - **Bỏ thanh "Ghi nhật ký cho việc này" cố định dưới cùng**; hàng nút dưới còn đúng 2 nút như mockup: **⇄ Bàn giao** (viền) + **✓ Nghiệm thu · Chốt sổ** (nền xanh). Nút Nghiệm thu luôn hiện (bấm khi việc chưa Hoàn thành sẽ nhắc), khi đã chốt thì hiện trạng thái "Đã chốt sổ" mờ. Nút **Xác nhận nhận việc** (khi việc từ chỉ đạo) tách thành 1 hàng riêng phía trên.
+
 ## [v2.12.4] - 2026-07-22
 ### Cập nhật (Updated)
 - **Rà tiếp 3 màn cốt lõi cho sát mockup "gọn nhẹ" (`nhatky/index.html`)** — nối tiếp v2.12.3:

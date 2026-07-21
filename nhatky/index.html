@@ -2352,6 +2352,11 @@
     .tl-sub.warn { color: var(--warn-ink); }
     .tl-more { font-size: .8rem; color: var(--muted); padding-left: 16px; }
     .tl-empty { font-size: .86rem; color: var(--muted); }
+    .tl-add {
+      display: inline-flex; align-items: center; font-size: .85rem; font-weight: 800;
+      padding: 8px 16px; border-radius: 999px; border: 0; background: var(--brand); color: #fff;
+    }
+    .tl-add:active { transform: scale(.98); }
   </style>
 </head>
 <body>
@@ -4683,7 +4688,7 @@
         });
       }
       if (items.length === 0) {
-        return `<div class="tl-empty">Chưa có nhật ký. Bấm “Ghi nhật ký cho việc này” để ghi lần đầu.</div>`;
+        return `<div class="tl-empty">Chưa có nhật ký. Bấm “＋ Ghi nhật ký” bên dưới để ghi lần đầu.</div>`;
       }
       items.sort((a, b) => b.key.localeCompare(a.key));
       const shown = items.slice(0, 6);
@@ -4956,7 +4961,6 @@
       // Có plan.phases (đã "nâng cấp") → card Giai đoạn thay card Bước phẳng cũ
       const stepsCard = planPhases(plan).length > 0 ? phasesCardHtml(plan) : stepsCardHtml(plan);
       const handoverCard = handoverCardHtml(plan);
-      const canClose = plan.status === "Hoàn thành" && !planHasLabel(plan, "Đã chốt sổ");
       const needsAck = (plan.source === "directive" || plan.assignedBy) && !plan.acknowledgedAt;
       const whereText = [plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ");
 
@@ -4990,18 +4994,19 @@
             <div class="d-sec">
               <div class="d-lab"><span class="n">4</span>Nhật ký &amp; phát sinh</div>
               ${planTimelineHtml(plan)}
-              <button class="link-button-sm mt-2" type="button" onclick="navigateTo('loghistory', {planId:'${escapeAttr(plan.id)}'})"><i class="bi bi-clock-history me-1"></i>Xem tất cả nhật ký</button>
+              <div class="d-flex flex-wrap align-items-center gap-2 mt-2">
+                <button class="tl-add" type="button" onclick="handleTaskAction('${escapeAttr(plan.id)}','Hoàn thành')"><i class="bi bi-journal-plus me-1"></i>Ghi nhật ký</button>
+                <button class="link-button-sm" type="button" onclick="navigateTo('loghistory', {planId:'${escapeAttr(plan.id)}'})"><i class="bi bi-clock-history me-1"></i>Xem tất cả</button>
+              </div>
             </div>
+            ${needsAck ? `<div class="d-sec"><button class="d-act ack w-100" type="button" onclick="acknowledgePlan('${escapeAttr(plan.id)}')"><i class="bi bi-check2 me-1"></i>Xác nhận nhận việc</button></div>` : ""}
             <div class="d-actions">
-              ${needsAck ? `<button class="d-act ack" type="button" onclick="acknowledgePlan('${escapeAttr(plan.id)}')"><i class="bi bi-check2 me-1"></i>Nhận việc</button>` : ""}
               <button class="d-act ghost" type="button" onclick="openHandoverModal('${escapeAttr(plan.id)}')"><i class="bi bi-arrow-repeat me-1"></i>Bàn giao</button>
-              ${canClose ? `<button class="d-act go" type="button" onclick="closePlanReview('${escapeAttr(plan.id)}')"><i class="bi bi-check2-circle me-1"></i>Nghiệm thu · Chốt sổ</button>` : ""}
+              ${planHasLabel(plan, "Đã chốt sổ")
+                ? `<button class="d-act go" type="button" disabled><i class="bi bi-check2-circle me-1"></i>Đã chốt sổ</button>`
+                : `<button class="d-act go" type="button" onclick="closePlanReview('${escapeAttr(plan.id)}')"><i class="bi bi-check2-circle me-1"></i>Nghiệm thu · Chốt sổ</button>`}
             </div>
           </div>
-        </div>
-        <div class="action-bar">
-          <!-- Nhân viên thường ghi sau khi làm xong: mặc định Hoàn thành, có thể đổi chip nếu còn dở/cần hỗ trợ. -->
-          <button class="btn-done" type="button" onclick="handleTaskAction('${escapeAttr(plan.id)}','Hoàn thành')"><i class="bi bi-journal-plus"></i>Ghi nhật ký cho việc này</button>
         </div>
       `;
       refreshTaskAssigneeEditor();
