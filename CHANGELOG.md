@@ -14,6 +14,24 @@ updated: 2026-06-08
 
 Tất cả các thay đổi và cải tiến của hệ thống Quản lý & Bảo trì Ban điện thông minh (CMMS Mini WebApp) được ghi nhận tại đây theo từng phiên bản.
 
+## [v2.12.0] - 2026-07-21
+### Thêm mới (Added)
+- **Vòng đời công việc & Bảng "Hôm nay" (`nhatky/index.html`)**: màn Việc của tôi nhóm theo Cần xử lý tiếp → Đang thực hiện → Chờ nghiệm thu → Kế hoạch trong ngày → Lịch sắp tới 7 ngày → Đã hoàn thành/Chốt sổ, thay vì nhóm theo người. Badge vòng đời (Tiếp nhận/Đã lên KH/Đang làm/Cần hỗ trợ/Bàn giao/Chờ nghiệm thu/Xong kỹ thuật/Đã chốt sổ/Đã hủy) suy ra được từ dữ liệu cũ, không cần migrate.
+- **Phối hợp nhiều người theo vai trò**: `people[]` (chủ trì ★ / phối hợp ○ / nghiệm thu 👁) tách từ `assignee` cũ, hiển thị badge trên thẻ việc.
+- **Avatar tài khoản** ở góc phải thanh tiêu đề → hồ sơ tài khoản (tên, tổ/ca) + phóng to cỡ chữ A/A+/A++ + đăng xuất.
+- **Giai đoạn 2 tầng (`phases[]`)**: việc có thể "nâng cấp" từ bước phẳng lên giai đoạn (Khảo sát/Vật tư/Thi công/Nghiệm thu hoặc tự đặt tên) — mỗi giai đoạn có bước con riêng (thêm/sửa/xoá, tick xong), không khoá cứng thứ tự. Chạy song song bước cũ, không phá dữ liệu kế hoạch đã có.
+- **Gán người theo tag**: chọn người thực hiện cho bước lọc theo cùng tổ/nhãn với việc, không đổ toàn bộ danh bạ.
+- **Đính ảnh** ở chỉ đạo/kế hoạch, phát sinh, từng bước, nhật ký, và bàn giao — chụp/chọn ảnh, resize còn ≤900px, upload Google Drive, xem lại thumbnail ngay trên màn.
+- **Bàn giao ca**: bàn giao việc cho 1 người hoặc cho ca/tổ, ghi "đã làm được / cần xử lý tiếp / lưu ý an toàn" + ảnh hiện trạng; người/ca sau bấm "Nhận bàn giao" để tiếp tục, tự động ghi người và giờ (không cần ký giấy).
+- **Nghiệm thu · Chốt sổ**: tách rõ "Xong kỹ thuật" và "Đã chốt sổ" — bất kỳ ai cũng xác nhận chốt sổ được, phần mềm tự ghi người/giờ vào nhật ký.
+- **Truy vết chỉ đạo**: thêm trường "Người giao" và "Tiêu chí hoàn thành" khi việc đến từ chỉ đạo cấp trên, kèm nút "Xác nhận nhận việc".
+- **Kanban nhóm theo vòng đời**: thêm 2 cột "Bàn giao / Xử lý tiếp" và "Chờ nghiệm thu" xen giữa Đang làm và Hoàn thành.
+- Backend: thêm cột `Phases`, `Photos`, `Handover`, `AssignedBy`, `DoneCriteria` vào sheet `NhatKyPlans`, cột `Photos` vào `WorkLogs`, action mới `uploadPhoto` — theo đúng cách bổ sung cột đã dùng từ trước (không đổi/xoá cột cũ).
+
+### Sửa lỗi (Fixed)
+- **`savePlan` không thực sự lưu xuống Google Sheets**: frontend gửi dữ liệu kế hoạch phẳng ở top-level nhưng backend chỉ đọc trường lồng `payload`, luôn nhận rỗng và luôn báo lỗi thiếu ngày/việc ở phía server; do frontend không kiểm tra kết quả trả về nên vẫn hiển thị "đã đồng bộ". `handleSavePlan` nay chấp nhận cả 2 dạng payload. **Cần đối chiếu dữ liệu `NhatKyPlans`** — các việc tạo/sửa trước bản vá này có thể chưa từng lưu xuống Sheets thật.
+- **Trạng thái "Bàn giao"/"Tiếp nhận" bị kẹt vĩnh viễn**: việc từng được bàn giao 1 lần, hoặc có người giao chỉ đạo, sẽ mãi hiển thị "Bàn giao"/"Tiếp nhận" dù đã nhận lại/đã xác nhận — nay chỉ tính là đang chờ khi thực sự chưa có ai nhận/xác nhận.
+
 ## [v2.11.0] - 2026-07-16
 ### Thêm mới (Added)
 - **PWA — cài ứng dụng ra màn hình chính, dùng được khi sóng yếu ngoài sân golf**: thêm `manifest.json`, `sw.js` (Service Worker) và `js/pwa.js`, áp dụng cho 8 trang tác nghiệp (`index.html`, `pump_info.html`, `meter.html`, `sangolf/`, `phanca/`, `hengio/`, `phongvan/`, `nhatky/`).

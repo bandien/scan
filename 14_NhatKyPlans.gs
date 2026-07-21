@@ -17,7 +17,7 @@ function ensurePlansSheet_() {
     "Watcher","Collaborators","DateEnd","Type","PlanQty","Unit",
     "DoneQty","FollowUpDate","Source","SourceText","Steps",
     "Labels","AssetUID","CreatedAt","Cost","PartsUsed","Project",
-    "Phases","Photos","Handover","AssignedBy","DoneCriteria"
+    "Phases","Photos","Handover","AssignedBy","DoneCriteria","AcknowledgedAt"
   ];
 
   if (!sheet) sheet = ss.insertSheet("NhatKyPlans");
@@ -86,6 +86,11 @@ function ensurePlansSheet_() {
       // DoneCriteria: tiêu chí để coi là hoàn thành — cả 2 chỉ hiển thị tham khảo,
       // không ảnh hưởng lifecycle/validate (P3, truy vết chỉ đạo)
       sheet.getRange(1, 33, 1, 2).setValues([["AssignedBy", "DoneCriteria"]]).setFontWeight("bold");
+    }
+    if (String(sheet.getRange(1, 35).getValue()).trim() === "") {
+      // AcknowledgedAt: thời điểm xác nhận đã nhận chỉ đạo — có giá trị thì lifecycle
+      // không còn coi là "Tiếp nhận" nữa dù vẫn còn AssignedBy (tránh kẹt vĩnh viễn)
+      sheet.getRange(1, 35).setValue("AcknowledgedAt").setFontWeight("bold");
     }
   }
   // Date/Time/DateEnd lưu dạng text để trả về đúng chuỗi yyyy-MM-dd / HH:mm-HH:mm
@@ -166,7 +171,7 @@ function handleGetPlans(e) {
   }
 
   let totals = null; // Lazy-load only when some plan rows have empty DoneQty
-  const rows = sheet.getRange(2, 1, lastRow - 1, 34).getValues();
+  const rows = sheet.getRange(2, 1, lastRow - 1, 35).getValues();
   const plans = rows
     .filter(function(r) {
       if (String(r[0]).trim() === "") return false;
@@ -223,7 +228,8 @@ function handleGetPlans(e) {
         photos: String(r[30] || ""),
         handover: String(r[31] || ""),
         assignedBy: String(r[32] || ""),
-        doneCriteria: String(r[33] || "")
+        doneCriteria: String(r[33] || ""),
+        acknowledgedAt: r[34] instanceof Date ? r[34].toISOString() : String(r[34] || "")
       };
     });
 
@@ -276,6 +282,7 @@ function handleSavePlan(params) {
   let preservedHandover = "";
   let preservedAssignedBy = "";
   let preservedDoneCriteria = "";
+  let preservedAcknowledgedAt = "";
   if (rowIndex > 0) {
     doneQty = sheet.getRange(rowIndex, 19).getValue();
     if (doneQty === "" || doneQty === null) doneQty = 0;
@@ -290,12 +297,13 @@ function handleSavePlan(params) {
     preservedCost = extraValues[3];
     preservedPartsUsed = String(extraValues[4] || "");
     preservedProject = String(extraValues[5] || "");
-    const phaseValues = sheet.getRange(rowIndex, 30, 1, 5).getValues()[0];
+    const phaseValues = sheet.getRange(rowIndex, 30, 1, 6).getValues()[0];
     preservedPhases = String(phaseValues[0] || "");
     preservedPhotos = String(phaseValues[1] || "");
     preservedHandover = String(phaseValues[2] || "");
     preservedAssignedBy = String(phaseValues[3] || "");
     preservedDoneCriteria = String(phaseValues[4] || "");
+    preservedAcknowledgedAt = phaseValues[5] instanceof Date ? phaseValues[5].toISOString() : String(phaseValues[5] || "");
   }
 
   // Nếu payload gửi labels, cộng dồn thêm extraLabel (vd "Cần hỗ trợ" từ status legacy) tránh mất cờ cảnh báo
@@ -340,7 +348,8 @@ function handleSavePlan(params) {
     payload.photos === undefined ? preservedPhotos : String(payload.photos || ""),
     payload.handover === undefined ? preservedHandover : String(payload.handover || ""),
     payload.assignedBy === undefined ? preservedAssignedBy : String(payload.assignedBy || ""),
-    payload.doneCriteria === undefined ? preservedDoneCriteria : String(payload.doneCriteria || "")
+    payload.doneCriteria === undefined ? preservedDoneCriteria : String(payload.doneCriteria || ""),
+    payload.acknowledgedAt === undefined ? preservedAcknowledgedAt : String(payload.acknowledgedAt || "")
   ];
 
   if (rowIndex > 0) {

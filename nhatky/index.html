@@ -4488,7 +4488,9 @@
       const ho = planHandover(plan);
       if ((ho && !ho.accepted) || (isoDate && isCarryOver(plan, isoDate)) || plan.followUpDate) return 'handover';
       if (status === 'Đang làm') return 'doing';
-      if (plan.source === 'directive' || plan.assignedBy) return 'recv';
+      // Chỉ tính là "Tiếp nhận" (chờ xác nhận) khi CHƯA xác nhận — có assignedBy
+      // không có nghĩa mãi mãi là recv, tránh lặp lại bug eternal-handover ở trên.
+      if ((plan.source === 'directive' || plan.assignedBy) && !plan.acknowledgedAt) return 'recv';
       return 'planned';
     }
 
@@ -4858,10 +4860,12 @@
         </div>` : "";
       const handoverCard = handoverCardHtml(plan);
       const canClose = plan.status === "Hoàn thành" && !planHasLabel(plan, "Đã chốt sổ");
+      const needsAck = (plan.source === "directive" || plan.assignedBy) && !plan.acknowledgedAt;
       const p3ActionsCard = `
         <div class="info-card">
           <div class="info-label"><i class="bi bi-signpost-2-fill"></i>Bàn giao / Nghiệm thu</div>
           <div class="d-flex flex-wrap gap-2 mt-2">
+            ${needsAck ? `<button class="btn btn-sm btn-outline-primary rounded-pill" type="button" onclick="acknowledgePlan('${escapeAttr(plan.id)}')"><i class="bi bi-check2 me-1"></i>Xác nhận nhận việc</button>` : ""}
             <button class="btn btn-sm btn-outline-warning rounded-pill" type="button" onclick="openHandoverModal('${escapeAttr(plan.id)}')"><i class="bi bi-arrow-repeat me-1"></i>Bàn giao việc</button>
             ${canClose ? `<button class="btn btn-sm btn-success rounded-pill" type="button" onclick="closePlanReview('${escapeAttr(plan.id)}')"><i class="bi bi-check2-circle me-1"></i>Nghiệm thu · Chốt sổ</button>` : ""}
           </div>
@@ -5599,6 +5603,18 @@
       });
       logPlanAction(plan, "Nghiệm thu · Chốt sổ", result);
       showToast("Đã chốt sổ ✓");
+    };
+
+    // Xác nhận đã nhận chỉ đạo — hết trạng thái "Tiếp nhận" (recv), chuyển sang
+    // vòng đời bình thường theo status thực tế. Không bắt buộc: chỉ hiện nút khi
+    // việc thực sự có nguồn chỉ đạo (assignedBy/source="directive") và chưa xác nhận.
+    window.acknowledgePlan = function (planId) {
+      if (!currentUser()) { showToast("Vui lòng đăng nhập trước khi xác nhận"); return; }
+      const plan = plans.find(item => item.id === planId);
+      if (!plan) return;
+      mutatePlanDirect(planId, p => { p.acknowledgedAt = new Date().toISOString(); });
+      logPlanAction(plan, "Xác nhận nhận việc");
+      showToast("Đã xác nhận nhận việc ✓");
     };
 
     // ===== Màn Ghi nhật ký (Phương án A) =====

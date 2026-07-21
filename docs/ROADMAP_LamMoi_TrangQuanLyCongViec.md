@@ -120,21 +120,22 @@ plan = {
 - [x] "Nhận bàn giao" (nút trên thẻ bàn giao đang chờ trong Chi tiết) → set `plan.status = "Đang làm"`, đánh dấu `handover.accepted/acceptedBy/acceptedAt`, giữ nguyên lịch sử (object `handover` không bị xoá, chỉ đổi cờ).
 - [x] Tách **Xong kỹ thuật** vs **Đã chốt sổ**: dùng lại đúng logic `getPlanLifecycle` đã có sẵn từ P1 (status "Hoàn thành" + chưa có nhãn "Đã chốt sổ" → badge "Xong kỹ thuật"; có nhãn → "Đã chốt sổ") — **không cần cột `closedBy/closedAt` riêng**, người/giờ chốt tự ghi qua `logPlanAction` (audit trail), nhãn "Đã chốt sổ" dùng lại cột `Labels` sẵn có. Nút "✓ Nghiệm thu · Chốt sổ" — ai cũng bấm được (không cố định người).
 - [x] Khối *Chỉ đạo & tiêu chí*: thêm `assignedBy` (Người giao) + `doneCriteria` (Tiêu chí hoàn thành) vào form Thêm/Sửa việc, hiển thị trong card "Việc gì".
+- [x] Nút **"Xác nhận nhận việc"** — hiện khi việc có `assignedBy`/`source="directive"` và chưa xác nhận (`plan.acknowledgedAt` rỗng); bấm xong ghi `acknowledgedAt` + audit log, lifecycle thoát khỏi "Tiếp nhận".
 - [x] Kanban (view phụ): thêm cột **Bàn giao / Xử lý tiếp** và **Chờ nghiệm thu** — nhóm theo *vòng đời* (`planHandover`/`isCarryOver`/nhãn) thay vì chỉ theo `status` thô như trước; cột "Hoàn thành" giờ chỉ còn việc đã "Đã chốt sổ".
 
-**Thiết kế thực tế khác với bản nháp ban đầu / phạm vi thu gọn (lý do):**
-- **Vá 1 lỗi "kẹt vĩnh viễn" tự phát hiện khi làm handover**: `getPlanLifecycle` (P1) kiểm tra `plan.handover` TỒN TẠI là đủ để coi là "Bàn giao" — nghĩa là sau khi nhận bàn giao xong, việc sẽ MÃI MÃI hiện lại "Bàn giao" vì object `handover` cũ vẫn còn. Đã sửa: thêm cờ `accepted` trong object `handover`, lifecycle chỉ tính "Bàn giao" khi `handover tồn tại && chưa accepted`. `plan.handover` giờ đóng vai trò lịch sử bàn giao **gần nhất**, không phải hàng đợi.
+**Thiết kế thực tế khác với bản nháp ban đầu (lý do):**
+- **Vá 2 lỗi "kẹt vĩnh viễn" cùng 1 kiểu** trong `getPlanLifecycle` (P1): (1) có `plan.handover` là đủ để coi mãi mãi là "Bàn giao" dù đã nhận lại — sửa bằng cờ `accepted` trong object `handover`; (2) có `assignedBy` là đủ để coi mãi mãi là "Tiếp nhận" dù đã xác nhận — sửa bằng cột mới `acknowledgedAt`. Cả 2 đều theo cùng nguyên tắc: field nguồn (`handover`/`assignedBy`) là **dữ liệu lịch sử**, còn một field/cờ riêng mới quyết định trạng thái hiện tại.
 - **Không thêm cột `closedBy/closedAt/result` như nháp §5 ban đầu** — chốt sổ tái dùng nhãn "Đã chốt sổ" (cột `Labels` đã có) + audit log (đã tự ghi người/giờ). Nhẹ hơn, ít cột hơn, cùng cơ chế `logPlanAction` đã kiểm chứng ở P1/P2.
-- **Bỏ qua nút "Xác nhận nhận việc" + cờ acknowledge cho `assignedBy`** (có trong nháp §4.2 ban đầu) — lý do: `getPlanLifecycle` hiện coi MỌI việc có `assignedBy` là lifecycle "Tiếp nhận" vĩnh viễn (bug tương tự handover, nhưng thuộc phạm vi P1, chưa vá vì rủi ro thấp/ít dùng hơn handover). Thêm nút xác nhận đòi hỏi 1 cờ mới + sửa lại điều kiện này — quyết định **hoãn lại**, chỉ triển khai phần thông tin (`assignedBy`/`doneCriteria` hiển thị) có giá trị ngay mà không cần thêm cờ. Ghi chú cho AI tiếp theo nếu cần hoàn thiện: sửa `getPlanLifecycle` dòng `if (plan.source === 'directive' || plan.assignedBy) return 'recv';` theo đúng kiểu đã sửa cho `handover` (thêm cờ acknowledge).
-- Backend: thêm cột **32 `Handover`**, **33 `AssignedBy`**, **34 `DoneCriteria`** vào `NhatKyPlans` — cùng pattern additive-migration.
+- Backend: thêm cột **32 `Handover`**, **33 `AssignedBy`**, **34 `DoneCriteria`**, **35 `AcknowledgedAt`** vào `NhatKyPlans` — cùng pattern additive-migration.
 
 **Nghiệm thu P3:**
 - [x] Bàn giao người & ca đều tạo được, lưu đúng `toType/toUser/toTeam`.
 - [x] "Nhận bàn giao" chuyển đúng về Đang làm, không còn kẹt ở trạng thái Bàn giao sau khi nhận.
 - [x] Chốt sổ chỉ khả dụng khi đã Hoàn thành, không cho chốt 2 lần, ai cũng bấm được.
+- [x] Xác nhận nhận việc chỉ hiện khi cần, bấm xong không hiện lại nữa.
 - [x] Kanban hiện đúng 6 cột, việc bàn giao/chờ nghiệm thu tách khỏi Đang làm/Hoàn thành.
 - [x] Cú pháp JS + 3 file `.gs` kiểm tra qua `node --check` — không lỗi.
-- [ ] **Chưa test tay trên trình duyệt/Apps Script thật** — cần deploy lại backend rồi thử: Bàn giao cho người → mở máy khác đăng nhập người đó → thấy thẻ "Đang bàn giao cho..." → Nhận bàn giao → kiểm tra Sheets cột `Handover`/`Labels`; thử chốt sổ 1 việc Hoàn thành → kiểm tra nhãn "Đã chốt sổ" và log audit.
+- [ ] **Chưa test tay trên trình duyệt/Apps Script thật** — cần deploy lại backend rồi thử: Bàn giao cho người → mở máy khác đăng nhập người đó → thấy thẻ "Đang bàn giao cho..." → Nhận bàn giao → kiểm tra Sheets cột `Handover`/`Labels`; thử chốt sổ 1 việc Hoàn thành → kiểm tra nhãn "Đã chốt sổ" và log audit; thử "Xác nhận nhận việc" trên 1 việc có Người giao.
 
 ---
 
@@ -159,9 +160,8 @@ plan = {
 ## 6. Việc còn lại (bàn giao cho AI/người tiếp theo)
 
 1. **Deploy lại Apps Script**: copy nội dung `01_Utils.gs`, `02_Router.gs`, `14_NhatKyPlans.gs` vào Apps Script editor (project `11_BanDienScan_Backend`), Deploy → New deployment (giữ nguyên URL nếu deploy dạng "Manage deployments" > sửa deployment hiện có).
-2. **Test tay đầy đủ trên trình duyệt thật** theo 2 kịch bản nghiệm thu ở mục P2/P3 phía trên.
+2. **Test tay đầy đủ trên trình duyệt thật** theo các kịch bản nghiệm thu ở mục P1/P2/P3 phía trên.
 3. **Đối chiếu dữ liệu `NhatKyPlans`** trước/sau khi vá bug `handleSavePlan` (mục P2) — xác nhận các việc tạo gần đây có thực sự nằm trong Sheet không.
-4. (Tuỳ chọn, không bắt buộc) Hoàn thiện nút "Xác nhận nhận việc" cho `assignedBy` — xem ghi chú "phạm vi thu gọn" ở mục P3.
-5. Cập nhật CHANGELOG.md sau khi test xong.
+4. Cập nhật CHANGELOG.md sau khi test xong (đã có mục [v2.12.0] — chỉ cần bổ sung nếu phát sinh thêm khi test).
 
 **Bắt đầu từ P1.** Khi xong mỗi giai đoạn, cập nhật checkbox trong file này và ghi CHANGELOG.
