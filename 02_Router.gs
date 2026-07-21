@@ -111,6 +111,7 @@ function doPost(e) {
       createWorkLog:        handleCreateWorkLog,
       seedWorkLogsDemo:     handleSeedWorkLogsDemo,
       savePlan:             handleSavePlan,
+      uploadPhoto:          handleUploadPhoto,           // Ảnh đính kèm chỉ đạo/kế hoạch/nhật ký/bước/bàn giao (trang nhatky)
       nhatkyExtensionOptions: handleNhatKyExtensionOptions,
       savePlanFromExtension: handleSavePlanFromExtension,
       deletePlan:           handleDeletePlan,
@@ -190,7 +191,7 @@ function ensureWorkLogsSheet_() {
   const headers = [
     "LogID","CreatedAt","WorkDate","Employee","Shift","Progress",
     "StartTime","EndTime","Task","Result","Issue","NextAction","PlanID","SyncStatus",
-    "Rating","RecordedBy","Quantity","Unit","Teams","StepID"
+    "Rating","RecordedBy","Quantity","Unit","Teams","StepID","Photos"
   ];
 
   if (!sheet) sheet = ss.insertSheet("WorkLogs");
@@ -212,6 +213,10 @@ function ensureWorkLogsSheet_() {
     if (String(sheet.getRange(1, 20).getValue()).trim() === "") {
       // Nhật ký ghi cho một bước cụ thể của kế hoạch (nhatky/index.html — steps)
       sheet.getRange(1, 20).setValue("StepID").setFontWeight("bold");
+    }
+    if (String(sheet.getRange(1, 21).getValue()).trim() === "") {
+      // Ảnh đính kèm nhật ký — JSON [{url,by,at}]
+      sheet.getRange(1, 21).setValue("Photos").setFontWeight("bold");
     }
   }
   return sheet;
@@ -239,7 +244,7 @@ function handleGetWorkLogs(e) {
   const cutoff = Utilities.formatDate(new Date(Date.now() - days * 86400000), Session.getScriptTimeZone(), "yyyy-MM-dd");
   const maxRows = 400;
   const startRow = Math.max(2, lastRow - maxRows + 1);
-  const rows = sheet.getRange(startRow, 1, lastRow - startRow + 1, 20).getValues();
+  const rows = sheet.getRange(startRow, 1, lastRow - startRow + 1, 21).getValues();
 
   const logs = [];
   rows.forEach(function(r) {
@@ -273,6 +278,7 @@ function handleGetWorkLogs(e) {
       unit: String(r[17] || ""),
       teams: String(r[18] || ""),
       stepId: String(r[19] || ""),
+      photos: String(r[20] || ""),
       syncStatus: "synced"
     });
   });
@@ -331,7 +337,8 @@ function handleCreateWorkLog(params) {
     payload.quantity === 0 || payload.quantity ? payload.quantity : "",
     payload.unit || "",
     requestedTeam,
-    payload.stepId || ""
+    payload.stepId || "",
+    payload.photos || ""
   ]);
 
   // Cập nhật tăng dần lũy kế vào dòng kế hoạch (Incremental Update)

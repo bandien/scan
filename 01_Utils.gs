@@ -115,3 +115,28 @@ function findDeviceRow(uid) {
   }
   return -1;
 }
+
+/**
+ * Upload 1 ảnh (base64) lên Drive, trả URL xem công khai (view-only link).
+ * Dùng chung cho mọi tính năng cần đính ảnh (checklist thiết bị, kế hoạch/nhật ký
+ * trang nhatky, bàn giao ca...) — cùng pattern đã có ở handleChecklistSubmit
+ * (04_Devices.gs) nhưng gom 1 nơi để không lặp code Drive ở nhiều file.
+ * @param {{base64:string, mimeType?:string}} imageObj
+ * @param {string} prefix tên gợi nhớ cho file (vd "NHATKY", "STEP", planId...)
+ * @param {string} [folderName] mặc định "QR_Maintenance_Images" (chung 1 thư mục với checklist thiết bị)
+ * @return {string} URL ảnh trên Drive, hoặc "" nếu không có ảnh, ném lỗi nếu upload thất bại
+ */
+function uploadPhotoToDrive_(imageObj, prefix, folderName) {
+  if (!imageObj || !imageObj.base64) return "";
+  const folder_ = folderName || "QR_Maintenance_Images";
+  let folders = DriveApp.getFoldersByName(folder_);
+  const folder = folders.hasNext() ? folders.next() : DriveApp.createFolder(folder_);
+  const blob = Utilities.newBlob(
+    Utilities.base64Decode(imageObj.base64),
+    imageObj.mimeType || "image/jpeg",
+    `${prefix || "IMG"}_${Date.now()}`
+  );
+  const file = folder.createFile(blob);
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  return file.getUrl();
+}

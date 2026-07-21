@@ -16,7 +16,8 @@ function ensurePlansSheet_() {
     "Assignee","Priority","Status","UpdatedAt","UpdatedBy",
     "Watcher","Collaborators","DateEnd","Type","PlanQty","Unit",
     "DoneQty","FollowUpDate","Source","SourceText","Steps",
-    "Labels","AssetUID","CreatedAt","Cost","PartsUsed","Project"
+    "Labels","AssetUID","CreatedAt","Cost","PartsUsed","Project",
+    "Phases","Photos","Handover","AssignedBy","DoneCriteria"
   ];
 
   if (!sheet) sheet = ss.insertSheet("NhatKyPlans");
@@ -63,6 +64,28 @@ function ensurePlansSheet_() {
     if (String(sheet.getRange(1, 25).getValue()).trim() === "") {
       // AssetUID/CreatedAt/Cost/PartsUsed/Project: phục vụ hợp nhất dữ liệu từ WorkOrders
       sheet.getRange(1, 25, 1, 5).setValues([["AssetUID", "CreatedAt", "Cost", "PartsUsed", "Project"]]).setFontWeight("bold");
+    }
+    if (String(sheet.getRange(1, 30).getValue()).trim() === "") {
+      // Phases: giai đoạn 2 tầng (mỗi giai đoạn chứa steps riêng) — JSON
+      // [{id,name,order,status,steps:[{id,title,assignees,done,doneAt,doneBy,photos}]}]
+      // Song song với cột Steps cũ (không xoá): chỉ dùng khi kế hoạch đã "nâng cấp" lên
+      // giai đoạn; kế hoạch cũ vẫn hiển thị Steps cũ như trước, không bị ảnh hưởng.
+      sheet.getRange(1, 30).setValue("Phases").setFontWeight("bold");
+    }
+    if (String(sheet.getRange(1, 31).getValue()).trim() === "") {
+      // Photos: ảnh đính vào chỉ đạo/kế hoạch/phát sinh của việc — JSON [{url,by,at}]
+      sheet.getRange(1, 31).setValue("Photos").setFontWeight("bold");
+    }
+    if (String(sheet.getRange(1, 32).getValue()).trim() === "") {
+      // Handover: bàn giao ca gần nhất — JSON {at,fromUser,toType,toUser,toTeam,
+      // progressNote,pending,risk,photos,accepted,acceptedBy,acceptedAt} (P3)
+      sheet.getRange(1, 32).setValue("Handover").setFontWeight("bold");
+    }
+    if (String(sheet.getRange(1, 33).getValue()).trim() === "") {
+      // AssignedBy: người ra chỉ đạo (nếu việc đến từ chỉ đạo, không phải tự lập KH)
+      // DoneCriteria: tiêu chí để coi là hoàn thành — cả 2 chỉ hiển thị tham khảo,
+      // không ảnh hưởng lifecycle/validate (P3, truy vết chỉ đạo)
+      sheet.getRange(1, 33, 1, 2).setValues([["AssignedBy", "DoneCriteria"]]).setFontWeight("bold");
     }
   }
   // Date/Time/DateEnd lưu dạng text để trả về đúng chuỗi yyyy-MM-dd / HH:mm-HH:mm
@@ -143,7 +166,7 @@ function handleGetPlans(e) {
   }
 
   let totals = null; // Lazy-load only when some plan rows have empty DoneQty
-  const rows = sheet.getRange(2, 1, lastRow - 1, 29).getValues();
+  const rows = sheet.getRange(2, 1, lastRow - 1, 34).getValues();
   const plans = rows
     .filter(function(r) {
       if (String(r[0]).trim() === "") return false;
@@ -195,7 +218,12 @@ function handleGetPlans(e) {
         createdAt: r[25] instanceof Date ? r[25].toISOString() : String(r[25] || ""),
         cost: r[26] === "" || r[26] === null ? "" : Number(r[26]),
         partsUsed: String(r[27] || ""),
-        project: String(r[28] || "")
+        project: String(r[28] || ""),
+        phases: String(r[29] || ""),
+        photos: String(r[30] || ""),
+        handover: String(r[31] || ""),
+        assignedBy: String(r[32] || ""),
+        doneCriteria: String(r[33] || "")
       };
     });
 
@@ -203,7 +231,10 @@ function handleGetPlans(e) {
 }
 
 function handleSavePlan(params) {
-  const payload = params.payload || {};
+  // Frontend (postPlanAction/bdsApiPost) gửi plan PHẲNG ở top-level (spread),
+  // không lồng trong { payload: ... } như createWorkLog — chấp nhận cả 2 dạng
+  // (giống cách handleDeletePlan đã phòng thủ) để không rớt savePlan âm thầm.
+  const payload = params.payload || params || {};
   const date = formatPlanDate_(payload.date);
   const task = String(payload.task || "").trim();
   const actor = String(payload.updatedBy || "").trim();
@@ -240,6 +271,11 @@ function handleSavePlan(params) {
   let preservedCost = "";
   let preservedPartsUsed = "";
   let preservedProject = "";
+  let preservedPhases = "";
+  let preservedPhotos = "";
+  let preservedHandover = "";
+  let preservedAssignedBy = "";
+  let preservedDoneCriteria = "";
   if (rowIndex > 0) {
     doneQty = sheet.getRange(rowIndex, 19).getValue();
     if (doneQty === "" || doneQty === null) doneQty = 0;
@@ -254,6 +290,12 @@ function handleSavePlan(params) {
     preservedCost = extraValues[3];
     preservedPartsUsed = String(extraValues[4] || "");
     preservedProject = String(extraValues[5] || "");
+    const phaseValues = sheet.getRange(rowIndex, 30, 1, 5).getValues()[0];
+    preservedPhases = String(phaseValues[0] || "");
+    preservedPhotos = String(phaseValues[1] || "");
+    preservedHandover = String(phaseValues[2] || "");
+    preservedAssignedBy = String(phaseValues[3] || "");
+    preservedDoneCriteria = String(phaseValues[4] || "");
   }
 
   // Nếu payload gửi labels, cộng dồn thêm extraLabel (vd "Cần hỗ trợ" từ status legacy) tránh mất cờ cảnh báo
@@ -293,7 +335,12 @@ function handleSavePlan(params) {
     rowIndex > 0 ? preservedCreatedAt : new Date(),
     payload.cost === undefined ? preservedCost : (payload.cost === "" ? "" : Number(payload.cost)),
     payload.partsUsed === undefined ? preservedPartsUsed : String(payload.partsUsed || ""),
-    payload.project === undefined ? preservedProject : String(payload.project || "")
+    payload.project === undefined ? preservedProject : String(payload.project || ""),
+    payload.phases === undefined ? preservedPhases : String(payload.phases || ""),
+    payload.photos === undefined ? preservedPhotos : String(payload.photos || ""),
+    payload.handover === undefined ? preservedHandover : String(payload.handover || ""),
+    payload.assignedBy === undefined ? preservedAssignedBy : String(payload.assignedBy || ""),
+    payload.doneCriteria === undefined ? preservedDoneCriteria : String(payload.doneCriteria || "")
   ];
 
   if (rowIndex > 0) {
@@ -343,6 +390,19 @@ function handleDeletePlan(params) {
   sheet.deleteRow(rowIndex);
   writeAuditLog(actor || "nhatky", "deletePlan", planId, "Xóa kế hoạch");
   return contentResponse({ status: "success", planId: planId });
+}
+
+// Upload 1 ảnh dùng chung cho mọi điểm ghi ở trang nhatky (chỉ đạo/kế hoạch,
+// phát sinh, nhật ký, bước, bàn giao) — trả URL Drive để frontend lưu vào
+// mảng photos[] của plan/step/log tương ứng trước khi savePlan/createWorkLog.
+function handleUploadPhoto(params) {
+  try {
+    const url = uploadPhotoToDrive_(params.image, params.prefix || "NHATKY");
+    if (!url) return contentResponse({ status: "error", message: "Thiếu dữ liệu ảnh" });
+    return contentResponse({ status: "success", url: url });
+  } catch (err) {
+    return contentResponse({ status: "error", message: "Lỗi upload ảnh: " + err.toString() });
+  }
 }
 
 function findPlanRow_(sheet, planId) {

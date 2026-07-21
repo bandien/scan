@@ -352,6 +352,35 @@
     .vikunja-label.step-progress-label { border-color: #93cdae; background: var(--surface-soft); color: var(--brand-2); }
     .vikunja-label.step-progress-label i { margin-right: 3px; }
 
+    /* ===== Giai đoạn 2 tầng (phases) — P2 ===== */
+    .phase-block { border: 2px solid var(--line); border-radius: 12px; padding: 10px; margin-top: 8px; background: #fbfcfc; }
+    .phase-block.phase-current { border-color: var(--doing); background: var(--doing-bg); }
+    .phase-head { display: flex; align-items: center; gap: 8px; }
+    .phase-dot {
+      flex-shrink: 0; width: 26px; height: 26px; border-radius: 999px; display: inline-flex;
+      align-items: center; justify-content: center; font-size: .85rem; color: #fff; background: var(--muted);
+    }
+    .phase-dot-done { background: var(--done); }
+    .phase-dot-cur { background: var(--doing); }
+    .phase-dot-todo { background: #9aa5ad; }
+    .phase-name { font-weight: 800; color: var(--ink); cursor: pointer; flex: 1; min-width: 0; }
+    .phase-count { font-size: .8rem; font-weight: 700; color: var(--muted); flex-shrink: 0; }
+    .add-step-link {
+      border: 1px dashed var(--line); border-radius: 10px; background: none; color: var(--brand);
+      font-size: .85rem; font-weight: 700; padding: 6px 10px; margin-top: 8px; width: 100%; text-align: left;
+    }
+    .link-button-sm {
+      border: 0; background: none; color: var(--brand); font-size: .78rem; font-weight: 700; padding: 2px 0;
+    }
+
+    /* ===== Ảnh đính kèm (chỉ đạo/kế hoạch/phát sinh/nhật ký/bàn giao) ===== */
+    .photo-thumbs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .photo-thumb {
+      width: 44px; height: 44px; border-radius: 8px; overflow: hidden; border: 1px solid var(--line);
+      display: block; flex-shrink: 0;
+    }
+    .photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
     /* ===== Badge / person-chip ===== */
     .person-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; background: var(--surface-soft); border: 2px solid #93cdae; color: var(--brand-2); border-radius: 999px; padding: 6px 12px; font-size: .95rem; font-weight: 700; }
     .person-chip button { border: 0; background: none; color: inherit; padding: 2px; line-height: 1; font-size: 1.05rem; }
@@ -2219,6 +2248,15 @@
     .contact-info-list > div:last-child { border-bottom: 0; }
     .contact-info-list span { color: var(--bds-muted); font-size: .82rem; }
     .contact-info-list strong { color: var(--bds-on-surface); font-size: .86rem; text-align: right; }
+
+    /* ===== P1 Dashboard Styles ===== */
+    .text-purple { color: #6b21a8 !important; }
+    .bg-purple { background-color: #9333ea !important; }
+    .bg-purple-subtle { background-color: #f3e8ff !important; }
+    .border-purple-subtle { border-color: #e9d5ff !important; }
+    .border-purple { border-color: #c084fc !important; }
+    .dash-job-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+    .dash-job-card:active { transform: scale(0.985); }
   </style>
 </head>
 <body>
@@ -2339,6 +2377,7 @@
                   <div class="media-row">
                     <button class="media-btn" type="button" id="btnAttachPhoto"><i class="bi bi-camera-fill"></i>Chụp ảnh</button>
                   </div>
+                  <div id="logPendingPhotos"></div>
                 </div>
               </div>
             </details>
@@ -2364,6 +2403,7 @@
             <input class="date-input" id="filterDate" type="date" aria-label="Ngày đang xem">
             <button class="btn-icon-sm" id="btnNextDay" type="button" title="Ngày sau" aria-label="Ngày sau"><i class="bi bi-chevron-right"></i></button>
             <button class="btn-icon-sm" id="btnToday" type="button" title="Về hôm nay" aria-label="Về hôm nay"><i class="bi bi-calendar-check"></i></button>
+            <button class="btn btn-sm btn-primary rounded-3 ms-auto fw-bold px-3 d-flex align-items-center gap-1 flex-shrink-0" type="button" onclick="openPlanModal('')" style="min-height:42px;"><i class="bi bi-plus-lg"></i> Việc mới</button>
           </div>
           <div class="px-3 pt-2 pb-1">
             <div class="position-relative">
@@ -2459,6 +2499,91 @@
         <div class="modal-footer">
           <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Đóng</button>
           <button class="btn btn-primary" type="button" id="btnSaveSettings">Lưu cấu hình</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Hồ sơ tài khoản & Tiện ích (P1) -->
+  <div class="modal fade" id="userProfileModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content rounded-4 border-0 shadow">
+        <div class="modal-header border-bottom">
+          <h3 class="modal-title h6 fw-bold"><i class="bi bi-person-badge-fill text-primary me-2"></i>Hồ sơ tài khoản</h3>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body text-center py-3">
+          <div class="user-avatar-circle mx-auto mb-2 shadow-sm d-flex align-items-center justify-content-center fw-bold text-white rounded-circle" id="userProfileAvatarCircle" style="width:56px; height:56px; background:linear-gradient(135deg, #0b4d5e, #0d6efd); font-size:22px;">
+            BD
+          </div>
+          <h4 class="fs-6 fw-bold text-dark mb-0" id="userProfileName">Tên người dùng</h4>
+          <div class="small text-muted mb-3" id="userProfileTeam">Tổ / Ca trực</div>
+
+          <div class="card bg-light border-0 rounded-3 p-2 mb-3">
+            <div class="small fw-bold text-secondary mb-2"><i class="bi bi-fonts me-1"></i>Phóng to / Thu nhỏ cỡ chữ</div>
+            <div class="d-flex align-items-center justify-content-center gap-2">
+              <button type="button" class="btn btn-sm btn-outline-secondary font-scale-opt px-3 py-1 fw-bold rounded-2" onclick="setProfileFontScale(100)">A (Thường)</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary font-scale-opt px-3 py-1 fw-bold rounded-2" onclick="setProfileFontScale(115)">A+ (Lớn)</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary font-scale-opt px-3 py-1 fw-bold rounded-2" onclick="setProfileFontScale(130)">A++ (Rất lớn)</button>
+            </div>
+          </div>
+
+          <div class="d-grid gap-2">
+            <button class="btn btn-outline-danger btn-sm rounded-3 fw-bold py-2" type="button" onclick="logoutFromProfileModal()">
+              <i class="bi bi-box-arrow-right me-1"></i> Đăng xuất
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Bàn giao việc (P3) — giao cho người hoặc ca/tổ, tự ghi người+giờ -->
+  <div class="modal fade" id="handoverModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-4 border-0 shadow">
+        <div class="modal-header border-bottom">
+          <h3 class="modal-title h6 fw-bold"><i class="bi bi-arrow-repeat text-warning me-2"></i>Bàn giao việc</h3>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="handoverPlanId">
+          <div class="btn-group w-100 mb-3" role="group" aria-label="Giao cho người hay ca/tổ">
+            <input type="radio" class="btn-check" name="handoverToType" id="handoverToTypePerson" value="person" checked onchange="toggleHandoverRecipientFields()">
+            <label class="btn btn-outline-primary" for="handoverToTypePerson"><i class="bi bi-person-fill me-1"></i>Cho người</label>
+            <input type="radio" class="btn-check" name="handoverToType" id="handoverToTypeShift" value="shift" onchange="toggleHandoverRecipientFields()">
+            <label class="btn btn-outline-primary" for="handoverToTypeShift"><i class="bi bi-people-fill me-1"></i>Cho ca/tổ</label>
+          </div>
+          <div class="field" id="handoverToUserField">
+            <label class="field-lb" for="handoverToUser">Người nhận</label>
+            <select class="form-select" id="handoverToUser"></select>
+          </div>
+          <div class="field d-none" id="handoverToTeamField">
+            <label class="field-lb" for="handoverToTeam">Ca / Tổ nhận</label>
+            <select class="form-select" id="handoverToTeam"></select>
+          </div>
+          <div class="field">
+            <label class="field-lb" for="handoverProgress">Đã làm được</label>
+            <textarea class="ta" id="handoverProgress" rows="2" placeholder="Đã làm gì, tới đâu..."></textarea>
+          </div>
+          <div class="field">
+            <label class="field-lb" for="handoverPending">Cần xử lý tiếp</label>
+            <textarea class="ta" id="handoverPending" rows="2" placeholder="Việc còn dở, cần làm tiếp..."></textarea>
+          </div>
+          <div class="field">
+            <label class="field-lb" for="handoverRisk">Lưu ý an toàn</label>
+            <textarea class="ta" id="handoverRisk" rows="2" placeholder="Khu vực nguy hiểm, lưu ý khi tiếp tục..."></textarea>
+          </div>
+          <div class="field">
+            <div class="field-lb">Ảnh hiện trạng</div>
+            <div id="handoverPhotos"></div>
+            <button class="link-button-sm mt-1" type="button" onclick="attachHandoverPhoto()"><i class="bi bi-camera me-1"></i>Đính ảnh</button>
+          </div>
+          <div class="small text-secondary mt-2" id="handoverAutoLogNote"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Hủy</button>
+          <button class="btn btn-primary" type="button" onclick="submitHandover()"><i class="bi bi-check2-circle me-1"></i>Bàn giao</button>
         </div>
       </div>
     </div>
@@ -2619,6 +2744,14 @@
                         <button class="btn btn-outline-secondary" type="button" id="btnAddPlanLabel"><i class="bi bi-plus-lg"></i></button>
                       </div>
                     </div>
+                    <div class="col-6">
+                      <label class="form-label" for="planAssignedBy">Người giao (nếu có chỉ đạo)</label>
+                      <input class="form-control" id="planAssignedBy" placeholder="vd: Kỹ sư trưởng, Ban lãnh đạo...">
+                    </div>
+                    <div class="col-6">
+                      <label class="form-label" for="planDoneCriteria">Tiêu chí hoàn thành</label>
+                      <input class="form-control" id="planDoneCriteria" placeholder="vd: lệch tải &lt; 5%">
+                    </div>
                   </div>
                 </details>
               </div>
@@ -2723,6 +2856,10 @@
       </div>
     </div>
   </div>
+
+  <!-- Input ảnh dùng chung cho mọi điểm đính ảnh (chỉ đạo/kế hoạch, phát sinh,
+       nhật ký, bước, bàn giao) — 1 input duy nhất, đích đến chọn qua attachPhoto() -->
+  <input type="file" id="sharedPhotoInput" accept="image/*" capture="environment" style="display:none">
 
   <div class="position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 1080">
     <div class="toast align-items-center border-0 bg-dark" id="toast" role="status" aria-live="polite" aria-atomic="true">
@@ -3007,14 +3144,16 @@
       }
       const contactsAction = (screen === "contacts" && canManageUsers()) ? '<button class="btn btn-sm btn-primary rounded-pill px-2.5 py-1 text-nowrap" type="button" title="Thêm danh bạ mới" style="font-size:12px; font-weight:600;" onclick="openUserEditor(\'\')"><i class="bi bi-person-plus-fill me-1"></i>+ Thêm danh bạ</button>' : "";
       const personalAction = screen === "personal" ? '<button class="app-header-action" type="button" title="Cài đặt" aria-label="Cài đặt" onclick="settingsModalInstance.show()"><i class="bi bi-gear-fill"></i></button>' : "";
+      const userAvatar = getUserAvatarHtml();
+      const customAction = editPlanId ? taskHeaderActions(detailPlan) : screen === "contactdetail" ? contactHeaderActions(params.name) : screen === "contacts" ? contactsAction : personalAction;
+
       window.BDSAppHeader.update({
         title: meta.title,
         subtitle: meta.subtitle,
         icon: meta.icon,
-        mode: screen === "people" ? "search" : "title",
-        searchPlaceholder: "Tìm công việc, vị trí, người làm",
+        mode: "title",
         onBack: isDetail ? goBack : null,
-        extraHtml: editPlanId ? taskHeaderActions(detailPlan) : screen === "contactdetail" ? contactHeaderActions(params.name) : screen === "contacts" ? contactsAction : personalAction
+        extraHtml: userAvatar + customAction
       });
       updateSyncStatus();
     }
@@ -3265,6 +3404,11 @@
         addPlanPerson(value);
         event.target.value = "";
       });
+      const planTeamInput = document.getElementById("planTeam");
+      if (planTeamInput) {
+        planTeamInput.addEventListener("input", () => renderPlanPersonSelect());
+        planTeamInput.addEventListener("change", () => renderPlanPersonSelect());
+      }
       document.getElementById("planPersonChips").addEventListener("click", event => {
         const btn = event.target.closest("button[data-name]");
         if (btn) removePlanPerson(btn.dataset.name);
@@ -3302,7 +3446,7 @@
       });
       document.getElementById("btnQtyMinus").addEventListener("click", () => adjustQuantity(-1));
       document.getElementById("btnQtyPlus").addEventListener("click", () => adjustQuantity(1));
-      document.getElementById("btnAttachPhoto").addEventListener("click", () => showToast("Chụp ảnh: tính năng sắp có"));
+      document.getElementById("btnAttachPhoto").addEventListener("click", () => attachLogPhoto());
 
       // Ghi chú nhanh: bấm thêm câu vào ô Kết quả, bấm lại để bỏ ra — không tự gán trạng thái
       document.getElementById("resultChips").addEventListener("click", event => {
@@ -3411,6 +3555,7 @@
         plans = JSON.parse(cached);
         refreshPlansInBackground();
         updateSyncStatus();
+        render();
         return;
       }
 
@@ -3425,6 +3570,7 @@
           localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
           updateSyncStatus();
           if (listBody) bdsHideLoading(listBody);
+          render();
           return;
         }
       } catch (e) {
@@ -3446,6 +3592,7 @@
 
       localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
       updateSyncStatus();
+      render();
     }
 
     // Bản từ server không được đè mất các kế hoạch local chưa kịp đồng bộ
@@ -3528,11 +3675,48 @@
 
     function renderPlanPersonSelect() {
       const chosen = new Set(planPeople);
-      const options = knownPeopleNames().filter(name => !chosen.has(name));
-      document.getElementById("planPersonSelect").innerHTML =
-        '<option value="">-- Chọn để thêm người --</option>' +
-        options.map(name => `<option>${escapeHtml(name)}</option>`).join("") +
-        '<option value="__other__">➕ Nhập tên khác...</option>';
+      const allOptions = knownPeopleNames().filter(name => !chosen.has(name));
+      const teamVal = (document.getElementById("planTeam")?.value || "").trim().toLowerCase();
+
+      let filteredOptions = allOptions;
+      if (teamVal) {
+        const teamMatches = allOptions.filter(name => {
+          const person = staffDirectory.find(p =>
+            (p.name && p.name.toLowerCase() === name.toLowerCase()) ||
+            (p.username && p.username.toLowerCase() === name.toLowerCase())
+          );
+          if (person) {
+            const pDept = (person.dept || "").toLowerCase();
+            const pLabels = (person.labels || "").toLowerCase();
+            const pTeams = (person.teams || "").toLowerCase();
+            if (pDept && (pDept.includes(teamVal) || teamVal.includes(pDept))) return true;
+            if (pLabels && (pLabels.includes(teamVal) || teamVal.includes(pLabels))) return true;
+            if (pTeams && (pTeams.includes(teamVal) || teamVal.includes(pTeams))) return true;
+          }
+          const hasPlanInTeam = plans.some(p => {
+            const pTeam = (p.team || "").toLowerCase();
+            if (!pTeam) return false;
+            if (pTeam.includes(teamVal) || teamVal.includes(pTeam)) {
+              const assignees = String(p.assignee || "").split(",").map(s => s.trim().toLowerCase());
+              return assignees.includes(name.toLowerCase());
+            }
+            return false;
+          });
+          return hasPlanInTeam;
+        });
+
+        if (teamMatches.length > 0) {
+          filteredOptions = teamMatches;
+        }
+      }
+
+      const selectEl = document.getElementById("planPersonSelect");
+      if (selectEl) {
+        selectEl.innerHTML =
+          '<option value="">-- Chọn để thêm người --</option>' +
+          filteredOptions.map(name => `<option>${escapeHtml(name)}</option>`).join("") +
+          '<option value="__other__">➕ Nhập tên khác...</option>';
+      }
     }
 
     function renderPlanPersonChips() {
@@ -3587,6 +3771,8 @@
       document.getElementById("btnDeletePlan").style.display = plan ? "inline-block" : "none";
       document.getElementById("planFormId").value = plan ? plan.id : "";
       document.getElementById("planFormAssetUID").value = plan ? (plan.assetUID || "") : (presetAsset ? presetAsset.uid || "" : "");
+      document.getElementById("planAssignedBy").value = plan ? (plan.assignedBy || "") : "";
+      document.getElementById("planDoneCriteria").value = plan ? (plan.doneCriteria || "") : "";
       document.getElementById("planDate").value = plan ? (plan.date || today) : newPlanDate;
       document.getElementById("planFollowUpDate").value = plan ? (plan.followUpDate || plan.date || today) : newPlanDate;
       document.getElementById("planDateEnd").value = plan ? (plan.dateEnd || "") : "";
@@ -3674,6 +3860,8 @@
         status: document.getElementById("planStatus").value,
         labels: planLabels.join(", "),
         assetUID: document.getElementById("planFormAssetUID").value.trim(),
+        assignedBy: document.getElementById("planAssignedBy").value.trim(),
+        doneCriteria: document.getElementById("planDoneCriteria").value.trim(),
         updatedBy: currentUser()
       };
       if (!payload.team && !canManageUsers()) {
@@ -3922,9 +4110,62 @@
       });
     }
 
+    function getUserAvatarHtml() {
+      const user = (window.BD_SSO && window.BD_SSO.getOperatorName()) || currentUser() || "Tài khoản";
+      const initial = (user.trim().charAt(0) || "U").toUpperCase();
+      return `
+        <button type="button" id="headerUserAvatar" class="btn p-0 rounded-circle border border-2 border-white shadow-sm me-1" style="width:34px; height:34px; background:linear-gradient(135deg, #0b4d5e, #0d6efd); color:#fff; font-weight:800; font-size:14px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer;" onclick="openUserProfileModal()" title="Hồ sơ & Tiện ích (${escapeAttr(user)})">
+          ${escapeHtml(initial)}
+        </button>
+      `;
+    }
+
     function updateUserButton() {
       if (currentScreen === "personal") renderPersonalScreen();
+      renderAppHeaderUserAvatar();
     }
+
+    function renderAppHeaderUserAvatar() {
+      if (!window.BDSAppHeader) return;
+      renderHeader(currentScreen, currentParams);
+    }
+
+    window.openUserProfileModal = function() {
+      const opName = (window.BD_SSO && window.BD_SSO.getOperatorName()) || currentUser() || "Tài khoản";
+      const fullName = currentFullName() || opName;
+      const teams = currentTeams() || "Toàn ban";
+      const initial = (fullName.trim().charAt(0) || "U").toUpperCase();
+
+      const avatarCircle = document.getElementById("userProfileAvatarCircle");
+      if (avatarCircle) avatarCircle.textContent = initial;
+
+      const nameEl = document.getElementById("userProfileName");
+      if (nameEl) nameEl.textContent = fullName;
+
+      const teamEl = document.getElementById("userProfileTeam");
+      if (teamEl) teamEl.textContent = "Tổ/Ca: " + teams;
+
+      const userModalEl = document.getElementById("userProfileModal");
+      if (userModalEl) {
+        const bsModal = bootstrap.Modal.getOrCreateInstance(userModalEl);
+        bsModal.show();
+      }
+    };
+
+    window.setProfileFontScale = function(scale) {
+      localStorage.setItem(STORAGE_KEYS.fontScale, String(scale));
+      applyFontScale();
+      showToast("Cỡ chữ: " + FONT_SCALE_LABELS[scale]);
+    };
+
+    window.logoutFromProfileModal = function() {
+      const userModalEl = document.getElementById("userProfileModal");
+      if (userModalEl) {
+        const bsModal = bootstrap.Modal.getInstance(userModalEl);
+        if (bsModal) bsModal.hide();
+      }
+      logout();
+    };
 
     function logout() {
       if (!confirm("Đăng xuất khỏi tài khoản này?")) return;
@@ -4079,9 +4320,17 @@
     }
 
     // Sửa/tạo/xóa kế hoạch → tự ghi 1 dòng nhật ký lưu vết cho người thao tác
-    function logPlanAction(plan, actionLabel) {
+    function logPlanAction(plan, actionLabel, extraNote) {
       const user = currentUser();
       if (!user) return;
+      const isAdhoc = plan.type === "Phát sinh";
+      let taskText = "";
+      if (actionLabel === "Tạo việc mới") {
+        taskText = isAdhoc ? `Phát sinh việc: ${plan.task || ""}` : `[Kế hoạch] Tạo việc mới: ${plan.task || ""}`;
+      } else {
+        const prefix = isAdhoc ? "[Phát sinh]" : "[Kế hoạch]";
+        taskText = `${prefix} ${actionLabel}: ${plan.task || ""}`;
+      }
       const log = {
         id: "LOG-" + Date.now() + "-KH",
         planId: plan.id || "",
@@ -4091,8 +4340,8 @@
         progress: plan.status || "",
         startTime: currentTime(),
         endTime: "",
-        selectedTask: `[Kế hoạch] ${actionLabel}: ${plan.task || ""}`,
-        result: `${actionLabel} lúc ${currentTime()} ngày ${formatDateVn(today)}`,
+        selectedTask: taskText,
+        result: `${actionLabel} lúc ${currentTime()} ngày ${formatDateVn(today)}` + (extraNote ? ` — ${extraNote}` : ""),
         issue: "",
         nextAction: "",
         quantity: "",
@@ -4189,6 +4438,84 @@
       return String(value || "").trim().toLowerCase();
     }
 
+    // ===== P1 Model Helpers: people[] & lifecycle =====
+    function ensurePlanPeople(plan) {
+      if (!plan) return [];
+      if (Array.isArray(plan.people) && plan.people.length > 0) {
+        return plan.people;
+      }
+      const rawList = splitAssignees(plan.assignee);
+      if (rawList.length === 0) return [];
+      return rawList.map((name, idx) => ({
+        name: name,
+        role: idx === 0 ? 'lead' : 'support'
+      }));
+    }
+
+    function renderPlanPeopleBadgesHtml(plan) {
+      const people = ensurePlanPeople(plan);
+      if (!people || people.length === 0) return '<span class="badge bg-light text-secondary border">Chưa gán</span>';
+      return people.map(p => {
+        let icon = '★'; // lead
+        let badgeStyle = 'background: #eef2ff; color: #3730a3; border: 1px solid #c7d2fe;';
+        let roleText = 'Chủ trì';
+        if (p.role === 'support') {
+          icon = '○';
+          badgeStyle = 'background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1;';
+          roleText = 'Phối hợp';
+        } else if (p.role === 'reviewer') {
+          icon = '👁';
+          badgeStyle = 'background: #faf5ff; color: #6b21a8; border: 1px solid #e9d5ff;';
+          roleText = 'Nghiệm thu';
+        }
+        return `<span class="badge me-1 font-weight-bold" style="${badgeStyle} font-size:11px; padding:3px 6px;" title="${roleText}"><span style="font-size:10px;">${icon}</span> ${escapeHtml(p.name)}</span>`;
+      }).join('');
+    }
+
+    // 7 Vòng đời: recv | planned | doing | help | handover | review | done | closed | cancelled
+    function getPlanLifecycle(plan, isoDate) {
+      if (!plan) return 'planned';
+      if (plan.lifecycle) return plan.lifecycle;
+      const status = plan.status || '';
+      const labels = String(plan.labels || '');
+      if (status === 'Đã hủy') return 'cancelled';
+      if (labels.includes('Đã chốt sổ') || plan.closedBy) return 'closed';
+      if (status === 'Hoàn thành') return 'done';
+      if (labels.includes('Cần hỗ trợ') || plan.priority === 'Khẩn cấp') return 'help';
+      // plan.handover là LỊCH SỬ bàn giao gần nhất — chỉ tính là đang "Bàn giao" khi
+      // CHƯA được nhận (planHandover().accepted = false), tránh việc kẹt mãi ở trạng
+      // thái Bàn giao sau khi đã có người nhận và tiếp tục làm.
+      const ho = planHandover(plan);
+      if ((ho && !ho.accepted) || (isoDate && isCarryOver(plan, isoDate)) || plan.followUpDate) return 'handover';
+      if (status === 'Đang làm') return 'doing';
+      if (plan.source === 'directive' || plan.assignedBy) return 'recv';
+      return 'planned';
+    }
+
+    const LIFECYCLE_CONFIG = {
+      recv:      { label: 'Tiếp nhận',     bg: '#e2e8f0', color: '#334155', dot: '#64748b', icon: 'bi-inbox-fill' },
+      planned:   { label: 'Đã lên KH',    bg: '#e0f2fe', color: '#0369a1', dot: '#0284c7', icon: 'bi-calendar-event' },
+      doing:     { label: 'Đang làm',      bg: '#dbeafe', color: '#1e40af', dot: '#2563eb', icon: 'bi-play-circle-fill' },
+      help:      { label: 'Cần hỗ trợ',   bg: '#fee2e2', color: '#991b1b', dot: '#dc2626', icon: 'bi-exclamation-triangle-fill' },
+      handover:  { label: 'Bàn giao',     bg: '#ffedd5', color: '#9a3412', dot: '#ea580c', icon: 'bi-arrow-repeat' },
+      review:    { label: 'Chờ nghiệm thu', bg: '#f3e8ff', color: '#6b21a8', dot: '#9333ea', icon: 'bi-clipboard-check-fill' },
+      done:      { label: 'Xong kỹ thuật', bg: '#dcfce7', color: '#166534', dot: '#16a34a', icon: 'bi-check-circle-fill' },
+      closed:    { label: 'Đã chốt sổ',   bg: '#d1fae5', color: '#065f46', dot: '#059669', icon: 'bi-lock-fill' },
+      cancelled: { label: 'Đã hủy',       bg: '#f1f5f9', color: '#64748b', dot: '#475569', icon: 'bi-x-circle-fill' }
+    };
+
+    function renderLifecycleBadge(lifecycle) {
+      const cfg = LIFECYCLE_CONFIG[lifecycle] || LIFECYCLE_CONFIG.planned;
+      return `<span class="badge border me-1 fw-bold" style="background:${cfg.bg}; color:${cfg.color}; border-color:${cfg.dot} !important; font-size:10.5px; padding:3px 7px;">
+        <i class="bi ${cfg.icon} me-1" style="color:${cfg.dot};"></i>${cfg.label}
+      </span>`;
+    }
+
+    function renderLifecycleDot(lifecycle) {
+      const cfg = LIFECYCLE_CONFIG[lifecycle] || LIFECYCLE_CONFIG.planned;
+      return `<span class="d-inline-block rounded-circle me-1" style="width:10px; height:10px; background-color:${cfg.dot}; flex-shrink:0;" title="${cfg.label}"></span>`;
+    }
+
     function planPeopleNames(plan) {
       const names = splitAssignees(plan.assignee);
       planSteps(plan).forEach(step => {
@@ -4197,8 +4524,13 @@
       return names.filter(Boolean);
     }
 
+    function isAuditLog(log) {
+      const task = String(log.selectedTask || "");
+      return task.startsWith("[Kế hoạch]") || task.startsWith("[Phát sinh]") || task.startsWith("Phát sinh việc:");
+    }
+
     function isWorkLog(log) {
-      return !String(log.selectedTask || "").startsWith("[Kế hoạch]");
+      return !isAuditLog(log);
     }
 
     function logBelongsToPlan(log, plan) {
@@ -4517,20 +4849,36 @@
           <div class="info-label"><i class="bi bi-sigma"></i>Khối lượng</div>
           <div class="info-value normal">${qtyBadge || "Chưa có dữ liệu"}</div>
         </div>` : "";
-      const stepsCard = stepsCardHtml(plan);
+      // Có plan.phases (đã "nâng cấp") → card Giai đoạn thay card Bước phẳng cũ
+      const stepsCard = planPhases(plan).length > 0 ? phasesCardHtml(plan) : stepsCardHtml(plan);
       const sourceCard = plan.sourceText ? `
         <div class="info-card">
           <div class="info-label"><i class="bi bi-chat-quote-fill"></i>Nguồn ${escapeHtml(plan.source || "Zalo Web")}</div>
           <div class="info-value normal" style="white-space:pre-wrap">${escapeHtml(plan.sourceText)}</div>
         </div>` : "";
+      const handoverCard = handoverCardHtml(plan);
+      const canClose = plan.status === "Hoàn thành" && !planHasLabel(plan, "Đã chốt sổ");
+      const p3ActionsCard = `
+        <div class="info-card">
+          <div class="info-label"><i class="bi bi-signpost-2-fill"></i>Bàn giao / Nghiệm thu</div>
+          <div class="d-flex flex-wrap gap-2 mt-2">
+            <button class="btn btn-sm btn-outline-warning rounded-pill" type="button" onclick="openHandoverModal('${escapeAttr(plan.id)}')"><i class="bi bi-arrow-repeat me-1"></i>Bàn giao việc</button>
+            ${canClose ? `<button class="btn btn-sm btn-success rounded-pill" type="button" onclick="closePlanReview('${escapeAttr(plan.id)}')"><i class="bi bi-check2-circle me-1"></i>Nghiệm thu · Chốt sổ</button>` : ""}
+          </div>
+        </div>`;
 
       container.innerHTML = `
         <div class="scroll">
           ${banner}
+          ${handoverCard}
           <div class="info-card">
             <div class="info-label"><i class="bi bi-lightning-charge-fill"></i>Việc gì</div>
             <div class="info-value">${escapeHtml(plan.task || "")}</div>
             <div class="d-flex flex-wrap gap-2 mt-2">${priorityBadge(plan.priority)}${typeBadge(plan)}${statusBadge(plan.status)}${labelBadges(plan)}</div>
+            ${plan.assignedBy ? `<div class="small text-secondary mt-2"><i class="bi bi-person-badge me-1"></i>Chỉ đạo từ: <b>${escapeHtml(plan.assignedBy)}</b></div>` : ""}
+            ${plan.doneCriteria ? `<div class="small text-secondary mt-1"><i class="bi bi-check2-square me-1"></i>Tiêu chí hoàn thành: ${escapeHtml(plan.doneCriteria)}</div>` : ""}
+            ${photoThumbsHtml(planPhotos(plan))}
+            <button class="link-button-sm mt-2" type="button" onclick="attachPlanPhoto('${escapeAttr(plan.id)}')"><i class="bi bi-camera me-1"></i>Đính ảnh (chỉ đạo/kế hoạch)</button>
           </div>
           <div class="info-card">
             <div class="info-label"><i class="bi bi-geo-alt-fill"></i>Ở đâu</div>
@@ -4547,6 +4895,7 @@
           ${stepsCard}
           ${qtyCard}
           ${sourceCard}
+          ${p3ActionsCard}
           <button class="link-button" type="button" onclick="navigateTo('loghistory', {planId:'${escapeAttr(plan.id)}'})"><i class="bi bi-clock-history me-1"></i>Xem nhật ký đã ghi</button>
         </div>
         <div class="action-bar">
@@ -4714,8 +5063,543 @@
           </div>
           ${steps.length ? `<div class="step-list mt-2">${steps.map(step => stepRowHtml(plan, step)).join("")}</div>`
             : `<div class="small text-secondary mt-2">Việc có nhiều người/nhiều giai đoạn — chia nhỏ thành từng bước để mỗi người đánh dấu và ghi nhật ký riêng bước của mình.</div>`}
+          <button class="link-button-sm mt-2" type="button" onclick="upgradeToPhases('${escapeAttr(plan.id)}')"><i class="bi bi-diagram-3 me-1"></i>Việc lớn, nhiều giai đoạn? Chuyển sang Giai đoạn</button>
         </div>`;
     }
+
+    // ===== Giai đoạn 2 tầng (phases) — P2 =====
+    // Song song với `steps` phẳng ở trên: kế hoạch CHƯA "nâng cấp" (plan.phases
+    // rỗng) hiển thị & hoạt động y hệt trước đây (card "Các bước thực hiện").
+    // Chỉ khi có plan.phases (bấm "Chuyển sang Giai đoạn" hoặc "+ Thêm giai đoạn")
+    // thì card Giai đoạn & bước mới thay thế card cũ trong renderTaskDetail.
+    function planPhases(plan) {
+      if (!plan || !plan.phases) return [];
+      try {
+        const parsed = JSON.parse(plan.phases);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (e) { return []; }
+    }
+
+    // Gộp bước phẳng cũ + bước trong giai đoạn mới — dùng cho những chỗ chỉ cần
+    // tính tổng tiến độ chung (vd cập nhật trạng thái việc khi ghi nhật ký).
+    function allPlanSteps(plan) {
+      return planSteps(plan).concat(planPhases(plan).flatMap(ph => ph.steps || []));
+    }
+
+    // Tìm 1 bước theo id — không biết (và không cần biết) bước đó nằm ở steps
+    // phẳng cũ hay trong 1 giai đoạn cụ thể (dùng ở màn Ghi nhật ký khi mở từ
+    // nút "Ghi nhật ký bước này" của cả 2 mô hình).
+    function findAnyStep(plan, stepId) {
+      if (!plan || !stepId) return null;
+      const legacy = planSteps(plan).find(s => s.id === stepId);
+      if (legacy) return legacy;
+      for (const ph of planPhases(plan)) {
+        const found = (ph.steps || []).find(s => s.id === stepId);
+        if (found) return found;
+      }
+      return null;
+    }
+
+    function updatePlanPhases(planId, mutateFn) {
+      const plan = plans.find(item => item.id === planId);
+      if (!plan) return;
+      const phases = planPhases(plan);
+      mutateFn(phases);
+      plan.phases = JSON.stringify(phases);
+      plan.syncStatus = "syncing";
+      const allSteps = allPlanSteps(plan);
+      if (allSteps.length > 0) {
+        plan.status = allSteps.every(s => s.done) ? "Hoàn thành" : "Đang làm";
+      }
+      localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
+      if (currentScreen === "taskdetail" && currentParams.id === planId) renderTaskDetail(planId);
+      else render();
+      syncPlanInBackground(plan);
+    }
+
+    window.upgradeToPhases = function (planId) {
+      const plan = plans.find(item => item.id === planId);
+      if (!plan) return;
+      if (!confirm("Chuyển các bước hiện có sang mô hình Giai đoạn? Sau đó có thể thêm nhiều giai đoạn (Khảo sát, Vật tư, Thi công, Nghiệm thu...).")) return;
+      const legacySteps = planSteps(plan);
+      updatePlanPhases(planId, phases => {
+        phases.push({
+          id: "PHASE-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+          name: "Thực hiện", order: 1,
+          status: legacySteps.length && legacySteps.every(s => s.done) ? "done" : "doing",
+          steps: legacySteps.map(s => ({ ...s })) // sao chép — không xoá plan.steps gốc
+        });
+      });
+    };
+
+    window.addPhase = function (planId) {
+      const name = prompt("Tên giai đoạn mới (vd Khảo sát, Vật tư, Thi công, Nghiệm thu):");
+      if (!name || !name.trim()) return;
+      updatePlanPhases(planId, phases => {
+        phases.push({
+          id: "PHASE-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+          name: name.trim(), order: phases.length + 1, status: "todo", steps: []
+        });
+      });
+    };
+
+    window.renamePhase = function (planId, phaseId) {
+      const plan = plans.find(item => item.id === planId);
+      const phase = plan && planPhases(plan).find(p => p.id === phaseId);
+      if (!phase) return;
+      const name = prompt("Tên giai đoạn:", phase.name || "");
+      if (name === null || !name.trim()) return;
+      updatePlanPhases(planId, phases => {
+        const ph = phases.find(p => p.id === phaseId);
+        if (ph) ph.name = name.trim();
+      });
+    };
+
+    window.deletePhase = function (planId, phaseId) {
+      if (!confirm("Xoá giai đoạn này? Các bước trong giai đoạn sẽ bị xoá theo.")) return;
+      updatePlanPhases(planId, phases => {
+        const index = phases.findIndex(p => p.id === phaseId);
+        if (index >= 0) phases.splice(index, 1);
+      });
+    };
+
+    function rollUpPhaseStatus_(phase) {
+      if (!phase) return;
+      const steps = phase.steps || [];
+      phase.status = steps.length === 0 ? "todo" : steps.every(s => s.done) ? "done" : steps.some(s => s.done) ? "doing" : "todo";
+    }
+
+    window.addPhaseStep = function (planId, phaseId) {
+      const title = prompt("Tên bước mới:");
+      if (!title || !title.trim()) return;
+      updatePlanPhases(planId, phases => {
+        const phase = phases.find(p => p.id === phaseId);
+        if (!phase) return;
+        if (!phase.steps) phase.steps = [];
+        phase.steps.push({
+          id: "STEP-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+          title: title.trim(), assignees: [], done: false, doneAt: "", doneBy: "", photos: []
+        });
+        rollUpPhaseStatus_(phase);
+      });
+    };
+
+    window.renamePhaseStep = function (planId, phaseId, stepId) {
+      const plan = plans.find(item => item.id === planId);
+      const phase = plan && planPhases(plan).find(p => p.id === phaseId);
+      const step = phase && (phase.steps || []).find(s => s.id === stepId);
+      if (!step) return;
+      const title = prompt("Tên bước:", step.title || "");
+      if (title === null || !title.trim()) return;
+      updatePlanPhases(planId, phases => {
+        const ph = phases.find(p => p.id === phaseId);
+        const s = ph && (ph.steps || []).find(x => x.id === stepId);
+        if (s) s.title = title.trim();
+      });
+    };
+
+    window.deletePhaseStep = function (planId, phaseId, stepId) {
+      if (!confirm("Xoá bước này?")) return;
+      updatePlanPhases(planId, phases => {
+        const phase = phases.find(p => p.id === phaseId);
+        if (!phase) return;
+        const index = (phase.steps || []).findIndex(s => s.id === stepId);
+        if (index >= 0) phase.steps.splice(index, 1);
+        rollUpPhaseStatus_(phase);
+      });
+    };
+
+    window.togglePhaseStepDone = function (planId, phaseId, stepId) {
+      updatePlanPhases(planId, phases => {
+        const phase = phases.find(p => p.id === phaseId);
+        const step = phase && (phase.steps || []).find(s => s.id === stepId);
+        if (!step) return;
+        step.done = !step.done;
+        step.doneAt = step.done ? new Date().toISOString() : "";
+        step.doneBy = step.done ? currentUser() : "";
+        rollUpPhaseStatus_(phase);
+      });
+    };
+
+    // Gán người cho bước: danh sách CHỈ hiện người cùng tag (tổ/nhãn) với việc
+    // — không đổ toàn bộ danh bạ, tránh chọn nhầm người không liên quan việc này.
+    // Không ai khớp tag → vẫn cho chọn toàn bộ (tránh bí lối khi danh bạ chưa gắn tag).
+    function filterNamesByTag(names, tagVal) {
+      const val = String(tagVal || "").trim().toLowerCase();
+      if (!val) return names;
+      const matches = names.filter(name => {
+        const person = staffDirectory.find(p =>
+          (p.name && p.name.toLowerCase() === name.toLowerCase()) ||
+          (p.username && p.username.toLowerCase() === name.toLowerCase())
+        );
+        if (!person) return false;
+        const dept = (person.dept || "").toLowerCase();
+        const labels = (person.labels || "").toLowerCase();
+        return (dept && (dept.includes(val) || val.includes(dept)))
+          || (labels && (labels.includes(val) || val.includes(labels)));
+      });
+      return matches.length > 0 ? matches : names;
+    }
+
+    window.addPhaseStepAssignee = function (planId, phaseId, stepId, rawName) {
+      let name = rawName;
+      if (name === "__other__") name = prompt("Tên người thực hiện:") || "";
+      if (!name || !name.trim()) return;
+      updatePlanPhases(planId, phases => {
+        const phase = phases.find(p => p.id === phaseId);
+        const step = phase && (phase.steps || []).find(s => s.id === stepId);
+        if (!step) return;
+        if (!step.assignees) step.assignees = [];
+        if (!step.assignees.some(n => normalizePerson(n) === normalizePerson(name))) step.assignees.push(name.trim());
+      });
+    };
+
+    window.removePhaseStepAssignee = function (planId, phaseId, stepId, name) {
+      updatePlanPhases(planId, phases => {
+        const phase = phases.find(p => p.id === phaseId);
+        const step = phase && (phase.steps || []).find(s => s.id === stepId);
+        if (!step) return;
+        step.assignees = (step.assignees || []).filter(n => normalizePerson(n) !== normalizePerson(name));
+      });
+    };
+
+    function phaseStepAssigneeEditorHtml(plan, phaseId, step) {
+      const names = step.assignees || [];
+      const chips = names.map(name => `
+        <span class="step-chip">${escapeHtml(name)}<button type="button" aria-label="Bỏ ${escapeAttr(name)}" onclick="event.stopPropagation(); removePhaseStepAssignee('${escapeAttr(plan.id)}','${escapeAttr(phaseId)}','${escapeAttr(step.id)}','${escapeAttr(name)}')">&times;</button></span>
+      `).join("");
+      const taken = new Set(names.map(normalizePerson));
+      const options = filterNamesByTag(knownPeopleNames().filter(n => !taken.has(normalizePerson(n))), plan.team);
+      const select = `
+        <select class="step-add-select" onclick="event.stopPropagation()" onchange="addPhaseStepAssignee('${escapeAttr(plan.id)}','${escapeAttr(phaseId)}','${escapeAttr(step.id)}', this.value); this.value='';">
+          <option value="">+ Gán người${plan.team ? " (" + escapeAttr(plan.team) + ")" : ""}</option>
+          ${options.map(n => `<option value="${escapeAttr(n)}">${escapeHtml(n)}</option>`).join("")}
+          <option value="__other__">➕ Nhập tên khác...</option>
+        </select>`;
+      return `<div class="step-assignees">${chips}${select}</div>`;
+    }
+
+    function phaseStepRowHtml(plan, phase, step) {
+      return `
+        <div class="step-row${step.done ? " done" : ""}">
+          <button class="step-check${step.done ? " done" : ""}" type="button"
+                  title="${step.done ? "Bỏ đánh dấu xong" : "Đánh dấu xong"}"
+                  onclick="togglePhaseStepDone('${escapeAttr(plan.id)}','${escapeAttr(phase.id)}','${escapeAttr(step.id)}')">
+            <i class="bi ${step.done ? "bi-check-lg" : "bi-circle"}"></i>
+          </button>
+          <div class="step-body min-w-0">
+            <div class="step-title" onclick="renamePhaseStep('${escapeAttr(plan.id)}','${escapeAttr(phase.id)}','${escapeAttr(step.id)}')">${escapeHtml(step.title || "Bước chưa đặt tên")}</div>
+            ${phaseStepAssigneeEditorHtml(plan, phase.id, step)}
+            ${photoThumbsHtml(step.photos)}
+            <button class="link-button-sm mt-1" type="button" onclick="attachPhaseStepPhoto('${escapeAttr(plan.id)}','${escapeAttr(phase.id)}','${escapeAttr(step.id)}')"><i class="bi bi-camera me-1"></i>Đính ảnh</button>
+            ${step.done && step.doneBy ? `<div class="step-done-note"><i class="bi bi-check2-circle me-1"></i>${escapeHtml(step.doneBy)} đã xong${step.doneAt ? " · " + friendlyDate(step.doneAt.slice(0, 10)) : ""}</div>` : ""}
+          </div>
+          <div class="step-actions">
+            ${!step.done ? `<button class="step-icon-btn" type="button" title="Ghi nhật ký bước này" onclick="navigateTo('logentry', {planId:'${escapeAttr(plan.id)}', stepId:'${escapeAttr(step.id)}', presetProgress:'Hoàn thành'})"><i class="bi bi-journal-plus"></i></button>` : ""}
+            <button class="step-icon-btn text-danger" type="button" title="Xoá bước" onclick="deletePhaseStep('${escapeAttr(plan.id)}','${escapeAttr(phase.id)}','${escapeAttr(step.id)}')"><i class="bi bi-trash"></i></button>
+          </div>
+        </div>`;
+    }
+
+    function phaseCardBodyHtml(plan, phase, isCurrent) {
+      const steps = phase.steps || [];
+      const doneCount = steps.filter(s => s.done).length;
+      const dotClass = phase.status === "done" ? "done" : phase.status === "doing" ? "cur" : "todo";
+      const dotIcon = phase.status === "done" ? "bi-check-lg" : phase.status === "doing" ? "bi-play-fill" : "bi-circle";
+      return `
+        <div class="phase-block${isCurrent ? " phase-current" : ""}">
+          <div class="phase-head">
+            <span class="phase-dot phase-dot-${dotClass}"><i class="bi ${dotIcon}"></i></span>
+            <span class="phase-name" onclick="renamePhase('${escapeAttr(plan.id)}','${escapeAttr(phase.id)}')">${escapeHtml(phase.name || "Giai đoạn")}</span>
+            <span class="phase-count">${steps.length ? `${doneCount}/${steps.length}` : ""}</span>
+            <button class="step-icon-btn text-danger" type="button" title="Xoá giai đoạn" onclick="deletePhase('${escapeAttr(plan.id)}','${escapeAttr(phase.id)}')"><i class="bi bi-trash"></i></button>
+          </div>
+          ${steps.length ? `<div class="step-list mt-2">${steps.map(step => phaseStepRowHtml(plan, phase, step)).join("")}</div>` : ""}
+          <button class="add-step-link" type="button" onclick="addPhaseStep('${escapeAttr(plan.id)}','${escapeAttr(phase.id)}')"><i class="bi bi-plus-lg"></i> Thêm bước</button>
+        </div>`;
+    }
+
+    function phasesCardHtml(plan) {
+      const phases = planPhases(plan).slice().sort((a, b) => (a.order || 0) - (b.order || 0));
+      if (phases.length === 0) return "";
+      const totalSteps = phases.reduce((n, ph) => n + (ph.steps || []).length, 0);
+      const doneSteps = phases.reduce((n, ph) => n + (ph.steps || []).filter(s => s.done).length, 0);
+      // Giai đoạn "đang chạy" = giai đoạn doing đầu tiên, hoặc giai đoạn todo đầu tiên nếu chưa có doing
+      const firstDoing = phases.find(p => p.status === "doing");
+      const firstTodo = phases.find(p => p.status !== "done");
+      const current = firstDoing || firstTodo || phases[phases.length - 1];
+      const currentIndex = current ? phases.findIndex(p => p.id === current.id) : -1;
+      return `
+        <div class="info-card">
+          <div class="d-flex align-items-center justify-content-between gap-2">
+            <div class="info-label mb-0"><i class="bi bi-diagram-3-fill"></i>Giai đoạn &amp; bước${totalSteps ? ` — GĐ ${currentIndex + 1}/${phases.length} · ${doneSteps}/${totalSteps} bước` : ` (${phases.length})`}</div>
+            <button class="btn btn-sm btn-outline-primary rounded-pill" type="button" onclick="addPhase('${escapeAttr(plan.id)}')"><i class="bi bi-plus-lg"></i> Thêm giai đoạn</button>
+          </div>
+          <div class="mt-2">${phases.map(phase => phaseCardBodyHtml(plan, phase, current && phase.id === current.id)).join("")}</div>
+        </div>`;
+    }
+
+    // ===== Ảnh đính kèm (chỉ đạo/kế hoạch, phát sinh, nhật ký, bước, bàn giao) =====
+    // 1 input file dùng chung (#sharedPhotoInput) — đích upload chọn qua attachPhoto(target),
+    // resize ảnh xuống tối đa 900px như handleImage() ở index.html để nhẹ dữ liệu qua GAS.
+    let pendingPhotoTarget = null;
+    let pendingLogPhotos = []; // ảnh đính vào nhật ký đang soạn, gộp vào payload lúc submitLog
+    let pendingHandoverPhotos = []; // ảnh đính vào phiếu bàn giao đang soạn, gộp vào submitHandover
+
+    function photoThumbsHtml(photos) {
+      const list = Array.isArray(photos) ? photos : [];
+      if (!list.length) return "";
+      return `<div class="photo-thumbs">${list.map(p => `
+        <a class="photo-thumb" href="${escapeAttr(p.url)}" target="_blank" rel="noopener" title="${escapeAttr(p.by || "")}${p.at ? " · " + escapeAttr(friendlyDate(String(p.at).slice(0, 10))) : ""}">
+          <img src="${escapeAttr(p.url)}" alt="Ảnh đính kèm" loading="lazy">
+        </a>`).join("")}</div>`;
+    }
+
+    function resizeImageFile(file, maxSize) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error("Không đọc được ảnh"));
+        reader.onload = event => {
+          const img = new Image();
+          img.onerror = () => reject(new Error("Ảnh không hợp lệ"));
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            let width = img.width, height = img.height;
+            const max = maxSize || 900;
+            if (width > height) { if (width > max) { height *= max / width; width = max; } }
+            else if (height > max) { width *= max / height; height = max; }
+            canvas.width = width; canvas.height = height;
+            canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+            const base64 = canvas.toDataURL("image/jpeg", 0.7);
+            resolve({ base64: base64.split(",")[1], mimeType: "image/jpeg" });
+          };
+          img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function uploadPhotoAndGetUrl(file, prefix) {
+      const imageObj = await resizeImageFile(file, 900);
+      const data = await bdsApiPost("uploadPhoto", { image: imageObj, prefix: prefix || "NHATKY" }, { timeout: 20000, retries: 1 });
+      if (data.status !== "success" || !data.url) throw new Error(data.message || "Upload ảnh thất bại");
+      return data.url;
+    }
+
+    function attachPhoto(target) {
+      if (!currentUser()) { showToast("Vui lòng đăng nhập trước khi đính ảnh"); return; }
+      pendingPhotoTarget = target;
+      document.getElementById("sharedPhotoInput").click();
+    }
+
+    window.attachPlanPhoto = function (planId) { attachPhoto({ kind: "plan", planId: planId }); };
+    window.attachPhaseStepPhoto = function (planId, phaseId, stepId) { attachPhoto({ kind: "phaseStep", planId: planId, phaseId: phaseId, stepId: stepId }); };
+    window.attachLogPhoto = function () { attachPhoto({ kind: "log" }); };
+    window.attachHandoverPhoto = function () { attachPhoto({ kind: "handover" }); };
+
+    function planPhotos(plan) {
+      if (!plan || !plan.photos) return [];
+      try {
+        const parsed = JSON.parse(plan.photos);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (e) { return []; }
+    }
+
+    function addPlanPhoto(planId, photo) {
+      const plan = plans.find(item => item.id === planId);
+      if (!plan) return;
+      const photos = planPhotos(plan);
+      photos.push(photo);
+      plan.photos = JSON.stringify(photos);
+      plan.syncStatus = "syncing";
+      localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
+      if (currentScreen === "taskdetail" && currentParams.id === planId) renderTaskDetail(planId);
+      syncPlanInBackground(plan);
+    }
+
+    function addPhaseStepPhoto(planId, phaseId, stepId, photo) {
+      updatePlanPhases(planId, phases => {
+        const phase = phases.find(p => p.id === phaseId);
+        const step = phase && (phase.steps || []).find(s => s.id === stepId);
+        if (!step) return;
+        if (!step.photos) step.photos = [];
+        step.photos.push(photo);
+      });
+    }
+
+    document.getElementById("sharedPhotoInput").addEventListener("change", async event => {
+      const file = event.target.files[0];
+      event.target.value = ""; // cho phép chọn lại đúng file đó lần sau
+      const target = pendingPhotoTarget;
+      pendingPhotoTarget = null;
+      if (!file || !target) return;
+      showToast("Đang tải ảnh lên...");
+      try {
+        const url = await uploadPhotoAndGetUrl(file, (target.kind || "NHATKY").toUpperCase());
+        const photo = { url: url, by: currentUser(), at: new Date().toISOString() };
+        if (target.kind === "plan") addPlanPhoto(target.planId, photo);
+        else if (target.kind === "phaseStep") addPhaseStepPhoto(target.planId, target.phaseId, target.stepId, photo);
+        else if (target.kind === "log") { pendingLogPhotos.push(photo); renderPendingLogPhotos(); }
+        else if (target.kind === "handover") { pendingHandoverPhotos.push(photo); renderPendingHandoverPhotos(); }
+        showToast("Đã đính ảnh ✓");
+      } catch (error) {
+        showToast("Lỗi đính ảnh: " + error.message);
+      }
+    });
+
+    function renderPendingLogPhotos() {
+      const box = document.getElementById("logPendingPhotos");
+      if (!box) return;
+      box.innerHTML = photoThumbsHtml(pendingLogPhotos);
+    }
+
+    // ===== Bàn giao ca (handover) — P3 =====
+    // plan.handover là LỊCH SỬ bàn giao GẦN NHẤT (JSON) — không phải hàng đợi nhiều
+    // bàn giao; đủ dùng vì mỗi lần bàn giao đều có nhật ký audit riêng (logPlanAction)
+    // làm bằng chứng lịch sử đầy đủ, còn plan.handover chỉ phục vụ hiển thị "đang chờ nhận".
+    let handoverModalInstance = null;
+
+    function planHandover(plan) {
+      if (!plan || !plan.handover) return null;
+      try {
+        const parsed = JSON.parse(plan.handover);
+        return parsed && typeof parsed === "object" ? parsed : null;
+      } catch (e) { return null; }
+    }
+
+    // Mọi thay đổi trực tiếp lên plan (không qua steps/phases) đi qua đây —
+    // cùng cơ chế local-first + đồng bộ nền như updatePlanSteps/updatePlanPhases.
+    function mutatePlanDirect(planId, mutateFn) {
+      const plan = plans.find(item => item.id === planId);
+      if (!plan) return null;
+      mutateFn(plan);
+      plan.syncStatus = "syncing";
+      localStorage.setItem(STORAGE_KEYS.plans, JSON.stringify(plans));
+      if (currentScreen === "taskdetail" && currentParams.id === planId) renderTaskDetail(planId);
+      else render();
+      syncPlanInBackground(plan);
+      return plan;
+    }
+
+    function renderPendingHandoverPhotos() {
+      const box = document.getElementById("handoverPhotos");
+      if (!box) return;
+      box.innerHTML = photoThumbsHtml(pendingHandoverPhotos);
+    }
+
+    window.toggleHandoverRecipientFields = function () {
+      const isTeam = document.getElementById("handoverToTypeShift").checked;
+      document.getElementById("handoverToUserField").classList.toggle("d-none", isTeam);
+      document.getElementById("handoverToTeamField").classList.toggle("d-none", !isTeam);
+    };
+
+    window.openHandoverModal = function (planId) {
+      if (!currentUser()) { showToast("Vui lòng đăng nhập trước khi bàn giao"); return; }
+      const plan = plans.find(item => item.id === planId);
+      if (!plan) return;
+      document.getElementById("handoverPlanId").value = planId;
+      document.getElementById("handoverToTypePerson").checked = true;
+      const userOptions = filterNamesByTag(knownPeopleNames(), plan.team);
+      document.getElementById("handoverToUser").innerHTML =
+        '<option value="">— Chọn người nhận —</option>' +
+        userOptions.map(name => `<option value="${escapeAttr(name)}">${escapeHtml(name)}</option>`).join("");
+      document.getElementById("handoverToTeam").innerHTML =
+        '<option value="">— Chọn ca/tổ nhận —</option>' +
+        SUPPORTED_TEAMS.map(team => `<option value="${escapeAttr(team)}">${escapeHtml(team)}</option>`).join("");
+      document.getElementById("handoverProgress").value = "";
+      document.getElementById("handoverPending").value = "";
+      document.getElementById("handoverRisk").value = "";
+      pendingHandoverPhotos = [];
+      renderPendingHandoverPhotos();
+      toggleHandoverRecipientFields();
+      document.getElementById("handoverAutoLogNote").innerHTML =
+        `<i class="bi bi-clock-history me-1"></i>Phần mềm tự ghi: <b>${escapeHtml(currentUser())}</b> bàn giao lúc lưu — thay cho chữ ký.`;
+      if (!handoverModalInstance) handoverModalInstance = new bootstrap.Modal(document.getElementById("handoverModal"));
+      handoverModalInstance.show();
+    };
+
+    window.submitHandover = function () {
+      const planId = document.getElementById("handoverPlanId").value;
+      const plan = plans.find(item => item.id === planId);
+      if (!plan) return;
+      const toType = document.getElementById("handoverToTypeShift").checked ? "shift" : "person";
+      const toUser = document.getElementById("handoverToUser").value;
+      const toTeam = document.getElementById("handoverToTeam").value;
+      if (toType === "person" && !toUser) { showToast("Chọn người nhận bàn giao"); return; }
+      if (toType === "shift" && !toTeam) { showToast("Chọn ca/tổ nhận bàn giao"); return; }
+      const handoverObj = {
+        at: new Date().toISOString(),
+        fromUser: currentUser(),
+        toType: toType,
+        toUser: toType === "person" ? toUser : "",
+        toTeam: toType === "shift" ? toTeam : "",
+        progressNote: document.getElementById("handoverProgress").value.trim(),
+        pending: document.getElementById("handoverPending").value.trim(),
+        risk: document.getElementById("handoverRisk").value.trim(),
+        photos: pendingHandoverPhotos,
+        accepted: false, acceptedBy: "", acceptedAt: ""
+      };
+      mutatePlanDirect(planId, p => { p.handover = JSON.stringify(handoverObj); });
+      const recipientText = toType === "person" ? toUser : `ca/tổ ${toTeam}`;
+      logPlanAction(plan, "Bàn giao việc", `giao cho ${recipientText}${handoverObj.pending ? " — Cần xử lý tiếp: " + handoverObj.pending : ""}`);
+      if (handoverModalInstance) handoverModalInstance.hide();
+      showToast("Đã bàn giao ✓ — đang đồng bộ nền...");
+    };
+
+    window.acceptHandover = function (planId) {
+      const plan = plans.find(item => item.id === planId);
+      const ho = plan && planHandover(plan);
+      if (!ho || ho.accepted) return;
+      if (!currentUser()) { showToast("Vui lòng đăng nhập trước khi nhận bàn giao"); return; }
+      if (!confirm("Xác nhận nhận bàn giao việc này? Việc sẽ chuyển về Đang làm.")) return;
+      ho.accepted = true;
+      ho.acceptedBy = currentUser();
+      ho.acceptedAt = new Date().toISOString();
+      mutatePlanDirect(planId, p => {
+        p.handover = JSON.stringify(ho);
+        p.status = "Đang làm";
+      });
+      logPlanAction(plan, "Nhận bàn giao");
+      showToast("Đã nhận bàn giao ✓");
+    };
+
+    // Thẻ hiển thị bàn giao đang chờ nhận trong màn Chi tiết (chỉ hiện khi
+    // handover chưa được nhận — sau khi nhận thì gọn lại, lịch sử đã có trong nhật ký).
+    function handoverCardHtml(plan) {
+      const ho = planHandover(plan);
+      if (!ho || ho.accepted) return "";
+      const recipient = ho.toType === "shift" ? `Ca/tổ ${escapeHtml(ho.toTeam || "")}` : escapeHtml(ho.toUser || "");
+      return `
+        <div class="info-card" style="border-left: 4px solid var(--warn-ink);">
+          <div class="info-label"><i class="bi bi-arrow-repeat"></i>Đang bàn giao cho ${recipient}</div>
+          ${ho.progressNote ? `<div class="info-value normal">${escapeHtml(ho.progressNote)}</div>` : ""}
+          ${ho.pending ? `<div class="small text-warning-emphasis fw-bold mt-1"><i class="bi bi-exclamation-triangle me-1"></i>Cần xử lý tiếp: ${escapeHtml(ho.pending)}</div>` : ""}
+          ${ho.risk ? `<div class="small text-danger mt-1"><i class="bi bi-shield-exclamation me-1"></i>${escapeHtml(ho.risk)}</div>` : ""}
+          ${photoThumbsHtml(ho.photos)}
+          <button class="btn btn-sm btn-primary rounded-pill mt-2" type="button" onclick="acceptHandover('${escapeAttr(plan.id)}')"><i class="bi bi-check2-circle me-1"></i>Nhận bàn giao</button>
+        </div>`;
+    }
+
+    // ===== Nghiệm thu / Chốt sổ — P3 =====
+    // Không cố định người nghiệm thu: ai cũng bấm được. "Đã chốt sổ" lưu qua nhãn
+    // (Labels — cột đã có sẵn), người/giờ chốt tự ghi qua logPlanAction (audit trail),
+    // không cần thêm cột ClosedBy/ClosedAt riêng.
+    window.closePlanReview = function (planId) {
+      const plan = plans.find(item => item.id === planId);
+      if (!plan) return;
+      if (plan.status !== "Hoàn thành") { showToast("Chỉ nghiệm thu/chốt sổ khi việc đã Hoàn thành kỹ thuật"); return; }
+      if (planHasLabel(plan, "Đã chốt sổ")) { showToast("Việc này đã được chốt sổ trước đó"); return; }
+      if (!currentUser()) { showToast("Vui lòng đăng nhập trước khi chốt sổ"); return; }
+      const result = (prompt("Kết quả xử lý (có thể để trống):", "") || "").trim();
+      if (!confirm("Xác nhận đạt tiêu chí — chốt sổ việc này? Phần mềm sẽ tự ghi người và giờ chốt.")) return;
+      mutatePlanDirect(planId, p => {
+        const labels = planLabelsList(p);
+        if (!labels.includes("Đã chốt sổ")) labels.push("Đã chốt sổ");
+        p.labels = labels.join(", ");
+      });
+      logPlanAction(plan, "Nghiệm thu · Chốt sổ", result);
+      showToast("Đã chốt sổ ✓");
+    };
 
     // ===== Màn Ghi nhật ký (Phương án A) =====
     function syncQuantityDisplay() {
@@ -4767,10 +5651,12 @@
     function renderLogEntry(params) {
       params = params || {};
       document.getElementById("quantity").value = "";
+      pendingLogPhotos = [];
+      renderPendingLogPhotos();
       const ctxCard = document.getElementById("logContextCard");
       const adhocField = document.getElementById("adhocTaskField");
       const plan = params.planId ? plans.find(item => item.id === params.planId) : null;
-      const step = plan && params.stepId ? planSteps(plan).find(s => s.id === params.stepId) : null;
+      const step = plan && params.stepId ? findAnyStep(plan, params.stepId) : null;
 
       if (plan) {
         ctxCard.style.display = "";
@@ -4875,6 +5761,7 @@
         createdAt: new Date().toISOString(),
         recordedBy: recordedBy,
         unit: document.getElementById("quantityUnit").value.trim(),
+        photos: pendingLogPhotos.length ? JSON.stringify(pendingLogPhotos) : "",
         syncStatus: "local"
       };
       const people = getPeopleResults();
@@ -4969,17 +5856,32 @@
       if (!plan) return;
 
       // Ghi nhật ký cho một bước cụ thể + kết quả "Hoàn thành" → đánh dấu đúng
-      // bước đó xong (không hỏi qua checkbox "Kết thúc việc này" — xem setProgress)
-      const steps = planSteps(plan);
+      // bước đó xong (không hỏi qua checkbox "Kết thúc việc này" — xem setProgress).
+      // Bước có thể nằm ở steps phẳng cũ HOẶC trong 1 giai đoạn — thử cả 2 nơi.
       if (stepId && logProgress === "Hoàn thành") {
-        const step = steps.find(s => s.id === stepId);
-        if (step) {
-          step.done = true;
-          step.doneAt = new Date().toISOString();
-          step.doneBy = recordedBy || "";
-          plan.steps = JSON.stringify(steps);
+        const legacySteps = planSteps(plan);
+        const legacyStep = legacySteps.find(s => s.id === stepId);
+        if (legacyStep) {
+          legacyStep.done = true;
+          legacyStep.doneAt = new Date().toISOString();
+          legacyStep.doneBy = recordedBy || "";
+          plan.steps = JSON.stringify(legacySteps);
+        } else {
+          const phases = planPhases(plan);
+          for (const phase of phases) {
+            const phaseStep = (phase.steps || []).find(s => s.id === stepId);
+            if (phaseStep) {
+              phaseStep.done = true;
+              phaseStep.doneAt = new Date().toISOString();
+              phaseStep.doneBy = recordedBy || "";
+              rollUpPhaseStatus_(phase);
+              break;
+            }
+          }
+          plan.phases = JSON.stringify(phases);
         }
       }
+      const steps = allPlanSteps(plan);
 
       let nextStatus = "Đang làm";
       // "Cần hỗ trợ" không còn là 1 state — chỉ gắn thêm label, tiến độ vẫn coi là "Đang làm"
@@ -5029,6 +5931,8 @@
       document.getElementById("planCumNote").classList.add("d-none");
       document.querySelectorAll("#resultChips .qc").forEach(btn => btn.classList.remove("on"));
       syncQuantityDisplay();
+      pendingLogPhotos = [];
+      renderPendingLogPhotos();
     }
 
     // ===== Màn Nhật ký đã ghi =====
@@ -5055,7 +5959,7 @@
 
     // Cần chú ý = cần hỗ trợ hoặc còn tồn/đề xuất, và kế hoạch liên quan chưa Hoàn thành
     function needsAttention(log) {
-      if (String(log.selectedTask || "").startsWith("[Kế hoạch]")) return false;
+      if (isAuditLog(log)) return false;
       if (log.progress !== "Cần hỗ trợ" && !hasFollowup(log)) return false;
       if (isFollowupResolved(log)) return false;
       if (log.planId) {
@@ -5222,7 +6126,7 @@
 
     // Nhật ký còn tồn tại hoặc đề xuất → cần theo dõi xử lý tiếp
     function hasFollowup(log) {
-      return Boolean((log.issue || log.nextAction) && !String(log.selectedTask || "").startsWith("[Kế hoạch]"));
+      return Boolean((log.issue || log.nextAction) && !isAuditLog(log));
     }
 
     // Bấm "Tiếp tục xử lý": đổ lại thông tin việc vào màn Ghi nhật ký
@@ -5431,9 +6335,6 @@
         (personName === PEOPLE_UNASSIGNED || normalizePerson(log.employee) === normalizePerson(personName)));
     }
 
-    // Trạng thái theo đúng thứ tự cột Bảng (Kanban) — nhóm việc theo state thay vì theo người
-    const PLAN_BOARD_STATES = ["Chưa làm", "Đang làm", "Hoàn thành", "Đã hủy"];
-
     function togglePeopleViewMode() {
       peopleViewMode = peopleViewMode === "board" ? "list" : "board";
       document.getElementById("btnToggleBoard").classList.toggle("active", peopleViewMode === "board");
@@ -5451,15 +6352,27 @@
       `;
     }
 
-    function renderPeopleBoard(container, visible) {
+    // Kanban — nhóm theo VÒNG ĐỜI (không chỉ status thô) để thấy được việc đang
+    // bàn giao/chờ nhận và việc xong kỹ thuật nhưng chưa chốt sổ (P3).
+    function renderPeopleBoard(container, visible, iso) {
       if (visible.length === 0) {
         container.innerHTML = '<div class="empty-state">Không có việc nào trong ngày này.</div>';
         return;
       }
-      const columns = PLAN_BOARD_STATES.map(state => ({
-        state,
-        items: visible.filter(plan => plan.status === state)
-      }));
+      const handoverItems = visible.filter(p => {
+        if (p.status === "Đã hủy") return false;
+        const ho = planHandover(p);
+        return Boolean((ho && !ho.accepted) || isCarryOver(p, iso) || (p.followUpDate && p.status !== "Hoàn thành"));
+      });
+      const reviewItems = visible.filter(p => !handoverItems.includes(p) && p.status === "Hoàn thành" && !planHasLabel(p, "Đã chốt sổ"));
+      const columns = [
+        { state: "Chưa làm", items: visible.filter(p => p.status === "Chưa làm" && !handoverItems.includes(p)) },
+        { state: "Đang làm", items: visible.filter(p => p.status === "Đang làm" && !handoverItems.includes(p)) },
+        { state: "Bàn giao / Xử lý tiếp", items: handoverItems },
+        { state: "Chờ nghiệm thu", items: reviewItems },
+        { state: "Hoàn thành", items: visible.filter(p => p.status === "Hoàn thành" && planHasLabel(p, "Đã chốt sổ")) },
+        { state: "Đã hủy", items: visible.filter(p => p.status === "Đã hủy") }
+      ];
       container.innerHTML = `
         <div class="board-columns">
           ${columns.map(col => `
@@ -5476,124 +6389,138 @@
 
     function renderPeopleScreen() {
       const container = document.getElementById("peopleBody");
+      if (!container) return;
       const iso = selectedTaskDate();
       const visible = getVisiblePlans("day");
       renderDayLogSummary(visible, iso);
 
       if (peopleViewMode === "board") {
-        renderPeopleBoard(container, visible);
+        renderPeopleBoard(container, visible, iso);
         return;
       }
 
-      const buckets = new Map();
-      visible.forEach(plan => {
-        planWorkItems(plan).forEach(item => {
-          const people = workItemAssignees(item);
-          (people.length ? people : [PEOPLE_UNASSIGNED]).forEach(name => {
-            const key = normalizePerson(name);
-            if (!buckets.has(key)) buckets.set(key, { name, items: [] });
-            buckets.get(key).items.push(item);
-          });
-        });
+      // 1. Cần xử lý tiếp (Help / Handover / Carryover / Priority Khẩn cấp)
+      const needsAttentionPlans = visible.filter(p => {
+        const lc = getPlanLifecycle(p, iso);
+        return lc === 'help' || lc === 'handover' || isCarryOver(p, iso) || planHasLabel(p, "Cần hỗ trợ") || p.priority === "Khẩn cấp";
       });
 
-      // Việc tồn từ nhật ký phát sinh (không gắn kế hoạch nào): trước đây chỉ hiện
-      // ở màn "Nhật ký đã ghi" — nhìn màn chính tưởng hết việc nhưng vẫn còn tồn.
+      // 2. Đang làm (Doing)
+      const doingPlans = visible.filter(p => {
+        if (needsAttentionPlans.includes(p)) return false;
+        const lc = getPlanLifecycle(p, iso);
+        return lc === 'doing' || p.status === "Đang làm";
+      });
+
+      // 3. Chờ nghiệm thu (Review / Technique Done)
+      const reviewPlans = visible.filter(p => {
+        if (needsAttentionPlans.includes(p) || doingPlans.includes(p)) return false;
+        const lc = getPlanLifecycle(p, iso);
+        return lc === 'review' || (p.status === "Hoàn thành" && !p.closedBy && !planHasLabel(p, "Đã chốt sổ"));
+      });
+
+      // 4. Lịch sắp tới (7 ngày tiếp theo)
+      const sevenDaysLaterIso = shiftFilterDate(7);
+      const upcomingPlans = plans.filter(p => {
+        const pDate = planReminder(p);
+        return pDate > iso && pDate <= sevenDaysLaterIso && p.status !== "Hoàn thành" && p.status !== "Đã hủy";
+      }).sort((a, b) => (a.date || "").localeCompare(b.date || "") || (a.time || "").localeCompare(b.time || ""));
+
+      // 5. Đã hoàn thành / Chốt sổ hôm nay
+      const donePlans = visible.filter(p => {
+        if (needsAttentionPlans.includes(p) || doingPlans.includes(p) || reviewPlans.includes(p)) return false;
+        return p.status === "Hoàn thành" || p.lifecycle === "closed" || planHasLabel(p, "Đã chốt sổ");
+      });
+
+      // Kế hoạch Chưa làm khác trong ngày
+      const otherPlanned = visible.filter(p => {
+        return !needsAttentionPlans.includes(p) && !doingPlans.includes(p) && !reviewPlans.includes(p) && !donePlans.includes(p);
+      });
+
       const followups = adhocFollowupLogs();
       const followupSection = followups.length ? followupSectionHtml(followups) : "";
 
-      if (buckets.size === 0 && !followupSection) {
-        container.innerHTML = '<div class="empty-state">Không có việc nào trong ngày này.</div>';
+      if (visible.length === 0 && upcomingPlans.length === 0 && !followupSection) {
+        container.innerHTML = '<div class="empty-state">Không có công việc nào trong ngày này.</div>';
         return;
       }
 
-      const hasAttention = group => group.items.some(item => planHasLabel(item.plan, "Cần hỗ trợ") || isCarryOver(item.plan, iso));
-      const groups = [...buckets.values()].sort((a, b) => {
-        const attnDiff = (hasAttention(a) ? 0 : 1) - (hasAttention(b) ? 0 : 1);
-        if (attnDiff) return attnDiff;
-        if (a.name === PEOPLE_UNASSIGNED) return 1;
-        if (b.name === PEOPLE_UNASSIGNED) return -1;
-        return a.name.localeCompare(b.name, "vi");
-      });
+      function renderJobCardHtml(plan, isUpcoming) {
+        const lc = getPlanLifecycle(plan, iso);
+        const cfg = LIFECYCLE_CONFIG[lc] || LIFECYCLE_CONFIG.planned;
+        const where = [plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ");
+        const steps = planSteps(plan);
+        const doneSteps = steps.filter(s => s.done).length;
+        const stepsProgressHtml = steps.length > 0
+          ? `<span class="badge bg-light text-dark border ms-2" style="font-size:10px;"><i class="bi bi-list-check me-1"></i>${doneSteps}/${steps.length} bước</span>`
+          : "";
+        const dateTag = isUpcoming ? `<span class="badge bg-primary-subtle text-primary border-primary me-1"><i class="bi bi-calendar-event me-1"></i>${shortDateVn(plan.date)}</span>` : "";
 
-      const html = groups.map(group => {
-        const doneCount = group.items.filter(item => !item.step && item.plan.status === "Hoàn thành").length;
-        const carryCount = group.items.filter(item => item.plan.status !== "Hoàn thành" && isCarryOver(item.plan, iso)).length;
-        const stepCount = group.items.filter(item => item.step).length;
-        const summary = [`${group.items.length} việc`, stepCount ? `${stepCount} bước dở dang` : "", doneCount ? `${doneCount} xong` : "", carryCount ? `${carryCount} tồn` : ""].filter(Boolean).join(" · ");
-        const rows = group.items
-          .slice()
-          .sort((a, b) => peopleItemOrder(a, iso) - peopleItemOrder(b, iso) || (a.plan.time || "").localeCompare(b.plan.time || ""))
-          .map(item => {
-            const plan = item.plan, step = item.step;
-            let logged;
-            if (step) {
-              logged = stepLoggedToday(plan, step, iso, group.name);
-            } else {
-              const entries = planLogsForDate(plan, iso);
-              logged = group.name === PEOPLE_UNASSIGNED
-                ? entries.length > 0
-                : entries.some(log => normalizePerson(log.employee) === normalizePerson(group.name));
-            }
-            const where = [plan.area, plan.asset].filter(Boolean).map(escapeHtml).join(" · ");
-            const taskLabel = step
-              ? `${escapeHtml(plan.task || "Chưa đặt tên công việc")} <span class="text-secondary fw-normal">— ${escapeHtml(step.title || "")}</span>`
-              : escapeHtml(plan.task || "Chưa đặt tên công việc");
-            const onClick = step
-              ? `navigateTo('logentry', {planId:'${escapeAttr(plan.id)}', stepId:'${escapeAttr(step.id)}', presetProgress:'Hoàn thành'})`
-              : `navigateTo('logentry', {planId:'${escapeAttr(plan.id)}', presetProgress:'Hoàn thành'})`;
+        const logOnClick = `navigateTo('logentry', {planId:'${escapeAttr(plan.id)}', presetProgress:'Hoàn thành'})`;
 
-            const priorityBarClass = plan.priority === "Khẩn cấp" || planHasLabel(plan, "Cần hỗ trợ") ? "stitch-bar-high"
-              : plan.priority === "Cao" ? "stitch-bar-medium" : "stitch-bar-low";
-
-            const priorityBadgeClass = plan.priority === "Khẩn cấp" || planHasLabel(plan, "Cần hỗ trợ") ? "stitch-badge-high"
-              : plan.priority === "Cao" ? "stitch-badge-medium" : "stitch-badge-low";
-
-            const steps = planSteps(plan);
-            const doneSteps = steps.filter(s => s.done).length;
-            const stepsProgressHtml = steps.length > 0
-              ? `<div class="mt-2 text-muted small"><i class="bi bi-list-check me-1"></i>Tiến độ bước: ${doneSteps}/${steps.length}</div>`
-              : "";
-
-            return `
-              <div class="stitch-card mb-2">
-                <div class="stitch-card-bar ${priorityBarClass}"></div>
-                <div class="stitch-card-header mb-1">
-                  <span class="stitch-badge ${priorityBadgeClass}">
-                    ${escapeHtml(plan.priority || "Trung bình")}
-                  </span>
-                  <div class="d-flex align-items-center gap-1">
-                    ${step ? peopleStepChip(plan, iso) : peoplePlanChip(plan, iso)}
-                    ${logged ? '<span class="badge-soft badge-done ms-1" style="font-size:10px;"><i class="bi bi-check-circle-fill"></i> Đã NK</span>' : ''}
-                  </div>
-                </div>
-                <div class="stitch-title fs-6 mb-1" onclick="${onClick}" style="cursor:pointer;" title="${step ? "Ghi nhật ký bước này" : "Ghi nhật ký việc này"}">${taskLabel}</div>
-                <div class="stitch-location small mb-2"><i class="bi bi-geo-alt me-1"></i>${where || "Chưa chọn vị trí"}${plan.time ? ' · <i class="bi bi-clock me-1"></i>' + escapeHtml(plan.time) : ''}</div>
-                ${stepsProgressHtml}
-                <div class="d-flex align-items-center gap-2 mt-2 pt-2 border-top border-light">
-                  <button type="button" class="btn btn-sm btn-outline-primary flex-grow-1 py-1 rounded-3 font-weight-bold" onclick="${onClick}">
-                    <i class="bi bi-journal-plus me-1"></i> Ghi nhật ký
-                  </button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary px-3 py-1 rounded-3" onclick="openTaskDetail('${escapeAttr(plan.id)}')" title="Chi tiết công việc">
-                    <i class="bi bi-info-circle me-1"></i> Chi tiết
-                  </button>
-                </div>
-              </div>`;
-          }).join("");
         return `
-          <div class="panel people-group">
-            <div class="panel-header d-flex align-items-center justify-content-between gap-2">
-              <h3 class="h6 m-0 fw-bold text-truncate"><i class="bi bi-person-fill text-brand me-1"></i>${escapeHtml(group.name)}</h3>
-              <span class="small text-secondary flex-shrink-0">${summary}</span>
+          <div class="dash-job-card shadow-sm mb-2 rounded-3 p-3 bg-white border border-light position-relative" style="border-left: 5px solid ${cfg.dot} !important;">
+            <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
+              <div class="d-flex align-items-center flex-wrap gap-1 min-w-0">
+                ${dateTag}
+                ${renderLifecycleBadge(lc)}
+                ${priorityBadge(plan.priority)}
+                ${labelBadges(plan)}
+              </div>
+              <span class="small text-muted flex-shrink-0"><i class="bi bi-clock me-1"></i>${escapeHtml(plan.time || 'Cả ngày')}</span>
             </div>
-            <div class="people-rows">${rows}</div>
+            <div class="fw-bold fs-6 text-dark mb-1 d-flex align-items-center justify-content-between" onclick="openTaskDetail('${escapeAttr(plan.id)}')" style="cursor:pointer;">
+              <span class="text-truncate">${escapeHtml(plan.task || 'Chưa đặt tên công việc')}</span>
+              ${stepsProgressHtml}
+            </div>
+            <div class="d-flex align-items-center justify-content-between gap-2 mt-2 pt-2 border-top border-light small">
+              <div class="d-flex align-items-center flex-wrap gap-1">
+                ${renderPlanPeopleBadgesHtml(plan)}
+              </div>
+              <div class="text-secondary text-truncate" style="max-width: 180px;">
+                <i class="bi bi-geo-alt me-1"></i>${where || 'Chưa chọn vị trí'}
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-2 mt-2 pt-2 border-top border-light">
+              <button type="button" class="btn btn-sm btn-outline-primary flex-grow-1 py-1 rounded-3 font-weight-bold" onclick="${logOnClick}">
+                <i class="bi bi-journal-plus me-1"></i> Ghi nhật ký
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary px-3 py-1 rounded-3" onclick="openTaskDetail('${escapeAttr(plan.id)}')" title="Chi tiết công việc">
+                <i class="bi bi-info-circle me-1"></i> Chi tiết
+              </button>
+            </div>
           </div>`;
-      }).join("");
+      }
 
-      container.innerHTML = `
-        <div class="week-label">${iso === today ? "Hôm nay" : weekdayNameVn(iso) + ", " + shortDateVn(iso)} — ${groups.length} người có việc</div>
+      function renderSectionHtml(title, iconClass, headerBgClass, countBadgeClass, items, isUpcoming = false) {
+        if (!items || items.length === 0) return '';
+        const cards = items.map(p => renderJobCardHtml(p, isUpcoming)).join('');
+        return `
+          <div class="dash-section mb-3">
+            <div class="dash-section-head d-flex align-items-center justify-content-between p-2 px-3 rounded-3 mb-2 ${headerBgClass}">
+              <div class="fw-bold fs-6 d-flex align-items-center gap-2">
+                <i class="bi ${iconClass}"></i> ${title}
+              </div>
+              <span class="badge ${countBadgeClass} rounded-pill px-2 py-1">${items.length}</span>
+            </div>
+            <div class="dash-section-body">${cards}</div>
+          </div>`;
+      }
+
+      const html = `
+        <div class="week-label mb-2 fw-bold text-secondary small">
+          <i class="bi bi-calendar3 me-1"></i>${iso === today ? "Hôm nay (" + formatDateVn(iso) + ")" : weekdayNameVn(iso) + ", " + shortDateVn(iso)} — ${visible.length} việc trong ngày
+        </div>
         ${followupSection}
-        ${html}`;
+        ${renderSectionHtml("CẦN XỬ LÝ TIẾP (Tồn / Bàn giao / Hỗ trợ)", "bi-exclamation-triangle-fill text-danger", "bg-danger-subtle text-danger border border-danger-subtle", "bg-danger text-white", needsAttentionPlans)}
+        ${renderSectionHtml("ĐANG THỰC HIỆN", "bi-play-circle-fill text-primary", "bg-primary-subtle text-primary border border-primary-subtle", "bg-primary text-white", doingPlans)}
+        ${renderSectionHtml("CHỜ NGHIỆM THU", "bi-clipboard-check-fill text-purple", "bg-purple-subtle text-purple border border-purple-subtle", "bg-purple text-white", reviewPlans)}
+        ${renderSectionHtml("KẾ HOẠCH TRONG NGÀY", "bi-calendar-check text-info", "bg-info-subtle text-info border border-info-subtle", "bg-info text-white", otherPlanned)}
+        ${renderSectionHtml("LỊCH SẮP TỚI (7 NGÀY)", "bi-calendar-week-fill text-success", "bg-success-subtle text-success border border-success-subtle", "bg-success text-white", upcomingPlans, true)}
+        ${renderSectionHtml("ĐÃ HOÀN THÀNH / CHỐT SỔ", "bi-check-circle-fill text-secondary", "bg-secondary-subtle text-secondary border border-secondary-subtle", "bg-secondary text-white", donePlans)}
+      `;
+
+      container.innerHTML = html;
     }
 
     let currentZaloTab = 'my_private';
