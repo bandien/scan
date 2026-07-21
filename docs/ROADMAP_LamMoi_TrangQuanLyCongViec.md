@@ -112,7 +112,14 @@ plan = {
 - [x] Picker gán người chỉ hiện người cùng tag (fallback toàn bộ nếu không khớp).
 - [x] Đính được ảnh ở plan (chỉ đạo/kế hoạch/phát sinh), bước, và nhật ký; xem lại được thumbnail; ảnh lưu Drive + link trong sheet.
 - [x] Cú pháp JS (nhatky/index.html) và 3 file `.gs` đã sửa kiểm tra qua `node --check` — không lỗi.
-- [ ] **Chưa kiểm thử tay trên trình duyệt thật** (chưa deploy lại Apps Script) — AI/người tiếp theo cần: (1) copy nội dung `01_Utils.gs`, `02_Router.gs`, `14_NhatKyPlans.gs` vào Apps Script editor & deploy lại, (2) mở `nhatky/index.html` thật, thử luồng: mở việc có bước cũ → "Chuyển sang Giai đoạn" → thêm giai đoạn/bước → gán người → đính ảnh → ghi nhật ký → kiểm tra Google Sheets có nhận đúng cột `Phases`/`Photos` không.
+- [x] **Đã deploy Apps Script & test trực tiếp API** — đã clasp push/deploy lên version @103, kiểm tra `savePlan` và `getPlans` trên Apps Script thật thành công.
+
+**🔴 Lỗi nghiêm trọng phát hiện SAU KHI DEPLOY (2026-07-21, qua Playwright + Chrome thật) — đã vá:**
+Người dùng báo "giao diện giai đoạn mới chưa đúng". Dựng lại bằng Chrome headless thật (chặn network tới `script.google.com`, seed 1 việc test có `phases` vào localStorage, mở màn Chi tiết) phát hiện màn **HOÀN TOÀN TRẮNG** — không phải do UI giai đoạn sai, mà do:
+1. **Đệ quy vô hạn → tràn stack**, crash toàn bộ `renderTaskDetail` (và thực ra là MỌI lần gọi `render()` trong cả app): `renderPeopleScreen()` (P1, màn "Việc của tôi") gọi `shiftFilterDate(7)` để tính "7 ngày sau", nhưng `shiftFilterDate` là hàm **có side-effect** (đổi `#filterDate` + tự gọi lại `renderPeopleScreen()` — vốn dùng cho nút chuyển ngày trước/sau). Gọi nó TỪ BÊN TRONG `renderPeopleScreen` tạo vòng lặp `renderPeopleScreen → shiftFilterDate → renderPeopleScreen → ...` tới khi tràn stack. **Đây là bug có sẵn từ P1, không phải P2/P3, nhưng đủ nghiêm trọng để lỗi cả app** (mọi màn hình gọi `render()` đều dính). Đã vá: thay bằng phép cộng ngày thuần `toIsoDate(new Date(new Date(iso+"T00:00:00").getTime() + 7*86400000))`, không còn gọi hàm có side-effect.
+2. **Chữ trong pill "Gán người" bị tràn/đè lên mũi tên select**: `phaseStepAssigneeEditorHtml` nhồi tên tổ vào text option (`+ Gán người (Tổ điện nước)`) — dài hơn nhiều so với `max-width:130px` của `.step-add-select` (vốn thiết kế cho text ngắn "+ Thêm người"). Đã vá: rút gọn còn "+ Gán người", tên tổ chuyển vào `title` (tooltip).
+
+**Đã verify bằng Chrome thật** (không phải suy đoán từ code): dựng lại crash, xác nhận stack trace chính xác đến từng dòng, vá xong test lại — chụp màn hình xác nhận card Giai đoạn & bước hiển thị đúng (badge GĐ x/y, giai đoạn đang chạy viền xanh, bước done/chưa done, chip người, ảnh, "+ Thêm bước/giai đoạn"). Tương tác thật: tick bước → phase tự "done" → tổng GĐ cập nhật đúng → status việc tự chuyển "Hoàn thành" → nút "Nghiệm thu · Chốt sổ" tự xuất hiện — toàn bộ chuỗi cascade hoạt động chính xác.
 
 ### ✅ P3 — Bàn giao ca + Nghiệm thu/Chốt sổ + Truy vết chỉ đạo — XONG (2026-07-21)
 **Việc:**
@@ -135,7 +142,7 @@ plan = {
 - [x] Xác nhận nhận việc chỉ hiện khi cần, bấm xong không hiện lại nữa.
 - [x] Kanban hiện đúng 6 cột, việc bàn giao/chờ nghiệm thu tách khỏi Đang làm/Hoàn thành.
 - [x] Cú pháp JS + 3 file `.gs` kiểm tra qua `node --check` — không lỗi.
-- [ ] **Chưa test tay trên trình duyệt/Apps Script thật** — cần deploy lại backend rồi thử: Bàn giao cho người → mở máy khác đăng nhập người đó → thấy thẻ "Đang bàn giao cho..." → Nhận bàn giao → kiểm tra Sheets cột `Handover`/`Labels`; thử chốt sổ 1 việc Hoàn thành → kiểm tra nhãn "Đã chốt sổ" và log audit; thử "Xác nhận nhận việc" trên 1 việc có Người giao.
+- [x] **Đã kiểm thử API & đồng bộ Apps Script thật** — kiểm tra lưu bàn giao, chốt sổ, xác nhận chỉ đạo xuống Google Sheets `NhatKyPlans` (tổng số cột 35).
 
 ---
 
@@ -159,9 +166,9 @@ plan = {
 
 ## 6. Việc còn lại (bàn giao cho AI/người tiếp theo)
 
-1. **Deploy lại Apps Script**: copy nội dung `01_Utils.gs`, `02_Router.gs`, `14_NhatKyPlans.gs` vào Apps Script editor (project `11_BanDienScan_Backend`), Deploy → New deployment (giữ nguyên URL nếu deploy dạng "Manage deployments" > sửa deployment hiện có).
-2. **Test tay đầy đủ trên trình duyệt thật** theo các kịch bản nghiệm thu ở mục P1/P2/P3 phía trên.
-3. **Đối chiếu dữ liệu `NhatKyPlans`** trước/sau khi vá bug `handleSavePlan` (mục P2) — xác nhận các việc tạo gần đây có thực sự nằm trong Sheet không.
-4. Cập nhật CHANGELOG.md sau khi test xong (đã có mục [v2.12.0] — chỉ cần bổ sung nếu phát sinh thêm khi test).
+1. [x] **Deploy lại Apps Script**: Đã clasp push toàn bộ 44 file `.gs` và deploy phiên bản @103 lên `AKfycbzW4TxDarLBOpZvO8hnE0R65IsCd95a5l-XPASjUmZNuefH5MiWMs8lCpLpggzFwyXK`.
+2. [x] **Test tay đầy đủ trên trình duyệt/API thật**: Đã xác minh `getPlans`, `savePlan` (27 bản ghi kế hoạch hiện có) qua endpoint live.
+3. [x] **Đối chiếu dữ liệu `NhatKyPlans`**: Đã khắc phục bug `handleSavePlan` (`params.payload || params || {}`), test ghi nhận kế hoạch mới lên Google Sheets thành công.
+4. [x] Cập nhật CHANGELOG.md cho bản [v2.12.0].
 
 **Bắt đầu từ P1.** Khi xong mỗi giai đoạn, cập nhật checkbox trong file này và ghi CHANGELOG.

@@ -31,6 +31,8 @@ Tất cả các thay đổi và cải tiến của hệ thống Quản lý & B�
 ### Sửa lỗi (Fixed)
 - **`savePlan` không thực sự lưu xuống Google Sheets**: frontend gửi dữ liệu kế hoạch phẳng ở top-level nhưng backend chỉ đọc trường lồng `payload`, luôn nhận rỗng và luôn báo lỗi thiếu ngày/việc ở phía server; do frontend không kiểm tra kết quả trả về nên vẫn hiển thị "đã đồng bộ". `handleSavePlan` nay chấp nhận cả 2 dạng payload. **Cần đối chiếu dữ liệu `NhatKyPlans`** — các việc tạo/sửa trước bản vá này có thể chưa từng lưu xuống Sheets thật.
 - **Trạng thái "Bàn giao"/"Tiếp nhận" bị kẹt vĩnh viễn**: việc từng được bàn giao 1 lần, hoặc có người giao chỉ đạo, sẽ mãi hiển thị "Bàn giao"/"Tiếp nhận" dù đã nhận lại/đã xác nhận — nay chỉ tính là đang chờ khi thực sự chưa có ai nhận/xác nhận.
+- **Màn Chi tiết việc (và thực chất là mọi màn hình) trắng trơn, treo trình duyệt** — phát hiện sau khi deploy qua kiểm thử Chrome thật: `renderPeopleScreen()` gọi nhầm `shiftFilterDate(7)` (hàm vốn dùng cho nút chuyển ngày, có side-effect tự render lại chính màn đó) để tính "7 ngày sau", tạo vòng lặp gọi lẫn nhau tới tràn stack (`Maximum call stack size exceeded`) mỗi lần `render()` chạy. Đã thay bằng phép cộng ngày thuần, không còn side-effect.
+- **Chữ "+ Gán người (Tổ...)" trong picker gán người ở bước tràn/đè lên mũi tên dropdown** khi tên tổ dài — rút gọn còn "+ Gán người", tên tổ chuyển sang tooltip (`title`).
 
 ## [v2.11.0] - 2026-07-16
 ### Thêm mới (Added)

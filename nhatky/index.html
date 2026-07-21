@@ -5274,9 +5274,13 @@
       `).join("");
       const taken = new Set(names.map(normalizePerson));
       const options = filterNamesByTag(knownPeopleNames().filter(n => !taken.has(normalizePerson(n))), plan.team);
+      // Chữ hiển thị trong pill giữ ngắn ("+ Gán người") — tên tổ/tag đưa vào
+      // title (tooltip) thay vì nhồi vào text, tránh tràn/đè lên mũi tên select
+      // khi tên tổ dài (vd "Tổ điện nước").
+      const selectTitle = plan.team ? `Lọc theo tổ: ${escapeAttr(plan.team)}` : "Gán người thực hiện";
       const select = `
-        <select class="step-add-select" onclick="event.stopPropagation()" onchange="addPhaseStepAssignee('${escapeAttr(plan.id)}','${escapeAttr(phaseId)}','${escapeAttr(step.id)}', this.value); this.value='';">
-          <option value="">+ Gán người${plan.team ? " (" + escapeAttr(plan.team) + ")" : ""}</option>
+        <select class="step-add-select" title="${selectTitle}" onclick="event.stopPropagation()" onchange="addPhaseStepAssignee('${escapeAttr(plan.id)}','${escapeAttr(phaseId)}','${escapeAttr(step.id)}', this.value); this.value='';">
+          <option value="">+ Gán người</option>
           ${options.map(n => `<option value="${escapeAttr(n)}">${escapeHtml(n)}</option>`).join("")}
           <option value="__other__">➕ Nhập tên khác...</option>
         </select>`;
@@ -6436,7 +6440,11 @@
       });
 
       // 4. Lịch sắp tới (7 ngày tiếp theo)
-      const sevenDaysLaterIso = shiftFilterDate(7);
+      // Lưu ý: KHÔNG dùng shiftFilterDate(7) ở đây — hàm đó có side-effect (đổi
+      // #filterDate + gọi lại renderPeopleScreen() để phục vụ nút chuyển ngày),
+      // gọi nó trong chính renderPeopleScreen tạo đệ quy vô hạn (tràn stack mỗi
+      // lần render màn Việc của tôi). Cộng ngày thuần, không side-effect.
+      const sevenDaysLaterIso = toIsoDate(new Date(new Date(iso + "T00:00:00").getTime() + 7 * 86400000));
       const upcomingPlans = plans.filter(p => {
         const pDate = planReminder(p);
         return pDate > iso && pDate <= sevenDaysLaterIso && p.status !== "Hoàn thành" && p.status !== "Đã hủy";
