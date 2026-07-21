@@ -34,6 +34,14 @@ Tất cả các thay đổi và cải tiến của hệ thống Quản lý & B�
 - **Màn Chi tiết việc (và thực chất là mọi màn hình) trắng trơn, treo trình duyệt** — phát hiện sau khi deploy qua kiểm thử Chrome thật: `renderPeopleScreen()` gọi nhầm `shiftFilterDate(7)` (hàm vốn dùng cho nút chuyển ngày, có side-effect tự render lại chính màn đó) để tính "7 ngày sau", tạo vòng lặp gọi lẫn nhau tới tràn stack (`Maximum call stack size exceeded`) mỗi lần `render()` chạy. Đã thay bằng phép cộng ngày thuần, không còn side-effect.
 - **Chữ "+ Gán người (Tổ...)" trong picker gán người ở bước tràn/đè lên mũi tên dropdown** khi tên tổ dài — rút gọn còn "+ Gán người", tên tổ chuyển sang tooltip (`title`).
 
+## [v2.12.3] - 2026-07-22
+### Cập nhật (Updated)
+- **Rà 3 màn cốt lõi cho khớp mockup "gọn nhẹ" (`nhatky/index.html`)** — nối tiếp v2.12.2:
+  - **Trang chủ (A)**: bỏ hẳn menu ⋮ và các nút phụ (Kanban, Bộ lọc nâng cao, Lịch tuần, Nạp lại, Thêm kế hoạch) — không có trong mockup; gộp **ô tìm kiếm + chọn ngày + về-hôm-nay trên cùng 1 dòng** đúng mockup.
+  - **Chi tiết việc (B)**: phần **Giai đoạn & bước** đổi từ thẻ Bootstrap nặng (hộp màu, viền dày, checkbox tròn 36px) sang **dòng phẳng kẻ mảnh** — giai đoạn là chấm nhỏ 20px + tên + đếm, ngăn nhau bằng kẻ đứt; bước thụt lề dưới chấm, ô tick vuông 22px, pill gán người, nút thao tác không viền. Giữ nguyên mọi chức năng (thêm/sửa/xoá giai đoạn & bước, gán người theo tag, đính ảnh, tick xong).
+  - **Bàn giao (C)**: modal vốn đã sát mockup; thêm ô nền nhạt cho dòng "Phần mềm tự ghi… — thay chữ ký" đúng khối `.autolog`.
+  - Chỉ đổi lớp trình bày (CSS + rút gọn DOM/handler đã xoá), không đổi logic nghiệp vụ; verify Chrome thật (Playwright) cả 3 màn, 0 lỗi.
+
 ## [v2.12.2] - 2026-07-22
 ### Cập nhật (Updated)
 - **Dọn phần đầu Trang chủ cho đúng mockup "gọn nhẹ" (`nhatky/index.html`)** — sau v2.12.1 phần danh sách đã phẳng nhưng khu điều khiển phía trên vẫn thừa so với 3 màn cốt lõi của mockup:

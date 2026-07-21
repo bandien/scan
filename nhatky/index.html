@@ -316,62 +316,75 @@
     .person-chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
 
     /* ===== Bước thực hiện (chia nhỏ việc nhiều người/nhiều giai đoạn) ===== */
-    .step-list { display: flex; flex-direction: column; gap: 8px; }
+    /* Bước (dùng chung bước phẳng cũ & bước trong giai đoạn) — dòng phẳng kẻ mảnh (mockup) */
+    .step-list { display: flex; flex-direction: column; }
     .step-row {
-      display: flex; align-items: flex-start; gap: 8px; border: 2px solid var(--line);
-      border-radius: 12px; padding: 10px; background: #fff;
+      display: flex; align-items: flex-start; gap: 8px; border: 0;
+      border-top: 1px solid #eef2f3; border-radius: 0; padding: 8px 0; background: transparent;
     }
-    .step-row.done { background: var(--done-bg); border-color: #bfe4cf; }
+    .step-row:first-child { border-top: 0; }
+    .step-row.done { background: transparent; }
     .step-check {
-      flex-shrink: 0; width: 36px; height: 36px; border-radius: 999px; border: 2px solid var(--line);
-      background: #fff; color: var(--muted); font-size: 1.1rem; display: inline-flex;
-      align-items: center; justify-content: center;
+      flex-shrink: 0; width: 22px; height: 22px; margin-top: 1px; border-radius: 6px;
+      border: 1.5px solid #c3ccd1; background: #fff; color: #fff; font-size: .78rem;
+      display: inline-flex; align-items: center; justify-content: center;
     }
+    .step-check:not(.done) i { display: none; } /* ô vuông trống khi chưa xong */
     .step-check.done { background: var(--done); border-color: var(--done); color: #fff; }
     .step-body { flex: 1; min-width: 0; }
-    .step-title { font-weight: 700; color: var(--ink); cursor: pointer; }
+    .step-title { font-weight: 600; font-size: .9rem; line-height: 1.32; color: var(--ink); cursor: pointer; }
     .step-row.done .step-title { text-decoration: line-through; color: var(--muted); }
-    .step-assignees { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; margin-top: 6px; }
+    .step-assignees { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; margin-top: 5px; }
     .step-chip {
-      display: inline-flex; align-items: center; gap: 4px; background: var(--surface-soft);
-      border: 1px solid #93cdae; color: var(--brand-2); border-radius: 999px;
-      padding: 3px 8px; font-size: .8rem; font-weight: 700;
+      display: inline-flex; align-items: center; gap: 4px; background: #fff;
+      border: 1.5px solid var(--line); color: #47535c; border-radius: 999px;
+      padding: 2px 9px; font-size: .76rem; font-weight: 700;
     }
-    .step-chip button { border: 0; background: none; color: inherit; padding: 0 2px; line-height: 1; font-size: .95rem; }
+    .step-chip button { border: 0; background: none; color: inherit; padding: 0 1px; line-height: 1; font-size: .9rem; }
     .step-add-select {
-      border: 1px dashed var(--line); border-radius: 999px; background: #fff; color: var(--brand);
-      font-size: .8rem; font-weight: 700; padding: 3px 8px; max-width: 130px;
+      border: 1.5px dashed #9dc0c6; border-radius: 999px; background: #fff; color: var(--brand);
+      font-size: .76rem; font-weight: 700; padding: 2px 8px; max-width: 130px;
     }
-    .step-done-note { font-size: .78rem; color: var(--done); margin-top: 4px; }
-    .step-actions { flex-shrink: 0; display: flex; flex-direction: column; gap: 6px; }
+    .step-done-note { font-size: .74rem; color: var(--done); margin-top: 4px; }
+    .step-actions { flex-shrink: 0; display: flex; flex-direction: row; gap: 2px; }
     .step-icon-btn {
-      width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--line);
-      background: var(--surface-high); color: var(--brand); font-size: .95rem;
+      width: 30px; height: 30px; border-radius: 8px; border: 0;
+      background: none; color: #9aa5ad; font-size: .95rem;
     }
+    .step-icon-btn.text-danger { color: #cf9b96 !important; }
     .step-icon-btn:active { transform: scale(.95); }
     .vikunja-label.step-progress-label { border-color: #93cdae; background: var(--surface-soft); color: var(--brand-2); }
     .vikunja-label.step-progress-label i { margin-right: 3px; }
 
-    /* ===== Giai đoạn 2 tầng (phases) — P2 ===== */
-    .phase-block { border: 2px solid var(--line); border-radius: 12px; padding: 10px; margin-top: 8px; background: #fbfcfc; }
-    .phase-block.phase-current { border-color: var(--doing); background: var(--doing-bg); }
-    .phase-head { display: flex; align-items: center; gap: 8px; }
+    /* ===== Giai đoạn 2 tầng (phases) — dòng phẳng kẻ mảnh (mockup) ===== */
+    .phase-block { border: 0; border-top: 1px dashed #dfe6e7; border-radius: 0; padding: 0; margin: 0; background: transparent; }
+    .phase-block:first-child { border-top: 0; }
+    .phase-block.phase-current { background: transparent; }
+    .phase-head { display: flex; align-items: center; gap: 9px; padding: 9px 0 2px; }
     .phase-dot {
-      flex-shrink: 0; width: 26px; height: 26px; border-radius: 999px; display: inline-flex;
-      align-items: center; justify-content: center; font-size: .85rem; color: #fff; background: var(--muted);
+      flex-shrink: 0; width: 20px; height: 20px; border-radius: 999px; display: inline-flex;
+      align-items: center; justify-content: center; font-size: .68rem; color: #fff; background: #ccd3d8;
     }
     .phase-dot-done { background: var(--done); }
     .phase-dot-cur { background: var(--doing); }
-    .phase-dot-todo { background: #9aa5ad; }
-    .phase-name { font-weight: 800; color: var(--ink); cursor: pointer; flex: 1; min-width: 0; }
-    .phase-count { font-size: .8rem; font-weight: 700; color: var(--muted); flex-shrink: 0; }
+    .phase-dot-todo { background: #ccd3d8; color: #6a7680; }
+    .phase-name { font-weight: 700; font-size: .92rem; color: var(--ink); cursor: pointer; flex: 1; min-width: 0; }
+    .phase-block.phase-current .phase-name { color: var(--doing); }
+    .phase-count { font-size: .76rem; font-weight: 700; color: var(--muted); flex-shrink: 0; }
+    .phase-block .step-list { padding-left: 29px; }   /* thụt bước dưới chấm giai đoạn */
     .add-step-link {
-      border: 1px dashed var(--line); border-radius: 10px; background: none; color: var(--brand);
-      font-size: .85rem; font-weight: 700; padding: 6px 10px; margin-top: 8px; width: 100%; text-align: left;
+      border: 0; background: none; color: var(--brand); font-size: .82rem; font-weight: 700;
+      padding: 4px 0 8px 29px; margin: 0; width: 100%; text-align: left;
     }
     .link-button-sm {
       border: 0; background: none; color: var(--brand); font-size: .78rem; font-weight: 700; padding: 2px 0;
     }
+    /* Ghi chú tự-ghi thay chữ ký trong modal Bàn giao (mockup .autolog) */
+    .handover-autolog {
+      font-size: .8rem; color: var(--muted); background: #f1f4f5; border-radius: 9px;
+      padding: 8px 10px; margin-top: 10px;
+    }
+    .handover-autolog b { color: var(--ink); }
 
     /* ===== Ảnh đính kèm (chỉ đạo/kế hoạch/phát sinh/nhật ký/bàn giao) ===== */
     .photo-thumbs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
@@ -1177,30 +1190,28 @@
       background: var(--page-bg);
       border-bottom: 1px solid var(--line);
     }
-    /* Thanh công cụ gọn (mockup): tìm kiếm 1 hàng, ngày + ⋮ hàng dưới */
+    /* Thanh công cụ gọn (mockup): tìm kiếm + chọn ngày + hôm nay cùng 1 dòng */
     .d-toolbar {
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
       gap: 8px;
       padding: 10px 12px;
     }
-    .d-toolbar .d-search { flex: 1 1 100%; order: -1; min-width: 0; }
+    .d-toolbar .d-search { flex: 1; min-width: 0; }
     .d-toolbar .date-bar {
       display: flex;
       align-items: center;
       gap: 2px;
       padding: 0;
-      flex: 1;
-      min-width: 0;
+      flex-shrink: 0;
     }
     .d-toolbar .date-bar .date-input {
-      flex: 1;
-      min-width: 0;
+      width: 116px;
       min-height: 40px;
+      padding-left: 6px;
+      padding-right: 4px;
     }
-    .d-toolbar .dropdown { margin-left: auto; }
-    .d-toolbar .task-toolbar-button { width: 40px; height: 40px; min-width: 40px; border-radius: 12px; }
+    .d-toolbar .btn-icon-sm { width: 34px; min-width: 34px; }
     .task-top-controls .date-bar {
       padding-bottom: 8px;
     }
@@ -2467,17 +2478,6 @@
               <button class="btn-icon-sm" id="btnNextDay" type="button" title="Ngày sau" aria-label="Ngày sau"><i class="bi bi-chevron-right"></i></button>
               <button class="btn-icon-sm" id="btnToday" type="button" title="Về hôm nay" aria-label="Về hôm nay"><i class="bi bi-calendar-check"></i></button>
             </div>
-            <div class="dropdown flex-shrink-0">
-              <button class="task-toolbar-button" type="button" id="btnTaskMore" data-bs-toggle="dropdown" aria-expanded="false" title="Thao tác khác" aria-label="Thao tác khác"><i class="bi bi-three-dots-vertical"></i></button>
-              <ul class="dropdown-menu dropdown-menu-end task-more-menu" aria-labelledby="btnTaskMore">
-                <li><button class="dropdown-item" id="btnToggleBoard" type="button"><i class="bi bi-kanban"></i>Xem dạng bảng (Kanban)</button></li>
-                <li><button class="dropdown-item" id="btnOpenFilters" type="button"><i class="bi bi-funnel"></i>Bộ lọc nâng cao</button></li>
-                <li><button class="dropdown-item" id="btnViewWeek" type="button"><i class="bi bi-calendar-week"></i>Lịch tuần</button></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><button class="dropdown-item" id="btnReload" type="button"><i class="bi bi-arrow-clockwise"></i>Nạp lại dữ liệu</button></li>
-                <li><button class="dropdown-item" id="btnAddPlan" type="button"><i class="bi bi-plus-square"></i>Thêm kế hoạch</button></li>
-              </ul>
-            </div>
           </div>
         </div>
         <div class="list-scroll">
@@ -2626,7 +2626,7 @@
             <div id="handoverPhotos"></div>
             <button class="link-button-sm mt-1" type="button" onclick="attachHandoverPhoto()"><i class="bi bi-camera me-1"></i>Đính ảnh</button>
           </div>
-          <div class="small text-secondary mt-2" id="handoverAutoLogNote"></div>
+          <div class="handover-autolog" id="handoverAutoLogNote"></div>
         </div>
         <div class="modal-footer">
           <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Hủy</button>
@@ -3426,25 +3426,8 @@
         renderHeader("people", {});
         renderPeopleScreen();
       });
-      document.getElementById("btnViewWeek").addEventListener("click", () => navigateTo("week", {}));
-      document.getElementById("btnReload").addEventListener("click", async () => {
-        const btn = document.getElementById("btnReload");
-        btn.disabled = true;
-        try {
-          localStorage.removeItem(STORAGE_KEYS.plans);
-          await loadPlans(true);
-          render();
-          showToast("Đã nạp lại việc");
-        } finally {
-          btn.disabled = false;
-        }
-      });
-      document.getElementById("btnOpenFilters").addEventListener("click", () => filterOffcanvasInstance.show());
-      document.getElementById("btnToggleBoard").addEventListener("click", togglePeopleViewMode);
-
       document.getElementById("logForm").addEventListener("submit", submitLog);
       document.getElementById("btnQuickLog").addEventListener("click", () => openPlanModal(""));
-      document.getElementById("btnAddPlan").addEventListener("click", () => openPlanModal(null));
       document.getElementById("planForm").addEventListener("submit", submitPlanForm);
       document.getElementById("planPersonSelect").addEventListener("change", event => {
         const value = event.target.value === "__other__" ? prompt("Tên người thực hiện:") : event.target.value;
@@ -6375,7 +6358,8 @@
 
     function togglePeopleViewMode() {
       peopleViewMode = peopleViewMode === "board" ? "list" : "board";
-      document.getElementById("btnToggleBoard").classList.toggle("active", peopleViewMode === "board");
+      const toggleBtn = document.getElementById("btnToggleBoard");
+      if (toggleBtn) toggleBtn.classList.toggle("active", peopleViewMode === "board");
       renderPeopleScreen();
     }
 
