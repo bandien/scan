@@ -34,6 +34,15 @@ Tất cả các thay đổi và cải tiến của hệ thống Quản lý & B�
 - **Màn Chi tiết việc (và thực chất là mọi màn hình) trắng trơn, treo trình duyệt** — phát hiện sau khi deploy qua kiểm thử Chrome thật: `renderPeopleScreen()` gọi nhầm `shiftFilterDate(7)` (hàm vốn dùng cho nút chuyển ngày, có side-effect tự render lại chính màn đó) để tính "7 ngày sau", tạo vòng lặp gọi lẫn nhau tới tràn stack (`Maximum call stack size exceeded`) mỗi lần `render()` chạy. Đã thay bằng phép cộng ngày thuần, không còn side-effect.
 - **Chữ "+ Gán người (Tổ...)" trong picker gán người ở bước tràn/đè lên mũi tên dropdown** khi tên tổ dài — rút gọn còn "+ Gán người", tên tổ chuyển sang tooltip (`title`).
 
+## [v2.12.2] - 2026-07-22
+### Cập nhật (Updated)
+- **Dọn phần đầu Trang chủ cho đúng mockup "gọn nhẹ" (`nhatky/index.html`)** — sau v2.12.1 phần danh sách đã phẳng nhưng khu điều khiển phía trên vẫn thừa so với 3 màn cốt lõi của mockup:
+  - **Gộp thanh công cụ**: chỉ còn 1 ô tìm kiếm rộng + 1 hàng chọn ngày (‹ ngày › về-hôm-nay) + nút ⋮ — thay cho 3 hàng cũ (ngày+Việc mới, tìm kiếm, và dải chip lọc).
+  - **Bỏ dải chip lọc** "Tất cả / Chưa xong / Cần hỗ trợ / Việc của tôi" — việc đã nhóm sẵn theo vòng đời nên không cần lọc thủ công; các chức năng phụ (Kanban, Bộ lọc nâng cao, Lịch tuần, Nạp lại, Thêm kế hoạch) dồn vào menu ⋮.
+  - **Bỏ hộp "Tiến độ nhật ký hôm nay"** (`day-log-summary` / `vikunja-day-progress`) — không có trong mockup.
+  - **Nút dưới đáy đổi từ "Ghi nhanh" → "＋ Việc mới"** đúng mockup (ghi nhật ký nay làm trong màn Chi tiết việc).
+  - Không đổi logic nghiệp vụ — chỉ dọn lớp trình bày; đã verify bằng Chrome thật (Playwright), 0 lỗi.
+
 ## [v2.12.1] - 2026-07-21
 ### Cập nhật (Updated)
 - **Trang chủ & Chi tiết việc đổi sang giao diện "gọn nhẹ"** đúng mockup đã duyệt (thay style thẻ Bootstrap nhiều viền/badge của bản v2.12.0):

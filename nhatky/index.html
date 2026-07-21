@@ -1177,6 +1177,30 @@
       background: var(--page-bg);
       border-bottom: 1px solid var(--line);
     }
+    /* Thanh công cụ gọn (mockup): tìm kiếm 1 hàng, ngày + ⋮ hàng dưới */
+    .d-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+    }
+    .d-toolbar .d-search { flex: 1 1 100%; order: -1; min-width: 0; }
+    .d-toolbar .date-bar {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding: 0;
+      flex: 1;
+      min-width: 0;
+    }
+    .d-toolbar .date-bar .date-input {
+      flex: 1;
+      min-width: 0;
+      min-height: 40px;
+    }
+    .d-toolbar .dropdown { margin-left: auto; }
+    .d-toolbar .task-toolbar-button { width: 40px; height: 40px; min-width: 40px; border-radius: 12px; }
     .task-top-controls .date-bar {
       padding-bottom: 8px;
     }
@@ -2431,46 +2455,36 @@
       <!-- Màn 1: Công việc (trang chủ) -->
       <section class="screen" data-screen="people" id="screen-people">
         <div class="task-top-controls">
-          <div class="date-bar" aria-label="Chọn ngày xem công việc">
-            <button class="btn-icon-sm" id="btnPrevDay" type="button" title="Ngày trước" aria-label="Ngày trước"><i class="bi bi-chevron-left"></i></button>
-            <input class="date-input" id="filterDate" type="date" aria-label="Ngày đang xem">
-            <button class="btn-icon-sm" id="btnNextDay" type="button" title="Ngày sau" aria-label="Ngày sau"><i class="bi bi-chevron-right"></i></button>
-            <button class="btn-icon-sm" id="btnToday" type="button" title="Về hôm nay" aria-label="Về hôm nay"><i class="bi bi-calendar-check"></i></button>
-            <button class="btn btn-sm btn-primary rounded-3 ms-auto fw-bold px-3 d-flex align-items-center gap-1 flex-shrink-0" type="button" onclick="openPlanModal('')" style="min-height:42px;"><i class="bi bi-plus-lg"></i> Việc mới</button>
-          </div>
-          <div class="px-3 pt-2 pb-1">
-            <div class="position-relative">
+          <div class="d-toolbar">
+            <div class="d-search position-relative">
               <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-              <input type="search" id="taskSearchInput" class="form-control form-control-sm ps-5 pe-4 rounded-pill border-1" placeholder="Tìm tên việc, vị trí, người làm..." aria-label="Tìm kiếm công việc">
+              <input type="search" id="taskSearchInput" class="form-control form-control-sm ps-5 pe-4 rounded-pill border-1" placeholder="Tìm việc, người, vị trí…" aria-label="Tìm kiếm công việc">
               <button type="button" id="btnClearSearch" class="btn btn-sm btn-link text-muted position-absolute top-50 end-0 translate-middle-y me-2 d-none" style="text-decoration:none;"><i class="bi bi-x-circle-fill"></i></button>
             </div>
-          </div>
-          <div class="filters-bar">
-            <div class="quick-filter-scroll">
-              <button class="a11y-chip active" type="button" data-quick-filter="all">Tất cả</button>
-              <button class="a11y-chip" type="button" data-quick-filter="open">Chưa xong</button>
-              <button class="a11y-chip warn" type="button" data-quick-filter="help">Cần hỗ trợ <span class="chip-count" id="helpChipCount" style="display:none">0</span></button>
-              <button class="a11y-chip" type="button" data-quick-filter="mine">Việc của tôi</button>
+            <div class="date-bar" aria-label="Chọn ngày xem công việc">
+              <button class="btn-icon-sm" id="btnPrevDay" type="button" title="Ngày trước" aria-label="Ngày trước"><i class="bi bi-chevron-left"></i></button>
+              <input class="date-input" id="filterDate" type="date" aria-label="Ngày đang xem">
+              <button class="btn-icon-sm" id="btnNextDay" type="button" title="Ngày sau" aria-label="Ngày sau"><i class="bi bi-chevron-right"></i></button>
+              <button class="btn-icon-sm" id="btnToday" type="button" title="Về hôm nay" aria-label="Về hôm nay"><i class="bi bi-calendar-check"></i></button>
             </div>
-            <button class="task-toolbar-button flex-shrink-0" type="button" id="btnOpenFilters" title="Bộ lọc nâng cao" aria-label="Bộ lọc nâng cao"><i class="bi bi-funnel"></i></button>
-            <button class="task-toolbar-button flex-shrink-0" type="button" id="btnToggleBoard" title="Đổi dạng xem Danh sách/Bảng" aria-label="Đổi dạng xem Danh sách/Bảng"><i class="bi bi-kanban"></i></button>
-            <div class="dropdown ms-auto flex-shrink-0">
+            <div class="dropdown flex-shrink-0">
               <button class="task-toolbar-button" type="button" id="btnTaskMore" data-bs-toggle="dropdown" aria-expanded="false" title="Thao tác khác" aria-label="Thao tác khác"><i class="bi bi-three-dots-vertical"></i></button>
               <ul class="dropdown-menu dropdown-menu-end task-more-menu" aria-labelledby="btnTaskMore">
+                <li><button class="dropdown-item" id="btnToggleBoard" type="button"><i class="bi bi-kanban"></i>Xem dạng bảng (Kanban)</button></li>
+                <li><button class="dropdown-item" id="btnOpenFilters" type="button"><i class="bi bi-funnel"></i>Bộ lọc nâng cao</button></li>
                 <li><button class="dropdown-item" id="btnViewWeek" type="button"><i class="bi bi-calendar-week"></i>Lịch tuần</button></li>
-                <li><button class="dropdown-item" id="btnReload" type="button"><i class="bi bi-arrow-clockwise"></i>Nạp lại dữ liệu</button></li>
                 <li><hr class="dropdown-divider"></li>
+                <li><button class="dropdown-item" id="btnReload" type="button"><i class="bi bi-arrow-clockwise"></i>Nạp lại dữ liệu</button></li>
                 <li><button class="dropdown-item" id="btnAddPlan" type="button"><i class="bi bi-plus-square"></i>Thêm kế hoạch</button></li>
               </ul>
             </div>
           </div>
         </div>
         <div class="list-scroll">
-          <div class="day-log-summary" id="dayLogSummary"></div>
           <div id="peopleBody"></div>
         </div>
         <div class="action-bar task-list-actionbar">
-          <button class="btn-main task-quick-log" id="btnQuickLog" type="button"><i class="bi bi-journal-plus"></i><span>Ghi nhanh</span></button>
+          <button class="btn-main task-quick-log" id="btnQuickLog" type="button"><i class="bi bi-plus-lg"></i><span>Việc mới</span></button>
         </div>
       </section>
 
@@ -3429,7 +3443,7 @@
       document.getElementById("btnToggleBoard").addEventListener("click", togglePeopleViewMode);
 
       document.getElementById("logForm").addEventListener("submit", submitLog);
-      document.getElementById("btnQuickLog").addEventListener("click", () => openPlanModal(null, null, null, { type: "Phát sinh", quick: true }));
+      document.getElementById("btnQuickLog").addEventListener("click", () => openPlanModal(""));
       document.getElementById("btnAddPlan").addEventListener("click", () => openPlanModal(null));
       document.getElementById("planForm").addEventListener("submit", submitPlanForm);
       document.getElementById("planPersonSelect").addEventListener("change", event => {
@@ -4600,39 +4614,6 @@
         return `<span class="badge-soft badge-mid"><i class="bi bi-exclamation-circle"></i> Thiếu ${coverage.total - coverage.done}/${coverage.total}</span>`;
       }
       return '<span class="badge-soft badge-high"><i class="bi bi-pencil-square"></i> Chưa ghi</span>';
-    }
-
-    function renderDayLogSummary(visible, selectedDate) {
-      const summary = document.getElementById("dayLogSummary");
-      if (!summary) return;
-      // Đếm trên TOÀN BỘ việc thuộc ngày (kể cả đã hoàn thành) để tiến độ chỉ tăng
-      // dần lên 100%; trước đây việc hoàn thành rời khỏi cả tử lẫn mẫu số nên thanh
-      // tiến độ tụt ngược khi làm xong việc và biến mất hẳn khi xong hết.
-      if (visible.length === 0) {
-        summary.style.display = "none";
-        return;
-      }
-      summary.style.display = "flex";
-      const complete = visible.filter(plan => {
-        if (plan.status === "Hoàn thành") return true;
-        const coverage = planLogCoverage(plan, selectedDate);
-        return coverage.done >= coverage.total;
-      }).length;
-      const missing = visible.length - complete;
-      const percent = Math.round((complete / visible.length) * 100);
-      summary.className = "day-log-summary vikunja-day-progress";
-      summary.innerHTML = `
-        <div class="vikunja-day-progress-head">
-          <strong>Tiến độ nhật ký ${shortDateVn(selectedDate)}</strong>
-          <span>${complete}/${visible.length} việc</span>
-        </div>
-        <div class="vikunja-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}" aria-label="Tiến độ ghi nhật ký">
-          <span class="vikunja-progress-value" style="width:${percent}%"></span>
-        </div>
-        <div class="vikunja-progress-note ${missing ? "attention" : ""}">
-          ${missing ? `Còn ${missing} việc chưa ghi đủ nhật ký.` : "Đã ghi đủ nhật ký cho mọi việc trong ngày ✓"}
-        </div>
-      `;
     }
 
     function planSyncIcon(plan) {
@@ -6449,7 +6430,6 @@
       if (!container) return;
       const iso = selectedTaskDate();
       const visible = getVisiblePlans("day");
-      renderDayLogSummary(visible, iso);
 
       if (peopleViewMode === "board") {
         renderPeopleBoard(container, visible, iso);
