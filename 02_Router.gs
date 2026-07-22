@@ -35,6 +35,7 @@ function doGet(e) {
   try {
     switch (action) {
       case 'setupHeaders':      return handleSetupHeaders(e);
+      case 'populateShortNames': return handlePopulateShortNames(e);
       case 'login':             return handleLogin(e);
       case 'getDeviceHistory':  return handleGetDeviceHistory(e);
       // getWorkOrders: đã gỡ — WorkOrders được thay bằng NhatKyPlans (xem 20_MigrateWorkOrders.gs)
@@ -120,6 +121,7 @@ function doPost(e) {
       nhatkyChangePin:      handleNhatKyChangePin,
       listUsers:            handleListUsers,
       saveUser:             handleSaveUser,
+      populateShortNames:   handlePopulateShortNames,
       deleteUser:           handleDeleteUser,
       savePumpTimerSetting: handleSavePumpTimerSetting,
       seedPumpTimerSettings: handleSeedPumpTimerSettings,

@@ -1533,6 +1533,273 @@
       font-weight: 700;
       margin-bottom: 10px;
     }
+
+    /* ===== Contacts Management — Redesigned ===== */
+    .cm-header {
+      position: sticky; top: 0; z-index: 20;
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      padding: 0;
+    }
+    .cm-search-bar {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 14px 6px;
+    }
+    .cm-search-bar .cm-search-input {
+      flex: 1; min-width: 0;
+      height: 42px; border-radius: 12px;
+      border: 1px solid var(--line);
+      background: var(--surface-high, #1a1d26);
+      color: var(--ink); font-size: .92rem;
+      padding: 0 12px 0 36px;
+      outline: none;
+    }
+    .cm-search-bar .cm-search-input:focus { border-color: var(--brand); }
+    .cm-search-bar .cm-search-icon {
+      position: absolute; left: 26px;
+      color: var(--muted); font-size: 1rem; pointer-events: none;
+    }
+    .cm-search-bar .cm-count-badge {
+      flex-shrink: 0;
+      background: var(--surface-high, #1a1d26);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: .8rem; font-weight: 700;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .cm-search-bar .cm-count-badge i { margin-right: 4px; }
+    .cm-search-bar .cm-download-btn {
+      flex-shrink: 0;
+      width: 42px; height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-high, #1a1d26);
+      color: var(--brand);
+      font-size: 1.1rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .cm-tabs {
+      display: flex; gap: 4px;
+      padding: 4px 14px 6px;
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .cm-tabs::-webkit-scrollbar { display: none; }
+    .cm-tab-btn {
+      flex-shrink: 0;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: transparent;
+      color: var(--muted);
+      font-size: .78rem; font-weight: 700;
+      padding: 5px 12px;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .cm-tab-btn.active {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: #fff;
+    }
+    .cm-tab-btn .cm-tab-count {
+      display: inline-block;
+      min-width: 18px; text-align: center;
+      background: rgba(255,255,255,.18);
+      border-radius: 8px;
+      padding: 1px 5px;
+      font-size: .72rem;
+      margin-left: 4px;
+    }
+    .cm-tab-btn.active .cm-tab-count {
+      background: rgba(255,255,255,.3);
+    }
+    .cm-tagbar {
+      display: flex; align-items: center; gap: 5px;
+      padding: 2px 14px 8px;
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .cm-tagbar::-webkit-scrollbar { display: none; }
+    .cm-tag-label {
+      flex-shrink: 0;
+      font-size: .72rem; font-weight: 700;
+      color: var(--muted);
+    }
+    .cm-tag-pill {
+      flex-shrink: 0;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: transparent;
+      color: var(--muted);
+      font-size: .72rem; font-weight: 600;
+      padding: 3px 10px;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .cm-tag-pill.active {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: #fff;
+    }
+    .cm-tag-pill .cm-tag-count {
+      font-size: .68rem;
+      opacity: .7;
+      margin-left: 3px;
+    }
+
+    /* Contact rows */
+    .cm-list {
+      padding: 4px 0;
+    }
+    .cm-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--line);
+      cursor: pointer;
+      transition: background .12s;
+    }
+    .cm-row:active { background: rgba(255,255,255,.04); }
+    .cm-avatar {
+      width: 40px; height: 40px; flex-shrink: 0;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--brand), #1a73e8);
+      color: #fff;
+      font-size: .95rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      text-transform: uppercase;
+    }
+    .cm-avatar.personal { background: linear-gradient(135deg, #f39c12, #d35400); }
+    .cm-avatar.partner { background: linear-gradient(135deg, #0984e3, #6c5ce7); }
+    .cm-info { flex: 1; min-width: 0; }
+    .cm-name-line {
+      display: flex; align-items: baseline; gap: 6px;
+      overflow: hidden;
+    }
+    .cm-short-name {
+      font-weight: 800; font-size: .95rem;
+      color: var(--ink);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .cm-full-name {
+      font-size: .78rem; color: var(--muted);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .cm-meta-line {
+      font-size: .78rem; color: var(--muted);
+      margin-top: 2px;
+      display: flex; align-items: center; gap: 4px;
+      overflow: hidden;
+    }
+    .cm-meta-line .cm-role-badge {
+      font-size: .66rem; font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+    .cm-role-badge.admin { background: #ef5350; color: #fff; }
+    .cm-role-badge.manager { background: #ff9800; color: #fff; }
+    .cm-actions {
+      display: flex; align-items: center; gap: 2px; flex-shrink: 0;
+    }
+    .cm-actions a, .cm-actions button {
+      width: 36px; height: 36px;
+      border: none; border-radius: 50%;
+      background: transparent;
+      color: var(--muted);
+      font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: color .12s, background .12s;
+      text-decoration: none;
+    }
+    .cm-actions a:hover, .cm-actions button:hover {
+      background: rgba(255,255,255,.08);
+      color: var(--ink);
+    }
+    .cm-actions a.cm-call { color: #4caf50; }
+    .cm-actions a.cm-zalo { color: #0068ff; }
+    .cm-actions button.cm-edit { color: var(--brand); }
+    .cm-actions button.cm-delete { color: #ef5350; }
+
+    /* Group view */
+    .cm-group-card {
+      margin: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+    .cm-group-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .cm-group-header:active { background: rgba(255,255,255,.04); }
+    .cm-group-name {
+      font-weight: 800; font-size: .9rem;
+      color: var(--ink);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .cm-group-count {
+      font-size: .76rem; font-weight: 700;
+      color: var(--muted);
+      background: var(--surface-high, #1a1d26);
+      border-radius: 8px;
+      padding: 2px 8px;
+    }
+    .cm-group-body { border-top: 1px solid var(--line); }
+
+    /* FAB */
+    .cm-fab {
+      position: fixed;
+      bottom: calc(76px + env(safe-area-inset-bottom));
+      right: max(16px, calc((100vw - 460px) / 2 + 16px));
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      border: none;
+      background: var(--brand);
+      color: #fff;
+      font-size: 1.5rem;
+      box-shadow: 0 6px 20px rgba(0,0,0,.35);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      z-index: 30;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .cm-fab:active { transform: scale(.92); }
+
+    /* Empty state */
+    .cm-empty {
+      padding: 40px 20px;
+      text-align: center;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+    .cm-empty i { font-size: 2.5rem; display: block; margin-bottom: 10px; opacity: .5; }
+
+    /* Private contact add bar */
+    .cm-add-private-bar {
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--line);
+      text-align: center;
+    }
+    .cm-add-private-btn {
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      background: transparent;
+      color: var(--brand);
+      font-size: .82rem; font-weight: 700;
+      padding: 8px 16px;
+      cursor: pointer;
+      transition: background .12s;
+    }
+    .cm-add-private-btn:hover { background: rgba(255,255,255,.05); }
+
+    /* Keep old user-card styles for backward compat (modal still uses some) */
     .user-card {
       border: 1px solid var(--line);
       border-radius: 16px;
@@ -1578,6 +1845,7 @@
       color: var(--ink);
     }
     .user-team-check input { width: 22px; height: 22px; flex-shrink: 0; }
+
 
     .modal-header,
     .modal-footer {
@@ -2353,6 +2621,11 @@
     .tl-item::before { content: ""; position: absolute; left: -14px; top: 5px; width: 9px; height: 9px; border-radius: 50%; background: var(--brand); border: 2px solid #fff; }
     .tl-item.hand::before { background: var(--warn-ink); }
     .tl-when { font-size: .74rem; font-weight: 700; color: var(--muted); }
+    .tl-step { font-size: .74rem; font-weight: 700; color: var(--brand); margin-top: 2px; display: flex; align-items: center; gap: 4px; }
+    /* P4: chip "Tôi là ai" (tự báo) + dòng tiến độ từng người trên bước */
+    .self-chip { border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 999px; padding: 8px 16px; font-size: .92rem; font-weight: 700; min-height: 44px; cursor: pointer; }
+    .self-chip.on { border-color: var(--brand); background: var(--brand); color: #fff; }
+    .step-progress-people { font-size: .78rem; font-weight: 600; color: var(--doing); margin-top: 4px; }
     .tl-txt { font-size: .87rem; line-height: 1.4; color: var(--ink); margin-top: 1px; }
     .tl-txt b { color: var(--brand); }
     .tl-tag { font-size: .66rem; font-weight: 800; text-transform: uppercase; padding: 1px 6px; border-radius: 4px; background: #f4ead2; color: var(--warn-ink); margin-left: 5px; }
@@ -2407,6 +2680,13 @@
                   <option value="">— Chọn tổ thực hiện —</option>
                 </select>
               </div>
+              <!-- P4: "Tôi là ai" — chế độ tự báo phần mình (chỉ hiện khi bước/việc
+                   có nhiều người). Điện thoại dùng chung: chạm chip để chọn đúng mình. -->
+              <div class="d-none mt-3" id="logSelfPicker">
+                <div class="field-lb"><i class="bi bi-person-check me-1"></i>Tôi là (tự ghi phần mình)</div>
+                <div class="d-flex flex-wrap gap-2" id="logSelfChips"></div>
+                <button type="button" class="link-button-sm mt-2" onclick="setLogMode('batch')"><i class="bi bi-people me-1"></i>Ghi hộ cả nhóm →</button>
+              </div>
             </div>
 
             <div class="d-sec">
@@ -2439,9 +2719,12 @@
             </div>
 
             <div class="d-sec d-none" id="peopleResults">
-              <div class="d-lab"><i class="bi bi-people"></i>Người tham gia</div>
-              <div class="d-flex flex-column gap-2" id="peopleResultRows"></div>
-              <div class="small text-secondary mt-1">Ghi riêng nội dung thực hiện của từng nhân viên</div>
+              <div class="d-flex align-items-center justify-content-between gap-2">
+                <div class="d-lab mb-0"><i class="bi bi-people"></i>Ghi hộ cả nhóm</div>
+                <button type="button" class="link-button-sm" onclick="setLogMode('self')"><i class="bi bi-person-check me-1"></i>← Chỉ ghi phần tôi</button>
+              </div>
+              <div class="d-flex flex-column gap-2 mt-2" id="peopleResultRows"></div>
+              <div class="small text-secondary mt-1">Ghi riêng kết quả từng người (người "Chưa đạt/Vắng" không tính là đã xong phần mình)</div>
             </div>
 
             <div class="d-sec">
@@ -2894,6 +3177,10 @@
               <div class="col-12">
                 <label class="form-label" for="userFullName">Họ và tên</label>
                 <input class="form-control" id="userFullName" autocomplete="name" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label" for="userShortName">Tên thường gọi (tên rút gọn hiển thị Dashboard)</label>
+                <input class="form-control" id="userShortName" placeholder="vd: Chiến, Cường, Thắng NQ, Hậu DV...">
               </div>
               <div class="col-12">
                 <label class="form-label" for="userUsername">Tên đăng nhập</label>
@@ -3685,24 +3972,45 @@
       }
     }
 
+    function formatStandardShortName(rawName) {
+      if (!rawName) return "";
+      const raw = String(rawName).trim();
+      if (!raw) return "";
+
+      const parts = raw.split(/\s+/);
+      if (parts.length <= 2) return raw; // Ví dụ "Thắng NQ", "Hậu DV" -> đã ngắn gọn chuẩn
+
+      const mainName = parts[parts.length - 1]; // "Thắng", "Hậu"
+      const initials = parts.slice(0, parts.length - 1).map(p => p.charAt(0).toUpperCase()).join("");
+      return `${mainName} ${initials}`; // "Thắng NQ", "Hậu DV"
+    }
+
     function getShortName(fullName) {
       if (!fullName) return "";
       const raw = String(fullName).trim();
       if (!raw) return "";
 
+      // 1. Tra cứu trực tiếp trong staffDirectory (danh bạ / tài khoản)
       const person = staffDirectory.find(p =>
         (p.name && p.name.toLowerCase() === raw.toLowerCase()) ||
         (p.username && p.username.toLowerCase() === raw.toLowerCase()) ||
         (p.shortName && p.shortName.toLowerCase() === raw.toLowerCase())
       );
-      if (person && person.shortName) return person.shortName;
 
-      const parts = raw.split(/\s+/);
-      if (parts.length <= 2) return raw;
+      // Nếu có tên thường gọi riêng trong danh bạ (vd "Chiến", "Huy pb", "Huy đh")
+      if (person && person.shortName && person.shortName.trim()) {
+        const customShort = person.shortName.trim();
+        // Kiểm tra xem tên gọi đó có bị trùng đơn thuần (vd 2 người cùng tên "Thắng") không
+        const duplicates = staffDirectory.filter(p => p.shortName && p.shortName.trim().toLowerCase() === customShort.toLowerCase());
+        if (duplicates.length <= 1) {
+          return customShort;
+        }
+        // Nếu bị trùng tên ngắn đơn lẻ, chuyển sang format chuẩn phân biệt: [Tên] [Chữ cái đầu Họ/Đệm]
+        return formatStandardShortName(person.name || raw);
+      }
 
-      const mainName = parts[parts.length - 1];
-      const initials = parts.slice(0, parts.length - 1).map(p => p.charAt(0).toUpperCase()).join("");
-      return `${mainName} ${initials}`;
+      // 2. Không có tên gọi riêng hoặc tên đầy đủ -> định dạng chuẩn ngắn gọn (vd "Nguyễn Quốc Thắng" ➔ "Thắng NQ", "Đinh Văn Hậu" ➔ "Hậu DV")
+      return formatStandardShortName(raw);
     }
 
     // Danh sách nhân viên cho dropdown "Người thực hiện": lấy từ sheet Staff
@@ -4488,7 +4796,7 @@
       const personSelect = document.getElementById("filterPerson");
       const currentPerson = personSelect.value;
       const people = [...new Set(plans.flatMap(plan => planPeopleNames(plan)))].sort();
-      personSelect.innerHTML = '<option value="">Tất cả</option>' + people.map(name => `<option>${escapeHtml(name)}</option>`).join("");
+      personSelect.innerHTML = '<option value="">Tất cả</option>' + people.map(name => `<option value="${escapeAttr(name)}">${escapeHtml(getShortName(name))}</option>`).join("");
       personSelect.value = currentPerson;
     }
 
@@ -4673,14 +4981,25 @@
     function planTimelineHtml(plan) {
       const items = logs
         .filter(l => isWorkLog(l) && logBelongsToPlan(l, plan))
-        .map(log => ({
-          key: String(log.workDate || "") + " " + String(log.startTime || "00:00"),
-          when: friendlyDate(log.workDate) + (log.startTime ? " " + log.startTime : ""),
-          who: log.employee || "",
-          text: log.result || log.selectedTask || "",
-          next: log.nextAction || "", issue: log.issue || "",
-          photos: logPhotoList(log), hand: false, tag: ""
-        }));
+        .map(log => {
+          // log chỉ lưu stepId — tra lại tên bước/giai đoạn để chú thích, vì nội
+          // dung "Kết quả" (result) hầu như luôn được ưu tiên hiển thị và không
+          // bao giờ chứa tên bước, nên trước đây timeline không biết log này của
+          // bước nào (dù dữ liệu đã có sẵn qua stepId).
+          const stepInfo = log.stepId ? findStepWithPhase(plan, log.stepId) : null;
+          const stepLabel = stepInfo
+            ? (stepInfo.phaseName ? `${stepInfo.phaseName} · ${stepInfo.step.title || "Bước"}` : `Bước: ${stepInfo.step.title || ""}`)
+            : "";
+          return {
+            key: String(log.workDate || "") + " " + String(log.startTime || "00:00"),
+            when: friendlyDate(log.workDate) + (log.startTime ? " " + log.startTime : ""),
+            who: log.employee || "",
+            text: log.result || log.selectedTask || "",
+            stepLabel,
+            next: log.nextAction || "", issue: log.issue || "",
+            photos: logPhotoList(log), hand: false, tag: ""
+          };
+        });
       const ho = planHandover(plan);
       if (ho && ho.at) {
         const recv = ho.toType === "shift" ? (ho.toTeam || "ca/tổ") : (ho.toUser || "người nhận");
@@ -4690,7 +5009,7 @@
           who: ho.fromUser || "",
           text: "Bàn giao cho " + recv + (ho.progressNote ? ": " + ho.progressNote : ""),
           next: ho.pending || "", issue: ho.risk || "",
-          photos: Array.isArray(ho.photos) ? ho.photos : [], hand: true, tag: "Bàn giao"
+          photos: Array.isArray(ho.photos) ? ho.photos : [], hand: true, tag: "Bàn giao", stepLabel: ""
         });
       }
       if (items.length === 0) {
@@ -4700,7 +5019,8 @@
       const shown = items.slice(0, 6);
       return `<div class="tl">${shown.map(it => `
         <div class="tl-item${it.hand ? " hand" : ""}">
-          <div class="tl-when">${escapeHtml(it.when)}${it.who ? " · " + escapeHtml(it.who) : ""}</div>
+          <div class="tl-when">${escapeHtml(it.when)}${it.who ? " · " + escapeHtml(getShortName(it.who)) : ""}</div>
+          ${it.stepLabel ? `<div class="tl-step"><i class="bi bi-diagram-3 me-1"></i>${escapeHtml(it.stepLabel)}</div>` : ""}
           <div class="tl-txt">${it.tag ? `<b>${escapeHtml(it.text)}</b><span class="tl-tag">${escapeHtml(it.tag)}</span>` : escapeHtml(it.text)}</div>
           ${it.next ? `<div class="tl-sub"><i class="bi bi-lightbulb me-1"></i>${escapeHtml(it.next)}</div>` : ""}
           ${it.issue ? `<div class="tl-sub warn"><i class="bi bi-exclamation-triangle me-1"></i>${escapeHtml(it.issue)}</div>` : ""}
@@ -4972,7 +5292,7 @@
       const select = `
         <select class="step-add-select" title="${plan.team ? 'Lọc theo tổ: ' + escapeAttr(plan.team) : 'Gán người'}" onchange="addPlanAssigneeQuick('${escapeAttr(plan.id)}', this.value); this.value='';">
           <option value="">+ Gán người</option>
-          ${options.map(n => `<option value="${escapeAttr(n)}">${escapeHtml(n)}</option>`).join("")}
+          ${options.map(n => `<option value="${escapeAttr(n)}">${escapeHtml(getShortName(n))}</option>`).join("")}
           <option value="__other__">➕ Nhập tên khác...</option>
         </select>`;
       return `<div class="step-assignees">${chips}${select}</div>`;
@@ -5148,6 +5468,8 @@
         step.done = !step.done;
         step.doneAt = step.done ? new Date().toISOString() : "";
         step.doneBy = step.done ? currentUser() : "";
+        // Tick tay là ghi đè cả bước → đồng bộ doneByPeople để hiển thị không lệch
+        step.doneByPeople = step.done ? (step.assignees || []).slice() : [];
       });
     };
 
@@ -5174,14 +5496,14 @@
     function stepAssigneeEditorHtml(planId, step) {
       const names = step.assignees || [];
       const chips = names.map(name => `
-        <span class="step-chip">${escapeHtml(name)}<button type="button" aria-label="Bỏ ${escapeAttr(name)}" onclick="event.stopPropagation(); removeStepAssignee('${escapeAttr(planId)}','${escapeAttr(step.id)}','${escapeAttr(name)}')">&times;</button></span>
+        <span class="step-chip" title="${escapeAttr(name)}">${escapeHtml(getShortName(name))}<button type="button" aria-label="Bỏ ${escapeAttr(name)}" onclick="event.stopPropagation(); removeStepAssignee('${escapeAttr(planId)}','${escapeAttr(step.id)}','${escapeAttr(name)}')">&times;</button></span>
       `).join("");
       const taken = new Set(names.map(normalizePerson));
       const options = knownPeopleNames().filter(n => !taken.has(normalizePerson(n)));
       const select = `
         <select class="step-add-select" onclick="event.stopPropagation()" onchange="addStepAssignee('${escapeAttr(planId)}','${escapeAttr(step.id)}', this.value); this.value='';">
           <option value="">+ Thêm người</option>
-          ${options.map(n => `<option value="${escapeAttr(n)}">${escapeHtml(n)}</option>`).join("")}
+          ${options.map(n => `<option value="${escapeAttr(n)}">${escapeHtml(getShortName(n))}</option>`).join("")}
           <option value="__other__">➕ Nhập tên khác...</option>
         </select>`;
       return `<div class="step-assignees">${chips}${select}</div>`;
@@ -5198,7 +5520,7 @@
           <div class="step-body min-w-0">
             <div class="step-title" onclick="renameStep('${escapeAttr(plan.id)}','${escapeAttr(step.id)}')">${escapeHtml(step.title || "Bước chưa đặt tên")}</div>
             ${stepAssigneeEditorHtml(plan.id, step)}
-            ${step.done && step.doneBy ? `<div class="step-done-note"><i class="bi bi-check2-circle me-1"></i>${escapeHtml(step.doneBy)} đã xong${step.doneAt ? " · " + friendlyDate(step.doneAt.slice(0, 10)) : ""}</div>` : ""}
+            ${stepPeopleProgressHtml(step)}
           </div>
           <div class="step-actions">
             ${!step.done ? `<button class="step-icon-btn" type="button" title="Ghi nhật ký bước này" onclick="navigateTo('logentry', {planId:'${escapeAttr(plan.id)}', stepId:'${escapeAttr(step.id)}', presetProgress:'Hoàn thành'})"><i class="bi bi-journal-plus"></i></button>` : ""}
@@ -5253,6 +5575,70 @@
         if (found) return found;
       }
       return null;
+    }
+
+    // Như findAnyStep, nhưng kèm tên giai đoạn (null nếu là bước phẳng cũ, chưa
+    // thuộc giai đoạn nào) — dùng để chú thích "nhật ký này thuộc bước/giai đoạn
+    // nào" trên timeline (planTimelineHtml), vì log chỉ lưu stepId, không lưu tên.
+    function findStepWithPhase(plan, stepId) {
+      if (!plan || !stepId) return null;
+      const legacy = planSteps(plan).find(s => s.id === stepId);
+      if (legacy) return { step: legacy, phaseName: null };
+      for (const ph of planPhases(plan)) {
+        const found = (ph.steps || []).find(s => s.id === stepId);
+        if (found) return { step: found, phaseName: ph.name || "" };
+      }
+      return null;
+    }
+
+    // ===== P4: mỗi người tự báo phần mình trên 1 bước =====
+    // step.doneByPeople[] = danh sách người đã tự ghi Hoàn thành phần mình. Bước
+    // nhiều người chỉ tính Xong khi MỌI người trong step.assignees đều đã có mặt
+    // trong doneByPeople. Bước 0/1 người giữ nguyên hành vi cũ (xong ngay khi ghi).
+    function stepDoneInfo(step) {
+      const assignees = (step && step.assignees) || [];
+      const doneNames = (step && step.doneByPeople) || [];
+      const doneSet = new Set(doneNames.map(normalizePerson));
+      const total = assignees.length;
+      const doneCount = total ? assignees.filter(a => doneSet.has(normalizePerson(a))).length : (step && step.done ? 1 : 0);
+      return { assignees, doneNames, total, doneCount, allDone: Boolean(step && step.done) };
+    }
+
+    // Ghi nhận (những) người đã Hoàn thành phần mình trên bước; đặt step.done theo
+    // nguyên tắc "đủ người mới xong". `people` rỗng → dùng fallbackBy (người ghi).
+    function markStepDoneByPeople(step, people, fallbackBy) {
+      if (!step) return;
+      const wasDone = step.done === true; // bước đã Xong (kể cả từ mô hình cũ) thì giữ Xong
+      if (!Array.isArray(step.doneByPeople)) step.doneByPeople = [];
+      const names = (people && people.length ? people : [fallbackBy]).filter(Boolean);
+      names.forEach(nm => {
+        if (!step.doneByPeople.some(n => normalizePerson(n) === normalizePerson(nm))) step.doneByPeople.push(nm);
+      });
+      const assignees = step.assignees || [];
+      const doneSet = new Set(step.doneByPeople.map(normalizePerson));
+      const allDone = assignees.length === 0 ? true : assignees.every(a => doneSet.has(normalizePerson(a)));
+      // Chỉ tiến lên "Xong", không tự lùi: ghi thêm không bao giờ bỏ trạng thái đã Xong
+      // (muốn bỏ Xong phải bấm tick thủ công ở toggleStepDone/togglePhaseStepDone).
+      step.done = wasDone || allDone;
+      step.doneAt = new Date().toISOString();
+      step.doneBy = names[names.length - 1] || fallbackBy || "";
+    }
+
+    // Dòng tiến độ hiển thị dưới 1 bước: đã xong → ai xong; chưa xong nhiều người →
+    // "x/y người đã xong" + tên. Dùng chung cho bước phẳng (stepRowHtml) và bước
+    // trong giai đoạn (phaseStepRowHtml). Bước cũ (done qua mô hình cũ, không có
+    // doneByPeople) vẫn hiển thị "đã xong" bình thường vì đọc step.done trực tiếp.
+    function stepPeopleProgressHtml(step) {
+      const info = stepDoneInfo(step);
+      if (step.done) {
+        const by = step.doneBy ? escapeHtml(getShortName(step.doneBy)) + " đã xong" : "Đã xong";
+        return `<div class="step-done-note"><i class="bi bi-check2-circle me-1"></i>${by}${step.doneAt ? " · " + friendlyDate(step.doneAt.slice(0, 10)) : ""}</div>`;
+      }
+      if (info.total > 1 && info.doneCount > 0) {
+        const doneList = (info.doneNames || []).map(n => escapeHtml(getShortName(n))).join(", ");
+        return `<div class="step-progress-people"><i class="bi bi-people me-1"></i>${info.doneCount}/${info.total} người đã xong${doneList ? " · " + doneList : ""}</div>`;
+      }
+      return "";
     }
 
     function updatePlanPhases(planId, mutateFn) {
@@ -5372,6 +5758,8 @@
         step.done = !step.done;
         step.doneAt = step.done ? new Date().toISOString() : "";
         step.doneBy = step.done ? currentUser() : "";
+        // Tick tay là ghi đè cả bước → đồng bộ doneByPeople để hiển thị không lệch
+        step.doneByPeople = step.done ? (step.assignees || []).slice() : [];
         rollUpPhaseStatus_(phase);
       });
     };
@@ -5421,7 +5809,7 @@
     function phaseStepAssigneeEditorHtml(plan, phaseId, step) {
       const names = step.assignees || [];
       const chips = names.map(name => `
-        <span class="step-chip">${escapeHtml(name)}<button type="button" aria-label="Bỏ ${escapeAttr(name)}" onclick="event.stopPropagation(); removePhaseStepAssignee('${escapeAttr(plan.id)}','${escapeAttr(phaseId)}','${escapeAttr(step.id)}','${escapeAttr(name)}')">&times;</button></span>
+        <span class="step-chip" title="${escapeAttr(name)}">${escapeHtml(getShortName(name))}<button type="button" aria-label="Bỏ ${escapeAttr(name)}" onclick="event.stopPropagation(); removePhaseStepAssignee('${escapeAttr(plan.id)}','${escapeAttr(phaseId)}','${escapeAttr(step.id)}','${escapeAttr(name)}')">&times;</button></span>
       `).join("");
       const taken = new Set(names.map(normalizePerson));
       const options = filterNamesByTag(knownPeopleNames().filter(n => !taken.has(normalizePerson(n))), plan.team);
@@ -5432,7 +5820,7 @@
       const select = `
         <select class="step-add-select" title="${selectTitle}" onclick="event.stopPropagation()" onchange="addPhaseStepAssignee('${escapeAttr(plan.id)}','${escapeAttr(phaseId)}','${escapeAttr(step.id)}', this.value); this.value='';">
           <option value="">+ Gán người</option>
-          ${options.map(n => `<option value="${escapeAttr(n)}">${escapeHtml(n)}</option>`).join("")}
+          ${options.map(n => `<option value="${escapeAttr(n)}">${escapeHtml(getShortName(n))}</option>`).join("")}
           <option value="__other__">➕ Nhập tên khác...</option>
         </select>`;
       return `<div class="step-assignees">${chips}${select}</div>`;
@@ -5451,7 +5839,7 @@
             ${phaseStepAssigneeEditorHtml(plan, phase.id, step)}
             ${photoThumbsHtml(step.photos)}
             <button class="link-button-sm mt-1" type="button" onclick="attachPhaseStepPhoto('${escapeAttr(plan.id)}','${escapeAttr(phase.id)}','${escapeAttr(step.id)}')"><i class="bi bi-camera me-1"></i>Đính ảnh</button>
-            ${step.done && step.doneBy ? `<div class="step-done-note"><i class="bi bi-check2-circle me-1"></i>${escapeHtml(step.doneBy)} đã xong${step.doneAt ? " · " + friendlyDate(step.doneAt.slice(0, 10)) : ""}</div>` : ""}
+            ${stepPeopleProgressHtml(step)}
           </div>
           <div class="step-actions">
             ${!step.done ? `<button class="step-icon-btn" type="button" title="Ghi nhật ký bước này" onclick="navigateTo('logentry', {planId:'${escapeAttr(plan.id)}', stepId:'${escapeAttr(step.id)}', presetProgress:'Hoàn thành'})"><i class="bi bi-journal-plus"></i></button>` : ""}
@@ -5518,6 +5906,12 @@
     let pendingPhotoTarget = null;
     let pendingLogPhotos = []; // ảnh đính vào nhật ký đang soạn, gộp vào payload lúc submitLog
     let pendingHandoverPhotos = []; // ảnh đính vào phiếu bàn giao đang soạn, gộp vào submitHandover
+
+    // ===== P4: chế độ ghi nhật ký "tự báo phần mình" vs "ghi hộ cả nhóm" =====
+    let logCtxAssignees = [];   // người của bước/việc đang ghi
+    let logCtxHasQty = false;   // việc có chỉ tiêu khối lượng (để hiện ô số đo ở chế độ tự báo)
+    let logSelfPerson = "";     // "tôi là ai" đang chọn (chế độ tự báo)
+    let logMode = "self";       // "self" (tự báo) | "batch" (ghi hộ cả nhóm)
 
     function photoThumbsHtml(photos) {
       const list = Array.isArray(photos) ? photos : [];
@@ -5803,6 +6197,52 @@
       syncQuantityDisplay();
     }
 
+    // ===== P4: chuyển & áp dụng chế độ ghi (tự báo / ghi hộ cả nhóm) =====
+    function renderLogSelfChips() {
+      const box = document.getElementById("logSelfChips");
+      if (!box) return;
+      if (logCtxAssignees.length === 0) {
+        // Không có danh sách người (việc chưa gán ai / phát sinh) → tự báo cho chính mình
+        box.innerHTML = `<span class="self-chip on">${escapeHtml(getShortName(logSelfPerson || currentUser()) || "Tôi")}</span>`;
+        return;
+      }
+      box.innerHTML = logCtxAssignees.map(name => {
+        const on = normalizePerson(name) === normalizePerson(logSelfPerson);
+        return `<button type="button" class="self-chip${on ? " on" : ""}" title="${escapeAttr(name)}" onclick="setLogSelfPerson('${escapeAttr(name)}')">${escapeHtml(getShortName(name))}</button>`;
+      }).join("");
+    }
+
+    window.setLogSelfPerson = function (name) {
+      logSelfPerson = name;
+      renderLogSelfChips();
+    };
+
+    window.setLogMode = function (mode) {
+      logMode = mode;
+      applyLogMode();
+    };
+
+    // Đồng bộ UI theo logMode: chế độ tự báo hiện chip "Tôi là ai" + ẩn lưới nhóm;
+    // chế độ ghi hộ hiện lưới nhiều người (renderPeopleResults) + ẩn chip.
+    function applyLogMode() {
+      const picker = document.getElementById("logSelfPicker");
+      const grid = document.getElementById("peopleResults");
+      const rows = document.getElementById("peopleResultRows");
+      const multi = logCtxAssignees.length > 1;
+      if (logMode === "batch" && multi) {
+        if (picker) picker.classList.add("d-none");
+        renderPeopleResults(logCtxAssignees.join(", ")); // tự hiện #peopleResults + ẩn ô số đo chung
+      } else {
+        // Chế độ tự báo (mặc định): chỉ hiện chip "tôi là ai" khi có từ 2 người
+        if (picker) picker.classList.toggle("d-none", !multi);
+        renderLogSelfChips();
+        if (grid) grid.classList.add("d-none");
+        if (rows) rows.innerHTML = "";
+        // Tự báo phần mình → cho nhập ô số đo nếu việc có chỉ tiêu khối lượng
+        toggleQuantityFields(logCtxHasQty);
+      }
+    }
+
     function prefillLogForm(plan, presetProgress, step) {
       document.getElementById("planId").value = plan.id;
       document.getElementById("stepId").value = step ? step.id : "";
@@ -5815,11 +6255,14 @@
       refreshTeamOptions(plan.team);
       setProgress(presetProgress || "Hoàn thành");
       document.getElementById("startTime").value = roundQuarter(currentTime());
-      // Bước có người riêng → đánh giá kết quả theo người của BƯỚC, không phải cả việc
-      const resultPeople = step ? (step.assignees || []).join(", ") : plan.assignee;
-      renderPeopleResults(resultPeople);
-      const hasPlanQuantity = Boolean(plan.planQty || plan.unit);
-      if (!String(resultPeople || "").trim()) toggleQuantityFields(hasPlanQuantity);
+      // P4: mặc định "tự báo phần mình". Người của bước (nếu ghi cho bước) hoặc của
+      // cả việc; "tôi" = người đang đăng nhập nếu thuộc nhóm, không thì người đầu.
+      logCtxAssignees = step ? (step.assignees || []).slice() : splitAssignees(plan.assignee);
+      logCtxHasQty = Boolean(plan.planQty || plan.unit);
+      logMode = "self";
+      const me = currentUser();
+      logSelfPerson = logCtxAssignees.find(a => normalizePerson(a) === normalizePerson(me)) || logCtxAssignees[0] || me || "";
+      applyLogMode();
       document.getElementById("quantityUnit").value = plan.unit || "";
       const note = document.getElementById("planCumNote");
       // Lũy kế khối lượng là của cả kế hoạch, không tách theo bước → chỉ hiện khi
@@ -5857,7 +6300,6 @@
         if (params.adhocTask) {
           clearForm();
           document.getElementById("selectedTask").value = params.adhocTask;
-          renderPeopleResults("");
           setProgress("Hoàn thành");
           document.getElementById("startTime").value = roundQuarter(currentTime());
         } else {
@@ -5963,17 +6405,23 @@
         document.getElementById("teams").focus();
         return;
       }
-      if (!base.result && !hasPeopleDetail) {
-        showToast("Nhập kết quả hoặc ghi kết quả từng người trước khi lưu");
+      // P4 — "nhanh gọn": tự báo cho việc/bước đã có ngữ cảnh (base.planId) thì chỉ
+      // cần chip trạng thái + Lưu; kết quả để trống → lấy luôn trạng thái làm kết quả.
+      // Việc phát sinh tự do (không có planId) vẫn cần nhập kết quả cho rõ.
+      if (!base.result && hasPeopleDetail) {
+        base.result = "Đã ghi kết quả từng người";
+      } else if (!base.result && base.planId) {
+        base.result = base.progress || "Đã ghi nhận";
+      } else if (!base.result) {
+        showToast("Nhập kết quả trước khi lưu nhật ký");
         document.getElementById("result").focus();
         return;
       }
-      if (!base.result && hasPeopleDetail) {
-        base.result = "Đã ghi kết quả từng người";
-      }
 
-      // Việc có nhiều người tham gia → 1 dòng nhật ký/người để đánh giá riêng;
-      // việc phát sinh không gắn kế hoạch → 1 dòng cho chính người ghi
+      // P4 — 2 chế độ:
+      //  • Tự báo (mặc định): 1 dòng cho CHÍNH người đang ghi (logSelfPerson), không
+      //    phải người bấm Lưu nếu điện thoại dùng chung (đã chọn "Tôi là ai").
+      //  • Ghi hộ cả nhóm (phụ): lưới nhiều người → 1 dòng/người kèm đánh giá riêng.
       const newLogs = people.length > 0
         ? people.map((person, index) => ({
             ...base,
@@ -5983,7 +6431,15 @@
             quantity: parseQty(person.qty),
             result: base.result + (person.note ? ` | ${person.name}: ${person.note}` : "")
           }))
-        : [{ ...base, id: "LOG-" + Date.now(), employee: recordedBy, rating: "", quantity: parseQty(document.getElementById("quantity").value) }];
+        : [{ ...base, id: "LOG-" + Date.now(), employee: logSelfPerson || recordedBy, rating: "", quantity: parseQty(document.getElementById("quantity").value) }];
+
+      // Người đã tự báo Hoàn thành phần mình trên bước (để đánh dấu bước theo từng
+      // người). Chế độ ghi hộ: chỉ người được đánh giá "Đạt" trở lên mới tính là
+      // xong phần mình (người "Chưa đạt"/"Vắng" không tính) → bước chưa đủ người.
+      const COMPLETION_RATINGS = new Set(["Hoàn thành tốt", "Đạt"]);
+      const donePeople = people.length > 0
+        ? people.filter(p => COMPLETION_RATINGS.has(p.rating)).map(p => p.name)
+        : [logSelfPerson || recordedBy];
 
       // Cộng dồn lũy kế ngay trên kế hoạch (server sẽ tính lại chính xác)
       const addedQty = newLogs.reduce((sum, log) => sum + (typeof log.quantity === "number" ? log.quantity : 0), 0);
@@ -6000,7 +6456,7 @@
       localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
       showAllLogs = false;
       const markPlanDone = document.getElementById("markPlanDone") ? document.getElementById("markPlanDone").checked : false;
-      updatePlanStatus(base.planId, base.progress, markPlanDone, base.stepId, recordedBy);
+      updatePlanStatus(base.planId, base.progress, markPlanDone, base.stepId, recordedBy, donePeople);
       clearForm();
       lastAddedLogId = newLogs[0].id;
       render();
@@ -6037,30 +6493,27 @@
       }
     }
 
-    function updatePlanStatus(planId, logProgress, markPlanDone, stepId, recordedBy) {
+    function updatePlanStatus(planId, logProgress, markPlanDone, stepId, recordedBy, donePeople) {
       if (!planId) return;
       const plan = plans.find(item => item.id === planId);
       if (!plan) return;
 
-      // Ghi nhật ký cho một bước cụ thể + kết quả "Hoàn thành" → đánh dấu đúng
-      // bước đó xong (không hỏi qua checkbox "Kết thúc việc này" — xem setProgress).
-      // Bước có thể nằm ở steps phẳng cũ HOẶC trong 1 giai đoạn — thử cả 2 nơi.
+      // Ghi nhật ký cho một bước cụ thể + kết quả "Hoàn thành" → ghi nhận NGƯỜI
+      // vừa tự báo xong (donePeople) vào bước; bước nhiều người chỉ chuyển "Xong"
+      // khi đủ người (xem markStepDoneByPeople). Bước nằm ở steps phẳng cũ HOẶC
+      // trong 1 giai đoạn — thử cả 2 nơi.
       if (stepId && logProgress === "Hoàn thành") {
         const legacySteps = planSteps(plan);
         const legacyStep = legacySteps.find(s => s.id === stepId);
         if (legacyStep) {
-          legacyStep.done = true;
-          legacyStep.doneAt = new Date().toISOString();
-          legacyStep.doneBy = recordedBy || "";
+          markStepDoneByPeople(legacyStep, donePeople, recordedBy);
           plan.steps = JSON.stringify(legacySteps);
         } else {
           const phases = planPhases(plan);
           for (const phase of phases) {
             const phaseStep = (phase.steps || []).find(s => s.id === stepId);
             if (phaseStep) {
-              phaseStep.done = true;
-              phaseStep.doneAt = new Date().toISOString();
-              phaseStep.doneBy = recordedBy || "";
+              markStepDoneByPeople(phaseStep, donePeople, recordedBy);
               rollUpPhaseStatus_(phase);
               break;
             }
@@ -6113,8 +6566,12 @@
       document.getElementById("shift").value = defaultShift();
       refreshTeamOptions();
       setProgress("Hoàn thành");
-      renderPeopleResults("");
-      toggleQuantityFields(false);
+      // P4: reset chế độ ghi về "tự báo cho chính mình", không còn người/nhóm
+      logCtxAssignees = [];
+      logCtxHasQty = false;
+      logMode = "self";
+      logSelfPerson = currentUser() || "";
+      applyLogMode();
       document.getElementById("planCumNote").classList.add("d-none");
       document.querySelectorAll("#resultChips .qc").forEach(btn => btn.classList.remove("on"));
       syncQuantityDisplay();
@@ -6938,10 +7395,7 @@
       const userRole = (curUser.role || '').toLowerCase();
       const isAdmin = canManageUsers() || userRole === 'admin' || userRole === 'manager';
 
-      // Non-admin staff default to 'all' so they see contacts matching tag pills directly
-      if (!isAdmin) {
-        currentZaloTab = 'all';
-      }
+      if (!isAdmin) currentZaloTab = 'all';
 
       // Background syncs
       syncPersonalContactsFromSheet(curUsername);
@@ -6951,7 +7405,7 @@
       const myPrivateContacts = getStoredPersonalContacts(curUsername);
       const erpPartners = getStoredErpPartners();
 
-      // User Label-based Permission Filtering
+      // Label-based filtering for non-admin
       const userLabels = (curUser.labels || curUser.teams || curUser.dept || '').split(/[,;]/).map(s => s.trim().toLowerCase()).filter(Boolean);
       if (!isAdmin && userLabels.length > 0 && !userLabels.includes('*')) {
         baseContacts = baseContacts.filter(p => {
@@ -6965,50 +7419,26 @@
         });
       }
 
-      // Compute dynamic tag counts (hides tags with count === 0)
+      // Tag counts
       const tagMap = new Map();
       baseContacts.forEach(p => {
         const rawLabels = [(p.labels || ''), (p.dept || '')].join(',').split(/[,;]/).map(s => s.trim()).filter(Boolean);
-        const uniqueSet = new Set(rawLabels);
-        uniqueSet.forEach(tag => {
-          tagMap.set(tag, (tagMap.get(tag) || 0) + 1);
-        });
+        new Set(rawLabels).forEach(tag => tagMap.set(tag, (tagMap.get(tag) || 0) + 1));
       });
+      const activeTagList = Array.from(tagMap.entries()).filter(([, c]) => c > 0).sort((a, b) => b[1] - a[1]);
 
-      const activeTagList = Array.from(tagMap.entries())
-        .filter(([tag, count]) => count > 0)
-        .sort((a, b) => b[1] - a[1]);
-
-      const tagPills = [{ tag: 'all', label: 'Tất cả Nhãn', count: baseContacts.length }].concat(
-        activeTagList.map(([tag, count]) => ({ tag: tag, label: tag, count: count }))
-      );
-
-      const tagPillsHtml = tagPills.map(item => {
-        const isActive = currentTagFilter === item.tag;
-        const badgeClass = isActive ? 'bg-white text-primary' : 'bg-secondary-subtle text-dark border';
-        return `<button type="button" class="btn btn-sm ${isActive ? 'btn-primary' : 'btn-outline-secondary'} rounded-pill px-2.5 py-0.5 text-nowrap" style="font-size:11px; font-weight:600;" onclick="setContactTagFilter('${escapeAttr(item.tag)}')">
-          ${escapeHtml(item.label)} <span class="badge ${badgeClass} ms-0.5" style="font-size:10px;">${item.count}</span>
-        </button>`;
-      }).join('');
-
-      // Filter baseContacts by active tag filter
+      // Filter by tag
       let contacts = baseContacts;
       if (currentTagFilter && currentTagFilter !== 'all') {
-        const filterKey = currentTagFilter.toLowerCase();
-        contacts = baseContacts.filter(p => {
-          const haystack = [(p.labels || ''), (p.dept || ''), (p.position || '')].join(' ').toLowerCase();
-          return haystack.includes(filterKey);
-        });
+        const fk = currentTagFilter.toLowerCase();
+        contacts = baseContacts.filter(p => [(p.labels || ''), (p.dept || ''), (p.position || '')].join(' ').toLowerCase().includes(fk));
       }
 
-      // Search Query Filter
+      // Search filter
       if (zaloSearchQuery) {
         contacts = contacts.filter(p => {
-          const name = String(p.name || p.username || '').toLowerCase();
-          const phone = String(p.phone || '').toLowerCase();
-          const dept = String(p.dept || '').toLowerCase();
-          const labels = String(p.labels || '').toLowerCase();
-          return name.includes(zaloSearchQuery) || phone.includes(zaloSearchQuery) || dept.includes(zaloSearchQuery) || labels.includes(zaloSearchQuery);
+          const hay = [p.name, p.username, p.shortName, p.commonName, p.phone, p.dept, p.labels].join(' ').toLowerCase();
+          return hay.includes(zaloSearchQuery);
         });
       }
 
@@ -7020,144 +7450,146 @@
         return isLeader || isSame;
       });
 
-      // Render Header Tabs (Only for Admin/Manager)
-      const erpTabHtml = isAdmin ? `
-        <button type="button" class="zalo-tab-btn ${currentZaloTab === 'erp_partners' ? 'active' : ''}" onclick="setZaloContactTab('erp_partners')">
-          <i class="bi bi-building-fill text-info"></i> Đối tác & NCC <span class="badge bg-secondary">${erpPartners.length}</span>
-        </button>` : '';
+      // --- Header ---
+      const totalCount = baseContacts.length;
+      const downloadBtn = isAdmin ? `<button class="cm-download-btn" type="button" onclick="downloadStaffContacts()" title="Tải danh bạ (.vcf)"><i class="bi bi-download"></i></button>` : '';
 
-      const tabPillsBarHtml = isAdmin ? `
-          <div class="zalo-tab-pills">
-            <button type="button" class="zalo-tab-btn ${currentZaloTab === 'my_private' ? 'active' : ''}" onclick="setZaloContactTab('my_private')">
-              <i class="bi bi-star-fill text-warning"></i> Cá nhân của tôi <span class="badge bg-warning text-dark fw-bold">${myPrivateContacts.length}</span>
-            </button>
-            <button type="button" class="zalo-tab-btn ${currentZaloTab === 'same_team' ? 'active' : ''}" onclick="setZaloContactTab('same_team')">
-              <i class="bi bi-people-fill"></i> Nhóm <span class="badge bg-secondary">${sameTeamContacts.length}</span>
-            </button>
-            ${erpTabHtml}
-            <button type="button" class="zalo-tab-btn ${currentZaloTab === 'groups' ? 'active' : ''}" onclick="setZaloContactTab('groups')">
-              <i class="bi bi-diagram-3-fill"></i> Tổ / Phòng ban
-            </button>
-            <button type="button" class="zalo-tab-btn ${currentZaloTab === 'all' ? 'active' : ''}" onclick="setZaloContactTab('all')">
-              <i class="bi bi-person-lines-fill"></i> Tất cả danh bạ <span class="badge bg-secondary">${contacts.length}</span>
-            </button>
-          </div>` : '';
-
-      const headerHtml = `
-        <div class="zalo-contact-header" style="background:#fff; border-bottom:1px solid #e9ecef;">
-          ${isAdmin ? `<div class="d-flex justify-content-end px-2 pt-2">
-            <button type="button" class="btn btn-sm btn-outline-primary fw-semibold" onclick="downloadStaffContacts()" title="Tải danh bạ nhân sự về máy dạng vCard">
-              <i class="bi bi-download me-1"></i>Tải danh bạ (.vcf)
-            </button>
-          </div>` : ''}
-          <div class="zalo-search-box">
-            <i class="bi bi-search"></i>
-            <input type="search" value="${escapeAttr(zaloSearchQuery)}" placeholder="Tìm kiếm danh bạ, nhãn/tag, SĐT..." oninput="filterZaloContacts(this.value)">
-          </div>
-          <div class="zalo-tag-bar d-flex align-items-center gap-1 overflow-x-auto py-1 px-2 border-bottom" style="scrollbar-width: none;">
-            <span class="small text-secondary flex-shrink-0 me-1" style="font-size:11px; font-weight:600;"><i class="bi bi-tags-fill text-primary"></i> Tag:</span>
-            ${tagPillsHtml}
-          </div>
-          ${tabPillsBarHtml}
+      const searchBarHtml = `
+        <div class="cm-search-bar" style="position:relative;">
+          <i class="cm-search-icon bi bi-search"></i>
+          <input class="cm-search-input" type="search" value="${escapeAttr(zaloSearchQuery)}" placeholder="Tìm tên, SĐT, tổ, nhãn..." oninput="filterZaloContacts(this.value)">
+          <span class="cm-count-badge"><i class="bi bi-people-fill"></i>${totalCount}</span>
+          ${downloadBtn}
         </div>`;
 
-      function buildRowHtml(person) {
-        const name = person.name || person.username || "Nhân viên";
-        const initial = escapeHtml((name.trim().charAt(0) || "?").toUpperCase());
+      // Tabs
+      const tabDefs = [
+        { key: 'all', icon: 'bi-person-lines-fill', label: 'Nhân sự', count: contacts.length },
+        { key: 'groups', icon: 'bi-diagram-3-fill', label: 'Nhóm', count: '' },
+        { key: 'same_team', icon: 'bi-people-fill', label: 'Cùng tổ', count: sameTeamContacts.length }
+      ];
+      if (isAdmin) {
+        tabDefs.push({ key: 'my_private', icon: 'bi-star-fill', label: 'Cá nhân', count: myPrivateContacts.length });
+        tabDefs.push({ key: 'erp_partners', icon: 'bi-building-fill', label: 'Đối tác', count: erpPartners.length });
+      }
+      const tabsHtml = `<div class="cm-tabs">${tabDefs.map(t =>
+        `<button class="cm-tab-btn${currentZaloTab === t.key ? ' active' : ''}" type="button" onclick="setZaloContactTab('${t.key}')">
+          <i class="bi ${t.icon}"></i> ${t.label}${t.count !== '' ? ` <span class="cm-tab-count">${t.count}</span>` : ''}
+        </button>`
+      ).join('')}</div>`;
+
+      // Tags
+      const tagPillsHtml = [{ tag: 'all', label: 'Tất cả', count: baseContacts.length }]
+        .concat(activeTagList.map(([tag, count]) => ({ tag, label: tag, count })))
+        .map(item => `<button class="cm-tag-pill${currentTagFilter === item.tag ? ' active' : ''}" type="button" onclick="setContactTagFilter('${escapeAttr(item.tag)}')">${escapeHtml(item.label)}<span class="cm-tag-count">${item.count}</span></button>`)
+        .join('');
+      const tagbarHtml = `<div class="cm-tagbar"><span class="cm-tag-label"><i class="bi bi-tags-fill"></i> Tag:</span>${tagPillsHtml}</div>`;
+
+      const headerHtml = `<div class="cm-header">${searchBarHtml}${tabsHtml}${tagbarHtml}</div>`;
+
+      // --- Row builder ---
+      function buildCmRow(person, opts) {
+        opts = opts || {};
+        const shortName = getShortName(person.name || person.username || "");
+        const fullName = person.name || person.username || "Nhân viên";
+        const initial = escapeHtml((fullName.trim().charAt(0) || "?").toUpperCase());
         const phone = contactPhone(person.phone);
         const phoneDigits = phone.replace(/\D/g, "");
-        const dept = person.dept || person.username || "Ban Điện";
-        const labelBadge = person.labels ? `<span class="badge bg-light text-primary border me-1" style="font-size:10px;">${escapeHtml(person.labels)}</span>` : '';
+        const dept = person.dept || "";
+        const pos = (person.position || person.role || "").toLowerCase();
         const username = person.username || person.id || "";
-        const adminActions = isAdmin ? `
-          <button class="btn btn-sm text-secondary p-1" title="Sửa tổ / thông tin" onclick="event.stopPropagation(); openUserEditor('${escapeAttr(username)}')"><i class="bi bi-pencil-fill"></i></button>
-          <button class="btn btn-sm text-danger p-1" title="Xóa khỏi nhóm" onclick="event.stopPropagation(); deleteManagedUser('${escapeAttr(username)}')"><i class="bi bi-trash-fill"></i></button>
-        ` : '';
+        const avatarClass = opts.avatarClass || "";
 
-        return `<article class="contact-row" role="button" tabindex="0" onclick="navigateTo('contactdetail',{name:'${escapeAttr(name)}'})" onkeydown="if(event.key==='Enter')navigateTo('contactdetail',{name:'${escapeAttr(name)}'})">
-          <div class="contact-avatar">${initial}</div>
-          <div class="contact-main">
-            <div class="contact-name">${escapeHtml(name)} ${labelBadge}</div>
-            <div class="contact-meta">${escapeHtml(dept)}${phone ? ` · ${escapeHtml(phone)}` : ""}</div>
+        let roleBadge = '';
+        if (pos === 'admin') roleBadge = '<span class="cm-role-badge admin">Admin</span>';
+        else if (pos === 'manager') roleBadge = '<span class="cm-role-badge manager">Mgr</span>';
+
+        const metaParts = [dept, phone].filter(Boolean).join(" · ");
+
+        let actionsHtml = '';
+        if (phone) {
+          actionsHtml += `<a class="cm-call" href="tel:${escapeAttr(phone)}" onclick="event.stopPropagation()" title="Gọi"><i class="bi bi-telephone-fill"></i></a>`;
+          actionsHtml += `<a class="cm-zalo" href="https://zalo.me/${escapeAttr(phoneDigits)}" onclick="event.stopPropagation()" target="_blank" rel="noopener" title="Zalo"><i class="bi bi-chat-dots-fill"></i></a>`;
+        }
+        if (isAdmin && !opts.skipAdmin) {
+          actionsHtml += `<button class="cm-edit" type="button" onclick="event.stopPropagation(); openUserEditor('${escapeAttr(username)}')" title="Sửa"><i class="bi bi-pencil-fill"></i></button>`;
+          actionsHtml += `<button class="cm-delete" type="button" onclick="event.stopPropagation(); deleteManagedUser('${escapeAttr(username)}')" title="Xóa"><i class="bi bi-trash-fill"></i></button>`;
+        }
+
+        const clickAction = opts.noClick ? '' : `onclick="navigateTo('contactdetail',{name:'${escapeAttr(fullName)}'})" role="button" tabindex="0"`;
+
+        return `<article class="cm-row" ${clickAction}>
+          <div class="cm-avatar ${avatarClass}">${initial}</div>
+          <div class="cm-info">
+            <div class="cm-name-line">
+              <span class="cm-short-name">${escapeHtml(shortName)}</span>
+              ${shortName !== fullName ? `<span class="cm-full-name">${escapeHtml(fullName)}</span>` : ''}
+            </div>
+            <div class="cm-meta-line">${roleBadge}${escapeHtml(metaParts)}</div>
           </div>
-          <div class="contact-actions">
-            ${phone ? `<a href="tel:${escapeAttr(phone)}" onclick="event.stopPropagation()" title="Gọi ${escapeAttr(name)}" aria-label="Gọi ${escapeAttr(name)}"><i class="bi bi-telephone-fill"></i></a>
-            <a class="zalo" href="https://zalo.me/${escapeAttr(phoneDigits)}" onclick="event.stopPropagation()" target="_blank" rel="noopener" title="Nhắn Zalo cho ${escapeAttr(name)}" aria-label="Nhắn Zalo cho ${escapeAttr(name)}"><i class="bi bi-chat-dots-fill"></i></a>` : '<span class="contact-no-phone">Chưa có SĐT</span>'}
-            ${adminActions}
-          </div>
+          <div class="cm-actions">${actionsHtml}</div>
         </article>`;
       }
 
+      // --- Body ---
       let bodyHtml = '';
 
       if (currentZaloTab === 'my_private') {
+        const addBar = `<div class="cm-add-private-bar"><button class="cm-add-private-btn" type="button" onclick="openPersonalContactModal('')"><i class="bi bi-plus-circle me-1"></i>Thêm liên hệ cá nhân</button></div>`;
         const rows = myPrivateContacts.map(item => {
-          const name = item.fullName || "Liên hệ cá nhân";
+          const name = item.fullName || "Liên hệ";
           const initial = escapeHtml((name.trim().charAt(0) || "?").toUpperCase());
           const phone = contactPhone(item.phone);
           const phoneDigits = phone.replace(/\D/g, "");
-          const note = item.deptOrNote || "Ghi chú riêng";
-          const personalAdminActions = isAdmin ? `
-            <button class="btn btn-sm text-secondary p-1" title="Sửa" onclick="openPersonalContactModal('${escapeAttr(item.id)}')"><i class="bi bi-pencil-fill"></i></button>
-            <button class="btn btn-sm text-danger p-1" title="Xóa" onclick="deletePersonalContactItem('${escapeAttr(item.id)}')"><i class="bi bi-trash-fill"></i></button>
-          ` : '';
-
-          return `<article class="contact-row">
-            <div class="contact-avatar" style="background: linear-gradient(145deg, #f39c12, #d35400);">${initial}</div>
-            <div class="contact-main">
-              <div class="contact-name">${escapeHtml(name)} <span class="badge bg-warning text-dark ms-1" style="font-size:10px;"><i class="bi bi-lock-fill"></i> Cá nhân</span></div>
-              <div class="contact-meta">${escapeHtml(note)}${phone ? ` · ${escapeHtml(phone)}` : ""}</div>
+          const note = item.deptOrNote || "";
+          let actionsHtml = '';
+          if (phone) {
+            actionsHtml += `<a class="cm-call" href="tel:${escapeAttr(phone)}" title="Gọi"><i class="bi bi-telephone-fill"></i></a>`;
+            actionsHtml += `<a class="cm-zalo" href="https://zalo.me/${escapeAttr(phoneDigits)}" target="_blank" rel="noopener" title="Zalo"><i class="bi bi-chat-dots-fill"></i></a>`;
+          }
+          actionsHtml += `<button class="cm-edit" type="button" onclick="openPersonalContactModal('${escapeAttr(item.id)}')" title="Sửa"><i class="bi bi-pencil-fill"></i></button>`;
+          actionsHtml += `<button class="cm-delete" type="button" onclick="deletePersonalContactItem('${escapeAttr(item.id)}')" title="Xóa"><i class="bi bi-trash-fill"></i></button>`;
+          return `<article class="cm-row">
+            <div class="cm-avatar personal">${initial}</div>
+            <div class="cm-info">
+              <div class="cm-name-line"><span class="cm-short-name">${escapeHtml(name)}</span><span class="cm-full-name" style="color:#f39c12;">Cá nhân</span></div>
+              <div class="cm-meta-line">${escapeHtml([note, phone].filter(Boolean).join(" · "))}</div>
             </div>
-            <div class="contact-actions">
-              ${phone ? `<a href="tel:${escapeAttr(phone)}" title="Gọi ${escapeAttr(name)}"><i class="bi bi-telephone-fill"></i></a>
-              <a class="zalo" href="https://zalo.me/${escapeAttr(phoneDigits)}" target="_blank" rel="noopener" title="Nhắn Zalo"><i class="bi bi-chat-dots-fill"></i></a>` : ''}
-              ${personalAdminActions}
-            </div>
+            <div class="cm-actions">${actionsHtml}</div>
           </article>`;
         }).join('');
-
-        const addPrivateBtn = isAdmin ? `<div class="p-2.5 border-bottom text-center bg-warning-subtle">
-          <button class="btn btn-sm btn-warning text-dark fw-bold rounded-pill px-3 py-1 shadow-sm" onclick="openPersonalContactModal('')">
-            <i class="bi bi-plus-circle-fill me-1"></i> + Thêm liên hệ cá nhân mới
-          </button>
-        </div>` : '';
-
-        bodyHtml = addPrivateBtn + `<div class="contacts-list">${rows || '<div class="empty-state">Chưa có liên hệ cá nhân nào.</div>'}</div>`;
+        bodyHtml = addBar + `<div class="cm-list">${rows || '<div class="cm-empty"><i class="bi bi-star"></i>Chưa có liên hệ cá nhân nào.</div>'}</div>`;
 
       } else if (currentZaloTab === 'same_team') {
-        const rows = sameTeamContacts.map(buildRowHtml).join('');
-        bodyHtml = `<div class="contacts-list">${rows || '<div class="empty-state">Không tìm thấy nhân sự cùng tổ / nhãn.</div>'}</div>`;
+        const rows = sameTeamContacts.map(p => buildCmRow(p)).join('');
+        bodyHtml = `<div class="cm-list">${rows || '<div class="cm-empty"><i class="bi bi-people"></i>Không tìm thấy nhân sự cùng tổ.</div>'}</div>`;
 
       } else if (currentZaloTab === 'erp_partners' && isAdmin) {
         let filteredPartners = erpPartners;
         if (zaloSearchQuery) {
-          filteredPartners = erpPartners.filter(p => {
-            const haystack = [p.name, p.contactPerson, p.phone, p.loai, p.address, p.taxCode].join(' ').toLowerCase();
-            return haystack.includes(zaloSearchQuery);
-          });
+          filteredPartners = erpPartners.filter(p => [p.name, p.contactPerson, p.phone, p.loai, p.address, p.taxCode].join(' ').toLowerCase().includes(zaloSearchQuery));
         }
-
         const rows = filteredPartners.map(p => {
-          const name = p.name || p.contactPerson || "Đối tác ERP";
+          const name = p.name || p.contactPerson || "Đối tác";
           const initial = escapeHtml((name.trim().charAt(0) || "?").toUpperCase());
           const phone = contactPhone(p.phone);
           const phoneDigits = phone.replace(/\D/g, "");
           const meta = [p.loai, p.contactPerson, p.phone, p.address].filter(Boolean).join(" · ");
-
-          return `<article class="contact-row">
-            <div class="contact-avatar" style="background: linear-gradient(145deg, #0984e3, #6c5ce7);">${initial}</div>
-            <div class="contact-main">
-              <div class="contact-name">${escapeHtml(name)} <span class="badge bg-info text-dark ms-1" style="font-size:10px;">${escapeHtml(p.loai || "Đối tác")}</span></div>
-              <div class="contact-meta">${escapeHtml(meta)}</div>
+          let actionsHtml = '';
+          if (phone) {
+            actionsHtml += `<a class="cm-call" href="tel:${escapeAttr(phone)}" title="Gọi"><i class="bi bi-telephone-fill"></i></a>`;
+            actionsHtml += `<a class="cm-zalo" href="https://zalo.me/${escapeAttr(phoneDigits)}" target="_blank" rel="noopener" title="Zalo"><i class="bi bi-chat-dots-fill"></i></a>`;
+          }
+          return `<article class="cm-row">
+            <div class="cm-avatar partner">${initial}</div>
+            <div class="cm-info">
+              <div class="cm-name-line"><span class="cm-short-name">${escapeHtml(name)}</span><span class="cm-full-name" style="color:#0984e3;">${escapeHtml(p.loai || "Đối tác")}</span></div>
+              <div class="cm-meta-line">${escapeHtml(meta)}</div>
             </div>
-            <div class="contact-actions">
-              ${phone ? `<a href="tel:${escapeAttr(phone)}" title="Gọi ${escapeAttr(name)}"><i class="bi bi-telephone-fill"></i></a>
-              <a class="zalo" href="https://zalo.me/${escapeAttr(phoneDigits)}" target="_blank" rel="noopener" title="Nhắn Zalo"><i class="bi bi-chat-dots-fill"></i></a>` : '<span class="contact-no-phone">Chưa có SĐT</span>'}
-            </div>
+            <div class="cm-actions">${actionsHtml}</div>
           </article>`;
         }).join('');
-
-        bodyHtml = `<div class="contacts-list">${rows || '<div class="empty-state">Không tìm thấy dữ liệu đối tác / nhà cung cấp ERP.</div>'}</div>`;
+        bodyHtml = `<div class="cm-list">${rows || '<div class="cm-empty"><i class="bi bi-building"></i>Không tìm thấy đối tác / NCC.</div>'}</div>`;
 
       } else if (currentZaloTab === 'groups') {
         const groupMap = new Map();
@@ -7166,50 +7598,45 @@
           if (!groupMap.has(gName)) groupMap.set(gName, []);
           groupMap.get(gName).push(p);
         });
-
-        let groupsHtml = '';
         let groupIdx = 0;
+        let groupsHtml = '';
         groupMap.forEach((members, gName) => {
           groupIdx++;
-          const gId = 'g_' + groupIdx;
-          const rows = members.map(buildRowHtml).join('');
-          const addMemberBtn = isAdmin ? `<button class="btn btn-sm btn-outline-primary py-0 px-2 ms-2" style="font-size:11px; border-radius:12px;" onclick="event.stopPropagation(); openUserEditor('')"><i class="bi bi-person-plus-fill"></i> + Thêm</button>` : '';
-
-          // Group starts collapsed by default for compact view
+          const gId = 'cmg_' + groupIdx;
+          const rows = members.map(p => buildCmRow(p)).join('');
           groupsHtml += `
-            <div class="zalo-group-card mb-2 border rounded shadow-sm overflow-hidden">
-              <div class="zalo-group-header user-select-none p-2 bg-white" style="cursor: pointer;" onclick="toggleZaloGroup('${gId}')">
-                <div class="d-flex align-items-center flex-grow-1 min-w-0 me-2">
-                  <i class="bi bi-folder-fill text-primary me-2 fs-5 flex-shrink-0"></i>
-                  <span class="fw-bold text-dark text-truncate" style="font-size:0.9rem;">${escapeHtml(gName)}</span>
-                  ${addMemberBtn}
-                </div>
-                <div class="d-flex align-items-center flex-shrink-0">
-                  <span class="badge bg-light text-dark border rounded-pill me-1" style="font-size:0.75rem;">${members.length} nhân sự</span>
-                  <i class="bi bi-chevron-down text-secondary ms-1" id="zalo-group-icon-${gId}" style="font-size:0.85rem; transition: transform 0.2s;"></i>
+            <div class="cm-group-card">
+              <div class="cm-group-header" onclick="toggleZaloGroup('${gId}')">
+                <div class="cm-group-name"><i class="bi bi-folder-fill" style="color:var(--brand);"></i>${escapeHtml(gName)}</div>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <span class="cm-group-count">${members.length}</span>
+                  <i class="bi bi-chevron-down" id="zalo-group-icon-${gId}" style="color:var(--muted);font-size:.85rem;transition:transform .2s;"></i>
                 </div>
               </div>
-              <div class="contacts-list border-top" id="zalo-group-body-${gId}" hidden>${rows}</div>
+              <div class="cm-group-body" id="zalo-group-body-${gId}" hidden>${rows}</div>
             </div>`;
         });
-
-        const toolbarHtml = `
-          <div class="px-3 py-2 bg-light border-bottom d-flex justify-content-between align-items-center" style="font-size: 0.8rem;">
-            <span class="text-secondary fw-semibold"><i class="bi bi-diagram-3 me-1"></i> ${groupMap.size} nhóm / ${contacts.length} nhân sự</span>
-            <div>
-              <button type="button" class="btn btn-sm btn-link p-0 me-3 text-decoration-none fw-bold" onclick="toggleAllZaloGroups(true)"><i class="bi bi-arrows-expand me-1"></i> Mở tất cả</button>
-              <button type="button" class="btn btn-sm btn-link p-0 text-secondary text-decoration-none fw-bold" onclick="toggleAllZaloGroups(false)"><i class="bi bi-arrows-collapse me-1"></i> Thu gọn tất cả</button>
-            </div>
-          </div>`;
-
-        bodyHtml = toolbarHtml + `<div class="p-2 bg-body-tertiary">${groupsHtml || '<div class="empty-state">Chưa phân nhóm.</div>'}</div>`;
+        const toolbarHtml = `<div style="padding:8px 14px;display:flex;justify-content:space-between;align-items:center;font-size:.78rem;color:var(--muted);font-weight:700;">
+          <span><i class="bi bi-diagram-3 me-1"></i>${groupMap.size} nhóm · ${contacts.length} nhân sự</span>
+          <span>
+            <button type="button" style="background:none;border:none;color:var(--brand);font-size:.78rem;font-weight:700;cursor:pointer;" onclick="toggleAllZaloGroups(true)"><i class="bi bi-arrows-expand"></i> Mở</button>
+            <button type="button" style="background:none;border:none;color:var(--muted);font-size:.78rem;font-weight:700;cursor:pointer;" onclick="toggleAllZaloGroups(false)"><i class="bi bi-arrows-collapse"></i> Thu</button>
+          </span>
+        </div>`;
+        bodyHtml = toolbarHtml + (groupsHtml || '<div class="cm-empty"><i class="bi bi-diagram-3"></i>Chưa phân nhóm.</div>');
 
       } else {
-        const rows = contacts.map(buildRowHtml).join('');
-        bodyHtml = `<div class="contacts-list">${rows || '<div class="empty-state">Chưa có dữ liệu danh bạ.</div>'}</div>`;
+        // Tab "all" / nhân sự
+        const rows = contacts.map(p => buildCmRow(p)).join('');
+        bodyHtml = `<div class="cm-list">${rows || '<div class="cm-empty"><i class="bi bi-person-x"></i>Không tìm thấy nhân sự nào.</div>'}</div>`;
       }
 
-      container.innerHTML = headerHtml + bodyHtml;
+      // FAB for admin
+      const fabHtml = isAdmin && currentZaloTab !== 'my_private' && currentZaloTab !== 'erp_partners'
+        ? `<button class="cm-fab" type="button" onclick="openUserEditor('')" title="Thêm danh bạ mới" aria-label="Thêm danh bạ"><i class="bi bi-person-plus-fill"></i></button>`
+        : '';
+
+      container.innerHTML = headerHtml + bodyHtml + fabHtml;
     }
 
     function contactPlans(name) {
@@ -7529,91 +7956,11 @@
       return `<div class="scroll"><div class="empty-state"><i class="bi bi-shield-exclamation d-block mb-2" style="font-size:2rem"></i>${escapeHtml(message)}</div></div>`;
     }
 
-    async function renderUserManagementScreen() {
-      const container = document.getElementById("screen-usermanagement");
-      if (!canManageUsers()) {
-        container.innerHTML = userAdminErrorHtml("Bạn không có quyền xem màn hình này.");
-        return;
-      }
-      if (!currentAuthToken()) {
-        container.innerHTML = `${userAdminErrorHtml("Vui lòng đăng nhập lại để mở phiên quản lý an toàn.")}<div class="action-bar"><button class="btn-main" type="button" onclick="openLogin()"><i class="bi bi-box-arrow-in-right"></i>Đăng nhập lại</button></div>`;
-        return;
-      }
+    // renderUserManagementScreen / renderUserManagementShell / renderManagedUserList
+    // đã gộp hoàn toàn vào renderContactsScreen() — xem ở trên.
+    // Giữ lại stub để không lỗi nếu có chỗ nào còn gọi.
+    async function renderUserManagementScreen() { renderContactsScreen(); }
 
-      container.innerHTML = '<div class="scroll"><div class="empty-state"><span class="spinner-border spinner-border-sm me-2"></span>Đang tải danh sách người dùng...</div></div>';
-      try {
-        const data = await postUserAdminAction("listUsers", {});
-        managedUsers = Array.isArray(data.users) ? data.users : [];
-        managedUserRoles = Array.isArray(data.roles) ? data.roles : ["User"];
-        managedTeamOptions = Array.isArray(data.teamOptions) ? data.teamOptions : [];
-        managedActorRole = data.actorRole || currentRole();
-        renderUserManagementShell();
-      } catch (error) {
-        if (/phiên đăng nhập|đăng nhập lại/i.test(error.message)) localStorage.removeItem(STORAGE_KEYS.authToken);
-        container.innerHTML = `${userAdminErrorHtml(error.message)}<div class="action-bar"><button class="btn-main" type="button" onclick="renderUserManagementScreen()"><i class="bi bi-arrow-clockwise"></i>Thử lại</button></div>`;
-      }
-    }
-
-    function renderUserManagementShell() {
-      const container = document.getElementById("screen-usermanagement");
-      container.innerHTML = `
-        <div class="scroll">
-          <div class="user-admin-toolbar">
-            <input class="form-control" id="userAdminSearch" type="search" placeholder="Tìm họ tên, username, tổ, số điện thoại..." aria-label="Tìm người dùng">
-            <button class="user-admin-add" id="btnAddUser" type="button" title="Thêm người dùng" aria-label="Thêm người dùng"><i class="bi bi-person-plus"></i></button>
-          </div>
-          <div class="user-admin-summary" id="userAdminSummary"></div>
-          <div id="userAdminList"></div>
-        </div>`;
-      document.getElementById("btnAddUser").addEventListener("click", () => openUserEditor(""));
-      document.getElementById("userAdminSearch").addEventListener("input", event => renderManagedUserList(event.target.value));
-      container.onclick = event => {
-        const edit = event.target.closest("[data-edit-user]");
-        const remove = event.target.closest("[data-delete-user]");
-        if (edit) openUserEditor(decodeURIComponent(edit.dataset.editUser));
-        if (remove) deleteManagedUser(decodeURIComponent(remove.dataset.deleteUser));
-      };
-      renderManagedUserList("");
-    }
-
-    function renderManagedUserList(query) {
-      const list = document.getElementById("userAdminList");
-      const summary = document.getElementById("userAdminSummary");
-      if (!list || !summary) return;
-      const normalized = String(query || "").trim().toLowerCase();
-      const visible = managedUsers.filter(user => {
-        const haystack = [user.fullName, user.username, user.role, user.teams, user.phone, user.note].join(" ").toLowerCase();
-        return !normalized || haystack.includes(normalized);
-      });
-      summary.textContent = `${visible.length}/${managedUsers.length} tài khoản · Quyền ${managedActorRole}`;
-      if (!visible.length) {
-        list.innerHTML = '<div class="empty-state">Không có tài khoản phù hợp.</div>';
-        return;
-      }
-      list.innerHTML = visible.map(user => {
-        const encoded = escapeAttr(encodeURIComponent(user.username));
-        const roleClass = user.role === "Admin" ? "badge-high" : user.role === "Manager" ? "badge-mid" : "badge-low";
-        const updatedMeta = [user.updatedAt ? toDateTimeLocalValue(user.updatedAt).replace("T", " ") : "", user.updatedBy ? "bởi " + user.updatedBy : ""].filter(Boolean).join(" · ");
-        return `
-          <article class="user-card">
-            <div class="user-card-head">
-              <div>
-                <div class="user-card-name">${escapeHtml(user.fullName || user.username)}</div>
-                <div class="user-card-meta"><i class="bi bi-person-badge me-1"></i>@${escapeHtml(user.username)}</div>
-                <div class="user-card-meta"><i class="bi bi-diagram-3 me-1"></i>${escapeHtml(user.teams || "Chưa phân tổ")}</div>
-                ${user.phone ? `<div class="user-card-meta"><i class="bi bi-telephone me-1"></i>${escapeHtml(user.phone)}</div>` : ""}
-              </div>
-              <span class="badge-soft ${roleClass}">${escapeHtml(user.role)}</span>
-            </div>
-            ${user.note ? `<div class="user-card-meta mt-2">${escapeHtml(user.note)}</div>` : ""}
-            ${updatedMeta ? `<div class="user-card-meta mt-2"><i class="bi bi-clock-history me-1"></i>${escapeHtml(updatedMeta)}</div>` : ""}
-            <div class="user-card-actions">
-              <button type="button" data-edit-user="${encoded}"><i class="bi bi-pencil me-1"></i>Sửa</button>
-              ${user.canDelete ? `<button class="danger" type="button" data-delete-user="${encoded}"><i class="bi bi-trash me-1"></i>Xóa</button>` : ""}
-            </div>
-          </article>`;
-      }).join("");
-    }
 
     function renderUserTeamChecks(selectedTeams) {
       const selected = String(selectedTeams || "").split(/[,;|]/).map(team => team.trim()).filter(Boolean);
@@ -7652,6 +7999,7 @@
       document.getElementById("userModalTitle").textContent = user ? "Sửa danh bạ" : "Thêm danh bạ mới";
       document.getElementById("userOriginalUsername").value = user ? user.username : "";
       document.getElementById("userFullName").value = user ? user.fullName || "" : "";
+      if (document.getElementById("userShortName")) document.getElementById("userShortName").value = user ? user.shortName || user.commonName || "" : "";
       document.getElementById("userUsername").value = user ? user.username : "";
       document.getElementById("userPin").value = user ? user.pin || "" : "";
       document.getElementById("userPin").required = !user;
@@ -7676,6 +8024,7 @@
       const payload = {
         originalUsername: document.getElementById("userOriginalUsername").value,
         fullName: document.getElementById("userFullName").value.trim(),
+        shortName: (document.getElementById("userShortName") ? document.getElementById("userShortName").value : "").trim(),
         username: document.getElementById("userUsername").value.trim(),
         pin: document.getElementById("userPin").value,
         role: document.getElementById("userRole").value,

@@ -14,6 +14,15 @@ updated: 2026-06-08
 
 Tất cả các thay đổi và cải tiến của hệ thống Quản lý & Bảo trì Ban điện thông minh (CMMS Mini WebApp) được ghi nhận tại đây theo từng phiên bản.
 
+## [v2.13.0] - 2026-07-22
+### Thêm mới (Added)
+- **Ghi nhật ký "mỗi người tự báo phần mình" theo bước/giai đoạn (P4, `nhatky/index.html`)**: đổi mô hình ghi nhật ký từ "1 người điền hộ cả nhóm" sang **mỗi người tự ghi phần mình** — đúng mục đích ban đầu (đánh giá riêng từng người, ghi nhanh gọn). Form ghi cho 1 bước mặc định là `currentUser()`; nếu bước có ≥2 người, hiện chip **"Tôi là ai"** (`#logSelfPicker`) để chọn đúng người khi dùng điện thoại chung. Chế độ "ghi hộ cả nhóm" (lưới nhiều người + đánh giá) vẫn giữ làm tuỳ chọn phụ, chuyển qua lại bằng 2 nút liên kết.
+  - Thêm `step.doneByPeople[]` — bước chỉ tự chuyển **Xong** khi **mọi người trong `assignees` đã tự ghi Hoàn thành phần mình** (`markStepDoneByPeople()`, `stepDoneInfo()`), khắc phục lỗ hổng cũ: trước đây 1 chip trạng thái chung đủ để tick Xong cả bước dù có người "Chưa đạt"/"Vắng". Bước cũ (`done=true`, chưa có `doneByPeople`) giữ nguyên coi là đã xong — không đòi ghi lại.
+  - Hiển thị tiến độ theo người ngay trên bước: **"x/y người đã xong"** + tên (`stepPeopleProgressHtml()`, dùng chung cho bước phẳng và bước trong giai đoạn).
+  - Timeline Chi tiết việc nay chú thích **log thuộc bước/giai đoạn nào** (`findStepWithPhase()` + dòng `.tl-step`) — trước đây log gắn `stepId` nhưng không có màn nào tra lại tên bước.
+  - **Đã verify bằng Chrome thật (Playwright)**: seed 1 bước 2 người, mock backend qua route interception — xác nhận chip "Tôi là ai" đúng người, ghi từng người cộng dồn đúng `doneByPeople`, bước/việc chỉ chuyển Hoàn thành khi đủ người, dòng tiến độ và timeline hiển thị đúng, 0 lỗi console. Chi tiết xem [`docs/ROADMAP_LamMoi_TrangQuanLyCongViec.md`](docs/ROADMAP_LamMoi_TrangQuanLyCongViec.md) §7.
+- **Hoàn thiện backend cột "Tên thường gọi"** (nối tiếp v2.12.6, trước đó phần `.gs` chưa được ghi nhận): `handleGetStaff` (`07_Analytics.gs`) nay trả thêm `shortName`/`commonName`; thêm action **`populateShortNames`** (GET/POST, `02_Router.gs` → `11_Setup.gs`) để tự tra cứu/điền "Tên thường gọi" hàng loạt cho sheet `Users` (ưu tiên giá trị đã có, xử lý trùng tên bằng cách thêm chữ đệm viết tắt).
+
 ## [v2.12.9] - 2026-07-22
 ### Cập nhật (Updated)
 - **Màn Ghi nhật ký — dựng lại đúng ngôn ngữ "gọn nhẹ" của A/B/C (`nhatky/index.html`)**: gộp toàn bộ form vào 1 `.d-sheet` (giống Chi tiết việc), chia 3 mục kẻ mảnh thay cho dải `.field` rời rạc + 1 khối `<details>` duy nhất trước đây: **① Việc đang ghi** (context/tổ), **② Trạng thái &amp; kết quả** (chip tiến độ, ô đo lường, kết quả nhanh), **Người tham gia** (hiện khi việc có nhiều người). Mục **Chi tiết thêm** (ngày/ca/giờ/tồn/làm tiếp/ảnh) giữ nguyên dạng gấp gọn `<details>`, không đánh số — cùng cách Chi tiết việc bỏ số cho khối hành động phụ. Giữ nguyên mọi control chạm to (chip trạng thái, ô đo lường +/-, chip kết quả nhanh) vì đó là thiết kế cố ý cho thao tác ngoài hiện trường, không thuộc phần cần gọn — chỉ đổi lớp bố cục/ngăn cách, không đổi logic (mọi id/hàm xử lý giữ nguyên).

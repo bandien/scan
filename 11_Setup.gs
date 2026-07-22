@@ -34,7 +34,8 @@ function setupAllSheets() {
   const logsSheet = ensureSheet(ss, SHEETS.LOGS, ["Timestamp","UID","Items","Notes","User","ImageUrl","SyncStatus","ERPNextID","SyncMessage"]);
   ensureColumnsExist_(logsSheet, ["SyncStatus", "ERPNextID", "SyncMessage"]);
 
-  ensureSheet(ss, SHEETS.USERS, ["Username","PIN","Role","Teams","Ghi chú","Cập nhật lúc","Cập nhật bởi","Phone","Họ và tên"]);
+  const userSheet = ensureSheet(ss, SHEETS.USERS, ["Username","PIN","Role","Teams","Ghi chú","Cập nhật lúc","Cập nhật bởi","Phone","Họ và tên","Tên thường gọi"]);
+  if (typeof ensureUserAdminColumns_ === "function") ensureUserAdminColumns_(userSheet);
   ensureSheet(ss, SHEETS.CHECKLISTS, ["Type","ID","Title","Description"]);
   ensureSheet(ss, SHEETS.WORK_ORDERS, [
     "WO_ID","Type","Priority","Status","AssetUID","AssignedTo",
@@ -76,6 +77,96 @@ function handleSetupHeaders(e) {
   try {
     setupAllSheets();
     return contentResponse({ status: "success", message: "All sheets initialized (v3)" });
+  } catch (err) {
+    return contentResponse({ status: "error", message: err.toString() });
+  }
+}
+
+/** GET/POST: Tự động tra cứu & cập nhật Tên thường gọi cho toàn bộ tài khoản trong sheet Users */
+function handlePopulateShortNames(e) {
+  try {
+    const sheet = getSheet(SHEETS.USERS);
+    if (!sheet) return contentResponse({ status: "error", message: "Không tìm thấy sheet Users" });
+
+    const prepared = ensureUserAdminColumns_(sheet);
+    const data = prepared.data;
+    const schema = prepared.schema;
+
+    if (schema.shortNameIndex < 0) {
+      return contentResponse({ status: "error", message: "Cột Tên thường gọi chưa được khởi tạo" });
+    }
+
+    let payloadMap = {};
+    if (e && e.postData && e.postData.contents) {
+      try {
+        const body = JSON.parse(e.postData.contents);
+        payloadMap = body.map || body.mapping || {};
+      } catch (_) {}
+    }
+
+    const rows = data.slice(1);
+    let updatedCount = 0;
+    const computedList = [];
+
+    function formatShortName_(rawName) {
+      if (!rawName) return "";
+      const raw = String(rawName).trim();
+      if (!raw) return "";
+      const parts = raw.split(/\s+/);
+      if (parts.length <= 2) return raw;
+      const mainName = parts[parts.length - 1];
+      const initials = parts.slice(0, parts.length - 1).map(function(p) { return p.charAt(0).toUpperCase(); }).join("");
+      return mainName + " " + initials;
+    }
+
+    rows.forEach(function(row, idx) {
+      const username = String(row[schema.usernameIndex] || "").trim();
+      const fullName = schema.fullNameIndex >= 0 ? String(row[schema.fullNameIndex] || "").trim() : "";
+      const existingShort = schema.shortNameIndex >= 0 ? String(row[schema.shortNameIndex] || "").trim() : "";
+
+      const nameToUse = fullName || username;
+      const keyLower = nameToUse.toLowerCase();
+      const userKeyLower = username.toLowerCase();
+
+      let shortName = existingShort;
+      if (!shortName) {
+        if (payloadMap[keyLower]) shortName = payloadMap[keyLower];
+        else if (payloadMap[userKeyLower]) shortName = payloadMap[userKeyLower];
+        else shortName = formatShortName_(nameToUse);
+      }
+
+      computedList.push({
+        rowIndex: idx + 2,
+        username: username,
+        fullName: fullName,
+        shortName: shortName
+      });
+    });
+
+    const nameCounts = {};
+    computedList.forEach(function(item) {
+      const key = item.shortName.toLowerCase();
+      nameCounts[key] = (nameCounts[key] || 0) + 1;
+    });
+
+    computedList.forEach(function(item) {
+      const key = item.shortName.toLowerCase();
+      if (nameCounts[key] > 1 && item.fullName && item.fullName.split(/\s+/).length > 2) {
+        item.shortName = formatShortName_(item.fullName);
+      }
+    });
+
+    computedList.forEach(function(item) {
+      sheet.getRange(item.rowIndex, schema.shortNameIndex + 1).setValue(item.shortName);
+      updatedCount++;
+    });
+
+    return contentResponse({
+      status: "success",
+      message: "Đã cập nhật Tên thường gọi cho " + updatedCount + " tài khoản trong sheet Users.",
+      updatedCount: updatedCount,
+      sample: computedList.slice(0, 10)
+    });
   } catch (err) {
     return contentResponse({ status: "error", message: err.toString() });
   }

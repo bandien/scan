@@ -105,12 +105,15 @@ function handleGetStaff(e) {
   }).map(function(row) {
     const username = String(row[schema.usernameIndex] || "").trim();
     const fullName = schema.fullNameIndex >= 0 ? String(row[schema.fullNameIndex] || "").trim() : "";
+    const shortName = schema.shortNameIndex >= 0 ? String(row[schema.shortNameIndex] || "").trim() : "";
     const labels = schema.labelsIndex >= 0 ? String(row[schema.labelsIndex] || "").trim() : "";
     return {
       id: username,
       username: username,
       name: fullName || username,
       fullName: fullName,
+      shortName: shortName,
+      commonName: shortName,
       position: String(row[schema.roleIndex] || "User").trim(),
       dept: String(row[schema.teamsIndex] || "").trim(),
       phone: schema.phoneIndex >= 0 ? String(row[schema.phoneIndex] || "").trim() : "",

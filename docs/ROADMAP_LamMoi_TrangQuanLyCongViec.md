@@ -3,7 +3,7 @@
 > **Giao việc cho AI kế tiếp.** Đây là bản kế hoạch triển khai đã chốt nghiệp vụ & thiết kế.
 > Đọc kèm: [`docs/PhanTich_NghiepVu_TrangQuanLyCongViec_v1.md`](./PhanTich_NghiepVu_TrangQuanLyCongViec_v1.md) (phân tích đầy đủ).
 > Mockup UI (bản gọn nhẹ): **https://claude.ai/code/artifact/ea0e52f5-f72d-415b-9e6a-55c4d1dd8b14**
-> Ngày: 2026-07-21 · Trạng thái: **P1 ✅ · P2 ✅ · P3 ✅ · P4 🔄 (đang triển khai — xem §7)** — P1-P3 đã deploy & test API thật; P4 (ghi nhật ký tự báo từng người) mới phân tích xong, chốt hướng.
+> Ngày: 2026-07-21 · Trạng thái: **P1 ✅ · P2 ✅ · P3 ✅ · P4 ✅ (xong — xem §7)** — P1-P3 đã deploy & test API thật; P4 (ghi nhật ký tự báo từng người) đã code xong + verify bằng Chrome thật (Playwright).
 >
 > **Cập nhật 2026-07-21 (v2.12.1):** P1 (làm bởi phiên trước) code theo style thẻ Bootstrap sẵn có của app, KHÔNG theo đúng mockup "gọn nhẹ" ở trên. Người dùng đối chiếu ảnh mockup với ảnh chụp thật, phát hiện lệch → đã build lại Trang chủ (dòng phẳng + chấm màu, nhóm theo mục) và Chi tiết (1 sheet liền, kẻ mảnh) đúng theo mockup, verify bằng Chrome thật (Playwright). Không đổi logic nghiệp vụ, chỉ đổi lớp trình bày. Xem CHANGELOG [v2.12.1].
 
@@ -177,9 +177,9 @@ Người dùng báo "giao diện giai đoạn mới chưa đúng". Dựng lại 
 
 ---
 
-## 7. P4 (mới — 2026-07-22) — Ghi nhật ký "mỗi người TỰ BÁO phần mình" theo từng bước/giai đoạn
+## 7. P4 (2026-07-22) — Ghi nhật ký "mỗi người TỰ BÁO phần mình" theo từng bước/giai đoạn
 
-> Trạng thái: **đang triển khai** (phân tích xong, chốt hướng, chưa code xong). Phát sinh từ yêu cầu người dùng làm rõ mục đích ghi nhật ký. **Đây là thay đổi NGHIỆP VỤ (đổi mô hình ghi + điều kiện đánh dấu Xong + thêm chỗ hiển thị lại)**, không phải chỉnh trình bày như các bản v2.12.x.
+> Trạng thái: **✅ Xong** (code xong + verify Chrome thật bằng Playwright, 2026-07-22). Phát sinh từ yêu cầu người dùng làm rõ mục đích ghi nhật ký. **Đây là thay đổi NGHIỆP VỤ (đổi mô hình ghi + điều kiện đánh dấu Xong + thêm chỗ hiển thị lại)**, không phải chỉnh trình bày như các bản v2.12.x.
 
 ### 7.1 Bối cảnh & phân tích (vì sao cần P4)
 
@@ -213,13 +213,13 @@ Người dùng báo "giao diện giai đoạn mới chưa đúng". Dựng lại 
 
 ### 7.3 Việc cần làm
 
-- [ ] **Nhận diện "tôi là ai":** form ghi cho 1 bước mặc định `currentUser()`; nếu currentUser nằm trong `step.assignees` → chọn sẵn. **Điện thoại dùng chung là thực tế phổ biến** → thêm nút/chip "Tôi là ai" chọn nhanh trong số người của bước (không cứng nhắc chỉ ghi cho currentUser).
-- [ ] **Form tự báo gọn:** ẩn lưới nhiều người + dropdown rating ở chế độ tự báo; chỉ còn 1 người (mình) + chip trạng thái + ô kết quả tuỳ chọn + (tuỳ) số lượng/ảnh. Kế thừa `teams` từ `plan.team`, không bắt chọn lại.
-- [ ] **Giữ chế độ phụ "ghi hộ cả nhóm":** 1 nút chuyển để 1 người điền cho nhiều người (giữ nguyên `renderPeopleResults` cũ), không xoá.
-- [ ] **Bước theo dõi từng người:** mở rộng model bước → `doneByPeople: []` (mảng người đã tự ghi Hoàn thành phần mình). `step.done = true` chỉ khi `doneByPeople` phủ hết `assignees`. Giữ `doneBy`/`doneAt` cũ (người/giờ hoàn tất cuối). Sửa `updatePlanStatus` để cập nhật `doneByPeople` theo `log.employee` thay vì set `done` mù.
-- [ ] **Hiển thị trên bước:** "2/3 người đã xong" + chip người đã ghi (✓) / chưa ghi. Áp dụng cho cả `phaseStepRowHtml` (giai đoạn) và `stepRowHtml` (bước phẳng cũ).
-- [ ] **Hiển thị đánh giá/kết quả theo người khi xem lại:** timeline + "Nhật ký đã ghi" hiện `employee` + trạng thái phần mình rõ ràng (không trộn ẩn danh).
-- [ ] *(Tuỳ chọn)* Thống kê tổng hợp theo người dựa trên log tự báo, không chỉ đếm `plan.status`.
+- [x] **Nhận diện "tôi là ai":** form ghi cho 1 bước mặc định `currentUser()`; nếu currentUser nằm trong `step.assignees` → chọn sẵn. Chip "Tôi là ai" (`#logSelfPicker`/`#logSelfChips`, `setLogSelfPerson()`) chọn nhanh trong số người của bước khi ≥2 người — dùng cho điện thoại chung.
+- [x] **Form tự báo gọn:** `applyLogMode()` ẩn lưới nhiều người + dropdown rating ở chế độ tự báo (`logMode = "self"`); chỉ còn chip trạng thái + ô kết quả tuỳ chọn + số lượng/ảnh. Kế thừa `teams` từ `plan.team` qua `refreshTeamOptions`, không bắt chọn lại.
+- [x] **Giữ chế độ phụ "ghi hộ cả nhóm":** nút "Ghi hộ cả nhóm →" (`setLogMode('batch')`) và nút quay lại "← Chỉ ghi phần tôi" (`setLogMode('self')`); `renderPeopleResults` cũ giữ nguyên, không xoá.
+- [x] **Bước theo dõi từng người:** `step.doneByPeople[]` qua `markStepDoneByPeople()`; `step.done` chỉ bật khi `doneByPeople` phủ hết `assignees` (`stepDoneInfo()`). Giữ `doneBy`/`doneAt` cũ. `updatePlanStatus()` nay nhận thêm `donePeople` và gọi `markStepDoneByPeople` thay vì set `done` mù.
+- [x] **Hiển thị trên bước:** `stepPeopleProgressHtml()` in "x/y người đã xong" + tên người đã ghi; dùng chung ở `phaseStepRowHtml` và `stepRowHtml`.
+- [x] **Hiển thị đánh giá/kết quả theo người khi xem lại:** `renderLogCard` hiện `log.employee` nổi bật; `findStepWithPhase()` + dòng `.tl-step` trên timeline (`planTimelineHtml`) cho biết log thuộc giai đoạn/bước nào.
+- [ ] *(Tuỳ chọn, chưa làm)* Thống kê tổng hợp theo người dựa trên log tự báo, không chỉ đếm `plan.status` — để ngỏ, không chặn P4.
 
 ### 7.4 Mô hình dữ liệu
 
@@ -227,11 +227,13 @@ Người dùng báo "giao diện giai đoạn mới chưa đúng". Dựng lại 
 - **Tương thích ngược:** bước cũ `done=true` (từ mô hình cũ, không có `doneByPeople`) → giữ nguyên coi là đã xong, KHÔNG đòi lại từng người. `doneByPeople` chỉ áp cho bước ghi mới.
 - Dropdown `RATING_OPTIONS` (leader-grade) chỉ còn dùng ở chế độ phụ "ghi hộ cả nhóm"; chế độ tự báo không dùng.
 
-### 7.5 Nghiệm thu P4
+### 7.5 Nghiệm thu P4 — ✅ tất cả đã verify bằng Chrome thật (Playwright, 2026-07-22)
 
-- [ ] Mở ghi cho 1 bước → mặc định là chính mình, ghi phần mình ≤ 3 chạm (chip trạng thái + Lưu), không bắt chọn lại tổ.
-- [ ] Điện thoại dùng chung: chọn "Tôi là ai" trong số người của bước rồi ghi được đúng tên.
-- [ ] Mỗi người ghi độc lập → bước hiện đúng "x/y người đã xong"; chỉ khi đủ người mới tự chuyển bước Xong.
-- [ ] Xem lại: timeline + "Nhật ký đã ghi" cho biết **ai** ghi **gì** cho **bước nào**.
-- [ ] Việc/dữ liệu cũ không lỗi (bước done cũ giữ nguyên).
-- [ ] Cú pháp JS + `.gs` (nếu đụng) qua `node --check`; verify Chrome thật nếu có công cụ, nếu không thì ghi rõ "chưa verify tay" trong CHANGELOG.
+- [x] Mở ghi cho 1 bước → mặc định là chính mình, ghi phần mình ≤ 3 chạm (chip trạng thái + Lưu), không bắt chọn lại tổ.
+- [x] Điện thoại dùng chung: chọn "Tôi là ai" trong số người của bước rồi ghi được đúng tên.
+- [x] Mỗi người ghi độc lập → bước hiện đúng "x/y người đã xong"; chỉ khi đủ người mới tự chuyển bước Xong.
+- [x] Xem lại: timeline + "Nhật ký đã ghi" cho biết **ai** ghi **gì** cho **bước nào**.
+- [x] Việc/dữ liệu cũ không lỗi (bước done cũ giữ nguyên — `wasDone` giữ true, `Array.isArray` phòng thủ).
+- [x] Cú pháp JS + `.gs` qua `node --check` — không lỗi.
+
+**Kịch bản đã verify bằng Chromium thật (Playwright, mock backend qua route interception):** seed 1 bước 2 người (An, Bình) → mở Ghi nhật ký cho bước → chip "Tôi là ai" hiện đúng 2 người, An được chọn sẵn (đúng currentUser) → An ghi Hoàn thành → `doneByPeople:["An"]`, `step.done:false`, việc vẫn "Đang làm" (đúng — chưa đủ người) → mở lại, bấm chip Bình → ghi Hoàn thành → `doneByPeople:["An","Bình"]`, `step.done:true`, việc tự chuyển "Hoàn thành" → dòng tiến độ bước hiện "Bình TT đã xong · Hôm nay" → timeline hiện "Thực hiện · Kiểm tra áp suất". 0 lỗi console/page.
