@@ -14,6 +14,14 @@ updated: 2026-06-08
 
 Tất cả các thay đổi và cải tiến của hệ thống Quản lý & Bảo trì Ban điện thông minh (CMMS Mini WebApp) được ghi nhận tại đây theo từng phiên bản.
 
+## [v2.12.7] - 2026-07-22
+### Cập nhật (Updated)
+- **Chi tiết việc (B) — dựng lại đúng mockup, bỏ hẳn bố cục cũ (`nhatky/index.html`)**:
+  - **Bỏ mục "Ai làm" cũ** (ô select Bootstrap to + nút "Lưu phân công") → gộp thành dòng **"Người làm"** gọn ngay trong mục ①: chip người (★ chủ trì) + 1 ô "＋ Gán người", **đổi là tự lưu nền** (không cần bấm Lưu).
+  - **Giai đoạn dạng accordion đúng mockup**: mỗi giai đoạn là 1 dòng gọn (chấm trạng thái + tên + tóm tắt người "★chủ trì ○phối hợp" hoặc "đã xong" + đếm bước + mũi tên); **chỉ giai đoạn đang chạy mở sẵn các bước**, giai đoạn khác thu gọn — chạm để mở/đóng. Thêm bước / đổi tên / xoá giai đoạn nằm gọn dưới khi mở.
+  - Mục ① đổi nhãn theo ngữ cảnh: **"Chỉ đạo & tiêu chí"** khi việc có chỉ đạo, **"Việc & người làm"** khi không.
+  - Còn 3 mục đánh số ①②③ + hàng nút **Bàn giao / Nghiệm thu·Chốt sổ** đúng mockup. Verify Chrome thật (Playwright) cả việc có giai đoạn lẫn việc bước phẳng, 0 lỗi.
+
 ## [v2.12.6] - 2026-07-22
 ### Thêm mới (Added)
 - **Cột Tên thường gọi (`shortName` / `commonName`)**: bổ sung cột "Tên thường gọi" vào schema sheet `Users`, API quản lý tài khoản (`17_UserAdmin.gs`) và xác thực đăng nhập (`03_Auth.gs`, `15_NhatKyAuth.gs`).
