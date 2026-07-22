@@ -3,7 +3,7 @@
 > **Giao việc cho AI kế tiếp.** Đây là bản kế hoạch triển khai đã chốt nghiệp vụ & thiết kế.
 > Đọc kèm: [`docs/PhanTich_NghiepVu_TrangQuanLyCongViec_v1.md`](./PhanTich_NghiepVu_TrangQuanLyCongViec_v1.md) (phân tích đầy đủ).
 > Mockup UI (bản gọn nhẹ): **https://claude.ai/code/artifact/ea0e52f5-f72d-415b-9e6a-55c4d1dd8b14**
-> Ngày: 2026-07-21 · Trạng thái: **P1 ✅ · P2 ✅ · P3 ✅ — cả 3 giai đoạn code xong, CẦN deploy lại Apps Script + test tay trên trình duyệt thật trước khi coi là hoàn tất**
+> Ngày: 2026-07-21 · Trạng thái: **P1 ✅ · P2 ✅ · P3 ✅ · P4 🔄 (đang triển khai — xem §7)** — P1-P3 đã deploy & test API thật; P4 (ghi nhật ký tự báo từng người) mới phân tích xong, chốt hướng.
 >
 > **Cập nhật 2026-07-21 (v2.12.1):** P1 (làm bởi phiên trước) code theo style thẻ Bootstrap sẵn có của app, KHÔNG theo đúng mockup "gọn nhẹ" ở trên. Người dùng đối chiếu ảnh mockup với ảnh chụp thật, phát hiện lệch → đã build lại Trang chủ (dòng phẳng + chấm màu, nhóm theo mục) và Chi tiết (1 sheet liền, kẻ mảnh) đúng theo mockup, verify bằng Chrome thật (Playwright). Không đổi logic nghiệp vụ, chỉ đổi lớp trình bày. Xem CHANGELOG [v2.12.1].
 
@@ -174,3 +174,64 @@ Người dùng báo "giao diện giai đoạn mới chưa đúng". Dựng lại 
 4. [x] Cập nhật CHANGELOG.md cho bản [v2.12.0].
 
 **Bắt đầu từ P1.** Khi xong mỗi giai đoạn, cập nhật checkbox trong file này và ghi CHANGELOG.
+
+---
+
+## 7. P4 (mới — 2026-07-22) — Ghi nhật ký "mỗi người TỰ BÁO phần mình" theo từng bước/giai đoạn
+
+> Trạng thái: **đang triển khai** (phân tích xong, chốt hướng, chưa code xong). Phát sinh từ yêu cầu người dùng làm rõ mục đích ghi nhật ký. **Đây là thay đổi NGHIỆP VỤ (đổi mô hình ghi + điều kiện đánh dấu Xong + thêm chỗ hiển thị lại)**, không phải chỉnh trình bày như các bản v2.12.x.
+
+### 7.1 Bối cảnh & phân tích (vì sao cần P4)
+
+**Mục đích người dùng nêu:** *"Ghi nhật ký để **đánh giá riêng từng người**, **ghi nhanh gọn**"* + *"**Mỗi người tự ghi phần mình**"*.
+
+**Mâu thuẫn gốc:** form ghi nhật ký hiện tại (`renderPeopleResults` + `submitLog`) xây theo mô hình **NGƯỢC lại**:
+
+| | Form hiện tại | Ý người dùng (P4) |
+|---|---|---|
+| Ai ghi | **1 người điền hộ cả nhóm** — mở form hiện tất cả `step.assignees` thành nhiều dòng, 1 người chấm cho từng người | **Mỗi người tự ghi phần mình** |
+| Bản chất | Tổ trưởng **chấm điểm** cấp dưới (dropdown Đạt/Chưa đạt/**Vắng-Không tham gia**) | Mỗi người **tự báo** kết quả phần việc của mình |
+| `recordedBy` vs `employee` | Khác nhau (người ghi ≠ người bị chấm) | Trùng nhau (tự ghi cho mình) |
+
+→ Dải "Chưa đạt / Vắng-Không tham gia" là dấu vết mô hình "tổ trưởng chấm", **không hợp** với tự báo (không ai tự ghi mình "vắng"). Với tự báo, "kết quả của tôi" đã có sẵn = **chip trạng thái** (Hoàn thành/Đang làm/Cần hỗ trợ) của chính lượt ghi.
+
+**Các lỗ hổng cụ thể đã tìm ra (đều là hành vi CÓ TỪ TRƯỚC, không do các bản v2.12.x):**
+
+1. 🔴 **Đánh giá "ghi rồi giấu":** `log.rating` (đánh giá riêng từng người) được ghi vào cột `Rating` sheet `WorkLogs` nhưng **KHÔNG màn nào đọc lại** — không ở timeline Chi tiết (`planTimelineHtml`), không ở "Nhật ký đã ghi" (`renderLogCard`), không ở Thống kê. Bảng Thống kê "Theo từng nhân viên" (`renderPersonStats`) chỉ đếm `plan.status` theo `plan.assignee` — **không dùng rating**. → Mục đích "đánh giá riêng từng người" bị vô hiệu ngay sau khi bấm Lưu.
+2. 🔴 **Bước bị tick Xong bất kể từng người:** `updatePlanStatus()` chỉ nhìn **1 chip trạng thái chung** để set `step.done = true`; **không kiểm tra** các dòng đánh giá riêng. Dù có người bị "Chưa đạt"/"Vắng", chip chung "Hoàn thành" là cả bước xong. `step.doneBy` chỉ ghi tên người bấm Lưu, không phải mọi người đã thực sự làm xong.
+3. 🟠 **Không tách khối lượng theo bước:** bước không có `planQty`/`unit`/`doneQty` riêng; mọi số lượng cộng dồn vào 1 con số `plan.doneQty` cấp việc. (Để ngỏ P4 — không bắt buộc.)
+4. 🟠 **Đường vào ghi theo bước dài & không nhanh gọn:** nút "＋ Ghi nhật ký" chính không gắn `stepId` (luôn ghi cấp việc); muốn ghi đúng bước phải vào Chi tiết → cuộn Giai đoạn & bước → bấm icon bút của từng bước. Đánh giá dùng `<select>` (chậm trên mobile) thay vì chip 1-chạm. Form bắt chọn lại "tổ" + nhập "kết quả" dù chỉ muốn báo nhanh.
+5. ✅ **Timeline không cho biết log thuộc bước/giai đoạn nào** — ĐÃ VÁ 1 PHẦN (2026-07-22): thêm `findStepWithPhase(plan, stepId)` + dòng `.tl-step` "Giai đoạn · Bước" trên timeline (log gắn `stepId` giờ hiện được thuộc bước nào). *(Thay đổi này chưa commit khi viết mục P4.)*
+
+### 7.2 Quyết định đã chốt (2026-07-22)
+
+1. **Ai ghi/đánh giá:** *"Mỗi người tự ghi phần mình"* (self-report) — KHÔNG phải tổ trưởng chấm điểm cấp dưới.
+2. Luồng ghi chính = **tự báo cho chính mình**; lưới "điền hộ cả nhóm" hiện tại **hạ xuống tuỳ chọn phụ** (1 người ghi hộ khi thật cần), không phải mặc định.
+3. **Bỏ/ẩn dropdown chấm điểm** (Đạt/Chưa đạt/Vắng) ở chế độ tự báo — dùng **chip trạng thái sẵn có** (Hoàn thành/Đang làm/Cần hỗ trợ) làm "kết quả của tôi".
+4. **Nhanh gọn:** kế thừa tổ từ việc (không bắt chọn lại), kết quả để tuỳ chọn, mục tiêu ghi phần mình ≤ 3 chạm.
+5. **Xem lại được theo người:** mỗi bước hiện "ai đã tự ghi Hoàn thành / ai chưa"; bước chỉ tự tính **Xong khi TẤT CẢ người của bước đã tự ghi Hoàn thành phần mình** (khắc phục lỗ hổng #2).
+
+### 7.3 Việc cần làm
+
+- [ ] **Nhận diện "tôi là ai":** form ghi cho 1 bước mặc định `currentUser()`; nếu currentUser nằm trong `step.assignees` → chọn sẵn. **Điện thoại dùng chung là thực tế phổ biến** → thêm nút/chip "Tôi là ai" chọn nhanh trong số người của bước (không cứng nhắc chỉ ghi cho currentUser).
+- [ ] **Form tự báo gọn:** ẩn lưới nhiều người + dropdown rating ở chế độ tự báo; chỉ còn 1 người (mình) + chip trạng thái + ô kết quả tuỳ chọn + (tuỳ) số lượng/ảnh. Kế thừa `teams` từ `plan.team`, không bắt chọn lại.
+- [ ] **Giữ chế độ phụ "ghi hộ cả nhóm":** 1 nút chuyển để 1 người điền cho nhiều người (giữ nguyên `renderPeopleResults` cũ), không xoá.
+- [ ] **Bước theo dõi từng người:** mở rộng model bước → `doneByPeople: []` (mảng người đã tự ghi Hoàn thành phần mình). `step.done = true` chỉ khi `doneByPeople` phủ hết `assignees`. Giữ `doneBy`/`doneAt` cũ (người/giờ hoàn tất cuối). Sửa `updatePlanStatus` để cập nhật `doneByPeople` theo `log.employee` thay vì set `done` mù.
+- [ ] **Hiển thị trên bước:** "2/3 người đã xong" + chip người đã ghi (✓) / chưa ghi. Áp dụng cho cả `phaseStepRowHtml` (giai đoạn) và `stepRowHtml` (bước phẳng cũ).
+- [ ] **Hiển thị đánh giá/kết quả theo người khi xem lại:** timeline + "Nhật ký đã ghi" hiện `employee` + trạng thái phần mình rõ ràng (không trộn ẩn danh).
+- [ ] *(Tuỳ chọn)* Thống kê tổng hợp theo người dựa trên log tự báo, không chỉ đếm `plan.status`.
+
+### 7.4 Mô hình dữ liệu
+
+- **Không cần cột mới** ở `NhatKyPlans`/`WorkLogs`. `doneByPeople[]` lưu trong cùng JSON `steps`/`phases` (như `assignees`/`photos` đã làm ở P2). `log.stepId`/`log.employee`/`log.progress` đã đủ để suy "ai đã ghi Hoàn thành bước nào".
+- **Tương thích ngược:** bước cũ `done=true` (từ mô hình cũ, không có `doneByPeople`) → giữ nguyên coi là đã xong, KHÔNG đòi lại từng người. `doneByPeople` chỉ áp cho bước ghi mới.
+- Dropdown `RATING_OPTIONS` (leader-grade) chỉ còn dùng ở chế độ phụ "ghi hộ cả nhóm"; chế độ tự báo không dùng.
+
+### 7.5 Nghiệm thu P4
+
+- [ ] Mở ghi cho 1 bước → mặc định là chính mình, ghi phần mình ≤ 3 chạm (chip trạng thái + Lưu), không bắt chọn lại tổ.
+- [ ] Điện thoại dùng chung: chọn "Tôi là ai" trong số người của bước rồi ghi được đúng tên.
+- [ ] Mỗi người ghi độc lập → bước hiện đúng "x/y người đã xong"; chỉ khi đủ người mới tự chuyển bước Xong.
+- [ ] Xem lại: timeline + "Nhật ký đã ghi" cho biết **ai** ghi **gì** cho **bước nào**.
+- [ ] Việc/dữ liệu cũ không lỗi (bước done cũ giữ nguyên).
+- [ ] Cú pháp JS + `.gs` (nếu đụng) qua `node --check`; verify Chrome thật nếu có công cụ, nếu không thì ghi rõ "chưa verify tay" trong CHANGELOG.
