@@ -14,6 +14,10 @@ updated: 2026-06-08
 
 Tất cả các thay đổi và cải tiến của hệ thống Quản lý & Bảo trì Ban điện thông minh (CMMS Mini WebApp) được ghi nhận tại đây theo từng phiên bản.
 
+## [v2.12.8] - 2026-07-22
+### Cập nhật (Updated)
+- **Chi tiết việc (B): bỏ banner cảnh báo vàng "Việc tồn — quá hạn xem lại"** ở đầu màn (`nhatky/index.html`) — đúng mockup không có banner; thông tin hạn xem lại vẫn còn ở dòng "Khi nào" của mục ①. Giữ banner đỏ "Cần xử lý ngay" cho việc gấp.
+
 ## [v2.12.7] - 2026-07-22
 ### Cập nhật (Updated)
 - **Chi tiết việc (B) — dựng lại đúng mockup, bỏ hẳn bố cục cũ (`nhatky/index.html`)**:

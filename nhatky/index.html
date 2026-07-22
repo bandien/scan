@@ -5017,13 +5017,12 @@
       }
       if (currentScreen === "taskdetail") renderHeader("taskdetail", { id: id });
       const selectedDate = document.getElementById("filterDate").value || today;
+      // Bỏ banner "Việc tồn — quá hạn xem lại" (warn) theo yêu cầu — thông tin
+      // hạn xem lại vẫn có ở dòng "Khi nào" của mục ①. Chỉ giữ banner khẩn cấp (danger).
       const help = planHasLabel(plan, "Cần hỗ trợ");
-      const carry = isCarryOver(plan, selectedDate);
       let banner = "";
       if (help) {
         banner = statusBannerHtml("danger", "bi-exclamation-triangle-fill", "Cần xử lý ngay", "Việc gấp — làm trước các việc khác");
-      } else if (carry) {
-        banner = statusBannerHtml("warn", "bi-exclamation-triangle-fill", "Việc tồn — quá hạn xem lại", `Hạn xem lại: ${shortDateVn(planReminder(plan))}`);
       }
 
       const qtyBadge = doneQtyBadge(plan);
