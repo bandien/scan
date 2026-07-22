@@ -13,8 +13,8 @@
 //   cache-first, vì nội dung không đổi theo version đã ghim.
 //
 // Tăng CACHE_VERSION mỗi khi đổi danh sách APP_SHELL để buộc nạp lại cache cũ.
-const CACHE_VERSION = 'bds-shell-v1';
-const RUNTIME_CACHE = 'bds-runtime-v1';
+const CACHE_VERSION = 'bds-shell-v2';
+const RUNTIME_CACHE = 'bds-runtime-v2';
 
 const APP_SHELL = [
   './',

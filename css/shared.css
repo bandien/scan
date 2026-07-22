@@ -1021,19 +1021,26 @@ body.bds-menu-open::before {
   letter-spacing: .05em;
   padding: 8px 12px 4px;
 }
-.bds-nav-menu a {
+.bds-nav-menu a,
+.bds-nav-menu-link {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
   border-radius: 12px;
+  background: transparent;
+  border: 0;
   color: var(--bds-on-surface);
   text-decoration: none;
   font-size: .9rem;
   font-weight: 600;
+  text-align: left;
+  width: 100%;
 }
-.bds-nav-menu a:hover, .bds-nav-menu a:active { background: var(--bds-surface-low); }
-.bds-nav-menu a i { color: var(--bds-primary); font-size: 1.05rem; width: 22px; text-align: center; }
+.bds-nav-menu a:hover, .bds-nav-menu a:active,
+.bds-nav-menu-link:hover, .bds-nav-menu-link:active { background: var(--bds-surface-low); }
+.bds-nav-menu a i,
+.bds-nav-menu-link i { color: var(--bds-primary); font-size: 1.05rem; width: 22px; text-align: center; }
 .bds-nav-menu-action {
   align-items: center;
   background: transparent;

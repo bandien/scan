@@ -72,14 +72,18 @@
   ];
 
   const MENU_DAILY = [
+    { icon: 'bi-flag-fill',        label: 'Checklist Cơ Điện Sân Golf',     href: root + 'sangolf/index.html' },
+    { icon: 'bi-journal-plus',    label: 'Tạo việc phát sinh', action: 'quick-task' },
+    { icon: 'bi-plus-square',     label: 'Thêm kế hoạch', action: 'add-plan' },
+    { icon: 'bi-calendar-week',   label: 'Lịch tuần', href: root + 'nhatky/index.html#week' },
+    { icon: 'bi-arrow-clockwise', label: 'Nạp lại dữ liệu', action: 'reload-plans' },
     { icon: 'bi-person-badge',     label: 'Trang cá nhân & Cài đặt',       href: root + 'nhatky/index.html#personal' },
     { icon: 'bi-bar-chart-line-fill', label: 'Báo cáo công việc',          href: root + 'nhatky/index.html#stats' },
     { icon: 'bi-water',            label: 'Thông tin & Check vận hành bơm', href: root + 'pump_info.html' },
-    { icon: 'bi-flag-fill',        label: 'Checklist Cơ Điện Sân Golf',     href: root + 'sangolf/' },
+    { icon: 'bi-alarm',            label: 'Xem cài đặt đồng hồ bơm',      href: root + 'hengio/index.html' },
     { icon: 'bi-calendar-range',   label: 'Phân ca trực Ban Điện',          href: root + 'phanca/' }
   ];
   const MENU_ADMIN = [
-    { icon: 'bi-alarm',            label: 'Cài đặt đồng hồ bơm',      href: root + 'hengio/' },
     { icon: 'bi-qr-code',          label: 'In mã QR máy bơm',         href: root + 'print_pumps.html' },
     { icon: 'bi-person-workspace', label: 'Câu hỏi phỏng vấn',        href: root + 'phongvan/' },
     { icon: 'bi-cpu-fill',         label: 'Giám sát Server Uptime',    href: root + 'status.html' },
@@ -87,7 +91,10 @@
   ];
 
   function menuLinks(items) {
-    return items.map(m => `<a href="${m.href}"><i class="bi ${m.icon}"></i>${m.label}</a>`).join('');
+    return items.map(m => m.action
+      ? `<button type="button" class="bds-nav-menu-link" data-bds-action="${m.action}"><i class="bi ${m.icon}"></i>${m.label}</button>`
+      : `<a href="${m.href}"><i class="bi ${m.icon}"></i>${m.label}</a>`
+    ).join('');
   }
 
   function notify(msg) {
@@ -113,9 +120,10 @@
     const menu = document.createElement('div');
     menu.className = 'bds-nav-menu';
     menu.id = 'bdsNavMenu';
+    const dailyItems = spaMode ? MENU_DAILY : MENU_DAILY.filter(item => !item.action);
     menu.innerHTML =
       `<div class="bds-nav-menu-header"><i class="bi bi-grid-fill me-1"></i> Menu tiện ích</div>` +
-      menuLinks(MENU_DAILY) +
+      menuLinks(dailyItems) +
       (isAdmin()
         ? `<hr><div class="bds-nav-menu-header"><i class="bi bi-shield-lock-fill me-1"></i> Dành cho quản trị</div>` + menuLinks(MENU_ADMIN)
         : '') +
@@ -178,6 +186,14 @@
         if (item) window.dispatchEvent(new CustomEvent('bds:navigate', { detail: { screen: item.dataset.navScreen } }));
       });
       menu.addEventListener('click', event => {
+        const action = event.target.closest('[data-bds-action]');
+        if (action) {
+          event.preventDefault();
+          menu.classList.remove('open');
+          document.body.classList.remove('bds-menu-open');
+          window.dispatchEvent(new CustomEvent('bds:action', { detail: { action: action.dataset.bdsAction } }));
+          return;
+        }
         const link = event.target.closest('a[href*="nhatky/index.html#"]');
         if (!link) return;
         const screen = link.getAttribute('href').split('#')[1];
