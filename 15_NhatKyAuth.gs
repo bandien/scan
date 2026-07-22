@@ -133,6 +133,16 @@ function handleListAccounts(e) {
     .map(function(r) { return String(r[0]).trim(); })
     .filter(Boolean)
     .sort();
+}
+
+function handleListAccounts(e) {
+  const sheet = getSheet(SHEETS.USERS);
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return contentResponse({ status: "success", names: [] });
+  const names = sheet.getRange(2, 1, lastRow - 1, 1).getValues()
+    .map(function(r) { return String(r[0]).trim(); })
+    .filter(Boolean)
+    .sort();
   return contentResponse({ status: "success", names: names });
 }
 
@@ -171,6 +181,7 @@ function handleNhatKyLogin(params) {
   }
   const name = String(row[schema.usernameIndex] || username).trim();
   const fullName = schema.fullNameIndex >= 0 ? String(row[schema.fullNameIndex] || "").trim() : "";
+  const shortName = schema.shortNameIndex >= 0 ? String(row[schema.shortNameIndex] || "").trim() : "";
   const role = String(row[schema.roleIndex] || "User").trim();
   const teams = String(row[schema.teamsIndex] || "").trim();
   const authToken = createNhatKySession_(name);
@@ -178,7 +189,8 @@ function handleNhatKyLogin(params) {
 
   return contentResponse({
     status: "success",
-    name: fullName || name,
+    name: shortName || fullName || name,
+    shortName: shortName,
     fullName: fullName,
     username: name,
     role: role,

@@ -9,6 +9,17 @@ function normalizeUserRole_(value) {
   return "User";
 }
 
+// ==========================================
+// 17_UserAdmin.gs - Quản lý tài khoản Users
+// ==========================================
+
+function normalizeUserRole_(value) {
+  const role = String(value || "User").trim().toLowerCase();
+  if (role === "admin") return "Admin";
+  if (role === "manager") return "Manager";
+  return "User";
+}
+
 function getUserAdminSheet_() {
   const sheet = getSheet(SHEETS.USERS);
   if (!sheet) throw new Error("Không tìm thấy sheet Users");
@@ -21,6 +32,7 @@ function ensureUserAdminColumns_(sheet) {
   const missingHeaders = [];
   if (schema.phoneIndex < 0) missingHeaders.push("Phone");
   if (schema.fullNameIndex < 0) missingHeaders.push("Họ và tên");
+  if (schema.shortNameIndex < 0) missingHeaders.push("Tên thường gọi");
   missingHeaders.forEach(function(header) {
     const column = sheet.getLastColumn() + 1;
     sheet.getRange(1, column).setValue(header).setFontWeight("bold");
@@ -36,6 +48,7 @@ function userAdminRecord_(row, schema) {
   return {
     username: String(row[schema.usernameIndex] || "").trim(),
     fullName: schema.fullNameIndex >= 0 ? String(row[schema.fullNameIndex] || "").trim() : "",
+    shortName: schema.shortNameIndex >= 0 ? String(row[schema.shortNameIndex] || "").trim() : "",
     pin: String(row[schema.pinIndex] || "").trim(),
     role: normalizeUserRole_(row[schema.roleIndex]),
     teams: String(row[schema.teamsIndex] || "").trim(),
@@ -178,6 +191,7 @@ function handleSaveUser(params) {
     const user = {
       username: String(input.username || "").trim(),
       fullName: String(input.fullName || "").trim(),
+      shortName: String(input.shortName || "").trim(),
       pin: String(input.pin || "").trim(),
       role: normalizeUserRole_(input.role),
       teams: splitTeams_(input.teams).filter(function(team, index, all) { return all.indexOf(team) === index; }).join(", "),
@@ -223,12 +237,6 @@ function handleSaveUser(params) {
     if (context.schema.noteIndex >= 0) row[context.schema.noteIndex] = user.note;
     if (context.schema.updatedAtIndex >= 0) row[context.schema.updatedAtIndex] = parseUserAdminDate_(user.updatedAt) || new Date();
     if (context.schema.updatedByIndex >= 0) row[context.schema.updatedByIndex] = user.updatedBy || context.actor.username;
-    if (context.schema.phoneIndex >= 0) row[context.schema.phoneIndex] = user.phone;
-    if (context.schema.fullNameIndex >= 0) row[context.schema.fullNameIndex] = user.fullName;
-    context.sheet.getRange(rowIndex, 1, 1, lastColumn).setValues([row]);
-
-    writeAuditLog(context.actor.username, originalRowIndex ? "updateUser" : "createUser", user.username, "Quản lý tài khoản Users");
-    return contentResponse({ status: "success", message: originalRowIndex ? "Đã cập nhật tài khoản." : "Đã thêm tài khoản." });
   } catch (error) {
     return contentResponse({ status: "error", message: "Không lưu được tài khoản: " + error.message });
   } finally {
