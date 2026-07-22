@@ -14,6 +14,11 @@ updated: 2026-06-08
 
 Tất cả các thay đổi và cải tiến của hệ thống Quản lý & Bảo trì Ban điện thông minh (CMMS Mini WebApp) được ghi nhận tại đây theo từng phiên bản.
 
+## [v2.12.9] - 2026-07-22
+### Cập nhật (Updated)
+- **Màn Ghi nhật ký — dựng lại đúng ngôn ngữ "gọn nhẹ" của A/B/C (`nhatky/index.html`)**: gộp toàn bộ form vào 1 `.d-sheet` (giống Chi tiết việc), chia 3 mục kẻ mảnh thay cho dải `.field` rời rạc + 1 khối `<details>` duy nhất trước đây: **① Việc đang ghi** (context/tổ), **② Trạng thái &amp; kết quả** (chip tiến độ, ô đo lường, kết quả nhanh), **Người tham gia** (hiện khi việc có nhiều người). Mục **Chi tiết thêm** (ngày/ca/giờ/tồn/làm tiếp/ảnh) giữ nguyên dạng gấp gọn `<details>`, không đánh số — cùng cách Chi tiết việc bỏ số cho khối hành động phụ. Giữ nguyên mọi control chạm to (chip trạng thái, ô đo lường +/-, chip kết quả nhanh) vì đó là thiết kế cố ý cho thao tác ngoài hiện trường, không thuộc phần cần gọn — chỉ đổi lớp bố cục/ngăn cách, không đổi logic (mọi id/hàm xử lý giữ nguyên).
+- **Chưa verify bằng Chrome thật (Playwright)** như các màn trước — phiên này không có sẵn `chromium-cli`/Playwright. Đã tự kiểm: toàn bộ id không trùng/không mất, cú pháp JS qua `node --check` không lỗi, và vá 1 lỗi CSS tự phát hiện (5 input ẩn đứng trước mục ① khiến selector `.d-sec:first-child` không khớp, thừa 1 đường kẻ ở mép trên sheet — đã chuyển input ẩn vào trong mục ①). **Cần người dùng mở thử trên điện thoại/trình duyệt thật để xác nhận trước khi coi là xong.**
+
 ## [v2.12.8] - 2026-07-22
 ### Cập nhật (Updated)
 - **Chi tiết việc (B): bỏ banner cảnh báo vàng "Việc tồn — quá hạn xem lại"** ở đầu màn (`nhatky/index.html`) — đúng mockup không có banner; thông tin hạn xem lại vẫn còn ở dòng "Khi nào" của mục ①. Giữ banner đỏ "Cần xử lý ngay" cho việc gấp.

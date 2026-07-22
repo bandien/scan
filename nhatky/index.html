@@ -2382,35 +2382,35 @@
       <!-- Màn 3: Ghi nhật ký (Phương án A — bảng nhanh) -->
       <section class="screen" data-screen="logentry" id="screen-logentry">
         <div class="scroll">
-          <div class="ctx-card" id="logContextCard" style="display:none;">
-            <div class="ctx-where" id="logContextWhere"></div>
-            <div class="ctx-what" id="logContextWhat"></div>
-          </div>
-          <div class="small text-primary fw-bold mb-3 d-none" id="planCumNote"></div>
-
-          <form id="logForm">
-            <input type="hidden" id="planId">
-            <input type="hidden" id="stepId">
-            <input type="hidden" id="progress" value="Hoàn thành">
-            <input type="hidden" id="quantity" value="">
-            <input type="hidden" id="quantityUnit" value="">
-
-            <div class="field d-none" id="adhocTaskField">
-              <div class="field-lb">Việc</div>
-              <textarea class="ta" id="selectedTask" rows="2" placeholder="Nhập việc phát sinh"></textarea>
+          <form id="logForm" class="d-sheet">
+            <div class="d-sec">
+              <input type="hidden" id="planId">
+              <input type="hidden" id="stepId">
+              <input type="hidden" id="progress" value="Hoàn thành">
+              <input type="hidden" id="quantity" value="">
+              <input type="hidden" id="quantityUnit" value="">
+              <div class="d-lab"><span class="n">1</span>Việc đang ghi</div>
+              <div class="ctx-card" id="logContextCard" style="display:none;">
+                <div class="ctx-where" id="logContextWhere"></div>
+                <div class="ctx-what" id="logContextWhat"></div>
+              </div>
+              <div class="small text-primary fw-bold d-none" id="planCumNote"></div>
+              <div class="field d-none mb-0" id="adhocTaskField">
+                <div class="field-lb">Việc</div>
+                <textarea class="ta" id="selectedTask" rows="2" placeholder="Nhập việc phát sinh"></textarea>
+              </div>
+              <div class="field mb-0 mt-2">
+                <label class="field-lb" for="teams">Việc của tổ nào</label>
+                <!-- Danh sách tổ do refreshTeamOptions() đổ từ SUPPORTED_TEAMS —
+                     một nguồn duy nhất, không hardcode lặp ở đây -->
+                <select class="form-select" id="teams" required>
+                  <option value="">— Chọn tổ thực hiện —</option>
+                </select>
+              </div>
             </div>
 
-            <div class="field">
-              <label class="field-lb" for="teams">Việc của tổ nào</label>
-              <!-- Danh sách tổ do refreshTeamOptions() đổ từ SUPPORTED_TEAMS —
-                   một nguồn duy nhất, không hardcode lặp ở đây -->
-              <select class="form-select" id="teams" required>
-                <option value="">— Chọn tổ thực hiện —</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <div class="field-lb">Trạng thái việc</div>
+            <div class="d-sec">
+              <div class="d-lab"><span class="n">2</span>Trạng thái &amp; kết quả</div>
               <div id="progressChips" class="seg">
                 <button class="opt" type="button" data-value="Hoàn thành"><i class="bi bi-check2-circle"></i>Hoàn thành</button>
                 <button class="opt" type="button" data-value="Đang làm"><i class="bi bi-arrow-repeat"></i>Đang làm</button>
@@ -2420,19 +2420,15 @@
                 <input class="form-check-input" type="checkbox" id="markPlanDone">
                 <label class="form-check-label small text-success fw-bold" for="markPlanDone">Kết thúc việc này</label>
               </div>
-            </div>
-
-            <div class="field d-none" id="quantityFieldWrap">
-              <div class="field-lb">Số đo</div>
-              <div class="measure">
-                <button class="stp" type="button" id="btnQtyMinus"><i class="bi bi-dash-lg"></i></button>
-                <div class="val"><span id="quantityDisplay">0</span><span class="unit" id="quantityUnitDisplay"></span></div>
-                <button class="stp" type="button" id="btnQtyPlus"><i class="bi bi-plus-lg"></i></button>
+              <div class="field d-none mb-0 mt-3" id="quantityFieldWrap">
+                <div class="field-lb">Số đo</div>
+                <div class="measure">
+                  <button class="stp" type="button" id="btnQtyMinus"><i class="bi bi-dash-lg"></i></button>
+                  <div class="val"><span id="quantityDisplay">0</span><span class="unit" id="quantityUnitDisplay"></span></div>
+                  <button class="stp" type="button" id="btnQtyPlus"><i class="bi bi-plus-lg"></i></button>
+                </div>
               </div>
-            </div>
-
-            <div class="field">
-              <div class="field-lb">Kết quả nhanh</div>
+              <div class="field-lb mt-3">Kết quả nhanh</div>
               <div class="quick-chips" id="resultChips">
                 <button class="qc" type="button" data-fill="Không phát hiện bất thường">Không bất thường</button>
                 <button class="qc" type="button" data-fill="Có bất thường, cần theo dõi">Còn theo dõi</button>
@@ -2442,53 +2438,55 @@
               <textarea class="ta mt-2" id="result" rows="3" placeholder="Ghi ngắn gọn: đã làm gì, kết quả ra sao..."></textarea>
             </div>
 
-            <div class="field d-none" id="peopleResults">
-              <div class="field-lb"><i class="bi bi-people"></i>Kết quả từng người tham gia</div>
+            <div class="d-sec d-none" id="peopleResults">
+              <div class="d-lab"><i class="bi bi-people"></i>Người tham gia</div>
               <div class="d-flex flex-column gap-2" id="peopleResultRows"></div>
               <div class="small text-secondary mt-1">Ghi riêng nội dung thực hiện của từng nhân viên</div>
             </div>
 
-            <details class="extra-details">
-              <summary>Chi tiết thêm</summary>
-              <div class="row g-2 mt-1">
-                <div class="col-6">
-                  <label class="form-label" for="workDate">Ngày</label>
-                  <input class="form-control" id="workDate" type="date" required>
-                </div>
-                <div class="col-6">
-                  <label class="form-label" for="shift">Ca</label>
-                  <select class="form-select" id="shift">
-                    <option>Ca sáng</option>
-                    <option>Ca chiều</option>
-                    <option>Ca đêm</option>
-                    <option>Hành chính</option>
-                  </select>
-                </div>
-                <div class="col-6">
-                  <label class="form-label" for="startTime">Từ giờ</label>
-                  <select class="form-select" id="startTime"></select>
-                </div>
-                <div class="col-6">
-                  <label class="form-label" for="endTime">Đến giờ</label>
-                  <select class="form-select" id="endTime"></select>
-                </div>
-                <div class="col-12">
-                  <label class="form-label" for="issue">Còn tồn</label>
-                  <textarea class="form-control" id="issue" rows="2" placeholder="Bỏ trống nếu không có"></textarea>
-                </div>
-                <div class="col-12">
-                  <label class="form-label" for="nextAction">Làm tiếp</label>
-                  <input class="form-control" id="nextAction" placeholder="Ví dụ: thay bóng, đặt vật tư, kiểm tra lại sau mưa...">
-                </div>
-                <div class="col-12">
-                  <div class="field-lb">Ảnh</div>
-                  <div class="media-row">
-                    <button class="media-btn" type="button" id="btnAttachPhoto"><i class="bi bi-camera-fill"></i>Chụp ảnh</button>
+            <div class="d-sec">
+              <details class="extra-details">
+                <summary>Chi tiết thêm</summary>
+                <div class="row g-2 mt-1">
+                  <div class="col-6">
+                    <label class="form-label" for="workDate">Ngày</label>
+                    <input class="form-control" id="workDate" type="date" required>
                   </div>
-                  <div id="logPendingPhotos"></div>
+                  <div class="col-6">
+                    <label class="form-label" for="shift">Ca</label>
+                    <select class="form-select" id="shift">
+                      <option>Ca sáng</option>
+                      <option>Ca chiều</option>
+                      <option>Ca đêm</option>
+                      <option>Hành chính</option>
+                    </select>
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label" for="startTime">Từ giờ</label>
+                    <select class="form-select" id="startTime"></select>
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label" for="endTime">Đến giờ</label>
+                    <select class="form-select" id="endTime"></select>
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label" for="issue">Còn tồn</label>
+                    <textarea class="form-control" id="issue" rows="2" placeholder="Bỏ trống nếu không có"></textarea>
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label" for="nextAction">Làm tiếp</label>
+                    <input class="form-control" id="nextAction" placeholder="Ví dụ: thay bóng, đặt vật tư, kiểm tra lại sau mưa...">
+                  </div>
+                  <div class="col-12">
+                    <div class="field-lb">Ảnh</div>
+                    <div class="media-row">
+                      <button class="media-btn" type="button" id="btnAttachPhoto"><i class="bi bi-camera-fill"></i>Chụp ảnh</button>
+                    </div>
+                    <div id="logPendingPhotos"></div>
+                  </div>
                 </div>
-              </div>
-            </details>
+              </details>
+            </div>
           </form>
           <button class="link-button mt-2" type="button" id="btnClearForm"><i class="bi bi-eraser me-1"></i>Xóa nội dung</button>
         </div>
