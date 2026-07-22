@@ -11,225 +11,430 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="../css/shared.css" rel="stylesheet">
+    <link href="../css/shared.css?v=20260721-menuplus" rel="stylesheet">
     <style>
         :root {
-            --bds-bg: #f3f4f6;
-            --bds-surface: #ffffff;
-            --bds-on-surface: #0f172a;
-            --bds-muted: #64748b;
-            --bds-line: #e5e7eb;
-            --bds-primary: #059669;
-            --bds-success: #10b981;
-            --bds-warning: #f59e0b;
-            --bds-danger: #ef4444;
+            --golf-bg: #eef7f1;
+            --golf-card: #ffffff;
+            --golf-line: #dbe7df;
+            --golf-text: #0f172a;
+            --golf-muted: #64748b;
+            --golf-green: #059669;
+            --golf-green-soft: #dcfce7;
+            --golf-blue: #2563eb;
+            --golf-amber: #f59e0b;
+            --golf-red: #ef4444;
         }
-
         body {
-            background-color: var(--bds-bg);
-            color: var(--bds-on-surface);
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(16,185,129,.18), transparent 36%),
+                linear-gradient(180deg, #f3fbf6 0%, var(--golf-bg) 100%);
+            color: var(--golf-text);
+            font-family: Inter, system-ui, -apple-system, sans-serif;
             min-height: 100vh;
-            padding-bottom: 90px;
+            padding-bottom: 96px;
         }
-
-        .app-shell { max-width: 520px; margin: 0 auto; padding: 16px; }
-
-        .header-bar {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 14px 18px; background: #fff; border-radius: 20px;
-            border: 2px solid var(--bds-line); margin-bottom: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        .shell { max-width: 560px; margin: 0 auto; padding: 14px; }
+        .panel {
+            background: rgba(255,255,255,.94);
+            border: 1px solid var(--golf-line);
+            border-radius: 24px;
+            box-shadow: 0 14px 34px rgba(15,23,42,.07);
+            padding: 16px;
+            margin-bottom: 12px;
         }
-        .header-bar .app-title { font-weight: 800; font-size: 1rem; }
-        .header-bar .app-sub { font-size: 0.75rem; color: var(--bds-muted); font-weight: 600; }
-
-        .card-custom {
-            background: var(--bds-surface); border-radius: 20px;
-            border: 2px solid var(--bds-line); padding: 18px;
-            box-shadow: 0 10px 25px rgba(15,23,42,0.04); margin-bottom: 14px;
+        .hero {
+            background: linear-gradient(135deg, #047857, #10b981);
+            color: #fff;
+            border: 0;
+            overflow: hidden;
+            position: relative;
         }
-
-        /* ── Home: template cards ── */
-        .tpl-card { cursor: pointer; transition: transform .15s ease, border-color .15s ease; }
-        .tpl-card:active { transform: scale(0.98); }
-        .tpl-card.dimmed { opacity: 0.6; }
-        .tpl-card .tpl-name { font-weight: 800; font-size: 1rem; }
-        .tpl-card .tpl-meta { font-size: 0.78rem; color: var(--bds-muted); font-weight: 600; }
-        .status-chip {
-            display: inline-flex; align-items: center; gap: 5px;
-            font-size: 0.72rem; font-weight: 800; padding: 4px 10px; border-radius: 999px;
+        .hero:after {
+            content: "";
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            border-radius: 999px;
+            right: -68px;
+            top: -76px;
+            background: rgba(255,255,255,.16);
         }
-        .chip-none      { background: #f1f5f9; color: #64748b; }
-        .chip-draft     { background: #fef3c7; color: #92400e; }
-        .chip-submitted { background: #dbeafe; color: #1d4ed8; }
-        .chip-confirmed { background: #d1fae5; color: #047857; }
-        .chip-due       { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
-
-        .pending-banner {
-            background: #eff6ff; border: 2px solid #bfdbfe; border-radius: 16px;
-            padding: 12px 14px; margin-bottom: 14px; font-size: 0.85rem; font-weight: 600;
+        .hero h1 { font-size: 1.25rem; font-weight: 800; margin: 0 0 4px; }
+        .hero p { margin: 0; opacity: .86; font-weight: 600; font-size: .88rem; }
+        .mini-label {
+            display: block;
+            color: var(--golf-muted);
+            font-size: .76rem;
+            font-weight: 800;
+            margin-bottom: 6px;
         }
-
-        /* ── Run view ── */
-        .section-title {
-            font-size: 0.8rem; font-weight: 800; text-transform: uppercase;
-            letter-spacing: 0.04em; color: var(--bds-primary);
-            margin: 20px 4px 10px; display: flex; gap: 8px; align-items: center;
+        .soft-input, .soft-select, .soft-textarea {
+            width: 100%;
+            border: 1.5px solid var(--golf-line);
+            border-radius: 16px;
+            background: #fff;
+            padding: 11px 13px;
+            font-weight: 700;
+            color: var(--golf-text);
         }
+        .soft-input:focus, .soft-select:focus, .soft-textarea:focus {
+            border-color: var(--golf-green);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(5,150,105,.12);
+        }
+        .date-row { display: grid; grid-template-columns: 44px 1fr 44px; gap: 8px; }
+        .icon-btn {
+            border: 1.5px solid var(--golf-line);
+            background: #fff;
+            border-radius: 15px;
+            min-height: 44px;
+            color: var(--golf-text);
+            font-weight: 800;
+        }
+        .section-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin: 16px 4px 10px;
+        }
+        .section-heading h2 { font-size: .98rem; font-weight: 800; margin: 0; }
+        .section-heading span { color: var(--golf-muted); font-size: .78rem; font-weight: 700; }
+        .task-card {
+            width: 100%;
+            border: 1.5px solid var(--golf-line);
+            background: #fff;
+            border-radius: 22px;
+            padding: 15px;
+            margin-bottom: 10px;
+            text-align: left;
+            box-shadow: 0 8px 22px rgba(15,23,42,.045);
+        }
+        .task-card:active { transform: scale(.985); }
+        .task-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            background: var(--golf-green-soft);
+            color: var(--golf-green);
+            font-size: 1.25rem;
+        }
+        .task-title { font-weight: 800; line-height: 1.22; }
+        .task-meta { color: var(--golf-muted); font-size: .8rem; font-weight: 700; margin-top: 3px; }
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            border-radius: 999px;
+            font-size: .73rem;
+            font-weight: 800;
+        }
+        .pill.gray { background: #f1f5f9; color: #475569; }
+        .pill.green { background: #dcfce7; color: #047857; }
+        .pill.amber { background: #fef3c7; color: #92400e; }
+        .pill.blue { background: #dbeafe; color: #1d4ed8; }
+        .pill.red { background: #fee2e2; color: #b91c1c; }
+        .progress-line {
+            height: 9px;
+            border-radius: 999px;
+            overflow: hidden;
+            background: #e2e8f0;
+            margin-top: 12px;
+        }
+        .progress-line > div {
+            height: 100%;
+            width: 0;
+            border-radius: inherit;
+            background: var(--golf-green);
+            transition: width .2s ease;
+        }
+        .run-top {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: rgba(238,247,241,.94);
+            backdrop-filter: blur(10px);
+            padding: 10px 0;
+            margin: -4px 0 6px;
+        }
+        .run-title { font-size: 1.04rem; font-weight: 800; margin: 0; }
+        .run-sub { color: var(--golf-muted); font-size: .78rem; font-weight: 700; }
+        .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .primary-btn, .secondary-btn, .danger-btn {
+            border: 0;
+            border-radius: 16px;
+            min-height: 46px;
+            padding: 10px 12px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .primary-btn { background: var(--golf-green); color: #fff; box-shadow: 0 9px 20px rgba(5,150,105,.22); }
+        .secondary-btn { background: #fff; color: var(--golf-text); border: 1.5px solid var(--golf-line); }
+        .danger-btn { background: #fee2e2; color: #991b1b; }
         .item-card {
-            background: #fff; border: 2px solid var(--bds-line); border-radius: 16px;
-            padding: 14px; margin-bottom: 10px;
+            background: #fff;
+            border: 1.5px solid var(--golf-line);
+            border-radius: 22px;
+            padding: 14px;
+            margin-bottom: 10px;
         }
-        .item-card.done { border-color: #a7f3d0; background: #f6fefb; }
-        .item-card.warn { border-color: #fecaca; background: #fef8f8; }
-        .item-label { font-weight: 700; font-size: 0.92rem; line-height: 1.35; }
-        .item-note-hint { font-size: 0.75rem; color: var(--bds-muted); margin-top: 3px; }
-
-        .check-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+        .item-card.done { border-color: #86efac; background: #fbfffd; }
+        .item-card.warn { border-color: #fca5a5; background: #fffafa; }
+        .item-head { display: flex; gap: 10px; align-items: flex-start; }
+        .item-index {
+            min-width: 30px;
+            height: 30px;
+            border-radius: 12px;
+            background: #f1f5f9;
+            display: grid;
+            place-items: center;
+            font-size: .78rem;
+            font-weight: 800;
+            color: #475569;
+        }
+        .item-label { font-weight: 800; line-height: 1.35; }
+        .item-note { color: var(--golf-muted); font-size: .78rem; font-weight: 600; margin-top: 3px; }
+        .check-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
         .check-btn {
-            border: 2px solid var(--bds-line); border-radius: 12px; padding: 9px 4px;
-            text-align: center; font-weight: 800; font-size: 0.8rem; cursor: pointer;
-            background: #fff; user-select: none; transition: all .15s ease;
+            border: 1.5px solid var(--golf-line);
+            border-radius: 15px;
+            background: #fff;
+            padding: 10px 4px;
+            font-size: .8rem;
+            font-weight: 800;
         }
-        .check-btn.on-ok   { background: #059669; border-color: #059669; color: #fff; }
-        .check-btn.on-ng   { background: #ef4444; border-color: #ef4444; color: #fff; }
-        .check-btn.on-skip { background: #64748b; border-color: #64748b; color: #fff; }
-
-        .num-wrap { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
-        .num-input {
-            flex: 1; border: 2px solid #d1d5db; border-radius: 12px; padding: 10px 14px;
-            font-weight: 700; font-size: 1.05rem; width: 100%;
+        .check-btn.ok.active { background: var(--golf-green); border-color: var(--golf-green); color: #fff; }
+        .check-btn.ng.active { background: var(--golf-red); border-color: var(--golf-red); color: #fff; }
+        .check-btn.skip.active { background: #64748b; border-color: #64748b; color: #fff; }
+        .field-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+        .unit { color: var(--golf-muted); font-weight: 800; min-width: 38px; }
+        .bad { border-color: var(--golf-red) !important; background: #fff1f2; color: #b91c1c; }
+        .warn-text { color: #b91c1c; font-size: .76rem; font-weight: 800; margin-top: 6px; }
+        .note-box {
+            width: 100%;
+            border: 1.5px dashed #cbd5e1;
+            border-radius: 15px;
+            padding: 10px 12px;
+            margin-top: 10px;
+            font-weight: 600;
+            min-height: 42px;
         }
-        .num-input:focus { outline: none; border-color: var(--bds-primary); }
-        .num-input.bad { border-color: var(--bds-danger); background: #fef2f2; color: #b91c1c; }
-        .unit-tag { font-weight: 800; color: var(--bds-muted); font-size: 0.9rem; min-width: 34px; }
-
-        .sub-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
-        .sub-label { flex: 1; font-size: 0.82rem; font-weight: 600; color: #334155; }
-        .time-input {
-            border: 2px solid #d1d5db; border-radius: 10px; padding: 7px 8px;
-            font-weight: 700; font-size: 0.9rem; width: 106px;
+        .readonly input, .readonly textarea, .readonly button[data-edit] { pointer-events: none; opacity: .78; }
+        .empty-state { text-align: center; color: var(--golf-muted); padding: 34px 16px; font-weight: 700; }
+        .toast-lite {
+            position: fixed;
+            left: 50%;
+            bottom: 92px;
+            transform: translateX(-50%);
+            z-index: 2000;
+            background: #0f172a;
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 999px;
+            font-size: .84rem;
+            font-weight: 800;
+            box-shadow: 0 10px 28px rgba(15,23,42,.24);
+            display: none;
         }
-        .time-input:focus { outline: none; border-color: var(--bds-primary); }
-        .sub-num { width: 96px; flex: none; padding: 7px 10px; font-size: 0.95rem; }
 
-        .text-input {
-            width: 100%; border: 2px solid #d1d5db; border-radius: 12px; padding: 10px 14px;
-            font-weight: 600; font-size: 0.9rem; margin-top: 10px; min-height: 64px;
+        /* Đợt 1 & 3: Stepper +/- & Previous value chip & TOC navigation */
+        .btn-prev-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: .74rem;
+            font-weight: 800;
+            margin-top: 6px;
+            cursor: pointer;
+            transition: all .15s ease;
         }
-        .text-input:focus { outline: none; border-color: var(--bds-primary); }
-
-        .note-toggle { border: none; background: none; color: var(--bds-muted); font-size: 1rem; padding: 2px 6px; }
-        .note-input {
-            width: 100%; border: 2px dashed #d1d5db; border-radius: 10px;
-            padding: 7px 12px; font-size: 0.85rem; margin-top: 8px;
+        .btn-prev-chip:active {
+            background: #dbeafe;
+            transform: scale(.97);
         }
-        .note-input:focus { outline: none; border-color: var(--bds-warning); }
-
-        .threshold-warn { font-size: 0.75rem; color: var(--bds-danger); font-weight: 700; margin-top: 6px; }
-
-        /* Progress bar sticky */
-        .progress-sticky {
-            position: sticky; top: 0; z-index: 20; background: var(--bds-bg);
-            padding: 10px 0 8px; margin: -6px 0 6px;
+        .stepper-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            width: 100%;
         }
-        .progress-track { background: #e2e8f0; border-radius: 999px; height: 10px; overflow: hidden; }
-        .progress-fill { background: var(--bds-primary); height: 100%; border-radius: 999px; transition: width .3s ease; }
-        .progress-label { font-size: 0.75rem; font-weight: 800; color: var(--bds-muted); margin-top: 5px; display: flex; justify-content: space-between; }
-
-        .btn-submit-glow {
-            width: 100%; border: none; border-radius: 16px; padding: 15px;
-            background: linear-gradient(135deg, #059669, #10b981); color: #fff;
-            font-weight: 800; font-size: 1rem; display: flex; align-items: center;
-            justify-content: center; gap: 8px;
-            box-shadow: 0 10px 22px rgba(5,150,105,0.3);
+        .stepper-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            border: 1.5px solid var(--golf-line);
+            background: #f8fafc;
+            color: var(--golf-text);
+            font-weight: 800;
+            font-size: 1.1rem;
+            display: grid;
+            place-items: center;
+            user-select: none;
+            flex-shrink: 0;
         }
-        .btn-submit-glow:disabled { opacity: 0.55; box-shadow: none; }
-
-        .sync-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
-        .sync-ok { background: #10b981; }
-        .sync-pending { background: #f59e0b; animation: pulse 1.2s infinite; }
-        @keyframes pulse { 50% { opacity: 0.35; } }
-
-        .readonly-lock input, .readonly-lock textarea, .readonly-lock .check-btn { pointer-events: none; opacity: 0.85; }
-
-        .date-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-        .date-nav input { flex: 1; border: 2px solid var(--bds-line); border-radius: 14px; padding: 10px 12px; font-weight: 700; }
-        .date-nav button { border: 2px solid var(--bds-line); background: #fff; border-radius: 12px; width: 42px; height: 42px; }
-    <script src="../js/app-header.js" data-root="../" data-title="Checklist Cơ Điện Sân Golf" data-sub="Sân Golf Kỳ Sơn Montana" data-icon="bi-flag-fill" data-back="../index.html"></script>
+        .stepper-btn:active {
+            background: #e2e8f0;
+            transform: scale(0.95);
+        }
+        .toc-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            overflow-x: auto;
+            padding: 8px 4px;
+            margin: -2px 0 10px;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+        }
+        .toc-bar::-webkit-scrollbar { display: none; }
+        .toc-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: .76rem;
+            font-weight: 800;
+            background: #ffffff;
+            border: 1.5px solid var(--golf-line);
+            color: var(--golf-text);
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .toc-chip.done {
+            border-color: #86efac;
+            background: #f0fdf4;
+            color: #166534;
+        }
+        .toc-next-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: .76rem;
+            font-weight: 800;
+            background: #fef3c7;
+            border: 1.5px solid #fde68a;
+            color: #92400e;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .section-heading-toggle {
+            cursor: pointer;
+            user-select: none;
+        }
+        .section-heading-toggle:active { opacity: 0.8; }
+        .item-card.highlight-flash {
+            animation: flashBorder 1.5s ease;
+        }
+        @keyframes flashBorder {
+            0%, 100% { box-shadow: 0 8px 22px rgba(15,23,42,.045); }
+            50% { box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.5); border-color: var(--golf-amber); }
+        }
+    </style>
+    <script src="../js/app-header.js?v=20260721-menuplus" data-root="../" data-title="Checklist Cơ Điện Sân Golf" data-sub="Ghi nhanh - lưu nháp - chốt ca" data-icon="bi-flag-fill" data-back="../index.html"></script>
 </head>
 <body>
-<div class="app-shell" style="padding-top: 16px;">
-
-    <!-- ═══════════ HOME VIEW ═══════════ -->
-    <div id="homeView">
-
-        <div class="card-custom" style="padding:14px 18px;">
-            <label class="fw-bold small text-secondary mb-1"><i class="bi bi-person-badge text-success me-1"></i>Người thực hiện</label>
-            <input type="text" id="operatorInput" class="num-input" style="margin-top:2px;" placeholder="Nhập họ tên của bạn...">
+<main class="shell">
+    <section id="homeView">
+        <div class="panel hero">
+            <h1>Checklist Cơ Điện Sân Golf</h1>
+            <p>Chọn ca, bấm Đạt/Lỗi, ghi phát sinh rồi chốt bàn giao. Gọn như một đường fairway đẹp.</p>
         </div>
 
-        <div class="date-nav">
-            <button onclick="shiftDate(-1)"><i class="bi bi-chevron-left"></i></button>
-            <input type="date" id="datePicker" onchange="onDateChange()">
-            <button onclick="shiftDate(1)"><i class="bi bi-chevron-right"></i></button>
+        <div class="panel">
+            <div class="row g-2">
+                <div class="col-12">
+                    <label class="mini-label"><i class="bi bi-person-badge me-1"></i>Người thực hiện</label>
+                    <input id="operatorInput" class="soft-input" placeholder="Nhập họ tên...">
+                </div>
+                <div class="col-12">
+                    <label class="mini-label"><i class="bi bi-calendar3 me-1"></i>Ngày checklist</label>
+                    <div class="date-row">
+                        <button class="icon-btn" onclick="shiftDate(-1)" aria-label="Ngày trước"><i class="bi bi-chevron-left"></i></button>
+                        <input id="datePicker" class="soft-input" type="date" onchange="onDateChange()">
+                        <button class="icon-btn" onclick="shiftDate(1)" aria-label="Ngày sau"><i class="bi bi-chevron-right"></i></button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div id="pendingBanners"></div>
+
+        <div class="section-heading">
+            <h2>Việc cần làm</h2>
+            <span id="homeSyncText">Đang tải...</span>
+        </div>
         <div id="templateCards">
-            <div class="text-center text-muted py-5"><div class="spinner-border spinner-border-sm me-2"></div>Đang tải mẫu checklist...</div>
+            <div class="panel empty-state"><span class="spinner-border spinner-border-sm me-2"></span>Đang tải checklist...</div>
         </div>
-    </div>
+    </section>
 
-    <!-- ═══════════ RUN VIEW ═══════════ -->
-    <div id="runView" style="display:none;">
-        <div class="header-bar">
-            <button onclick="backHome()" style="border:none;background:none;font-size:1.3rem;padding:0 8px 0 0;"><i class="bi bi-arrow-left"></i></button>
-            <div style="flex:1;">
-                <div class="app-title" id="runTitle">—</div>
-                <div class="app-sub" id="runSub">—</div>
+    <section id="runView" style="display:none;">
+        <div class="run-top">
+            <div class="panel mb-0">
+                <div class="d-flex align-items-center gap-2">
+                    <button class="icon-btn" onclick="backHome()" aria-label="Quay lại"><i class="bi bi-arrow-left"></i></button>
+                    <div class="flex-grow-1">
+                        <h1 class="run-title" id="runTitle">Checklist</h1>
+                        <div class="run-sub" id="runSub">—</div>
+                    </div>
+                    <span id="syncPill" class="pill green"><i class="bi bi-cloud-check"></i>Lưu</span>
+                </div>
+                <div class="progress-line"><div id="progressFill"></div></div>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <span class="run-sub" id="progressText">0/0 mục</span>
+                    <span id="statusPill" class="pill gray">Nháp</span>
+                </div>
+                <div class="quick-actions" id="quickActions">
+                    <button class="primary-btn" onclick="quickFillAll()"><i class="bi bi-lightning-charge-fill"></i>Điền nhanh ca trước</button>
+                    <button class="secondary-btn" onclick="markAllOk()"><i class="bi bi-check-all"></i>Chỉ Đạt</button>
+                </div>
             </div>
-            <span id="runSyncIndicator" class="sync-dot sync-ok"></span>
         </div>
-
-        <div class="progress-sticky">
-            <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-            <div class="progress-label">
-                <span id="progressText">0/0 mục</span>
-                <span id="runStatusChip"></span>
-            </div>
-        </div>
-
+        <div id="tocArea" class="toc-bar" style="display:none;"></div>
         <div id="runBody"></div>
+        <div id="submitArea"></div>
+    </section>
+</main>
 
-        <div id="submitArea" class="mt-3"></div>
-    </div>
-</div>
-
-<!-- ═══════════ SUBMIT MODAL ═══════════ -->
 <div class="modal fade" id="submitModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:20px;">
+        <div class="modal-content" style="border-radius:22px;">
             <div class="modal-header border-0 pb-0">
-                <h6 class="fw-bold mb-0"><i class="bi bi-clipboard-check text-success me-1"></i>Chốt ca & bàn giao</h6>
+                <h6 class="fw-bold mb-0"><i class="bi bi-send-check text-success me-1"></i>Chốt ca & bàn giao</h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div id="submitSummary" class="mb-3 small"></div>
-                <label class="fw-bold small text-secondary">Nội dung bàn giao cho ca sau</label>
-                <textarea id="handoverNoteInput" class="text-input" style="margin-top:4px;" placeholder="Sự cố, việc dở dang, đề nghị ca sau..."></textarea>
-                <label class="fw-bold small text-secondary mt-2">Người nhận bàn giao (nếu biết)</label>
-                <input type="text" id="handoverToInput" class="num-input" style="margin-top:4px;" placeholder="Họ tên người ca sau...">
+                <div id="submitSummary" class="alert alert-light border fw-bold small"></div>
+                <label class="mini-label">Nội dung bàn giao / phát sinh cần lưu ý</label>
+                <textarea id="handoverNoteInput" class="soft-textarea" rows="4" placeholder="Ví dụ: bơm tưới số 2 rung nhẹ, đã kiểm tra tạm ổn; ca sau theo dõi thêm..."></textarea>
+                <label class="mini-label mt-3">Người nhận bàn giao</label>
+                <input id="handoverToInput" class="soft-input" placeholder="Nếu biết thì nhập tên người nhận...">
             </div>
             <div class="modal-footer border-0 pt-0">
-                <button class="btn-submit-glow" id="btnConfirmSubmit" onclick="doSubmitRun()">
-                    <i class="bi bi-check-circle-fill"></i>XÁC NHẬN CHỐT CA
+                <button id="btnConfirmSubmit" class="primary-btn w-100" onclick="doSubmitRun()">
+                    <i class="bi bi-check-circle-fill"></i>Xác nhận chốt ca
                 </button>
             </div>
         </div>
     </div>
 </div>
+
+<div id="toastLite" class="toast-lite"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../js/config.js"></script>
@@ -238,52 +443,54 @@
 <script src="../js/fontscale.js"></script>
 <script src="../js/pwa.js" data-root="../"></script>
 <script>
-// =============================================================================
-// sangolf — Checklist Cơ Điện Sân Golf (local-first, autosave)
-// Backend: 19_GolfChecklist.gs · Kế hoạch: docs/PLAN_ChecklistGolf_SoHoa.md
-// =============================================================================
-
-const LS_TEMPLATES = 'golf_templates_v1';
-const LS_RUN_PREFIX = 'golf_run_';             // + runId → draft local
-
+const LS_TEMPLATES = 'golf_templates_v2';
+const LS_RUN_PREFIX = 'golf_run_';
 const TEMPLATE_ORDER = ['ca_sang', 'ca_toi', 'tuan', 'thang'];
 const TEMPLATE_ICONS = { ca_sang: 'bi-sunrise', ca_toi: 'bi-moon-stars', tuan: 'bi-calendar-week', thang: 'bi-calendar-month' };
 
-let templates = [];          // flat items từ backend
-let serverRuns = {};         // runId → run object (theo ngày đang chọn + hôm trước)
-let currentRun = null;       // {runId, templateId, date, status, items:{}, dirty}
+let templates = [];
+let serverRuns = {};
+let currentRun = null;
 let saveTimer = null;
+let toastTimer = null;
 
-// ─── Helpers ────────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
-const todayStr = () => new Date().toLocaleDateString('sv-SE'); // yyyy-MM-dd giờ địa phương
+const todayStr = () => new Date().toLocaleDateString('sv-SE');
 const esc = s => { const d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; };
 
-// Nguồn tên người thực hiện dùng chung toàn hệ thống (js/sso.js).
-function getOperator() {
-    return window.BD_SSO ? BD_SSO.getOperatorName() : '';
+function toast(message, type = 'dark') {
+    if (window.bdsShowToast) return bdsShowToast(message, type === 'dark' ? 'success' : type);
+    const el = $('toastLite');
+    el.textContent = message;
+    el.style.display = 'block';
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.style.display = 'none', 2400);
 }
-
+function getOperator() { return window.BD_SSO ? BD_SSO.getOperatorName() : ($('operatorInput')?.value || '').trim(); }
 function selectedDate() { return $('datePicker').value || todayStr(); }
-
 function golfRunId(templateId, date) { return 'GOLF-' + templateId + '-' + date.replace(/-/g, ''); }
-
-function prevDate(dateStr) {
+function previousDate(dateStr) {
     const d = new Date(dateStr + 'T12:00:00');
     d.setDate(d.getDate() - 1);
     return d.toLocaleDateString('sv-SE');
 }
-
 function isDue(templateId, dateStr) {
     const d = new Date(dateStr + 'T12:00:00');
-    if (templateId === 'tuan')  return d.getDay() === 1;      // thứ Hai
-    if (templateId === 'thang') return d.getDate() === 1;     // ngày 1
-    return true;                                              // ca hàng ngày
+    if (templateId === 'tuan') return d.getDay() === 1;
+    if (templateId === 'thang') return d.getDate() === 1;
+    return true;
 }
-
+function templateItems(templateId) {
+    return templates
+        .filter(x => x.templateId === templateId)
+        .sort((a, b) => String(a.section).localeCompare(String(b.section), 'vi') || Number(a.order || 0) - Number(b.order || 0));
+}
+function templateName(templateId) {
+    const it = templates.find(x => x.templateId === templateId);
+    return it ? it.templateName : templateId;
+}
 function parseThreshold(spec) {
-    if (!spec) return null;
-    const m = String(spec).match(/^(min|max|range):([\d.,-]+)$/);
+    const m = String(spec || '').match(/^(min|max|range):([\d.,-]+)$/);
     if (!m) return null;
     if (m[1] === 'range') {
         const parts = m[2].split('-').map(Number);
@@ -291,25 +498,13 @@ function parseThreshold(spec) {
     }
     return { type: m[1], val: Number(m[2]) };
 }
-
 function violates(spec, value) {
     const t = parseThreshold(spec);
-    if (!t || value === '' || value == null || isNaN(Number(value))) return false;
+    if (!t || value === '' || value == null || Number.isNaN(Number(value))) return false;
     const v = Number(value);
     if (t.type === 'min') return v < t.val;
     if (t.type === 'max') return v > t.val;
     return v < t.lo || v > t.hi;
-}
-
-// ─── Templates ──────────────────────────────────────────────────────────────
-function templateItems(templateId) {
-    return templates
-        .filter(x => x.templateId === templateId)
-        .sort((a, b) => a.section === b.section ? a.order - b.order : (a.section < b.section ? -1 : 1));
-}
-function templateName(templateId) {
-    const it = templates.find(x => x.templateId === templateId);
-    return it ? it.templateName : templateId;
 }
 
 async function loadTemplates() {
@@ -320,137 +515,254 @@ async function loadTemplates() {
     }
     try {
         const res = await bdsApiFetch('getGolfTemplates');
-        if (res.status === 'success' && Array.isArray(res.items) && res.items.length) {
+        if (res.status === 'success' && Array.isArray(res.items)) {
             templates = res.items;
             localStorage.setItem(LS_TEMPLATES, JSON.stringify({ items: templates, at: Date.now() }));
             renderHome();
         }
     } catch (err) {
-        if (!templates.length) {
-            $('templateCards').innerHTML = '';
-            bdsShowError('templateCards', 'Không tải được mẫu checklist', loadTemplates);
-        }
+        if (!templates.length) $('templateCards').innerHTML = '<div class="panel empty-state">Không tải được mẫu checklist. Kiểm tra mạng rồi mở lại trang.</div>';
     }
 }
-
-// ─── Runs (server + local draft merge) ──────────────────────────────────────
-function localDraft(runId) {
-    try { return JSON.parse(localStorage.getItem(LS_RUN_PREFIX + runId)); } catch (_) { return null; }
-}
-function saveLocalDraft(run) {
-    localStorage.setItem(LS_RUN_PREFIX + run.runId, JSON.stringify(run));
-}
-
 async function loadRuns() {
+    $('homeSyncText').textContent = 'Đang đồng bộ...';
     const date = selectedDate();
     try {
-        const res = await bdsApiFetch('getGolfRuns', { from: prevDate(date), to: date });
+        const res = await bdsApiFetch('getGolfRuns', { from: previousDate(date), to: date });
         if (res.status === 'success') {
             serverRuns = {};
             (res.runs || []).forEach(r => {
                 try { r.itemsObj = r.items ? JSON.parse(r.items) : {}; } catch (_) { r.itemsObj = {}; }
                 serverRuns[r.runId] = r;
             });
+            $('homeSyncText').textContent = 'Đã cập nhật';
         }
-    } catch (_) { /* offline — dùng draft local */ }
+    } catch (_) {
+        $('homeSyncText').textContent = 'Đang offline';
+    }
     renderHome();
 }
-
-// Trạng thái hiển thị của 1 mẫu trong ngày: kết hợp server + draft local
+function localDraft(runId) {
+    try { return JSON.parse(localStorage.getItem(LS_RUN_PREFIX + runId)); } catch (_) { return null; }
+}
+function saveLocalDraft(run) { localStorage.setItem(LS_RUN_PREFIX + run.runId, JSON.stringify(run)); }
 function runStateFor(templateId, date) {
     const runId = golfRunId(templateId, date);
     const server = serverRuns[runId];
     const draft = localDraft(runId);
-    const items = (draft && draft.dirty) ? draft.items : (server ? server.itemsObj : (draft ? draft.items : {}));
+    const items = draft && draft.dirty ? draft.items : (server ? server.itemsObj : (draft ? draft.items : {}));
     const status = server ? server.status : (draft ? 'draft' : '');
-    const total = countTotal(templateId);
+    const total = templateItems(templateId).length;
     const done = countDone(templateId, items || {});
-    return { runId, status, items: items || {}, done, total, server, draft };
+    return { runId, server, draft, status, items: items || {}, total, done };
 }
-
-function countTotal(templateId) { return templateItems(templateId).length; }
+let collapsedSections = {};
 
 function itemIsDone(item, val) {
     if (!val) return false;
     if (item.inputType === 'check') return !!val.status;
+    if (item.inputType === 'timerange') {
+        const v = val.value || {};
+        return typeof v === 'object' && !!v.on && !!v.off;
+    }
     if (item.inputType === 'group') {
         const v = val.value || {};
-        return Object.values(v).some(x => x !== '' && x != null && !(typeof x === 'object' && !x.on && !x.off));
+        const fields = item.fields || [];
+        if (!fields.length) return false;
+        return fields.every(f => {
+            const fv = v[f.key];
+            if (fv == null || fv === '') return false;
+            if (f.type === 'timerange') {
+                return typeof fv === 'object' && !!fv.on && !!fv.off;
+            }
+            return true;
+        });
     }
     return val.value !== '' && val.value != null;
 }
 function countDone(templateId, items) {
     return templateItems(templateId).filter(it => itemIsDone(it, items[it.itemId])).length;
 }
-
-// ─── HOME render ────────────────────────────────────────────────────────────
-function statusChip(state) {
-    if (state.status === 'confirmed') return '<span class="status-chip chip-confirmed"><i class="bi bi-check-circle-fill"></i>Đã xác nhận</span>';
-    if (state.status === 'submitted') return '<span class="status-chip chip-submitted"><i class="bi bi-send-check"></i>Đã chốt — chờ ca sau</span>';
-    if (state.status === 'draft' || state.done > 0) return '<span class="status-chip chip-draft"><i class="bi bi-pencil"></i>Đang làm ' + state.done + '/' + state.total + '</span>';
-    return '<span class="status-chip chip-none">Chưa bắt đầu</span>';
+function hasViolation(item, val) {
+    if (!val) return false;
+    if (item.inputType === 'check') return val.status === 'ng';
+    if (item.inputType === 'number') return violates(item.threshold, val.value);
+    if (item.inputType === 'group') {
+        const v = val.value || {};
+        return (item.fields || []).some(f => f.type === 'number' && violates(f.threshold, v[f.key]));
+    }
+    return false;
 }
 
+function getPrevItemValue(itemId, subKey = null) {
+    if (!currentRun) return null;
+    const sortedRuns = Object.values(serverRuns)
+        .filter(r => r.templateId === currentRun.templateId && r.date < currentRun.date)
+        .sort((a, b) => b.date.localeCompare(a.date));
+
+    for (const r of sortedRuns) {
+        const items = r.itemsObj || {};
+        if (items[itemId]) {
+            const itemData = items[itemId];
+            if (subKey) {
+                const val = (itemData.value && typeof itemData.value === 'object') ? itemData.value[subKey] : null;
+                if (val != null && val !== '') return { value: val, date: r.date };
+            } else {
+                if (itemData.value != null && itemData.value !== '') return { value: itemData.value, date: r.date };
+            }
+        }
+    }
+    const prevRunId = golfRunId(currentRun.templateId, previousDate(currentRun.date));
+    const draft = localDraft(prevRunId);
+    if (draft && draft.items && draft.items[itemId]) {
+        const itemData = draft.items[itemId];
+        if (subKey) {
+            const val = (itemData.value && typeof itemData.value === 'object') ? itemData.value[subKey] : null;
+            if (val != null && val !== '') return { value: val, date: draft.date };
+        } else {
+            if (itemData.value != null && itemData.value !== '') return { value: itemData.value, date: draft.date };
+        }
+    }
+    return null;
+}
+
+function applyPrevValue(itemId, subKey = null) {
+    if (isLocked()) return;
+    const prev = getPrevItemValue(itemId, subKey);
+    if (!prev) return toast('Không tìm thấy số ca trước', 'warning');
+    if (subKey) {
+        setGroup(itemId, subKey, prev.value);
+    } else {
+        setValue(itemId, prev.value);
+    }
+    toast('Đã lấy số ca trước: ' + prev.value);
+}
+
+function stepCmValue(itemId, delta, subKey = null) {
+    if (isLocked()) return;
+    let cur = null;
+    if (subKey) {
+        const v = itemVal(itemId).value || {};
+        cur = Number(v[subKey]);
+    } else {
+        cur = Number(itemVal(itemId).value);
+    }
+    if (Number.isNaN(cur) || cur == null || cur === 0) {
+        const prev = getPrevItemValue(itemId, subKey);
+        cur = prev ? Number(prev.value) || 0 : 0;
+    }
+    const newVal = Math.max(0, Math.round((cur + delta) * 100) / 100);
+    if (subKey) {
+        setGroup(itemId, subKey, newVal);
+    } else {
+        setValue(itemId, newVal);
+    }
+}
+
+function quickFillAll() {
+    if (isLocked()) return;
+    const items = templateItems(currentRun.templateId);
+    let checkCount = 0;
+    let numCount = 0;
+
+    items.forEach(item => {
+        if (item.inputType === 'check') {
+            const v = itemVal(item.itemId);
+            if (!v.status) {
+                v.status = 'ok';
+                checkCount++;
+            }
+        } else if (item.inputType === 'number') {
+            const v = itemVal(item.itemId);
+            if (v.value === '' || v.value == null) {
+                const prev = getPrevItemValue(item.itemId);
+                if (prev) {
+                    v.value = prev.value;
+                    numCount++;
+                }
+            }
+        } else if (item.inputType === 'group') {
+            const v = itemVal(item.itemId);
+            if (!v.value || typeof v.value !== 'object') v.value = {};
+            (item.fields || []).forEach(f => {
+                if (f.type === 'number' && (v.value[f.key] === '' || v.value[f.key] == null)) {
+                    const prev = getPrevItemValue(item.itemId, f.key);
+                    if (prev) {
+                        v.value[f.key] = prev.value;
+                        numCount++;
+                    }
+                }
+            });
+        }
+    });
+
+    changed('', true);
+    toast(`Đã đánh Đạt (${checkCount}) & điền ${numCount} số ca trước!`);
+}
+
+function statusPill(state) {
+    if (state.status === 'confirmed') return '<span class="pill green"><i class="bi bi-patch-check"></i>Đã xác nhận</span>';
+    if (state.status === 'submitted') return '<span class="pill blue"><i class="bi bi-send-check"></i>Đã chốt</span>';
+    if (state.status === 'draft' || state.done > 0) return '<span class="pill amber"><i class="bi bi-pencil"></i>Đang làm</span>';
+    return '<span class="pill gray">Chưa làm</span>';
+}
 function renderHome() {
     if (!templates.length) return;
     const date = selectedDate();
-    const cards = TEMPLATE_ORDER.filter(t => templates.some(x => x.templateId === t)).map(tid => {
-        const due = isDue(tid, date);
-        const state = runStateFor(tid, date);
-        const dueBadge = tid === 'tuan' ? '<span class="status-chip chip-due">Thứ Hai</span>'
-                        : tid === 'thang' ? '<span class="status-chip chip-due">Ngày 1</span>' : '';
-        return `
-        <div class="card-custom tpl-card ${due ? '' : 'dimmed'}" onclick="openRun('${tid}')">
+    const html = TEMPLATE_ORDER.filter(id => templates.some(x => x.templateId === id)).map(id => {
+        const state = runStateFor(id, date);
+        const pct = state.total ? Math.round(state.done / state.total * 100) : 0;
+        const due = isDue(id, date);
+        const dueText = id === 'tuan' ? 'Làm vào thứ Hai' : id === 'thang' ? 'Làm ngày 1 hằng tháng' : 'Làm hằng ngày';
+        return `<button class="task-card" onclick="openRun('${id}')">
             <div class="d-flex align-items-center gap-3">
-                <div style="font-size:1.6rem;color:var(--bds-primary);"><i class="bi ${TEMPLATE_ICONS[tid] || 'bi-clipboard'}"></i></div>
+                <div class="task-icon"><i class="bi ${TEMPLATE_ICONS[id] || 'bi-clipboard-check'}"></i></div>
                 <div class="flex-grow-1">
-                    <div class="tpl-name">${esc(templateName(tid))}</div>
-                    <div class="tpl-meta">${state.total} hạng mục ${due ? '' : '· không bắt buộc hôm nay'}</div>
+                    <div class="task-title">${esc(templateName(id))}</div>
+                    <div class="task-meta">${state.done}/${state.total} mục · ${dueText}</div>
                 </div>
-                <i class="bi bi-chevron-right text-muted"></i>
+                <i class="bi bi-chevron-right text-secondary"></i>
             </div>
-            <div class="mt-2 d-flex gap-2 flex-wrap">${statusChip(state)} ${dueBadge}</div>
-        </div>`;
+            <div class="d-flex gap-2 flex-wrap mt-3">
+                ${statusPill(state)}
+                ${due ? '<span class="pill green">Đến lịch</span>' : '<span class="pill gray">Không bắt buộc hôm nay</span>'}
+            </div>
+            <div class="progress-line"><div style="width:${pct}%"></div></div>
+        </button>`;
     }).join('');
-    $('templateCards').innerHTML = cards;
+    $('templateCards').innerHTML = html || '<div class="panel empty-state">Chưa có mẫu checklist.</div>';
     renderPendingBanners();
 }
-
-// Bàn giao chờ xác nhận: run submitted của hôm nay hoặc hôm trước
 function renderPendingBanners() {
-    const me = getOperator();
-    const banners = Object.values(serverRuns)
-        .filter(r => r.status === 'submitted')
-        .map(r => `
-        <div class="pending-banner">
-            <i class="bi bi-bell-fill text-primary me-1"></i>
-            <b>${esc(templateName(r.templateId))}</b> ngày ${esc(r.date)} do <b>${esc(r.operator)}</b> đã chốt.
-            ${r.handoverNote ? '<div class="mt-1 text-secondary">📝 ' + esc(r.handoverNote) + '</div>' : ''}
-            <button class="btn btn-sm btn-primary rounded-pill mt-2 fw-bold" onclick="confirmHandover('${r.runId}')">
-                <i class="bi bi-check2-circle me-1"></i>Xác nhận nhận bàn giao
-            </button>
-        </div>`).join('');
-    $('pendingBanners').innerHTML = banners;
+    const pending = Object.values(serverRuns).filter(r => r.status === 'submitted');
+    $('pendingBanners').innerHTML = pending.map(r => `<div class="panel">
+        <div class="fw-bold"><i class="bi bi-bell-fill text-primary me-1"></i>Chờ nhận bàn giao: ${esc(templateName(r.templateId))}</div>
+        <div class="small text-secondary mt-1">Ngày ${esc(r.date)} · Người chốt: ${esc(r.operator || '—')}</div>
+        ${r.handoverNote ? `<div class="small mt-2">${esc(r.handoverNote)}</div>` : ''}
+        <button class="primary-btn w-100 mt-3" onclick="confirmHandover('${esc(r.runId)}')"><i class="bi bi-check2-circle"></i>Xác nhận đã nhận bàn giao</button>
+    </div>`).join('');
 }
-
 async function confirmHandover(runId) {
     const me = getOperator();
-    if (!me) { bdsShowToast('Nhập tên người thực hiện trước', 'warning'); $('operatorInput').focus(); return; }
+    if (!me) return toast('Nhập người thực hiện trước', 'warning');
     try {
         const res = await bdsApiPost('confirmGolfHandover', { payload: { runId, confirmedBy: me } });
         if (res.status === 'success') {
-            bdsShowToast('Đã xác nhận nhận bàn giao');
+            toast('Đã xác nhận bàn giao');
             await loadRuns();
+        } else {
+            toast(res.message || 'Không xác nhận được', 'danger');
         }
-    } catch (err) { bdsShowToast('Lỗi: ' + err.message, 'danger'); }
+    } catch (err) { toast('Lỗi xác nhận: ' + err.message, 'danger'); }
 }
 
-// ─── RUN view ───────────────────────────────────────────────────────────────
 function openRun(templateId) {
     const date = selectedDate();
     const state = runStateFor(templateId, date);
     currentRun = {
-        runId: state.runId, templateId, date,
+        runId: state.runId,
+        templateId,
+        date,
         status: state.status || 'draft',
         items: JSON.parse(JSON.stringify(state.items || {})),
         dirty: !!(state.draft && state.draft.dirty)
@@ -458,11 +770,10 @@ function openRun(templateId) {
     $('homeView').style.display = 'none';
     $('runView').style.display = '';
     $('runTitle').textContent = templateName(templateId);
-    $('runSub').textContent = 'Ngày ' + date + (getOperator() ? ' · ' + getOperator() : '');
-    renderRunBody();
+    $('runSub').textContent = date + (getOperator() ? ' · ' + getOperator() : '');
+    renderRun();
     window.scrollTo(0, 0);
 }
-
 function backHome() {
     flushSave();
     currentRun = null;
@@ -470,268 +781,351 @@ function backHome() {
     $('homeView').style.display = '';
     loadRuns();
 }
+function isLocked() { return currentRun && ['submitted', 'confirmed'].includes(currentRun.status); }
 
-function isLocked() {
-    return currentRun && (currentRun.status === 'submitted' || currentRun.status === 'confirmed');
-}
-
-function renderRunBody() {
+function renderRun() {
     const items = templateItems(currentRun.templateId);
-    let html = '', lastSection = '';
-    items.forEach(it => {
-        if (it.section !== lastSection) {
-            lastSection = it.section;
-            html += `<div class="section-title"><span>${esc(it.section)}.</span> ${esc(it.sectionTitle)}</div>`;
+
+    // Gom nhóm hạng mục theo section
+    const sections = [];
+    let curSec = null;
+    items.forEach((item, idx) => {
+        const secName = item.sectionTitle || item.section || 'Hạng mục';
+        if (!curSec || curSec.key !== item.section) {
+            curSec = { key: item.section, title: secName, items: [] };
+            sections.push(curSec);
         }
-        html += renderItem(it);
+        curSec.items.push({ item, index: idx + 1 });
     });
-    $('runBody').innerHTML = `<div class="${isLocked() ? 'readonly-lock' : ''}">${html}</div>`;
+
+    // Render thanh Mục lục dính (TOC bar)
+    let missingTotal = 0;
+    const tocHtml = sections.map((sec, secIdx) => {
+        const secDone = sec.items.every(x => itemIsDone(x.item, currentRun.items[x.item.itemId]));
+        const secWarn = sec.items.filter(x => hasViolation(x.item, currentRun.items[x.item.itemId])).length;
+        const secMissing = sec.items.filter(x => !itemIsDone(x.item, currentRun.items[x.item.itemId])).length;
+        missingTotal += secMissing;
+        return `<button class="toc-chip ${secDone ? 'done' : ''}" onclick="scrollToSection(${secIdx})">
+            ${esc(sec.title)}
+            ${secWarn ? `<span class="badge bg-danger">${secWarn}</span>` : ''}
+            ${secMissing ? `<span class="badge bg-secondary">${secMissing}</span>` : ''}
+        </button>`;
+    }).join('');
+
+    const nextBtnHtml = missingTotal > 0 ? `<button class="toc-next-btn" onclick="scrollToNextIncomplete()"><i class="bi bi-arrow-down-circle-fill me-1"></i>Chưa xong (${missingTotal})</button>` : '';
+
+    const tocEl = $('tocArea');
+    if (tocEl) {
+        tocEl.style.display = 'flex';
+        tocEl.innerHTML = nextBtnHtml + tocHtml;
+    }
+
+    // Render danh sách mục theo Section
+    let html = '';
+    sections.forEach((sec, secIdx) => {
+        const isCollapsed = !!collapsedSections[sec.key];
+        const secWarn = sec.items.filter(x => hasViolation(x.item, currentRun.items[x.item.itemId])).length;
+        const secMissing = sec.items.filter(x => !itemIsDone(x.item, currentRun.items[x.item.itemId])).length;
+
+        html += `<div class="section-heading section-heading-toggle" id="sec-head-${secIdx}" onclick="toggleSection('${esc(sec.key)}')">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi ${isCollapsed ? 'bi-chevron-right' : 'bi-chevron-down'} text-secondary"></i>
+                <h2>${esc(sec.title)}</h2>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+                ${secWarn ? `<span class="pill red py-1 px-2"><i class="bi bi-exclamation-triangle-fill me-1"></i>${secWarn}</span>` : ''}
+                ${secMissing ? `<span class="pill gray py-1 px-2">${secMissing} mục trống</span>` : '<span class="pill green py-1 px-2"><i class="bi bi-check-lg"></i>Đủ</span>'}
+            </div>
+        </div>`;
+
+        if (!isCollapsed) {
+            sec.items.forEach(x => {
+                html += renderItem(x.item, x.index);
+            });
+        }
+    });
+
+    $('runBody').innerHTML = `<div class="${isLocked() ? 'readonly' : ''}">${html}</div>`;
     renderSubmitArea();
     updateProgress();
+}
+
+function toggleSection(secKey) {
+    collapsedSections[secKey] = !collapsedSections[secKey];
+    renderRun();
+}
+
+function scrollToSection(secIdx) {
+    const el = $('sec-head-' + secIdx);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function scrollToNextIncomplete() {
+    const cards = document.querySelectorAll('#runBody .item-card');
+    for (const card of cards) {
+        if (!card.classList.contains('done')) {
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            card.classList.add('highlight-flash');
+            setTimeout(() => card.classList.remove('highlight-flash'), 1500);
+            return;
+        }
+    }
+    toast('Tất cả các mục đã hoàn thành!');
 }
 
 function itemVal(itemId) {
     if (!currentRun.items[itemId]) currentRun.items[itemId] = {};
     return currentRun.items[itemId];
 }
-
-function renderItem(it) {
-    const val = currentRun.items[it.itemId] || {};
-    const done = itemIsDone(it, val);
-    const warn = hasViolation(it, val);
-    let body = '';
-
-    if (it.inputType === 'check') {
+function renderItem(item, index) {
+    const val = currentRun.items[item.itemId] || {};
+    const done = itemIsDone(item, val);
+    const warn = hasViolation(item, val);
+    return `<article class="item-card ${done ? 'done' : ''} ${warn ? 'warn' : ''}" id="item-${esc(item.itemId)}">
+        <div class="item-head">
+            <div class="item-index">${index}</div>
+            <div class="flex-grow-1">
+                <div class="item-label">${esc(item.label)}</div>
+                ${item.note ? `<div class="item-note"><i class="bi bi-info-circle me-1"></i>${esc(item.note)}</div>` : ''}
+            </div>
+        </div>
+        ${renderInput(item, val)}
+        <textarea class="note-box" data-edit placeholder="Ghi chú / phát sinh nếu có..." oninput="setNote('${esc(item.itemId)}', this.value)">${esc(val.note || '')}</textarea>
+    </article>`;
+}
+function renderInput(item, val) {
+    if (item.inputType === 'check') {
         const s = val.status || '';
-        body = `<div class="check-btns">
-            <div class="check-btn ${s === 'ok' ? 'on-ok' : ''}" onclick="setCheck('${it.itemId}','ok')"><i class="bi bi-check-lg"></i> ĐẠT</div>
-            <div class="check-btn ${s === 'ng' ? 'on-ng' : ''}" onclick="setCheck('${it.itemId}','ng')"><i class="bi bi-x-lg"></i> KHÔNG ĐẠT</div>
-            <div class="check-btn ${s === 'skip' ? 'on-skip' : ''}" onclick="setCheck('${it.itemId}','skip')"><i class="bi bi-dash-lg"></i> BỎ QUA</div>
+        return `<div class="check-grid">
+            <button data-edit class="check-btn ok ${s === 'ok' ? 'active' : ''}" onclick="setCheck('${esc(item.itemId)}','ok')"><i class="bi bi-check-lg"></i> Đạt</button>
+            <button data-edit class="check-btn ng ${s === 'ng' ? 'active' : ''}" onclick="setCheck('${esc(item.itemId)}','ng')"><i class="bi bi-x-lg"></i> Lỗi</button>
+            <button data-edit class="check-btn skip ${s === 'skip' ? 'active' : ''}" onclick="setCheck('${esc(item.itemId)}','skip')"><i class="bi bi-dash-lg"></i> Bỏ qua</button>
         </div>`;
-    } else if (it.inputType === 'number') {
-        const bad = violates(it.threshold, val.value);
-        body = `<div class="num-wrap">
-            <input type="number" inputmode="decimal" step="any" class="num-input ${bad ? 'bad' : ''}" data-main="1"
-                value="${val.value != null ? esc(val.value) : ''}" placeholder="Nhập số đo..."
-                oninput="setValue('${it.itemId}', this.value)">
-            <span class="unit-tag">${esc(it.unit)}</span>
-        </div>
-        ${it.threshold ? '<div class="threshold-warn" style="display:' + (bad ? '' : 'none') + ';"><i class="bi bi-exclamation-triangle-fill"></i> Vượt ngưỡng cho phép (' + esc(it.threshold) + ')</div>' : ''}`;
-    } else if (it.inputType === 'time') {
-        body = `<div class="num-wrap"><input type="time" class="time-input" value="${esc(val.value || '')}"
-            onchange="setValue('${it.itemId}', this.value)"></div>`;
-    } else if (it.inputType === 'timerange') {
-        const v = val.value || {};
-        body = `<div class="sub-row">
-            <span class="sub-label text-success fw-bold">Giờ bật</span>
-            <input type="time" class="time-input" value="${esc(v.on || '')}" onchange="setRange('${it.itemId}','on',this.value)">
-            <span class="sub-label text-danger fw-bold" style="flex:none;">Giờ tắt</span>
-            <input type="time" class="time-input" value="${esc(v.off || '')}" onchange="setRange('${it.itemId}','off',this.value)">
-        </div>`;
-    } else if (it.inputType === 'text') {
-        body = `<textarea class="text-input" placeholder="Ghi nội dung..."
-            oninput="setValue('${it.itemId}', this.value)">${esc(val.value || '')}</textarea>`;
-    } else if (it.inputType === 'group') {
-        const v = val.value || {};
-        body = (it.fields || []).map(f => {
-            if (f.type === 'timerange') {
-                const fv = v[f.key] || {};
-                return `<div class="sub-row"><span class="sub-label">${esc(f.label)}</span>
-                    <input type="time" class="time-input" value="${esc(fv.on || '')}" onchange="setGroupRange('${it.itemId}','${f.key}','on',this.value)">
-                    <input type="time" class="time-input" value="${esc(fv.off || '')}" onchange="setGroupRange('${it.itemId}','${f.key}','off',this.value)">
-                </div>`;
-            }
-            if (f.type === 'time') {
-                return `<div class="sub-row"><span class="sub-label">${esc(f.label)}</span>
-                    <input type="time" class="time-input" value="${esc(v[f.key] || '')}" onchange="setGroup('${it.itemId}','${f.key}',this.value)">
-                </div>`;
-            }
-            if (f.type === 'number') {
-                const bad = violates(f.threshold, v[f.key]);
-                return `<div class="sub-row"><span class="sub-label">${esc(f.label)}</span>
-                    <input type="number" inputmode="decimal" step="any" class="num-input sub-num ${bad ? 'bad' : ''}" data-fkey="${esc(f.key)}"
-                        value="${v[f.key] != null ? esc(v[f.key]) : ''}" oninput="setGroup('${it.itemId}','${f.key}',this.value)">
-                    <span class="unit-tag">${esc(f.unit || '')}</span>
-                </div>`;
-            }
-            return `<div class="sub-row"><span class="sub-label">${esc(f.label)}</span>
-                <input type="text" class="num-input sub-num" style="width:140px;"
-                    value="${esc(v[f.key] || '')}" oninput="setGroup('${it.itemId}','${f.key}',this.value)">
+    }
+    if (item.inputType === 'number') {
+        const bad = violates(item.threshold, val.value);
+        const prev = getPrevItemValue(item.itemId);
+        const isCm = item.unit === 'cm';
+        
+        let fieldHtml = '';
+        if (isCm) {
+            fieldHtml = `<div class="stepper-row">
+                <button data-edit type="button" class="stepper-btn" onclick="stepCmValue('${esc(item.itemId)}', -1)">-</button>
+                <input data-edit class="soft-input ${bad ? 'bad' : ''} text-center fw-bold" type="number" step="any" inputmode="decimal" value="${esc(val.value || '')}" placeholder="Nhập số đo" oninput="setValue('${esc(item.itemId)}', this.value)">
+                <button data-edit type="button" class="stepper-btn" onclick="stepCmValue('${esc(item.itemId)}', 1)">+</button>
+                <span class="unit">${esc(item.unit)}</span>
             </div>`;
-        }).join('');
+        } else {
+            fieldHtml = `<div class="field-row">
+                <input data-edit class="soft-input ${bad ? 'bad' : ''}" type="number" step="any" inputmode="decimal" value="${esc(val.value || '')}" placeholder="Nhập số đo" oninput="setValue('${esc(item.itemId)}', this.value)">
+                <span class="unit">${esc(item.unit)}</span>
+            </div>`;
+        }
+
+        const prevBtn = (prev && (val.value === '' || val.value == null)) ?
+            `<button data-edit type="button" class="btn-prev-chip" onclick="applyPrevValue('${esc(item.itemId)}')"><i class="bi bi-clock-history me-1"></i>Lấy số ca trước (${esc(prev.value)} ${esc(item.unit)})</button>` : '';
+
+        return fieldHtml + prevBtn + (bad ? `<div class="warn-text"><i class="bi bi-exclamation-triangle-fill me-1"></i> Ngoài ngưỡng ${esc(item.threshold)}</div>` : '');
     }
-
-    return `
-    <div class="item-card ${done ? 'done' : ''} ${warn ? 'warn' : ''}" id="item-${it.itemId}">
-        <div class="d-flex justify-content-between align-items-start gap-2">
-            <div class="item-label">${esc(it.label)}</div>
-            <button class="note-toggle" onclick="toggleNote('${it.itemId}')" title="Ghi chú"><i class="bi bi-chat-text"></i></button>
-        </div>
-        ${it.note ? '<div class="item-note-hint"><i class="bi bi-info-circle me-1"></i>' + esc(it.note) + '</div>' : ''}
-        ${body}
-        <input type="text" class="note-input" id="note-${it.itemId}" placeholder="Ghi chú thêm..."
-            style="display:${val.note ? '' : 'none'};" value="${esc(val.note || '')}"
-            oninput="setNote('${it.itemId}', this.value)">
-    </div>`;
-}
-
-function hasViolation(it, val) {
-    if (!val) return false;
-    if (it.inputType === 'check') return val.status === 'ng';
-    if (it.inputType === 'number') return violates(it.threshold, val.value);
-    if (it.inputType === 'group') {
+    if (item.inputType === 'time') {
+        return `<div class="field-row"><input data-edit class="soft-input" type="time" value="${esc(val.value || '')}" onchange="setValue('${esc(item.itemId)}', this.value)"></div>`;
+    }
+    if (item.inputType === 'timerange') {
         const v = val.value || {};
-        return (it.fields || []).some(f => f.type === 'number' && violates(f.threshold, v[f.key]));
+        return `<div class="row g-2 mt-1">
+            <div class="col-6"><label class="mini-label">Giờ bật</label><input data-edit class="soft-input" type="time" value="${esc(v.on || '')}" onchange="setRange('${esc(item.itemId)}','on',this.value)"></div>
+            <div class="col-6"><label class="mini-label">Giờ tắt</label><input data-edit class="soft-input" type="time" value="${esc(v.off || '')}" onchange="setRange('${esc(item.itemId)}','off',this.value)"></div>
+        </div>`;
     }
-    return false;
+    if (item.inputType === 'group') return renderGroupInput(item, val);
+    return `<textarea data-edit class="soft-textarea mt-2" rows="3" placeholder="Nhập nội dung..." oninput="setValue('${esc(item.itemId)}', this.value)">${esc(val.value || '')}</textarea>`;
+}
+function renderGroupInput(item, val) {
+    const v = val.value || {};
+    return `<div class="mt-2">${(item.fields || []).map(f => {
+        if (f.type === 'timerange') {
+            const fv = v[f.key] || {};
+            return `<div class="row g-2 mt-1"><div class="col-12 mini-label">${esc(f.label)}</div>
+                <div class="col-6"><input data-edit class="soft-input" type="time" value="${esc(fv.on || '')}" onchange="setGroupRange('${esc(item.itemId)}','${esc(f.key)}','on',this.value)"></div>
+                <div class="col-6"><input data-edit class="soft-input" type="time" value="${esc(fv.off || '')}" onchange="setGroupRange('${esc(item.itemId)}','${esc(f.key)}','off',this.value)"></div>
+            </div>`;
+        }
+        if (f.type === 'time') return `<label class="mini-label mt-2">${esc(f.label)}</label><input data-edit class="soft-input" type="time" value="${esc(v[f.key] || '')}" onchange="setGroup('${esc(item.itemId)}','${esc(f.key)}',this.value)">`;
+        if (f.type === 'number') {
+            const bad = violates(f.threshold, v[f.key]);
+            const prev = getPrevItemValue(item.itemId, f.key);
+            const isCm = f.unit === 'cm';
+
+            let fieldHtml = '';
+            if (isCm) {
+                fieldHtml = `<div class="stepper-row">
+                    <button data-edit type="button" class="stepper-btn" onclick="stepCmValue('${esc(item.itemId)}', -1, '${esc(f.key)}')">-</button>
+                    <input data-edit class="soft-input ${bad ? 'bad' : ''} text-center fw-bold" type="number" step="any" inputmode="decimal" value="${esc(v[f.key] || '')}" oninput="setGroup('${esc(item.itemId)}','${esc(f.key)}',this.value)">
+                    <button data-edit type="button" class="stepper-btn" onclick="stepCmValue('${esc(item.itemId)}', 1, '${esc(f.key)}')">+</button>
+                    <span class="unit">${esc(f.unit || '')}</span>
+                </div>`;
+            } else {
+                fieldHtml = `<div class="field-row">
+                    <input data-edit class="soft-input ${bad ? 'bad' : ''}" type="number" step="any" inputmode="decimal" value="${esc(v[f.key] || '')}" oninput="setGroup('${esc(item.itemId)}','${esc(f.key)}',this.value)">
+                    <span class="unit">${esc(f.unit || '')}</span>
+                </div>`;
+            }
+
+            const prevBtn = (prev && (v[f.key] === '' || v[f.key] == null)) ?
+                `<button data-edit type="button" class="btn-prev-chip" onclick="applyPrevValue('${esc(item.itemId)}', '${esc(f.key)}')"><i class="bi bi-clock-history me-1"></i>Lấy số ca trước (${esc(prev.value)} ${esc(f.unit || '')})</button>` : '';
+
+            return `<label class="mini-label mt-2">${esc(f.label)}</label>${fieldHtml}${prevBtn}${bad ? `<div class="warn-text">Ngoài ngưỡng ${esc(f.threshold)}</div>` : ''}`;
+        }
+        return `<label class="mini-label mt-2">${esc(f.label)}</label><input data-edit class="soft-input" value="${esc(v[f.key] || '')}" oninput="setGroup('${esc(item.itemId)}','${esc(f.key)}',this.value)">`;
+    }).join('')}</div>`;
 }
 
-// ─── Input handlers ─────────────────────────────────────────────────────────
-function afterChange(itemId) {
+function changed(itemId, rerender = false) {
+    if (isLocked()) return;
     currentRun.dirty = true;
     saveLocalDraft(currentRun);
-    refreshItemCard(itemId);
-    updateProgress();
-    scheduleSync();
+    setSyncState('pending');
+    if (rerender) renderRun(); else updateProgress();
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => flushSave(false), 1800);
 }
 function setCheck(itemId, status) {
-    if (isLocked()) return;
     const v = itemVal(itemId);
-    v.status = (v.status === status) ? '' : status;
-    afterChange(itemId);
+    v.status = v.status === status ? '' : status;
+    changed(itemId, true);
 }
-function setValue(itemId, value) { itemVal(itemId).value = value; afterChange(itemId); }
+function setValue(itemId, value) { itemVal(itemId).value = value; changed(itemId, false); }
 function setRange(itemId, key, value) {
     const v = itemVal(itemId);
-    if (typeof v.value !== 'object' || v.value == null) v.value = {};
+    if (!v.value || typeof v.value !== 'object') v.value = {};
     v.value[key] = value;
-    afterChange(itemId);
+    changed(itemId, false);
 }
-function setGroup(itemId, fieldKey, value) {
+function setGroup(itemId, key, value) {
     const v = itemVal(itemId);
-    if (typeof v.value !== 'object' || v.value == null) v.value = {};
-    v.value[fieldKey] = value;
-    afterChange(itemId);
+    if (!v.value || typeof v.value !== 'object') v.value = {};
+    v.value[key] = value;
+    changed(itemId, false);
 }
-function setGroupRange(itemId, fieldKey, sub, value) {
+function setGroupRange(itemId, key, sub, value) {
     const v = itemVal(itemId);
-    if (typeof v.value !== 'object' || v.value == null) v.value = {};
-    if (typeof v.value[fieldKey] !== 'object' || v.value[fieldKey] == null) v.value[fieldKey] = {};
-    v.value[fieldKey][sub] = value;
-    afterChange(itemId);
+    if (!v.value || typeof v.value !== 'object') v.value = {};
+    if (!v.value[key] || typeof v.value[key] !== 'object') v.value[key] = {};
+    v.value[key][sub] = value;
+    changed(itemId, false);
 }
-function setNote(itemId, value) { itemVal(itemId).note = value; currentRun.dirty = true; saveLocalDraft(currentRun); scheduleSync(); }
-function toggleNote(itemId) {
-    const el = $('note-' + itemId);
-    el.style.display = el.style.display === 'none' ? '' : 'none';
-    if (el.style.display === '') el.focus();
+function setNote(itemId, value) { itemVal(itemId).note = value; changed(itemId, false); }
+function markAllOk() {
+    if (isLocked()) return;
+    templateItems(currentRun.templateId).filter(x => x.inputType === 'check').forEach(item => itemVal(item.itemId).status = 'ok');
+    changed('', true);
+    toast('Đã đánh Đạt các mục kiểm tra');
 }
-
-// Cập nhật viền card + số đo đỏ mà không re-render toàn trang (giữ focus input)
-function refreshItemCard(itemId) {
-    const it = templates.find(x => x.templateId === currentRun.templateId && x.itemId === itemId);
-    const card = $('item-' + itemId);
-    if (!it || !card) return;
-    const val = currentRun.items[itemId];
-    card.classList.toggle('done', itemIsDone(it, val));
-    card.classList.toggle('warn', hasViolation(it, val));
-    if (it.inputType === 'check') {
-        const s = (val && val.status) || '';
-        card.querySelectorAll('.check-btn').forEach((btn, i) => {
-            btn.classList.toggle('on-ok',   i === 0 && s === 'ok');
-            btn.classList.toggle('on-ng',   i === 1 && s === 'ng');
-            btn.classList.toggle('on-skip', i === 2 && s === 'skip');
-        });
-    } else if (it.inputType === 'number') {
-        const bad = violates(it.threshold, val && val.value);
-        const inp = card.querySelector('.num-input[data-main]');
-        if (inp) inp.classList.toggle('bad', bad);
-        const warnEl = card.querySelector('.threshold-warn');
-        if (warnEl) warnEl.style.display = bad ? '' : 'none';
-    } else if (it.inputType === 'group') {
-        const v = (val && val.value) || {};
-        (it.fields || []).forEach(f => {
-            if (f.type !== 'number' || !f.threshold) return;
-            const inp = card.querySelector('.num-input[data-fkey="' + f.key + '"]');
-            if (inp) inp.classList.toggle('bad', violates(f.threshold, v[f.key]));
-        });
-    }
-}
-
 function updateProgress() {
-    const total = countTotal(currentRun.templateId);
+    if (!currentRun) return;
+    const total = templateItems(currentRun.templateId).length;
     const done = countDone(currentRun.templateId, currentRun.items);
-    $('progressFill').style.width = total ? (done / total * 100) + '%' : '0%';
-    $('progressText').textContent = done + '/' + total + ' mục';
-    const chips = { draft: '', submitted: '<span class="status-chip chip-submitted">Đã chốt ca</span>', confirmed: '<span class="status-chip chip-confirmed">Đã xác nhận</span>' };
-    $('runStatusChip').innerHTML = chips[currentRun.status] || '';
+    $('progressFill').style.width = total ? `${done / total * 100}%` : '0%';
+    $('progressText').textContent = `${done}/${total} mục`;
+    const pill = currentRun.status === 'confirmed' ? '<span class="pill green">Đã xác nhận</span>' :
+        currentRun.status === 'submitted' ? '<span class="pill blue">Đã chốt</span>' :
+        currentRun.dirty ? '<span class="pill amber">Có thay đổi</span>' : '<span class="pill gray">Nháp</span>';
+    $('statusPill').outerHTML = `<span id="statusPill">${pill}</span>`;
 }
-
-function renderSubmitArea() {
-    if (currentRun.status === 'confirmed') {
-        $('submitArea').innerHTML = '<div class="pending-banner" style="background:#d1fae5;border-color:#a7f3d0;"><i class="bi bi-patch-check-fill text-success me-1"></i>Đã hoàn tất và được xác nhận bàn giao.</div>';
-    } else if (currentRun.status === 'submitted') {
-        $('submitArea').innerHTML = '<div class="pending-banner"><i class="bi bi-send-check text-primary me-1"></i>Đã chốt ca — chờ ca sau xác nhận nhận bàn giao.</div>';
-    } else {
-        $('submitArea').innerHTML = `<button class="btn-submit-glow" onclick="openSubmitModal()"><i class="bi bi-clipboard-check-fill"></i>CHỐT CA & BÀN GIAO</button>`;
-    }
+function setSyncState(state) {
+    $('syncPill').className = 'pill ' + (state === 'pending' ? 'amber' : 'green');
+    $('syncPill').innerHTML = state === 'pending' ? '<i class="bi bi-cloud-arrow-up"></i>Chờ lưu' : '<i class="bi bi-cloud-check"></i>Đã lưu';
 }
-
-// ─── Autosave / sync ────────────────────────────────────────────────────────
-function scheduleSync() {
-    setSyncDot('pending');
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(flushSave, 2500);
-}
-
-async function flushSave() {
+async function flushSave(showToast) {
     clearTimeout(saveTimer);
     if (!currentRun || !currentRun.dirty || isLocked()) return;
     const op = getOperator();
     try {
         const res = await bdsApiPost('saveGolfRun', { payload: {
-            runId: currentRun.runId, date: currentRun.date, templateId: currentRun.templateId,
-            operator: op, updatedBy: op, items: JSON.stringify(currentRun.items)
+            runId: currentRun.runId,
+            date: currentRun.date,
+            templateId: currentRun.templateId,
+            operator: op,
+            updatedBy: op,
+            items: JSON.stringify(currentRun.items)
         }});
         if (res.status === 'success') {
             currentRun.dirty = false;
             saveLocalDraft(currentRun);
-            setSyncDot('ok');
-        }
+            setSyncState('ok');
+            if (showToast) toast('Đã lưu nháp');
+        } else if (showToast) toast(res.message || 'Chưa lưu được', 'danger');
     } catch (_) {
-        setSyncDot('pending'); // offline — draft đã nằm trong localStorage, thử lại sau
+        setSyncState('pending');
+        if (showToast) toast('Đã lưu trên máy, sẽ đồng bộ khi có mạng', 'warning');
     }
 }
 
-function setSyncDot(state) {
-    ['syncIndicator', 'runSyncIndicator'].forEach(id => {
-        const el = $(id);
-        if (!el) return;
-        el.className = 'sync-dot ' + (state === 'ok' ? 'sync-ok' : 'sync-pending');
-        el.title = state === 'ok' ? 'Đã đồng bộ' : 'Đang chờ đồng bộ...';
-    });
+function renderSubmitArea() {
+    if (currentRun.status === 'confirmed') {
+        $('quickActions').style.display = 'none';
+        $('submitArea').innerHTML = '<div class="panel"><span class="pill green"><i class="bi bi-patch-check"></i>Checklist đã hoàn tất và được xác nhận bàn giao.</span></div>';
+    } else if (currentRun.status === 'submitted') {
+        $('quickActions').style.display = 'none';
+        $('submitArea').innerHTML = '<div class="panel"><span class="pill blue"><i class="bi bi-send-check"></i>Đã chốt ca, chờ ca sau xác nhận nhận bàn giao.</span></div>';
+    } else {
+        $('quickActions').style.display = '';
+        $('submitArea').innerHTML = '<button class="primary-btn w-100 mt-2" onclick="openSubmitModal()"><i class="bi bi-send-check-fill"></i>Chốt ca & bàn giao</button>';
+    }
+}
+function onConfirmIncompleteChange() {
+    const chk = $('confirmIncompleteCheck');
+    const btn = $('btnConfirmSubmit');
+    if (btn) btn.disabled = !(chk && chk.checked);
 }
 
-window.addEventListener('online', flushSave);
-
-// ─── Submit / chốt ca ───────────────────────────────────────────────────────
 function openSubmitModal() {
     const op = getOperator();
-    if (!op) { bdsShowToast('Nhập tên người thực hiện ở màn hình chính trước', 'warning'); return; }
-    const total = countTotal(currentRun.templateId);
+    if (!op) return toast('Nhập người thực hiện trước khi chốt ca', 'warning');
+    const items = templateItems(currentRun.templateId);
+    const total = items.length;
     const done = countDone(currentRun.templateId, currentRun.items);
-    const ngItems = templateItems(currentRun.templateId)
-        .filter(it => hasViolation(it, currentRun.items[it.itemId]))
-        .map(it => it.section + '.' + it.label);
-    $('submitSummary').innerHTML =
-        `<div class="fw-bold">Hoàn thành: ${done}/${total} mục ${done < total ? '<span class="text-warning">(còn thiếu ' + (total - done) + ')</span>' : '✅'}</div>` +
-        (ngItems.length ? '<div class="text-danger mt-1"><b>⚠ Không đạt / vượt ngưỡng:</b><br>' + ngItems.map(esc).join('<br>') + '</div>' : '');
-    // Gợi ý nội dung bàn giao từ mục text "bàn giao" nếu có
-    const hoItem = templateItems(currentRun.templateId).find(it => it.inputType === 'text' && /bàn giao/i.test(it.label));
-    if (hoItem) {
-        const v = currentRun.items[hoItem.itemId];
-        if (v && v.value && !$('handoverNoteInput').value) $('handoverNoteInput').value = v.value;
+    const warnings = items.filter(it => hasViolation(it, currentRun.items[it.itemId]));
+    const incomplete = items.filter(it => !itemIsDone(it, currentRun.items[it.itemId]));
+
+    let summaryHtml = `<div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="fw-bold">Tiến độ ca:</span>
+        <span class="pill ${done === total ? 'green' : 'amber'}">${done}/${total} mục đã xong</span>
+    </div>`;
+
+    if (warnings.length > 0) {
+        summaryHtml += `<div class="alert alert-warning py-2 px-3 mb-2 small">
+            <div class="fw-bold"><i class="bi bi-exclamation-triangle-fill me-1"></i>Có ${warnings.length} mục báo Lỗi / ngoài ngưỡng:</div>
+            <ul class="mb-0 ps-3 mt-1">${warnings.map(it => `<li>${esc(it.label)}</li>`).join('')}</ul>
+        </div>`;
     }
+
+    if (incomplete.length > 0) {
+        summaryHtml += `<div class="alert alert-danger py-2 px-3 mb-2 small">
+            <div class="fw-bold"><i class="bi bi-x-circle-fill me-1"></i>Còn ${incomplete.length} mục chưa hoàn thành:</div>
+            <ul class="mb-0 ps-3 mt-1">${incomplete.map(it => `<li>${esc(it.label)}</li>`).join('')}</ul>
+        </div>
+        <div class="form-check mt-3 bg-light p-2 rounded border">
+            <input class="form-check-input ms-1 me-2" type="checkbox" id="confirmIncompleteCheck" onchange="onConfirmIncompleteChange()">
+            <label class="form-check-label fw-bold text-danger small" for="confirmIncompleteCheck">Tôi xác nhận vẫn muốn chốt ca dù còn ${incomplete.length} mục chưa xong</label>
+        </div>`;
+    }
+
+    $('submitSummary').innerHTML = summaryHtml;
+
+    // Thống nhất 1 nguồn bàn giao: đọc từ mục text nếu có
+    const textItem = items.find(it => it.inputType === 'text' && /bàn giao|phát sinh|ghi chú/i.test(it.label));
+    if (textItem && currentRun.items[textItem.itemId]?.value && !$('handoverNoteInput').value) {
+        $('handoverNoteInput').value = currentRun.items[textItem.itemId].value;
+    }
+
+    const btn = $('btnConfirmSubmit');
+    if (incomplete.length > 0) {
+        btn.disabled = true;
+    } else {
+        btn.disabled = false;
+    }
+
     new bootstrap.Modal($('submitModal')).show();
 }
 
@@ -739,31 +1133,43 @@ async function doSubmitRun() {
     const btn = $('btnConfirmSubmit');
     btn.disabled = true;
     const op = getOperator();
+    const handoverNoteVal = $('handoverNoteInput').value.trim();
+
+    // Thống nhất 1 nguồn bàn giao: đồng bộ ngược lại vào mục text trong checklist
+    const textItem = templateItems(currentRun.templateId).find(it => it.inputType === 'text' && /bàn giao|phát sinh|ghi chú/i.test(it.label));
+    if (textItem && handoverNoteVal) {
+        itemVal(textItem.itemId).value = handoverNoteVal;
+    }
+
     try {
-        await flushSave();
+        await flushSave(false);
         const res = await bdsApiPost('submitGolfRun', { payload: {
-            runId: currentRun.runId, date: currentRun.date, templateId: currentRun.templateId,
-            operator: op, updatedBy: op,
+            runId: currentRun.runId,
+            date: currentRun.date,
+            templateId: currentRun.templateId,
+            operator: op,
+            updatedBy: op,
             items: JSON.stringify(currentRun.items),
-            handoverNote: $('handoverNoteInput').value.trim(),
+            handoverNote: handoverNoteVal,
             handoverTo: $('handoverToInput').value.trim()
         }});
         if (res.status === 'success') {
             currentRun.status = 'submitted';
             currentRun.dirty = false;
             saveLocalDraft(currentRun);
-            bootstrap.Modal.getInstance($('submitModal')).hide();
-            bdsShowToast('Đã chốt ca thành công');
-            renderRunBody();
+            bootstrap.Modal.getInstance($('submitModal'))?.hide();
+            toast('Đã chốt ca');
+            renderRun();
+        } else {
+            toast(res.message || 'Không chốt được', 'danger');
         }
     } catch (err) {
-        bdsShowToast('Lỗi chốt ca: ' + err.message, 'danger');
+        toast('Lỗi chốt ca: ' + err.message, 'danger');
     } finally {
         btn.disabled = false;
     }
 }
 
-// ─── Home nav ───────────────────────────────────────────────────────────────
 function onDateChange() { loadRuns(); }
 function shiftDate(days) {
     const d = new Date(selectedDate() + 'T12:00:00');
@@ -771,16 +1177,17 @@ function shiftDate(days) {
     $('datePicker').value = d.toLocaleDateString('sv-SE');
     loadRuns();
 }
-
-// ─── Init ───────────────────────────────────────────────────────────────────
+window.addEventListener('online', () => flushSave(false));
 document.addEventListener('DOMContentLoaded', () => {
     $('datePicker').value = todayStr();
     $('operatorInput').value = getOperator();
-    $('operatorInput').addEventListener('input', e => BD_SSO.setOperatorName(e.target.value.trim()));
+    $('operatorInput').addEventListener('input', e => {
+        if (window.BD_SSO) BD_SSO.setOperatorName(e.target.value.trim());
+    });
     loadTemplates();
     loadRuns();
 });
 </script>
-<script src="../js/bottomnav.js" data-root="../"></script>
+<script src="../js/bottomnav.js?v=20260721-menuplus" data-root="../"></script>
 </body>
 </html>
