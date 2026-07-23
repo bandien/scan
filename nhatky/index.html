@@ -128,6 +128,17 @@
     .day-log-summary { margin: 0 16px 10px; border: 2px solid var(--line); border-radius: 10px; background: #f8fbfa; color: var(--muted); padding: 8px 10px; display: none; align-items: center; gap: 8px; flex-wrap: wrap; font-size: .9rem; font-weight: 600; }
     .day-log-summary strong { color: var(--ink); }
 
+    /* ===== Tóm tắt vận hành Sân Golf (đọc từ checklist ca) ===== */
+    .golf-status-card { margin: 0 16px 10px; display: none; }
+    .golf-status-card .gsc-head { display: flex; align-items: center; gap: 6px; font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: 6px; }
+    .golf-status-row { border: 2px solid var(--line); border-radius: 10px; background: #f8fbfa; padding: 8px 10px; margin-bottom: 6px; font-size: .86rem; }
+    .golf-status-row:last-child { margin-bottom: 0; }
+    .golf-status-row .gsr-title { font-weight: 800; color: var(--ink); }
+    .golf-status-row .gsr-meta { color: var(--muted); font-weight: 600; }
+    .golf-status-row.has-issue { border-color: var(--danger); background: #fdeceb; }
+    .golf-status-row.has-issue .gsr-title { color: var(--danger-dark); }
+    .golf-status-row .gsr-note { margin-top: 4px; color: var(--ink); }
+
     /* ===== Danh sách việc ===== */
     .section-label { font-size: .82rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 14px 0 8px; }
     .a11y-list { background: transparent; border: none; }
@@ -2394,6 +2405,7 @@
         </div>
         <div class="list-scroll">
           <div class="day-log-summary" id="dayLogSummary"></div>
+          <div class="golf-status-card" id="golfStatusCard"></div>
           <div id="peopleBody"></div>
         </div>
         <div class="action-bar task-list-actionbar">
@@ -3132,6 +3144,7 @@
       loadSettings();
       loadStaff();
       loadLogs();
+      loadGolfStatus();
       bindEvents();
       let startScreen = "people";
       const hash = window.location.hash.substring(1);
@@ -4246,6 +4259,35 @@
         <div class="vikunja-progress-note ${missing ? "attention" : ""}">
           ${missing ? `Còn ${missing} việc chưa ghi đủ nhật ký.` : "Đã ghi đủ nhật ký cho mọi việc trong ngày ✓"}
         </div>
+      `;
+    }
+
+    // Tóm tắt tình hình vận hành Sân Golf lấy từ checklist ca (checklist.html) —
+    // để ca hành chính (không theo checklist cố định) vẫn nắm được sự cố/bàn giao
+    // đang tồn đọng. Gọi 1 lần lúc khởi động; lỗi thì bỏ qua im lặng, không chặn
+    // luồng chính của Nhật Ký.
+    async function loadGolfStatus() {
+      try {
+        const res = await bdsApiFetch("getGolfStatus");
+        if (res && res.status === "success") renderGolfStatusCard(res.shifts || []);
+      } catch (_) { /* im lặng — tính năng phụ, không ảnh hưởng luồng chính */ }
+    }
+
+    function renderGolfStatusCard(shifts) {
+      const el = document.getElementById("golfStatusCard");
+      if (!el) return;
+      const active = (shifts || []).filter(s => s.date);
+      if (!active.length) { el.style.display = "none"; el.innerHTML = ""; return; }
+      el.style.display = "block";
+      el.innerHTML = `
+        <div class="gsc-head"><i class="bi bi-clipboard2-pulse"></i> Tình hình vận hành Sân Golf</div>
+        ${active.map(s => `
+          <div class="golf-status-row ${s.issueCount > 0 ? "has-issue" : ""}">
+            <span class="gsr-title">${escapeHtml(s.templateName)}</span>
+            <span class="gsr-meta"> · ${escapeHtml(s.date)} · ${escapeHtml(s.operator || "—")}${s.issueCount > 0 ? ` · <b>${s.issueCount} mục không đạt</b>` : ""}</span>
+            ${s.handoverNote ? `<div class="gsr-note"><i class="bi bi-chat-left-text me-1"></i>${escapeHtml(s.handoverNote)}</div>` : ""}
+          </div>
+        `).join("")}
       `;
     }
 

@@ -10,9 +10,14 @@
 // - POST action=submitGolfRun  {payload}      → chốt ca + bàn giao
 // - POST action=confirmGolfHandover {payload} → ca sau xác nhận nhận bàn giao
 // - POST action=seedGolfTemplates {force}     → nạp lại mẫu từ seed trong code
+// - POST action=upsertGolfTemplateItem {..}   → thêm mới/sửa 1 hạng mục mẫu (Quản lý)
+// - POST action=deleteGolfTemplateItem {templateId,itemId} → xóa 1 hạng mục mẫu (Quản lý)
+// - GET  action=getGolfStatus                 → tóm tắt run mới nhất/mẫu (dùng ở trang nhatky)
 //
 // Mẫu lưu ở sheet GolfChecklistTemplates — sửa hạng mục chỉ cần sửa sheet,
 // không cần deploy lại. Seed trong code chỉ dùng lần đầu hoặc khi force.
+// Lưu ý: ItemID (A01, B01...) chỉ duy nhất TRONG PHẠM VI 1 templateId — luôn
+// xác định 1 hạng mục bằng cặp (templateId, itemId), không dùng itemId riêng lẻ.
 
 // ---------- SEED 4 MẪU (chuyển từ Excel, 1 phần tử = 1 dòng giấy) ----------
 // InputType: check | number | time | timerange | text | group
@@ -280,6 +285,127 @@ function handleGetGolfTemplates(e) {
       };
     });
   return contentResponse({ status: "success", items: items });
+}
+
+// Tìm dòng sheet của 1 hạng mục theo cặp (templateId, itemId) — ItemID lặp lại
+// giữa các template (mỗi mẫu đều có A01, A02...) nên PHẢI khớp cả hai cột.
+function findGolfTemplateItemRow_(sheet, templateId, itemId) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return 0;
+  const rows = sheet.getRange(2, 1, lastRow - 1, 5).getValues(); // TemplateID, TemplateName, Section, SectionTitle, ItemID
+  for (let i = 0; i < rows.length; i++) {
+    if (String(rows[i][0]).trim() === templateId && String(rows[i][4]).trim() === itemId) return i + 2;
+  }
+  return 0;
+}
+
+const GOLF_TEMPLATE_NAMES = {
+  ca_sang: "Ca Sáng (5h00 – 13h00)",
+  ca_toi:  "Ca Tối (13h00 – 21h00)",
+  tuan:    "Kiểm Tra Tuần (thứ Hai)",
+  thang:   "Kiểm Tra Tháng (ngày 1)"
+};
+
+// POST action=upsertGolfTemplateItem — payload {templateId, itemId, section, sectionTitle,
+//   label, inputType, unit, threshold, note, fields, order, active, user}
+// itemId rỗng → tạo hạng mục mới (ID tự sinh); itemId khớp dòng có sẵn → cập nhật tại chỗ.
+function handleUpsertGolfTemplateItem(params) {
+  const templateId = String(params.templateId || "").trim();
+  const label = String(params.label || "").trim();
+  if (!templateId) return contentResponse({ status: "error", message: "Thiếu mã mẫu (templateId)" });
+  if (!label) return contentResponse({ status: "error", message: "Thiếu tên hạng mục" });
+
+  const sheet = ensureGolfTemplatesSheet_();
+  const templateName = String(params.templateName || GOLF_TEMPLATE_NAMES[templateId] || templateId);
+  const section = String(params.section || "A").trim();
+  const sectionTitle = String(params.sectionTitle || "");
+  const inputType = String(params.inputType || "check");
+  const unit = String(params.unit || "");
+  const threshold = String(params.threshold || "");
+  const note = String(params.note || "");
+  const fieldsJson = params.fields
+    ? (typeof params.fields === "string" ? params.fields : JSON.stringify(params.fields))
+    : "";
+  const active = params.active === false ? "FALSE" : "TRUE";
+
+  let itemId = String(params.itemId || "").trim();
+  const rowIndex = itemId ? findGolfTemplateItemRow_(sheet, templateId, itemId) : 0;
+
+  if (rowIndex > 0) {
+    const order = Number(params.order) || sheet.getRange(rowIndex, 6).getValue();
+    sheet.getRange(rowIndex, 2, 1, GOLF_TEMPLATE_HEADERS.length - 1).setValues([[
+      templateName, section, sectionTitle, itemId, order,
+      label, inputType, fieldsJson, unit, threshold, note, active
+    ]]);
+    writeAuditLog(params.user || "System", "upsertGolfTemplateItem", templateId + "/" + itemId, "Updated: " + label);
+    return contentResponse({ status: "success", message: "Đã cập nhật hạng mục", itemId: itemId });
+  }
+
+  if (!itemId) itemId = "CUSTOM-" + Date.now();
+  const order = Number(params.order) || sheet.getLastRow();
+  sheet.appendRow([
+    templateId, templateName, section, sectionTitle, itemId, order,
+    label, inputType, fieldsJson, unit, threshold, note, "TRUE"
+  ]);
+  writeAuditLog(params.user || "System", "upsertGolfTemplateItem", templateId + "/" + itemId, "Created: " + label);
+  return contentResponse({ status: "success", message: "Đã thêm hạng mục", itemId: itemId });
+}
+
+// POST action=deleteGolfTemplateItem — payload {templateId, itemId, user}
+function handleDeleteGolfTemplateItem(params) {
+  const templateId = String(params.templateId || "").trim();
+  const itemId = String(params.itemId || "").trim();
+  if (!templateId || !itemId) return contentResponse({ status: "error", message: "Thiếu templateId hoặc itemId" });
+
+  const sheet = ensureGolfTemplatesSheet_();
+  const rowIndex = findGolfTemplateItemRow_(sheet, templateId, itemId);
+  if (rowIndex < 2) return contentResponse({ status: "error", message: "Không tìm thấy hạng mục: " + itemId });
+
+  sheet.deleteRow(rowIndex);
+  writeAuditLog(params.user || "System", "deleteGolfTemplateItem", templateId + "/" + itemId, "Deleted");
+  return contentResponse({ status: "success", message: "Đã xóa hạng mục" });
+}
+
+// GET action=getGolfStatus — tóm tắt run mới nhất của mỗi mẫu (ca_sang/ca_toi/tuan/thang)
+// cho các trang khác (vd. trang nhatky) đọc nhanh tình hình vận hành hiện tại.
+function handleGetGolfStatus(e) {
+  const sheet = ensureGolfRunsSheet_();
+  const lastRow = sheet.getLastRow();
+  const latestByTemplate = {};
+
+  if (lastRow >= 2) {
+    const rows = sheet.getRange(2, 1, lastRow - 1, GOLF_RUN_HEADERS.length).getValues();
+    rows.forEach(function(r) {
+      if (String(r[0]).trim() === "") return;
+      const run = golfRunRowToObject_(r);
+      const prev = latestByTemplate[run.templateId];
+      if (!prev || run.date > prev.date) latestByTemplate[run.templateId] = run;
+    });
+  }
+
+  const shifts = Object.keys(GOLF_TEMPLATE_NAMES).map(function(templateId) {
+    const run = latestByTemplate[templateId];
+    if (!run) {
+      return {
+        templateId: templateId, templateName: GOLF_TEMPLATE_NAMES[templateId],
+        date: "", status: "", operator: "", handoverNote: "", submittedAt: "", issueCount: 0
+      };
+    }
+    let issueCount = 0;
+    try {
+      const items = JSON.parse(run.items || "{}");
+      Object.keys(items).forEach(function(k) {
+        if (items[k] && items[k].status === "ng") issueCount++;
+      });
+    } catch (_) {}
+    return {
+      templateId: templateId, templateName: GOLF_TEMPLATE_NAMES[templateId],
+      date: run.date, status: run.status, operator: run.operator,
+      handoverNote: run.handoverNote, submittedAt: run.submittedAt, issueCount: issueCount
+    };
+  });
+
+  return contentResponse({ status: "success", shifts: shifts });
 }
 
 // ---------- RUNS ----------
