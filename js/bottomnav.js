@@ -72,6 +72,7 @@
   ];
 
   const MENU_DAILY = [
+    { icon: 'bi-clipboard2-check-fill', label: 'Checklist Vận Hành Ca',     href: root + 'checklist.html' },
     { icon: 'bi-person-badge',     label: 'Trang cá nhân & Cài đặt',       href: root + 'nhatky/index.html#personal' },
     { icon: 'bi-bar-chart-line-fill', label: 'Báo cáo công việc',          href: root + 'nhatky/index.html#stats' },
     { icon: 'bi-water',            label: 'Thông tin & Check vận hành bơm', href: root + 'pump_info.html' },
