@@ -62,6 +62,7 @@ function doGet(e) {
       case 'getPlans':          return handleGetPlans(e);           // Kế hoạch trang nhatky
       case 'getGolfTemplates':  return handleGetGolfTemplates(e);   // Checklist sân golf (trang sangolf)
       case 'getGolfRuns':       return handleGetGolfRuns(e);        // Checklist sân golf (trang sangolf)
+      case 'getGolfStatus':     return handleGetGolfStatus(e);      // Tóm tắt vận hành sân golf (cho trang nhatky)
       case 'getWorkLogs':       return handleGetWorkLogs(e);        // Nhật ký cả tổ (trang nhatky)
       case 'nhatkyAccounts':    return handleListAccounts(e);       // Danh sách tài khoản trang nhatky
       case 'tempDumpDevices':   return handleTempDumpDevices(e);
@@ -171,6 +172,8 @@ function doPost(e) {
       submitGolfRun:        handleSubmitGolfRun,
       confirmGolfHandover:  handleConfirmGolfHandover,
       seedGolfTemplates:    handleSeedGolfTemplates,
+      upsertGolfTemplateItem: handleUpsertGolfTemplateItem,
+      deleteGolfTemplateItem: handleDeleteGolfTemplateItem,
     };
 
     const handler = DISPATCH[params.action];
