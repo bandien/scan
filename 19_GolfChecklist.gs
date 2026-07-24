@@ -398,6 +398,37 @@ function handleSubmitGolfRun(params) {
   sheet.getRange(rowIndex, 12, 1, 2).setValues([[now, String(payload.updatedBy || payload.operator || "")]]);
 
   writeAuditLog(payload.operator || "sangolf", "submitGolfRun", runId, "Chốt checklist sân golf");
+  
+  // Kiểm tra tự động phát sinh Task sự cố vào NhatKyPlans nếu có mục "Không đạt" hoặc vi phạm threshold
+  try {
+    const rawItems = payload.items || sheet.getRange(rowIndex, 14).getValue();
+    const itemsObj = typeof rawItems === "string" ? JSON.parse(rawItems || "{}") : (rawItems || {});
+    let issueSummary = [];
+    Object.keys(itemsObj).forEach(function(key) {
+      const item = itemsObj[key];
+      if (item && (item.status === "fail" || item.fail || item.isViolation)) {
+        issueSummary.push(item.label || key);
+      }
+    });
+    if (issueSummary.length > 0) {
+      const issueTaskName = "[SỰ CỐ CHECKLIST] " + templateId + " (" + issueSummary.slice(0, 2).join(", ") + ")";
+      handleSavePlan({
+        date: date,
+        task: issueTaskName,
+        team: "Tổ cơ điện",
+        type: "Phát sinh",
+        priority: "Khẩn cấp",
+        status: "Chưa làm",
+        assignedBy: "Hệ thống Checklist (" + (payload.operator || "KTV") + ")",
+        source: "checklist",
+        sourceText: "Phát hiện sự cố khi chốt ca checklist " + runId + ": " + issueSummary.join("; "),
+        updatedBy: payload.operator || "ChecklistSystem"
+      });
+    }
+  } catch(e) {
+    console.warn("Lỗi auto-create plan from checklist:", e.message);
+  }
+
   try {
     sendAlert("⛳ [Sân Golf] " + (payload.operator || "KTV") + " đã chốt " + runId
       + (payload.handoverNote ? "\nBàn giao: " + payload.handoverNote : ""));

@@ -14,6 +14,10 @@ updated: 2026-06-08
 
 Tất cả các thay đổi và cải tiến của hệ thống Quản lý & Bảo trì Ban điện thông minh (CMMS Mini WebApp) được ghi nhận tại đây theo từng phiên bản.
 
+## [v2.13.1] - 2026-07-22
+### Thêm mới (Added)
+- **Hướng dẫn Báo cáo Nước & Copy tin nhắn nhanh (chốt 18h)**: Thêm mục "Hướng dẫn báo cáo nước (18h)" vào Menu tiện ích của thanh điều hướng dưới (`js/bottomnav.js`). Khi bấm vào sẽ mở một hộp thoại (modal) hướng dẫn từng bước quy trình chốt số liệu nước lúc 18h00, tích hợp liên kết đến website KySon (tự động điền/hiển thị tài khoản và nút Copy nhanh thông tin đăng nhập `vanhanh/vanhanh`) và phần tạo mẫu tin nhắn báo cáo tóm tắt kèm nút **Copy tin nhắn** tiện lợi cho nhân viên vận hành.
+
 ## [v2.13.0] - 2026-07-22
 ### Thêm mới (Added)
 - **Ghi nhật ký "mỗi người tự báo phần mình" theo bước/giai đoạn (P4, `nhatky/index.html`)**: đổi mô hình ghi nhật ký từ "1 người điền hộ cả nhóm" sang **mỗi người tự ghi phần mình** — đúng mục đích ban đầu (đánh giá riêng từng người, ghi nhanh gọn). Form ghi cho 1 bước mặc định là `currentUser()`; nếu bước có ≥2 người, hiện chip **"Tôi là ai"** (`#logSelfPicker`) để chọn đúng người khi dùng điện thoại chung. Chế độ "ghi hộ cả nhóm" (lưới nhiều người + đánh giá) vẫn giữ làm tuỳ chọn phụ, chuyển qua lại bằng 2 nút liên kết.
