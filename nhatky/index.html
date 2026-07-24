@@ -234,6 +234,101 @@
       border-radius: 10px;
       padding: 1px 5px;
     }
+
+    /* 5. Chat Modal UI */
+    .chat-modal-body {
+      background: #e2e8f0; /* Zalo chat background */
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .chat-bubble-wrap {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 4px;
+    }
+    .chat-bubble-wrap.me {
+      flex-direction: row-reverse;
+    }
+    .chat-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0084FF, #0052cc);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+    .chat-bubble-content {
+      background: #FFFFFF;
+      border-radius: 8px;
+      padding: 8px 12px;
+      max-width: 80%;
+      position: relative;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .chat-bubble-wrap.me .chat-bubble-content {
+      background: #eef2ff; /* slight blue for 'me' */
+    }
+    .chat-bubble-title {
+      font-weight: 600;
+      color: #000000;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+    .chat-bubble-text {
+      font-size: 0.95rem;
+      color: #333333;
+      word-wrap: break-word;
+    }
+    .chat-bubble-quote {
+      border-left: 3px solid #0084FF;
+      padding-left: 8px;
+      margin-bottom: 6px;
+      font-size: 0.85rem;
+      color: #666666;
+    }
+    .chat-bubble-time {
+      font-size: 0.7rem;
+      color: #999999;
+      margin-top: 4px;
+      text-align: right;
+    }
+    .chat-input-bar {
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      background: #FFFFFF;
+      border-top: 1px solid var(--zalo-line);
+      gap: 12px;
+    }
+    .chat-input-bar i {
+      font-size: 1.4rem;
+      color: #72767d;
+      cursor: pointer;
+    }
+    .chat-input-box {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 0.95rem;
+      padding: 6px 0;
+    }
+    .chat-input-box::placeholder {
+      color: #b0b3b8;
+    }
+    .chat-action-icons {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
   </style>
 </head>
 <body>
@@ -330,20 +425,47 @@
     </div>
   </div>
 
-  <!-- Modal Chi Tiết Công Việc -->
+  <!-- Modal Chi Tiết Công Việc (Zalo Chat UI) -->
   <div class="modal fade" id="taskDetailModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-      <div class="modal-content border-0 shadow rounded-4">
-        <div class="modal-header border-0 pb-0">
-          <h5 class="modal-title fw-bold"><i class="bi bi-card-text me-2 text-primary"></i>Chi tiết công việc</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-fullscreen m-0">
+      <div class="modal-content border-0 rounded-0">
+        <!-- Header: Xanh dương giống chat -->
+        <div class="modal-header rounded-0 text-white" style="background: var(--zalo-blue); padding: 10px 14px;">
+          <div class="d-flex align-items-center gap-3 w-100">
+            <i class="bi bi-chevron-left fs-4" data-bs-dismiss="modal" style="cursor: pointer;"></i>
+            <div class="flex-grow-1 overflow-hidden">
+              <div class="fw-bold text-truncate" id="chatModalTitle">Chi tiết công việc</div>
+              <div class="small text-white-50" id="chatModalSubtitle" style="font-size: 0.75rem;">Đang hoạt động</div>
+            </div>
+            <i class="bi bi-telephone fs-5"></i>
+            <i class="bi bi-camera-video fs-5"></i>
+            <i class="bi bi-list fs-4 ms-2"></i>
+          </div>
         </div>
-        <div class="modal-body" id="taskDetailBody">
+        
+        <!-- Body: Nền xám, danh sách bubble -->
+        <div class="modal-body chat-modal-body" id="taskDetailBody">
           <!-- Render dynamically -->
         </div>
-        <div class="modal-footer border-0 pt-0">
-          <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
-          <button type="button" class="btn btn-success rounded-pill px-4" id="btnMarkDone">Hoàn thành</button>
+        
+        <!-- Footer: Thanh nhập liệu -->
+        <div class="modal-footer p-0 border-0 d-block">
+          <!-- Suggestion pills for quick actions -->
+          <div class="px-3 py-2 bg-light border-top d-flex gap-2 overflow-x-auto" id="chatQuickActions">
+            <span class="badge bg-white text-dark border rounded-pill px-3 py-2 text-nowrap shadow-sm" style="cursor:pointer" id="btnMarkDone">✅ Đánh dấu hoàn thành</span>
+            <span class="badge bg-white text-dark border rounded-pill px-3 py-2 text-nowrap shadow-sm" style="cursor:pointer" onclick="document.getElementById('chatInputMsg').value='Tôi đang tới xử lý...'; document.getElementById('chatInputMsg').dispatchEvent(new Event('input'));">📍 Đã tới vị trí</span>
+          </div>
+          
+          <div class="chat-input-bar">
+            <i class="bi bi-emoji-smile"></i>
+            <input type="text" class="chat-input-box" id="chatInputMsg" placeholder="Message">
+            <div class="chat-action-icons" id="chatActionIcons">
+              <i class="bi bi-three-dots"></i>
+              <i class="bi bi-mic"></i>
+              <i class="bi bi-image"></i>
+            </div>
+            <i class="bi bi-send-fill text-primary d-none fs-4" id="chatBtnSend"></i>
+          </div>
         </div>
       </div>
     </div>
@@ -535,37 +657,83 @@
       const plan = allPlans.find(p => p.id === id);
       if(!plan) return;
       
+      const user = BD_SSO.getUser();
+      const currentUserName = user ? (user.name || user.username) : "Tài khoản của bạn";
+      
+      // Update Header
+      document.getElementById("chatModalTitle").textContent = plan.task;
+      document.getElementById("chatModalSubtitle").textContent = "Người phụ trách: " + (plan.assignee || plan.updatedBy || 'Chưa gán');
+
+      // Setup Input Bar interaction
+      const inputMsg = document.getElementById("chatInputMsg");
+      const actionIcons = document.getElementById("chatActionIcons");
+      const btnSend = document.getElementById("chatBtnSend");
+      
+      inputMsg.value = "";
+      actionIcons.classList.remove("d-none");
+      btnSend.classList.add("d-none");
+
+      inputMsg.addEventListener("input", function() {
+        if(this.value.trim().length > 0) {
+          actionIcons.classList.add("d-none");
+          btnSend.classList.remove("d-none");
+        } else {
+          actionIcons.classList.remove("d-none");
+          btnSend.classList.add("d-none");
+        }
+      });
+      
       const body = document.getElementById("taskDetailBody");
       
-      let badgeClass = "bg-secondary";
-      if(plan.status === 'Hoàn thành') badgeClass = "bg-success";
-      else if(plan.status === 'Đang làm') badgeClass = "bg-primary";
-      else if(plan.status === 'Chưa làm') badgeClass = "bg-warning text-dark";
-
-      body.innerHTML = `
-        <h6 class="fw-bold mb-2 fs-5 lh-base">${plan.task}</h6>
-        <p class="text-muted small mb-3">Mã: ${plan.id}</p>
-        
-        <div class="mb-2"><span class="text-muted small d-inline-block" style="width: 100px;">Người nhận:</span> <span class="fw-semibold">${plan.assignee || plan.updatedBy || 'N/A'}</span></div>
-        <div class="mb-2"><span class="text-muted small d-inline-block" style="width: 100px;">Trạng thái:</span> <span class="badge ${badgeClass} rounded-pill px-2 py-1">${plan.status}</span></div>
-        <div class="mb-2"><span class="text-muted small d-inline-block" style="width: 100px;">Thời gian:</span> <span class="fw-semibold">${plan.date} ${plan.time || ''}</span></div>
-        ${plan.area ? `<div class="mb-2"><span class="text-muted small d-inline-block" style="width: 100px;">Khu vực:</span> <span class="fw-semibold">${plan.area}</span></div>` : ''}
-        ${plan.asset ? `<div class="mb-2"><span class="text-muted small d-inline-block" style="width: 100px;">Thiết bị:</span> <span class="fw-semibold">${plan.asset}</span></div>` : ''}
-        ${plan.sourceText ? `<div class="mt-3 p-3 bg-light rounded-3 small border"><i>Ghi chú / Nguồn:</i><br/>${plan.sourceText}</div>` : ''}
+      const sender = plan.assignee || plan.updatedBy || 'System';
+      const senderAvatar = sender.charAt(0).toUpperCase();
+      const isMe = sender === currentUserName;
+      
+      let html = "";
+      
+      // Bubble 1: Initial task info
+      let infoText = `Mã: ${plan.id}`;
+      if(plan.area) infoText += `<br>Vị trí: ${plan.area}`;
+      if(plan.asset) infoText += `<br>Thiết bị: ${plan.asset}`;
+      infoText += `<br>Trạng thái: <b>${plan.status}</b>`;
+      
+      html += `
+        <div class="chat-bubble-wrap ${isMe ? 'me' : ''}">
+          <div class="chat-avatar">${senderAvatar}</div>
+          <div class="chat-bubble-content">
+            <div class="chat-bubble-title">${sender}</div>
+            <div class="chat-bubble-quote">Yêu cầu công việc / Sự cố mới phát sinh.</div>
+            <div class="chat-bubble-text">${infoText}</div>
+            <div class="chat-bubble-time">${plan.date} ${plan.time || ''}</div>
+          </div>
+        </div>
       `;
       
+      // Bubble 2: Source Text or Notes if any
+      if(plan.sourceText) {
+        html += `
+          <div class="chat-bubble-wrap ${isMe ? 'me' : ''}">
+            <div class="chat-avatar">${senderAvatar}</div>
+            <div class="chat-bubble-content">
+              <div class="chat-bubble-text">${plan.sourceText}</div>
+              <div class="chat-bubble-time">${plan.date} ${plan.time || ''}</div>
+            </div>
+          </div>
+        `;
+      }
+      
+      body.innerHTML = html;
+      
       const btnDone = document.getElementById("btnMarkDone");
+      const quickActions = document.getElementById("chatQuickActions");
       if (plan.status === 'Hoàn thành') {
-        btnDone.style.display = 'none';
+        quickActions.classList.add('d-none');
       } else {
-        btnDone.style.display = 'block';
+        quickActions.classList.remove('d-none');
         btnDone.onclick = async () => {
           try {
-            btnDone.innerHTML = '<span class="spinner-border spinner-border-sm"></span>...';
+            btnDone.innerHTML = '🔄 Đang cập nhật...';
             btnDone.disabled = true;
-            
-            let currentUserInfo = BD_SSO.getUser();
-            let currentUserName = currentUserInfo ? (currentUserInfo.name || currentUserInfo.username) : "Unknown";
             
             await window.bdsApiPost('savePlan', {
               id: plan.id,
@@ -575,20 +743,62 @@
               task: plan.task
             });
             
-            btnDone.innerHTML = 'Hoàn thành';
-            btnDone.disabled = false;
             detailModalInstance.hide();
             if (window.bdsShowToast) window.bdsShowToast("Đã cập nhật trạng thái Hoàn thành!", "success");
             loadPlans();
           } catch(e) {
             alert("Lỗi cập nhật: " + e.message);
-            btnDone.innerHTML = 'Hoàn thành';
+            btnDone.innerHTML = '✅ Đánh dấu hoàn thành';
             btnDone.disabled = false;
           }
         };
       }
       
+      // Send chat
+      btnSend.onclick = async () => {
+        const msg = inputMsg.value.trim();
+        if(!msg) return;
+        
+        // Append visual bubble directly
+        const myAvatar = currentUserName.charAt(0).toUpperCase();
+        const nowTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        body.insertAdjacentHTML('beforeend', `
+          <div class="chat-bubble-wrap me">
+            <div class="chat-avatar">${myAvatar}</div>
+            <div class="chat-bubble-content">
+              <div class="chat-bubble-text">${msg}</div>
+              <div class="chat-bubble-time">${nowTime}</div>
+            </div>
+          </div>
+        `);
+        
+        // Auto scroll
+        body.scrollTop = body.scrollHeight;
+        
+        inputMsg.value = "";
+        inputMsg.dispatchEvent(new Event('input')); // reset icons
+        
+        // Save to backend (Update sourceText or just show success)
+        const newSourceText = (plan.sourceText ? plan.sourceText + "\n---\n" : "") + `[${nowTime}] ${currentUserName}: ${msg}`;
+        try {
+          await window.bdsApiPost('savePlan', {
+            id: plan.id,
+            sourceText: newSourceText,
+            updatedBy: currentUserName,
+            date: plan.date,
+            task: plan.task
+          });
+          // Update local data
+          plan.sourceText = newSourceText;
+        } catch(e) {
+          console.error("Save chat err:", e);
+        }
+      };
+      
       detailModalInstance.show();
+      // Scroll to bottom after show
+      setTimeout(() => { body.scrollTop = body.scrollHeight; }, 300);
     }
   </script>
 </body>
