@@ -1,4 +1,4 @@
-# Design Spec: Hoàn Thiện 100% Vòng Đời Checklist Cơ Điện Sân Golf (Phase 4 & Phase 5)
+# Design Spec: Hoàn Thiện 100% Vòng Đời Checklist Cơ Điện Sân Golf (Phase 5)
 
 - **Ngày lập:** 2026-07-24
 - **Tác giả:** AI Assistant & Engineering Team
@@ -9,15 +9,13 @@
 
 ## 1. Tổng quan & Mục tiêu
 
-Hoàn thiện 100% vòng đời của module **Checklist Cơ Điện Sân Golf** bằng cách bổ sung Phase 4 (Phân nhiệm & Duyệt 2 cấp) và Phase 5 (Báo cáo Tuân thủ, Biểu đồ Trend số đo & Cảnh báo Telegram tự động).
+Hoàn thiện 100% vòng đời của module **Checklist Cơ Điện Sân Golf** bằng cách bổ sung Phase 5 (Báo cáo Tuân thủ, Biểu đồ Trend số đo & Cảnh báo Telegram tự động).
 
 ```mermaid
 flowchart TD
     A[KTV Thực Hiện Checklist] -->|Save/Submit| B(Tự động kiểm tra Ngưỡng Threshold)
     B -->|Nếu vi phạm| C[Bắn Cảnh báo Telegram Đỏ]
     B -->|Submit thành công| D[Trạng thái: Submitted]
-    D -->|Tổ trưởng kiểm tra| E[Nút Duyệt 1: Approved Level 1]
-    E -->|Quản lý Sân Golf duyệt| F[Nút Duyệt 2: Completed / Fully Approved]
     
     subgraph Analytics & Reporting
         G[Dashboard Báo cáo & Trend]
@@ -26,36 +24,11 @@ flowchart TD
     end
     
     D -.-> G
-    F -.-> G
 ```
 
 ---
 
-## 2. Thiết kế Chi tiết Phase 4: Phân Nhiệm & Duyệt 2 Cấp
 
-### 2.1 Cấu trúc Dữ liệu `GolfChecklistRuns` (Google Sheets)
-Bổ sung các trường vào `GolfChecklistRuns` và cấu trúc JSON `ItemsJSON`:
-
-- **Trạng thái lượt chạy (`Status`)**:
-  - `draft`: Đang ghi nháp.
-  - `submitted`: KTV đã hoàn thành & chốt ca/tuần/tháng.
-  - `approved_level1`: Tổ trưởng Cơ Điện đã xác nhận.
-  - `completed`: Quản lý Sân Golf đã duyệt chính thức.
-- **Trường lưu thông tin người duyệt**:
-  - `ApprovedByL1`, `ApprovedAtL1` (Tổ trưởng).
-  - `ApprovedByL2`, `ApprovedAtL2` (Quản lý sân Golf).
-- **Chi tiết từng hạng mục (`ItemsJSON`)**:
-  - Mỗi phần tử bổ sung trường `checkedBy` (lấy theo tài khoản Đăng nhập `nhatky auth` hiện tại của KTV nhập mục đó).
-
-### 2.2 Quy trình & UI Duyệt 2 Cấp (Frontend `sangolf/index.html`)
-- Màn hình chi tiết lượt checklist hiển thị thanh Tiến trình Duyệt (Workflow Steps):
-  `[1. KTV Chốt] -> [2. Tổ Trưởng Xác Nhận] -> [3. Quản Lý Duyệt]`
-- Tùy thuộc vào quyền/vai trò người dùng đăng nhập (`currentUser()` từ `15_NhatKyAuth.gs`):
-  - **Tổ trưởng**: Thấy nút **"✓ Xác nhận chuyên môn (Tổ trưởng)"**.
-  - **Quản lý sân Golf**: Thấy nút **"★ Duyệt chính thức (Quản lý)"**.
-- Hỗ trợ ghi chú khi phê xuất hoặc yêu cầu KTV làm lại (Reject / Yêu cầu chỉnh sửa).
-
----
 
 ## 3. Thiết kế Chi tiết Phase 5: Báo cáo, Biểu đồ Trend & Cảnh báo Telegram
 
@@ -105,10 +78,9 @@ Bổ sung Tab **"Báo cáo & Trend"** bên cạnh Tab "Checklist":
 
 ---
 
-## 5. Xác minh & Kiểm thử (Verification Plan)
+## 4. Xác minh & Kiểm thử (Verification Plan)
 
 1. **Kiểm thử Unit & API Backend**:
-   - Chạy lệnh test kiểm tra kết quả trả về của API `getGolfAnalytics` và `approveGolfRun`.
-2. **Kiểm thử Luồng Duyệt 2 cấp & Telegram**:
+   - Chạy lệnh test kiểm tra kết quả trả về của API `getGolfAnalytics`.
+2. **Kiểm thử Luồng Telegram**:
    - Giả lập nhập chỉ số vi phạm (VD: nhập 40°C cho máy gia nhiệt) -> Xác nhận tin nhắn cảnh báo gửi về Telegram.
-   - Thực hiện luồng `Submit` -> `Approve L1` -> `Approve L2` và kiểm tra trạng thái trong Google Sheet `GolfChecklistRuns`.
