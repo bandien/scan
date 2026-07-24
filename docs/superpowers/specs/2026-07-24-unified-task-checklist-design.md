@@ -11,9 +11,10 @@
 
 Xây dựng hệ thống giao diện và backend hợp nhất quản lý công việc Ban Điện:
 1. **Hợp nhất luồng Checklist & Công việc**: Khi đi checklist phát hiện sự cố/vượt ngưỡng, tự động khởi tạo Task công việc.
-2. **Quy trình 2 Luồng Công việc**:
-   - **Luồng 1 (Việc Nhỏ / Việc Phát Sinh)**: 1 Chạm — Nhập tên việc, chụp ảnh kết quả, lưu & tự động chốt sổ.
-   - **Luồng 2 (Việc Phức Tạp / Nhiều Giai Đoạn)**: Phân chia Phase/Step, gán 1 hoặc nhiều KTV, theo dõi tiến độ từng người.
+2. **Giao diện nhập liệu hợp nhất (Unified Entry Form)**:
+   - Sử dụng **1 màn hình duy nhất** cho mọi loại việc.
+   - Việc nhỏ: Giao diện mặc định tối giản (chỉ tên việc, ảnh).
+   - Việc phức tạp: Bấm "Hiện thêm" để mở cấu hình nhiều giai đoạn/bước, gán KTV.
 3. **Quy tắc Ghi Hộ của Quản Lý (Manager Proxy Logging)**: Cho phép Tổ trưởng/Quản lý ghi báo cáo/nhật ký thay cho KTV nhưng luôn lưu rõ danh tính 2 bên.
 
 ---
@@ -44,19 +45,21 @@ Tránh mạo danh và tranh chấp bằng cách phân định 2 trường riêng
 
 ---
 
-## 3. Quy Trình Chi Tiết 2 Luồng Công Việc
+## 3. Quy Trình Nhập Liệu Hợp Nhất (Unified Task Entry)
 
-### 3.1 Luồng 1: Việc Nhỏ / Việc Nhanh (1-Touch Workflow)
-- **Đối tượng**: Phát sinh sự cố nhỏ, xử lý nhanh trong ca (< 30 phút).
-- **Quy trình 3 bước**:
-  1. Người dùng bấm **"＋ Việc mới"** $\rightarrow$ Chọn loại **"Việc nhỏ / Phát sinh"**.
-  2. Nhập: Tên việc + Vị trí + Chụp 1-2 Ảnh hiện trạng/kết quả.
-  3. Bấm **"Lưu & Hoàn Thành"**:
-     - Backend sinh bản ghi `NhatKyPlans` (`Status = Hoàn thành`, `Lifecycle = closed`, `Labels = Đã chốt sổ`).
-     - Sinh bản ghi `WorkLogs` đính kèm ảnh và kết quả.
+Thay vì phân chia 2 luồng riêng biệt, hệ thống sử dụng **1 màn hình nhập công việc duy nhất** có khả năng mở rộng linh hoạt:
 
-### 3.2 Luồng 2: Việc Phức Tạp / Nhiều Giai Đoạn (Multi-Phase Workflow)
-- **Cấu trúc Giai đoạn & Bước con**:
+### 3.1 Chế độ Mặc Định (Việc Nhỏ / Nhanh)
+- **Giao diện tối giản**: Phù hợp cho sự cố nhỏ, xử lý nhanh trong ca (< 30 phút).
+- **Các trường hiển thị**: Tên việc, Vị trí/Thiết bị, Nút chụp ảnh hiện trạng/kết quả.
+- **Thao tác**: Nhập thông tin $\rightarrow$ Bấm **"Lưu & Hoàn Thành"**.
+  - Backend tự động sinh bản ghi `NhatKyPlans` (`Status = Hoàn thành`, `Lifecycle = closed`, `Labels = Đã chốt sổ`).
+  - Sinh bản ghi `WorkLogs` đính kèm ảnh và kết quả.
+
+### 3.2 Chế độ Mở Rộng (Việc Phức Tạp / Nhiều Giai Đoạn)
+- **Kích hoạt**: Bấm nút **"Mở rộng / Hiện thêm"** ở dưới cùng form mặc định.
+- **Thông tin bổ sung**: Giao diện sổ xuống các trường cấu hình chuyên sâu:
+  - **Cấu trúc Giai đoạn & Bước con**: Thêm danh sách Phase, Step.
   ```jsonc
   phases: [
     {
