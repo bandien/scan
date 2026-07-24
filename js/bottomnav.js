@@ -85,7 +85,9 @@
     { icon: 'bi-qr-code',          label: 'In mã QR máy bơm',         href: root + 'print_pumps.html' },
     { icon: 'bi-person-workspace', label: 'Câu hỏi phỏng vấn',        href: root + 'phongvan/' },
     { icon: 'bi-cpu-fill',         label: 'Giám sát Server Uptime',    href: root + 'status.html' },
-    { icon: 'bi-history',          label: 'Nhật ký Thay đổi',          href: root + 'changelog.html' }
+    { icon: 'bi-history',          label: 'Nhật ký Thay đổi',          href: root + 'changelog.html' },
+    { icon: 'bi-diagram-3',        label: 'Sơ đồ Hệ thống',            href: root + 'architecture.html' },
+    { icon: 'bi-tools',            label: 'Chẩn đoán EBYTE NA111',     href: root + 'na111.html' }
   ];
 
   function menuLinks(items) {
