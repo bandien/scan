@@ -63,22 +63,7 @@
             min-height: 100vh;
         }
 
-        .app-shell { max-width: 440px; margin: 0 auto; padding: 76px 16px calc(92px + env(safe-area-inset-bottom)) 16px; }
-
-        .header-section {
-            position: fixed; top: 0; left: 50%; transform: translateX(-50%);
-            width: 100%; max-width: 440px; min-height: 64px; padding: 8px 16px;
-            display: flex; align-items: center; justify-content: space-between; gap: 10px;
-            background: var(--siu-surface); border-bottom: 1px solid var(--siu-outline-variant);
-            z-index: 1030;
-        }
-        .header-title-row { display: flex; align-items: center; gap: 10px; min-width: 0; }
-        .header-title-row i { color: var(--siu-primary); font-size: 22px; }
-        .header-title-row h1 { font-size: 20px; font-weight: 800; margin: 0; line-height: 1.2; color: var(--siu-on-surface); }
-        .header-section > .logo-box,
-        .header-section > h2,
-        .header-section > p { display: none; }
-        .header-section > .d-flex { margin: 0 !important; padding: 0 !important; flex: 0 0 auto; }
+        .app-shell { max-width: 440px; margin: 0 auto; padding: 16px; }
 
         .logo-box {
             background: var(--siu-primary);
@@ -282,67 +267,6 @@
         .anim-up { animation: fadeInUp 0.4s ease-out; }
         .anim-in { animation: fadeIn 0.3s ease-out; }
 
-        /* ===== Bottom Navigation Bar (dark là mặc định duy nhất) ===== */
-        .bottom-nav-bar {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 440px;
-            height: calc(72px + env(safe-area-inset-bottom));
-            padding-bottom: env(safe-area-inset-bottom);
-            background: var(--siu-surface);
-            border-top: 1px solid var(--siu-outline-variant);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 1040;
-            padding: 0 8px;
-            box-shadow: 0 -4px 10px rgba(0,0,0,.05);
-        }
-        .bottom-nav-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            color: var(--siu-on-surface-variant);
-            font-size: 11px;
-            font-weight: 800;
-            transition: all 0.2s ease;
-            background: none;
-            border: none;
-            padding: 4px 0;
-        }
-        .bottom-nav-item:active {
-            transform: scale(0.97);
-        }
-        .bottom-nav-item .material-symbols-outlined {
-            font-size: 24px;
-            line-height: 1;
-            margin-bottom: 2px;
-            display: block;
-        }
-        .bottom-nav-item.active {
-            color: var(--siu-primary);
-        }
-        .bottom-nav-item.active .nav-icon-wrapper {
-            background-color: rgba(0, 87, 206, .1);
-            color: var(--siu-primary);
-            border-radius: 12px;
-            padding: 6px 16px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .bottom-nav-item:not(.active) .nav-icon-wrapper {
-            padding: 6px 16px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
     </style>
 </head>
 <body>
@@ -386,27 +310,9 @@
     </div>
 </div>
 
-<div class="app-shell" id="appShell" style="display: none;">
-    <div class="header-section">
-        <div class="header-inner w-100 d-flex align-items-center justify-content-between">
-          <div class="header-left min-w-0 d-flex align-items-center gap-2">
-            <div class="brand-mark flex-shrink-0" style="width: 40px; height: 40px; border-radius: 14px; background: linear-gradient(135deg, var(--siu-primary), #1c9a7c); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; box-shadow: 0 6px 18px rgba(15,107,95,.2);"><i class="bi bi-qr-code-scan"></i></div>
-            <div class="header-titles min-w-0">
-              <div class="app-title text-truncate" style="font-size: 1.1rem; font-weight: 800; line-height: 1.2; color: var(--siu-on-surface);">Tìm kiếm</div>
-              <div class="header-sub text-truncate" style="font-size: .75rem; font-weight: 700; color: var(--siu-on-surface-variant); margin-top: 1px;">Quét QR & Tìm thiết bị</div>
-            </div>
-          </div>
-          <div class="header-right d-flex align-items-center gap-2">
-                <!-- Menu tiện ích & tài khoản đã chuyển xuống tab "Menu" / "Cá nhân" ở
-                     thanh điều hướng dưới, đồng nhất với các màn hình chính khác. -->
-                <span class="badge bg-success-subtle text-success shadow-sm px-2 py-2 rounded-pill" id="syncBadge" style="display: none;" title="Data Synced">
-                    <i class="bi bi-cloud-check-fill"></i>
-                </span>
-                <button type="button" class="btn btn-sm rounded-pill border px-2 py-2 fw-bold" style="background: var(--siu-surface-high); color: var(--siu-on-surface); border-color: var(--siu-outline-variant); min-width: 34px;" id="btnFontScale" title="Phóng to chữ"><span id="fontScaleLabel">A</span></button>
-          </div>
-        </div>
-    </div>
+<script src="js/app-header.js" data-root="./" data-title="Tìm kiếm" data-sub="Quét QR & Tìm thiết bị" data-icon="bi-qr-code-scan" data-hidden="true"></script>
 
+<div class="app-shell" id="appShell" style="display: none;">
     <!-- Search & Scan Card -->
     <div class="card-premium p-3 mb-3">
         <div class="d-flex gap-2">
@@ -1421,63 +1327,7 @@
         <button class="btn-submit" onclick="submitData()">XÁC NHẬN HOÀN TẤT <i class="bi bi-check-circle ms-2"></i></button>
     </div>
 
-    <!-- Unified Bottom Navigation Bar -->
-    <nav class="bottom-nav-bar" id="mainBottomNav" style="display: none;">
-        <button class="bottom-nav-item active" type="button">
-            <div class="nav-icon-wrapper">
-                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">qr_code_scanner</span>
-            </div>
-            <span>Quét QR</span>
-        </button>
-        <div class="dropup" style="flex: 1; display: flex; justify-content: center; align-items: center;">
-            <button class="bottom-nav-item border-0 bg-transparent w-100" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
-                <div class="nav-icon-wrapper">
-                    <span class="material-symbols-outlined">menu</span>
-                </div>
-                <span>Menu</span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end mb-2 shadow-lg border-0 rounded-4" style="min-width: 220px; background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant) !important; z-index: 1050;">
-                <li><h6 class="dropdown-header text-muted small fw-bold"><i class="bi bi-grid-fill me-1"></i> MENU TIỆN ÍCH</h6></li>
-                <li><hr class="dropdown-divider opacity-50"></li>
-                <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleDeviceList()" id="btn-device-list"><i class="bi bi-cpu me-2 text-primary"></i> Thiết bị của tôi</a></li>
-                <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleCalendar()" id="btn-calendar"><i class="bi bi-calendar-event me-2 text-primary"></i> Lịch Bảo Trì</a></li>
-                <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleKanban()" id="btn-kanban"><i class="bi bi-kanban me-2 text-primary"></i> Kanban WO</a></li>
-                <li><a class="dropdown-item rounded-3 py-2" href="pump_info.html"><i class="bi bi-water me-2 text-primary"></i> Thông tin & Check vận hành bơm</a></li>
-                <li><a class="dropdown-item rounded-3 py-2" href="sangolf/"><i class="bi bi-flag-fill me-2 text-success"></i> Checklist Cơ Điện Sân Golf</a></li>
-                <li><a class="dropdown-item rounded-3 py-2" href="phanca/"><i class="bi bi-calendar-range me-2 text-info"></i> Phân ca trực</a></li>
-
-                <!-- ===== Dành cho Quản trị — chỉ hiện với Role Admin/Manager (xem updateUI()) ===== -->
-                <li id="adminMenuHeader" class="admin-menu-item" style="display:none;">
-                    <hr class="dropdown-divider opacity-50">
-                    <h6 class="dropdown-header text-muted small fw-bold"><i class="bi bi-shield-lock-fill me-1"></i> DÀNH CHO QUẢN TRỊ</h6>
-                </li>
-                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="nhatky/index.html#people"><i class="bi bi-clipboard-check me-2 text-info"></i> Kế hoạch công việc</a></li>
-                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="nhatky/index.html#loghistory"><i class="bi bi-journal-text me-2 text-info"></i> Nhật ký công việc</a></li>
-                <li id="menuAddDevice" class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="showAddDeviceModal()"><i class="bi bi-plus-square-dotted me-2 text-success"></i> Thêm thiết bị mới</a></li>
-                <li id="menuBatchGen" class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleBatchGenerator()"><i class="bi bi-magic me-2 text-success"></i> Tạo mã hàng loạt</a></li>
-                <li id="menuProjMgr" class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="openProjectManager()"><i class="bi bi-briefcase-fill me-2 text-success"></i> Quản lý Dự án</a></li>
-                <li id="menuLocMgr" class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="openLocationManager()"><i class="bi bi-geo-fill me-2 text-success"></i> Quản lý Địa điểm</a></li>
-                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleDashboard()" id="btn-dashboard"><i class="bi bi-bar-chart-fill me-2 text-primary"></i> Dashboard thiết bị/WO</a></li>
-                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="nhatky/index.html#stats"><i class="bi bi-bar-chart-fill me-2 text-success"></i> Báo cáo công việc tổ</a></li>
-                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="hengio/"><i class="bi bi-alarm me-2 text-warning"></i> Cài đặt đồng hồ bơm</a></li>
-                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="print_pumps.html"><i class="bi bi-qr-code me-2 text-primary"></i> In mã QR máy bơm</a></li>
-                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="phongvan/"><i class="bi bi-person-workspace me-2 text-secondary"></i> Câu hỏi phỏng vấn</a></li>
-                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2 small" href="architecture.html" target="_blank"><i class="bi bi-diagram-3 me-2 text-secondary"></i> Sơ đồ Hệ thống</a></li>
-                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2 small" href="status.html" target="_blank"><i class="bi bi-cpu-fill me-2 text-success"></i> Giám sát Server Uptime</a></li>
-                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2 small" href="changelog.html" target="_blank"><i class="bi bi-history me-2 text-info"></i> Nhật ký Thay đổi</a></li>
-                <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2 small" href="na111.html" target="_blank"><i class="bi bi-tools me-2 text-warning"></i> Chẩn đoán EBYTE NA111</a></li>
-
-                <li><hr class="dropdown-divider opacity-50"></li>
-                <li class="px-3 py-1 text-center text-muted" style="font-size: 0.72rem; list-style-type: none;"><span>Phiên bản</span> <span class="app-version"></span></li>
-            </ul>
-        </div>
-        <button class="bottom-nav-item" type="button" onclick="window.location.href='nhatky/index.html#personal'">
-            <div class="nav-icon-wrapper">
-                <span class="material-symbols-outlined">person</span>
-            </div>
-            <span>Cá nhân</span>
-        </button>
-    </nav>
+    <script src="js/bottomnav.js" data-root="./" data-hidden="true"></script>
 </div>
 
 <script>
@@ -1514,6 +1364,45 @@
     // Điền số phiên bản vào mọi vị trí hiển thị (màn đăng nhập, cuối menu)
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.app-version').forEach(el => { el.textContent = CONFIG.version; });
+
+        // Chèn nút phóng chữ + menu "Chức năng thiết bị" (Thiết bị của tôi, Lịch Bảo Trì,
+        // Kanban WO, quản lý Dự án/Địa điểm...) vào slot extraHtml của header dùng chung.
+        // Các link sang trang khác (pump_info, sangolf, phanca, hengio...) đã chuyển hẳn
+        // sang "Menu tiện ích" dùng chung của js/bottomnav.js, không lặp lại ở đây nữa.
+        if (window.BDSAppHeader) {
+            BDSAppHeader.update({
+                extraHtml: `
+                    <button type="button" class="app-header-action" id="btnFontScale" title="Phóng to chữ"><span id="fontScaleLabel">A</span></button>
+                    <button type="button" class="app-header-action" data-header-plus title="Menu tiện ích"><i class="bi bi-grid-3x3-gap-fill"></i></button>
+                    <div class="dropdown">
+                        <button type="button" class="app-header-action" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" title="Chức năng thiết bị"><i class="bi bi-three-dots-vertical"></i></button>
+                        <ul class="dropdown-menu dropdown-menu-end mb-2 shadow-lg border-0 rounded-4" style="min-width: 220px; background: var(--siu-surface-high); border: 1px solid var(--siu-outline-variant) !important;">
+                            <li><h6 class="dropdown-header text-muted small fw-bold"><i class="bi bi-grid-fill me-1"></i> CHỨC NĂNG THIẾT BỊ</h6></li>
+                            <li><hr class="dropdown-divider opacity-50"></li>
+                            <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleDeviceList()" id="btn-device-list"><i class="bi bi-cpu me-2 text-primary"></i> Thiết bị của tôi</a></li>
+                            <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleCalendar()" id="btn-calendar"><i class="bi bi-calendar-event me-2 text-primary"></i> Lịch Bảo Trì</a></li>
+                            <li><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleKanban()" id="btn-kanban"><i class="bi bi-kanban me-2 text-primary"></i> Kanban WO</a></li>
+
+                            <!-- ===== Dành cho Quản trị — chỉ hiện với Role Admin/Manager (xem updateUI()) ===== -->
+                            <li id="adminMenuHeader" class="admin-menu-item" style="display:none;">
+                                <hr class="dropdown-divider opacity-50">
+                                <h6 class="dropdown-header text-muted small fw-bold"><i class="bi bi-shield-lock-fill me-1"></i> DÀNH CHO QUẢN TRỊ</h6>
+                            </li>
+                            <li id="menuAddDevice" class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="showAddDeviceModal()"><i class="bi bi-plus-square-dotted me-2 text-success"></i> Thêm thiết bị mới</a></li>
+                            <li id="menuBatchGen" class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleBatchGenerator()"><i class="bi bi-magic me-2 text-success"></i> Tạo mã hàng loạt</a></li>
+                            <li id="menuProjMgr" class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="openProjectManager()"><i class="bi bi-briefcase-fill me-2 text-success"></i> Quản lý Dự án</a></li>
+                            <li id="menuLocMgr" class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="openLocationManager()"><i class="bi bi-geo-fill me-2 text-success"></i> Quản lý Địa điểm</a></li>
+                            <li class="admin-menu-item" style="display:none;"><a class="dropdown-item rounded-3 py-2" href="#" onclick="toggleDashboard()" id="btn-dashboard"><i class="bi bi-bar-chart-fill me-2 text-primary"></i> Dashboard thiết bị/WO</a></li>
+
+                            <li><hr class="dropdown-divider opacity-50"></li>
+                            <li class="px-3 py-1 text-center text-muted" style="font-size: 0.72rem; list-style-type: none;"><span>Phiên bản</span> <span class="app-version"></span></li>
+                        </ul>
+                    </div>
+                `
+            });
+            document.querySelectorAll('.app-version').forEach(el => { el.textContent = CONFIG.version; });
+            if (window.BD_FontScale) window.BD_FontScale.bind();
+        }
     });
 
     // Phóng to chữ: js/fontscale.js tự áp dụng + gắn sự kiện cho #btnFontScale khi tải trang.
@@ -2736,7 +2625,8 @@
     function updateUI(user) {
         document.getElementById('loginOverlay').style.display = 'none';
         document.getElementById('appShell').style.display = 'block';
-        document.getElementById('mainBottomNav').style.display = 'flex';
+        if (window.BDSAppHeader) BDSAppHeader.setVisible(true);
+        if (window.BDSBottomNav) BDSBottomNav.setVisible(true);
 
         // Khối "Dành cho Quản trị" trong tab Menu: ẩn hoàn toàn với tài khoản
         // nhân viên thường (User/Tech) để menu gọn, chỉ Admin/Manager mới thấy.
