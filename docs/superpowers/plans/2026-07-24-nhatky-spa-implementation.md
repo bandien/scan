@@ -24,16 +24,11 @@
   node -e "const fs = require('fs'); const content = fs.readFileSync('d:/Claude/1_Projects/scan/02_Source/nhatky/index.html', 'utf8'); console.log('File size:', content.length, 'Header button OK:', content.includes('header-right-plus-btn'));"
   ```
 
-### Task 3: Triển Khai Modal 1-Touch Cho Luồng Việc Nhỏ
-- **Mục tiêu**: Tạo Form Ghi Nhanh Việc Nhỏ: Nhập Tên việc, Vị trí, Ảnh chụp kết quả $\rightarrow$ Bấm "Lưu & Hoàn Thành" tự động chốt sổ.
-- **Đường dẫn file**: `d:/Claude/1_Projects/scan/02_Source/nhatky/index.html`
-
-### Task 4: Triển Khai Logic Ghi Hộ Của Quản Lý & Phân Định Audit Trail
-- **Mục tiêu**: Thêm công tắc bật "Tổ trưởng / Quản lý ghi hộ cho nhân viên", lưu biệt lập `Employee` (KTV) và `RecordedBy` (Tổ trưởng).
-- **Đường dẫn file**: `d:/Claude/1_Projects/scan/02_Source/nhatky/index.html`
-
-### Task 5: Triển Khai Luồng Việc Phức Tạp Nhiều Giai Đoạn (Multi-Phase)
-- **Mục tiêu**: Màn hình Chi tiết hỗ trợ hiển thị danh sách `Phases` và `Steps`, áp dụng quy tắc Crowd-Completion (đủ người mới `done`).
+### Task 3: Triển Khai Form Nhập Liệu Hợp Nhất (Unified Task Entry)
+- **Mục tiêu**: Xây dựng 1 màn hình Modal nhập liệu duy nhất thay thế cho các Modal rời rạc.
+  - **Mặc định (Việc nhỏ)**: Chỉ nhập Tên việc, Vị trí, Chụp ảnh $\rightarrow$ Bấm "Lưu nhanh".
+  - **Mở rộng (Multi-Phase)**: Nút "Hiện thêm" để xổ ra cấu hình danh sách `Phases`, `Steps`, gán người (`Assignees`) và quy tắc Crowd-Completion.
+  - **Ghi hộ (Manager Proxy)**: Có sẵn công tắc bật chế độ Tổ trưởng ghi hộ nhân viên, phân định rõ `Employee` và `RecordedBy`.
 - **Đường dẫn file**: `d:/Claude/1_Projects/scan/02_Source/nhatky/index.html`
 
 ---

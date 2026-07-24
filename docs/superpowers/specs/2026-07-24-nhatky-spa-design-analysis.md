@@ -29,9 +29,7 @@ flowchart TD
         T2[Tab 2: Checklist Vận Hành - Golf & Bơm]
         T3[Tab 3: Danh Bạ Nhân Sự]
         T4[Tab 4: Cá Nhân & Cài Đặt]
-        M1[Modal 1-Touch: Ghi Nhanh Việc Nhỏ]
-        M2[Modal Multi-Phase: Chi Tiết & Gán Người]
-        M3[Modal Manager Proxy: Ghi Hộ Nhân Viên]
+        M1[Modal Hợp Nhất: Chi Tiết & Ghi Nhận Công Việc]
     end
 
     subgraph Backend Services - Google Apps Script
@@ -41,10 +39,10 @@ flowchart TD
     end
 
     UI --> T1 & T2 & T3 & T4
-    T1 --> M1 & M2 & M3
+    T1 --> M1
     T2 -->|Save/Submit Checklist| GAS2
     GAS2 -->|Auto Violation Detect| GAS1
-    M1 & M2 & M3 -->|Save Plan / WorkLog| GAS1 & GAS3
+    M1 -->|Save Plan / WorkLog / Audit| GAS1 & GAS3
 ```
 
 ---
@@ -66,14 +64,13 @@ flowchart TD
   - `RecordedBy`: Tên người đang đăng nhập bấm Lưu (vd: `Tổ trưởng Hậu DV`).
   - UI hiển thị: *"Thắng NQ (Ghi hộ bởi Tổ trưởng Hậu DV lúc 14:20)"*.
 
-### 3.3 Quy trình 2 Luồng Công Việc
-1. **Luồng 1-Touch (Việc Nhỏ / Phát Sinh)**:
-   - Form gồm: Tên việc + Vị trí + Chụp 1-2 Ảnh kết quả $\rightarrow$ Bấm **"Lưu & Hoàn Thành"**.
-   - Backend tự động ghi `Status = Hoàn thành`, `Lifecycle = closed`, `Labels = Đã chốt sổ` và lưu WorkLog.
-2. **Luồng Multi-Phase (Việc Phức Tạp / Nhiều Giai Đoạn)**:
-   - Chia thành mảng `Phases` $\rightarrow$ `Steps`.
-   - Mỗi step có mảng `assignees` (ví dụ: `["Thắng NQ", "Hậu DV"]`).
-   - Quy tắc **Crowd-Completion**: `doneByPeople` lưu danh sách KTV đã hoàn thành phần việc của họ. Khi `doneByPeople.length == assignees.length` $\rightarrow$ Step tự chuyển `done = true`.
+### 3.3 Form Nhập Liệu Hợp Nhất (Unified Task Entry)
+Sử dụng **1 Màn hình Modal duy nhất** thay vì phân mảnh:
+- **Chế độ Mặc định (Việc Nhỏ / Nhanh)**: Form thu gọn chỉ gồm Tên việc, Vị trí, và Chụp ảnh. Bấm "Lưu & Hoàn Thành" sẽ tự chốt sổ.
+- **Chế độ Mở rộng (Multi-Phase)**: Có nút "Hiện thêm" để xổ ra các trường bổ sung: `Phases`, `Steps`, `Assignees`. Áp dụng quy tắc **Crowd-Completion** (tự động chuyển trạng thái `done = true` khi tất cả người được gán hoàn thành).
+- **Tích hợp Ghi Hộ**: Form cũng chứa luôn công tắc Ghi hộ dành riêng cho Role Manager.
+
+*(Chi tiết xem thêm tại `2026-07-24-unified-task-checklist-design.md`)*
 
 ---
 
