@@ -319,6 +319,7 @@
                   <option value="Thắng NQ">Thắng NQ</option>
                   <option value="Hậu DV">Hậu DV</option>
                   <option value="Hoàng HV">Hoàng HV</option>
+                  <option value="Phong ND">Phong ND</option>
                 </select>
               </div>
             </div>
@@ -329,89 +330,266 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    const zaloPlans = [
-      {
-        id: "P1",
-        title: "Kiểm tra nhiệt độ đầu cốt tủ MSB-B1",
-        sender: "Thắng NQ",
-        taskNote: "Đang đo camera nhiệt và siết ốc cốt",
-        time: "1 hour",
-        progressBadge: "1/2"
-      },
-      {
-        id: "P2",
-        title: "[SỰ CỐ CHECKLIST] Bơm tưới TB1 tụt áp gas",
-        sender: "Checklist System",
-        taskNote: "Phát hiện tụt áp khi chốt ca sáng",
-        time: "1 second",
-        progressBadge: "0/1"
-      },
-      {
-        id: "P3",
-        title: "Bảo dưỡng định kỳ máy phát điện dự phòng 1000kVA",
-        sender: "Hậu DV",
-        taskNote: "Đã kiểm tra mức dầu và ắc quy",
-        time: "14:20",
-        progressBadge: "3/3"
-      }
-    ];
-
-    function renderZaloListView() {
-      const container = document.getElementById("zaloListView");
-      container.innerHTML = zaloPlans.map(item => `
-        <div class="zalo-item" onclick="openTaskDetail('${item.id}')">
-          <div class="zalo-avatar">${item.sender.charAt(0)}</div>
-          <div class="zalo-content">
-            <div class="zalo-title">${item.title}</div>
-            <div class="zalo-subtitle">${item.sender}: ${item.taskNote}</div>
-          </div>
-          <div class="zalo-status-col">
-            <div class="zalo-time">${item.time}</div>
-            <div class="zalo-unread-badge">${item.progressBadge}</div>
-          </div>
+  <!-- Modal Chi Tiết Công Việc -->
+  <div class="modal fade" id="taskDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content border-0 shadow rounded-4">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold"><i class="bi bi-card-text me-2 text-primary"></i>Chi tiết công việc</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-      `).join("");
-    }
+        <div class="modal-body" id="taskDetailBody">
+          <!-- Render dynamically -->
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+          <button type="button" class="btn btn-success rounded-pill px-4" id="btnMarkDone">Hoàn thành</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    let quickModalInstance;
+  <!-- Shared CSS cho Toast notification -->
+  <link href="../css/shared.css" rel="stylesheet">
+  <script src="../js/config.js"></script>
+  <script src="../js/sso.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    let allPlans = [];
+    let currentTab = 'work';
+    let quickModalInstance, detailModalInstance;
+
     document.addEventListener("DOMContentLoaded", () => {
       quickModalInstance = new bootstrap.Modal(document.getElementById("quickTaskModal"));
-      renderZaloListView();
+      detailModalInstance = new bootstrap.Modal(document.getElementById("taskDetailModal"));
+      
+      const user = BD_SSO.getUser();
+      if (user) {
+        const workerSelect = document.getElementById("qtWorker");
+        if(workerSelect) {
+          // Prepend current user if not in list
+          let opts = Array.from(workerSelect.options).map(o => o.value);
+          if(!opts.includes(user.name)) {
+            const opt = document.createElement('option');
+            opt.value = user.name;
+            opt.text = user.name;
+            workerSelect.add(opt, workerSelect[0]);
+          }
+          workerSelect.value = user.name;
+        }
+      } else {
+        BD_SSO.requireLogin();
+      }
+      
+      loadPlans();
 
       document.getElementById("qtIsProxy").addEventListener("change", (e) => {
         document.getElementById("qtProxyWorkerWrap").classList.toggle("d-none", !e.target.checked);
       });
 
-      document.getElementById("quickTaskForm").addEventListener("submit", (e) => {
+      document.getElementById("quickTaskForm").addEventListener("submit", async (e) => {
         e.preventDefault();
         const task = document.getElementById("qtTask").value;
+        const area = document.getElementById("qtArea").value;
         const isProxy = document.getElementById("qtIsProxy").checked;
-        const sender = isProxy ? document.getElementById("qtWorker").value : "Tài khoản hiện tại";
+        
+        let currentUserInfo = BD_SSO.getUser();
+        let currentUserName = currentUserInfo ? (currentUserInfo.name || currentUserInfo.username) : "Unknown";
+        
+        const sender = isProxy ? document.getElementById("qtWorker").value : currentUserName;
+        const updatedBy = currentUserName;
 
-        zaloPlans.unshift({
-          id: "P-" + Date.now(),
-          title: task,
-          sender: sender,
-          taskNote: isProxy ? "(Tổ trưởng ghi hộ)" : "Vừa khởi tạo",
-          time: "1 second",
-          progressBadge: "0/1"
-        });
-
-        renderZaloListView();
-        quickModalInstance.hide();
-        document.getElementById("quickTaskForm").reset();
+        const payload = {
+          date: new Date().toISOString().split('T')[0],
+          task: task,
+          area: area,
+          assignee: sender,
+          updatedBy: updatedBy,
+          type: "Phát sinh",
+          status: "Đang làm",
+          priority: "Trung bình",
+          source: "NhatKy_GhiNhanh"
+        };
+        
+        try {
+          const btn = e.target.querySelector('button[type="submit"]');
+          const oldText = btn.innerHTML;
+          btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang lưu...';
+          btn.disabled = true;
+          
+          await window.bdsApiPost('savePlan', payload);
+          
+          btn.innerHTML = oldText;
+          btn.disabled = false;
+          
+          quickModalInstance.hide();
+          document.getElementById("quickTaskForm").reset();
+          if (window.bdsShowToast) window.bdsShowToast("Đã tạo công việc thành công!", "success");
+          loadPlans(); 
+        } catch(err) {
+          alert("Lỗi khi lưu: " + err.message);
+          const btn = e.target.querySelector('button[type="submit"]');
+          btn.innerHTML = 'Lưu & Tạo Việc';
+          btn.disabled = false;
+        }
       });
     });
 
+    async function loadPlans() {
+      const container = document.getElementById("zaloListView");
+      container.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div><p class="mt-2 text-muted small">Đang tải công việc từ Server...</p></div>';
+      
+      try {
+        let user = BD_SSO.getUser();
+        let username = user ? (user.username || user.name) : "";
+        const res = await window.bdsApiFetch('getPlans', { user: username });
+        if (res.status === 'success' && res.plans) {
+          allPlans = res.plans;
+          // Sort by date/time desc roughly
+          allPlans.sort((a,b) => {
+            let d1 = new Date(a.date + ' ' + (a.time||'00:00')).getTime();
+            let d2 = new Date(b.date + ' ' + (b.time||'00:00')).getTime();
+            return isNaN(d1) || isNaN(d2) ? 0 : d2 - d1;
+          });
+          renderZaloListView();
+        } else {
+          container.innerHTML = '<div class="text-center py-4 text-danger">Không tải được dữ liệu</div>';
+        }
+      } catch (err) {
+        container.innerHTML = '<div class="text-center py-4 text-danger">Lỗi kết nối: ' + err.message + '</div>';
+      }
+    }
+
     function switchSubTab(type) {
+      currentTab = type;
       document.getElementById("tabWork").classList.toggle("active", type === 'work');
+      document.getElementById("tabPlan").classList.toggle("active", type === 'plan');
       document.getElementById("tabChecklist").classList.toggle("active", type === 'checklist');
+      renderZaloListView();
+    }
+
+    function renderZaloListView() {
+      const container = document.getElementById("zaloListView");
+      
+      const filtered = allPlans.filter(p => {
+        const isChecklist = p.type === 'Checklist' || p.source === 'Checklist System' || (p.task && p.task.includes('SỰ CỐ CHECKLIST'));
+        if (currentTab === 'work') {
+          return p.status !== 'Hoàn thành' && p.status !== 'Đã hủy' && !isChecklist;
+        } else if (currentTab === 'plan') {
+          return p.type === 'Kế hoạch';
+        } else if (currentTab === 'checklist') {
+          return isChecklist;
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="text-center py-5 text-muted"><i class="bi bi-inbox fs-1" style="color: #ccc;"></i><p class="mt-2">Không có công việc nào</p></div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(item => {
+        const title = item.task || 'Không có tên';
+        const sender = item.assignee || item.updatedBy || 'System';
+        const avatarChar = sender.charAt(0).toUpperCase();
+        
+        let note = item.status;
+        if(item.area) note += ' - ' + item.area;
+        if(item.asset) note += ' (' + item.asset + ')';
+        
+        let timeStr = item.date;
+        if(item.time) timeStr += ' ' + item.time;
+        
+        let badge = "";
+        let badgeStyle = "background: #eef2ff; color: #4f46e5;";
+        if(item.planQty) {
+          badge = (item.doneQty || 0) + '/' + item.planQty;
+          if (item.doneQty >= item.planQty) badgeStyle = "background: #d1fae5; color: #059669;";
+        } else {
+          badge = item.status === 'Hoàn thành' ? 'OK' : item.status;
+          if (item.status === 'Hoàn thành') badgeStyle = "background: #d1fae5; color: #059669;";
+          else if (item.status === 'Khẩn cấp' || (item.priority && item.priority.includes('Khẩn'))) badgeStyle = "background: #fee2e2; color: #e51c23;";
+        }
+
+        return `
+        <div class="zalo-item" onclick="openTaskDetail('${item.id}')">
+          <div class="zalo-avatar-square">${avatarChar}</div>
+          <div class="zalo-content">
+            <div class="zalo-title">${title}</div>
+            <div class="zalo-subtitle">${sender}: ${note}</div>
+          </div>
+          <div class="zalo-status-col">
+            <div class="zalo-time">${timeStr}</div>
+            <div class="zalo-status-icon-tag" style="${badgeStyle}">${badge}</div>
+          </div>
+        </div>
+        `;
+      }).join("");
     }
 
     function openQuickTaskModal() { quickModalInstance.show(); }
-    function openTaskDetail(id) { alert("Mở chi tiết công việc " + id); }
+    
+    function openTaskDetail(id) {
+      const plan = allPlans.find(p => p.id === id);
+      if(!plan) return;
+      
+      const body = document.getElementById("taskDetailBody");
+      
+      let badgeClass = "bg-secondary";
+      if(plan.status === 'Hoàn thành') badgeClass = "bg-success";
+      else if(plan.status === 'Đang làm') badgeClass = "bg-primary";
+      else if(plan.status === 'Chưa làm') badgeClass = "bg-warning text-dark";
+
+      body.innerHTML = `
+        <h6 class="fw-bold mb-2 fs-5 lh-base">${plan.task}</h6>
+        <p class="text-muted small mb-3">Mã: ${plan.id}</p>
+        
+        <div class="mb-2"><span class="text-muted small d-inline-block" style="width: 100px;">Người nhận:</span> <span class="fw-semibold">${plan.assignee || plan.updatedBy || 'N/A'}</span></div>
+        <div class="mb-2"><span class="text-muted small d-inline-block" style="width: 100px;">Trạng thái:</span> <span class="badge ${badgeClass} rounded-pill px-2 py-1">${plan.status}</span></div>
+        <div class="mb-2"><span class="text-muted small d-inline-block" style="width: 100px;">Thời gian:</span> <span class="fw-semibold">${plan.date} ${plan.time || ''}</span></div>
+        ${plan.area ? `<div class="mb-2"><span class="text-muted small d-inline-block" style="width: 100px;">Khu vực:</span> <span class="fw-semibold">${plan.area}</span></div>` : ''}
+        ${plan.asset ? `<div class="mb-2"><span class="text-muted small d-inline-block" style="width: 100px;">Thiết bị:</span> <span class="fw-semibold">${plan.asset}</span></div>` : ''}
+        ${plan.sourceText ? `<div class="mt-3 p-3 bg-light rounded-3 small border"><i>Ghi chú / Nguồn:</i><br/>${plan.sourceText}</div>` : ''}
+      `;
+      
+      const btnDone = document.getElementById("btnMarkDone");
+      if (plan.status === 'Hoàn thành') {
+        btnDone.style.display = 'none';
+      } else {
+        btnDone.style.display = 'block';
+        btnDone.onclick = async () => {
+          try {
+            btnDone.innerHTML = '<span class="spinner-border spinner-border-sm"></span>...';
+            btnDone.disabled = true;
+            
+            let currentUserInfo = BD_SSO.getUser();
+            let currentUserName = currentUserInfo ? (currentUserInfo.name || currentUserInfo.username) : "Unknown";
+            
+            await window.bdsApiPost('savePlan', {
+              id: plan.id,
+              status: "Hoàn thành",
+              updatedBy: currentUserName,
+              date: plan.date,
+              task: plan.task
+            });
+            
+            btnDone.innerHTML = 'Hoàn thành';
+            btnDone.disabled = false;
+            detailModalInstance.hide();
+            if (window.bdsShowToast) window.bdsShowToast("Đã cập nhật trạng thái Hoàn thành!", "success");
+            loadPlans();
+          } catch(e) {
+            alert("Lỗi cập nhật: " + e.message);
+            btnDone.innerHTML = 'Hoàn thành';
+            btnDone.disabled = false;
+          }
+        };
+      }
+      
+      detailModalInstance.show();
+    }
   </script>
 </body>
 </html>
