@@ -7,6 +7,18 @@
 
 ---
 
+## Kết luận Bước 1 (Brainstorming) — 2026-07-25
+
+Đã hỏi chốt phạm vi trước khi lập plan (Bước 2). Kết quả:
+
+- **Phạm vi xác nhận: cả 5 mục A1-A5 + Phần B (Golf Phase 5) đều nằm trong kế hoạch** — không mục nào bị cắt/hoãn vĩnh viễn. Chưa xếp thứ tự làm trước/sau giữa các mục.
+- **A1 (Giai đoạn/Bước + Crowd-Completion) — cách tiếp cận CHƯA CHỐT.** Có 2 hướng còn mở khi cần quay lại quyết định:
+  1. Port lại logic P1-P4 cũ (đã verify Chrome thật ở commit `e0dfa93`), chỉ đổi lớp UI cho khớp modal chat-bubble — nhanh, rủi ro thấp.
+  2. Thiết kế lại từ đầu để mỗi bước/giai đoạn hiện tự nhiên như tin nhắn trong khung chat — mất công hơn, hợp thẩm mỹ Zalo hơn.
+- **Bước tiếp theo:** vì chưa xếp thứ tự, **Bước 2 (Viết Implementation Plan) sẽ chỉ bắt đầu khi có 1 mục cụ thể được chọn làm trước** — plan chi tiết (đường dẫn file, sub-task, lệnh verification) cần 1 phạm vi bị chặn (bounded), không viết plan cho cả 6 mục cùng lúc.
+
+---
+
 ## Hiện trạng thật của `nhatky/index.html` (kiểm tra trực tiếp code, 2026-07-25)
 
 **Đã có:**
