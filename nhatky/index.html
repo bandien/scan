@@ -480,6 +480,9 @@
   
   <script>
     let allPlans = [];
+    let staffList = [];
+    let staffDirectory = [];
+    let currentOpenPlanId = null;
     let currentTab = 'work';
     let quickModalInstance, detailModalInstance;
 
@@ -489,14 +492,6 @@
       
       const user = BD_SSO.getUser();
       if (user) {
-        const workerSelect = document.getElementById("qtWorker");
-        if(workerSelect) {
-          // Prepend current user if not in list
-          let opts = Array.from(workerSelect.options).map(o => o.value);
-          if(!opts.includes(user.name)) {
-            const opt = document.createElement('option');
-            opt.value = user.name;
-            opt.text = user.name;
             workerSelect.add(opt, workerSelect[0]);
           }
           workerSelect.value = user.name;
@@ -654,6 +649,7 @@
     function openQuickTaskModal() { quickModalInstance.show(); }
     
     function openTaskDetail(id) {
+      currentOpenPlanId = id;
       const plan = allPlans.find(p => p.id === id);
       if(!plan) return;
       
@@ -721,6 +717,8 @@
           </div>
         `;
       }
+      
+      html += renderPhasesAndSteps(plan);
       
       body.innerHTML = html;
       
@@ -799,6 +797,463 @@
       detailModalInstance.show();
       // Scroll to bottom after show
       setTimeout(() => { body.scrollTop = body.scrollHeight; }, 300);
+    }
+
+    // ===== Task 2: Danh bạ (staffDirectory) Helpers =====
+    async function loadStaff() {
+      staffList = JSON.parse(localStorage.getItem("bandien_nhatky_staff_v2") || "[]");
+      staffDirectory = JSON.parse(localStorage.getItem("bandien_nhatky_staff_directory_v1") || "[]");
+
+      if (!staffDirectory.length) {
+        try {
+          const res = await fetch("../danhba_chuan_hoa.json", { cache: "no-cache" });
+          if (res.ok) {
+            const list = await res.json();
+            staffDirectory = list.map(person => ({
+              username: String(person.id || person.empId || "").trim(),
+              name: String(person.fullName || "").trim(),
+              shortName: String(person.commonName || "").trim(),
+              phone: String(person.phone || "").trim(),
+              dept: String(person.dept || person.toNhom || "").trim(),
+              position: String(person.chucDanh || "").trim(),
+              labels: String(person.toNhom || person.dept || "Public").trim()
+            })).filter(p => p.name);
+            staffList = staffDirectory.map(p => p.name).filter(Boolean).sort();
+          }
+        } catch (_) {}
+      }
+
+      try {
+        const userStr = localStorage.getItem("currentUser");
+        const curUser = userStr ? JSON.parse(userStr) : {};
+        if (typeof bdsApiFetch !== 'undefined') {
+          const data = await bdsApiFetch('getStaff', { role: curUser.role || '', team: curUser.teams || curUser.dept || '' }, { timeout: 10000, retries: 2 });
+          if (data && data.status === "success" && Array.isArray(data.staff)) {
+            staffDirectory = data.staff.map(person => ({
+              username: String(person.username || person.id || "").trim(),
+              name: String(person.fullName || person.name || person.username || "").trim(),
+              shortName: String(person.shortName || person.commonName || person.short_name || "").trim(),
+              phone: String(person.phone || "").trim(),
+              dept: String(person.dept || "").trim(),
+              position: String(person.position || "").trim(),
+              labels: String(person.labels || person.dept || "Public").trim()
+            })).filter(person => person.name || person.username);
+            staffList = staffDirectory.map(person => person.name || person.username).filter(Boolean).sort();
+            localStorage.setItem("bandien_nhatky_staff_v2", JSON.stringify(staffList));
+            localStorage.setItem("bandien_nhatky_staff_directory_v1", JSON.stringify(staffDirectory));
+            
+            if (detailModalInstance && detailModalInstance._isShown && currentOpenPlanId) {
+               openTaskDetail(currentOpenPlanId);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("loadStaff error", error);
+      }
+    }
+
+    function getShortName(fullName) {
+      if (!fullName) return "";
+      const raw = String(fullName).trim();
+      if (!raw) return "";
+
+      const person = staffDirectory.find(p =>
+        (p.name && p.name.toLowerCase() === raw.toLowerCase()) ||
+        (p.username && p.username.toLowerCase() === raw.toLowerCase()) ||
+        (p.shortName && p.shortName.toLowerCase() === raw.toLowerCase())
+      );
+
+      if (person && person.shortName && person.shortName.trim()) {
+        const customShort = person.shortName.trim();
+        const duplicates = staffDirectory.filter(p => p.shortName && p.shortName.trim().toLowerCase() === customShort.toLowerCase());
+        if (duplicates.length <= 1) return customShort;
+        return formatStandardShortName(person.name || raw);
+      }
+      return formatStandardShortName(raw);
+    }
+
+    function knownPeopleNames() {
+      const names = new Set(staffList);
+      allPlans.flatMap(p => String(p.assignee || "").split(",")).forEach(n => names.add(n.trim()));
+      allPlans.flatMap(p => allPlanSteps(p)).forEach(step => (step.assignees || []).forEach(n => names.add(String(n || "").trim())));
+      return [...names].filter(Boolean).sort();
+    }
+
+    function filterNamesByTag(names, tagVal) {
+      const val = String(tagVal || "").trim().toLowerCase();
+      if (!val) return names;
+      const matches = names.filter(name => {
+        const person = staffDirectory.find(p =>
+          (p.name && p.name.toLowerCase() === name.toLowerCase()) ||
+          (p.username && p.username.toLowerCase() === name.toLowerCase())
+        );
+        if (!person) return false;
+        const dept = (person.dept || "").toLowerCase();
+        const labels = (person.labels || "").toLowerCase();
+        return (dept && (dept.includes(val) || val.includes(dept))) || (labels && (labels.includes(val) || val.includes(labels)));
+      });
+      return matches.length > 0 ? matches : names;
+    }
+
+    // ===== Task 3 & 4: CRUD Phase/Step & UI Rendering =====
+    let phaseAccordionPlanId = null;
+    const openPhaseIds = new Set();
+    function ensurePhaseAccordion(planId, currentId) {
+      if (phaseAccordionPlanId !== planId) {
+        phaseAccordionPlanId = planId;
+        openPhaseIds.clear();
+        if (currentId) openPhaseIds.add(currentId);
+      }
+    }
+    window.togglePhaseExpand = function (planId, phaseId) {
+      if (openPhaseIds.has(phaseId)) openPhaseIds.delete(phaseId);
+      else openPhaseIds.add(phaseId);
+      openTaskDetail(planId);
+    };
+    function phaseWhoText(phase) {
+      const steps = phase.steps || [];
+      if (phase.status === "done") {
+        const bys = [...new Set(steps.filter(s => s.doneBy).map(s => s.doneBy))];
+        return bys.length ? bys.map(getShortName).join(", ") + " · đã xong" : "đã xong";
+      }
+      const names = [...new Set(steps.flatMap(s => s.assignees || []).filter(Boolean))];
+      if (!names.length) return "";
+      return names.map((n, i) => (i === 0 ? "★" : "○") + getShortName(n)).join(" ");
+    }
+
+    async function updatePlanPhases(planId, mutateFn) {
+      const plan = allPlans.find(p => p.id === planId);
+      if (!plan) return;
+      const phases = planPhases(plan);
+      mutateFn(phases);
+      plan.phases = JSON.stringify(phases);
+      const steps = allPlanSteps(plan);
+      if (steps.length > 0) plan.status = steps.every(s => s.done) ? "Hoàn thành" : "Đang làm";
+      
+      const user = typeof BD_SSO !== 'undefined' ? BD_SSO.getUser() : null;
+      const currentUserName = user ? (user.fullName || user.name) : "KTV";
+      
+      try {
+        await window.bdsApiPost('savePlan', {
+          id: plan.id, phases: plan.phases, status: plan.status,
+          date: plan.date, task: plan.task, updatedBy: currentUserName
+        });
+      } catch (e) { console.error("Lỗi cập nhật phase:", e); }
+      openTaskDetail(planId); 
+    }
+
+    window.addPhase = function (planId) {
+      const name = prompt("Tên giai đoạn mới (vd Khảo sát, Vật tư, Thi công, Nghiệm thu):");
+      if (!name || !name.trim()) return;
+      updatePlanPhases(planId, phases => {
+        phases.push({
+          id: "PHASE-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+          name: name.trim(), order: phases.length + 1, status: "todo", steps: []
+        });
+      });
+    };
+
+    window.renamePhase = function (planId, phaseId) {
+      const plan = allPlans.find(item => item.id === planId);
+      const phase = plan && planPhases(plan).find(p => p.id === phaseId);
+      if (!phase) return;
+      const name = prompt("Tên giai đoạn:", phase.name || "");
+      if (name === null || !name.trim()) return;
+      updatePlanPhases(planId, phases => {
+        const ph = phases.find(p => p.id === phaseId);
+        if (ph) ph.name = name.trim();
+      });
+    };
+
+    window.deletePhase = function (planId, phaseId) {
+      if (!confirm("Xoá giai đoạn này? Các bước trong giai đoạn sẽ bị xoá theo.")) return;
+      updatePlanPhases(planId, phases => {
+        const index = phases.findIndex(p => p.id === phaseId);
+        if (index >= 0) phases.splice(index, 1);
+      });
+    };
+
+    window.addPhaseStep = function (planId, phaseId) {
+      const title = prompt("Tên bước mới:");
+      if (!title || !title.trim()) return;
+      updatePlanPhases(planId, phases => {
+        const phase = phases.find(p => p.id === phaseId);
+        if (!phase) return;
+        if (!phase.steps) phase.steps = [];
+        phase.steps.push({
+          id: "STEP-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+          title: title.trim(), assignees: [], done: false, doneAt: "", doneBy: "", photos: []
+        });
+        rollUpPhaseStatus_(phase);
+      });
+    };
+
+    window.renamePhaseStep = function (planId, phaseId, stepId) {
+      const plan = allPlans.find(item => item.id === planId);
+      const phase = plan && planPhases(plan).find(p => p.id === phaseId);
+      const step = phase && (phase.steps || []).find(s => s.id === stepId);
+      if (!step) return;
+      const title = prompt("Tên bước:", step.title || "");
+      if (title === null || !title.trim()) return;
+      updatePlanPhases(planId, phases => {
+        const ph = phases.find(p => p.id === phaseId);
+        const s = ph && (ph.steps || []).find(x => x.id === stepId);
+        if (s) s.title = title.trim();
+      });
+    };
+
+    window.deletePhaseStep = function (planId, phaseId, stepId) {
+      if (!confirm("Xoá bước này?")) return;
+      updatePlanPhases(planId, phases => {
+        const phase = phases.find(p => p.id === phaseId);
+        if (!phase) return;
+        const index = (phase.steps || []).findIndex(s => s.id === stepId);
+        if (index >= 0) phase.steps.splice(index, 1);
+        rollUpPhaseStatus_(phase);
+      });
+    };
+
+    window.togglePhaseStepDone = function (planId, phaseId, stepId) {
+      updatePlanPhases(planId, phases => {
+        const phase = phases.find(p => p.id === phaseId);
+        const step = phase && (phase.steps || []).find(s => s.id === stepId);
+        if (!step) return;
+        step.done = !step.done;
+        step.doneAt = step.done ? new Date().toISOString() : "";
+        const user = typeof BD_SSO !== 'undefined' ? BD_SSO.getUser() : null;
+        step.doneBy = step.done ? (user ? (user.fullName || user.name) : "") : "";
+        step.doneByPeople = step.done ? (step.assignees || []).slice() : [];
+        rollUpPhaseStatus_(phase);
+      });
+    };
+
+    window.addPhaseStepAssignee = function (planId, phaseId, stepId, rawName) {
+      let name = rawName;
+      if (name === "__other__") name = prompt("Tên người thực hiện:") || "";
+      if (!name || !name.trim()) return;
+      updatePlanPhases(planId, phases => {
+        const phase = phases.find(p => p.id === phaseId);
+        const step = phase && (phase.steps || []).find(s => s.id === stepId);
+        if (!step) return;
+        if (!step.assignees) step.assignees = [];
+        if (!step.assignees.some(n => normalizePerson(n) === normalizePerson(name))) step.assignees.push(name.trim());
+      });
+    };
+
+    window.removePhaseStepAssignee = function (planId, phaseId, stepId, name) {
+      updatePlanPhases(planId, phases => {
+        const phase = phases.find(p => p.id === phaseId);
+        const step = phase && (phase.steps || []).find(s => s.id === stepId);
+        if (!step) return;
+        step.assignees = (step.assignees || []).filter(n => normalizePerson(n) !== normalizePerson(name));
+      });
+    };
+
+    function escapeAttr(str) {
+      return escapeHtml(str);
+    }
+
+    function phaseStepAssigneeEditorHtml(plan, phaseId, step) {
+      const names = step.assignees || [];
+      const chips = names.map(name => `
+        <span class="step-chip" title="${escapeAttr(name)}">${escapeHtml(getShortName(name))}<button type="button" aria-label="Bỏ ${escapeAttr(name)}" onclick="event.stopPropagation(); removePhaseStepAssignee('${escapeAttr(plan.id)}','${escapeAttr(phaseId)}','${escapeAttr(step.id)}','${escapeAttr(name)}')">&times;</button></span>
+      `).join("");
+      const taken = new Set(names.map(normalizePerson));
+      const options = filterNamesByTag(knownPeopleNames().filter(n => !taken.has(normalizePerson(n))), plan.team);
+      const selectTitle = plan.team ? `Lọc theo tổ: ${escapeAttr(plan.team)}` : "Gán người thực hiện";
+      const select = `
+        <select class="step-add-select" title="${selectTitle}" onclick="event.stopPropagation()" onchange="addPhaseStepAssignee('${escapeAttr(plan.id)}','${escapeAttr(phaseId)}','${escapeAttr(step.id)}', this.value); this.value='';">
+          <option value="">+ Gán người</option>
+          ${options.map(n => `<option value="${escapeAttr(n)}">${escapeHtml(getShortName(n))}</option>`).join("")}
+          <option value="__other__">➔ Nhập tên khác...</option>
+        </select>`;
+      return `<div class="step-assignees">${chips}${select}</div>`;
+    }
+
+    function photoThumbsHtml(photos) {
+      const list = Array.isArray(photos) ? photos : [];
+      if (!list.length) return "";
+      return `<div class="photo-thumbs">${list.map(p => `
+        <a class="photo-thumb" href="${escapeAttr(p.url)}" target="_blank" rel="noopener" title="${escapeAttr(p.by || "")}${p.at ? " · " + escapeAttr(friendlyDate(String(p.at).slice(0, 10))) : ""}">
+          <img src="${escapeAttr(p.url)}" alt="Ảnh đính kèm" loading="lazy">
+        </a>`).join("")}</div>`;
+    }
+
+    function phaseStepRowHtml(plan, phase, step) {
+      return `
+        <div class="step-row${step.done ? " done" : ""}">
+          <button class="step-check${step.done ? " done" : ""}" type="button"
+                  title="${step.done ? "Bỏ đánh dấu xong" : "Đánh dấu xong"}"
+                  onclick="togglePhaseStepDone('${escapeAttr(plan.id)}','${escapeAttr(phase.id)}','${escapeAttr(step.id)}')">
+            <i class="bi ${step.done ? "bi-check-lg" : "bi-circle"}"></i>
+          </button>
+          <div class="step-body min-w-0">
+            <div class="step-title" onclick="renamePhaseStep('${escapeAttr(plan.id)}','${escapeAttr(phase.id)}','${escapeAttr(step.id)}')">${escapeHtml(step.title || "Bước chưa đặt tên")}</div>
+            ${phaseStepAssigneeEditorHtml(plan, phase.id, step)}
+            ${photoThumbsHtml(step.photos)}
+            ${stepPeopleProgressHtml(step)}
+          </div>
+          <div class="step-actions">
+            <button class="step-icon-btn text-danger" type="button" title="Xoá bước" onclick="deletePhaseStep('${escapeAttr(plan.id)}','${escapeAttr(phase.id)}','${escapeAttr(step.id)}')"><i class="bi bi-trash"></i></button>
+          </div>
+        </div>`;
+    }
+
+    function phaseCardBodyHtml(plan, phase, isCurrent) {
+      const steps = phase.steps || [];
+      const doneCount = steps.filter(s => s.done).length;
+      const dotClass = phase.status === "done" ? "done" : phase.status === "doing" ? "cur" : "todo";
+      const dotIcon = phase.status === "done" ? "bi-check-lg" : phase.status === "doing" ? "bi-play-fill" : "bi-circle";
+      const expanded = openPhaseIds.has(phase.id);
+      const who = phaseWhoText(phase);
+      return `
+        <div class="phase-block${isCurrent ? " phase-current" : ""}">
+          <div class="phase-head" onclick="togglePhaseExpand('${escapeAttr(plan.id)}','${escapeAttr(phase.id)}')">
+            <span class="phase-dot phase-dot-${dotClass}"><i class="bi ${dotIcon}"></i></span>
+            <div class="phase-main">
+              <div class="phase-name">${escapeHtml(phase.name || "Giai đoạn")}</div>
+              ${who ? `<div class="phase-who">${escapeHtml(who)}</div>` : ""}
+            </div>
+            <span class="phase-count">${steps.length ? `${doneCount}/${steps.length}` : ""}</span>
+            <i class="bi bi-chevron-${expanded ? "up" : "down"} phase-caret"></i>
+          </div>
+          ${expanded ? `
+            ${steps.length ? `<div class="step-list">${steps.map(step => phaseStepRowHtml(plan, phase, step)).join("")}</div>` : ""}
+            <div class="phase-foot">
+              <button class="add-step-link" type="button" onclick="event.stopPropagation(); addPhaseStep('${escapeAttr(plan.id)}','${escapeAttr(phase.id)}')"><i class="bi bi-plus-lg"></i> Thêm bước</button>
+              <button class="phase-mini" type="button" title="Đổi tên giai đoạn" onclick="event.stopPropagation(); renamePhase('${escapeAttr(plan.id)}','${escapeAttr(phase.id)}')"><i class="bi bi-pencil"></i></button>
+              <button class="phase-mini text-danger" type="button" title="Xoá giai đoạn" onclick="event.stopPropagation(); deletePhase('${escapeAttr(plan.id)}','${escapeAttr(phase.id)}')"><i class="bi bi-trash"></i></button>
+            </div>
+          ` : ""}
+        </div>`;
+    }
+
+    function renderPhasesAndSteps(plan) {
+      const phases = planPhases(plan).slice().sort((a, b) => (a.order || 0) - (b.order || 0));
+      if (phases.length === 0) return `<button class="btn btn-sm btn-outline-primary rounded-pill mb-3" type="button" onclick="addPhase('${escapeAttr(plan.id)}')"><i class="bi bi-plus-lg"></i> Thêm giai đoạn</button>`;
+      const totalSteps = phases.reduce((n, ph) => n + (ph.steps || []).length, 0);
+      const doneSteps = phases.reduce((n, ph) => n + (ph.steps || []).filter(s => s.done).length, 0);
+      const firstDoing = phases.find(p => p.status === "doing");
+      const firstTodo = phases.find(p => p.status !== "done");
+      const current = firstDoing || firstTodo || phases[phases.length - 1];
+      const currentIndex = current ? phases.findIndex(p => p.id === current.id) : -1;
+      ensurePhaseAccordion(plan.id, current && current.id);
+      return `
+        <div class="d-sec phases-container">
+          <div class="d-flex align-items-center justify-content-between gap-2">
+            <div class="d-lab mb-0"><span class="n">✓</span>Giai đoạn &amp; bước${totalSteps ? ` — GĐ ${currentIndex + 1}/${phases.length} · ${doneSteps}/${totalSteps} bước` : ` (${phases.length})`}</div>
+            <button class="btn btn-sm btn-outline-primary rounded-pill" type="button" onclick="addPhase('${escapeAttr(plan.id)}')"><i class="bi bi-plus-lg"></i> Thêm giai đoạn</button>
+          </div>
+          <div class="phase-list mt-2">${phases.map(phase => phaseCardBodyHtml(plan, phase, current && phase.id === current.id)).join("")}</div>
+        </div>`;
+    }
+
+    // ===== Giai Đoạn & Bước Helpers (Ported from P4) =====
+    function normalizePerson(value) {
+      return String(value || "").trim().toLowerCase();
+    }
+
+    function formatStandardShortName(rawName) {
+      if (!rawName) return "";
+      const raw = String(rawName).trim();
+      if (!raw) return "";
+
+      const parts = raw.split(/\s+/);
+      if (parts.length <= 2) return raw; // Ví dụ "Thắng NQ", "Hậu DV" -> đã ngắn gọn chuẩn
+
+      const mainName = parts[parts.length - 1]; // "Thắng", "Hậu"
+      const initials = parts.slice(0, parts.length - 1).map(p => p.charAt(0).toUpperCase()).join("");
+      return `${mainName} ${initials}`; // "Thắng NQ", "Hậu DV"
+    }
+
+    function planPhases(plan) {
+      if (!plan || !plan.phases) return [];
+      try {
+        const parsed = JSON.parse(plan.phases);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (e) { return []; }
+    }
+
+    function allPlanSteps(plan) {
+      return planPhases(plan).flatMap(ph => ph.steps || []);
+    }
+
+    function findAnyStep(plan, stepId) {
+      if (!plan || !stepId) return null;
+      for (const ph of planPhases(plan)) {
+        const found = (ph.steps || []).find(s => s.id === stepId);
+        if (found) return found;
+      }
+      return null;
+    }
+
+    function findStepWithPhase(plan, stepId) {
+      if (!plan || !stepId) return null;
+      for (const ph of planPhases(plan)) {
+        const found = (ph.steps || []).find(s => s.id === stepId);
+        if (found) return { step: found, phaseName: ph.name || "" };
+      }
+      return null;
+    }
+
+    function stepDoneInfo(step) {
+      const assignees = (step && step.assignees) || [];
+      const doneNames = (step && step.doneByPeople) || [];
+      const doneSet = new Set(doneNames.map(normalizePerson));
+      const total = assignees.length;
+      const doneCount = total ? assignees.filter(a => doneSet.has(normalizePerson(a))).length : (step && step.done ? 1 : 0);
+      return { assignees, doneNames, total, doneCount, allDone: Boolean(step && step.done) };
+    }
+
+    function markStepDoneByPeople(step, people, fallbackBy) {
+      if (!step) return;
+      const wasDone = step.done === true;
+      if (!Array.isArray(step.doneByPeople)) step.doneByPeople = [];
+      const names = (people && people.length ? people : [fallbackBy]).filter(Boolean);
+      names.forEach(nm => {
+        if (!step.doneByPeople.some(n => normalizePerson(n) === normalizePerson(nm))) step.doneByPeople.push(nm);
+      });
+      const assignees = step.assignees || [];
+      const doneSet = new Set(step.doneByPeople.map(normalizePerson));
+      const allDone = assignees.length === 0 ? true : assignees.every(a => doneSet.has(normalizePerson(a)));
+      step.done = wasDone || allDone;
+      step.doneAt = new Date().toISOString();
+      step.doneBy = names[names.length - 1] || fallbackBy || "";
+    }
+
+    function escapeHtml(unsafe) {
+      if (!unsafe) return "";
+      return String(unsafe).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    function friendlyDate(isoDate) {
+      if (!isoDate) return "";
+      const d = new Date(isoDate);
+      if (isNaN(d)) return isoDate;
+      const t = new Date();
+      if (d.toDateString() === t.toDateString()) return "Hôm nay";
+      t.setDate(t.getDate() - 1);
+      if (d.toDateString() === t.toDateString()) return "Hôm qua";
+      return d.toLocaleDateString('vi-VN');
+    }
+
+    function stepPeopleProgressHtml(step) {
+      const info = stepDoneInfo(step);
+      if (step.done) {
+        const by = step.doneBy ? escapeHtml(getShortName(step.doneBy)) + " đã xong" : "Đã xong";
+        return `<div class="step-done-note"><i class="bi bi-check2-circle me-1"></i>${by}${step.doneAt ? " · " + friendlyDate(step.doneAt.slice(0, 10)) : ""}</div>`;
+      }
+      if (info.total > 1 && info.doneCount > 0) {
+        const doneList = (info.doneNames || []).map(n => escapeHtml(getShortName(n))).join(", ");
+        return `<div class="step-progress-people"><i class="bi bi-people me-1"></i>${info.doneCount}/${info.total} người đã xong${doneList ? " · " + doneList : ""}</div>`;
+      }
+      return "";
+    }
+
+    function rollUpPhaseStatus_(phase) {
+      if (!phase) return;
+      const steps = phase.steps || [];
+      phase.status = steps.length === 0 ? "todo" : steps.every(s => s.done) ? "done" : steps.some(s => s.done) ? "doing" : "todo";
     }
   </script>
 </body>
