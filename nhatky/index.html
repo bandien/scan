@@ -402,23 +402,64 @@
               <label class="form-label small fw-bold">Vị trí / Khu vực</label>
               <input type="text" id="qtArea" class="form-control" placeholder="Ví dụ: Tầng hầm B1...">
             </div>
-            <div class="mb-3 p-2 bg-light rounded-3 border" id="proxyLoggingSection">
-              <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" id="qtIsProxy">
-                <label class="form-check-input-label small fw-bold text-primary" for="qtIsProxy">
-                  Tổ trưởng / Quản lý ghi hộ cho nhân viên
-                </label>
+            
+            <div class="mb-3 text-center">
+              <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-4" id="btnToggleExtendedInfo" onclick="toggleExtendedInfo()">
+                Mở rộng tuỳ chọn <i class="bi bi-chevron-down ms-1" id="iconToggleExtended"></i>
+              </button>
+            </div>
+
+            <div id="extendedInfo" class="d-none">
+              <div class="mb-3">
+                <label class="form-label small fw-bold">Thiết bị (Asset)</label>
+                <input type="text" id="qtAsset" class="form-control" placeholder="Tên thiết bị...">
               </div>
-              <div class="mt-2 d-none" id="qtProxyWorkerWrap">
-                <select id="qtWorker" class="form-select form-select-sm">
-                  <option value="Thắng NQ">Thắng NQ</option>
-                  <option value="Hậu DV">Hậu DV</option>
-                  <option value="Hoàng HV">Hoàng HV</option>
-                  <option value="Phong ND">Phong ND</option>
+              <div class="row mb-3">
+                <div class="col-6">
+                  <label class="form-label small fw-bold">Loại việc</label>
+                  <select id="qtType" class="form-select">
+                    <option value="Phát sinh">Phát sinh</option>
+                    <option value="Kế hoạch">Kế hoạch</option>
+                    <option value="Chỉ đạo">Chỉ đạo</option>
+                  </select>
+                </div>
+                <div class="col-6">
+                  <label class="form-label small fw-bold">Độ ưu tiên</label>
+                  <select id="qtPriority" class="form-select">
+                    <option value="Trung bình">Trung bình</option>
+                    <option value="Cao">Cao</option>
+                    <option value="Thấp">Thấp</option>
+                  </select>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label small fw-bold">Gán người thực hiện</label>
+                <select id="qtAssignee" class="form-select">
+                  <option value="">Tự động (Hoặc chọn...)</option>
+                  <!-- render dynamically -->
                 </select>
               </div>
+
+              <div class="mb-3 p-2 bg-light rounded-3 border" id="proxyLoggingSection">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="qtIsProxy" onchange="document.getElementById('qtProxyWorkerWrap').classList.toggle('d-none', !this.checked)">
+                  <label class="form-check-input-label small fw-bold text-primary" for="qtIsProxy">
+                    Tổ trưởng / Quản lý ghi hộ cho nhân viên
+                  </label>
+                </div>
+                <div class="mt-2 d-none" id="qtProxyWorkerWrap">
+                  <select id="qtWorker" class="form-select form-select-sm">
+                    <option value="">Chọn người...</option>
+                    <!-- render dynamically -->
+                  </select>
+                </div>
+              </div>
             </div>
-            <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold">Lưu & Tạo Việc</button>
+
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-primary flex-grow-1 rounded-pill py-2 fw-bold" id="btnSaveTask">Lưu & Đóng</button>
+              <button type="button" class="btn btn-outline-primary rounded-pill py-2 fw-bold px-3" id="btnSaveAndPhase" title="Lưu & Phân rã Giai đoạn/Bước" onclick="submitQuickTaskForm(true)"><i class="bi bi-list-task"></i> + Bước</button>
+            </div>
           </form>
         </div>
       </div>
@@ -491,66 +532,85 @@
       detailModalInstance = new bootstrap.Modal(document.getElementById("taskDetailModal"));
       
       const user = BD_SSO.getUser();
-      if (user) {
-            workerSelect.add(opt, workerSelect[0]);
-          }
-          workerSelect.value = user.name;
-        }
-      } else {
+      if (!user) {
         BD_SSO.requireLogin();
       }
       
       loadPlans();
 
-      document.getElementById("qtIsProxy").addEventListener("change", (e) => {
-        document.getElementById("qtProxyWorkerWrap").classList.toggle("d-none", !e.target.checked);
-      });
-
       document.getElementById("quickTaskForm").addEventListener("submit", async (e) => {
         e.preventDefault();
-        const task = document.getElementById("qtTask").value;
-        const area = document.getElementById("qtArea").value;
-        const isProxy = document.getElementById("qtIsProxy").checked;
+        const task = document.getElementById("qtTask").value.trim();
+        const area = document.getElementById("qtArea").value.trim();
+        const asset = document.getElementById("qtAsset") ? document.getElementById("qtAsset").value.trim() : "";
+        const type = document.getElementById("qtType") ? document.getElementById("qtType").value : "Phát sinh";
+        const priority = document.getElementById("qtPriority") ? document.getElementById("qtPriority").value : "Trung bình";
+        const assignee = document.getElementById("qtAssignee") ? document.getElementById("qtAssignee").value : "";
+        
+        const isProxy = document.getElementById("qtIsProxy") && document.getElementById("qtIsProxy").checked;
+        const proxyWorker = document.getElementById("qtWorker") ? document.getElementById("qtWorker").value : "";
         
         let currentUserInfo = BD_SSO.getUser();
-        let currentUserName = currentUserInfo ? (currentUserInfo.name || currentUserInfo.username) : "Unknown";
+        let currentUserName = currentUserInfo ? (currentUserInfo.fullName || currentUserInfo.name || currentUserInfo.username) : "KTV";
         
-        const sender = isProxy ? document.getElementById("qtWorker").value : currentUserName;
+        let finalSender = isProxy && proxyWorker ? proxyWorker : currentUserName;
         const updatedBy = currentUserName;
+
+        // Tự động gán assignee nếu chưa có
+        let finalAssignee = assignee || finalSender;
 
         const payload = {
           date: new Date().toISOString().split('T')[0],
           task: task,
           area: area,
-          assignee: sender,
+          asset: asset,
+          assignee: finalAssignee,
           updatedBy: updatedBy,
-          type: "Phát sinh",
+          type: type,
           status: "Đang làm",
-          priority: "Trung bình",
+          priority: priority,
           source: "NhatKy_GhiNhanh"
         };
         
         try {
-          const btn = e.target.querySelector('button[type="submit"]');
-          const oldText = btn.innerHTML;
-          btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang lưu...';
-          btn.disabled = true;
+          const btn = document.getElementById("btnSaveTask");
+          const oldText = btn ? btn.innerHTML : '';
+          if (btn) {
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+            btn.disabled = true;
+          }
+          if (document.getElementById("btnSaveAndPhase")) document.getElementById("btnSaveAndPhase").disabled = true;
           
-          await window.bdsApiPost('savePlan', payload);
+          const res = await window.bdsApiPost('savePlan', payload);
+          const newPlanId = res ? res.id : null;
           
-          btn.innerHTML = oldText;
-          btn.disabled = false;
+          if (btn) {
+            btn.innerHTML = oldText;
+            btn.disabled = false;
+          }
+          if (document.getElementById("btnSaveAndPhase")) document.getElementById("btnSaveAndPhase").disabled = false;
           
           quickModalInstance.hide();
-          document.getElementById("quickTaskForm").reset();
           if (window.bdsShowToast) window.bdsShowToast("Đã tạo công việc thành công!", "success");
-          loadPlans(); 
+          
+          await loadPlans(); 
+          
+          if (shouldOpenDetailAfterSave) {
+            const createdPlan = newPlanId ? allPlans.find(p => p.id === newPlanId) : allPlans[0]; 
+            if (createdPlan) {
+              openTaskDetail(createdPlan.id);
+            }
+          }
         } catch(err) {
           alert("Lỗi khi lưu: " + err.message);
-          const btn = e.target.querySelector('button[type="submit"]');
-          btn.innerHTML = 'Lưu & Tạo Việc';
-          btn.disabled = false;
+          const btn = document.getElementById("btnSaveTask");
+          if (btn) {
+            btn.innerHTML = 'Lưu & Đóng';
+            btn.disabled = false;
+          }
+          if (document.getElementById("btnSaveAndPhase")) document.getElementById("btnSaveAndPhase").disabled = false;
         }
+        shouldOpenDetailAfterSave = false;
       });
     });
 
@@ -646,7 +706,42 @@
       }).join("");
     }
 
-    function openQuickTaskModal() { quickModalInstance.show(); }
+    function toggleExtendedInfo() {
+      const ext = document.getElementById("extendedInfo");
+      const icon = document.getElementById("iconToggleExtended");
+      if (ext.classList.contains("d-none")) {
+        ext.classList.remove("d-none");
+        icon.classList.remove("bi-chevron-down");
+        icon.classList.add("bi-chevron-up");
+      } else {
+        ext.classList.add("d-none");
+        icon.classList.remove("bi-chevron-up");
+        icon.classList.add("bi-chevron-down");
+      }
+    }
+
+    function populateStaffDropdowns() {
+      const allNames = knownPeopleNames();
+      const qtAssignee = document.getElementById("qtAssignee");
+      const qtWorker = document.getElementById("qtWorker");
+      if (qtAssignee) qtAssignee.innerHTML = '<option value="">Tự động (Hoặc chọn...)</option>' + allNames.map(n => `<option value="${escapeAttr(n)}">${escapeHtml(getShortName(n))}</option>`).join("");
+      if (qtWorker) qtWorker.innerHTML = '<option value="">Chọn người...</option>' + allNames.map(n => `<option value="${escapeAttr(n)}">${escapeHtml(getShortName(n))}</option>`).join("");
+    }
+
+    let shouldOpenDetailAfterSave = false;
+    window.submitQuickTaskForm = function(openDetail) {
+      shouldOpenDetailAfterSave = openDetail;
+      document.getElementById("quickTaskForm").requestSubmit();
+    };
+
+    function openQuickTaskModal() {
+      populateStaffDropdowns();
+      document.getElementById("extendedInfo").classList.add("d-none");
+      if(document.getElementById("iconToggleExtended")) document.getElementById("iconToggleExtended").className = "bi bi-chevron-down ms-1";
+      document.getElementById("quickTaskForm").reset();
+      if(document.getElementById("qtProxyWorkerWrap")) document.getElementById("qtProxyWorkerWrap").classList.add("d-none");
+      quickModalInstance.show();
+    }
     
     function openTaskDetail(id) {
       currentOpenPlanId = id;
