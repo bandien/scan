@@ -994,14 +994,42 @@ function canWriteOnBehalf() {
 
 function populateAssigneeDatalist() {
   const dl = document.getElementById('staffDatalist');
-  if (!dl) return;
-  if (staffDirectory.length === 0) return;
-  dl.innerHTML = staffDirectory.map(s => {
+  if (!dl || staffDirectory.length === 0) return;
+
+  // Lấy tổ/nhóm của user đang đăng nhập
+  const user = (typeof BD_SSO !== 'undefined') ? BD_SSO.getUser() : null;
+  const myTeam = (user ? (user.teams || user.team || user.teamGroup || '') : '').trim().toLowerCase();
+
+  const makeOption = s => {
     const n = s.fullName || s.name || '';
+    const dept = s.dept || s.toNhom || s.team || '';
     const short = getShortName(n);
-    const dept = s.dept || s.team || '';
     return `<option value="${escapeAttr(n)}">${short}${dept ? ' · ' + dept : ''}</option>`;
-  }).join('');
+  };
+
+  if (!myTeam) {
+    // Không biết tổ → hiện tất cả như cũ
+    dl.innerHTML = staffDirectory.map(makeOption).join('');
+    return;
+  }
+
+  // Phân nhóm: cùng tổ / khác tổ
+  const sameTeam = staffDirectory.filter(s => {
+    const d = (s.dept || s.toNhom || s.team || '').toLowerCase();
+    return d.includes(myTeam) || myTeam.includes(d);
+  });
+  const otherTeam = staffDirectory.filter(s => {
+    const d = (s.dept || s.toNhom || s.team || '').toLowerCase();
+    return !(d.includes(myTeam) || myTeam.includes(d));
+  });
+
+  // datalist không hỗ trợ optgroup → dùng separator pseudo-option
+  let html = sameTeam.map(makeOption).join('');
+  if (otherTeam.length > 0) {
+    html += `<option disabled value="">── Tổ khác ──</option>`;
+    html += otherTeam.map(makeOption).join('');
+  }
+  dl.innerHTML = html;
 }
 
 async function loadStaffIntoSelect() {
