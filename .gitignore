@@ -6,3 +6,5 @@
 *secret*.json
 kh_ncc_raw.json
 audit_duplicates_report.json
+
+node_modules/
