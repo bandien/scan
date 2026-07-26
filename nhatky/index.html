@@ -58,7 +58,7 @@
       <span class="nk-bottomnav__icon">🗂</span>
       <span class="nk-bottomnav__label">Công việc</span>
     </a>
-    <a class="nk-bottomnav__item" href="../danhba.html" id="navContacts">
+    <a class="nk-bottomnav__item" href="#" id="navContacts" onclick="event.preventDefault(); navigateToContacts()">
       <span class="nk-bottomnav__icon">👥</span>
       <span class="nk-bottomnav__label">Danh bạ</span>
     </a>
@@ -117,7 +117,7 @@
       <span class="nk-bottomnav__icon">🗂</span>
       <span class="nk-bottomnav__label">Công việc</span>
     </a>
-    <a class="nk-bottomnav__item" href="../danhba.html">
+    <a class="nk-bottomnav__item" href="#" onclick="event.preventDefault(); navigateToContacts()">
       <span class="nk-bottomnav__icon">👥</span>
       <span class="nk-bottomnav__label">Danh bạ</span>
     </a>
@@ -159,7 +159,7 @@
       <span class="nk-bottomnav__icon">🗂</span>
       <span class="nk-bottomnav__label">Công việc</span>
     </a>
-    <a class="nk-bottomnav__item" href="../danhba.html">
+    <a class="nk-bottomnav__item" href="#" onclick="event.preventDefault(); navigateToContacts()">
       <span class="nk-bottomnav__icon">👥</span>
       <span class="nk-bottomnav__label">Danh bạ</span>
     </a>
@@ -177,6 +177,53 @@
   </nav>
 
 </div><!-- /screenProfile -->
+
+<!-- ═══════════════════════════════════════════════════
+     SCREEN: DANH BẠ (A6)
+═══════════════════════════════════════════════════ -->
+<div class="nk-app" id="screenContacts" style="display:none">
+
+  <header class="nk-appbar">
+    <div class="nk-appbar__icon">🗂</div>
+    <div class="nk-appbar__title">
+      <div class="nk-appbar__name">Danh bạ</div>
+      <div class="nk-appbar__sub" id="contactsCount"></div>
+    </div>
+    <button class="nk-appbar__theme" id="btnThemeContacts" title="Đổi giao diện">🌙</button>
+  </header>
+
+  <div class="nk-toolbar">
+    <div class="nk-search" style="flex:1">
+      <span>🔍</span>
+      <input type="search" id="contactSearch" placeholder="Tìm tên, tổ, số điện thoại..." autocomplete="off">
+    </div>
+  </div>
+
+  <main class="nk-content" id="contactsBody"></main>
+
+  <nav class="nk-bottomnav" id="bnavContacts">
+    <a class="nk-bottomnav__item" href="#" onclick="event.preventDefault(); navigateToMain()">
+      <span class="nk-bottomnav__icon">🗂</span>
+      <span class="nk-bottomnav__label">Công việc</span>
+    </a>
+    <a class="nk-bottomnav__item is-active" href="#">
+      <span class="nk-bottomnav__icon">👥</span>
+      <span class="nk-bottomnav__label">Danh bạ</span>
+    </a>
+    <div class="nk-bottomnav__fab">
+      <button class="nk-newbtn-fab" onclick="navigateToMain(); setTimeout(openNewTaskModal,200)" aria-label="Thêm việc mới">＋</button>
+    </div>
+    <a class="nk-bottomnav__item" href="#" onclick="event.preventDefault(); navigateToReport()">
+      <span class="nk-bottomnav__icon">📊</span>
+      <span class="nk-bottomnav__label">Báo cáo</span>
+    </a>
+    <a class="nk-bottomnav__item" href="#" onclick="event.preventDefault(); navigateToProfile()">
+      <span class="nk-bottomnav__icon">👤</span>
+      <span class="nk-bottomnav__label">Cá nhân</span>
+    </a>
+  </nav>
+
+</div><!-- /screenContacts -->
 
 
 <!-- ═══════════════════════════════════════════════════
@@ -396,10 +443,10 @@ if (window.bdsShowToast === undefined) {
 // HASH ROUTING (Main ↔ Detail)
 // ─────────────────────────────────────────────────────────────────────────────
 function showScreen(screen) {
-  const screens = ['screenMain','screenReport','screenProfile'];
-  document.getElementById('screenMain').style.display   = screen === 'main'   ? '' : 'none';
-  document.getElementById('screenReport').style.display = screen === 'report' ? '' : 'none';
-  document.getElementById('screenProfile').style.display = screen === 'profile' ? '' : 'none';
+  document.getElementById('screenMain').style.display    = screen === 'main'     ? '' : 'none';
+  document.getElementById('screenReport').style.display  = screen === 'report'   ? '' : 'none';
+  document.getElementById('screenProfile').style.display = screen === 'profile'  ? '' : 'none';
+  document.getElementById('screenContacts').style.display= screen === 'contacts' ? '' : 'none';
   document.getElementById('screenDetail').classList.toggle('is-active', screen === 'detail');
 }
 
@@ -419,6 +466,10 @@ function navigateToProfile() {
   window.location.hash = '#profile';
 }
 
+function navigateToContacts() {
+  window.location.hash = '#contacts';
+}
+
 window.addEventListener('hashchange', handleRoute);
 window.addEventListener('load', handleRoute);
 
@@ -430,6 +481,9 @@ function handleRoute() {
   } else if (hash === '#profile') {
     renderProfileScreen();
     showScreen('profile');
+  } else if (hash === '#contacts') {
+    renderContactsScreen();
+    showScreen('contacts');
   } else {
     const m = hash.match(/^#detail\/(.+)$/);
     if (m) {
@@ -878,6 +932,12 @@ document.getElementById('searchInput').addEventListener('input', e => {
   }, 250);
 });
 
+// Contact search listener
+document.getElementById('contactSearch').addEventListener('input', e => {
+  contactSearchQuery = e.target.value;
+  renderContactsScreen();
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 // MODAL: TẠO VIỆC MỚI
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1109,13 +1169,75 @@ function doLogout() {
   setTimeout(() => window.location.reload(), 900);
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// RENDER CONTACTS SCREEN (A6)
+// ─────────────────────────────────────────────────────────────────────────────
+let contactSearchQuery = '';
+
+function renderContactsScreen() {
+  const q = contactSearchQuery.trim().toLowerCase();
+  let list = [...staffDirectory];
+
+  if (q) {
+    list = list.filter(s => {
+      const name  = (s.fullName || s.name || '').toLowerCase();
+      const dept  = (s.dept || '').toLowerCase();
+      const phone = (s.phone || s.mobile || '').toLowerCase();
+      return name.includes(q) || dept.includes(q) || phone.includes(q);
+    });
+  }
+
+  // Cập nhật count
+  const countEl = document.getElementById('contactsCount');
+  if (countEl) countEl.textContent = list.length ? `${list.length} người` : '';
+
+  if (list.length === 0) {
+    document.getElementById('contactsBody').innerHTML =
+      `<div class="nk-empty"><div class="nk-empty__icon">👤</div>
+       ${q ? 'Không tìm thấy kết quả.' : 'Danh bạ chưa có dữ liệu.'}</div>`;
+    return;
+  }
+
+  // Group theo dept
+  const groups = {};
+  list.forEach(s => {
+    const dept = s.dept || s.team || 'Khác';
+    if (!groups[dept]) groups[dept] = [];
+    groups[dept].push(s);
+  });
+
+  const html = Object.entries(groups)
+    .sort((a,b) => a[0].localeCompare(b[0], 'vi'))
+    .map(([dept, members]) => `
+      <div class="nk-contact-group">
+        <div class="nk-contact-group__label">${escapeHtml(dept)} <span class="nk-contact-group__count">${members.length}</span></div>
+        ${members.map(s => {
+          const name   = s.fullName || s.name || '?';
+          const phone  = s.phone || s.mobile || '';
+          const initials = name.trim().charAt(0).toUpperCase();
+          const role   = s.position || s.role || '';
+          return `
+            <div class="nk-contact-card">
+              <div class="nk-contact-card__avatar">${initials}</div>
+              <div class="nk-contact-card__info">
+                <div class="nk-contact-card__name">${escapeHtml(name)}</div>
+                <div class="nk-contact-card__meta">${escapeHtml(role || dept)}${phone ? ' · ' + escapeHtml(phone) : ''}</div>
+              </div>
+              ${phone ? `<a class="nk-contact-card__call" href="tel:${escapeAttr(phone)}" aria-label="Gọi ${escapeAttr(name)}">📞</a>` : ''}
+            </div>`;
+        }).join('')}
+      </div>`).join('');
+
+  document.getElementById('contactsBody').innerHTML = html;
+}
+
 function toggleTheme() {
   const cur  = document.documentElement.getAttribute('data-theme') || 'light';
   const next = cur === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', next);
   localStorage.setItem('nk_theme', next);
   const icon = next === 'dark' ? '☀️' : '🌙';
-  ['btnTheme','btnThemeReport','btnThemeProfile'].forEach(id => {
+  ['btnTheme','btnThemeReport','btnThemeProfile','btnThemeContacts'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.textContent = icon;
   });

@@ -445,3 +445,78 @@ test.describe('A4 — Subtab lọc loại công việc', () => {
     await expect(rows).toHaveCount(2);
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// A6 — Screen Danh bạ
+// ─────────────────────────────────────────────────────────────────────────────
+test.describe('A6 — Screen Danh bạ', () => {
+  test.beforeEach(async ({ page }) => {
+    await setupMocks(page);
+    await page.goto('/nhatky/index.html');
+  });
+
+  test('Tab Danh bạ → screenContacts hiện, screenMain ẩn', async ({ page }) => {
+    await page.evaluate(() => navigateToContacts());
+    await expect(page.locator('#screenContacts')).toBeVisible();
+    await expect(page.locator('#screenMain')).not.toBeVisible();
+  });
+
+  test('screenContacts có ô tìm kiếm #contactSearch', async ({ page }) => {
+    await page.evaluate(() => navigateToContacts());
+    await expect(page.locator('#contactSearch')).toBeVisible();
+  });
+
+  test('Render danh sách từ staffDirectory', async ({ page }) => {
+    await page.evaluate(() => {
+      staffDirectory = [
+        { fullName: 'Nguyễn Văn A', dept: 'Điện', phone: '0901234567' },
+        { fullName: 'Trần Thị B',   dept: 'Cơ', phone: '' }
+      ];
+      navigateToContacts();
+    });
+    await expect(page.locator('.nk-contact-card')).toHaveCount(2);
+  });
+
+  test('Card có nút gọi khi có phone', async ({ page }) => {
+    await page.evaluate(() => {
+      staffDirectory = [
+        { fullName: 'Nguyễn Văn A', dept: 'Điện', phone: '0901234567' },
+        { fullName: 'Trần Thị B',   dept: 'Cơ',   phone: '' }
+      ];
+      navigateToContacts();
+    });
+    // Chỉ A có phone → 1 call button
+    await expect(page.locator('.nk-contact-card__call')).toHaveCount(1);
+  });
+
+  test('Tìm kiếm theo tên lọc đúng', async ({ page }) => {
+    await page.evaluate(() => {
+      staffDirectory = [
+        { fullName: 'Nguyễn Văn An', dept: 'Điện', phone: '0901' },
+        { fullName: 'Trần Thị Bích', dept: 'Cơ',   phone: '0902' },
+        { fullName: 'Lê Văn Cường',  dept: 'Điện', phone: '0903' }
+      ];
+      navigateToContacts();
+    });
+    await page.locator('#contactSearch').fill('bích');
+    await expect(page.locator('.nk-contact-card')).toHaveCount(1);
+    await expect(page.locator('.nk-contact-card__name')).toContainText('Trần Thị Bích');
+  });
+
+  test('Empty state khi không tìm thấy kết quả', async ({ page }) => {
+    await page.evaluate(() => {
+      staffDirectory = [{ fullName: 'Nguyễn Văn A', dept: 'Điện', phone: '' }];
+      navigateToContacts();
+    });
+    await page.locator('#contactSearch').fill('zzz-not-found');
+    await expect(page.locator('.nk-empty')).toBeVisible();
+    await expect(page.locator('.nk-contact-card')).toHaveCount(0);
+  });
+
+  test('Bấm Công việc trong bnavContacts → quay về screenMain', async ({ page }) => {
+    await page.evaluate(() => navigateToContacts());
+    await page.locator('#bnavContacts a').first().click();
+    await expect(page.locator('#screenMain')).toBeVisible();
+    await expect(page.locator('#screenContacts')).not.toBeVisible();
+  });
+});
