@@ -1,0 +1,511 @@
+<title>Làm mới Trang Quản lý Công việc — Bản gọn nhẹ</title>
+<style>
+  :root {
+    --brand: #0b4d5e;
+    --brand-ink: #083b48;
+    --doing: #0d47a1;
+    --done: #1b5e20;
+    --danger: #b3261e;
+    --warn: #8a5a00;
+    --review: #6a4bab;
+    --recv: #58636d;
+
+    --app-bg: #f1f3f4;
+    --app-surface: #ffffff;
+    --app-line: #e3e7ea;
+    --app-line-soft: #eef1f2;
+    --app-ink: #131a1f;
+    --app-muted: #63707a;
+
+    --page: #eaecee;
+    --panel: #f6f8f9;
+    --panel-2: #ffffff;
+    --line: #d3dadd;
+    --ink: #131b20;
+    --muted: #58636b;
+    --accent: #0b4d5e;
+    --accent-soft: #dfeaec;
+    --shadow: 0 8px 24px rgba(8,40,50,.10);
+    --radius: 16px;
+    --fs: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --page:#0d1416; --panel:#141f1f; --panel-2:#0f1a1a; --line:#26383a;
+      --ink:#e7eef0; --muted:#93a3a6; --accent:#4fb3c4; --accent-soft:#10302f;
+      --shadow:0 10px 28px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="light"]{--page:#eaecee;--panel:#f6f8f9;--panel-2:#fff;--line:#d3dadd;--ink:#131b20;--muted:#58636b;--accent:#0b4d5e;--accent-soft:#dfeaec;--shadow:0 8px 24px rgba(8,40,50,.10);}
+  :root[data-theme="dark"]{--page:#0d1416;--panel:#141f1f;--panel-2:#0f1a1a;--line:#26383a;--ink:#e7eef0;--muted:#93a3a6;--accent:#4fb3c4;--accent-soft:#10302f;--shadow:0 10px 28px rgba(0,0,0,.5);}
+
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  .wrap { font-family: var(--fs); background: var(--page); color: var(--ink); min-height: 100dvh; padding: 30px 20px 64px; line-height: 1.55; }
+  .container { max-width: 1080px; margin: 0 auto; }
+
+  .masthead { margin-bottom: 26px; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); padding: 6px 12px; border-radius: 999px; }
+  h1 { font-size: clamp(24px, 3.6vw, 36px); line-height: 1.14; margin: 13px 0 8px; font-weight: 800; letter-spacing: -.015em; text-wrap: balance; max-width: 22ch; }
+  .lede { color: var(--muted); font-size: 15.5px; max-width: 64ch; margin: 0; }
+  .lede b { color: var(--ink); }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 15px; }
+  .tag { font-size: 12.5px; font-weight: 600; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; background: var(--panel); }
+  .tag.hi { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); font-weight: 700; }
+
+  section { margin-top: 42px; }
+  .sec-head { display: flex; align-items: baseline; gap: 13px; margin-bottom: 16px; flex-wrap: wrap; }
+  .sec-num { font-size: 13px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+  h2 { font-size: 20px; font-weight: 800; letter-spacing: -.01em; margin: 0; }
+  .sec-sub { color: var(--muted); font-size: 14px; margin: 2px 0 0; max-width: 72ch; }
+
+  /* lifecycle — legend strip gọn (chấm nhỏ) */
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 15px 18px; box-shadow: var(--shadow); }
+  .lg { display: flex; align-items: center; gap: 8px; font-size: 13.5px; }
+  .lg .d { width: 11px; height: 11px; border-radius: 50%; flex: 0 0 auto; }
+  .lg b { font-weight: 700; color: var(--ink); }
+  .lg span { color: var(--muted); font-size: 12.5px; }
+
+  .gal { display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 24px; align-items: start; }
+  .frame-block { display: flex; flex-direction: column; gap: 13px; }
+  .frame-cap h3 { font-size: 16px; font-weight: 800; margin: 0 0 4px; }
+  .frame-cap p { font-size: 13.5px; color: var(--muted); margin: 0; }
+  .notes { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-direction: column; gap: 6px; }
+  .notes li { position: relative; padding-left: 18px; font-size: 13px; }
+  .notes li::before { content: ""; position: absolute; left: 2px; top: 7px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+  .notes li b { color: var(--accent); font-weight: 700; }
+
+  /* device */
+  .device { width: 100%; max-width: 366px; margin: 0 auto; background: #0c1417; border-radius: 40px; padding: 11px; box-shadow: 0 20px 46px rgba(6,30,38,.30), inset 0 0 0 1px rgba(255,255,255,.06); }
+  .screen { background: var(--app-bg); border-radius: 30px; overflow: hidden; font-family: var(--fs); color: var(--app-ink); display: flex; flex-direction: column; min-height: 600px; }
+  .statusbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px 4px; font-size: 12.5px; font-weight: 700; }
+  .statusbar .dots { letter-spacing: 2px; }
+  .appbar { background: var(--brand); color: #fff; padding: 11px 15px 13px; display: flex; align-items: center; gap: 10px; }
+  .appbar .ico { width: 34px; height: 34px; border-radius: 10px; background: rgba(255,255,255,.16); display: grid; place-items: center; font-size: 17px; }
+  .appbar .t { font-size: 15.5px; font-weight: 800; line-height: 1.1; }
+  .appbar .s { font-size: 11.5px; opacity: .82; font-weight: 600; }
+  .appbar .avatar { margin-left: auto; width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,.18); border: 1.5px solid rgba(255,255,255,.45); color: #fff; font-size: 15px; font-weight: 800; display: grid; place-items: center; flex: 0 0 auto; }
+  .screen-body { padding: 12px 13px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+
+  /* search + date row */
+  .toolbar { display: flex; gap: 7px; align-items: center; margin-bottom: 4px; }
+  .search { flex: 1; border: 1.5px solid var(--app-line); border-radius: 11px; padding: 8px 11px; font-size: 12.5px; color: var(--app-muted); background: #fff; display: flex; align-items: center; gap: 7px; }
+  .datepick { border: 1.5px solid var(--app-line); border-radius: 11px; padding: 8px 11px; font-size: 12.5px; font-weight: 700; color: var(--brand); background: #fff; white-space: nowrap; }
+
+  /* group section (giống dashboard .md) */
+  .grp { margin-top: 6px; }
+  .grp-h { display: flex; align-items: center; gap: 8px; padding: 4px 2px 6px; }
+  .grp-h .gd { width: 9px; height: 9px; border-radius: 50%; }
+  .grp-h .gt { font-size: 13px; font-weight: 800; letter-spacing: .01em; }
+  .grp-h .gc { margin-left: auto; font-size: 11.5px; font-weight: 700; color: var(--app-muted); font-variant-numeric: tabular-nums; }
+
+  /* list rows — gọn */
+  .list { background: var(--app-surface); border: 1px solid var(--app-line); border-radius: 13px; overflow: hidden; }
+  .row { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-top: 1px solid var(--app-line-soft); }
+  .row:first-child { border-top: 0; }
+  .row .rd { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; margin-top: 1px; align-self: flex-start; margin-top: 5px; }
+  .row .rmain { min-width: 0; flex: 1; }
+  .row .rt { font-size: 13.8px; font-weight: 700; line-height: 1.3; letter-spacing: -.005em; }
+  .row .rm { font-size: 11.8px; color: var(--app-muted); margin-top: 2px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .row .rm .sep { opacity: .45; }
+  .row .rm .who { font-weight: 700; color: #47535c; }
+  .row .rm .who .star { color: var(--brand); }
+  .row .rm .ph { color: var(--doing); font-weight: 700; }
+  .row .rm .warnx { color: var(--warn); font-weight: 700; }
+  .row .chev { color: #b9c2c8; font-size: 15px; flex: 0 0 auto; }
+
+  .newbtn { margin-top: 10px; text-align: center; font-size: 13.5px; font-weight: 800; padding: 11px; border-radius: 12px; background: var(--brand); color: #fff; }
+
+  /* detail — mục phẳng, kẻ mảnh */
+  .d-sheet { background: var(--app-surface); border: 1px solid var(--app-line); border-radius: 14px; }
+  .d-sec { padding: 12px 13px; border-top: 1px solid var(--app-line-soft); }
+  .d-sec:first-child { border-top: 0; }
+  .d-lab { font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--app-muted); margin-bottom: 7px; display: flex; align-items: center; gap: 6px; }
+  .d-lab .n { color: var(--brand); }
+  .kv { font-size: 12.8px; } .kv .k { color: var(--app-muted); font-weight: 700; }
+  .quote { font-size: 12.5px; font-style: italic; color: #3a444c; border-left: 3px solid var(--brand); padding: 3px 0 3px 10px; margin-top: 6px; }
+  .crit { font-size: 12.5px; margin-top: 7px; } .crit .k { color: var(--app-muted); font-weight: 700; }
+
+  .pline { display: flex; align-items: center; gap: 9px; padding: 7px 0; border-top: 1px dashed #e6eaec; }
+  .pline:first-of-type { border-top: 0; }
+  .pmark { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; font-size: 10.5px; color: #fff; flex: 0 0 auto; }
+  .pmark.done { background: var(--done); } .pmark.cur { background: var(--doing); } .pmark.todo { background: #ccd3d8; color: #6a7680; }
+  .pline .pn { font-size: 13px; font-weight: 700; } .pline .pw { font-size: 11px; color: var(--app-muted); }
+  .pline .pc { margin-left: auto; font-size: 11px; font-weight: 700; color: var(--app-muted); font-variant-numeric: tabular-nums; }
+  .softwarn { font-size: 11.5px; color: var(--warn); margin-top: 8px; display: flex; gap: 6px; }
+
+  /* bước trong giai đoạn (CRUD + gán người + ảnh) */
+  .steps { padding: 3px 0 2px 27px; display: flex; flex-direction: column; }
+  .step { display: flex; align-items: center; gap: 7px; padding: 6px 0; border-top: 1px solid #f0f3f4; }
+  .step:first-child { border-top: 0; }
+  .step .ck { width: 17px; height: 17px; border-radius: 5px; border: 1.5px solid #c3ccd1; flex: 0 0 auto; display: grid; place-items: center; font-size: 10px; color: #fff; }
+  .step .ck.on { background: var(--done); border-color: var(--done); }
+  .step .st { font-size: 12.5px; font-weight: 600; flex: 1; min-width: 0; line-height: 1.3; }
+  .step .st.done { text-decoration: line-through; color: var(--app-muted); }
+  .step-asg { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 700; padding: 2px 8px 2px 4px; border-radius: 999px; border: 1.5px solid var(--app-line); color: #47535c; white-space: nowrap; flex: 0 0 auto; }
+  .step-asg .r { width: 13px; height: 13px; border-radius: 50%; display: grid; place-items: center; font-size: 8px; color: #fff; }
+  .step-asg.lead .r { background: var(--brand); } .step-asg.support .r { background: #9aa6ad; }
+  .step-asg.add { color: var(--brand); border-style: dashed; border-color: #9dc0c6; }
+  .thumb { width: 26px; height: 26px; border-radius: 6px; flex: 0 0 auto; background: #e2e8ea; display: grid; place-items: center; font-size: 13px; border: 1px solid var(--app-line); }
+  .step .sx { color: #c2cace; font-size: 13px; flex: 0 0 auto; }
+  .add-step { font-size: 12px; font-weight: 700; color: var(--brand); padding: 8px 0 0 27px; }
+  .attach { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: var(--brand); border: 1.5px dashed #9dc0c6; border-radius: 8px; padding: 4px 9px; }
+  .imgrow { display: flex; gap: 6px; align-items: center; margin-top: 7px; flex-wrap: wrap; }
+  .tl-txt .thumb { display: inline-grid; vertical-align: middle; margin-left: 4px; width: 22px; height: 22px; font-size: 11px; }
+
+  .tl { position: relative; padding-left: 16px; margin-top: 2px; }
+  .tl::before { content: ""; position: absolute; left: 4px; top: 5px; bottom: 5px; width: 2px; background: #e6eaec; }
+  .tl-item { position: relative; padding: 3px 0 10px; }
+  .tl-item::before { content: ""; position: absolute; left: -14px; top: 5px; width: 9px; height: 9px; border-radius: 50%; background: var(--brand); border: 2px solid #fff; }
+  .tl-item.hand::before { background: var(--warn); }
+  .tl-when { font-size: 10.8px; font-weight: 700; color: var(--app-muted); }
+  .tl-txt { font-size: 12.5px; } .tl-txt b { color: var(--brand-ink); }
+  .tl-tag { font-size: 9.5px; font-weight: 800; text-transform: uppercase; padding: 1px 5px; border-radius: 4px; background: #f4ead2; color: var(--warn); margin-left: 3px; }
+
+  .d-actions { display: flex; gap: 8px; padding: 12px 13px; }
+  .d-actions .b { flex: 1; text-align: center; font-size: 13px; font-weight: 800; padding: 11px; border-radius: 11px; }
+  .d-actions .ghost { border: 1.5px solid var(--app-line); color: var(--brand); background: #fff; }
+  .d-actions .go { background: var(--done); color: #fff; }
+
+  /* handover — gọn */
+  .hv { background: var(--app-surface); border: 1px solid var(--app-line); border-radius: 14px; padding: 13px; }
+  .hv h4 { font-size: 15px; font-weight: 800; margin: 0 0 2px; }
+  .hv .sub { font-size: 12px; color: var(--app-muted); margin: 0 0 11px; }
+  .seg2 { display: flex; gap: 6px; margin-bottom: 11px; background: #eef1f2; padding: 4px; border-radius: 11px; }
+  .seg2 button { flex: 1; font-size: 12.5px; font-weight: 700; padding: 8px; border-radius: 8px; border: 0; background: transparent; color: var(--app-muted); }
+  .seg2 button.on { background: #fff; color: var(--brand); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .fld { margin-bottom: 9px; }
+  .fld label { font-size: 11px; font-weight: 800; color: var(--app-muted); text-transform: uppercase; letter-spacing: .03em; display: block; margin-bottom: 4px; }
+  .fld .box { border: 1.5px solid var(--app-line); border-radius: 10px; padding: 9px 10px; font-size: 12.5px; background: #fbfcfc; }
+  .fld .box.ph { color: var(--app-muted); }
+  .autolog { font-size: 11.3px; color: var(--app-muted); background: #f1f4f5; border-radius: 9px; padding: 8px 10px; margin: 4px 0 11px; display: flex; gap: 6px; }
+  .autolog b { color: var(--app-ink); }
+  .hv-cta { display: flex; gap: 8px; }
+  .hv-cta .b { flex: 1; text-align: center; font-size: 13px; font-weight: 800; padding: 11px; border-radius: 11px; }
+  .hv-cta .cancel { background: #eef1f2; color: #47525b; }
+  .hv-cta .go { background: var(--brand); color: #fff; }
+
+  /* quick access (giống ## Truy cập nhanh) */
+  .qa { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .qa a { display: flex; align-items: center; gap: 8px; background: var(--app-surface); border: 1px solid var(--app-line); border-radius: 11px; padding: 10px 11px; font-size: 12.5px; font-weight: 700; color: var(--app-ink); text-decoration: none; }
+  .qa a .qi { font-size: 16px; }
+
+  .foot { margin-top: 46px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; display: flex; flex-wrap: wrap; gap: 8px 22px; }
+  .foot b { color: var(--ink); }
+
+  @media (max-width: 620px) { .wrap { padding: 20px 13px 48px; } .gal { grid-template-columns: 1fr; } }
+</style>
+
+<div class="wrap">
+  <div class="container">
+
+    <header class="masthead">
+      <span class="eyebrow">🗂️ BanDienScan · Bản gọn nhẹ v2</span>
+      <h1>Bảng việc "Hôm nay" — nhóm theo trạng thái, dòng gọn</h1>
+      <p class="lede">Làm lại theo tinh thần dashboard M&amp;E: <b>nhóm theo việc cần chú ý hôm nay</b>, dùng <b>dòng danh sách + chấm màu</b> thay thẻ nặng, bỏ thanh tiến độ trên từng việc. Vẫn đủ vòng đời, giai đoạn, phối hợp, bàn giao — chỉ nhẹ hơn nhiều về thị giác.</p>
+      <div class="meta-row">
+        <span class="tag hi">Ưu tiên gọn nhẹ</span>
+        <span class="tag">Nền tảng: nhatky/index.html</span>
+        <span class="tag">List-first · Kanban là view phụ</span>
+        <span class="tag">Tương thích ngược dữ liệu cũ</span>
+      </div>
+    </header>
+
+    <!-- lifecycle legend gọn -->
+    <section>
+      <div class="sec-head">
+        <span class="sec-num">01</span>
+        <div><h2>Vòng đời — chỉ là chấm màu</h2>
+        <p class="sec-sub">Không còn dải badge to. Mỗi trạng thái là một chấm màu nhỏ, dùng lại làm đầu dòng việc và tiêu đề nhóm.</p></div>
+      </div>
+      <div class="legend">
+        <span class="lg"><i class="d" style="background:#58636d"></i><b>Tiếp nhận</b><span>chờ nhận việc</span></span>
+        <span class="lg"><i class="d" style="background:#0b4d5e"></i><b>Đã lên KH</b></span>
+        <span class="lg"><i class="d" style="background:#0d47a1"></i><b>Đang làm</b></span>
+        <span class="lg"><i class="d" style="background:#b3261e"></i><b>Cần hỗ trợ</b></span>
+        <span class="lg"><i class="d" style="background:#8a5a00"></i><b>Bàn giao / Xử lý tiếp</b></span>
+        <span class="lg"><i class="d" style="background:#6a4bab"></i><b>Chờ nghiệm thu</b></span>
+        <span class="lg"><i class="d" style="background:#1b5e20"></i><b>Hoàn thành → Chốt sổ</b></span>
+      </div>
+    </section>
+
+    <section>
+      <div class="sec-head">
+        <span class="sec-num">02</span>
+        <div><h2>Ba màn cốt lõi</h2>
+        <p class="sec-sub">Trang chủ là bảng nhóm theo ưu tiên (giống các mục của file dashboard). Chi tiết và bàn giao đều phẳng, ít viền.</p></div>
+      </div>
+
+      <div class="gal">
+
+        <!-- A: Dashboard hôm nay -->
+        <div class="frame-block">
+          <div class="device">
+            <div class="screen">
+              <div class="statusbar"><span>8:12</span><span class="dots">● ● ●</span></div>
+              <div class="appbar">
+                <div class="ico">🗂️</div>
+                <div><div class="t">Công việc</div><div class="s">Ca sáng · Thứ Ba 21/07</div></div>
+                <div class="avatar" title="Huy PBĐ — chạm mở tài khoản">H</div>
+              </div>
+              <div class="screen-body">
+                <div class="toolbar">
+                  <div class="search">🔍 Tìm việc, người, vị trí…</div>
+                  <div class="datepick">Hôm nay ▾</div>
+                </div>
+
+                <!-- nhóm 1: cần xử lý tiếp -->
+                <div class="grp">
+                  <div class="grp-h"><i class="gd" style="background:#8a5a00"></i><span class="gt">Cần xử lý tiếp</span><span class="gc">2</span></div>
+                  <div class="list">
+                    <div class="row">
+                      <i class="rd" style="background:#8a5a00"></i>
+                      <div class="rmain">
+                        <div class="rt">Đấu nối tủ điện T2 — chờ cắt điện 22h</div>
+                        <div class="rm"><span class="warnx">⇄ Ca đêm nhận</span><span class="sep">·</span><span>từ Huy PBĐ</span></div>
+                      </div><span class="chev">›</span>
+                    </div>
+                    <div class="row">
+                      <i class="rd" style="background:#b3261e"></i>
+                      <div class="rmain">
+                        <div class="rt">Bảo dưỡng MBA T1 — quá hạn 2 ngày</div>
+                        <div class="rm"><span class="who"><span class="star">★</span>Nam</span><span class="sep">·</span><span>Khẩn cấp</span></div>
+                      </div><span class="chev">›</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- nhóm 2: đang làm -->
+                <div class="grp">
+                  <div class="grp-h"><i class="gd" style="background:#0d47a1"></i><span class="gt">Đang làm</span><span class="gc">3</span></div>
+                  <div class="list">
+                    <div class="row">
+                      <i class="rd" style="background:#0d47a1"></i>
+                      <div class="rmain">
+                        <div class="rt">Điện cân pha — BV Bắc Hà tầng 3</div>
+                        <div class="rm"><span class="who"><span class="star">★</span>Huy · ○Báu</span><span class="sep">·</span><span class="ph">GĐ 2/3</span></div>
+                      </div><span class="chev">›</span>
+                    </div>
+                    <div class="row">
+                      <i class="rd" style="background:#0d47a1"></i>
+                      <div class="rmain">
+                        <div class="rt">Vệ sinh, siết đầu cực tủ RMU khu B</div>
+                        <div class="rm"><span class="who"><span class="star">★</span>Sơn</span><span class="sep">·</span><span class="ph">GĐ 1/2</span></div>
+                      </div><span class="chev">›</span>
+                    </div>
+                    <div class="row">
+                      <i class="rd" style="background:#0d47a1"></i>
+                      <div class="rmain">
+                        <div class="rt">Kiểm tra tiếp địa trạm B2</div>
+                        <div class="rm"><span class="who"><span class="star">★</span>Báu</span></div>
+                      </div><span class="chev">›</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- nhóm 3: chờ nghiệm thu -->
+                <div class="grp">
+                  <div class="grp-h"><i class="gd" style="background:#6a4bab"></i><span class="gt">Chờ nghiệm thu</span><span class="gc">1</span></div>
+                  <div class="list">
+                    <div class="row">
+                      <i class="rd" style="background:#6a4bab"></i>
+                      <div class="rmain">
+                        <div class="rt">Thay 2 bơm tăng áp trục đứng — khu A</div>
+                        <div class="rm"><span class="who"><span class="star">★</span>Nam</span><span class="sep">·</span><span>xong KT 20/07</span></div>
+                      </div><span class="chev">›</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- nhóm 4: lịch sắp tới 7 ngày (PM) -->
+                <div class="grp">
+                  <div class="grp-h"><i class="gd" style="background:#0b4d5e"></i><span class="gt">Lịch sắp tới · 7 ngày</span><span class="gc">3</span></div>
+                  <div class="list">
+                    <div class="row">
+                      <i class="rd" style="background:#0b4d5e"></i>
+                      <div class="rmain">
+                        <div class="rt">Bảo dưỡng định kỳ máy phát G2</div>
+                        <div class="rm"><span>23/07</span><span class="sep">·</span><span class="who"><span class="star">★</span>Sơn</span></div>
+                      </div><span class="chev">›</span>
+                    </div>
+                    <div class="row">
+                      <i class="rd" style="background:#0b4d5e"></i>
+                      <div class="rmain">
+                        <div class="rt">Vệ sinh lọc gió AHU tầng hầm</div>
+                        <div class="rm"><span>25/07</span><span class="sep">·</span><span class="who"><span class="star">★</span>Báu</span></div>
+                      </div><span class="chev">›</span>
+                    </div>
+                    <div class="row">
+                      <i class="rd" style="background:#0b4d5e"></i>
+                      <div class="rmain">
+                        <div class="rt">Đo cách điện tủ MSB khu C</div>
+                        <div class="rm"><span>27/07</span><span class="sep">·</span><span class="who"><span class="star">★</span>Huy PBĐ</span></div>
+                      </div><span class="chev">›</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="newbtn">＋ Việc mới</div>
+              </div>
+            </div>
+          </div>
+          <div class="frame-cap">
+            <h3>A · Bảng việc "Hôm nay"</h3>
+            <p>Màn chính: nhóm theo việc cần chú ý, đọc hết 1 màn không phải lọc.</p>
+            <ul class="notes">
+              <li><b>Nhóm theo ưu tiên</b>: Cần xử lý tiếp → Đang làm → Chờ nghiệm thu → <b>Lịch sắp tới 7 ngày</b> (đúng kiểu file dashboard)</li>
+              <li><b>Dòng gọn</b>: chấm màu + tên + 1 dòng meta; chạm để mở</li>
+              <li>Người: <b>★ chủ trì · ○ phối hợp</b> viết tắt, giai đoạn chỉ "GĐ 2/3"</li>
+              <li>Bỏ nút trên từng việc, bỏ thanh segment → nhẹ hơn nhiều</li>
+              <li><b>Avatar góc phải</b> (chữ cái tên): chạm mở tên + ca trực, phóng chữ A/A+/A++, đăng xuất — chốt đúng danh tính người ghi</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- B: Detail phẳng -->
+        <div class="frame-block">
+          <div class="device">
+            <div class="screen">
+              <div class="statusbar"><span>8:15</span><span class="dots">● ● ●</span></div>
+              <div class="appbar">
+                <div class="ico">‹</div>
+                <div><div class="t">Chi tiết việc</div><div class="s">Điện cân pha — BV Bắc Hà</div></div>
+              </div>
+              <div class="screen-body">
+                <div class="d-sheet">
+                  <div class="d-sec">
+                    <div class="d-lab"><span class="n">1</span> Chỉ đạo &amp; tiêu chí</div>
+                    <div class="kv"><span class="k">Giao:</span> CT Phạm Đình Mạnh · 08/06</div>
+                    <div class="quote">"Huy PBĐ triển khai, Báu phối hợp — kiểm tra điện cân pha, xong trước 15/6."</div>
+                    <div class="crit"><span class="k">Tiêu chí xong:</span> lệch tải 3 tủ &lt; 5%</div>
+                    <div class="imgrow"><span class="thumb">🖼️</span><span class="thumb">🖼️</span><span class="attach">📷 Ảnh chỉ đạo</span></div>
+                  </div>
+                  <div class="d-sec">
+                    <div class="d-lab"><span class="n">2</span> Giai đoạn &amp; bước</div>
+                    <div class="pline"><span class="pmark done">✓</span><span><div class="pn">Khảo sát</div><div class="pw">Huy PBĐ · xong 08/06</div></span><span class="pc">2/2</span></div>
+                    <div class="pline"><span class="pmark cur">▸</span><span><div class="pn">Thi công</div><div class="pw">Huy ★ · Báu ○</div></span><span class="pc">2/3</span></div>
+                    <!-- bước của giai đoạn đang mở -->
+                    <div class="steps">
+                      <div class="step">
+                        <span class="ck on">✓</span>
+                        <span class="st done">Kéo cáp nguồn 100m</span>
+                        <span class="step-asg lead"><span class="r">★</span>Huy</span>
+                        <span class="thumb">🖼️</span>
+                      </div>
+                      <div class="step">
+                        <span class="ck"></span>
+                        <span class="st">Đấu nối tủ T2 (chờ cắt điện)</span>
+                        <span class="step-asg support"><span class="r">○</span>Báu</span>
+                        <span class="sx">⋮</span>
+                      </div>
+                      <div class="step">
+                        <span class="ck"></span>
+                        <span class="st">Cân pha, đo lệch tải 3 tủ</span>
+                        <span class="step-asg add">＋ gán · #Điện</span>
+                        <span class="sx">⋮</span>
+                      </div>
+                    </div>
+                    <div class="add-step">＋ Thêm bước</div>
+                    <div class="pline" style="margin-top:2px"><span class="pmark todo">○</span><span><div class="pn">Nghiệm thu</div></span><span class="pc">0/1</span></div>
+                  </div>
+                  <div class="d-sec">
+                    <div class="d-lab"><span class="n">3</span> Nhật ký &amp; phát sinh</div>
+                    <div class="tl">
+                      <div class="tl-item"><div class="tl-when">Hôm nay 10:20 · Báu</div><div class="tl-txt">Siết đầu cực pha B, lệch tải còn 6%.<span class="thumb">🖼️</span></div></div>
+                      <div class="tl-item hand"><div class="tl-when">Hôm qua 22:00 · Huy PBĐ</div><div class="tl-txt"><b>Bàn giao ca đêm</b><span class="tl-tag">Bàn giao</span> kéo cáp 60m, còn đấu T2.<span class="thumb">🖼️</span></div></div>
+                      <div class="tl-item"><div class="tl-when">Hôm qua 14:00 · Huy PBĐ</div><div class="tl-txt">Xong khảo sát, 3 tủ cần cân pha.</div></div>
+                    </div>
+                    <div class="imgrow"><span class="attach">＋ Ghi nhật ký</span><span class="attach">📷 Đính ảnh</span></div>
+                  </div>
+                  <div class="d-actions">
+                    <span class="b ghost">⇄ Bàn giao</span>
+                    <span class="b go">✓ Nghiệm thu · Chốt sổ</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="frame-cap">
+            <h3>B · Chi tiết — mục phẳng</h3>
+            <p>Cùng 4 mạch nghiệp vụ nhưng ngăn bằng kẻ mảnh, không thẻ chồng thẻ.</p>
+            <ul class="notes">
+              <li>Giai đoạn mở ra <b>bước con: thêm/sửa/xoá</b> (＋ Thêm bước · ⋮ sửa-xoá)</li>
+              <li>Mỗi bước <b>gán người từ danh bạ</b>, danh sách <b>lọc theo cùng tag</b> (vd #Điện) — ★ chủ trì · ○ phối hợp</li>
+              <li><b>Đính ảnh mọi điểm ghi</b>: chỉ đạo · kế hoạch · phát sinh · nhật ký · bàn giao (🖼️ thumbnail)</li>
+              <li><b>Cảnh báo mềm</b> (không khoá); nhật ký gộp cả bản ghi bàn giao</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- C: Handover gọn + quick access -->
+        <div class="frame-block">
+          <div class="device">
+            <div class="screen">
+              <div class="statusbar"><span>21:48</span><span class="dots">● ● ●</span></div>
+              <div class="appbar">
+                <div class="ico">⇄</div>
+                <div><div class="t">Bàn giao việc</div><div class="s">Đấu nối tủ T2</div></div>
+              </div>
+              <div class="screen-body">
+                <div class="hv">
+                  <h4>Bàn giao việc</h4>
+                  <p class="sub">Giao cho ai để tiếp tục.</p>
+                  <div class="seg2"><button class="on">👤 Cho người</button><button>👥 Cho ca / tổ</button></div>
+                  <div class="fld"><label>Người nhận</label><div class="box">Ca đêm — Đ/c Sơn ▾</div></div>
+                  <div class="fld"><label>Đã làm được</label><div class="box">Kéo cáp 60m/100m</div></div>
+                  <div class="fld"><label>Cần xử lý tiếp</label><div class="box">Đấu nối tủ T2 — chờ cắt điện 22h</div></div>
+                  <div class="fld"><label>Lưu ý an toàn</label><div class="box ph">Khu vực ẩm…</div></div>
+                  <div class="fld"><label>Ảnh hiện trạng</label><div class="imgrow"><span class="thumb">🖼️</span><span class="attach">📷 Chụp / chọn ảnh</span></div></div>
+                  <div class="autolog">🕒 Tự ghi: <b>Huy PBĐ · 21:48 20/07</b> — thay chữ ký.</div>
+                  <div class="hv-cta"><span class="b cancel">Hủy</span><span class="b go">Bàn giao</span></div>
+                </div>
+
+                <div class="grp" style="margin-top:12px">
+                  <div class="grp-h"><i class="gd" style="background:#0b4d5e"></i><span class="gt">Truy cập nhanh</span></div>
+                  <div class="qa">
+                    <a href="#"><span class="qi">📇</span> Danh bạ</a>
+                    <a href="#"><span class="qi">🗓️</span> Phân ca</a>
+                    <a href="#"><span class="qi">💧</span> Check bơm</a>
+                    <a href="#"><span class="qi">📊</span> Báo cáo</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="frame-cap">
+            <h3>C · Bàn giao gọn + Truy cập nhanh</h3>
+            <p>Form 1 tấm, chuyển Người/Ca bằng segmented, tự ghi người + giờ.</p>
+            <ul class="notes">
+              <li><b>Cho người / Cho ca-tổ</b> — cùng luồng; chọn ca nối <b>phanca/</b> (mở rộng sau)</li>
+              <li>Ba ô: đã làm · cần xử lý tiếp · lưu ý an toàn + <b>ảnh hiện trạng</b></li>
+              <li><b>Auto-ghi</b> tên + giờ thay chữ ký</li>
+              <li><b>Truy cập nhanh</b> kiểu dashboard — link các trang hay dùng</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section>
+      <div class="sec-head">
+        <span class="sec-num">03</span>
+        <div><h2>Nhẹ đi ở đâu — so với bản v1</h2></div>
+      </div>
+      <div class="legend" style="gap:12px 26px">
+        <span class="lg"><i class="d" style="background:#1b5e20"></i><b>Thẻ nặng → dòng gọn</b><span>chấm màu + 1 dòng meta</span></span>
+        <span class="lg"><i class="d" style="background:#1b5e20"></i><b>Badge to → chấm nhỏ</b><span>trạng thái là màu chấm</span></span>
+        <span class="lg"><i class="d" style="background:#1b5e20"></i><b>Bỏ thanh segment</b><span>còn "GĐ 2/3" chữ nhỏ</span></span>
+        <span class="lg"><i class="d" style="background:#1b5e20"></i><b>Nhóm theo hôm nay</b><span>không cần lọc nhiều</span></span>
+        <span class="lg"><i class="d" style="background:#1b5e20"></i><b>Kanban → view phụ</b><span>list là chính</span></span>
+      </div>
+    </section>
+
+    <div class="foot">
+      <span><b>Duyệt hướng này?</b> Bước tiếp: code P1 (vai trò người + chấm vòng đời + nhóm "hôm nay") trên nhatky/index.html.</span>
+      <span><b>Ảnh</b> tái dùng cơ chế sẵn có: upload Drive → lưu link ở cột <b>ImageURL</b> (sheet Logs), không thêm bảng mới.</span>
+      <span>Ràng buộc CLAUDE.md: không đổi 24 cột · không ghi đè dữ liệu gốc khi chưa xác nhận.</span>
+    </div>
+
+  </div>
+</div>

@@ -14,7 +14,38 @@ updated: 2026-06-08
 
 Tất cả các thay đổi và cải tiến của hệ thống Quản lý & Bảo trì Ban điện thông minh (CMMS Mini WebApp) được ghi nhận tại đây theo từng phiên bản.
 
+## [v2.15.0] - 2026-07-26
+### Thêm mới (Added)
+- **A2 — Gate quyền Ghi hộ + Danh bạ thật** (`nhatky/index.html`):
+  - `canWriteOnBehalf()` — gate theo `user.role` (Manager/Admin/Quản lý/Tổ trưởng); section "Ghi hộ" ẩn hoàn toàn với user thường.
+  - `fAssignee` đổi thành datalist `staffDatalist` — gợi ý tên từ `staffDirectory` khi gõ.
+  - `populateAssigneeDatalist()` — điền datalist sau `loadStaff()` trong `initApp()`.
+  - `loadStaffIntoSelect()` refactor: dùng `staffDirectory` thay API call, sắp xếp cùng tổ lên trước, **xóa hoàn toàn** fallback 4 tên hardcode.
+- **A5 — Tab Báo cáo + Tab Cá nhân** (`nhatky/index.html`, `css/app.css`):
+  - **Screen Báo cáo** (`#screenReport`, `#report` hash route): 4 stat cards (Đang làm / Cần hỗ trợ / Hoàn thành / Tổng việc) + bảng Top 5 kỹ thuật viên theo số việc; bottom-nav đầy đủ.
+  - **Screen Cá nhân** (`#screenProfile`, `#profile` hash route): avatar circle gradient + tên + role + tổ + username; nút Đổi giao diện (đồng bộ dark/light); nút Đăng xuất (clear localStorage + reload).
+  - `navigateToReport()`, `navigateToProfile()` — hash routing mới.
+  - `toggleTheme()` — đồng bộ icon dark/light trên cả 3 screen.
+  - `renderReportScreen()`, `renderProfileScreen()`, `doLogout()`.
+  - **CSS mới**: `.nk-stat-grid`, `.nk-stat-card`, `.nk-report-table`, `.nk-report-row`, `.nk-profile`, `.nk-profile__avatar`, `.nk-profile__action[--danger]`.
+  - **Verify**: `node --check` 0 lỗi; Playwright **48/48 tests passed** (Chromium + Mobile Chrome, 9.7s).
+
+## [v2.14.0] - 2026-07-26
+### Thêm mới (Added)
+- **Khôi phục Giai đoạn & Bước + Crowd-Completion trên Zalo shell** (`nhatky/index.html`): Port toàn bộ tính năng Plan A1 từ commit `e0dfa93` lên shell Zalo mới — đúng theo thiết kế "Việc nhỏ ẩn bớt, việc lớn hiện thêm".
+  - **Task 1–2 (Hạ tầng)**: `planPhases`, `allPlanSteps`, `findAnyStep`, `findStepWithPhase`, `stepDoneInfo`, `markStepDoneByPeople`, `stepPeopleProgressHtml`, `rollUpPhaseStatus_`. Danh bạ thật (`loadStaff` → 3 tầng cache: localStorage → `danhba_chuan_hoa.json` → `getStaff` API), `getShortName` đầy đủ (tra `staffDirectory`, fallback format chuẩn), `knownPeopleNames`, `filterNamesByTag` (lọc theo `plan.team`/tổ).
+  - **Task 3 (CRUD)**: `addPhase`, `renamePhase`, `deletePhase`, `addPhaseStep`, `renamePhaseStep`, `deletePhaseStep`, `togglePhaseStepDone`, `updatePlanPhases` (optimistic UI + rollback khi API lỗi).
+  - **Task 4 (Gán người)**: `phaseStepAssigneeEditorHtml` — chip tên (có nút ×), dropdown `+ Gán người` lọc theo tổ, tuỳ chọn "➕ Nhập tên khác".
+  - **Task 5 (Nâng cấp)**: Nút **"⚙️ Việc này phức tạp? Chia giai đoạn/bước"** chỉ hiện khi việc chưa có phases — bấm tạo giai đoạn đầu tiên "Thực hiện".
+  - **Task 6 (Render)**: `renderFlatPhases` trong `renderDetailScreen` — khối Giai đoạn & Bước chỉ xuất hiện khi `planPhases(plan).length > 0`, kèm trạng thái done/doing/todo, đếm bước, nút + Thêm bước/giai đoạn.
+  - **Task 7 (Crowd-Completion)**: `reportStepDone` + nút **"○ Báo mình xong"** (`nk-self-chip`) — mỗi assignee tự bấm xác nhận phần mình; bước chỉ tick Done khi mọi người đã báo xong (`markStepDoneByPeople` + `rollUpPhaseStatus_`).
+  - **Task 8 (Badge danh sách)**: Card trên màn chính hiện badge **"GĐ X/Y"** thay badge trạng thái thường khi việc có phases — thể hiện tiến độ bước ngay ở màn danh sách.
+  - **CSS mới**: `.nk-step-wrap`, `.step-chip`, `.step-assignees`, `.step-add-select`, `.step-done-note`, `.step-progress-people`, `.nk-self-chip` (hover + `is-done`), `.nk-step__del` (hiện khi hover).
+  - **Utilities mới**: `friendlyDate()` — chuyển ISO date → "Hôm nay/Hôm qua/N ngày trước/dd/mm".
+  - **Verify**: `node --check` 0 lỗi cú pháp; Playwright **28/28 tests passed** (Chromium + Mobile Chrome) — badge GĐ, nút Nâng cấp, render phases, chips, progress, crowd-completion self-chip.
+
 ## [v2.13.1] - 2026-07-22
+
 ### Thêm mới (Added)
 - **Hướng dẫn Báo cáo Nước & Copy tin nhắn nhanh (chốt 18h)**: Thêm mục "Hướng dẫn báo cáo nước (18h)" vào Menu tiện ích của thanh điều hướng dưới (`js/bottomnav.js`). Khi bấm vào sẽ mở một hộp thoại (modal) hướng dẫn từng bước quy trình chốt số liệu nước lúc 18h00, tích hợp liên kết đến website KySon (tự động điền/hiển thị tài khoản và nút Copy nhanh thông tin đăng nhập `vanhanh/vanhanh`) và phần tạo mẫu tin nhắn báo cáo tóm tắt kèm nút **Copy tin nhắn** tiện lợi cho nhân viên vận hành.
 

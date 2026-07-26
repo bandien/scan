@@ -1,0 +1,1306 @@
+/* ==========================================================================
+   BanDienScan — App CSS Design System
+   Quy tắc BẮT BUỘC:
+   1. TẤT CẢ màu qua CSS Variable — không hard-code hex trong HTML
+   2. Không dùng Bootstrap. Không dùng prefers-color-scheme tự động.
+   3. Dark mode: chỉ bật bằng [data-theme="dark"] trên <html>
+   4. Class prefix: .nk- (nhatky) để tránh xung đột
+   ========================================================================== */
+
+/* ==========================================================================
+   1. CSS VARIABLES — Light Mode (mặc định)
+   ========================================================================== */
+:root {
+  /* Brand */
+  --brand:         #0b4d5e;
+  --brand-light:   #dfeaec;
+  --brand-dark:    #083b48;
+
+  /* Lifecycle dot colors */
+  --dot-urgent:    #8a5a00;
+  --dot-doing:     #0d47a1;
+  --dot-review:    #6a4bab;
+  --dot-planned:   #0b4d5e;
+  --dot-done:      #1b5e20;
+  --dot-recv:      #58636d;
+  --dot-danger:    #b3261e;
+
+  /* Surface / Background */
+  --bg-page:       #eaecee;
+  --bg-surface:    #ffffff;
+  --bg-panel:      #f6f8f9;
+  --bg-overlay:    rgba(0, 0, 0, 0.45);
+
+  /* Lines & Borders */
+  --line:          #d3dadd;
+  --line-soft:     #eef1f2;
+
+  /* Ink / Text */
+  --ink:           #131b20;
+  --ink-muted:     #58636b;
+  --ink-faint:     #93a3a6;
+
+  /* Status badges */
+  --status-bg-urgent:  #fff3cd;
+  --status-ink-urgent: #8a5a00;
+
+  /* Elevation / Shadow */
+  --shadow-sm:     0 2px 8px rgba(8,40,50,.08);
+  --shadow-md:     0 8px 24px rgba(8,40,50,.12);
+  --shadow-lg:     0 20px 48px rgba(8,40,50,.16);
+
+  /* Typography */
+  --font-sans:     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-size-base: 14px;
+  --line-height:   1.55;
+
+  /* Spacing & Radius */
+  --radius-sm:     8px;
+  --radius-md:     13px;
+  --radius-lg:     20px;
+  --radius-pill:   999px;
+
+  /* Animation */
+  --transition:    150ms ease;
+}
+
+/* ==========================================================================
+   2. CSS VARIABLES — Dark Mode (chỉ khi [data-theme="dark"])
+   ========================================================================== */
+[data-theme="dark"] {
+  --bg-page:       #0d1416;
+  --bg-surface:    #192226;
+  --bg-panel:      #141f1f;
+  --bg-overlay:    rgba(0, 0, 0, 0.65);
+
+  --line:          #26383a;
+  --line-soft:     #1d2d30;
+
+  --ink:           #e7eef0;
+  --ink-muted:     #93a3a6;
+  --ink-faint:     #5a6e72;
+
+  --brand:         #4fb3c4;
+  --brand-light:   #10302f;
+  --brand-dark:    #6fc6d4;
+
+  --shadow-sm:     0 2px 8px rgba(0,0,0,.3);
+  --shadow-md:     0 8px 24px rgba(0,0,0,.4);
+  --shadow-lg:     0 20px 48px rgba(0,0,0,.55);
+}
+
+/* ==========================================================================
+   3. RESET & BASE
+   ========================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: var(--font-size-base);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-page);
+  color: var(--ink);
+  line-height: var(--line-height);
+  min-height: 100dvh;
+}
+
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; font-family: inherit; }
+input, textarea, select { font-family: inherit; font-size: inherit; }
+
+/* ==========================================================================
+   4. LAYOUT — App Shell
+   ========================================================================== */
+.nk-app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  max-width: 640px;
+  margin: 0 auto;
+  background: var(--bg-page);
+}
+
+/* AppBar */
+.nk-appbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 15px 13px;
+  background: var(--brand);
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+.nk-appbar__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.16);
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+  flex: 0 0 auto;
+}
+
+.nk-appbar__title {
+  flex: 1;
+  min-width: 0;
+}
+
+.nk-appbar__name {
+  font-size: 15.5px;
+  font-weight: 800;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nk-appbar__sub {
+  font-size: 11.5px;
+  opacity: .82;
+  font-weight: 600;
+}
+
+.nk-appbar__avatar {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.18);
+  border: 1.5px solid rgba(255,255,255,.45);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.nk-appbar__avatar:hover {
+  background: rgba(255,255,255,.28);
+}
+
+/* Content area */
+.nk-content {
+  flex: 1;
+  padding: 12px 13px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Toolbar (Search + Date) */
+.nk-toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.nk-search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-surface);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--ink-muted);
+  box-shadow: var(--shadow-sm);
+}
+
+.nk-search input {
+  border: none;
+  outline: none;
+  background: transparent;
+  flex: 1;
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.nk-search input::placeholder { color: var(--ink-muted); }
+
+.nk-datepick {
+  background: var(--bg-surface);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--brand);
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ==========================================================================
+   5. WORK BOARD — Groups & Rows
+   ========================================================================== */
+.nk-group {
+  margin-top: 8px;
+}
+
+.nk-group__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 2px 7px;
+}
+
+.nk-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.nk-group__title {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .01em;
+  color: var(--ink);
+}
+
+.nk-group__count {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.nk-list {
+  background: var(--bg-surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Work Row — prefix nk-wrow để tránh xung đột hoàn toàn */
+.nk-wrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  border-top: 1px solid var(--line-soft);
+  cursor: pointer;
+  transition: background var(--transition);
+  text-decoration: none;
+  color: inherit;
+}
+
+.nk-wrow:first-child { border-top: 0; }
+.nk-wrow:hover { background: var(--bg-panel); }
+.nk-wrow:active { background: var(--line-soft); }
+
+.nk-wrow__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  align-self: flex-start;
+  margin-top: 5px;
+}
+
+.nk-wrow__main {
+  min-width: 0;
+  flex: 1;
+}
+
+.nk-wrow__title {
+  font-size: 13.8px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -.005em;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.nk-wrow__meta {
+  font-size: 12px;
+  color: var(--ink-muted);
+  margin-top: 2px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.nk-wrow__meta .sep { opacity: .4; }
+.nk-wrow__meta .who { font-weight: 700; color: #47535c; }
+
+[data-theme="dark"] .nk-wrow__meta .who { color: var(--ink-muted); }
+
+.nk-wrow__chev {
+  color: var(--ink-faint);
+  font-size: 16px;
+  flex: 0 0 auto;
+}
+
+/* New task button */
+.nk-newbtn {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 800;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: var(--brand);
+  color: #fff;
+  cursor: pointer;
+  border: none;
+  width: 100%;
+  letter-spacing: .01em;
+  box-shadow: var(--shadow-md);
+  transition: opacity var(--transition);
+}
+
+.nk-newbtn:hover { opacity: .92; }
+.nk-newbtn:active { opacity: .84; }
+
+/* Empty state */
+.nk-empty {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--ink-muted);
+  font-size: 14px;
+}
+
+.nk-empty__icon { font-size: 48px; margin-bottom: 12px; }
+
+/* ==========================================================================
+   6. DETAIL VIEW — Full-screen (hash route)
+   ========================================================================== */
+.nk-detail {
+  display: none;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: var(--bg-page);
+}
+
+.nk-detail.is-active { display: flex; }
+
+.nk-detail__bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 15px 13px;
+  background: var(--brand);
+  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nk-detail__back {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  opacity: .9;
+}
+
+.nk-detail__bar-title {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nk-detail__body {
+  flex: 1;
+  padding: 12px 13px 80px;
+  overflow-y: auto;
+}
+
+/* Detail Sheet */
+.nk-sheet {
+  background: var(--bg-surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.nk-section {
+  padding: 13px 14px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.nk-section:first-child { border-top: 0; }
+
+.nk-section__label {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nk-section__label .n {
+  color: var(--brand);
+}
+
+/* Key-Value */
+.nk-kv {
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.nk-kv .k {
+  color: var(--ink-muted);
+  font-weight: 700;
+}
+
+.nk-quote {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--ink);
+  border-left: 3px solid var(--brand);
+  padding: 4px 0 4px 11px;
+  margin: 8px 0 4px;
+  line-height: 1.5;
+}
+
+/* Phase Lines */
+.nk-pline {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 0;
+  border-top: 1px dashed var(--line);
+}
+
+.nk-pline:first-child { border-top: 0; }
+
+.nk-pmark {
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  color: #fff;
+  flex: 0 0 auto;
+  font-weight: 700;
+}
+
+.nk-pmark--done   { background: var(--dot-done); }
+.nk-pmark--doing  { background: var(--dot-doing); }
+.nk-pmark--todo   { background: var(--line); color: var(--ink-muted); }
+
+.nk-pname { font-size: 13.5px; font-weight: 700; flex: 1; }
+.nk-pcount {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Steps */
+.nk-steps {
+  padding: 2px 0 4px 28px;
+  display: flex;
+  flex-direction: column;
+}
+
+.nk-step-wrap {
+  border-top: 1px solid var(--line-soft);
+}
+.nk-step-wrap:first-child { border-top: 0; }
+
+.nk-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 0;
+}
+
+
+.nk-step__ck {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1.5px solid var(--line);
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  color: #fff;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.nk-step__ck--done {
+  background: var(--dot-done);
+  border-color: var(--dot-done);
+}
+
+.nk-step__text {
+  flex: 1;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  min-width: 0;
+}
+
+.nk-step__text--done {
+  text-decoration: line-through;
+  color: var(--ink-muted);
+}
+
+.nk-step__asg {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 8px 2px 4px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--line);
+  color: var(--ink-muted);
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.nk-step__asg .r {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 8px;
+  color: #fff;
+  background: var(--brand);
+}
+
+.nk-add-step {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brand);
+  padding: 8px 0 4px 28px;
+  cursor: pointer;
+  display: block;
+}
+
+/* ── Gán người vào bước ────────────────────────────────────── */
+.step-assignees {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  margin-top: 4px;
+  padding-left: 28px;
+}
+
+.step-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: var(--brand-light, #e0f0f5);
+  color: var(--brand, #0b4d5e);
+  border-radius: 12px;
+  padding: 2px 6px 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.step-chip button {
+  background: none;
+  border: none;
+  padding: 0 0 0 2px;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  color: inherit;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+.step-chip button:hover { opacity: 1; }
+
+.step-add-select {
+  font-size: 11px;
+  border: 1px solid var(--line, #d3dadd);
+  border-radius: 12px;
+  padding: 2px 22px 2px 8px;
+  background: var(--bg-surface, #fff);
+  color: var(--ink, #1a1a1a);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%230b4d5e'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 7px center;
+  background-size: 8px;
+  max-width: 140px;
+}
+
+.step-done-note {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--dot-done, #28a745);
+  font-weight: 600;
+  margin-top: 3px;
+  padding-left: 28px;
+}
+
+.step-progress-people {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--ink-muted, #6c7b80);
+  margin-top: 3px;
+  padding-left: 28px;
+}
+
+/* Crowd-completion self-chip */
+.nk-self-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1.5px solid var(--brand, #0b4d5e);
+  color: var(--brand, #0b4d5e);
+  background: transparent;
+  border-radius: 14px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 4px;
+  margin-left: 28px;
+  transition: background 0.15s, color 0.15s;
+}
+.nk-self-chip:hover { background: var(--brand, #0b4d5e); color: #fff; }
+.nk-self-chip.is-done {
+  background: var(--dot-done, #28a745);
+  color: #fff;
+  border-color: var(--dot-done, #28a745);
+  pointer-events: none;
+}
+
+/* Step del button */
+.nk-step__del {
+  background: none;
+  border: none;
+  color: var(--ink-muted, #6c7b80);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 4px;
+  opacity: 0;
+  transition: opacity 0.1s;
+  flex-shrink: 0;
+  margin-left: auto;
+  align-self: flex-start;
+}
+.nk-step:hover .nk-step__del { opacity: 0.7; }
+.nk-step__del:hover { opacity: 1 !important; color: var(--danger, #dc3545); }
+
+/* Timeline */
+.nk-tl {
+  position: relative;
+  padding-left: 16px;
+  margin-top: 4px;
+}
+
+.nk-tl::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 5px;
+  bottom: 5px;
+  width: 2px;
+  background: var(--line);
+}
+
+.nk-tl-item {
+  position: relative;
+  padding: 3px 0 10px;
+}
+
+.nk-tl-item::before {
+  content: "";
+  position: absolute;
+  left: -14px;
+  top: 6px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--brand);
+  border: 2px solid var(--bg-surface);
+}
+
+.nk-tl-when {
+  font-size: 10.8px;
+  font-weight: 700;
+  color: var(--ink-muted);
+}
+
+.nk-tl-text {
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+/* Detail Actions */
+.nk-actions {
+  display: flex;
+  gap: 8px;
+  padding: 14px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.nk-btn {
+  flex: 1;
+  text-align: center;
+  font-size: 13.5px;
+  font-weight: 800;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  transition: opacity var(--transition);
+}
+
+.nk-btn:hover { opacity: .88; }
+.nk-btn--ghost {
+  border: 1.5px solid var(--line);
+  color: var(--brand);
+  background: transparent;
+}
+
+.nk-btn--primary {
+  background: var(--dot-done);
+  color: #fff;
+}
+
+.nk-btn--brand {
+  background: var(--brand);
+  color: #fff;
+}
+
+/* ==========================================================================
+   7. MODAL — Form tạo việc mới
+   ========================================================================== */
+.nk-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--bg-overlay);
+  z-index: 200;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.nk-modal-overlay.is-open {
+  display: flex;
+}
+
+.nk-modal {
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  width: 100%;
+  max-width: 640px;
+  max-height: 90dvh;
+  overflow-y: auto;
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+  animation: slideUp 200ms ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(24px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.nk-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 0;
+  margin-bottom: 4px;
+}
+
+.nk-modal__title {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.nk-modal__close {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: var(--ink-muted);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.nk-modal__body {
+  padding: 12px 16px 16px;
+}
+
+.nk-field {
+  margin-bottom: 12px;
+}
+
+.nk-field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--ink-muted);
+  margin-bottom: 5px;
+}
+
+.nk-field input,
+.nk-field select,
+.nk-field textarea {
+  width: 100%;
+  background: var(--bg-panel);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 13.5px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.nk-field input:focus,
+.nk-field select:focus,
+.nk-field textarea:focus {
+  border-color: var(--brand);
+}
+
+.nk-field textarea { resize: vertical; min-height: 72px; }
+
+.nk-expand-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--brand);
+  background: none;
+  border: none;
+  padding: 4px 0 8px;
+  cursor: pointer;
+}
+
+.nk-expand-fields { display: none; }
+.nk-expand-fields.is-open { display: block; }
+
+.nk-modal__footer {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 16px;
+}
+
+/* ==========================================================================
+   8. UTILITIES
+   ========================================================================== */
+
+/* Loading spinner */
+.nk-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  gap: 10px;
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+.nk-spinner__ring {
+  width: 22px;
+  height: 22px;
+  border: 3px solid var(--line);
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex: 0 0 auto;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Toast */
+.nk-toast-wrap {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.nk-toast {
+  background: #1c2c30;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-lg);
+  white-space: nowrap;
+  animation: toastIn 200ms ease;
+}
+
+.nk-toast--success { background: var(--dot-done); }
+.nk-toast--danger  { background: var(--dot-danger); }
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Attach button */
+.nk-attach {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--brand);
+  border: 1.5px dashed var(--brand-light);
+  border-radius: var(--radius-sm);
+  padding: 5px 10px;
+  cursor: pointer;
+  background: transparent;
+  margin-top: 6px;
+  transition: border-color var(--transition);
+}
+
+.nk-attach:hover { border-color: var(--brand); }
+
+/* Responsive */
+@media (min-width: 640px) {
+  .nk-app { box-shadow: 0 0 0 1px var(--line), var(--shadow-lg); }
+}
+
+/* ==========================================================================
+   9. BOTTOM NAVIGATION
+   ========================================================================== */
+.nk-bottomnav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(100%, 640px);
+  background: var(--bg-surface);
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  padding: 6px 8px env(safe-area-inset-bottom, 4px);
+  z-index: 90;
+  box-shadow: 0 -2px 12px rgba(8,40,50,.08);
+}
+
+.nk-bottomnav__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-decoration: none;
+  color: var(--ink-muted);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 2px 2px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nk-bottomnav__item:hover { color: var(--brand); }
+.nk-bottomnav__item.is-active { color: var(--brand); }
+
+.nk-bottomnav__icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.nk-bottomnav__label {
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* FAB center button */
+.nk-bottomnav__fab {
+  flex: 0 0 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 2px;
+}
+
+.nk-newbtn-fab {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: #fff;
+  font-size: 26px;
+  font-weight: 400;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(11,77,94,.4);
+  display: grid;
+  place-items: center;
+  line-height: 1;
+  transition: transform var(--transition), box-shadow var(--transition);
+  -webkit-tap-highlight-color: transparent;
+  margin-bottom: 4px;
+}
+
+.nk-newbtn-fab:hover  { transform: scale(1.07); box-shadow: 0 6px 20px rgba(11,77,94,.5); }
+.nk-newbtn-fab:active { transform: scale(.96); }
+
+/* Adjust content padding to avoid Bottom Nav overlap */
+.nk-content   { padding-bottom: 90px; }
+.nk-detail__body { padding-bottom: 90px; }
+
+/* ==========================================================================
+   10. APPBAR THEME TOGGLE
+   ========================================================================== */
+.nk-appbar__theme {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  padding: 4px;
+  cursor: pointer;
+  opacity: .85;
+  flex: 0 0 auto;
+  transition: opacity var(--transition);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nk-appbar__theme:hover { opacity: 1; }
+
+/* ── Report Screen ─────────────────────────────────────────────────────────── */
+.nk-stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 0;
+  margin-bottom: 4px;
+}
+
+.nk-stat-card {
+  background: var(--bg-surface);
+  border-radius: 14px;
+  padding: 18px 14px;
+  text-align: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+
+.nk-stat-card__num {
+  font-size: 36px;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.nk-stat-card__lbl {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--ink-muted);
+}
+
+.nk-report-table {
+  background: var(--bg-surface);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+
+.nk-report-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.nk-report-row:last-child { border-bottom: 0; }
+
+.nk-report-row__rank {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--brand-light, #e0f0f5);
+  color: var(--brand);
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.nk-report-row__name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.nk-report-row__count {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brand);
+}
+
+/* ── Profile Screen ────────────────────────────────────────────────────────── */
+.nk-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 36px 20px 24px;
+}
+
+.nk-profile__avatar {
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand, #0b4d5e) 0%, #1a8099 100%);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 38px;
+  font-weight: 900;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 16px rgba(11,77,94,.3);
+}
+
+.nk-profile__name {
+  font-size: 22px;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.nk-profile__meta {
+  font-size: 13px;
+  color: var(--ink-muted);
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.nk-profile__section-label {
+  width: 100%;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--ink-muted);
+  margin-bottom: 8px;
+}
+
+.nk-profile__actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nk-profile__action {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid var(--line, #d3dadd);
+  border-radius: 12px;
+  background: var(--bg-surface);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--transition), border-color var(--transition);
+}
+.nk-profile__action:hover {
+  background: var(--bg-hover, #f5f5f5);
+}
+
+.nk-profile__action--danger {
+  color: var(--danger, #dc3545);
+  border-color: var(--danger, #dc3545);
+}
+.nk-profile__action--danger:hover {
+  background: rgba(220,53,69,.06);
+}
+
+/* ── Subtabs (A4) ──────────────────────────────────────────────────────────── */
+.nk-subtabs {
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px 4px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.nk-subtabs::-webkit-scrollbar { display: none; }
+
+.nk-subtab {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border: 1.5px solid var(--line, #d3dadd);
+  border-radius: 20px;
+  background: var(--bg-surface);
+  color: var(--ink-muted);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nk-subtab.is-active {
+  background: var(--brand, #0b4d5e);
+  color: #fff;
+  border-color: var(--brand, #0b4d5e);
+}
+
+.nk-subtab:not(.is-active):hover {
+  border-color: var(--brand, #0b4d5e);
+  color: var(--brand, #0b4d5e);
+}
