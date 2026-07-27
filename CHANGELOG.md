@@ -14,6 +14,33 @@ updated: 2026-06-08
 
 Tất cả các thay đổi và cải tiến của hệ thống Quản lý & Bảo trì Ban điện thông minh (CMMS Mini WebApp) được ghi nhận tại đây theo từng phiên bản.
 
+## [v2.16.0] - 2026-07-26
+### Thêm mới (Added)
+- **Quản lý tài khoản Admin / Account Management** (`nhatky/index.html`, `css/app.css`):
+  - Phân quyền Gate Admin/Manager trên Screen Cá nhân (`#screenProfile`): hiện nút `⚙️ Quản lý tài khoản nhân sự`.
+  - Modal `#modalManageAccounts` hiển thị Thống kê (255 Tổng số · 3 Admin · 11 Manager · 241 Staff), ô Tìm kiếm & Lọc vai trò.
+  - Dropdown đổi vai trò nhanh (`Staff` ↔ `Manager` ↔ `Admin`) trực tiếp cho từng nhân sự.
+  - Form `#formAddAccountBox` tạo tài khoản nhân sự mới và lưu vào `staffDirectory` + `localStorage`.
+  - 5 Playwright tests mới (`100/100 tests passed`).
+- **Quên mật khẩu / Forgot Password** (`nhatky/index.html`, `css/app.css`):
+  - Link `#btnOpenForgot` "Quên mật khẩu?" tại form `#screenLogin`.
+  - Modal `#modalForgotPassword` tra cứu cán bộ nhân sự theo Username / Họ tên / SĐT.
+  - Tự động đối soát `staffDirectory` hiển thị thông tin Quản lý/Tổ trưởng phụ trách tổ hoặc Hotline Ban Điện (`0392966368`), kèm nút bấm gọi điện một chạm (`tel:`).
+  - 3 Playwright tests mới (`90/90 tests passed`).
+- **Login Screen — màn hình đăng nhập full-screen** (`nhatky/index.html`, `css/app.css`):
+  - `#screenLogin` — HTML cố định theo SPA pattern (thay bottom-sheet overlay cũ tạo bằng JS).
+  - Brand logo 🗂 + tiêu đề "Ban Điện" + subtitle "Nhật ký Công việc".
+  - `#loginForm` với `#liUser`, `#liPass`, `#liBtn` — submit bằng Enter hoặc click.
+  - `#loginError` — error inline (không dùng toast) khi nhập sai hoặc API lỗi.
+  - `initLoginForm()` — gắn handler sau DOMContentLoaded, sau login thành công gọi `showScreen('main')` trực tiếp.
+  - `checkLogin()` gọi `showLoginScreen()` (thay `showLoginOverlay()`) — hiện `#screenLogin` qua `showScreen('login')`.
+  - `initApp()` — gate login trước khi load plans: `if (!checkLogin()) return`.
+  - `handleRoute()` — guard: không override login screen khi đang hiện.
+  - **CSS mới**: `.nk-login`, `.nk-login__brand`, `.nk-login__logo`, `.nk-login__title`, `.nk-login__sub`, `.nk-login__form`, `.nk-login__label`, `.nk-login__input`, `.nk-login__error`, `.nk-login__btn`, `.nk-login__footer`.
+  - **Dark mode**: `.nk-login__error` đổi màu theo theme.
+  - **Playwright 6 tests mới** (`Login Screen` describe): chưa login hiện screen, có form đúng, submit trống → error, sai credentials → error "Sai", đúng credentials → screenMain, đã login → không hiện.
+  - **Verify**: Playwright **84/84 tests PASSED** (72 cũ + 6 login + 6 A6 — Chromium + Mobile Chrome, 15.7s).
+
 ## [v2.15.0] - 2026-07-26
 ### Thêm mới (Added)
 - **A2 — Gate quyền Ghi hộ + Danh bạ thật** (`nhatky/index.html`):

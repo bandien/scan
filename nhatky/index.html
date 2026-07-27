@@ -658,18 +658,20 @@ function renderMainBoard() {
 
   function buildGroup(title, items, dotColor, groupId) {
     if (items.length === 0) return '';
-
-    const rows = items.map(p => {
-      const id       = planField(p, 'PlanID', 'id', 'planId');
-      const task     = escapeHtml(planField(p, 'Task', 'task') || 'Không có tên');
-      const assignee = getShortName(planField(p, 'Assignee', 'assignee'));
-      const updBy    = getShortName(planField(p, 'UpdatedBy', 'updatedBy'));
-      const area     = planField(p, 'Area', 'area');
-      const date     = planField(p, 'Date', 'date');
-
-      const who  = escapeHtml(assignee || updBy || 'Chưa giao');
-      
-      let badgeHtml = '';
+            return `
+              <div class="nk-step-wrap">
+                <div class="nk-step">
+                  <div class="nk-step__ck ${ckCls}" style="cursor:pointer" onclick="togglePhaseStepDone('${escapeAttr(pid)}','${escapeAttr(ph.id)}','${escapeAttr(st.id)}')">${st.done ? '✓' : ''}</div>
+                  <div class="nk-step__text ${txtCls}">
+                    <span style="cursor:pointer" onclick="renamePhaseStep('${escapeAttr(pid)}','${escapeAttr(ph.id)}','${escapeAttr(st.id)}')">${escapeHtml(st.title)}</span>
+                  </div>
+                  <button class="nk-step__del" onclick="deletePhaseStep('${escapeAttr(pid)}','${escapeAttr(ph.id)}','${escapeAttr(st.id)}')">&#215;</button>
+                </div>
+                ${phaseStepAssigneeEditorHtml(plan, ph.id, st)}
+                ${selfChipHtml}
+                ${stepPeopleProgressHtml(st)}
+              </div>`;
+          }).join('') + `</div>`;
       const phases = typeof planPhases === 'function' ? planPhases(p) : [];
       if (Array.isArray(phases) && phases.length > 0) {
         let totalSteps = 0;
