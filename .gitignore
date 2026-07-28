@@ -7,5 +7,6 @@
 *secret*.json
 kh_ncc_raw.json
 audit_duplicates_report.json
+danhba_chuan_hoa.{csv,json}
 
 node_modules/

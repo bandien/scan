@@ -1479,9 +1479,18 @@ function showLoginOverlay() {
     btn.disabled = true; btn.textContent = '⏳ Đang xác thực...';
 
     try {
-      const res = await window.bdsApiPost('login', { username: u, password: p });
-      if (res && res.status === 'success' && res.user) {
-        localStorage.setItem('currentUser', JSON.stringify(res.user));
+      const res = await window.bdsApiPost('nhatkyLogin', { username: u, pin: p });
+      if (res && res.status === 'success' && res.authToken) {
+        localStorage.setItem('currentUser', JSON.stringify({
+          name: res.name || res.fullName || res.username,
+          fullName: res.fullName || res.name || res.username,
+          username: res.username,
+          role: res.role || 'User',
+          teams: res.teams || '',
+          team: res.teams || '',
+          authToken: res.authToken,
+          loginAt: Date.now()
+        }));
         div.remove();
         initApp();
       } else {
@@ -1648,10 +1657,16 @@ document.addEventListener('DOMContentLoaded', () => {
           if (Array.isArray(arr) && arr.length > 0) staffDirectory = arr;
         }
 
-        const res = await window.bdsApiFetch('getStaff', { force: true });
-        if (res && res.status === 'success' && Array.isArray(res.data)) {
-          staffDirectory = res.data;
-          staffList = res.data.map(d => d.fullName).filter(Boolean);
+        const sessionUser = (typeof BD_SSO !== 'undefined') ? BD_SSO.getUser() : null;
+        if (!sessionUser || !sessionUser.authToken) throw new Error('Phiên đăng nhập không hợp lệ');
+        const res = await window.bdsApiFetch('getStaff', {
+          force: true,
+          authToken: sessionUser.authToken
+        });
+        const staffData = res && (res.data || res.staff);
+        if (res && res.status === 'success' && Array.isArray(staffData)) {
+          staffDirectory = staffData;
+          staffList = staffData.map(d => d.fullName).filter(Boolean);
           localStorage.setItem('bandien_nhatky_staff_v2', JSON.stringify(staffList));
           localStorage.setItem('bandien_nhatky_staff_directory_v1', JSON.stringify(staffDirectory));
           
