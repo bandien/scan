@@ -1,6 +1,7 @@
 # Local tool config
 .claude/
 .design-sync/
+~/.superpowers/
 
 # Secrets and temp audit data
 *secret*.json
