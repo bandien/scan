@@ -1483,6 +1483,25 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   letter-spacing: 0.5px;
 }
 
+.nk-login__label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 18px;
+}
+
+.nk-login__label-row .nk-login__label {
+  margin-bottom: 6px;
+}
+
+.nk-login__label-row a {
+  color: var(--brand);
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  margin-bottom: 6px;
+}
+
 .nk-login__input {
   width: 100%;
   padding: 13px 14px;
@@ -1564,6 +1583,160 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   animation: nkFadeIn 0.2s ease;
 }
 
+.nk-account-help {
+  color: var(--ink-muted);
+  font-size: 12px;
+  line-height: 1.55;
+  margin: 0 0 14px;
+}
+
+.nk-account-divider {
+  border-top: 1px solid var(--line);
+  margin: 12px 0;
+}
+
+.nk-account-call {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 9px 12px;
+  border-radius: 9px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.nk-modal--wide {
+  max-width: 760px;
+}
+
+.nk-account-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 150px auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.nk-account-summary {
+  color: var(--ink-muted);
+  font-size: 12px;
+  font-weight: 700;
+  margin: 12px 0 8px;
+}
+
+.nk-account-list {
+  display: grid;
+  gap: 8px;
+  max-height: 55dvh;
+  overflow-y: auto;
+}
+
+.nk-account-row {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto 36px 36px;
+  align-items: center;
+  gap: 9px;
+  min-height: 58px;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--bg-surface);
+}
+
+.nk-account-avatar {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: #fff;
+  font-weight: 900;
+}
+
+.nk-account-info {
+  min-width: 0;
+}
+
+.nk-account-info strong,
+.nk-account-info span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nk-account-info strong {
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.nk-account-info span {
+  color: var(--ink-muted);
+  font-size: 11px;
+  margin-top: 3px;
+}
+
+.nk-role-badge {
+  padding: 4px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.nk-account-icon-btn {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--bg-base);
+  color: var(--ink);
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.nk-account-icon-btn--danger {
+  color: #c0392b;
+}
+
+.nk-account-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.nk-account-loading {
+  padding: 28px 12px;
+  color: var(--ink-muted);
+  text-align: center;
+}
+
+@media (max-width: 560px) {
+  .nk-account-toolbar {
+    grid-template-columns: 1fr 120px;
+  }
+
+  .nk-account-toolbar #btnAddAccount {
+    grid-column: 1 / -1;
+  }
+
+  .nk-account-row {
+    grid-template-columns: 38px minmax(0, 1fr) 34px 34px;
+  }
+
+  .nk-account-row .nk-role-badge {
+    grid-column: 2;
+  }
+
+  .nk-account-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
 /* ── Role Badges ──────────────────────────────────────────────────────────── */
 .nk-role-badge--admin {
   background: #f3e5f5;
@@ -1594,5 +1767,28 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   background: rgba(46, 125, 50, 0.25);
   color: #a5d6a7;
 }
-
-
+/* PWA/offline sync status — infrastructure shared by the Nhật ký shell. */
+.nk-sync-status {
+  position: fixed;
+  right: 12px;
+  bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  z-index: 1000;
+  padding: 6px 11px;
+  border: 1px solid #b9d7c5;
+  border-radius: 999px;
+  background: #eef8f2;
+  color: #17643a;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
+  font-size: 12px;
+  font-weight: 700;
+}
+.nk-sync-status.is-pending {
+  border-color: #f0c36d;
+  background: #fff8e1;
+  color: #8a5700;
+}
+.nk-sync-status.is-syncing {
+  border-color: #8eb9d5;
+  background: #edf7fd;
+  color: #155f88;
+}

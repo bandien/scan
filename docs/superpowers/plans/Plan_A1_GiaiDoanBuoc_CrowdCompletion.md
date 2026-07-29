@@ -148,7 +148,7 @@ if (phases.length > 0) {
 }
 ```
 Viết `phaseBlockHtml(plan, phase)` + `phaseStepRowHtml(plan, phase, step)` (port rút gọn từ dòng 5829 bản cũ, dùng `phaseStepAssigneeEditorHtml` đã port ở Task 4 + `stepPeopleProgressHtml(step)` đã port ở Task 1).
-**CSS cần thêm** (copy nguyên từ `e0dfa93`, các class: `.step-row`, `.step-check`, `.step-chip`, `.step-assignees`, `.step-add-select`, `.step-done-note`, `.step-progress-people` — tra bằng `grep -n "\.step-row\|\.step-check\|\.step-chip" old_p4.html` để lấy đúng block CSS) — chèn vào `<style>` hiện có.
+**CSS cần thêm** (đối chiếu commit lịch sử `e0dfa93`, các class: `.step-row`, `.step-check`, `.step-chip`, `.step-assignees`, `.step-add-select`, `.step-done-note`, `.step-progress-people`) — chèn vào `<style>` hiện có.
 **Verify (Playwright, giống cách đã verify P4):**
 1. Mock `getPlans` trả về 1 plan **không có `phases`** → mở Chi tiết → **không thấy** khối "Giai đoạn & bước", chỉ thấy nút "Nâng cấp" (Task 5).
 2. Mock `getPlans` trả về 1 plan **có `phases`** (1 giai đoạn, 1 bước, 2 `assignees`) + mock `getStaff` trả 2 người đó → mở Chi tiết → **thấy** khối Giai đoạn & Bước hiện đầy đủ, dropdown gán người lọc đúng theo tổ, không lỗi console.

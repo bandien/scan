@@ -1,0 +1,24 @@
+{
+  "name": "Ban Điện · Nhật ký Công việc",
+  "short_name": "Nhật ký",
+  "description": "Nhật ký công việc Ban Điện",
+  "start_url": "./",
+  "scope": "./",
+  "id": "./",
+  "display": "standalone",
+  "background_color": "#f4f7f8",
+  "theme_color": "#0b4d5e",
+  "icons": [
+    {
+      "src": "../icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "../icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+

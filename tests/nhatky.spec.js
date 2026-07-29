@@ -1,94 +1,104 @@
-const { test, expect } = require('@playwright/test');
+﻿const { test, expect } = require('@playwright/test');
 
-// ── Mock Data ─────────────────────────────────────────────────────────────────
+// â”€â”€ Mock Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const MOCK_PLAN_NO_PHASES = {
   id: 'T-SIMPLE', PlanID: 'T-SIMPLE',
-  task: 'Kiểm tra điện định kỳ', Task: 'Kiểm tra điện định kỳ',
-  assignee: 'Đinh Văn Hậu', Assignee: 'Đinh Văn Hậu',
-  area: 'Toàn nhà', Area: 'Toàn nhà',
+  task: 'Kiá»ƒm tra Ä‘iá»‡n Ä‘á»‹nh ká»³', Task: 'Kiá»ƒm tra Ä‘iá»‡n Ä‘á»‹nh ká»³',
+  assignee: 'Äinh VÄƒn Háº­u', Assignee: 'Äinh VÄƒn Háº­u',
+  area: 'ToÃ n nhÃ ', Area: 'ToÃ n nhÃ ',
   date: '2026-07-26', Date: '2026-07-26',
-  status: 'Đang làm', Status: 'Đang làm'
+  status: 'Äang lÃ m', Status: 'Äang lÃ m'
 };
 
 const MOCK_PLAN_WITH_PHASES = {
   id: 'T-PHASES', PlanID: 'T-PHASES',
-  task: 'Thay thế cáp điện tầng 3', Task: 'Thay thế cáp điện tầng 3',
-  assignee: 'Nguyễn Quốc Thắng', Assignee: 'Nguyễn Quốc Thắng',
-  area: 'Tầng 3 - Block A', Area: 'Tầng 3 - Block A',
+  task: 'Thay tháº¿ cÃ¡p Ä‘iá»‡n táº§ng 3', Task: 'Thay tháº¿ cÃ¡p Ä‘iá»‡n táº§ng 3',
+  assignee: 'Nguyá»…n Quá»‘c Tháº¯ng', Assignee: 'Nguyá»…n Quá»‘c Tháº¯ng',
+  area: 'Táº§ng 3 - Block A', Area: 'Táº§ng 3 - Block A',
   date: '2026-07-26', Date: '2026-07-26',
-  status: 'Đang làm', Status: 'Đang làm',
-  team: 'Điện',
+  status: 'Äang lÃ m', Status: 'Äang lÃ m',
+  team: 'Äiá»‡n',
   phases: JSON.stringify([
     {
-      id: 'PH-1', name: 'Khảo sát', order: 1, status: 'done',
+      id: 'PH-1', name: 'Kháº£o sÃ¡t', order: 1, status: 'done',
       steps: [
-        { id: 'ST-1', title: 'Đo đạc hiện trạng', assignees: ['Nguyễn Quốc Thắng'], done: true, doneAt: '2026-07-25T08:00:00Z', doneBy: 'Nguyễn Quốc Thắng', doneByPeople: ['Nguyễn Quốc Thắng'] }
+        { id: 'ST-1', title: 'Äo Ä‘áº¡c hiá»‡n tráº¡ng', assignees: ['Nguyá»…n Quá»‘c Tháº¯ng'], done: true, doneAt: '2026-07-25T08:00:00Z', doneBy: 'Nguyá»…n Quá»‘c Tháº¯ng', doneByPeople: ['Nguyá»…n Quá»‘c Tháº¯ng'] }
       ]
     },
     {
-      id: 'PH-2', name: 'Thi công', order: 2, status: 'doing',
+      id: 'PH-2', name: 'Thi cÃ´ng', order: 2, status: 'doing',
       steps: [
-        { id: 'ST-2', title: 'Kéo cáp mới', assignees: ['Đinh Văn Hậu', 'Hoàng Việt Hoàng'], done: false, doneByPeople: ['Đinh Văn Hậu'] },
-        { id: 'ST-3', title: 'Đấu nối đầu cáp', assignees: ['Đinh Văn Hậu'], done: false, doneByPeople: [] }
+        { id: 'ST-2', title: 'KÃ©o cÃ¡p má»›i', assignees: ['Äinh VÄƒn Háº­u', 'HoÃ ng Viá»‡t HoÃ ng'], done: false, doneByPeople: ['Äinh VÄƒn Háº­u'] },
+        { id: 'ST-3', title: 'Äáº¥u ná»‘i Ä‘áº§u cÃ¡p', assignees: ['Äinh VÄƒn Háº­u'], done: false, doneByPeople: [] }
       ]
     },
     {
-      id: 'PH-3', name: 'Nghiệm thu', order: 3, status: 'todo', steps: []
+      id: 'PH-3', name: 'Nghiá»‡m thu', order: 3, status: 'todo', steps: []
     }
   ])
 };
 
-// Plan cho test crowd-completion: assignees phải khớp với user mock
+// Plan cho test crowd-completion: assignees pháº£i khá»›p vá»›i user mock
 const MOCK_PLAN_CROWD = {
   id: 'T-CROWD', PlanID: 'T-CROWD',
   task: 'Test crowd completion', Task: 'Test crowd completion',
   assignee: 'Hau DV', Assignee: 'Hau DV',
   date: '2026-07-26', Date: '2026-07-26',
-  status: 'Đang làm', Status: 'Đang làm',
+  status: 'Äang lÃ m', Status: 'Äang lÃ m',
   phases: JSON.stringify([
     {
-      id: 'PH-C', name: 'Thi công', order: 1, status: 'doing',
+      id: 'PH-C', name: 'Thi cÃ´ng', order: 1, status: 'doing',
       steps: [
-        // 2 assignees, user là 'Hau DV' (khớp BD_SSO mock)
-        { id: 'ST-C', title: 'Kéo cáp', assignees: ['Hau DV', 'Hoang VH'], done: false, doneByPeople: [] }
+        // 2 assignees, user lÃ  'Hau DV' (khá»›p BD_SSO mock)
+        { id: 'ST-C', title: 'KÃ©o cÃ¡p', assignees: ['Hau DV', 'Hoang VH'], done: false, doneByPeople: [] }
       ]
     }
   ])
 };
 
-// ── Setup ─────────────────────────────────────────────────────────────────────
+// â”€â”€ Setup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const STAGING_URL = process.env.STAGING_URL;
+
 function setupMocks(page) {
-  return page.addInitScript(() => {
-    // Set localStorage TRƯỚC để sso.js.getUser() đọc được
+  return page.addInitScript((stagingUrl) => {
+    if (stagingUrl) {
+      window.CONFIG = window.CONFIG || {};
+      window.CONFIG.gasUrl = stagingUrl;
+    }
+    // Set localStorage TRÆ¯á»šC Ä‘á»ƒ sso.js.getUser() Ä‘á»c Ä‘Æ°á»£c
     const mockUser = {
       name: 'Hau DV',
       username: 'hau.dv',
       role: 'user',
-      team: 'Điện',
-      loginAt: Date.now() - 1000  // mới đăng nhập 1 giây trước
+      team: 'Äiá»‡n',
+      loginAt: Date.now() - 1000  // má»›i Ä‘Äƒng nháº­p 1 giÃ¢y trÆ°á»›c
     };
     localStorage.setItem('currentUser', JSON.stringify(mockUser));
 
-    // Fallback: cũng set window.BD_SSO phòng trường hợp sso.js chưa load
+    // Fallback: cÅ©ng set window.BD_SSO phÃ²ng trÆ°á»ng há»£p sso.js chÆ°a load
     window.BD_SSO = {
       getUser: () => mockUser
     };
 
     // Mock API functions
-    window.bdsApiFetch = async (action) => {
+    if (!stagingUrl) {
+      window.bdsApiFetch = async (action) => {
       if (action === 'getPlans') return { status: 'success', plans: [] };
       if (action === 'getStaff') return {
         status: 'success',
         data: [
-          { fullName: 'Đinh Văn Hậu', shortName: 'Hậu ĐV', dept: 'Điện', username: 'hau.dv' },
-          { fullName: 'Hoàng Việt Hoàng', shortName: 'Hoàng VH', dept: 'Điện', username: 'hoang.vh' },
-          { fullName: 'Nguyễn Quốc Thắng', shortName: 'Thắng NQ', dept: 'Cơ khí', username: 'thang.nq' }
+          { fullName: 'Äinh VÄƒn Háº­u', shortName: 'Háº­u ÄV', dept: 'Äiá»‡n', username: 'hau.dv' },
+          { fullName: 'HoÃ ng Viá»‡t HoÃ ng', shortName: 'HoÃ ng VH', dept: 'Äiá»‡n', username: 'hoang.vh' },
+          { fullName: 'Nguyá»…n Quá»‘c Tháº¯ng', shortName: 'Tháº¯ng NQ', dept: 'CÆ¡ khÃ­', username: 'thang.nq' }
         ]
       };
       return { status: 'success' };
     };
-    window.bdsApiPost = async () => ({ status: 'success' });
-  });
+    }
+    if (!stagingUrl) {
+      window.bdsApiPost = async () => ({ status: 'success' });
+    }
+  }, STAGING_URL);
 }
 
 async function openDetail(page, plan) {
@@ -100,16 +110,16 @@ async function openDetail(page, plan) {
   }, plan);
 }
 
-// ── Tests ─────────────────────────────────────────────────────────────────────
-test.describe('Core — UI cơ bản', () => {
+// â”€â”€ Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+test.describe('Core â€” UI cÆ¡ báº£n', () => {
   test.beforeEach(async ({ page }) => {
     await setupMocks(page);
     await page.goto('/nhatky/index.html');
   });
 
-  test('Hiển thị giao diện chính', async ({ page }) => {
-    await expect(page).toHaveTitle(/Công việc/);
-    await expect(page.locator('#screenMain .nk-appbar__name')).toHaveText('Công việc');
+  test('Hiá»ƒn thá»‹ giao diá»‡n chÃ­nh', async ({ page }) => {
+    await expect(page).toHaveTitle(/CÃ´ng viá»‡c/);
+    await expect(page.locator('#screenMain .nk-appbar__name')).toHaveText('CÃ´ng viá»‡c');
     await expect(page.locator('#loginOverlay')).not.toBeVisible();
   });
 
@@ -122,7 +132,7 @@ test.describe('Core — UI cơ bản', () => {
     await expect(html).toHaveAttribute('data-theme', 'light');
   });
 
-  test('Mở/đóng Modal Việc Mới', async ({ page }) => {
+  test('Má»Ÿ/Ä‘Ã³ng Modal Viá»‡c Má»›i', async ({ page }) => {
     const modal = page.locator('#modalNewTask');
     await expect(modal).not.toHaveClass(/is-open/);
     await page.locator('#btnNewTask').click();
@@ -132,106 +142,106 @@ test.describe('Core — UI cơ bản', () => {
   });
 });
 
-test.describe('Task 8 — Badge GĐ X/Y trên card danh sách', () => {
+test.describe('Task 8 â€” Badge GÄ X/Y trÃªn card danh sÃ¡ch', () => {
   test.beforeEach(async ({ page }) => {
     await setupMocks(page);
     await page.goto('/nhatky/index.html');
   });
 
-  test('Plan có phases → hiện badge GĐ 1/3', async ({ page }) => {
+  test('Plan cÃ³ phases â†’ hiá»‡n badge GÄ 1/3', async ({ page }) => {
     await page.evaluate((plan) => {
       allPlans = [plan];
       renderMainBoard();
     }, MOCK_PLAN_WITH_PHASES);
-    // Badge GĐ 1/3 (1 bước done trong 3 bước tổng)
+    // Badge GÄ 1/3 (1 bÆ°á»›c done trong 3 bÆ°á»›c tá»•ng)
     const badge = page.locator('.nk-wrow__title').first();
-    await expect(badge).toContainText('GĐ');
+    await expect(badge).toContainText('GÄ');
     await expect(badge).toContainText('1/3');
   });
 
-  test('Plan không có phases → không hiện badge GĐ', async ({ page }) => {
+  test('Plan khÃ´ng cÃ³ phases â†’ khÃ´ng hiá»‡n badge GÄ', async ({ page }) => {
     await page.evaluate((plan) => {
       allPlans = [plan];
       renderMainBoard();
     }, MOCK_PLAN_NO_PHASES);
-    const badge = page.locator('.nk-wrow__title').filter({ hasText: /GĐ \d/ });
+    const badge = page.locator('.nk-wrow__title').filter({ hasText: /GÄ \d/ });
     await expect(badge).toHaveCount(0);
   });
 });
 
-test.describe('Task 5 — Nút Nâng cấp (plan không có phases)', () => {
+test.describe('Task 5 â€” NÃºt NÃ¢ng cáº¥p (plan khÃ´ng cÃ³ phases)', () => {
   test.beforeEach(async ({ page }) => {
     await setupMocks(page);
     await page.goto('/nhatky/index.html');
   });
 
-  test('Plan không có phases → hiện nút Nâng cấp, không có .nk-pline', async ({ page }) => {
+  test('Plan khÃ´ng cÃ³ phases â†’ hiá»‡n nÃºt NÃ¢ng cáº¥p, khÃ´ng cÃ³ .nk-pline', async ({ page }) => {
     await openDetail(page, MOCK_PLAN_NO_PHASES);
-    await expect(page.locator('button', { hasText: 'Việc này phức tạp' })).toBeVisible();
+    await expect(page.locator('button', { hasText: 'Viá»‡c nÃ y phá»©c táº¡p' })).toBeVisible();
     await expect(page.locator('.nk-pline')).toHaveCount(0);
   });
 });
 
-test.describe('Task 6 — Render Giai đoạn & Bước (plan có phases)', () => {
+test.describe('Task 6 â€” Render Giai Ä‘oáº¡n & BÆ°á»›c (plan cÃ³ phases)', () => {
   test.beforeEach(async ({ page }) => {
     await setupMocks(page);
     await page.goto('/nhatky/index.html');
   });
 
-  test('Hiện đúng 3 giai đoạn, không có nút Nâng cấp', async ({ page }) => {
+  test('Hiá»‡n Ä‘Ãºng 3 giai Ä‘oáº¡n, khÃ´ng cÃ³ nÃºt NÃ¢ng cáº¥p', async ({ page }) => {
     await openDetail(page, MOCK_PLAN_WITH_PHASES);
-    await expect(page.locator('button', { hasText: 'Việc này phức tạp' })).toHaveCount(0);
+    await expect(page.locator('button', { hasText: 'Viá»‡c nÃ y phá»©c táº¡p' })).toHaveCount(0);
     await expect(page.locator('.nk-pline')).toHaveCount(3);
-    await expect(page.locator('.nk-pline').nth(0)).toContainText('Khảo sát');
-    await expect(page.locator('.nk-pline').nth(1)).toContainText('Thi công');
-    await expect(page.locator('.nk-pline').nth(2)).toContainText('Nghiệm thu');
+    await expect(page.locator('.nk-pline').nth(0)).toContainText('Kháº£o sÃ¡t');
+    await expect(page.locator('.nk-pline').nth(1)).toContainText('Thi cÃ´ng');
+    await expect(page.locator('.nk-pline').nth(2)).toContainText('Nghiá»‡m thu');
   });
 
-  test('Giai đoạn Khảo sát có icon done (✓)', async ({ page }) => {
+  test('Giai Ä‘oáº¡n Kháº£o sÃ¡t cÃ³ icon done (âœ“)', async ({ page }) => {
     await openDetail(page, MOCK_PLAN_WITH_PHASES);
-    // icon done = '✓' trong .nk-pmark--done
+    // icon done = 'âœ“' trong .nk-pmark--done
     const ph1Mark = page.locator('.nk-pmark--done').first();
     await expect(ph1Mark).toBeVisible();
   });
 
-  test('Bước ST-1 done → hiện .step-done-note', async ({ page }) => {
+  test('BÆ°á»›c ST-1 done â†’ hiá»‡n .step-done-note', async ({ page }) => {
     await openDetail(page, MOCK_PLAN_WITH_PHASES);
     const doneNote = page.locator('.step-done-note').first();
     await expect(doneNote).toBeVisible();
-    await expect(doneNote).toContainText('đã xong');
+    await expect(doneNote).toContainText('Ä‘Ã£ xong');
   });
 
-  test('Bước có assignees → hiện .step-chip đúng số lượng', async ({ page }) => {
+  test('BÆ°á»›c cÃ³ assignees â†’ hiá»‡n .step-chip Ä‘Ãºng sá»‘ lÆ°á»£ng', async ({ page }) => {
     await openDetail(page, MOCK_PLAN_WITH_PHASES);
-    // ST-1: 1 chip, ST-2: 2 chips, ST-3: 1 chip = tổng 4
+    // ST-1: 1 chip, ST-2: 2 chips, ST-3: 1 chip = tá»•ng 4
     const chips = page.locator('.step-chip');
     await expect(chips).toHaveCount(4);
   });
 
-  test('Bước ST-2 (2 người, Hậu đã xong) → hiện progress 1/2', async ({ page }) => {
+  test('BÆ°á»›c ST-2 (2 ngÆ°á»i, Háº­u Ä‘Ã£ xong) â†’ hiá»‡n progress 1/2', async ({ page }) => {
     await openDetail(page, MOCK_PLAN_WITH_PHASES);
     const progress = page.locator('.step-progress-people').first();
     await expect(progress).toBeVisible();
     await expect(progress).toContainText('1/2');
   });
 
-  test('Có nút + Thêm bước và + Thêm giai đoạn', async ({ page }) => {
+  test('CÃ³ nÃºt + ThÃªm bÆ°á»›c vÃ  + ThÃªm giai Ä‘oáº¡n', async ({ page }) => {
     await openDetail(page, MOCK_PLAN_WITH_PHASES);
-    const addStepBtns = page.locator('.nk-add-step', { hasText: /Thêm bước/ });
+    const addStepBtns = page.locator('.nk-add-step', { hasText: /ThÃªm bÆ°á»›c/ });
     await expect(addStepBtns).toHaveCount(3); // 3 phases
-    const addPhaseBtns = page.locator('.nk-add-step', { hasText: /Thêm giai đoạn/ });
+    const addPhaseBtns = page.locator('.nk-add-step', { hasText: /ThÃªm giai Ä‘oáº¡n/ });
     await expect(addPhaseBtns).toHaveCount(1);
   });
 });
 
-test.describe('Task 7 — Crowd-Completion self-chip', () => {
+test.describe('Task 7 â€” Crowd-Completion self-chip', () => {
   test.beforeEach(async ({ page }) => {
     await setupMocks(page); // user = 'Hau DV'
     await page.goto('/nhatky/index.html');
   });
 
-  test('User là assignee trong bước >=2 người → hiện .nk-self-chip', async ({ page }) => {
-    // Phải set BD_SSO trước khi render để renderFlatPhases đọc được user
+  test('User lÃ  assignee trong bÆ°á»›c >=2 ngÆ°á»i â†’ hiá»‡n .nk-self-chip', async ({ page }) => {
+    // Pháº£i set BD_SSO trÆ°á»›c khi render Ä‘á»ƒ renderFlatPhases Ä‘á»c Ä‘Æ°á»£c user
     await page.evaluate((plan) => {
       window.BD_SSO = { getUser: () => ({ name: 'Hau DV', username: 'hau.dv' }) };
       allPlans = [plan];
@@ -241,10 +251,10 @@ test.describe('Task 7 — Crowd-Completion self-chip', () => {
     }, MOCK_PLAN_CROWD);
     const selfChip = page.locator('.nk-self-chip');
     await expect(selfChip).toHaveCount(1);
-    await expect(selfChip).toContainText('Báo mình xong');
+    await expect(selfChip).toContainText('BÃ¡o mÃ¬nh xong');
   });
 
-  test('User chưa báo xong → chip không có class is-done', async ({ page }) => {
+  test('User chÆ°a bÃ¡o xong â†’ chip khÃ´ng cÃ³ class is-done', async ({ page }) => {
     await page.evaluate((plan) => {
       window.BD_SSO = { getUser: () => ({ name: 'Hau DV', username: 'hau.dv' }) };
       allPlans = [plan];
@@ -254,20 +264,20 @@ test.describe('Task 7 — Crowd-Completion self-chip', () => {
     }, MOCK_PLAN_CROWD);
     const selfChip = page.locator('.nk-self-chip');
     await expect(selfChip).toBeVisible();
-    // doneByPeople rỗng → chip chưa is-done
+    // doneByPeople rá»—ng â†’ chip chÆ°a is-done
     const cls = await selfChip.getAttribute('class');
     expect(cls).not.toMatch(/is-done/);
   });
 });
 
-// ── A2: Gate quyền Ghi hộ ─────────────────────────────────────────────────────
-test.describe('A2 — Gate quyền Ghi hộ', () => {
+// â”€â”€ A2: Gate quyá»n Ghi há»™ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+test.describe('A2 â€” Gate quyá»n Ghi há»™', () => {
   test.beforeEach(async ({ page }) => {
     await setupMocks(page);
     await page.goto('/nhatky/index.html');
   });
 
-  test('User thường → KHÔNG thấy section Ghi hộ khi mở modal', async ({ page }) => {
+  test('User thÆ°á»ng â†’ KHÃ”NG tháº¥y section Ghi há»™ khi má»Ÿ modal', async ({ page }) => {
     await page.evaluate(() => {
       window.BD_SSO = { getUser: () => ({ name: 'User TH', username: 'user.th', role: 'user' }) };
       openNewTaskModal();
@@ -276,7 +286,7 @@ test.describe('A2 — Gate quyền Ghi hộ', () => {
     await expect(page.locator('#behalfSection')).toHaveCSS('display', 'none');
   });
 
-  test('Manager → THẤY section Ghi hộ khi mở modal', async ({ page }) => {
+  test('Manager â†’ THáº¤Y section Ghi há»™ khi má»Ÿ modal', async ({ page }) => {
     await page.evaluate(() => {
       window.BD_SSO = { getUser: () => ({ name: 'Hau DV', username: 'hau.dv', role: 'Manager' }) };
       openNewTaskModal();
@@ -285,24 +295,24 @@ test.describe('A2 — Gate quyền Ghi hộ', () => {
     await expect(page.locator('#behalfSection')).not.toHaveCSS('display', 'none');
   });
 
-  test('fAssignee có datalist attribute', async ({ page }) => {
+  test('fAssignee cÃ³ datalist attribute', async ({ page }) => {
     await expect(page.locator('#fAssignee')).toHaveAttribute('list', 'staffDatalist');
     await expect(page.locator('#staffDatalist')).toHaveCount(1);
   });
 });
 
-// ── A5: Screen Báo cáo ─────────────────────────────────────────────────────────
-test.describe('A5 — Screen Báo cáo', () => {
+// â”€â”€ A5: Screen BÃ¡o cÃ¡o â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+test.describe('A5 â€” Screen BÃ¡o cÃ¡o', () => {
   test.beforeEach(async ({ page }) => {
     await setupMocks(page);
     await page.goto('/nhatky/index.html');
   });
 
-  test('Bấm tab Báo cáo → screenReport hiện, screenMain ẩn', async ({ page }) => {
+  test('Báº¥m tab BÃ¡o cÃ¡o â†’ screenReport hiá»‡n, screenMain áº©n', async ({ page }) => {
     await page.evaluate(() => {
       allPlans = [
-        { id: 'R1', Task: 'Việc A', Assignee: 'Hau DV', Date: '2026-07-26', Status: 'Đang làm' },
-        { id: 'R2', Task: 'Việc B', Assignee: 'Thang NQ', Date: '2026-07-26', Status: 'Hoàn thành' }
+        { id: 'R1', Task: 'Viá»‡c A', Assignee: 'Hau DV', Date: '2026-07-26', Status: 'Äang lÃ m' },
+        { id: 'R2', Task: 'Viá»‡c B', Assignee: 'Thang NQ', Date: '2026-07-26', Status: 'HoÃ n thÃ nh' }
       ];
       navigateToReport();
     });
@@ -310,36 +320,36 @@ test.describe('A5 — Screen Báo cáo', () => {
     await expect(page.locator('#screenMain')).not.toBeVisible();
   });
 
-  test('Screen Báo cáo có 4 stat cards', async ({ page }) => {
+  test('Screen BÃ¡o cÃ¡o cÃ³ 4 stat cards', async ({ page }) => {
     await page.evaluate(() => {
-      allPlans = [{ id: 'R1', Task: 'V1', Assignee: 'A', Date: '2026-07-26', Status: 'Đang làm' }];
+      allPlans = [{ id: 'R1', Task: 'V1', Assignee: 'A', Date: '2026-07-26', Status: 'Äang lÃ m' }];
       navigateToReport();
     });
     await expect(page.locator('.nk-stat-card')).toHaveCount(4);
   });
 
-  test('Stat card Tổng việc hiện đúng số lượng', async ({ page }) => {
+  test('Stat card Tá»•ng viá»‡c hiá»‡n Ä‘Ãºng sá»‘ lÆ°á»£ng', async ({ page }) => {
     await page.evaluate(() => {
       allPlans = [
-        { id: 'R1', Task: 'V1', Assignee: 'A', Status: 'Đang làm' },
-        { id: 'R2', Task: 'V2', Assignee: 'A', Status: 'Đang làm' },
-        { id: 'R3', Task: 'V3', Assignee: 'B', Status: 'Hoàn thành' }
+        { id: 'R1', Task: 'V1', Assignee: 'A', Status: 'Äang lÃ m' },
+        { id: 'R2', Task: 'V2', Assignee: 'A', Status: 'Äang lÃ m' },
+        { id: 'R3', Task: 'V3', Assignee: 'B', Status: 'HoÃ n thÃ nh' }
       ];
       navigateToReport();
     });
-    // Card "Tổng việc" là card thứ 4
+    // Card "Tá»•ng viá»‡c" lÃ  card thá»© 4
     await expect(page.locator('.nk-stat-card').nth(3).locator('.nk-stat-card__num')).toHaveText('3');
   });
 });
 
-// ── A5: Screen Cá nhân ─────────────────────────────────────────────────────────
-test.describe('A5 — Screen Cá nhân', () => {
+// â”€â”€ A5: Screen CÃ¡ nhÃ¢n â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+test.describe('A5 â€” Screen CÃ¡ nhÃ¢n', () => {
   test.beforeEach(async ({ page }) => {
     await setupMocks(page);
     await page.goto('/nhatky/index.html');
   });
 
-  test('Bấm tab Cá nhân → screenProfile hiện, screenMain ẩn', async ({ page }) => {
+  test('Báº¥m tab CÃ¡ nhÃ¢n â†’ screenProfile hiá»‡n, screenMain áº©n', async ({ page }) => {
     await page.evaluate(() => {
       window.BD_SSO = { getUser: () => ({ name: 'Hau DV', username: 'hau.dv', role: 'Manager' }) };
       navigateToProfile();
@@ -348,97 +358,193 @@ test.describe('A5 — Screen Cá nhân', () => {
     await expect(page.locator('#screenMain')).not.toBeVisible();
   });
 
-  test('profileName hiện đúng tên user', async ({ page }) => {
+  test('profileName hiá»‡n Ä‘Ãºng tÃªn user', async ({ page }) => {
     await page.evaluate(() => {
-      window.BD_SSO = { getUser: () => ({ name: 'Đinh Văn Hậu', username: 'hau.dv', role: 'Manager' }) };
+      window.BD_SSO = { getUser: () => ({ name: 'Äinh VÄƒn Háº­u', username: 'hau.dv', role: 'Manager' }) };
       navigateToProfile();
     });
-    await expect(page.locator('#profileName')).toContainText('Đinh Văn Hậu');
+    await expect(page.locator('#profileName')).toContainText('Äinh VÄƒn Háº­u');
   });
 
-  test('Avatar hiện chữ cái đầu của tên', async ({ page }) => {
+  test('Avatar hiá»‡n chá»¯ cÃ¡i Ä‘áº§u cá»§a tÃªn', async ({ page }) => {
     await page.evaluate(() => {
-      window.BD_SSO = { getUser: () => ({ name: 'Đinh Văn Hậu', username: 'hau.dv' }) };
+      window.BD_SSO = { getUser: () => ({ name: 'Äinh VÄƒn Háº­u', username: 'hau.dv' }) };
       navigateToProfile();
     });
-    await expect(page.locator('.nk-profile__avatar')).toContainText('Đ');
+    await expect(page.locator('.nk-profile__avatar')).toContainText('Ä');
   });
 
-  test('Có nút Đăng xuất', async ({ page }) => {
+  test('CÃ³ nÃºt ÄÄƒng xuáº¥t', async ({ page }) => {
     await page.evaluate(() => {
       window.BD_SSO = { getUser: () => ({ name: 'Test User', username: 'test' }) };
       navigateToProfile();
     });
     const logoutBtn = page.locator('.nk-profile__action--danger');
     await expect(logoutBtn).toBeVisible();
-    await expect(logoutBtn).toContainText('Đăng xuất');
+    await expect(logoutBtn).toContainText('ÄÄƒng xuáº¥t');
   });
 });
 
-// ── A4: Subtab lọc loại công việc ──────────────────────────────────────────────
-test.describe('A4 — Subtab lọc loại công việc', () => {
+// â”€â”€ A4: Subtab lá»c loáº¡i cÃ´ng viá»‡c â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+test.describe('A4 â€” Subtab lá»c loáº¡i cÃ´ng viá»‡c', () => {
   test.beforeEach(async ({ page }) => {
     await setupMocks(page);
     await page.goto('/nhatky/index.html');
   });
 
-  test('Có 3 subtab: Công việc / Kế hoạch / Checklist', async ({ page }) => {
+  test('CÃ³ 3 subtab: CÃ´ng viá»‡c / Káº¿ hoáº¡ch / Checklist', async ({ page }) => {
     const tabs = page.locator('.nk-subtab');
     await expect(tabs).toHaveCount(3);
-    await expect(tabs.nth(0)).toContainText('Công việc');
-    await expect(tabs.nth(1)).toContainText('Kế hoạch');
+    await expect(tabs.nth(0)).toContainText('CÃ´ng viá»‡c');
+    await expect(tabs.nth(1)).toContainText('Káº¿ hoáº¡ch');
     await expect(tabs.nth(2)).toContainText('Checklist');
   });
 
-  test('Tab "Công việc" active mặc định', async ({ page }) => {
+  test('Tab "CÃ´ng viá»‡c" active máº·c Ä‘á»‹nh', async ({ page }) => {
     await expect(page.locator('#subtabAll')).toHaveClass(/is-active/);
     await expect(page.locator('#subtabPlan')).not.toHaveClass(/is-active/);
   });
 
-  test('Bấm tab "Kế hoạch" → chỉ hiện plan có type Kế hoạch', async ({ page }) => {
+  test('Báº¥m tab "Káº¿ hoáº¡ch" â†’ chá»‰ hiá»‡n plan cÃ³ type Káº¿ hoáº¡ch', async ({ page }) => {
     await page.evaluate(() => {
       allPlans = [
-        { id: 'P1', Task: 'Việc phát sinh', Assignee: 'A', Date: '2026-07-26', Status: 'Đang làm', Type: 'Phát sinh' },
-        { id: 'P2', Task: 'Bảo dưỡng máy bơm', Assignee: 'B', Date: '2026-07-26', Status: 'Đang làm', Type: 'Bảo dưỡng' },
-        { id: 'P3', Task: 'Kế hoạch sửa chữa', Assignee: 'C', Date: '2026-07-26', Status: 'Đang làm', Type: 'Kế hoạch' }
+        { id: 'P1', Task: 'Viá»‡c phÃ¡t sinh', Assignee: 'A', Date: '2026-07-26', Status: 'Äang lÃ m', Type: 'PhÃ¡t sinh' },
+        { id: 'P2', Task: 'Báº£o dÆ°á»¡ng mÃ¡y bÆ¡m', Assignee: 'B', Date: '2026-07-26', Status: 'Äang lÃ m', Type: 'Báº£o dÆ°á»¡ng' },
+        { id: 'P3', Task: 'Káº¿ hoáº¡ch sá»­a chá»¯a', Assignee: 'C', Date: '2026-07-26', Status: 'Äang lÃ m', Type: 'Káº¿ hoáº¡ch' }
       ];
       renderMainBoard();
     });
-    // Bấm tab Kế hoạch
+    // Báº¥m tab Káº¿ hoáº¡ch
     await page.locator('#subtabPlan').click();
     await expect(page.locator('#subtabPlan')).toHaveClass(/is-active/);
-    // Chỉ thấy Bảo dưỡng và Kế hoạch (P2 + P3), không thấy P1
+    // Chá»‰ tháº¥y Báº£o dÆ°á»¡ng vÃ  Káº¿ hoáº¡ch (P2 + P3), khÃ´ng tháº¥y P1
     const rows = page.locator('.nk-wrow');
     await expect(rows).toHaveCount(2);
   });
 
-  test('Bấm tab "Checklist" → chỉ hiện plan tên chứa CHECKLIST', async ({ page }) => {
+  test('Báº¥m tab "Checklist" â†’ chá»‰ hiá»‡n plan tÃªn chá»©a CHECKLIST', async ({ page }) => {
     await page.evaluate(() => {
       allPlans = [
-        { id: 'C1', Task: 'Kéo cáp bình thường', Assignee: 'A', Date: '2026-07-26', Status: 'Đang làm', Type: 'Phát sinh' },
-        { id: 'C2', Task: '[SỰ CỐ CHECKLIST] Golf ca sáng', Assignee: 'B', Date: '2026-07-26', Status: 'Đang làm', Type: 'Phát sinh' }
+        { id: 'C1', Task: 'KÃ©o cÃ¡p bÃ¬nh thÆ°á»ng', Assignee: 'A', Date: '2026-07-26', Status: 'Äang lÃ m', Type: 'PhÃ¡t sinh' },
+        { id: 'C2', Task: '[Sá»° Cá» CHECKLIST] Golf ca sÃ¡ng', Assignee: 'B', Date: '2026-07-26', Status: 'Äang lÃ m', Type: 'PhÃ¡t sinh' }
       ];
       renderMainBoard();
     });
     await page.locator('#subtabChecklist').click();
     await expect(page.locator('#subtabChecklist')).toHaveClass(/is-active/);
-    // Chỉ thấy C2
+    // Chá»‰ tháº¥y C2
     const rows = page.locator('.nk-wrow');
     await expect(rows).toHaveCount(1);
     await expect(rows.first()).toContainText('CHECKLIST');
+    
+    // Test A4 Shortcuts xuáº¥t hiá»‡n á»Ÿ tab Checklist
+    const shortcuts = page.locator('.nk-checklist-shortcuts');
+    await expect(shortcuts).toBeVisible();
+    await expect(shortcuts).toContainText('Golf (SÃ¡ng)');
   });
 
-  test('Bấm tab "Công việc" sau khi lọc → hiện lại tất cả', async ({ page }) => {
+  test('Trá»n vÃ²ng Ä‘á»i Checklist: Táº¡o, xem chi tiáº¿t, vÃ  má»Ÿ form', async ({ page }) => {
+    // 1. Mock bdsApiPost Ä‘á»ƒ tráº£ vá» res.data cho riÃªng lá»‡nh savePlan
+    const isStaging = !!process.env.STAGING_URL;
+    await page.evaluate((isStaging) => {
+      if (!isStaging) {
+        window.bdsApiPost = async (action, payload) => {
+          if (action === 'savePlan') {
+            return { status: 'success', planId: 'C99' };
+          }
+          return { status: 'success' };
+        };
+      }
+      // Reset danh sÃ¡ch plan
+      allPlans = [];
+      renderMainBoard();
+    }, isStaging);
+
+    // 2. Chá»n Tab Checklist
+    await page.locator('#subtabChecklist').click();
+
+    // 3. Báº¥m táº¡o Checklist Golf (SÃ¡ng)
+    await page.getByText('Golf (SÃ¡ng)').click();
+
+    // 5. LÃºc nÃ y form chi tiáº¿t (nk-sheet) pháº£i tá»± Ä‘á»™ng má»Ÿ ra
+    const sheet = page.locator('#detailBody');
+    await expect(sheet).toBeVisible({ timeout: 2000 });
+
+    // 6. Kiá»ƒm tra tiÃªu Ä‘á» task cÃ³ chá»¯ CHECKLIST
+    const title = page.locator('.nk-detail__bar-title');
+    await expect(title).toContainText('[CHECKLIST] SÃ¢n Golf');
+
+    // 7. Kiá»ƒm tra nÃºt Äiá»n Form Checklist cÃ³ tá»“n táº¡i vÃ  truyá»n Ä‘Ãºng taskId
+    const btnForm = page.locator('button:has-text("Äiá»n Form Checklist")');
+    await expect(btnForm).toBeVisible();
+    const onclick = await btnForm.getAttribute('onclick');
+    expect(onclick).toContain('?taskId=C99');
+  });
+});
+
+// â”€â”€ A3: BÃ n giao ca & Nghiá»‡m thu/Chá»‘t sá»• (Lifecycle) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+test.describe('A3 â€” VÃ²ng Ä‘á»i BÃ n giao & Chá»‘t sá»•', () => {
+  test.beforeEach(async ({ page }) => {
+    await setupMocks(page);
+    await page.goto('/nhatky/index.html');
+  });
+
+  test('Viá»‡c Ä‘ang lÃ m hiá»ƒn thá»‹ nÃºt Xong ká»¹ thuáº­t vÃ  BÃ n giao', async ({ page }) => {
+    await page.evaluate(() => {
+      allPlans = [{ id: 'L1', Task: 'Sá»­a Ä‘iá»‡n', Status: 'Äang lÃ m' }];
+      renderMainBoard();
+    });
+    await page.locator('.nk-wrow').first().click();
+    // Check buttons
+    const btnTechDone = page.locator('#btnTechDone');
+    await expect(btnTechDone).toBeVisible();
+    await expect(btnTechDone).toContainText('Xong ká»¹ thuáº­t');
+    
+    const actions = page.locator('.nk-actions');
+    await expect(actions).toContainText('BÃ n giao');
+  });
+
+  test('Viá»‡c Chá» nghiá»‡m thu hiá»ƒn thá»‹ nÃºt Chá»‘t sá»• cho quáº£n lÃ½', async ({ page }) => {
+    await page.evaluate(() => {
+      // Mock user lÃ  admin Ä‘á»ƒ pass canWriteOnBehalf()
+      window.BD_SSO = { getUser: () => ({ username: 'admin', role: 'admin' }) };
+      allPlans = [{ id: 'L2', Task: 'Sá»­a nÆ°á»›c', Status: 'Chá» nghiá»‡m thu' }];
+      renderMainBoard();
+    });
+    await page.locator('.nk-wrow').first().click();
+    // Quáº£n lÃ½ sáº½ tháº¥y nÃºt Chá»‘t sá»•
+    const btnDone = page.locator('#btnMarkDone');
+    await expect(btnDone).toBeVisible();
+    await expect(btnDone).toContainText('Chá»‘t sá»•');
+  });
+
+  test('Viá»‡c Chá» nghiá»‡m thu áº©n nÃºt Chá»‘t sá»• vá»›i nhÃ¢n viÃªn thÆ°á»ng', async ({ page }) => {
+    await page.evaluate(() => {
+      // Mock user lÃ  nhÃ¢n viÃªn thÆ°á»ng
+      window.BD_SSO = { getUser: () => ({ username: 'nv1', role: 'user' }) };
+      allPlans = [{ id: 'L3', Task: 'Sá»­a láº¡nh', Status: 'Chá» nghiá»‡m thu' }];
+      renderMainBoard();
+    });
+    await page.locator('.nk-wrow').first().click();
+    // NhÃ¢n viÃªn chá»‰ tháº¥y "Äang chá» chá»‘t sá»•" (pointer-events: none)
+    const btnDone = page.locator('#btnMarkDone');
+    await expect(btnDone).not.toBeVisible();
+    const actions = page.locator('.nk-actions');
+    await expect(actions).toContainText('Äang chá» chá»‘t sá»•');
+  });
+
+
+  test('Báº¥m tab "CÃ´ng viá»‡c" sau khi lá»c â†’ hiá»‡n láº¡i táº¥t cáº£', async ({ page }) => {
     await page.evaluate(() => {
       allPlans = [
-        { id: 'A1', Task: 'Việc A', Assignee: 'A', Date: '2026-07-26', Status: 'Đang làm', Type: 'Phát sinh' },
-        { id: 'A2', Task: 'Việc B', Assignee: 'B', Date: '2026-07-26', Status: 'Đang làm', Type: 'Kế hoạch' }
+        { id: 'A1', Task: 'Viá»‡c A', Assignee: 'A', Date: '2026-07-26', Status: 'Äang lÃ m', Type: 'PhÃ¡t sinh' },
+        { id: 'A2', Task: 'Viá»‡c B', Assignee: 'B', Date: '2026-07-26', Status: 'Äang lÃ m', Type: 'Káº¿ hoáº¡ch' }
       ];
       renderMainBoard();
     });
-    // Lọc sang Kế hoạch trước
+    // Lá»c sang Káº¿ hoáº¡ch trÆ°á»›c
     await page.locator('#subtabPlan').click();
-    // Quay về Công việc
+    // Quay vá» CÃ´ng viá»‡c
     await page.locator('#subtabAll').click();
     await expect(page.locator('#subtabAll')).toHaveClass(/is-active/);
     const rows = page.locator('.nk-wrow');
@@ -446,66 +552,66 @@ test.describe('A4 — Subtab lọc loại công việc', () => {
   });
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// A6 — Screen Danh bạ
-// ─────────────────────────────────────────────────────────────────────────────
-test.describe('A6 — Screen Danh bạ', () => {
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// A6 â€” Screen Danh báº¡
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+test.describe('A6 â€” Screen Danh báº¡', () => {
   test.beforeEach(async ({ page }) => {
     await setupMocks(page);
     await page.goto('/nhatky/index.html');
   });
 
-  test('Tab Danh bạ → screenContacts hiện, screenMain ẩn', async ({ page }) => {
+  test('Tab Danh báº¡ â†’ screenContacts hiá»‡n, screenMain áº©n', async ({ page }) => {
     await page.evaluate(() => navigateToContacts());
     await expect(page.locator('#screenContacts')).toBeVisible();
     await expect(page.locator('#screenMain')).not.toBeVisible();
   });
 
-  test('screenContacts có ô tìm kiếm #contactSearch', async ({ page }) => {
+  test('screenContacts cÃ³ Ã´ tÃ¬m kiáº¿m #contactSearch', async ({ page }) => {
     await page.evaluate(() => navigateToContacts());
     await expect(page.locator('#contactSearch')).toBeVisible();
   });
 
-  test('Render danh sách từ staffDirectory', async ({ page }) => {
+  test('Render danh sÃ¡ch tá»« staffDirectory', async ({ page }) => {
     await page.evaluate(() => {
       staffDirectory = [
-        { fullName: 'Nguyễn Văn A', dept: 'Điện', phone: '0901234567' },
-        { fullName: 'Trần Thị B',   dept: 'Cơ', phone: '' }
+        { fullName: 'Nguyá»…n VÄƒn A', dept: 'Äiá»‡n', phone: '0901234567' },
+        { fullName: 'Tráº§n Thá»‹ B',   dept: 'CÆ¡', phone: '' }
       ];
       navigateToContacts();
     });
     await expect(page.locator('.nk-contact-card')).toHaveCount(2);
   });
 
-  test('Card có nút gọi khi có phone', async ({ page }) => {
+  test('Card cÃ³ nÃºt gá»i khi cÃ³ phone', async ({ page }) => {
     await page.evaluate(() => {
       staffDirectory = [
-        { fullName: 'Nguyễn Văn A', dept: 'Điện', phone: '0901234567' },
-        { fullName: 'Trần Thị B',   dept: 'Cơ',   phone: '' }
+        { fullName: 'Nguyá»…n VÄƒn A', dept: 'Äiá»‡n', phone: '0901234567' },
+        { fullName: 'Tráº§n Thá»‹ B',   dept: 'CÆ¡',   phone: '' }
       ];
       navigateToContacts();
     });
-    // Chỉ A có phone → 1 call button
+    // Chá»‰ A cÃ³ phone â†’ 1 call button
     await expect(page.locator('.nk-contact-card__call')).toHaveCount(1);
   });
 
-  test('Tìm kiếm theo tên lọc đúng', async ({ page }) => {
+  test('TÃ¬m kiáº¿m theo tÃªn lá»c Ä‘Ãºng', async ({ page }) => {
     await page.evaluate(() => {
       staffDirectory = [
-        { fullName: 'Nguyễn Văn An', dept: 'Điện', phone: '0901' },
-        { fullName: 'Trần Thị Bích', dept: 'Cơ',   phone: '0902' },
-        { fullName: 'Lê Văn Cường',  dept: 'Điện', phone: '0903' }
+        { fullName: 'Nguyá»…n VÄƒn An', dept: 'Äiá»‡n', phone: '0901' },
+        { fullName: 'Tráº§n Thá»‹ BÃ­ch', dept: 'CÆ¡',   phone: '0902' },
+        { fullName: 'LÃª VÄƒn CÆ°á»ng',  dept: 'Äiá»‡n', phone: '0903' }
       ];
       navigateToContacts();
     });
-    await page.locator('#contactSearch').fill('bích');
+    await page.locator('#contactSearch').fill('bÃ­ch');
     await expect(page.locator('.nk-contact-card')).toHaveCount(1);
-    await expect(page.locator('.nk-contact-card__name')).toContainText('Trần Thị Bích');
+    await expect(page.locator('.nk-contact-card__name')).toContainText('Tráº§n Thá»‹ BÃ­ch');
   });
 
-  test('Empty state khi không tìm thấy kết quả', async ({ page }) => {
+  test('Empty state khi khÃ´ng tÃ¬m tháº¥y káº¿t quáº£', async ({ page }) => {
     await page.evaluate(() => {
-      staffDirectory = [{ fullName: 'Nguyễn Văn A', dept: 'Điện', phone: '' }];
+      staffDirectory = [{ fullName: 'Nguyá»…n VÄƒn A', dept: 'Äiá»‡n', phone: '' }];
       navigateToContacts();
     });
     await page.locator('#contactSearch').fill('zzz-not-found');
@@ -513,10 +619,15 @@ test.describe('A6 — Screen Danh bạ', () => {
     await expect(page.locator('.nk-contact-card')).toHaveCount(0);
   });
 
-  test('Bấm Công việc trong bnavContacts → quay về screenMain', async ({ page }) => {
+  test('Báº¥m CÃ´ng viá»‡c trong bnavContacts â†’ quay vá» screenMain', async ({ page }) => {
     await page.evaluate(() => navigateToContacts());
     await page.locator('#bnavContacts a').first().click();
     await expect(page.locator('#screenMain')).toBeVisible();
     await expect(page.locator('#screenContacts')).not.toBeVisible();
   });
 });
+
+
+
+
+

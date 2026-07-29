@@ -718,10 +718,25 @@ function renderMainBoard() {
   html += buildGroup('Chờ nghiệm thu',         gReview,  'var(--dot-review)', 'review');
   html += buildGroup('Lịch sắp tới',           gPlanned, 'var(--dot-planned)','planned');
 
+  let shortcutsHtml = '';
+  if (filterTab === 'checklist') {
+    shortcutsHtml = `
+      <div class="nk-checklist-shortcuts" style="display:flex; flex-direction:column; gap:8px; padding:10px 16px; background:var(--bg-surface); border-bottom:1px solid var(--line); margin-bottom: 8px;">
+        <div style="display:flex; gap:10px;">
+          <a href="../sangolf/index.html?autoTemplate=ca_sang" class="nk-btn nk-btn--outline" style="flex:1; border-color:var(--brand); color:var(--brand); font-weight:700; text-decoration:none; display:flex; align-items:center; justify-content:center;">⛳ Golf (Sáng)</a>
+          <a href="../sangolf/index.html?autoTemplate=ca_toi" class="nk-btn nk-btn--outline" style="flex:1; border-color:var(--brand); color:var(--brand); font-weight:700; text-decoration:none; display:flex; align-items:center; justify-content:center;">⛳ Golf (Tối)</a>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="nk-btn nk-btn--outline" style="flex:1; border-color:#007bff; color:#007bff; font-weight:700;" onclick="showToast('Tính năng trạm bơm chưa hỗ trợ auto-open', 'warning')">💧 Bơm (Sáng)</button>
+          <button class="nk-btn nk-btn--outline" style="flex:1; border-color:#007bff; color:#007bff; font-weight:700;" onclick="showToast('Tính năng trạm bơm chưa hỗ trợ auto-open', 'warning')">💧 Bơm (Tối)</button>
+        </div>
+      </div>`;
+  }
+
   if (!html) {
-    board.innerHTML = `<div class="nk-empty"><div class="nk-empty__icon">📭</div>Không có công việc nào${filterTab !== 'all' ? ' trong tab này' : ''}.</div>`;
+    board.innerHTML = shortcutsHtml + `<div class="nk-empty"><div class="nk-empty__icon">📭</div>Không có công việc nào${filterTab !== 'all' ? ' trong tab này' : ''}.</div>`;
   } else {
-    board.innerHTML = html;
+    board.innerHTML = shortcutsHtml + html;
   }
 }
 

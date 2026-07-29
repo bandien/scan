@@ -10,3 +10,16 @@ audit_duplicates_report.json
 danhba_chuan_hoa.{csv,json}
 
 node_modules/
+
+# Generated test and local debugging artifacts
+playwright-report/
+test-results/
+test-results-debug/
+screenshot_*.png
+nhatky_live*.png
+temp*
+
+# Local Apps Script exports and legacy recovery snapshots
+*.gs
+old_*.html
+recovered_*.html
