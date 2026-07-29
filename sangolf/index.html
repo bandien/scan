@@ -348,10 +348,10 @@ function saveLocalDraft(run) {
     localStorage.setItem(LS_RUN_PREFIX + run.runId, JSON.stringify(run));
 }
 
-async function loadRuns() {
+async function loadRuns(apiOptions) {
     const date = selectedDate();
     try {
-        const res = await bdsApiFetch('getGolfRuns', { from: prevDate(date), to: date });
+        const res = await bdsApiFetch('getGolfRuns', { from: prevDate(date), to: date }, apiOptions);
         if (res.status === 'success') {
             serverRuns = {};
             (res.runs || []).forEach(r => {
@@ -361,6 +361,15 @@ async function loadRuns() {
         }
     } catch (_) { /* offline Ã¢â‚¬â€ dÃƒÂ¹ng draft local */ }
     renderHome();
+}
+
+function pendingHandoverFor(templateId) {
+    const previousTemplateId = templateId === 'ca_sang' ? 'ca_toi'
+        : templateId === 'ca_toi' ? 'ca_sang' : '';
+    if (!previousTemplateId) return null;
+    return Object.values(serverRuns)
+        .filter(r => r.status === 'submitted' && r.templateId === previousTemplateId)
+        .sort((a, b) => String(b.submittedAt || b.date).localeCompare(String(a.submittedAt || a.date)))[0] || null;
 }
 
 // TrÃ¡ÂºÂ¡ng thÃƒÂ¡i hiÃ¡Â»Æ’n thÃ¡Â»â€¹ cÃ¡Â»Â§a 1 mÃ¡ÂºÂ«u trong ngÃƒÂ y: kÃ¡ÂºÂ¿t hÃ¡Â»Â£p server + draft local
@@ -425,31 +434,53 @@ function renderHome() {
 
 // BÃƒÂ n giao chÃ¡Â»Â xÃƒÂ¡c nhÃ¡ÂºÂ­n: run submitted cÃ¡Â»Â§a hÃƒÂ´m nay hoÃ¡ÂºÂ·c hÃƒÂ´m trÃ†Â°Ã¡Â»â€ºc
 function renderPendingBanners() {
-    const me = getOperator();
     const banners = Object.values(serverRuns)
-        .filter(r => r.status === 'submitted')
-        .map(r => `
+        .filter(r => r.status === 'submitted' && (r.templateId === 'ca_sang' || r.templateId === 'ca_toi'))
+        .map(r => {
+        let issueCount = 0;
+        try {
+            const values = r.itemsObj || (r.items ? JSON.parse(r.items) : {});
+            issueCount = Object.values(values).filter(v => v && v.status === 'ng').length;
+        } catch (_) {}
+        const nextTemplateId = r.templateId === 'ca_sang' ? 'ca_toi' : 'ca_sang';
+        return `
         <div class="pending-banner">
-            <i class="bi bi-bell-fill text-primary me-1"></i>
-            <b>${esc(templateName(r.templateId))}</b> ngÃƒÂ y ${esc(r.date)} do <b>${esc(r.operator)}</b> Ã„â€˜ÃƒÂ£ chÃ¡Â»â€˜t.
+            <div class="fw-bold mb-1"><i class="bi bi-bell-fill text-primary me-1"></i>CA TRƯỚC BÀN GIAO</div>
+            <b>${esc(templateName(r.templateId))}</b> ngày ${esc(r.date)} do <b>${esc(r.operator)}</b> chốt.
+            ${r.submittedAt ? '<div class="small text-secondary mt-1">Chốt lúc: ' + esc(r.submittedAt) + '</div>' : ''}
+            <div class="small mt-1">Kết quả: ${issueCount ? '<b class="text-danger">' + issueCount + ' mục không đạt</b>' : '<b class="text-success">Không có mục không đạt</b>'}</div>
             ${r.handoverNote ? '<div class="mt-1 text-secondary">Ã°Å¸â€œÂ ' + esc(r.handoverNote) + '</div>' : ''}
-            <button class="btn btn-sm btn-primary rounded-pill mt-2 fw-bold" onclick="confirmHandover('${r.runId}')">
-                <i class="bi bi-check2-circle me-1"></i>XÃƒÂ¡c nhÃ¡ÂºÂ­n nhÃ¡ÂºÂ­n bÃƒÂ n giao
+            <button class="btn btn-sm btn-primary rounded-pill mt-2 fw-bold" onclick="acceptHandoverAndStart('${r.runId}','${nextTemplateId}')">
+                <i class="bi bi-check2-circle me-1"></i>Xác nhận nhận ca &amp; bắt đầu
             </button>
-        </div>`).join('');
+        </div>`;
+        }).join('');
     $('pendingBanners').innerHTML = banners;
 }
 
-async function confirmHandover(runId) {
+async function acceptHandoverAndStart(runId, currentTemplateId) {
     const me = getOperator();
     if (!me) { bdsShowToast('NhÃ¡ÂºÂ­p tÃƒÂªn ngÃ†Â°Ã¡Â»Âi thÃ¡Â»Â±c hiÃ¡Â»â€¡n trÃ†Â°Ã¡Â»â€ºc', 'warning'); $('operatorInput').focus(); return; }
     try {
-        const res = await bdsApiPost('confirmGolfHandover', { payload: { runId, confirmedBy: me } });
+        const res = await bdsApiPost('acceptGolfHandoverAndStartRun', { payload: {
+            previousRunId: runId,
+            currentDate: selectedDate(),
+            currentTemplateId: currentTemplateId,
+            receivedBy: me
+        }});
         if (res.status === 'success') {
-            bdsShowToast('Ã„ÂÃƒÂ£ xÃƒÂ¡c nhÃ¡ÂºÂ­n nhÃ¡ÂºÂ­n bÃƒÂ n giao');
+            bdsShowToast('Đã nhận bàn giao và bắt đầu ca');
             await loadRuns();
+            openRun(currentTemplateId);
         }
     } catch (err) { bdsShowToast('LÃ¡Â»â€”i: ' + err.message, 'danger'); }
+}
+
+// Tương thích các liên kết cũ; luồng mới luôn nhận bàn giao và mở ca kế tiếp.
+function confirmHandover(runId) {
+    const previous = serverRuns[runId];
+    const nextTemplateId = previous && previous.templateId === 'ca_sang' ? 'ca_toi' : 'ca_sang';
+    return acceptHandoverAndStart(runId, nextTemplateId);
 }
 
 // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ RUN view Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
@@ -829,8 +860,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         $('datePicker').value = d.toLocaleDateString('sv-SE');
-        openRun(autoTemplate);
-        loadRuns();
+        // Đọc trạng thái ca trước trước khi mở checklist. Fast-fail giữ được khả năng
+        // làm local khi offline, nhưng không bỏ qua một bàn giao server đã tải được.
+        loadRuns({ timeout: 5000, retries: 0 }).then(() => {
+            if (pendingHandoverFor(autoTemplate)) {
+                currentRun = null;
+                $('runView').style.display = 'none';
+                $('homeView').style.display = '';
+                renderHome();
+                window.scrollTo(0, 0);
+                return;
+            }
+            openRun(autoTemplate);
+        });
     } else {
         $('datePicker').value = todayStr();
         loadTemplates();

@@ -20,9 +20,57 @@ test('Nhật ký mở được checklist Ca Sáng khi backend không khả dụn
   await expect(page.locator('#progressText')).not.toContainText('0/0');
 });
 
+test('không bỏ qua ca trước đang chờ nhận khi vào bằng autoTemplate', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('cmms_op_name', 'KTV Ca Sáng');
+    const nativeFetch = window.fetch.bind(window);
+    window.fetch = async (input, init) => {
+      const url = String(input);
+      if (!url.includes('script.google.com')) return nativeFetch(input, init);
+      const action = new URL(url).searchParams.get('action');
+      if (action === 'getGolfTemplates') {
+        return new Response(JSON.stringify({ status: 'success', items: [] }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } });
+      }
+      if (action === 'getGolfRuns') {
+        return new Response(JSON.stringify({ status: 'success', runs: [{
+          runId: 'GOLF-ca_toi-PREVIOUS',
+          templateId: 'ca_toi',
+          date: '2026-07-28',
+          status: 'submitted',
+          operator: 'KTV Ca Tối',
+          submittedAt: '2026-07-28T21:00:00+07:00',
+          handoverNote: 'Bơm hồ đang tiếp tục chạy',
+          items: JSON.stringify({ A01: { status: 'ng' } })
+        }] }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      }
+      return new Response(JSON.stringify({ status: 'success' }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } });
+    };
+  });
+
+  await page.goto('/sangolf/index.html?autoTemplate=ca_sang');
+  await expect(page.locator('#homeView')).toBeVisible();
+  await expect(page.locator('#runView')).toBeHidden();
+  await expect(page.locator('#pendingBanners')).toContainText('CA TRƯỚC BÀN GIAO');
+  await expect(page.locator('#pendingBanners')).toContainText('Bơm hồ đang tiếp tục chạy');
+  await expect(page.locator('#pendingBanners button')).toBeVisible();
+});
+
 test('vòng đời: bắt đầu, lưu draft, chốt ca và xác nhận bàn giao', async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem('cmms_op_name', 'KTV Ca Sáng');
+    const nativeFetch = window.fetch.bind(window);
+    window.fetch = async (input, init) => {
+      const url = String(input);
+      if (!url.includes('script.google.com')) return nativeFetch(input, init);
+      const action = new URL(url).searchParams.get('action');
+      const data = action === 'getGolfRuns'
+        ? { status: 'success', runs: [] }
+        : { status: 'success', items: [] };
+      return new Response(JSON.stringify(data),
+        { status: 200, headers: { 'Content-Type': 'application/json' } });
+    };
   });
   await page.goto('/sangolf/index.html?autoTemplate=ca_sang');
   await expect(page.locator('#runView')).toBeVisible();
@@ -37,7 +85,7 @@ test('vòng đời: bắt đầu, lưu draft, chốt ca và xác nhận bàn gia
           ...body.payload, status: 'submitted', items: body.payload.items
         };
       }
-      if (action === 'confirmGolfHandover' && window.__submittedRun) {
+      if (action === 'acceptGolfHandoverAndStartRun' && window.__submittedRun) {
         window.__submittedRun.status = 'confirmed';
       }
       return { status: 'success' };
@@ -50,7 +98,7 @@ test('vòng đời: bắt đầu, lưu draft, chốt ca và xác nhận bàn gia
     };
   });
 
-  await page.locator('#item-A01 .check-btn').first().click();
+  await page.locator('#item-A01 .check-btn').first().click({ force: true });
   await page.locator('#item-A02 input[type="number"]').fill('55');
   const runId = await page.evaluate(() =>
     Object.keys(localStorage).find(key => key.startsWith('golf_run_GOLF-ca_sang-'))
@@ -76,6 +124,7 @@ test('vòng đời: bắt đầu, lưu draft, chốt ca và xác nhận bàn gia
     localStorage.setItem('cmms_op_name', 'KTV Ca Tối');
   });
   await page.locator('#pendingBanners button').click();
-  await expect.poll(() => page.evaluate(() => window.__golfCalls)).toContain('confirmGolfHandover');
+  await expect.poll(() => page.evaluate(() => window.__golfCalls))
+    .toContain('acceptGolfHandoverAndStartRun');
   await expect.poll(() => page.evaluate(() => window.__submittedRun.status)).toBe('confirmed');
 });
