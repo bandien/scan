@@ -236,6 +236,7 @@
 <script src="../js/config.js"></script>
 <script src="../js/api.js"></script>
 <script src="../js/sso.js"></script>
+<script src="../js/golf-checklist-fallback.js"></script>
 <script src="../js/fontscale.js"></script>
 <script src="../js/pwa.js" data-root="../"></script>
 <script>
@@ -314,6 +315,10 @@ function templateName(templateId) {
 }
 
 async function loadTemplates() {
+    if (!templates.length && Array.isArray(window.BD_GOLF_FALLBACK_TEMPLATES)) {
+        templates = window.BD_GOLF_FALLBACK_TEMPLATES;
+        renderHome();
+    }
     const cached = localStorage.getItem(LS_TEMPLATES);
     if (cached) {
         try { templates = JSON.parse(cached).items || []; } catch (_) {}
@@ -324,7 +329,8 @@ async function loadTemplates() {
         if (res.status === 'success' && Array.isArray(res.items) && res.items.length) {
             templates = res.items;
             localStorage.setItem(LS_TEMPLATES, JSON.stringify({ items: templates, at: Date.now() }));
-            renderHome();
+            if (currentRun) renderRunBody();
+            else renderHome();
         }
     } catch (err) {
         if (!templates.length) {
@@ -809,23 +815,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
     const autoTemplate = params.get('autoTemplate');
     if (autoTemplate) {
-        loadTemplates().then(() => {
-            let d = new Date();
-            const tName = templateName(autoTemplate);
-            const match = String(tName).match(/-.*?(\d{1,2})h(\d{2})/);
-            if (match) {
-                const endH = parseInt(match[1], 10);
-                if (endH <= 6 && d.getHours() < 12) {
-                    d.setDate(d.getDate() - 1);
-                } else if (d.getHours() < 6) {
-                    d.setDate(d.getDate() - 1);
-                }
+        // Dựng run ngay từ mẫu local; không bắt thao tác người dùng chờ timeout/retry API.
+        loadTemplates();
+        let d = new Date();
+        const tName = templateName(autoTemplate);
+        const match = String(tName).match(/-.*?(\d{1,2})h(\d{2})/);
+        if (match) {
+            const endH = parseInt(match[1], 10);
+            if (endH <= 6 && d.getHours() < 12) {
+                d.setDate(d.getDate() - 1);
+            } else if (d.getHours() < 6) {
+                d.setDate(d.getDate() - 1);
             }
-            $('datePicker').value = d.toLocaleDateString('sv-SE');
-            return loadRuns();
-        }).then(() => {
-            openRun(autoTemplate);
-        });
+        }
+        $('datePicker').value = d.toLocaleDateString('sv-SE');
+        openRun(autoTemplate);
+        loadRuns();
     } else {
         $('datePicker').value = todayStr();
         loadTemplates();
