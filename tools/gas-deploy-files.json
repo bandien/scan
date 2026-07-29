@@ -1,0 +1,35 @@
+{
+  "releaseOverlay": [
+    "02_Router.gs",
+    "19_GolfChecklist.gs"
+  ],
+  "files": [
+    "00_Config.gs",
+    "01_Utils.gs",
+    "02_Router.gs",
+    "03_Auth.gs",
+    "04_Devices.gs",
+    "05_WorkOrders.gs",
+    "06_Masters.gs",
+    "07_Analytics.gs",
+    "08_Checklists.gs",
+    "09_Metering.gs",
+    "10_Scheduler.gs",
+    "11_Setup.gs",
+    "12_GiaoViec.gs",
+    "13_UptimeProxy.gs",
+    "14_NhatKyPlans.gs",
+    "15_NhatKyAuth.gs",
+    "16_ShiftRoster.gs",
+    "17_ERPNextSync.gs",
+    "17_UserAdmin.gs",
+    "18_ExportAll.gs",
+    "18_ZaloExtension.gs",
+    "19_GolfChecklist.gs",
+    "20_MigrateWorkOrders.gs",
+    "Code.gs.gs",
+    "XepLich.gs",
+    "appsscript.json",
+    "index.html"
+  ]
+}
