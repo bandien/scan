@@ -14,6 +14,15 @@ updated: 2026-06-08
 
 Tất cả các thay đổi và cải tiến của hệ thống Quản lý & Bảo trì Ban điện thông minh (CMMS Mini WebApp) được ghi nhận tại đây theo từng phiên bản.
 
+## [v2.17.0] - 2026-07-29
+### Thêm mới (Added)
+- **Khởi tạo mẫu checklist theo địa điểm / thời gian / ca trực** (`19_GolfChecklist.gs`, `02_Router.gs`):
+  - Sheet mới `ChecklistTemplateDefs` — sổ đăng ký mẫu checklist: mỗi mẫu khai báo Địa điểm, Ca trực (`ShiftCode`), Tần suất (`daily`/`weekly`/`monthly`), Khung giờ (`TimeStart`–`TimeEnd`, hỗ trợ ca qua đêm), Thứ/Ngày áp dụng, Tổ phụ trách. Seed sẵn 4 mẫu golf hiện hành.
+  - API mới: `getChecklistTemplateDefs` (danh sách định nghĩa mẫu), `getChecklistSchedule` (mẫu nào áp dụng tại ngày/giờ — ngày nghiệp vụ tính ở server, không suy luận ở frontend), `upsertChecklistTemplateDef` (tạo/sửa mẫu, hỗ trợ `cloneFromTemplateId` nhân bản hạng mục từ mẫu có sẵn), `deleteChecklistTemplateDef` (soft delete, giữ lịch sử runs).
+  - Mẫu mới tạo dùng lại nguyên vòng đời run hiện có (autosave → chốt ca → bàn giao → xác nhận) vì runs khóa theo `TemplateID`.
+  - Tài liệu phân tích nghiệp vụ: `docs/superpowers/specs/2026-07-29-checklist-template-init-design.md`.
+  - 8 test Node mới (`tests/checklist-template-defs.test.js`): khung giờ, ca qua đêm, tuần/tháng theo ngày nghiệp vụ, validation, route.
+
 ## [v2.16.0] - 2026-07-26
 ### Thêm mới (Added)
 - **Quản lý tài khoản Admin / Account Management** (`nhatky/index.html`, `css/app.css`):

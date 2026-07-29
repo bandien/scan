@@ -64,6 +64,8 @@ function doGet(e) {
       case 'getGolfRuns':       return handleGetGolfRuns(e);        // Checklist sân golf (trang sangolf)
       case 'getGolfAnalytics':  return handleGetGolfAnalytics(e);   // Báo cáo & Trend (trang sangolf)
       case 'getGolfStatus':     return handleGetGolfStatus(e);      // Tóm tắt vận hành sân golf (cho trang nhatky)
+      case 'getChecklistTemplateDefs': return handleGetChecklistTemplateDefs(e); // Định nghĩa mẫu checklist theo địa điểm/ca
+      case 'getChecklistSchedule':     return handleGetChecklistSchedule(e);     // Mẫu áp dụng tại (ngày, giờ) — ngày nghiệp vụ tính ở server
       case 'getWorkLogs':       return handleGetWorkLogs(e);        // Nhật ký cả tổ (trang nhatky)
       case 'nhatkyAccounts':    return handleListAccounts(e);       // Danh sách tài khoản trang nhatky
       case 'tempDumpDevices':   return handleTempDumpDevices(e);
@@ -177,6 +179,9 @@ function doPost(e) {
       seedGolfTemplates:    handleSeedGolfTemplates,
       upsertGolfTemplateItem: handleUpsertGolfTemplateItem,
       deleteGolfTemplateItem: handleDeleteGolfTemplateItem,
+      // Khởi tạo mẫu checklist theo địa điểm/thời gian/ca trực (Quản lý)
+      upsertChecklistTemplateDef: handleUpsertChecklistTemplateDef,
+      deleteChecklistTemplateDef: handleDeleteChecklistTemplateDef,
     };
 
     const handler = DISPATCH[params.action];

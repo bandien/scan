@@ -14,6 +14,14 @@
 // - POST action=deleteGolfTemplateItem {templateId,itemId} → xóa 1 hạng mục mẫu (Quản lý)
 // - GET  action=getGolfStatus                 → tóm tắt run mới nhất/mẫu (dùng ở trang nhatky)
 //
+// KHỞI TẠO MẪU THEO ĐỊA ĐIỂM / THỜI GIAN / CA TRỰC (sheet ChecklistTemplateDefs):
+// - GET  action=getChecklistTemplateDefs {location?, includeInactive?} → danh sách định nghĩa mẫu
+// - GET  action=getChecklistSchedule {date?, time?, location?} → mẫu nào áp dụng tại thời điểm đó
+// - POST action=upsertChecklistTemplateDef {payload} → tạo/sửa định nghĩa mẫu (Quản lý);
+//        tạo mới có thể nhân bản hạng mục từ mẫu có sẵn qua cloneFromTemplateId
+// - POST action=deleteChecklistTemplateDef {templateId} → ngừng áp dụng mẫu (soft delete)
+// Thiết kế chi tiết: docs/superpowers/specs/2026-07-29-checklist-template-init-design.md
+//
 // Mẫu lưu ở sheet GolfChecklistTemplates — sửa hạng mục chỉ cần sửa sheet,
 // không cần deploy lại. Seed trong code chỉ dùng lần đầu hoặc khi force.
 // Lưu ý: ItemID (A01, B01...) chỉ duy nhất TRONG PHẠM VI 1 templateId — luôn
@@ -895,4 +903,337 @@ function checkGolfShiftSchedule_() {
        + "- Hệ thống ghi nhận checklist sân golf vẫn chưa được CHỐT CA.\n"
        + "👉 Yêu cầu KTV khẩn trương hoàn thành và chốt ca!");
   }
+}
+
+// ==========================================
+// ĐỊNH NGHĨA MẪU CHECKLIST — ĐỊA ĐIỂM / THỜI GIAN / CA TRỰC
+// ==========================================
+// Sheet ChecklistTemplateDefs là sổ đăng ký mẫu: mỗi dòng khai báo một mẫu
+// checklist áp dụng cho ĐỊA ĐIỂM nào, khung THỜI GIAN nào và gán cho CA TRỰC nào.
+// Hạng mục chi tiết của mẫu vẫn nằm ở GolfChecklistTemplates (khóa theo TemplateID),
+// lượt thực hiện vẫn ở GolfChecklistRuns — nhờ đó mẫu mới tạo dùng lại nguyên
+// vòng đời save/submit/confirm hiện có mà không cần sửa gì thêm.
+//
+// Frequency: daily | weekly | monthly
+// - daily:   áp dụng mỗi ngày trong khung TimeStart–TimeEnd (TimeEnd <= TimeStart
+//            nghĩa là ca qua đêm; giờ trước TimeEnd thuộc ngày nghiệp vụ hôm trước)
+// - weekly:  áp dụng vào DayOfWeek (1=Thứ Hai … 7=Chủ Nhật) của ngày nghiệp vụ
+// - monthly: áp dụng vào DayOfMonth (1–31) của ngày nghiệp vụ
+// TimeStart/TimeEnd để trống → áp dụng cả ngày (mẫu tuần/tháng).
+
+const CHECKLIST_TEMPLATE_DEF_HEADERS = [
+  "TemplateID","TemplateName","Location","ShiftCode","Frequency",
+  "TimeStart","TimeEnd","DayOfWeek","DayOfMonth","AssignedTeam",
+  "Note","Active","CreatedAt","CreatedBy","UpdatedAt","UpdatedBy"
+];
+
+const CHECKLIST_TEMPLATE_DEF_FREQUENCIES = ["daily", "weekly", "monthly"];
+
+// Seed từ 4 mẫu golf hiện hành để dữ liệu cũ tự có định nghĩa tương ứng.
+const CHECKLIST_TEMPLATE_DEF_SEED = [
+  { templateId: "ca_sang", templateName: "Ca Sáng (5h00 – 13h00)",
+    location: "Sân Golf Kỳ Sơn", shiftCode: "ca_sang", frequency: "daily",
+    timeStart: "05:00", timeEnd: "13:00", dayOfWeek: "", dayOfMonth: "",
+    assignedTeam: "Tổ Cơ Điện Sân Golf", note: "" },
+  { templateId: "ca_toi", templateName: "Ca Tối (13h00 – 21h00)",
+    location: "Sân Golf Kỳ Sơn", shiftCode: "ca_toi", frequency: "daily",
+    timeStart: "13:00", timeEnd: "21:00", dayOfWeek: "", dayOfMonth: "",
+    assignedTeam: "Tổ Cơ Điện Sân Golf", note: "" },
+  { templateId: "tuan", templateName: "Kiểm Tra Tuần (thứ Hai)",
+    location: "Sân Golf Kỳ Sơn", shiftCode: "ca_sang", frequency: "weekly",
+    timeStart: "", timeEnd: "", dayOfWeek: 1, dayOfMonth: "",
+    assignedTeam: "Tổ Cơ Điện Sân Golf", note: "Thực hiện sáng thứ Hai đầu tuần" },
+  { templateId: "thang", templateName: "Kiểm Tra Tháng (ngày 1)",
+    location: "Sân Golf Kỳ Sơn", shiftCode: "ca_sang", frequency: "monthly",
+    timeStart: "", timeEnd: "", dayOfWeek: "", dayOfMonth: 1,
+    assignedTeam: "Tổ Cơ Điện Sân Golf", note: "Cần tối thiểu 2 KTV" }
+];
+
+function ensureChecklistTemplateDefsSheet_() {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  let sheet = ss.getSheetByName("ChecklistTemplateDefs");
+  if (!sheet) sheet = ss.insertSheet("ChecklistTemplateDefs");
+  if (sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, CHECKLIST_TEMPLATE_DEF_HEADERS.length)
+      .setValues([CHECKLIST_TEMPLATE_DEF_HEADERS]).setFontWeight("bold");
+  }
+  // TimeStart/TimeEnd lưu dạng text HH:mm, tránh Sheets tự đổi thành Date
+  sheet.getRange("F:G").setNumberFormat("@");
+  if (sheet.getLastRow() < 2) {
+    const now = new Date();
+    const rows = CHECKLIST_TEMPLATE_DEF_SEED.map(function(d) {
+      return [
+        d.templateId, d.templateName, d.location, d.shiftCode, d.frequency,
+        d.timeStart, d.timeEnd, d.dayOfWeek, d.dayOfMonth, d.assignedTeam,
+        d.note, "TRUE", now, "Seed", now, "Seed"
+      ];
+    });
+    sheet.getRange(2, 1, rows.length, CHECKLIST_TEMPLATE_DEF_HEADERS.length).setValues(rows);
+  }
+  return sheet;
+}
+
+function checklistTemplateDefRowToObject_(r) {
+  return {
+    templateId:   String(r[0]).trim(),
+    templateName: String(r[1] || ""),
+    location:     String(r[2] || ""),
+    shiftCode:    String(r[3] || ""),
+    frequency:    String(r[4] || "daily"),
+    timeStart:    String(r[5] || ""),
+    timeEnd:      String(r[6] || ""),
+    dayOfWeek:    r[7] === "" || r[7] === null ? "" : Number(r[7]),
+    dayOfMonth:   r[8] === "" || r[8] === null ? "" : Number(r[8]),
+    assignedTeam: String(r[9] || ""),
+    note:         String(r[10] || ""),
+    active:       String(r[11]).toUpperCase() !== "FALSE"
+  };
+}
+
+function readChecklistTemplateDefs_() {
+  const sheet = ensureChecklistTemplateDefsSheet_();
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return [];
+  return sheet.getRange(2, 1, lastRow - 1, CHECKLIST_TEMPLATE_DEF_HEADERS.length)
+    .getValues()
+    .map(checklistTemplateDefRowToObject_)
+    .filter(function(d) { return d.templateId !== ""; });
+}
+
+function findChecklistTemplateDefRow_(sheet, templateId) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return 0;
+  const ids = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
+  for (let i = 0; i < ids.length; i++) {
+    if (String(ids[i][0]).trim() === templateId) return i + 2;
+  }
+  return 0;
+}
+
+// GET action=getChecklistTemplateDefs — {location?, includeInactive?}
+function handleGetChecklistTemplateDefs(e) {
+  const p = (e && e.parameter) || {};
+  const location = String(p.location || "").trim();
+  const includeInactive = String(p.includeInactive || "") === "true";
+  const defs = readChecklistTemplateDefs_().filter(function(d) {
+    if (!includeInactive && !d.active) return false;
+    if (location && d.location !== location) return false;
+    return true;
+  });
+  return contentResponse({ status: "success", defs: defs });
+}
+
+// ---- Phân giải lịch: mẫu nào áp dụng tại (ngày, giờ)? ----
+// Các helper thuần bên dưới không phụ thuộc Sheets/GAS để test được bằng Node.
+
+function checklistTimeToMinutes_(t) {
+  const m = /^([01]?\d|2[0-3]):([0-5]\d)$/.exec(String(t || "").trim());
+  if (!m) return null;
+  return Number(m[1]) * 60 + Number(m[2]);
+}
+
+function checklistAddDays_(dateStr, days) {
+  const parts = String(dateStr).split("-");
+  const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 12);
+  d.setDate(d.getDate() + days);
+  const pad = function(v) { return String(v).length < 2 ? "0" + v : String(v); };
+  return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+}
+
+// 1=Thứ Hai … 7=Chủ Nhật (ISO), khớp cách ghi trong sheet
+function checklistIsoDayOfWeek_(dateStr) {
+  const parts = String(dateStr).split("-");
+  const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 12);
+  const dow = d.getDay();
+  return dow === 0 ? 7 : dow;
+}
+
+// Với danh sách định nghĩa mẫu, trả về trạng thái áp dụng tại (dateStr, timeStr):
+// - businessDate: ngày nghiệp vụ (ca qua đêm → giờ trước TimeEnd thuộc hôm trước)
+// - matchesDate:  mẫu có rơi vào ngày nghiệp vụ này không (thứ trong tuần/ngày trong tháng)
+// - inWindow:     thời điểm hiện tại có nằm trong khung giờ thực hiện không
+function resolveChecklistSchedule_(defs, dateStr, timeStr) {
+  const minutes = checklistTimeToMinutes_(timeStr);
+  return (defs || [])
+    .filter(function(d) { return d && d.active !== false && String(d.templateId || "").trim() !== ""; })
+    .map(function(d) {
+      const start = checklistTimeToMinutes_(d.timeStart);
+      const end = checklistTimeToMinutes_(d.timeEnd);
+      const overnight = start !== null && end !== null && end <= start;
+
+      let businessDate = String(dateStr);
+      if (overnight && minutes !== null && minutes < end) {
+        businessDate = checklistAddDays_(businessDate, -1);
+      }
+
+      let matchesDate = true;
+      if (d.frequency === "weekly") {
+        matchesDate = Number(d.dayOfWeek) === checklistIsoDayOfWeek_(businessDate);
+      } else if (d.frequency === "monthly") {
+        matchesDate = Number(d.dayOfMonth) === Number(businessDate.slice(8, 10));
+      }
+
+      let inWindow = matchesDate;
+      if (matchesDate && start !== null && end !== null && minutes !== null) {
+        inWindow = overnight
+          ? (minutes >= start || minutes < end)
+          : (minutes >= start && minutes < end);
+      }
+
+      return {
+        templateId: d.templateId,
+        templateName: d.templateName,
+        location: d.location,
+        shiftCode: d.shiftCode,
+        frequency: d.frequency,
+        businessDate: businessDate,
+        matchesDate: matchesDate,
+        inWindow: inWindow
+      };
+    });
+}
+
+// GET action=getChecklistSchedule — {date?, time?, location?}
+// Không truyền date/time thì lấy theo giờ server (múi giờ script), tránh việc
+// frontend tự suy luận ngày nghiệp vụ bằng đồng hồ thiết bị.
+function handleGetChecklistSchedule(e) {
+  const p = (e && e.parameter) || {};
+  const now = new Date();
+  const pad = function(v) { return String(v).length < 2 ? "0" + v : String(v); };
+  const date = String(p.date || "").trim() || formatPlanDate_(now);
+  const time = String(p.time || "").trim() || (pad(now.getHours()) + ":" + pad(now.getMinutes()));
+  const location = String(p.location || "").trim();
+
+  let defs = readChecklistTemplateDefs_();
+  if (location) defs = defs.filter(function(d) { return d.location === location; });
+
+  const schedule = resolveChecklistSchedule_(defs, date, time);
+  return contentResponse({ status: "success", date: date, time: time, schedule: schedule });
+}
+
+// ---- Khởi tạo / cập nhật định nghĩa mẫu ----
+
+function validateChecklistTemplateDef_(def) {
+  if (!def.templateName) return "Thiếu tên mẫu checklist";
+  if (!def.location) return "Thiếu địa điểm áp dụng";
+  if (CHECKLIST_TEMPLATE_DEF_FREQUENCIES.indexOf(def.frequency) < 0) {
+    return "Tần suất không hợp lệ (daily/weekly/monthly): " + def.frequency;
+  }
+  const hasStart = def.timeStart !== "";
+  const hasEnd = def.timeEnd !== "";
+  if (hasStart !== hasEnd) return "Khung giờ phải có đủ cả giờ bắt đầu và giờ kết thúc";
+  if (hasStart && checklistTimeToMinutes_(def.timeStart) === null) return "Giờ bắt đầu không hợp lệ (HH:mm): " + def.timeStart;
+  if (hasEnd && checklistTimeToMinutes_(def.timeEnd) === null) return "Giờ kết thúc không hợp lệ (HH:mm): " + def.timeEnd;
+  if (def.frequency === "weekly") {
+    const dow = Number(def.dayOfWeek);
+    if (!(dow >= 1 && dow <= 7)) return "Mẫu tuần cần thứ trong tuần (1=Thứ Hai … 7=Chủ Nhật)";
+  }
+  if (def.frequency === "monthly") {
+    const dom = Number(def.dayOfMonth);
+    if (!(dom >= 1 && dom <= 31)) return "Mẫu tháng cần ngày trong tháng (1–31)";
+  }
+  return "";
+}
+
+// Nhân bản toàn bộ hạng mục của mẫu nguồn sang templateId mới trong
+// GolfChecklistTemplates — dùng khi khởi tạo mẫu cho địa điểm mới từ mẫu có sẵn.
+function cloneChecklistTemplateItems_(sourceTemplateId, targetTemplateId, targetTemplateName) {
+  const sheet = ensureGolfTemplatesSheet_();
+  if (sheet.getLastRow() < 2) return 0;
+  const rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, GOLF_TEMPLATE_HEADERS.length).getValues();
+  const cloned = [];
+  rows.forEach(function(r) {
+    if (String(r[0]).trim() !== sourceTemplateId) return;
+    const copy = r.slice();
+    copy[0] = targetTemplateId;
+    copy[1] = targetTemplateName;
+    cloned.push(copy);
+  });
+  if (cloned.length > 0) {
+    sheet.getRange(sheet.getLastRow() + 1, 1, cloned.length, GOLF_TEMPLATE_HEADERS.length).setValues(cloned);
+  }
+  return cloned.length;
+}
+
+// POST action=upsertChecklistTemplateDef — payload {templateId?, templateName, location,
+//   shiftCode?, frequency?, timeStart?, timeEnd?, dayOfWeek?, dayOfMonth?, assignedTeam?,
+//   note?, active?, cloneFromTemplateId?, user?}
+// templateId trống → tạo mẫu mới (ID tự sinh); trùng ID có sẵn → cập nhật tại chỗ.
+function handleUpsertChecklistTemplateDef(params) {
+  const payload = params.payload || params;
+  const def = {
+    templateId:   String(payload.templateId || "").trim(),
+    templateName: String(payload.templateName || "").trim(),
+    location:     String(payload.location || "").trim(),
+    shiftCode:    String(payload.shiftCode || "").trim(),
+    frequency:    String(payload.frequency || "daily").trim(),
+    timeStart:    String(payload.timeStart || "").trim(),
+    timeEnd:      String(payload.timeEnd || "").trim(),
+    dayOfWeek:    payload.dayOfWeek === undefined || payload.dayOfWeek === "" ? "" : Number(payload.dayOfWeek),
+    dayOfMonth:   payload.dayOfMonth === undefined || payload.dayOfMonth === "" ? "" : Number(payload.dayOfMonth),
+    assignedTeam: String(payload.assignedTeam || "").trim(),
+    note:         String(payload.note || "")
+  };
+  const invalid = validateChecklistTemplateDef_(def);
+  if (invalid) return contentResponse({ status: "error", message: invalid });
+
+  const active = payload.active === false ? "FALSE" : "TRUE";
+  const user = String(payload.user || params.user || "System");
+  const sheet = ensureChecklistTemplateDefsSheet_();
+  const now = new Date();
+  const rowIndex = def.templateId ? findChecklistTemplateDefRow_(sheet, def.templateId) : 0;
+
+  if (rowIndex > 0) {
+    // Cập nhật: giữ CreatedAt/CreatedBy, chỉ ghi lại phần định nghĩa + Updated*
+    sheet.getRange(rowIndex, 2, 1, 10).setValues([[
+      def.templateName, def.location, def.shiftCode, def.frequency,
+      def.timeStart, def.timeEnd, def.dayOfWeek, def.dayOfMonth,
+      def.assignedTeam, def.note
+    ]]);
+    sheet.getRange(rowIndex, 12).setValue(active);
+    sheet.getRange(rowIndex, 15, 1, 2).setValues([[now, user]]);
+    writeAuditLog(user, "upsertChecklistTemplateDef", def.templateId, "Updated: " + def.templateName);
+    return contentResponse({ status: "success", message: "Đã cập nhật định nghĩa mẫu", templateId: def.templateId });
+  }
+
+  if (!def.templateId) def.templateId = "tpl_" + Date.now();
+  sheet.appendRow([
+    def.templateId, def.templateName, def.location, def.shiftCode, def.frequency,
+    def.timeStart, def.timeEnd, def.dayOfWeek, def.dayOfMonth, def.assignedTeam,
+    def.note, active, now, user, now, user
+  ]);
+
+  let clonedCount = 0;
+  const cloneFrom = String(payload.cloneFromTemplateId || "").trim();
+  if (cloneFrom) {
+    clonedCount = cloneChecklistTemplateItems_(cloneFrom, def.templateId, def.templateName);
+  }
+
+  writeAuditLog(user, "upsertChecklistTemplateDef", def.templateId,
+    "Created: " + def.templateName + (cloneFrom ? " (nhân bản " + clonedCount + " hạng mục từ " + cloneFrom + ")" : ""));
+  return contentResponse({
+    status: "success",
+    message: "Đã khởi tạo mẫu checklist" + (clonedCount ? " với " + clonedCount + " hạng mục nhân bản" : ""),
+    templateId: def.templateId,
+    clonedItems: clonedCount
+  });
+}
+
+// POST action=deleteChecklistTemplateDef — payload {templateId, user?}
+// Soft delete: Active=FALSE để giữ nguyên lịch sử runs/hạng mục đã có.
+function handleDeleteChecklistTemplateDef(params) {
+  const payload = params.payload || params;
+  const templateId = String(payload.templateId || "").trim();
+  if (!templateId) return contentResponse({ status: "error", message: "Thiếu templateId" });
+
+  const sheet = ensureChecklistTemplateDefsSheet_();
+  const rowIndex = findChecklistTemplateDefRow_(sheet, templateId);
+  if (rowIndex < 2) return contentResponse({ status: "error", message: "Không tìm thấy định nghĩa mẫu: " + templateId });
+
+  const now = new Date();
+  const user = String(payload.user || params.user || "System");
+  sheet.getRange(rowIndex, 12).setValue("FALSE");
+  sheet.getRange(rowIndex, 15, 1, 2).setValues([[now, user]]);
+  writeAuditLog(user, "deleteChecklistTemplateDef", templateId, "Deactivated");
+  return contentResponse({ status: "success", message: "Đã ngừng áp dụng mẫu (giữ nguyên lịch sử)" });
 }
