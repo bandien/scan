@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checklist CÃ†Â¡ Ã„ÂiÃ¡Â»â€¡n SÃƒÂ¢n Golf | BanDienScan</title>
+    <title>Checklist Cơ Điện Sân Golf | BanDienScan</title>
     <link rel="manifest" href="../manifest.json">
     <meta name="theme-color" content="#059669">
     <link rel="icon" href="../favicon.ico">
@@ -50,7 +50,7 @@
             box-shadow: 0 10px 25px rgba(15,23,42,0.04); margin-bottom: 14px;
         }
 
-        /* Ã¢â€â‚¬Ã¢â€â‚¬ Home: template cards Ã¢â€â‚¬Ã¢â€â‚¬ */
+        /* ── Home: template cards ── */
         .tpl-card { cursor: pointer; transition: transform .15s ease, border-color .15s ease; }
         .tpl-card:active { transform: scale(0.98); }
         .tpl-card.dimmed { opacity: 0.6; }
@@ -71,7 +71,7 @@
             padding: 12px 14px; margin-bottom: 14px; font-size: 0.85rem; font-weight: 600;
         }
 
-        /* Ã¢â€â‚¬Ã¢â€â‚¬ Run view Ã¢â€â‚¬Ã¢â€â‚¬ */
+        /* ── Run view ── */
         .section-title {
             font-size: 0.8rem; font-weight: 800; text-transform: uppercase;
             letter-spacing: 0.04em; color: var(--bds-primary);
@@ -158,17 +158,17 @@
         .date-nav input { flex: 1; border: 2px solid var(--bds-line); border-radius: 14px; padding: 10px 12px; font-weight: 700; }
         .date-nav button { border: 2px solid var(--bds-line); background: #fff; border-radius: 12px; width: 42px; height: 42px; }
     </style>
-    <script src="../js/app-header.js" data-root="../" data-title="Checklist CÃ†Â¡ Ã„ÂiÃ¡Â»â€¡n SÃƒÂ¢n Golf" data-sub="SÃƒÂ¢n Golf KÃ¡Â»Â³ SÃ†Â¡n Montana" data-icon="bi-flag-fill" data-back="../index.html"></script>
+    <script src="../js/app-header.js" data-root="../" data-title="Checklist Cơ Điện Sân Golf" data-sub="Sân Golf Kỳ Sơn Montana" data-icon="bi-flag-fill" data-back="../index.html"></script>
 </head>
 <body>
 <div class="app-shell" style="padding-top: 16px;">
 
-    <!-- Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â HOME VIEW Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â -->
+    <!-- ═══════════ HOME VIEW ═══════════ -->
     <div id="homeView">
 
         <div class="card-custom" style="padding:14px 18px;">
-            <label class="fw-bold small text-secondary mb-1"><i class="bi bi-person-badge text-success me-1"></i>NgÃ†Â°Ã¡Â»Âi thÃ¡Â»Â±c hiÃ¡Â»â€¡n</label>
-            <input type="text" id="operatorInput" class="num-input" style="margin-top:2px;" placeholder="NhÃ¡ÂºÂ­p hÃ¡Â»Â tÃƒÂªn cÃ¡Â»Â§a bÃ¡ÂºÂ¡n...">
+            <label class="fw-bold small text-secondary mb-1"><i class="bi bi-person-badge text-success me-1"></i>Người thực hiện</label>
+            <input type="text" id="operatorInput" class="num-input" style="margin-top:2px;" placeholder="Nhập họ tên của bạn...">
         </div>
 
         <div class="date-nav">
@@ -179,17 +179,17 @@
 
         <div id="pendingBanners"></div>
         <div id="templateCards">
-            <div class="text-center text-muted py-5"><div class="spinner-border spinner-border-sm me-2"></div>Ã„Âang tÃ¡ÂºÂ£i mÃ¡ÂºÂ«u checklist...</div>
+            <div class="text-center text-muted py-5"><div class="spinner-border spinner-border-sm me-2"></div>Đang tải mẫu checklist...</div>
         </div>
     </div>
 
-    <!-- Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â RUN VIEW Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â -->
+    <!-- ═══════════ RUN VIEW ═══════════ -->
     <div id="runView" style="display:none;">
         <div class="header-bar">
             <button onclick="backHome()" style="border:none;background:none;font-size:1.3rem;padding:0 8px 0 0;"><i class="bi bi-arrow-left"></i></button>
             <div style="flex:1;">
-                <div class="app-title" id="runTitle">Ã¢â‚¬â€</div>
-                <div class="app-sub" id="runSub">Ã¢â‚¬â€</div>
+                <div class="app-title" id="runTitle">—</div>
+                <div class="app-sub" id="runSub">—</div>
             </div>
             <span id="runSyncIndicator" class="sync-dot sync-ok"></span>
         </div>
@@ -197,7 +197,7 @@
         <div class="progress-sticky">
             <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
             <div class="progress-label">
-                <span id="progressText">0/0 mÃ¡Â»Â¥c</span>
+                <span id="progressText">0/0 mục</span>
                 <span id="runStatusChip"></span>
             </div>
         </div>
@@ -208,24 +208,24 @@
     </div>
 </div>
 
-<!-- Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â SUBMIT MODAL Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â -->
+<!-- ═══════════ SUBMIT MODAL ═══════════ -->
 <div class="modal fade" id="submitModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content" style="border-radius:20px;">
             <div class="modal-header border-0 pb-0">
-                <h6 class="fw-bold mb-0"><i class="bi bi-clipboard-check text-success me-1"></i>ChÃ¡Â»â€˜t ca & bÃƒÂ n giao</h6>
+                <h6 class="fw-bold mb-0"><i class="bi bi-clipboard-check text-success me-1"></i>Chốt ca & bàn giao</h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div id="submitSummary" class="mb-3 small"></div>
-                <label class="fw-bold small text-secondary">NÃ¡Â»â„¢i dung bÃƒÂ n giao cho ca sau</label>
-                <textarea id="handoverNoteInput" class="text-input" style="margin-top:4px;" placeholder="SÃ¡Â»Â± cÃ¡Â»â€˜, viÃ¡Â»â€¡c dÃ¡Â»Å¸ dang, Ã„â€˜Ã¡Â»Â nghÃ¡Â»â€¹ ca sau..."></textarea>
-                <label class="fw-bold small text-secondary mt-2">NgÃ†Â°Ã¡Â»Âi nhÃ¡ÂºÂ­n bÃƒÂ n giao (nÃ¡ÂºÂ¿u biÃ¡ÂºÂ¿t)</label>
-                <input type="text" id="handoverToInput" class="num-input" style="margin-top:4px;" placeholder="HÃ¡Â»Â tÃƒÂªn ngÃ†Â°Ã¡Â»Âi ca sau...">
+                <label class="fw-bold small text-secondary">Nội dung bàn giao cho ca sau</label>
+                <textarea id="handoverNoteInput" class="text-input" style="margin-top:4px;" placeholder="Sự cố, việc dở dang, đề nghị ca sau..."></textarea>
+                <label class="fw-bold small text-secondary mt-2">Người nhận bàn giao (nếu biết)</label>
+                <input type="text" id="handoverToInput" class="num-input" style="margin-top:4px;" placeholder="Họ tên người ca sau...">
             </div>
             <div class="modal-footer border-0 pt-0">
                 <button class="btn-submit-glow" id="btnConfirmSubmit" onclick="doSubmitRun()">
-                    <i class="bi bi-check-circle-fill"></i>XÃƒÂC NHÃ¡ÂºÂ¬N CHÃ¡Â»ÂT CA
+                    <i class="bi bi-check-circle-fill"></i>XÁC NHẬN CHỐT CA
                 </button>
             </div>
         </div>
@@ -241,27 +241,27 @@
 <script src="../js/pwa.js" data-root="../"></script>
 <script>
 // =============================================================================
-// sangolf Ã¢â‚¬â€ Checklist CÃ†Â¡ Ã„ÂiÃ¡Â»â€¡n SÃƒÂ¢n Golf (local-first, autosave)
-// Backend: 19_GolfChecklist.gs Ã‚Â· KÃ¡ÂºÂ¿ hoÃ¡ÂºÂ¡ch: docs/PLAN_ChecklistGolf_SoHoa.md
+// sangolf — Checklist Cơ Điện Sân Golf (local-first, autosave)
+// Backend: 19_GolfChecklist.gs · Kế hoạch: docs/PLAN_ChecklistGolf_SoHoa.md
 // =============================================================================
 
 const LS_TEMPLATES = 'golf_templates_v1';
-const LS_RUN_PREFIX = 'golf_run_';             // + runId Ã¢â€ â€™ draft local
+const LS_RUN_PREFIX = 'golf_run_';             // + runId → draft local
 
 const TEMPLATE_ORDER = ['ca_sang', 'ca_toi', 'tuan', 'thang'];
 const TEMPLATE_ICONS = { ca_sang: 'bi-sunrise', ca_toi: 'bi-moon-stars', tuan: 'bi-calendar-week', thang: 'bi-calendar-month' };
 
-let templates = [];          // flat items tÃ¡Â»Â« backend
-let serverRuns = {};         // runId Ã¢â€ â€™ run object (theo ngÃƒÂ y Ã„â€˜ang chÃ¡Â»Ân + hÃƒÂ´m trÃ†Â°Ã¡Â»â€ºc)
+let templates = [];          // flat items từ backend
+let serverRuns = {};         // runId → run object (theo ngày đang chọn + hôm trước)
 let currentRun = null;       // {runId, templateId, date, status, items:{}, dirty}
 let saveTimer = null;
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Helpers Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+// ─── Helpers ────────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
-const todayStr = () => new Date().toLocaleDateString('sv-SE'); // yyyy-MM-dd giÃ¡Â»Â Ã„â€˜Ã¡Â»â€¹a phÃ†Â°Ã†Â¡ng
+const todayStr = () => new Date().toLocaleDateString('sv-SE'); // yyyy-MM-dd giờ địa phương
 const esc = s => { const d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; };
 
-// NguÃ¡Â»â€œn tÃƒÂªn ngÃ†Â°Ã¡Â»Âi thÃ¡Â»Â±c hiÃ¡Â»â€¡n dÃƒÂ¹ng chung toÃƒÂ n hÃ¡Â»â€¡ thÃ¡Â»â€˜ng (js/sso.js).
+// Nguồn tên người thực hiện dùng chung toàn hệ thống (js/sso.js).
 function getOperator() {
     return window.BD_SSO ? BD_SSO.getOperatorName() : '';
 }
@@ -278,9 +278,9 @@ function prevDate(dateStr) {
 
 function isDue(templateId, dateStr) {
     const d = new Date(dateStr + 'T12:00:00');
-    if (templateId === 'tuan')  return d.getDay() === 1;      // thÃ¡Â»Â© Hai
-    if (templateId === 'thang') return d.getDate() === 1;     // ngÃƒÂ y 1
-    return true;                                              // ca hÃƒÂ ng ngÃƒÂ y
+    if (templateId === 'tuan')  return d.getDay() === 1;      // thứ Hai
+    if (templateId === 'thang') return d.getDate() === 1;     // ngày 1
+    return true;                                              // ca hàng ngày
 }
 
 function parseThreshold(spec) {
@@ -303,7 +303,7 @@ function violates(spec, value) {
     return v < t.lo || v > t.hi;
 }
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Templates Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+// ─── Templates ──────────────────────────────────────────────────────────────
 function templateItems(templateId) {
     return templates
         .filter(x => x.templateId === templateId)
@@ -335,12 +335,12 @@ async function loadTemplates() {
     } catch (err) {
         if (!templates.length) {
             $('templateCards').innerHTML = '';
-            bdsShowError('templateCards', 'KhÃƒÂ´ng tÃ¡ÂºÂ£i Ã„â€˜Ã†Â°Ã¡Â»Â£c mÃ¡ÂºÂ«u checklist', loadTemplates);
+            bdsShowError('templateCards', 'Không tải được mẫu checklist', loadTemplates);
         }
     }
 }
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Runs (server + local draft merge) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+// ─── Runs (server + local draft merge) ──────────────────────────────────────
 function localDraft(runId) {
     try { return JSON.parse(localStorage.getItem(LS_RUN_PREFIX + runId)); } catch (_) { return null; }
 }
@@ -359,7 +359,7 @@ async function loadRuns(apiOptions) {
                 serverRuns[r.runId] = r;
             });
         }
-    } catch (_) { /* offline Ã¢â‚¬â€ dÃƒÂ¹ng draft local */ }
+    } catch (_) { /* offline — dùng draft local */ }
     renderHome();
 }
 
@@ -372,7 +372,7 @@ function pendingHandoverFor(templateId) {
         .sort((a, b) => String(b.submittedAt || b.date).localeCompare(String(a.submittedAt || a.date)))[0] || null;
 }
 
-// TrÃ¡ÂºÂ¡ng thÃƒÂ¡i hiÃ¡Â»Æ’n thÃ¡Â»â€¹ cÃ¡Â»Â§a 1 mÃ¡ÂºÂ«u trong ngÃƒÂ y: kÃ¡ÂºÂ¿t hÃ¡Â»Â£p server + draft local
+// Trạng thái hiển thị của 1 mẫu trong ngày: kết hợp server + draft local
 function runStateFor(templateId, date) {
     const runId = golfRunId(templateId, date);
     const server = serverRuns[runId];
@@ -399,12 +399,12 @@ function countDone(templateId, items) {
     return templateItems(templateId).filter(it => itemIsDone(it, items[it.itemId])).length;
 }
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ HOME render Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+// ─── HOME render ────────────────────────────────────────────────────────────
 function statusChip(state) {
-    if (state.status === 'confirmed') return '<span class="status-chip chip-confirmed"><i class="bi bi-check-circle-fill"></i>Ã„ÂÃƒÂ£ xÃƒÂ¡c nhÃ¡ÂºÂ­n</span>';
-    if (state.status === 'submitted') return '<span class="status-chip chip-submitted"><i class="bi bi-send-check"></i>Ã„ÂÃƒÂ£ chÃ¡Â»â€˜t Ã¢â‚¬â€ chÃ¡Â»Â ca sau</span>';
-    if (state.status === 'draft' || state.done > 0) return '<span class="status-chip chip-draft"><i class="bi bi-pencil"></i>Ã„Âang lÃƒÂ m ' + state.done + '/' + state.total + '</span>';
-    return '<span class="status-chip chip-none">ChÃ†Â°a bÃ¡ÂºÂ¯t Ã„â€˜Ã¡ÂºÂ§u</span>';
+    if (state.status === 'confirmed') return '<span class="status-chip chip-confirmed"><i class="bi bi-check-circle-fill"></i>Đã xác nhận</span>';
+    if (state.status === 'submitted') return '<span class="status-chip chip-submitted"><i class="bi bi-send-check"></i>Đã chốt — chờ ca sau</span>';
+    if (state.status === 'draft' || state.done > 0) return '<span class="status-chip chip-draft"><i class="bi bi-pencil"></i>Đang làm ' + state.done + '/' + state.total + '</span>';
+    return '<span class="status-chip chip-none">Chưa bắt đầu</span>';
 }
 
 function renderHome() {
@@ -413,15 +413,15 @@ function renderHome() {
     const cards = TEMPLATE_ORDER.filter(t => templates.some(x => x.templateId === t)).map(tid => {
         const due = isDue(tid, date);
         const state = runStateFor(tid, date);
-        const dueBadge = tid === 'tuan' ? '<span class="status-chip chip-due">ThÃ¡Â»Â© Hai</span>'
-                        : tid === 'thang' ? '<span class="status-chip chip-due">NgÃƒÂ y 1</span>' : '';
+        const dueBadge = tid === 'tuan' ? '<span class="status-chip chip-due">Thứ Hai</span>'
+                        : tid === 'thang' ? '<span class="status-chip chip-due">Ngày 1</span>' : '';
         return `
         <div class="card-custom tpl-card ${due ? '' : 'dimmed'}" onclick="openRun('${tid}')">
             <div class="d-flex align-items-center gap-3">
                 <div style="font-size:1.6rem;color:var(--bds-primary);"><i class="bi ${TEMPLATE_ICONS[tid] || 'bi-clipboard'}"></i></div>
                 <div class="flex-grow-1">
                     <div class="tpl-name">${esc(templateName(tid))}</div>
-                    <div class="tpl-meta">${state.total} hÃ¡ÂºÂ¡ng mÃ¡Â»Â¥c ${due ? '' : 'Ã‚Â· khÃƒÂ´ng bÃ¡ÂºÂ¯t buÃ¡Â»â„¢c hÃƒÂ´m nay'}</div>
+                    <div class="tpl-meta">${state.total} hạng mục ${due ? '' : '· không bắt buộc hôm nay'}</div>
                 </div>
                 <i class="bi bi-chevron-right text-muted"></i>
             </div>
@@ -432,7 +432,7 @@ function renderHome() {
     renderPendingBanners();
 }
 
-// BÃƒÂ n giao chÃ¡Â»Â xÃƒÂ¡c nhÃ¡ÂºÂ­n: run submitted cÃ¡Â»Â§a hÃƒÂ´m nay hoÃ¡ÂºÂ·c hÃƒÂ´m trÃ†Â°Ã¡Â»â€ºc
+// Bàn giao chờ xác nhận: run submitted của hôm nay hoặc hôm trước
 function renderPendingBanners() {
     const banners = Object.values(serverRuns)
         .filter(r => r.status === 'submitted' && (r.templateId === 'ca_sang' || r.templateId === 'ca_toi'))
@@ -449,7 +449,7 @@ function renderPendingBanners() {
             <b>${esc(templateName(r.templateId))}</b> ngày ${esc(r.date)} do <b>${esc(r.operator)}</b> chốt.
             ${r.submittedAt ? '<div class="small text-secondary mt-1">Chốt lúc: ' + esc(r.submittedAt) + '</div>' : ''}
             <div class="small mt-1">Kết quả: ${issueCount ? '<b class="text-danger">' + issueCount + ' mục không đạt</b>' : '<b class="text-success">Không có mục không đạt</b>'}</div>
-            ${r.handoverNote ? '<div class="mt-1 text-secondary">Ã°Å¸â€œÂ ' + esc(r.handoverNote) + '</div>' : ''}
+            ${r.handoverNote ? '<div class="mt-1 text-secondary">📝 ' + esc(r.handoverNote) + '</div>' : ''}
             <button class="btn btn-sm btn-primary rounded-pill mt-2 fw-bold" onclick="acceptHandoverAndStart('${r.runId}','${nextTemplateId}')">
                 <i class="bi bi-check2-circle me-1"></i>Xác nhận nhận ca &amp; bắt đầu
             </button>
@@ -460,7 +460,7 @@ function renderPendingBanners() {
 
 async function acceptHandoverAndStart(runId, currentTemplateId) {
     const me = getOperator();
-    if (!me) { bdsShowToast('NhÃ¡ÂºÂ­p tÃƒÂªn ngÃ†Â°Ã¡Â»Âi thÃ¡Â»Â±c hiÃ¡Â»â€¡n trÃ†Â°Ã¡Â»â€ºc', 'warning'); $('operatorInput').focus(); return; }
+    if (!me) { bdsShowToast('Nhập tên người thực hiện trước', 'warning'); $('operatorInput').focus(); return; }
     try {
         const res = await bdsApiPost('acceptGolfHandoverAndStartRun', { payload: {
             previousRunId: runId,
@@ -473,7 +473,7 @@ async function acceptHandoverAndStart(runId, currentTemplateId) {
             await loadRuns();
             openRun(currentTemplateId);
         }
-    } catch (err) { bdsShowToast('LÃ¡Â»â€”i: ' + err.message, 'danger'); }
+    } catch (err) { bdsShowToast('Lá»—i: ' + err.message, 'danger'); }
 }
 
 // Tương thích các liên kết cũ; luồng mới luôn nhận bàn giao và mở ca kế tiếp.
@@ -483,7 +483,7 @@ function confirmHandover(runId) {
     return acceptHandoverAndStart(runId, nextTemplateId);
 }
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ RUN view Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+// ─── RUN view ───────────────────────────────────────────────────────────────
 function openRun(templateId) {
     const date = selectedDate();
     const state = runStateFor(templateId, date);
@@ -500,7 +500,7 @@ function openRun(templateId) {
     $('homeView').style.display = 'none';
     $('runView').style.display = '';
     $('runTitle').textContent = templateName(templateId);
-    $('runSub').textContent = 'NgÃƒÂ y ' + date + (getOperator() ? ' Ã‚Â· ' + getOperator() : '');
+    $('runSub').textContent = 'Ngày ' + date + (getOperator() ? ' · ' + getOperator() : '');
     renderRunBody();
     window.scrollTo(0, 0);
 }
@@ -569,32 +569,32 @@ function renderItem(it) {
     if (it.inputType === 'check') {
         const s = val.status || '';
         body = `<div class="check-btns">
-            <div class="check-btn ${s === 'ok' ? 'on-ok' : ''}" onclick="setCheck('${it.itemId}','ok')"><i class="bi bi-check-lg"></i> Ã„ÂÃ¡ÂºÂ T</div>
-            <div class="check-btn ${s === 'ng' ? 'on-ng' : ''}" onclick="setCheck('${it.itemId}','ng')"><i class="bi bi-x-lg"></i> KHÃƒâ€NG Ã„ÂÃ¡ÂºÂ T</div>
-            <div class="check-btn ${s === 'skip' ? 'on-skip' : ''}" onclick="setCheck('${it.itemId}','skip')"><i class="bi bi-dash-lg"></i> BÃ¡Â»Å½ QUA</div>
+            <div class="check-btn ${s === 'ok' ? 'on-ok' : ''}" onclick="setCheck('${it.itemId}','ok')"><i class="bi bi-check-lg"></i> ĐẠT</div>
+            <div class="check-btn ${s === 'ng' ? 'on-ng' : ''}" onclick="setCheck('${it.itemId}','ng')"><i class="bi bi-x-lg"></i> KHÔNG ĐẠT</div>
+            <div class="check-btn ${s === 'skip' ? 'on-skip' : ''}" onclick="setCheck('${it.itemId}','skip')"><i class="bi bi-dash-lg"></i> BỎ QUA</div>
         </div>`;
     } else if (it.inputType === 'number') {
         const bad = violates(it.threshold, val.value);
         body = `<div class="num-wrap">
             <input type="number" inputmode="decimal" step="any" class="num-input ${bad ? 'bad' : ''}" data-main="1"
-                value="${val.value != null ? esc(val.value) : ''}" placeholder="NhÃ¡ÂºÂ­p sÃ¡Â»â€˜ Ã„â€˜o..."
+                value="${val.value != null ? esc(val.value) : ''}" placeholder="Nhập số đo..."
                 oninput="setValue('${it.itemId}', this.value)">
             <span class="unit-tag">${esc(it.unit)}</span>
         </div>
-        ${it.threshold ? '<div class="threshold-warn" style="display:' + (bad ? '' : 'none') + ';"><i class="bi bi-exclamation-triangle-fill"></i> VÃ†Â°Ã¡Â»Â£t ngÃ†Â°Ã¡Â»Â¡ng cho phÃƒÂ©p (' + esc(it.threshold) + ')</div>' : ''}`;
+        ${it.threshold ? '<div class="threshold-warn" style="display:' + (bad ? '' : 'none') + ';"><i class="bi bi-exclamation-triangle-fill"></i> Vượt ngưỡng cho phép (' + esc(it.threshold) + ')</div>' : ''}`;
     } else if (it.inputType === 'time') {
         body = `<div class="num-wrap"><input type="time" class="time-input" value="${esc(val.value || '')}"
             onchange="setValue('${it.itemId}', this.value)"></div>`;
     } else if (it.inputType === 'timerange') {
         const v = val.value || {};
         body = `<div class="sub-row">
-            <span class="sub-label text-success fw-bold">GiÃ¡Â»Â bÃ¡ÂºÂ­t</span>
+            <span class="sub-label text-success fw-bold">Giờ bật</span>
             <input type="time" class="time-input" value="${esc(v.on || '')}" onchange="setRange('${it.itemId}','on',this.value)">
-            <span class="sub-label text-danger fw-bold" style="flex:none;">GiÃ¡Â»Â tÃ¡ÂºÂ¯t</span>
+            <span class="sub-label text-danger fw-bold" style="flex:none;">Giờ tắt</span>
             <input type="time" class="time-input" value="${esc(v.off || '')}" onchange="setRange('${it.itemId}','off',this.value)">
         </div>`;
     } else if (it.inputType === 'text') {
-        body = `<textarea class="text-input" placeholder="Ghi nÃ¡Â»â„¢i dung..."
+        body = `<textarea class="text-input" placeholder="Ghi nội dung..."
             oninput="setValue('${it.itemId}', this.value)">${esc(val.value || '')}</textarea>`;
     } else if (it.inputType === 'group') {
         const v = val.value || {};
@@ -630,11 +630,11 @@ function renderItem(it) {
     <div class="item-card ${done ? 'done' : ''} ${warn ? 'warn' : ''}" id="item-${it.itemId}">
         <div class="d-flex justify-content-between align-items-start gap-2">
             <div class="item-label">${esc(it.label)}</div>
-            <button class="note-toggle" onclick="toggleNote('${it.itemId}')" title="Ghi chÃƒÂº"><i class="bi bi-chat-text"></i></button>
+            <button class="note-toggle" onclick="toggleNote('${it.itemId}')" title="Ghi chú"><i class="bi bi-chat-text"></i></button>
         </div>
         ${it.note ? '<div class="item-note-hint"><i class="bi bi-info-circle me-1"></i>' + esc(it.note) + '</div>' : ''}
         ${body}
-        <input type="text" class="note-input" id="note-${it.itemId}" placeholder="Ghi chÃƒÂº thÃƒÂªm..."
+        <input type="text" class="note-input" id="note-${it.itemId}" placeholder="Ghi chú thêm..."
             style="display:${val.note ? '' : 'none'};" value="${esc(val.note || '')}"
             oninput="setNote('${it.itemId}', this.value)">
     </div>`;
@@ -651,7 +651,7 @@ function hasViolation(it, val) {
     return false;
 }
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Input handlers Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+// ─── Input handlers ─────────────────────────────────────────────────────────
 function afterChange(itemId) {
     currentRun.dirty = true;
     saveLocalDraft(currentRun);
@@ -692,7 +692,7 @@ function toggleNote(itemId) {
     if (el.style.display === '') el.focus();
 }
 
-// Cáº­p nháº­t viá»n card + sá»‘ Ä‘o Ä‘á»¡ mÃ  khÃ´ng re-render toÃ n trang (giá»¯ focus input)
+// Cập nhật viền card + số đo đỡ mà không re-render toàn trang (giữ focus input)
 function refreshItemCard(itemId) {
     const it = templates.find(x => x.templateId === currentRun.templateId && x.itemId === itemId);
     const card = $('item-' + itemId);
@@ -727,22 +727,22 @@ function updateProgress() {
     const total = countTotal(currentRun.templateId);
     const done = countDone(currentRun.templateId, currentRun.items);
     $('progressFill').style.width = total ? (done / total * 100) + '%' : '0%';
-    $('progressText').textContent = done + '/' + total + ' mÃ¡Â»Â¥c';
-    const chips = { draft: '', submitted: '<span class="status-chip chip-submitted">Ã„ÂÃƒÂ£ chÃ¡Â»â€˜t ca</span>', confirmed: '<span class="status-chip chip-confirmed">Ã„ÂÃƒÂ£ xÃƒÂ¡c nhÃ¡ÂºÂ­n</span>' };
+    $('progressText').textContent = done + '/' + total + ' mục';
+    const chips = { draft: '', submitted: '<span class="status-chip chip-submitted">Đã chốt ca</span>', confirmed: '<span class="status-chip chip-confirmed">Đã xác nhận</span>' };
     $('runStatusChip').innerHTML = chips[currentRun.status] || '';
 }
 
 function renderSubmitArea() {
     if (currentRun.status === 'confirmed') {
-        $('submitArea').innerHTML = '<div class="pending-banner" style="background:#d1fae5;border-color:#a7f3d0;"><i class="bi bi-patch-check-fill text-success me-1"></i>Ã„ÂÃƒÂ£ hoÃƒÂ n tÃ¡ÂºÂ¥t vÃƒÂ  Ã„â€˜Ã†Â°Ã¡Â»Â£c xÃƒÂ¡c nhÃ¡ÂºÂ­n bÃƒÂ n giao.</div>';
+        $('submitArea').innerHTML = '<div class="pending-banner" style="background:#d1fae5;border-color:#a7f3d0;"><i class="bi bi-patch-check-fill text-success me-1"></i>Đã hoàn tất và được xác nhận bàn giao.</div>';
     } else if (currentRun.status === 'submitted') {
-        $('submitArea').innerHTML = '<div class="pending-banner"><i class="bi bi-send-check text-primary me-1"></i>Ã„ÂÃƒÂ£ chÃ¡Â»â€˜t ca Ã¢â‚¬â€ chÃ¡Â»Â ca sau xÃƒÂ¡c nhÃ¡ÂºÂ­n nhÃ¡ÂºÂ­n bÃƒÂ n giao.</div>';
+        $('submitArea').innerHTML = '<div class="pending-banner"><i class="bi bi-send-check text-primary me-1"></i>Đã chốt ca — chờ ca sau xác nhận nhận bàn giao.</div>';
     } else {
-        $('submitArea').innerHTML = `<button class="btn-submit-glow" onclick="openSubmitModal()"><i class="bi bi-clipboard-check-fill"></i>CHÃ¡Â»ÂT CA & BÃƒâ‚¬N GIAO</button>`;
+        $('submitArea').innerHTML = `<button class="btn-submit-glow" onclick="openSubmitModal()"><i class="bi bi-clipboard-check-fill"></i>CHỐT CA & BÀN GIAO</button>`;
     }
 }
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Autosave / sync Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+// ─── Autosave / sync ────────────────────────────────────────────────────────
 function scheduleSync() {
     setSyncDot('pending');
     clearTimeout(saveTimer);
@@ -764,7 +764,7 @@ async function flushSave() {
             setSyncDot('ok');
         }
     } catch (_) {
-        setSyncDot('pending'); // offline Ã¢â‚¬â€ draft Ã„â€˜ÃƒÂ£ nÃ¡ÂºÂ±m trong localStorage, thÃ¡Â»Â­ lÃ¡ÂºÂ¡i sau
+        setSyncDot('pending'); // offline — draft đã nằm trong localStorage, thử lại sau
     }
 }
 
@@ -773,26 +773,26 @@ function setSyncDot(state) {
         const el = $(id);
         if (!el) return;
         el.className = 'sync-dot ' + (state === 'ok' ? 'sync-ok' : 'sync-pending');
-        el.title = state === 'ok' ? 'Ã„ÂÃƒÂ£ Ã„â€˜Ã¡Â»â€œng bÃ¡Â»â„¢' : 'Ã„Âang chÃ¡Â»Â Ã„â€˜Ã¡Â»â€œng bÃ¡Â»â„¢...';
+        el.title = state === 'ok' ? 'Đã đồng bộ' : 'Đang chờ đồng bộ...';
     });
 }
 
 window.addEventListener('online', flushSave);
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Submit / chÃ¡Â»â€˜t ca Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+// ─── Submit / chốt ca ───────────────────────────────────────────────────────
 function openSubmitModal() {
     const op = getOperator();
-    if (!op) { bdsShowToast('NhÃ¡ÂºÂ­p tÃƒÂªn ngÃ†Â°Ã¡Â»Âi thÃ¡Â»Â±c hiÃ¡Â»â€¡n Ã¡Â»Å¸ mÃƒÂ n hÃƒÂ¬nh chÃƒÂ­nh trÃ†Â°Ã¡Â»â€ºc', 'warning'); return; }
+    if (!op) { bdsShowToast('Nhập tên người thực hiện ở màn hình chính trước', 'warning'); return; }
     const total = countTotal(currentRun.templateId);
     const done = countDone(currentRun.templateId, currentRun.items);
     const ngItems = templateItems(currentRun.templateId)
         .filter(it => hasViolation(it, currentRun.items[it.itemId]))
         .map(it => it.section + '.' + it.label);
     $('submitSummary').innerHTML =
-        `<div class="fw-bold">HoÃƒÂ n thÃƒÂ nh: ${done}/${total} mÃ¡Â»Â¥c ${done < total ? '<span class="text-warning">(cÃƒÂ²n thiÃ¡ÂºÂ¿u ' + (total - done) + ')</span>' : 'Ã¢Å“â€¦'}</div>` +
-        (ngItems.length ? '<div class="text-danger mt-1"><b>Ã¢Å¡Â  KhÃƒÂ´ng Ã„â€˜Ã¡ÂºÂ¡t / vÃ†Â°Ã¡Â»Â£t ngÃ†Â°Ã¡Â»Â¡ng:</b><br>' + ngItems.map(esc).join('<br>') + '</div>' : '');
-    // GÃ¡Â»Â£i ÃƒÂ½ nÃ¡Â»â„¢i dung bÃƒÂ n giao tÃ¡Â»Â« mÃ¡Â»Â¥c text "bÃƒÂ n giao" nÃ¡ÂºÂ¿u cÃƒÂ³
-    const hoItem = templateItems(currentRun.templateId).find(it => it.inputType === 'text' && /bÃƒÂ n giao/i.test(it.label));
+        `<div class="fw-bold">Hoàn thành: ${done}/${total} mục ${done < total ? '<span class="text-warning">(còn thiếu ' + (total - done) + ')</span>' : '✅'}</div>` +
+        (ngItems.length ? '<div class="text-danger mt-1"><b>⚠ Không đạt / vượt ngưỡng:</b><br>' + ngItems.map(esc).join('<br>') + '</div>' : '');
+    // Gợi ý nội dung bàn giao từ mục text "bàn giao" nếu có
+    const hoItem = templateItems(currentRun.templateId).find(it => it.inputType === 'text' && /bàn giao/i.test(it.label));
     if (hoItem) {
         const v = currentRun.items[hoItem.itemId];
         if (v && v.value && !$('handoverNoteInput').value) $('handoverNoteInput').value = v.value;
@@ -819,17 +819,17 @@ async function doSubmitRun() {
             currentRun.dirty = false;
             saveLocalDraft(currentRun);
             bootstrap.Modal.getInstance($('submitModal')).hide();
-            bdsShowToast('Ã„ÂÃƒÂ£ chÃ¡Â»â€˜t ca thÃƒÂ nh cÃƒÂ´ng');
+            bdsShowToast('Đã chốt ca thành công');
             renderRunBody();
         }
     } catch (err) {
-        bdsShowToast('LÃ¡Â»â€”i chÃ¡Â»â€˜t ca: ' + err.message, 'danger');
+        bdsShowToast('Lỗi chốt ca: ' + err.message, 'danger');
     } finally {
         btn.disabled = false;
     }
 }
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Home nav Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+// ─── Home nav ───────────────────────────────────────────────────────────────
 function onDateChange() { loadRuns(); }
 function shiftDate(days) {
     const d = new Date(selectedDate() + 'T12:00:00');
@@ -838,7 +838,7 @@ function shiftDate(days) {
     loadRuns();
 }
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Init Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+// ─── Init ───────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     $('operatorInput').value = getOperator();
     $('operatorInput').addEventListener('input', e => BD_SSO.setOperatorName(e.target.value.trim()));
