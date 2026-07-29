@@ -900,9 +900,21 @@
 
         const urlParams = new URLSearchParams(window.location.search);
         const startId = urlParams.get('pumpId') || urlParams.get('id');
+        const autoCheck = urlParams.get('autoCheck') === '1';
+        const requestedShift = urlParams.get('shift');
+        const requestedDate = urlParams.get('date');
         document.getElementById('operatorInput').value = getLoggedInUser();
         resetToCurrentTime();
         if (startId) loadPump(extractPumpId(startId));
+        else if (autoCheck) {
+            const shiftName = requestedShift === 'ca_toi' ? 'Ca Tối' : 'Ca Sáng';
+            const context = document.createElement('div');
+            context.id = 'autoCheckContext';
+            context.className = 'alert alert-primary rounded-4 fw-bold small mb-3';
+            context.innerHTML = `<i class="bi bi-clipboard-check me-1"></i>Check vận hành Bơm · ${shiftName}${requestedDate ? ' · ' + requestedDate : ''}<div class="fw-normal mt-1">Quét QR hoặc nhập mã bơm để mở tờ check.</div>`;
+            document.getElementById('scanCard').prepend(context);
+            document.getElementById('manual_pump_id').focus();
+        }
 
         updateSyncBadge();
         syncOfflineQueue();

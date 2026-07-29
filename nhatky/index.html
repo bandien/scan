@@ -339,6 +339,7 @@
 <script src="../js/config.js"></script>
 <script src="../js/api.js"></script>
 <script src="../js/sso.js"></script>
+<script src="../js/checklist-shifts.js"></script>
 <script>
 'use strict';
 
@@ -720,16 +721,22 @@ function renderMainBoard() {
 
   let shortcutsHtml = '';
   if (filterTab === 'checklist') {
+    const adjacentShifts = window.BD_ChecklistShifts
+      ? BD_ChecklistShifts.adjacent(new Date())
+      : [];
     shortcutsHtml = `
       <div class="nk-checklist-shortcuts" style="display:flex; flex-direction:column; gap:8px; padding:10px 16px; background:var(--bg-surface); border-bottom:1px solid var(--line); margin-bottom: 8px;">
-        <div style="display:flex; gap:10px;">
-          <a href="../sangolf/index.html?autoTemplate=ca_sang" class="nk-btn nk-btn--outline" style="flex:1; border-color:var(--brand); color:var(--brand); font-weight:700; text-decoration:none; display:flex; align-items:center; justify-content:center;">⛳ Golf (Sáng)</a>
-          <a href="../sangolf/index.html?autoTemplate=ca_toi" class="nk-btn nk-btn--outline" style="flex:1; border-color:var(--brand); color:var(--brand); font-weight:700; text-decoration:none; display:flex; align-items:center; justify-content:center;">⛳ Golf (Tối)</a>
-        </div>
-        <div style="display:flex; gap:10px;">
-          <button class="nk-btn nk-btn--outline" style="flex:1; border-color:#007bff; color:#007bff; font-weight:700;" onclick="showToast('Tính năng trạm bơm chưa hỗ trợ auto-open', 'warning')">💧 Bơm (Sáng)</button>
-          <button class="nk-btn nk-btn--outline" style="flex:1; border-color:#007bff; color:#007bff; font-weight:700;" onclick="showToast('Tính năng trạm bơm chưa hỗ trợ auto-open', 'warning')">💧 Bơm (Tối)</button>
-        </div>
+        ${adjacentShifts.map(shift => `
+          <section class="nk-shift-card" data-shift-position="${shift.position}" style="border:1px solid var(--line);border-radius:14px;padding:10px;background:var(--bg-surface);">
+            <div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:8px;">
+              <b>${shift.label}</b>
+              <span style="color:var(--text-muted);font-size:.82rem;">${shift.templateName} · ${shift.date}</span>
+            </div>
+            <div style="display:flex;gap:10px;">
+              <a href="${BD_ChecklistShifts.golfUrl(shift)}" class="nk-btn nk-btn--outline" style="flex:1;border-color:var(--brand);color:var(--brand);font-weight:700;text-decoration:none;display:flex;align-items:center;justify-content:center;">⛳ Golf</a>
+              <a href="${BD_ChecklistShifts.pumpUrl(shift)}" class="nk-btn nk-btn--outline nk-pump-auto-link" style="flex:1;border-color:#007bff;color:#007bff;font-weight:700;text-decoration:none;display:flex;align-items:center;justify-content:center;">💧 Bơm</a>
+            </div>
+          </section>`).join('')}
       </div>`;
   }
 

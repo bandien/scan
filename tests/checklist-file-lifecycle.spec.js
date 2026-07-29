@@ -11,13 +11,33 @@ test('Nhật ký mở được checklist Ca Sáng khi backend không khả dụn
 
   await page.goto('/nhatky/index.html');
   await page.locator('#subtabChecklist').click();
-  await page.getByRole('link', { name: /Golf \(Sáng\)/ }).click();
+  await expect(page.locator('.nk-shift-card')).toHaveCount(2);
+  await page.locator('.nk-shift-card').filter({ hasText: 'Ca liền sau' })
+    .getByRole('link', { name: 'Golf' }).click();
 
-  await expect(page).toHaveURL(/sangolf\/index\.html\?autoTemplate=ca_sang/);
+  await expect(page).toHaveURL(/sangolf\/index\.html\?autoTemplate=(ca_sang|ca_toi)&date=\d{4}-\d{2}-\d{2}/);
   await expect(page.locator('#runView')).toBeVisible();
-  await expect(page.locator('#runTitle')).toContainText(/Ca Sáng/i);
+  await expect(page.locator('#runTitle')).toContainText(/Ca (Sáng|Tối)/i);
   await expect(page.locator('#runBody .item-card').first()).toBeVisible();
   await expect(page.locator('#progressText')).not.toContainText('0/0');
+});
+
+test('Bơm mở màn hình chọn thiết bị với sẵn ngữ cảnh ca', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('currentUser', JSON.stringify({
+      username: 'e2e', name: 'KTV E2E', role: 'staff'
+    }));
+  });
+  await page.goto('/nhatky/index.html');
+  await page.locator('#subtabChecklist').click();
+  await expect(page.locator('.nk-shift-card')).toHaveCount(2);
+
+  const nextShift = page.locator('.nk-shift-card').filter({ hasText: 'Ca liền sau' });
+  await nextShift.getByRole('link', { name: 'Bơm' }).click();
+
+  await expect(page).toHaveURL(/pump_info\.html\?autoCheck=1&shift=(ca_sang|ca_toi)&date=\d{4}-\d{2}-\d{2}/);
+  await expect(page.locator('#autoCheckContext')).toContainText('Check vận hành Bơm');
+  await expect(page.locator('#manual_pump_id')).toBeFocused();
 });
 
 test('không bỏ qua ca trước đang chờ nhận khi vào bằng autoTemplate', async ({ page }) => {
