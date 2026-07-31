@@ -1468,7 +1468,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
     const autoTemplate = params.get('autoTemplate');
     const requestedDate = params.get('date');
-    if (autoTemplate) {
+    const manageTemplatesParam = params.get('manageTemplates');
+
+    if (manageTemplatesParam) {
+        $('datePicker').value = todayStr();
+        loadTemplates().then(() => {
+            openAdminTemplates();
+        });
+        loadRuns();
+    } else if (autoTemplate) {
         // Dựng run ngay từ mẫu local; không bắt thao tác người dùng chờ timeout/retry API.
         loadTemplates();
         let d = new Date();
