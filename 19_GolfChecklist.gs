@@ -1,4 +1,4 @@
-﻿// ==========================================
+// ==========================================
 // 19_GolfChecklist.gs — CHECKLIST CƠ ĐIỆN SÂN GOLF
 // ==========================================
 // Số hóa sổ vận hành ChecklistCoDienSanGolf.xlsx cho Tổ Cơ Điện Sân Golf
@@ -391,11 +391,14 @@ function handleGetGolfStatus(e) {
     });
   }
 
-  const shifts = Object.keys(GOLF_TEMPLATE_NAMES).map(function(templateId) {
+  const defs = readChecklistTemplateDefs_().filter(function(d) { return d.active !== false; });
+  const shifts = defs.map(function(def) {
+    const templateId = def.templateId;
+    const templateName = def.templateName || (GOLF_TEMPLATE_NAMES[templateId] || templateId);
     const run = latestByTemplate[templateId];
     if (!run) {
       return {
-        templateId: templateId, templateName: GOLF_TEMPLATE_NAMES[templateId],
+        templateId: templateId, templateName: templateName,
         date: "", status: "", operator: "", handoverNote: "", submittedAt: "", issueCount: 0
       };
     }
@@ -407,7 +410,7 @@ function handleGetGolfStatus(e) {
       });
     } catch (_) {}
     return {
-      templateId: templateId, templateName: GOLF_TEMPLATE_NAMES[templateId],
+      templateId: templateId, templateName: templateName,
       date: run.date, status: run.status, operator: run.operator,
       handoverNote: run.handoverNote, submittedAt: run.submittedAt, issueCount: issueCount
     };

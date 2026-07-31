@@ -106,3 +106,16 @@ test('validation chặn định nghĩa mẫu thiếu/sai dữ liệu', () => {
   assert.notEqual(context.validateChecklistTemplateDef_({ ...base, frequency: 'weekly' }), '');
   assert.notEqual(context.validateChecklistTemplateDef_({ ...base, frequency: 'monthly', dayOfMonth: 32 }), '');
 });
+
+test('handleGetGolfStatus sử dụng readChecklistTemplateDefs_', () => {
+  context.ensureGolfRunsSheet_ = () => ({ getLastRow: () => 0 });
+  context.readChecklistTemplateDefs_ = () => [
+    { templateId: 'ca_moi', templateName: 'Ca Mới Tăng Cường', active: true }
+  ];
+  context.contentResponse = (obj) => obj;
+  const res = context.handleGetGolfStatus();
+  assert.equal(res.status, 'success');
+  assert.equal(res.shifts.length, 1);
+  assert.equal(res.shifts[0].templateId, 'ca_moi');
+  assert.equal(res.shifts[0].templateName, 'Ca Mới Tăng Cường');
+});

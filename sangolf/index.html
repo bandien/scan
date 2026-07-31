@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -177,10 +177,25 @@
             <button onclick="shiftDate(1)"><i class="bi bi-chevron-right"></i></button>
         </div>
 
+        <div class="d-flex align-items-center justify-content-between my-2">
+            <span class="fw-bold text-secondary small"><i class="bi bi-list-task me-1"></i>DANH SÁCH MẪU CHECKLIST</span>
+            <button id="btnManageTemplates" class="btn btn-outline-primary btn-sm rounded-pill px-3" onclick="openAdminTemplates()"><i class="bi bi-sliders me-1"></i>Quản lý mẫu</button>
+        </div>
+
         <div id="pendingBanners"></div>
         <div id="templateCards">
             <div class="text-center text-muted py-5"><div class="spinner-border spinner-border-sm me-2"></div>Đang tải mẫu checklist...</div>
         </div>
+    </div>
+
+    <!-- ═══════════ ADMIN TEMPLATES VIEW ═══════════ -->
+    <div id="adminTemplatesView" style="display:none;" class="card-custom p-3 mb-3">
+        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="closeAdminTemplates()"><i class="bi bi-arrow-left me-1"></i> Quay lại</button>
+            <h6 class="mb-0 fw-bold text-primary"><i class="bi bi-gear-fill me-1"></i>Quản Lý Định Nghĩa Mẫu</h6>
+            <button id="btnAddTemplate" class="btn btn-sm btn-primary rounded-pill px-3" onclick="openTemplateForm()"><i class="bi bi-plus-lg me-1"></i> Thêm mẫu mới</button>
+        </div>
+        <div id="adminTemplatesList"></div>
     </div>
 
     <!-- ═══════════ RUN VIEW ═══════════ -->
@@ -232,11 +247,157 @@
     </div>
 </div>
 
+<!-- ═══════════ TEMPLATE FORM MODAL ═══════════ -->
+<div class="modal fade" id="templateFormModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:20px;">
+            <div class="modal-header border-0 pb-0">
+                <h6 class="fw-bold mb-0" id="templateFormModalTitle"><i class="bi bi-sliders text-primary me-1"></i>Cấu hình mẫu checklist</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="tplFormError" class="alert alert-danger py-2 mb-3 small" style="display:none;"></div>
+                <input type="hidden" id="tplIdInput">
+                <div class="mb-2">
+                    <label class="fw-bold small text-secondary">Tên mẫu checklist <span class="text-danger">*</span></label>
+                    <input type="text" id="tplNameInput" class="num-input" placeholder="VD: Ca Đêm Tăng Cường">
+                </div>
+                <div class="mb-2">
+                    <label class="fw-bold small text-secondary">Địa điểm <span class="text-danger">*</span></label>
+                    <input type="text" id="tplLocationInput" class="num-input" value="Sân Golf Kỳ Sơn" placeholder="VD: Sân Golf Kỳ Sơn">
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-6">
+                        <label class="fw-bold small text-secondary">Mã ca (Shift Code)</label>
+                        <input type="text" id="tplShiftCodeInput" class="num-input" placeholder="ca_dem">
+                    </div>
+                    <div class="col-6">
+                        <label class="fw-bold small text-secondary">Tần suất</label>
+                        <select id="tplFrequencySelect" class="num-input" style="padding:6px 8px;">
+                            <option value="daily">Hàng ngày</option>
+                            <option value="weekly">Hàng tuần</option>
+                            <option value="monthly">Hàng tháng</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-6">
+                        <label class="fw-bold small text-secondary">Giờ bắt đầu</label>
+                        <input type="time" id="tplTimeStartInput" class="num-input" value="05:00">
+                    </div>
+                    <div class="col-6">
+                        <label class="fw-bold small text-secondary">Giờ kết thúc</label>
+                        <input type="time" id="tplTimeEndInput" class="num-input" value="13:00">
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <label class="fw-bold small text-secondary">Nhân bản hạng mục từ mẫu có sẵn</label>
+                    <select id="tplCloneFromSelect" class="num-input" style="padding:6px 8px;">
+                        <option value="">(Không nhân bản - Tạo mẫu rỗng)</option>
+                    </select>
+                </div>
+                <div class="form-check form-switch mt-3">
+                    <input class="form-check-input" type="checkbox" id="tplActiveCheck" checked>
+                    <label class="form-check-label fw-bold small text-secondary" for="tplActiveCheck">Bật áp dụng mẫu</label>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light btn-sm rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" id="btnSaveTemplateDef" class="btn btn-primary btn-sm rounded-pill px-3" onclick="saveTemplateDef()">Lưu mẫu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════ TEMPLATE ITEMS MANAGER MODAL ═══════════ -->
+<div class="modal fade" id="adminItemsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="border-radius:20px;">
+            <div class="modal-header border-0 pb-0">
+                <h6 class="fw-bold mb-0" id="adminItemsModalTitle"><i class="bi bi-list-check text-primary me-1"></i>Quản lý hạng mục kiểm tra</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+                    <span class="small text-muted" id="adminItemsModalSub">Danh sách các hạng mục kiểm tra</span>
+                    <button class="btn btn-sm btn-primary rounded-pill px-3" onclick="openAddTemplateItemModal()"><i class="bi bi-plus-lg me-1"></i>Thêm hạng mục</button>
+                </div>
+                <div id="adminItemsList" style="max-height:60vh; overflow-y:auto;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════ EDIT TEMPLATE ITEM MODAL ═══════════ -->
+<div class="modal fade" id="editItemModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="border-radius:20px;">
+            <div class="modal-header border-0 pb-0">
+                <h6 class="fw-bold mb-0" id="editItemModalTitle"><i class="bi bi-pencil-square text-primary me-1"></i>Hạng mục kiểm tra</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editTemplateId">
+                <input type="hidden" id="editItemId">
+                <div class="row g-2 mb-2">
+                    <div class="col-4">
+                        <label class="fw-bold small text-secondary">Mã phần</label>
+                        <input type="text" id="editSection" class="num-input" value="A" placeholder="A, B, C...">
+                    </div>
+                    <div class="col-8">
+                        <label class="fw-bold small text-secondary">Tên phần (Section Title)</label>
+                        <input type="text" id="editSectionTitle" class="num-input" placeholder="VD: Nhận ca & kiểm tra nước">
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <label class="fw-bold small text-secondary">Tên hạng mục kiểm tra <span class="text-danger">*</span></label>
+                    <input type="text" id="editLabel" class="num-input" placeholder="VD: Kiểm tra mức nước 5 hồ">
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-4">
+                        <label class="fw-bold small text-secondary">Loại đầu vào</label>
+                        <select id="editInputType" class="num-input" style="padding:6px 8px;">
+                            <option value="check">Đạt / Không đạt / Bỏ qua</option>
+                            <option value="number">Nhập số đo</option>
+                            <option value="time">Nhập giờ</option>
+                            <option value="timerange">Khoảng giờ (Bật - Tắt)</option>
+                            <option value="text">Nhập văn bản</option>
+                            <option value="group">Nhóm nhiều trường con (Group/Fields)</option>
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <label class="fw-bold small text-secondary">Đơn vị đo (nếu có)</label>
+                        <input type="text" id="editUnit" class="num-input" placeholder="VD: cm, °C, bar">
+                    </div>
+                    <div class="col-4">
+                        <label class="fw-bold small text-secondary">Ngưỡng cho phép (nếu có)</label>
+                        <input type="text" id="editThreshold" class="num-input" placeholder="VD: min:45 hoặc ≥ 50%">
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <label class="fw-bold small text-secondary">Ghi chú hướng dẫn cho nhân viên</label>
+                    <textarea id="editNote" class="text-input" style="min-height:54px;" placeholder="VD: Kiểm tra kỹ phao báo và mở van bù nước nếu < 50%"></textarea>
+                </div>
+                <div class="mb-2" id="editFieldsWrap">
+                    <label class="fw-bold small text-secondary">Danh sách trường con chi tiết (Sub-fields / Chi tiết A10...)</label>
+                    <textarea id="editFields" class="text-input font-monospace small" style="min-height:80px;" placeholder="Mỗi dòng 1 trường: Tên trường | loại | đơn vị&#10;Ví dụ:&#10;Mức nước Hồ 1 | number | cm&#10;Mức nước Hồ 2 | number | cm"></textarea>
+                    <div class="form-text text-muted extra-small">Nhập mỗi dòng: <code>Tên trường | loại (number/time/timerange/text) | đơn vị</code> hoặc JSON array.</div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light btn-sm rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" id="btnSaveTemplateItem" class="btn btn-primary btn-sm rounded-pill px-3" onclick="saveTemplateItem()">Lưu hạng mục</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../js/config.js"></script>
 <script src="../js/api.js"></script>
 <script src="../js/sso.js"></script>
 <script src="../js/golf-checklist-fallback.js"></script>
+<script src="../js/checklist-schedule.js"></script>
 <script src="../js/fontscale.js"></script>
 <script src="../js/pwa.js" data-root="../"></script>
 <script>
@@ -249,9 +410,11 @@ const LS_TEMPLATES = 'golf_templates_v1';
 const LS_RUN_PREFIX = 'golf_run_';             // + runId → draft local
 
 const TEMPLATE_ORDER = ['ca_sang', 'ca_toi', 'tuan', 'thang'];
-const TEMPLATE_ICONS = { ca_sang: 'bi-sunrise', ca_toi: 'bi-moon-stars', tuan: 'bi-calendar-week', thang: 'bi-calendar-month' };
+const TEMPLATE_ICONS = { ca_sang: 'bi-sunrise', ca_toi: 'bi-moon-stars', ca_dem: 'bi-moon-stars', tuan: 'bi-calendar-week', thang: 'bi-calendar-month' };
 
 let templates = [];          // flat items từ backend
+let templateDefs = [];       // danh sách mẫu từ getChecklistTemplateDefs
+let scheduleData = [];       // lịch áp dụng từ getChecklistSchedule
 let serverRuns = {};         // runId → run object (theo ngày đang chọn + hôm trước)
 let currentRun = null;       // {runId, templateId, date, status, items:{}, dirty}
 let saveTimer = null;
@@ -277,6 +440,10 @@ function prevDate(dateStr) {
 }
 
 function isDue(templateId, dateStr) {
+    if (Array.isArray(scheduleData) && scheduleData.length) {
+        const item = scheduleData.find(s => s.templateId === templateId);
+        if (item) return Boolean(item.matchesDate && item.inWindow);
+    }
     const d = new Date(dateStr + 'T12:00:00');
     if (templateId === 'tuan')  return d.getDay() === 1;      // thứ Hai
     if (templateId === 'thang') return d.getDate() === 1;     // ngày 1
@@ -305,13 +472,15 @@ function violates(spec, value) {
 
 // ─── Templates ──────────────────────────────────────────────────────────────
 function templateItems(templateId) {
-    return templates
-        .filter(x => x.templateId === templateId)
-        .sort((a, b) => a.section === b.section ? a.order - b.order : (a.section < b.section ? -1 : 1));
+    const matched = templates.filter(x => x.templateId === templateId);
+    if (matched.length === 1 && Array.isArray(matched[0].items)) {
+        return matched[0].items;
+    }
+    return matched.sort((a, b) => a.section === b.section ? a.order - b.order : (a.section < b.section ? -1 : 1));
 }
 function templateName(templateId) {
     const it = templates.find(x => x.templateId === templateId);
-    return it ? it.templateName : templateId;
+    return it ? (it.templateName || it.name || templateId) : templateId;
 }
 
 async function loadTemplates() {
@@ -324,19 +493,42 @@ async function loadTemplates() {
         try { templates = JSON.parse(cached).items || []; } catch (_) {}
         if (templates.length) renderHome();
     }
+    let loadedOk = false;
     try {
         const res = await bdsApiFetch('getGolfTemplates');
-        if (res.status === 'success' && Array.isArray(res.items) && res.items.length) {
-            templates = res.items;
+        const itemsList = (res && res.status === 'success') ? (res.items || res.templates || []) : [];
+        if (itemsList.length) {
+            templates = itemsList;
             localStorage.setItem(LS_TEMPLATES, JSON.stringify({ items: templates, at: Date.now() }));
-            if (currentRun) renderRunBody();
-            else renderHome();
+            loadedOk = true;
         }
     } catch (err) {
-        if (!templates.length) {
+        if (!templates || !templates.length) {
             $('templateCards').innerHTML = '';
             bdsShowError('templateCards', 'Không tải được mẫu checklist', loadTemplates);
+            return;
+        } else {
+            if (!currentRun) renderHome();
+            return;
         }
+    }
+
+    try {
+        const [defsRes, schedRes] = await Promise.allSettled([
+            bdsApiFetch('getChecklistTemplateDefs', { location: 'Sân Golf Kỳ Sơn' }),
+            bdsApiFetch('getChecklistSchedule', { date: selectedDate(), location: 'Sân Golf Kỳ Sơn' })
+        ]);
+        if (defsRes.status === 'fulfilled' && defsRes.value && defsRes.value.status === 'success' && Array.isArray(defsRes.value.defs)) {
+            templateDefs = defsRes.value.defs;
+        }
+        if (schedRes.status === 'fulfilled' && schedRes.value && schedRes.value.status === 'success' && Array.isArray(schedRes.value.schedule)) {
+            scheduleData = schedRes.value.schedule;
+        }
+    } catch (_) {}
+
+    if (loadedOk) {
+        if (currentRun) renderRunBody();
+        else renderHome();
     }
 }
 
@@ -364,8 +556,10 @@ async function loadRuns(apiOptions) {
 }
 
 function pendingHandoverFor(templateId) {
-    const previousTemplateId = templateId === 'ca_sang' ? 'ca_toi'
-        : templateId === 'ca_toi' ? 'ca_sang' : '';
+    const pair = window.BD_ChecklistSchedule
+        ? BD_ChecklistSchedule.getHandoverPairFor(templateId, templateDefs, selectedDate())
+        : null;
+    const previousTemplateId = pair ? pair.targetTemplateId : (templateId === 'ca_sang' ? 'ca_toi' : templateId === 'ca_toi' ? 'ca_sang' : '');
     if (!previousTemplateId) return null;
     return Object.values(serverRuns)
         .filter(r => r.status === 'submitted' && r.templateId === previousTemplateId)
@@ -410,15 +604,31 @@ function statusChip(state) {
 function renderHome() {
     if (!templates.length) return;
     const date = selectedDate();
-    const cards = TEMPLATE_ORDER.filter(t => templates.some(x => x.templateId === t)).map(tid => {
+
+    let templateIds = [];
+    if (Array.isArray(scheduleData) && scheduleData.length) {
+        templateIds = scheduleData.map(s => s.templateId);
+    } else {
+        const uniqueFromItems = [...new Set(templates.map(x => x.templateId))];
+        templateIds = TEMPLATE_ORDER.filter(t => uniqueFromItems.includes(t));
+        uniqueFromItems.forEach(t => { if (!templateIds.includes(t)) templateIds.push(t); });
+    }
+
+    const cards = templateIds.filter(tid => templates.some(x => x.templateId === tid)).map(tid => {
         const due = isDue(tid, date);
         const state = runStateFor(tid, date);
-        const dueBadge = tid === 'tuan' ? '<span class="status-chip chip-due">Thứ Hai</span>'
-                        : tid === 'thang' ? '<span class="status-chip chip-due">Ngày 1</span>' : '';
+        const iconClass = TEMPLATE_ICONS[tid] || 'bi-clipboard-check';
+        const schedItem = (scheduleData || []).find(s => s.templateId === tid);
+        const dueBadge = schedItem
+            ? (schedItem.frequency === 'weekly' ? '<span class="status-chip chip-due">Hàng tuần</span>'
+              : schedItem.frequency === 'monthly' ? '<span class="status-chip chip-due">Hàng tháng</span>' : '')
+            : (tid === 'tuan' ? '<span class="status-chip chip-due">Thứ Hai</span>'
+              : tid === 'thang' ? '<span class="status-chip chip-due">Ngày 1</span>' : '');
+
         return `
         <div class="card-custom tpl-card ${due ? '' : 'dimmed'}" onclick="openRun('${tid}')">
             <div class="d-flex align-items-center gap-3">
-                <div style="font-size:1.6rem;color:var(--bds-primary);"><i class="bi ${TEMPLATE_ICONS[tid] || 'bi-clipboard'}"></i></div>
+                <div style="font-size:1.6rem;color:var(--bds-primary);"><i class="bi ${iconClass}"></i></div>
                 <div class="flex-grow-1">
                     <div class="tpl-name">${esc(templateName(tid))}</div>
                     <div class="tpl-meta">${state.total} hạng mục ${due ? '' : '· không bắt buộc hôm nay'}</div>
@@ -435,14 +645,17 @@ function renderHome() {
 // Bàn giao chờ xác nhận: run submitted của hôm nay hoặc hôm trước
 function renderPendingBanners() {
     const banners = Object.values(serverRuns)
-        .filter(r => r.status === 'submitted' && (r.templateId === 'ca_sang' || r.templateId === 'ca_toi'))
+        .filter(r => r.status === 'submitted')
         .map(r => {
         let issueCount = 0;
         try {
             const values = r.itemsObj || (r.items ? JSON.parse(r.items) : {});
             issueCount = Object.values(values).filter(v => v && v.status === 'ng').length;
         } catch (_) {}
-        const nextTemplateId = r.templateId === 'ca_sang' ? 'ca_toi' : 'ca_sang';
+        const pair = window.BD_ChecklistSchedule
+            ? BD_ChecklistSchedule.getHandoverPairFor(r.templateId, templateDefs, r.date)
+            : null;
+        const nextTemplateId = pair ? pair.targetTemplateId : (r.templateId === 'ca_sang' ? 'ca_toi' : 'ca_sang');
         return `
         <div class="pending-banner">
             <div class="fw-bold mb-1"><i class="bi bi-bell-fill text-primary me-1"></i>CA TRƯỚC BÀN GIAO</div>
@@ -515,12 +728,22 @@ function backHome() {
 
 function checkChecklistEligibility(templateId, dateStr) {
     if (!templateId || !dateStr) return { isLate: false };
-    const tName = templateName(templateId);
-    const match = String(tName).match(/-.*?(\d{1,2})h(\d{2})/);
-    if (!match) return { isLate: false };
-    
-    const endH = parseInt(match[1], 10);
-    const endM = parseInt(match[2], 10);
+    let endH = 0, endM = 0, foundEnd = false;
+    if (Array.isArray(templateDefs) && templateDefs.length) {
+        const def = templateDefs.find(d => d.templateId === templateId);
+        if (def && def.timeEnd) {
+            const parts = def.timeEnd.split(':').map(Number);
+            endH = parts[0]; endM = parts[1] || 0;
+            foundEnd = true;
+        }
+    }
+    if (!foundEnd) {
+        const tName = templateName(templateId);
+        const match = String(tName).match(/-.*?(\d{1,2})h(\d{2})/);
+        if (!match) return { isLate: false };
+        endH = parseInt(match[1], 10);
+        endM = parseInt(match[2], 10);
+    }
     
     const shiftEnd = new Date(dateStr + 'T00:00:00');
     shiftEnd.setHours(endH, endM, 0, 0);
@@ -826,6 +1049,405 @@ async function doSubmitRun() {
         bdsShowToast('Lỗi chốt ca: ' + err.message, 'danger');
     } finally {
         btn.disabled = false;
+    }
+}
+
+// ─── Admin Template & Item Management ───────────────────────────────────────
+let currentEditingTemplateId = null;
+
+function openAdminTemplates() {
+    $('homeView').style.display = 'none';
+    $('runView').style.display = 'none';
+    $('adminTemplatesView').style.display = '';
+    renderAdminTemplatesList();
+}
+
+function closeAdminTemplates() {
+    $('adminTemplatesView').style.display = 'none';
+    $('homeView').style.display = '';
+    loadTemplates();
+}
+
+function getCombinedTemplateDefs() {
+    const list = Array.isArray(templateDefs) ? [...templateDefs] : [];
+    const defaults = [
+        { templateId: 'ca_sang', templateName: 'Ca Sáng (5h00 – 13h00)', location: 'Sân Golf Kỳ Sơn', shiftCode: 'ca_sang', frequency: 'daily', timeStart: '05:00', timeEnd: '13:00', active: true },
+        { templateId: 'ca_toi', templateName: 'Ca Tối (13h00 – 21h00)', location: 'Sân Golf Kỳ Sơn', shiftCode: 'ca_toi', frequency: 'daily', timeStart: '13:00', timeEnd: '21:00', active: true },
+        { templateId: 'tuan', templateName: 'Bảo Dưỡng Hàng Tuần', location: 'Sân Golf Kỳ Sơn', shiftCode: 'tuan', frequency: 'weekly', timeStart: '06:00', timeEnd: '18:00', active: true },
+        { templateId: 'thang', templateName: 'Báo Cáo Hàng Tháng', location: 'Sân Golf Kỳ Sơn', shiftCode: 'thang', frequency: 'monthly', timeStart: '06:00', timeEnd: '18:00', active: true }
+    ];
+
+    defaults.forEach(def => {
+        if (!list.some(d => d.templateId === def.templateId)) {
+            list.push(def);
+        }
+    });
+
+    if (Array.isArray(templates)) {
+        const uniqueIds = [...new Set(templates.map(t => t.templateId))];
+        uniqueIds.forEach(tid => {
+            if (tid && !list.some(d => d.templateId === tid)) {
+                list.push({
+                    templateId: tid,
+                    templateName: templateName(tid),
+                    location: 'Sân Golf Kỳ Sơn',
+                    shiftCode: tid,
+                    frequency: 'daily',
+                    timeStart: '05:00',
+                    timeEnd: '13:00',
+                    active: true
+                });
+            }
+        });
+    }
+
+    return list;
+}
+
+function renderAdminTemplatesList() {
+    const container = $('adminTemplatesList');
+    const combinedDefs = getCombinedTemplateDefs();
+    if (!combinedDefs.length) {
+        container.innerHTML = '<div class="text-muted text-center py-4">Chưa có mẫu nào</div>';
+        return;
+    }
+    let html = '';
+    combinedDefs.forEach(def => {
+        const isActive = def.active !== false;
+        const items = templateItems(def.templateId);
+        const itemCount = items ? items.length : 0;
+        html += `
+        <div class="admin-tpl-card card-custom mb-3 p-3 border">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div>
+                    <span class="fw-bold text-dark fs-6 me-2">${esc(def.templateName || def.templateId)}</span>
+                    <span class="badge ${isActive ? 'bg-success' : 'bg-secondary'}">${isActive ? 'Đang áp dụng' : 'Ngừng áp dụng'}</span>
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="openTemplateForm('${esc(def.templateId)}')"><i class="bi bi-sliders me-1"></i>Sửa ca/khung giờ</button>
+                    <button class="btn btn-sm btn-primary rounded-pill px-3" onclick="openEditTemplateItems('${esc(def.templateId)}')"><i class="bi bi-list-check me-1"></i>Sửa hạng mục (${itemCount})</button>
+                </div>
+            </div>
+            <div class="small text-muted mt-2">
+                <span><i class="bi bi-geo-alt me-1"></i>${esc(def.location || 'Sân Golf Kỳ Sơn')}</span> · 
+                <span><i class="bi bi-clock me-1"></i>${esc(def.timeStart || '')} - ${esc(def.timeEnd || '')}</span> · 
+                <span>Mã ca: ${esc(def.shiftCode || def.templateId)}</span>
+            </div>
+            <div class="mt-2 text-end border-top pt-2">
+                <button class="btn btn-link text-decoration-none text-danger p-0 small btn-soft-delete-tpl" onclick="softDeleteTemplateDef('${esc(def.templateId)}', ${!isActive})">
+                    <i class="bi ${isActive ? 'bi-pause-circle' : 'bi-play-circle'} me-1"></i>${isActive ? 'Ngừng áp dụng' : 'Kích hoạt lại'} (giữ lịch sử)
+                </button>
+            </div>
+        </div>`;
+    });
+    container.innerHTML = html;
+}
+
+function openEditTemplateItems(templateId) {
+    currentEditingTemplateId = templateId;
+    const tName = templateName(templateId);
+    $('adminItemsModalTitle').textContent = 'Quản lý hạng mục — ' + tName;
+    $('adminItemsModalSub').textContent = 'Mẫu ' + templateId + ' · Cập nhật trực tiếp danh sách kiểm tra';
+    renderAdminItemsList(templateId);
+    bootstrap.Modal.getOrCreateInstance($('adminItemsModal')).show();
+}
+
+function renderAdminItemsList(templateId) {
+    const items = templateItems(templateId);
+    const container = $('adminItemsList');
+    if (!items || !items.length) {
+        container.innerHTML = '<div class="text-center text-muted py-4">Chưa có hạng mục nào trong mẫu này.<br><button class="btn btn-sm btn-primary mt-2 rounded-pill px-3" onclick="openAddTemplateItemModal()">+ Thêm hạng mục đầu tiên</button></div>';
+        return;
+    }
+
+    let html = '', lastSection = '';
+    items.forEach(it => {
+        if (it.section !== lastSection) {
+            lastSection = it.section;
+            html += `<div class="fw-bold text-primary small mt-3 mb-1 border-bottom pb-1">Phần ${esc(it.section)}: ${esc(it.sectionTitle || '')}</div>`;
+        }
+
+        let fieldsDetailHtml = '';
+        if (Array.isArray(it.fields) && it.fields.length) {
+            fieldsDetailHtml = `
+            <div class="mt-2 ps-3 border-start border-2 border-primary bg-light-subtle p-2 rounded small">
+                <div class="fw-bold text-secondary mb-1"><i class="bi bi-diagram-3 me-1"></i>Các trường chi tiết (${it.fields.length}):</div>
+                <div class="row g-1">
+                    ${it.fields.map(f => `
+                        <div class="col-12 col-md-6 text-truncate">
+                            • <span class="fw-medium">${esc(f.label)}</span> 
+                            ${f.type ? `<span class="badge bg-secondary-subtle text-secondary extra-small">${esc(f.type)}</span>` : ''} 
+                            ${f.unit ? `<span class="text-muted extra-small">[${esc(f.unit)}]</span>` : ''}
+                            ${f.threshold ? `<span class="text-warning extra-small me-1">(${esc(f.threshold)})</span>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>`;
+        }
+
+        html += `
+        <div class="p-2 border-bottom hover-bg">
+            <div class="d-flex align-items-start justify-content-between gap-2">
+                <div style="flex:1;">
+                    <span class="badge bg-light text-dark border me-2">${esc(it.itemId)}</span>
+                    <span class="fw-bold text-dark fs-6">${esc(it.label)}</span>
+                    ${it.unit ? `<span class="badge bg-info-subtle text-info border border-info-subtle ms-1">${esc(it.unit)}</span>` : ''}
+                    <span class="badge bg-secondary-subtle text-secondary small ms-1">${esc(it.inputType)}</span>
+                    ${it.threshold ? `<span class="badge bg-warning-subtle text-warning border border-warning-subtle ms-1"><i class="bi bi-speedometer2 me-1"></i>Ngưỡng: ${esc(it.threshold)}</span>` : ''}
+                </div>
+                <div class="d-flex gap-1 flex-shrink-0">
+                    <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="openEditItemModal('${esc(templateId)}','${esc(it.itemId)}')">Sửa</button>
+                    <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="deleteTemplateItem('${esc(templateId)}','${esc(it.itemId)}')">Xóa</button>
+                </div>
+            </div>
+            ${it.note ? `<div class="small text-muted mt-1 bg-light p-1.5 rounded border"><i class="bi bi-info-circle text-primary me-1"></i><strong>Hướng dẫn:</strong> ${esc(it.note)}</div>` : ''}
+            ${fieldsDetailHtml}
+        </div>`;
+    });
+
+    container.innerHTML = html;
+}
+
+function openAddTemplateItemModal() {
+    const templateId = currentEditingTemplateId;
+    if (!templateId) return;
+    $('editItemId').value = '';
+    $('editTemplateId').value = templateId;
+    $('editSection').value = 'A';
+    $('editSectionTitle').value = 'Mục kiểm tra mới';
+    $('editLabel').value = '';
+    $('editInputType').value = 'check';
+    $('editUnit').value = '';
+    $('editThreshold').value = '';
+    $('editNote').value = '';
+    $('editFields').value = '';
+    $('editItemModalTitle').textContent = 'Thêm hạng mục mới vào mẫu ' + templateId;
+    bootstrap.Modal.getOrCreateInstance($('editItemModal')).show();
+}
+
+function openEditItemModal(templateId, itemId) {
+    const items = templateItems(templateId);
+    const it = items.find(x => x.itemId === itemId);
+    if (!it) return;
+    $('editItemId').value = it.itemId;
+    $('editTemplateId').value = templateId;
+    $('editSection').value = it.section || 'A';
+    $('editSectionTitle').value = it.sectionTitle || '';
+    $('editLabel').value = it.label || '';
+    $('editInputType').value = it.inputType || 'check';
+    $('editUnit').value = it.unit || '';
+    $('editThreshold').value = it.threshold || '';
+    $('editNote').value = it.note || '';
+
+    if (Array.isArray(it.fields) && it.fields.length) {
+        $('editFields').value = it.fields.map(f => {
+            return `${f.label || ''} | ${f.type || 'number'} | ${f.unit || ''}`;
+        }).join('\n');
+    } else {
+        $('editFields').value = '';
+    }
+
+    $('editItemModalTitle').textContent = 'Sửa hạng mục ' + itemId + ' — Mẫu ' + templateId;
+    bootstrap.Modal.getOrCreateInstance($('editItemModal')).show();
+}
+
+async function saveTemplateItem() {
+    const btn = $('btnSaveTemplateItem');
+    const itemId = $('editItemId').value;
+    const templateId = $('editTemplateId').value;
+    const section = $('editSection').value.trim() || 'A';
+    const sectionTitle = $('editSectionTitle').value.trim() || 'Hạng mục';
+    const label = $('editLabel').value.trim();
+    const inputType = $('editInputType').value;
+    const unit = $('editUnit').value.trim();
+    const threshold = $('editThreshold').value.trim();
+    const note = $('editNote').value.trim();
+    const fieldsStr = $('editFields').value.trim();
+
+    let fields = [];
+    if (fieldsStr) {
+        try {
+            fields = JSON.parse(fieldsStr);
+        } catch (e) {
+            fields = fieldsStr.split('\n').filter(Boolean).map((line, idx) => {
+                const parts = line.split('|').map(s => s.trim());
+                return {
+                    key: 'f' + (idx + 1),
+                    label: parts[0] || line,
+                    type: parts[1] || 'number',
+                    unit: parts[2] || ''
+                };
+            });
+        }
+    }
+
+    if (!label) { bdsShowToast('Vui lòng nhập tên hạng mục', 'warning'); return; }
+
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang lưu...';
+
+    try {
+        const res = await bdsApiPost('upsertGolfTemplateItem', {
+            templateId, itemId, section, sectionTitle, label, inputType, unit,
+            threshold, note, fields,
+            user: getOperator()
+        });
+        if (res && res.status === 'success') {
+            bdsShowToast('Đã lưu hạng mục thành công');
+            bootstrap.Modal.getOrCreateInstance($('editItemModal')).hide();
+            await loadTemplates();
+            renderAdminItemsList(templateId);
+            renderAdminTemplatesList();
+            if (currentRun) renderRunBody();
+        } else {
+            bdsShowToast((res && res.message) || 'Lỗi khi lưu hạng mục', 'danger');
+        }
+    } catch (err) {
+        bdsShowToast('Lỗi: ' + err.message, 'danger');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+}
+
+async function deleteTemplateItem(templateId, itemId) {
+    if (!confirm('Bạn có chắc chắn muốn xóa hạng mục ' + itemId + '?')) return;
+    try {
+        const res = await bdsApiPost('deleteGolfTemplateItem', { templateId, itemId, user: getOperator() });
+        if (res && res.status === 'success') {
+            bdsShowToast('Đã xóa hạng mục');
+            if (Array.isArray(templates)) {
+                templates = templates.filter(x => !(x.templateId === templateId && x.itemId === itemId));
+            }
+            renderAdminItemsList(templateId);
+            renderAdminTemplatesList();
+            if (currentRun) renderRunBody();
+        } else {
+            bdsShowToast((res && res.message) || 'Không xóa được hạng mục', 'danger');
+        }
+    } catch (err) {
+        bdsShowToast('Lỗi: ' + err.message, 'danger');
+    }
+}
+
+function openTemplateForm(templateId) {
+    $('tplFormError').style.display = 'none';
+    $('tplFormError').textContent = '';
+
+    const cloneSel = $('tplCloneFromSelect');
+    let opts = '<option value="">(Không nhân bản - Tạo mẫu rỗng)</option>';
+    const combinedDefs = getCombinedTemplateDefs();
+    combinedDefs.forEach(d => {
+        opts += `<option value="${esc(d.templateId)}">${esc(d.templateName || d.templateId)}</option>`;
+    });
+    cloneSel.innerHTML = opts;
+
+    if (templateId) {
+        const def = combinedDefs.find(d => d.templateId === templateId);
+        if (def) {
+            $('templateFormModalTitle').textContent = 'Sửa định nghĩa mẫu';
+            $('tplIdInput').value = def.templateId;
+            $('tplNameInput').value = def.templateName || '';
+            $('tplLocationInput').value = def.location || 'Sân Golf Kỳ Sơn';
+            $('tplShiftCodeInput').value = def.shiftCode || '';
+            $('tplFrequencySelect').value = def.frequency || 'daily';
+            $('tplTimeStartInput').value = def.timeStart || '05:00';
+            $('tplTimeEndInput').value = def.timeEnd || '13:00';
+            $('tplActiveCheck').checked = def.active !== false;
+            cloneSel.value = '';
+        }
+    } else {
+        $('templateFormModalTitle').textContent = 'Thêm mẫu checklist mới';
+        $('tplIdInput').value = '';
+        $('tplNameInput').value = '';
+        $('tplLocationInput').value = 'Sân Golf Kỳ Sơn';
+        $('tplShiftCodeInput').value = '';
+        $('tplFrequencySelect').value = 'daily';
+        $('tplTimeStartInput').value = '05:00';
+        $('tplTimeEndInput').value = '13:00';
+        $('tplActiveCheck').checked = true;
+        cloneSel.value = '';
+    }
+
+    const modal = bootstrap.Modal.getOrCreateInstance($('templateFormModal'));
+    modal.show();
+}
+
+async function saveTemplateDef() {
+    const btn = $('btnSaveTemplateDef');
+    const tName = $('tplNameInput').value.trim();
+    const loc = $('tplLocationInput').value.trim();
+
+    if (!tName) {
+        showTplError('Vui lòng nhập tên mẫu checklist');
+        return;
+    }
+    if (!loc) {
+        showTplError('Vui lòng nhập địa điểm');
+        return;
+    }
+
+    const idInput = $('tplIdInput').value.trim();
+    const templateId = idInput || tName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '_');
+    const def = {
+        templateId,
+        templateName: tName,
+        location: loc,
+        shiftCode: $('tplShiftCodeInput').value.trim() || 'ca_sang',
+        frequency: $('tplFrequencySelect').value,
+        timeStart: $('tplTimeStartInput').value,
+        timeEnd: $('tplTimeEndInput').value,
+        active: $('tplActiveCheck').checked,
+        cloneFromTemplateId: $('tplCloneFromSelect').value || null
+    };
+
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang lưu...';
+
+    try {
+        const res = await bdsApiPost('upsertChecklistTemplateDef', { def });
+        if (res && res.status === 'success') {
+            const idx = (templateDefs || []).findIndex(d => d.templateId === templateId);
+            if (idx >= 0) templateDefs[idx] = def;
+            else (templateDefs = templateDefs || []).push(def);
+
+            const modalEl = $('templateFormModal');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            if (modal) modal.hide();
+
+            renderAdminTemplatesList();
+            bdsShowToast('Lưu mẫu thành công!');
+        } else {
+            showTplError((res && res.message) || 'Lỗi khi lưu mẫu');
+        }
+    } catch (err) {
+        showTplError('Không thể kết nối máy chủ: ' + err.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+}
+
+function showTplError(msg) {
+    const errEl = $('tplFormError');
+    errEl.textContent = msg;
+    errEl.style.display = '';
+}
+
+async function softDeleteTemplateDef(templateId, newActiveState) {
+    const active = typeof newActiveState === 'boolean' ? newActiveState : false;
+    try {
+        const res = await bdsApiPost('deleteChecklistTemplateDef', { templateId, active });
+        if (res && res.status === 'success') {
+            const def = (templateDefs || []).find(d => d.templateId === templateId);
+            if (def) def.active = active;
+            renderAdminTemplatesList();
+            bdsShowToast(active ? 'Đã kích hoạt lại mẫu' : 'Đã ngừng áp dụng mẫu (giữ lịch sử)');
+        }
+    } catch (err) {
+        alert('Lỗi: ' + err.message);
     }
 }
 

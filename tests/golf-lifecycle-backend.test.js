@@ -40,7 +40,7 @@ test('backend khóa sửa và chốt lại hồ sơ đã bàn giao', () => {
 
 test('giao dịch nhận ca dùng script lock và idempotency', () => {
   const body = source.match(
-    /function handleAcceptGolfHandoverAndStartRun[\s\S]*?\n}\n/);
+    /function handleAcceptGolfHandoverAndStartRun[\s\S]*?\r?\n}\r?\n/);
   assert.ok(body, 'Không tìm thấy handler nhận ca');
   assert.match(body[0], /LockService\.getScriptLock/);
   assert.match(body[0], /previousStatus === "confirmed"/);

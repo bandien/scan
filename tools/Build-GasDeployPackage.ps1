@@ -63,6 +63,9 @@ foreach ($relativePath in $files) {
         }
         $sourcePath = Join-Path $baselineRoot $baselineRelativePath
         if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) {
+            $sourcePath = Join-Path $baselineRoot $relativePath
+        }
+        if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) {
             throw "Missing baseline source: $baselineRelativePath"
         }
     }

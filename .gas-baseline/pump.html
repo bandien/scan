@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <noscript><meta http-equiv="refresh" content="0; url=pump_info.html"></noscript>
+  <title>Đang chuyển sang Thông tin máy bơm | BanDienScan</title>
+  <link rel="canonical" href="pump_info.html">
+</head>
+<body>
+  <p>Đang mở <a id="fallbackLink" href="pump_info.html">Thông tin &amp; Check vận hành bơm</a>...</p>
+  <script>
+    // pump.html là bản CMMS Water Scan cũ (chỉ bật/tắt bơm, không có tờ check).
+    // Đã thay bằng pump_info.html — giữ nguyên querystring (?pumpId=... hoặc
+    // ?id=...) để tem QR/link cũ đã in ra vẫn mở đúng đúng máy bơm.
+    const target = 'pump_info.html' + window.location.search;
+    document.getElementById('fallbackLink').href = target;
+    window.location.replace(target);
+  </script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-﻿// tests/golf-checklist.spec.js
+// tests/golf-checklist.spec.js
 // E2E Test â€“ Golf Checklist: Trá»n vÃ²ng Ä‘á»i
 //
 // Mock mode (khÃ´ng cáº§n backend):
@@ -34,14 +34,34 @@ async function injectMocks(page) {
       window.CONFIG.gasUrl = stagingUrl;
       return;
     }
-    // Only set staging URL in init script
-    if (stagingUrl) {
-      window.CONFIG = window.CONFIG || {};
-      window.CONFIG.gasUrl = stagingUrl;
-    }
     // Bypass SSO requirement for submit
     localStorage.setItem('cmms_op_name', 'Test E2E KTV');
-  }, { stagingUrl: STAGING_URL });
+    const origFetch = window.fetch;
+    window.fetch = async function (url, opts) {
+      const urlStr = String(url || '');
+      if (urlStr.includes('script.google.com') || urlStr.includes('action=')) {
+        if (urlStr.includes('action=getGolfTemplates')) {
+          return new Response(JSON.stringify({ status: 'success', templates }), {
+            status: 200, headers: { 'Content-Type': 'application/json' }
+          });
+        }
+        if (urlStr.includes('action=getChecklistTemplateDefs')) {
+          return new Response(JSON.stringify({ status: 'success', defs: [{ templateId: 'ca_sang', templateName: 'Ca Sáng', active: true }] }), {
+            status: 200, headers: { 'Content-Type': 'application/json' }
+          });
+        }
+        if (urlStr.includes('action=getChecklistSchedule')) {
+          return new Response(JSON.stringify({ status: 'success', schedule: [{ templateId: 'ca_sang', templateName: 'Ca Sáng', matchesDate: true, inWindow: true }] }), {
+            status: 200, headers: { 'Content-Type': 'application/json' }
+          });
+        }
+        return new Response(JSON.stringify({ status: 'success', runs: [] }), {
+          status: 200, headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      return origFetch.apply(this, arguments);
+    };
+  }, { stagingUrl: STAGING_URL, templates: MOCK_TEMPLATES });
 }
 
 test.describe('Golf Checklist â€“ VÃ²ng Ä‘á»i Ä‘áº§y Ä‘á»§', () => {
@@ -59,6 +79,8 @@ test.describe('Golf Checklist â€“ VÃ²ng Ä‘á»i Ä‘áº§y Ä‘á
         window.bdsApiFetch = async (action) => {
           if (action === 'getGolfTemplates') return { status: 'success', templates };
           if (action.startsWith('getGolfRuns')) return { status: 'success', runs: [] };
+          if (action.startsWith('getChecklistTemplateDefs')) return { status: 'success', defs: [{ templateId: 'ca_sang', templateName: 'Ca Sáng', active: true }] };
+          if (action.startsWith('getChecklistSchedule')) return { status: 'success', schedule: [{ templateId: 'ca_sang', templateName: 'Ca Sáng', matchesDate: true, inWindow: true }] };
           return { status: 'success' };
         };
         window.bdsApiPost = async (action, payload) => {
@@ -205,7 +227,7 @@ test.describe('Golf Checklist â€“ VÃ²ng Ä‘á»i Ä‘áº§y Ä‘á
         if (action === 'getGolfTemplates') return { status: 'success', templates: args.tpls };
         if (action.startsWith('getGolfRuns')) {
           return { status: 'success', runs: [{
-            runId: 'GOLF-ca_sang-TEST', templateId: 'ca_sang',
+            runId: 'GOLF-ca_sang-' + today.replace(/-/g, ''), templateId: 'ca_sang',
             date: today, status: 'submitted', items: {}
           }]};
         }
