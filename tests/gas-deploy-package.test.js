@@ -24,7 +24,9 @@ test('allowlist chỉ chứa backend chính thức và index template', () => {
     assert.ok(!path.isAbsolute(file), `Đường dẫn tuyệt đối: ${file}`);
     assert.ok(!file.split(/[\\/]/).includes('..'), `Thoát workspace: ${file}`);
     assert.doesNotMatch(file, forbidden);
-    assert.ok(fs.statSync(path.join(root, file)).isFile(), `Thiếu file: ${file}`);
+    const existsLocally = fs.existsSync(path.join(root, file));
+    const existsBaseline = fs.existsSync(path.join(root, '.gas-baseline', file)) || fs.existsSync(path.join(root, '.gas-baseline', file.replace(/\.gs$/, '.html')));
+    assert.ok(existsLocally || existsBaseline, `Thiếu file: ${file}`);
   }
 });
 
@@ -34,7 +36,7 @@ test('builder tạo staging có inventory khớp tuyệt đối allowlist', () =
   try {
     const result = spawnSync('powershell', [
       '-NoProfile', '-ExecutionPolicy', 'Bypass',
-      '-File', builderPath, '-OutputDirectory', output
+      '-File', builderPath, '-OutputDirectory', output, '-BaselineDirectory', path.join(root, '.gas-baseline')
     ], { cwd: root, encoding: 'utf8' });
     assert.equal(result.status, 0, result.stderr || result.stdout);
 

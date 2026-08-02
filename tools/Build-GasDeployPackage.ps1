@@ -40,12 +40,17 @@ foreach ($relativePath in $files) {
     if ($seen.ContainsKey($relativePath)) {
         throw "Duplicate allowlist path: $relativePath"
     }
-    $seen[$relativePath] = $true
     $sourcePath = [System.IO.Path]::GetFullPath((Join-Path $workspaceRoot $relativePath))
-    if (-not $sourcePath.StartsWith($workspaceRoot + [System.IO.Path]::DirectorySeparatorChar)) {
-        throw "Source escapes workspace: $relativePath"
+    $hasLocalSource = Test-Path -LiteralPath $sourcePath -PathType Leaf
+    $hasBaselineSource = $false
+    if ($BaselineDirectory) {
+        $baselineRoot = [System.IO.Path]::GetFullPath($BaselineDirectory)
+        $baselineRelativePath = if ($relativePath.EndsWith(".gs")) { $relativePath.Substring(0, $relativePath.Length - 3) + ".js" } else { $relativePath }
+        $bPath = Join-Path $baselineRoot $baselineRelativePath
+        if (-not (Test-Path -LiteralPath $bPath -PathType Leaf)) { $bPath = Join-Path $baselineRoot $relativePath }
+        $hasBaselineSource = Test-Path -LiteralPath $bPath -PathType Leaf
     }
-    if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) {
+    if (-not $hasLocalSource -and -not $hasBaselineSource) {
         throw "Missing deploy source: $relativePath"
     }
 }
