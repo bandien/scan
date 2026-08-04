@@ -1,5 +1,60 @@
 const { test, expect } = require('@playwright/test');
 
+test('tab Checklist ưu tiên ca hiện tại và tóm tắt bàn giao ca trước', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('bd_current_user', JSON.stringify({
+      username: 'e2e', name: 'KTV E2E', role: 'staff'
+    }));
+  });
+  await page.route(/script\.google\.com|script\.googleusercontent\.com/, async route => {
+    const action = new URL(route.request().url()).searchParams.get('action');
+    if (action === 'getGolfRuns') {
+      const params = new URL(route.request().url()).searchParams;
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({ status: 'success', runs: [{
+          runId: 'previous-run', templateId: params.get('templateId'), date: params.get('from'),
+          status: 'submitted', operator: 'KTV Ca Sáng',
+          submittedAt: '2026-08-02T12:55:00+07:00',
+          handoverNote: 'Theo dõi áp suất bơm số 2',
+          items: JSON.stringify({ A01: { status: 'ok' }, A02: { status: 'ng' } })
+        }] })
+      });
+      return;
+    }
+    await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ status: 'success', plans: [] }) });
+  });
+
+  await page.goto('/nhatky/index.html');
+  await page.locator('#subtabChecklist').click();
+
+  const current = page.locator('.nk-current-shift');
+  const previous = page.locator('.nk-previous-summary');
+  await expect(current).toContainText('Ca hiện tại');
+  await expect(current.getByRole('link', { name: /checklist Golf/i })).toBeVisible();
+  await expect(current.getByRole('link', { name: /Hiện trạng bơm/i })).toBeVisible();
+  await expect(current.getByRole('link', { name: /Check Bơm/i })).toHaveCount(0);
+  await expect(previous).toContainText('Bàn giao ca trước');
+  await expect(previous).toContainText('1 mục cần chú ý');
+  await expect(previous).toContainText('Theo dõi áp suất bơm số 2');
+  await expect(page.locator('.nk-shift-card[data-shift-position="next"]')).toHaveCount(0);
+
+  const layout = await page.evaluate(() => {
+    const currentBox = document.querySelector('.nk-current-shift').getBoundingClientRect();
+    const previousBox = document.querySelector('.nk-previous-summary').getBoundingClientRect();
+    const actionHeights = Array.from(document.querySelectorAll('.nk-checklist-action'))
+      .map(element => element.getBoundingClientRect().height);
+    return {
+      noHorizontalOverflow: document.documentElement.scrollWidth <= window.innerWidth,
+      currentBeforePrevious: currentBox.top < previousBox.top,
+      actionHeights
+    };
+  });
+  expect(layout.noHorizontalOverflow).toBe(true);
+  expect(layout.currentBeforePrevious).toBe(true);
+  expect(Math.min(...layout.actionHeights)).toBeGreaterThanOrEqual(44);
+});
+
 test('Nhật ký mở được checklist Ca Sáng khi backend không khả dụng', async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem('bd_current_user', JSON.stringify({
@@ -11,9 +66,9 @@ test('Nhật ký mở được checklist Ca Sáng khi backend không khả dụn
 
   await page.goto('/nhatky/index.html');
   await page.locator('#subtabChecklist').click();
-  await expect(page.locator('.nk-shift-card')).toHaveCount(2);
-  await page.locator('.nk-shift-card').filter({ hasText: 'Ca liền sau' })
-    .getByRole('link', { name: 'Golf' }).click();
+  await expect(page.locator('.nk-current-shift')).toBeVisible();
+  await page.locator('.nk-current-shift')
+    .getByRole('link', { name: /checklist Golf/i }).click();
 
   await expect(page).toHaveURL(/sangolf\/index\.html\?autoTemplate=(ca_sang|ca_toi)&date=\d{4}-\d{2}-\d{2}/);
   await expect(page.locator('#runView')).toBeVisible();
@@ -22,22 +77,44 @@ test('Nhật ký mở được checklist Ca Sáng khi backend không khả dụn
   await expect(page.locator('#progressText')).not.toContainText('0/0');
 });
 
-test('Bơm mở màn hình chọn thiết bị với sẵn ngữ cảnh ca', async ({ page }) => {
+test('mở nhanh màn hình hiện trạng và thấy bơm đang chạy', async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem('currentUser', JSON.stringify({
       username: 'e2e', name: 'KTV E2E', role: 'staff'
     }));
   });
+  await page.route(/script\.google\.com|script\.googleusercontent\.com/, async route => {
+    const action = new URL(route.request().url()).searchParams.get('action');
+    const body = action === 'getPumpStatuses'
+      ? { status: 'success', items: [
+          { id: '1', name: 'Bơm hồ 1', source: 'Hồ cảnh quan', state: 'RUNNING',
+            lastEvent: { timestamp: new Date().toISOString(), operator: 'KTV E2E', action: 'START' } },
+          { id: '2', name: 'Bơm hồ 2', source: 'Hồ cảnh quan', state: 'STOPPED',
+            lastEvent: { timestamp: new Date().toISOString(), operator: 'KTV E2E', action: 'STOP' } }
+        ] }
+      : { status: 'success', plans: [] };
+    await route.fulfill({ contentType: 'application/json', body: JSON.stringify(body) });
+  });
   await page.goto('/nhatky/index.html');
   await page.locator('#subtabChecklist').click();
-  await expect(page.locator('.nk-shift-card')).toHaveCount(2);
+  await expect(page.locator('.nk-current-shift')).toBeVisible();
 
-  const nextShift = page.locator('.nk-shift-card').filter({ hasText: 'Ca liền sau' });
-  await nextShift.getByRole('link', { name: 'Bơm' }).click();
+  const currentShift = page.locator('.nk-current-shift');
+  await currentShift.getByRole('link', { name: /Hiện trạng bơm/i }).click();
 
-  await expect(page).toHaveURL(/pump_info\.html\?autoCheck=1&shift=(ca_sang|ca_toi)&date=\d{4}-\d{2}-\d{2}/);
-  await expect(page.locator('#autoCheckContext')).toContainText('Check vận hành Bơm');
-  await expect(page.locator('#manual_pump_id')).toBeFocused();
+  await expect(page).toHaveURL(/pump_status\.html/);
+  await expect(page.getByRole('heading', { name: /Hiện trạng bơm/i })).toBeVisible();
+  await expect(page.locator('[data-pump-state="RUNNING"]')).toContainText('Bơm hồ 1');
+  await expect(page.locator('#runningCount')).toHaveText('1');
+  await page.getByRole('button', { name: 'Đang chạy' }).click();
+  await expect(page.locator('.pump')).toHaveCount(1);
+  const mobileLayout = await page.evaluate(() => ({
+    noHorizontalOverflow: document.documentElement.scrollWidth <= window.innerWidth,
+    controlsAtLeast44px: Array.from(document.querySelectorAll('button'))
+      .every(button => button.getBoundingClientRect().height >= 44)
+  }));
+  expect(mobileLayout.noHorizontalOverflow).toBe(true);
+  expect(mobileLayout.controlsAtLeast44px).toBe(true);
 });
 
 test('không bỏ qua ca trước đang chờ nhận khi vào bằng autoTemplate', async ({ page }) => {

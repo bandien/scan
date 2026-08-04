@@ -59,6 +59,7 @@ function doGet(e) {
       case 'getPumps':          return handleGetPumps(e);
       case 'getPumpChecks':     return handleGetPumpChecks(e);
       case 'getMeterStatus':    return handleGetMeterStatus(e);
+      case 'getPumpStatuses':   return handleGetPumpStatuses(e);
       case 'getPlans':          return handleGetPlans(e);           // Kế hoạch trang nhatky
       case 'getGolfTemplates':  return handleGetGolfTemplates(e);   // Checklist sân golf (trang sangolf)
       case 'getGolfRuns':       return handleGetGolfRuns(e);        // Checklist sân golf (trang sangolf)
@@ -727,7 +728,7 @@ function ensurePumpsSheet_() {
   return sheet;
 }
 
-function handleGetPumps(e) {
+function readPumps_() {
   const sheet = ensurePumpsSheet_();
   const values = sheet.getDataRange().getValues();
   const data = [];
@@ -744,7 +745,69 @@ function handleGetPumps(e) {
       modbusId: String(values[i][7] || "")
     });
   }
-  return contentResponse({ status: "success", data: data });
+  return data;
+}
+
+function handleGetPumps(e) {
+  return contentResponse({ status: "success", data: readPumps_() });
+}
+
+/** Join danh mục bơm với sự kiện START/STOP mới nhất theo thời điểm nghiệp vụ. */
+function buildPumpStatuses_(pumps, readings) {
+  const latestByPump = {};
+  (readings || []).forEach(function(row) {
+    const meterId = String(row[1] || "").trim();
+    const match = /^PUMP_(.+)$/.exec(meterId);
+    if (!match) return;
+    const numericValue = Number(row[2]);
+    if (numericValue !== 0 && numericValue !== 1) return;
+
+    const timestamp = row[4] instanceof Date ? row[4].toISOString() : String(row[4] || "");
+    const eventTime = new Date(timestamp).getTime();
+    if (!timestamp || !isFinite(eventTime)) return;
+
+    const pumpId = String(match[1]);
+    const previous = latestByPump[pumpId];
+    if (previous && previous._eventTime > eventTime) return;
+    latestByPump[pumpId] = {
+      action: numericValue === 1 ? "START" : "STOP",
+      timestamp: timestamp,
+      operator: String(row[5] || ""),
+      notes: String(row[6] || ""),
+      source: "manual",
+      _eventTime: eventTime
+    };
+  });
+
+  return (pumps || []).map(function(pump) {
+    const event = latestByPump[String(pump.id)] || null;
+    if (event) delete event._eventTime;
+    return {
+      id: String(pump.id),
+      name: pump.name || "",
+      source: pump.source || "",
+      flowRate: Number(pump.flowRate) || 0,
+      monitorOnly: Boolean(pump.monitorOnly),
+      state: event ? (event.action === "START" ? "RUNNING" : "STOPPED") : "UNKNOWN",
+      lastEvent: event
+    };
+  });
+}
+
+/** GET: Tổng quan trạng thái ghi nhận gần nhất của toàn bộ máy bơm. */
+function handleGetPumpStatuses(e) {
+  const pumps = readPumps_();
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  const sheet = ss.getSheetByName("MeterReadings");
+  const readings = sheet && sheet.getLastRow() > 1
+    ? sheet.getDataRange().getValues().slice(1)
+    : [];
+  const items = buildPumpStatuses_(pumps, readings);
+  return contentResponse({
+    status: "success",
+    generatedAt: new Date().toISOString(),
+    items: items
+  });
 }
 
 function handleSavePump(params) {

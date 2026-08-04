@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#075b68">
+  <title>Hiện trạng bơm</title>
+  <style>
+    :root { color-scheme: light; --teal:#075b68; --ink:#17262b; --muted:#607078; --line:#dce5e7; --bg:#f3f6f7; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif; color:var(--ink); background:var(--bg); }
+    button,input { font:inherit; }
+    .topbar { position:sticky; top:0; z-index:5; display:flex; align-items:center; gap:12px; padding:calc(12px + env(safe-area-inset-top)) 16px 12px; color:#fff; background:var(--teal); box-shadow:0 2px 10px #003d4733; }
+    .back,.refresh { display:grid; place-items:center; width:44px; height:44px; border:1px solid #ffffff44; border-radius:14px; color:#fff; background:#ffffff16; text-decoration:none; cursor:pointer; }
+    .heading { flex:1; min-width:0; }
+    h1 { margin:0; font-size:19px; line-height:1.25; }
+    .heading p { margin:3px 0 0; font-size:11px; color:#d9f1f3; }
+    main { width:min(760px,100%); margin:auto; padding:16px 14px 40px; }
+    .notice { display:flex; gap:9px; margin-bottom:14px; padding:11px 12px; border:1px solid #b9d9df; border-radius:14px; font-size:12px; line-height:1.45; color:#31575e; background:#edf9fb; }
+    .notice strong { display:block; color:#174851; }
+    .summary { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-bottom:15px; }
+    .metric { min-width:0; padding:12px 8px; border:1px solid var(--line); border-radius:16px; text-align:center; background:#fff; box-shadow:0 3px 12px #1731390b; }
+    .metric b { display:block; font-size:26px; line-height:1; }
+    .metric span { display:block; margin-top:6px; font-size:11px; font-weight:750; color:var(--muted); }
+    .metric.running b { color:#07874e; } .metric.stopped b { color:#59666b; } .metric.unknown b { color:#b17100; }
+    .tools { position:sticky; top:81px; z-index:4; margin:0 -2px 14px; padding:2px; background:var(--bg); }
+    .search { display:flex; align-items:center; gap:8px; height:46px; padding:0 13px; border:1px solid var(--line); border-radius:14px; background:#fff; }
+    .search input { width:100%; border:0; outline:0; color:var(--ink); background:transparent; }
+    .filters { display:flex; gap:7px; margin-top:9px; overflow-x:auto; scrollbar-width:none; }
+    .filter { min-height:44px; padding:0 15px; border:1px solid #cbd7d9; border-radius:999px; white-space:nowrap; color:#506269; background:#fff; cursor:pointer; }
+    .filter.active { border-color:var(--teal); color:#fff; background:var(--teal); }
+    .section-title { display:flex; justify-content:space-between; align-items:end; gap:12px; margin:0 2px 9px; }
+    .section-title h2 { margin:0; font-size:15px; }
+    #updatedAt { font-size:11px; color:var(--muted); text-align:right; }
+    .list { display:grid; gap:10px; }
+    .pump { display:grid; grid-template-columns:48px 1fr; gap:12px; padding:14px; border:1px solid var(--line); border-radius:17px; background:#fff; box-shadow:0 3px 12px #1731390b; }
+    .pump-icon { display:grid; place-items:center; width:48px; height:48px; border-radius:15px; font-size:23px; background:#edf2f3; }
+    .pump[data-pump-state="RUNNING"] { border-left:5px solid #0aa864; }
+    .pump[data-pump-state="RUNNING"] .pump-icon { background:#e6f8ef; }
+    .pump[data-pump-state="STOPPED"] { border-left:5px solid #89979c; }
+    .pump[data-pump-state="UNKNOWN"] { border-left:5px solid #d7951a; }
+    .pump-head { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+    .pump h3 { margin:1px 0 3px; font-size:15px; }
+    .source { margin:0; color:var(--muted); font-size:12px; }
+    .badge { flex:none; padding:6px 9px; border-radius:999px; font-size:10px; font-weight:850; letter-spacing:.02em; }
+    .badge.running { color:#00693c; background:#dff7eb; } .badge.stopped { color:#4c595e; background:#edf1f2; } .badge.unknown { color:#805100; background:#fff0cf; }
+    .event { display:flex; flex-wrap:wrap; gap:6px 12px; margin-top:10px; font-size:11px; color:#62737a; }
+    .stale { color:#9a6100; font-weight:750; }
+    .empty,.loading { padding:35px 16px; border:1px dashed #c7d4d7; border-radius:16px; text-align:center; color:var(--muted); background:#fff; }
+    .error { border-color:#efc4c4; color:#8b2e2e; background:#fff5f5; }
+    @media (min-width:640px) { main{padding-top:22px}.list{grid-template-columns:repeat(2,1fr)}.tools{top:85px} }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="back" href="nhatky/index.html" aria-label="Quay lại">←</a>
+    <div class="heading">
+      <h1>Hiện trạng bơm</h1>
+      <p>Trạng thái ghi nhận gần nhất, không phải cảm biến thời gian thực</p>
+    </div>
+    <button class="refresh" id="refreshBtn" type="button" aria-label="Tải lại">↻</button>
+  </header>
+  <main>
+    <div class="notice"><span>ℹ️</span><div><strong>Dùng để xem nhanh</strong>Trạng thái dựa trên lần nhân viên ghi bật/tắt gần nhất. Nhãn “cũ” nghĩa là cần xác minh lại tại hiện trường.</div></div>
+    <section class="summary" aria-label="Tóm tắt trạng thái">
+      <div class="metric running"><b id="runningCount">–</b><span>▶ ĐANG CHẠY</span></div>
+      <div class="metric stopped"><b id="stoppedCount">–</b><span>■ ĐÃ DỪNG</span></div>
+      <div class="metric unknown"><b id="unknownCount">–</b><span>? CHƯA RÕ</span></div>
+    </section>
+    <div class="tools">
+      <label class="search"><span>⌕</span><input id="searchInput" type="search" placeholder="Tìm tên bơm, nguồn nước…" aria-label="Tìm bơm"></label>
+      <div class="filters" role="group" aria-label="Lọc trạng thái">
+        <button class="filter active" data-state="ALL" type="button">Tất cả</button>
+        <button class="filter" data-state="RUNNING" type="button">Đang chạy</button>
+        <button class="filter" data-state="STOPPED" type="button">Đã dừng</button>
+        <button class="filter" data-state="UNKNOWN" type="button">Chưa rõ</button>
+      </div>
+    </div>
+    <div class="section-title"><h2>Danh sách bơm</h2><span id="updatedAt">Đang tải…</span></div>
+    <div class="list" id="pumpList"><div class="loading">Đang tải hiện trạng bơm…</div></div>
+  </main>
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/pump-status.js"></script>
+  <script>
+    (() => {
+      const STALE_HOURS = 12;
+      const cacheKey = 'bds_pump_status:' + encodeURIComponent((window.CONFIG && CONFIG.gasUrl) || location.host);
+      let items = [];
+      let activeState = 'ALL';
+      const list = document.getElementById('pumpList');
+
+      function formatTime(value) {
+        const date = new Date(value);
+        return Number.isNaN(date.getTime()) ? 'Chưa có thời điểm' : date.toLocaleString('vi-VN', { hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit' });
+      }
+      function child(tag, className, text) {
+        const node = document.createElement(tag);
+        if (className) node.className = className;
+        if (text !== undefined) node.textContent = text;
+        return node;
+      }
+      function render() {
+        const count = BD_PumpStatus.counts(items);
+        document.getElementById('runningCount').textContent = count.running;
+        document.getElementById('stoppedCount').textContent = count.stopped;
+        document.getElementById('unknownCount').textContent = count.unknown;
+        const visible = BD_PumpStatus.filter(items, { state: activeState, query: document.getElementById('searchInput').value });
+        list.replaceChildren();
+        if (!visible.length) { list.append(child('div', 'empty', 'Không tìm thấy bơm phù hợp.')); return; }
+        const labels = { RUNNING:'▶ ĐANG CHẠY', STOPPED:'■ ĐÃ DỪNG', UNKNOWN:'? CHƯA RÕ' };
+        visible.forEach(item => {
+          const card = child('article', 'pump');
+          card.dataset.pumpState = item.state;
+          card.append(child('div', 'pump-icon', item.state === 'RUNNING' ? '⚙️' : '💧'));
+          const body = child('div');
+          const head = child('div', 'pump-head');
+          const title = child('div');
+          title.append(child('h3', '', item.name || `Bơm ${item.id}`));
+          title.append(child('p', 'source', item.source || `Mã bơm ${item.id}`));
+          head.append(title, child('span', `badge ${item.state.toLowerCase()}`, labels[item.state]));
+          body.append(head);
+          const event = child('div', 'event');
+          if (item.lastEvent) {
+            event.append(child('span', '', `🕒 ${formatTime(item.lastEvent.timestamp)}`));
+            if (item.lastEvent.operator) event.append(child('span', '', `👤 ${item.lastEvent.operator}`));
+          } else event.append(child('span', '', 'Chưa có lần ghi bật/tắt'));
+          if (item.isStale) event.append(child('span', 'stale', '⚠ Dữ liệu cũ — cần xác minh'));
+          body.append(event); card.append(body); list.append(card);
+        });
+      }
+      async function load() {
+        document.getElementById('refreshBtn').disabled = true;
+        document.getElementById('updatedAt').textContent = 'Đang cập nhật…';
+        try {
+          const response = await bdsApiFetch('getPumpStatuses', null, { retries: 1 });
+          items = BD_PumpStatus.prepare(response.items || [], new Date(), STALE_HOURS);
+          localStorage.setItem(cacheKey, JSON.stringify({ savedAt: new Date().toISOString(), items: response.items || [] }));
+          document.getElementById('updatedAt').textContent = `Cập nhật ${formatTime(response.generatedAt || new Date())}`;
+          render();
+        } catch (error) {
+          let cached = null;
+          try { cached = JSON.parse(localStorage.getItem(cacheKey)); } catch (_) {}
+          if (cached && Array.isArray(cached.items)) {
+            items = BD_PumpStatus.prepare(cached.items, new Date(), STALE_HOURS).map(item => Object.assign(item, { isStale:true }));
+            document.getElementById('updatedAt').textContent = `Bản lưu ${formatTime(cached.savedAt)}`;
+            render();
+          } else {
+            list.replaceChildren(child('div', 'loading error', 'Không tải được hiện trạng bơm. Hãy kiểm tra mạng và thử lại.'));
+            document.getElementById('updatedAt').textContent = 'Chưa cập nhật';
+          }
+        } finally { document.getElementById('refreshBtn').disabled = false; }
+      }
+      document.getElementById('refreshBtn').addEventListener('click', load);
+      document.getElementById('searchInput').addEventListener('input', render);
+      document.querySelectorAll('.filter').forEach(button => button.addEventListener('click', () => {
+        document.querySelectorAll('.filter').forEach(item => item.classList.toggle('active', item === button));
+        activeState = button.dataset.state; render();
+      }));
+      load();
+    })();
+  </script>
+</body>
+</html>

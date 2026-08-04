@@ -348,6 +348,9 @@
 // ─────────────────────────────────────────────────────────────────────────────
 let allPlans = [];
 let allLogs = [];
+let checklistRuns = [];
+let checklistRunsState = 'idle';
+let checklistSummaryRequest = 0;
 
 function saveToCache() {
   localStorage.setItem('nk_plans', JSON.stringify(allPlans));
@@ -577,6 +580,78 @@ async function loadPlans() {
   }
 }
 
+async function loadChecklistSummary() {
+  if (!window.BD_ChecklistShifts) return;
+  const requestId = ++checklistSummaryRequest;
+  const previous = BD_ChecklistShifts.context(new Date()).previous;
+  const cacheKey = `nk_checklist_handover_${previous.templateId}_${previous.date}`;
+
+  checklistRunsState = 'loading';
+  try {
+    const cached = JSON.parse(localStorage.getItem(cacheKey) || '[]');
+    if (Array.isArray(cached) && cached.length) checklistRuns = cached;
+  } catch (_) {}
+  if (filterTab === 'checklist') renderMainBoard();
+
+  try {
+    const res = await window.bdsApiFetch('getGolfRuns', {
+      from: previous.date,
+      to: previous.date,
+      templateId: previous.templateId
+    }, { timeout: 8000, retries: 0 });
+    if (requestId !== checklistSummaryRequest) return;
+    checklistRuns = Array.isArray(res && res.runs) ? res.runs : [];
+    checklistRunsState = 'loaded';
+    localStorage.setItem(cacheKey, JSON.stringify(checklistRuns));
+  } catch (_) {
+    if (requestId !== checklistSummaryRequest) return;
+    checklistRunsState = checklistRuns.length ? 'loaded' : 'error';
+  }
+  if (filterTab === 'checklist') renderMainBoard();
+}
+
+function checklistSubmittedTime(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+}
+
+function renderPreviousChecklistSummary(previous, summary) {
+  let body = '';
+  if (summary.kind === 'ready') {
+    const statusLabel = summary.status === 'submitted'
+      ? 'Chờ nhận ca'
+      : summary.status === 'confirmed' ? 'Đã nhận' : 'Chưa bàn giao';
+    const issueText = summary.issueCount
+      ? `<strong class="nk-handover-issues">${summary.issueCount} mục cần chú ý</strong>`
+      : '<strong class="nk-handover-ok">Không có mục không đạt</strong>';
+    const submittedTime = checklistSubmittedTime(summary.submittedAt);
+    body = `
+      <div class="nk-handover-result">
+        ${issueText}<span class="nk-handover-status">${statusLabel}</span>
+      </div>
+      ${(summary.operator || submittedTime) ? `<div class="nk-handover-meta">${summary.operator ? escapeHtml(summary.operator) : ''}${summary.operator && submittedTime ? ' · ' : ''}${submittedTime ? `chốt lúc ${submittedTime}` : ''}</div>` : ''}
+      ${summary.handoverNote ? `<div class="nk-handover-note"><span>Ghi chú</span>${escapeHtml(summary.handoverNote)}</div>` : ''}`;
+  } else {
+    body = `
+      <div class="nk-handover-placeholder nk-handover-placeholder--${summary.kind}">
+        <strong>${escapeHtml(summary.headline)}</strong>
+        ${summary.detail ? `<span>${escapeHtml(summary.detail)}</span>` : ''}
+      </div>`;
+  }
+
+  return `
+    <section class="nk-previous-summary" aria-live="polite">
+      <div class="nk-checklist-card-head">
+        <div><span class="nk-checklist-kicker">Bàn giao ca trước</span><b>${escapeHtml(previous.templateName)}</b></div>
+        <time>${escapeHtml(previous.date)}</time>
+      </div>
+      <div class="nk-checklist-scope">Tóm tắt Checklist Golf</div>
+      ${body}
+    </section>`;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // RENDER MAIN BOARD
 // ─────────────────────────────────────────────────────────────────────────────
@@ -721,33 +796,38 @@ function renderMainBoard() {
 
   let shortcutsHtml = '';
   if (filterTab === 'checklist') {
-    const adjacentShifts = window.BD_ChecklistShifts
-      ? BD_ChecklistShifts.adjacent(new Date())
-      : [];
+    const shiftContext = window.BD_ChecklistShifts
+      ? BD_ChecklistShifts.context(new Date())
+      : null;
+    const summary = shiftContext
+      ? BD_ChecklistShifts.summarizePreviousRun(checklistRuns, shiftContext.previous, checklistRunsState)
+      : { kind: 'error', headline: 'Chưa xác định được ca trực', detail: 'Vẫn có thể mở checklist thủ công.' };
     shortcutsHtml = `
-      <div class="nk-checklist-shortcuts" style="display:flex; flex-direction:column; gap:8px; padding:10px 16px; background:var(--bg-surface); border-bottom:1px solid var(--line); margin-bottom: 8px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
-          <span style="font-weight:700; font-size:0.88rem; color:var(--text-secondary);">CA TRỰC & CHECKLIST</span>
-          <a href="../sangolf/index.html?manageTemplates=1" class="nk-btn nk-btn--outline" style="border:1px solid #059669; background:#ecfdf5; color:#059669; font-weight:700; text-decoration:none; padding:5px 14px; font-size:0.82rem; border-radius:20px; display:inline-flex; align-items:center; gap:4px; box-shadow:0 1px 2px rgba(0,0,0,0.05);">
-            ⚙️ Quản lý mẫu
+      <div class="nk-checklist-shortcuts">
+        <div class="nk-checklist-heading">
+          <div><span>CHECKLIST CA TRỰC</span><strong>Nhận bàn giao, làm ngay</strong></div>
+          <a href="../sangolf/index.html?manageTemplates=1" class="nk-template-link">
+            ⚙️ Mẫu
           </a>
         </div>
-        ${adjacentShifts.map(shift => `
-          <section class="nk-shift-card" data-shift-position="${shift.position}" style="border:1px solid var(--line);border-radius:14px;padding:10px;background:var(--bg-surface);">
-            <div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:8px;">
-              <b>${shift.label}</b>
-              <span style="color:var(--text-muted);font-size:.82rem;">${shift.templateName} · ${shift.date}</span>
+        ${shiftContext ? `
+          <section class="nk-current-shift nk-shift-card" data-shift-position="current">
+            <div class="nk-checklist-card-head">
+              <div><span class="nk-checklist-kicker">Ca hiện tại</span><b>${escapeHtml(shiftContext.current.templateName)}</b></div>
+              <time>${escapeHtml(shiftContext.current.date)}</time>
             </div>
-            <div style="display:flex;gap:10px;">
-              <a href="${BD_ChecklistShifts.golfUrl(shift)}" class="nk-btn nk-btn--outline" style="flex:1;border-color:var(--brand);color:var(--brand);font-weight:700;text-decoration:none;display:flex;align-items:center;justify-content:center;">⛳ Golf</a>
-              <a href="${BD_ChecklistShifts.pumpUrl(shift)}" class="nk-btn nk-btn--outline nk-pump-auto-link" style="flex:1;border-color:#007bff;color:#007bff;font-weight:700;text-decoration:none;display:flex;align-items:center;justify-content:center;">💧 Bơm</a>
+            <p>Chọn khu vực để bắt đầu checklist của ca này.</p>
+            <div class="nk-current-actions">
+              <a href="${BD_ChecklistShifts.golfUrl(shiftContext.current)}" class="nk-checklist-action nk-checklist-action--primary">⛳ <span><small>Làm ngay</small>Checklist Golf</span></a>
+              <a href="../pump_status.html" class="nk-checklist-action nk-checklist-action--status">📊 <span><small>Xem nhanh</small>Hiện trạng bơm</span></a>
             </div>
-          </section>`).join('')}
+          </section>
+          ${renderPreviousChecklistSummary(shiftContext.previous, summary)}` : ''}
       </div>`;
   }
 
   if (!html) {
-    board.innerHTML = shortcutsHtml + `<div class="nk-empty"><div class="nk-empty__icon">📭</div>Không có công việc nào${filterTab !== 'all' ? ' trong tab này' : ''}.</div>`;
+    board.innerHTML = shortcutsHtml + (filterTab === 'checklist' ? '' : `<div class="nk-empty"><div class="nk-empty__icon">📭</div>Không có công việc nào${filterTab !== 'all' ? ' trong tab này' : ''}.</div>`);
   } else {
     board.innerHTML = shortcutsHtml + html;
   }
@@ -1439,6 +1519,7 @@ document.getElementById('subtabBar').addEventListener('click', e => {
   document.querySelectorAll('.nk-subtab').forEach(b => b.classList.remove('is-active'));
   btn.classList.add('is-active');
   renderMainBoard();
+  if (tab === 'checklist') loadChecklistSummary();
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
