@@ -140,6 +140,38 @@ test.describe('Core â€” UI cÆ¡ báº£n', () => {
     await page.locator('#btnCloseNewTask').click();
     await expect(modal).not.toHaveClass(/is-open/);
   });
+
+  test('savePlan sends the plan inside the backend payload envelope', async ({ page }) => {
+    await page.evaluate(() => {
+      window.__savePlanCall = null;
+      window.bdsApiPost = async (action, payload) => {
+        window.__savePlanCall = { action, payload };
+        return { status: 'success', planId: 'PLAN-SAVED' };
+      };
+    });
+
+    await page.locator('#btnNewTask').click();
+    await page.locator('#fTask').fill('Kiem tra dong bo ke hoach');
+    await page.locator('#fArea').fill('Hapulico');
+    await page.locator('#fAssignee').fill('To Dien - Nuoc');
+    await page.locator('#btnExpandFields').click();
+    await page.locator('#fType').selectOption('Kế hoạch');
+    await page.locator('#fDate').fill('2026-08-03');
+    await page.locator('#fDateEnd').fill('2026-08-09');
+    await page.locator('#btnSaveNewTask').click();
+
+    await expect.poll(() => page.evaluate(() => window.__savePlanCall)).not.toBeNull();
+    const call = await page.evaluate(() => window.__savePlanCall);
+    expect(call.action).toBe('savePlan');
+    expect(call.payload).not.toHaveProperty('task');
+    expect(call.payload.payload).toMatchObject({
+      task: 'Kiem tra dong bo ke hoach',
+      area: 'Hapulico',
+      assignee: 'To Dien - Nuoc',
+      date: '2026-08-03',
+      dateEnd: '2026-08-09'
+    });
+  });
 });
 
 test.describe('Task 8 â€” Badge GÄ X/Y trÃªn card danh sÃ¡ch', () => {
