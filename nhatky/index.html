@@ -357,6 +357,10 @@ function saveToCache() {
   localStorage.setItem('nk_logs', JSON.stringify(allLogs));
 }
 
+function savePlanToServer(payload) {
+  return window.bdsApiPost('savePlan', { payload });
+}
+
 function loadFromCache() {
   try {
     const plansStr = localStorage.getItem('nk_plans');
@@ -1021,7 +1025,7 @@ async function markPlanDone(plan, btn) {
 
   try {
     const payload = { ...plan, status: 'Hoàn thành', updatedBy: userName };
-    await window.bdsApiPost('savePlan', payload);
+    await savePlanToServer(payload);
     hideSyncToast();
   } catch (err) {
     hideSyncToast();
@@ -1475,7 +1479,7 @@ async function saveNewTask() {
   });
 
   try {
-    await window.bdsApiPost('savePlan', payload);
+    await savePlanToServer(payload);
     hideSyncToast();
   } catch (err) {
     hideSyncToast();
@@ -1867,7 +1871,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       try {
         const payload = { ...plan, updatedBy: userName };
-        await window.bdsApiPost('savePlan', payload);
+        await savePlanToServer(payload);
         hideSyncToast();
       } catch (err) {
         hideSyncToast();
@@ -2013,7 +2017,7 @@ window.submitLog = async function() {
   showSyncToast();
   
   try {
-    const res = await window.bdsApiFetch('savePlan', {
+    const res = await savePlanToServer({
       ...plan,
       actionLog: JSON.stringify([logData])
     });
@@ -2066,7 +2070,7 @@ window.submitHandover = async function() {
   showSyncToast();
   
   try {
-    const res = await window.bdsApiFetch('savePlan', updatedPlan);
+    const res = await savePlanToServer(updatedPlan);
     hideSyncToast();
   } catch (err) {
     hideSyncToast();
@@ -2267,7 +2271,7 @@ document.getElementById('btnSubmitLog')?.addEventListener('click', async () => {
   showSyncToast();
   
   try {
-    const res = await window.bdsApiFetch('savePlan', {
+    const res = await savePlanToServer({
       ...plan,
       actionLog: JSON.stringify([logData])
     });
