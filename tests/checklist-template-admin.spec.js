@@ -94,10 +94,50 @@ test.describe('Checklist Template Admin - Quản lý mẫu', () => {
     await page.waitForFunction(() => window.__lastApiCall__ && window.__lastApiCall__.action === 'upsertChecklistTemplateDef');
     const lastCall = await page.evaluate(() => window.__lastApiCall__);
     expect(lastCall).toBeTruthy();
-    const def = (lastCall.payload && lastCall.payload.def) || lastCall.def;
-    expect(def).toBeTruthy();
-    expect(def.templateName).toBe('Ca Đêm Tăng Cường');
-    expect(def.cloneFromTemplateId).toBe('ca_sang');
+    expect(lastCall.templateName).toBe('Ca Đêm Tăng Cường');
+    expect(lastCall.cloneFromTemplateId).toBe('ca_sang');
+  });
+
+  test('Sửa mẫu gửi payload phẳng và dùng timeout phù hợp cold start', async ({ page }) => {
+    await page.evaluate(() => {
+      window.__templateSaveCall__ = null;
+      window.bdsApiPost = async (action, payload, options) => {
+        window.__templateSaveCall__ = { action, payload, options };
+        return { status: 'success', templateId: payload.templateId };
+      };
+    });
+
+    await page.locator('#btnManageTemplates').click();
+    await page.locator('.admin-tpl-card').first().getByRole('button', { name: /Sửa ca/i }).click();
+    await expect(page.locator('#templateFormModal')).toBeVisible();
+    await page.locator('#tplNameInput').fill('Ca Sáng cập nhật');
+    await page.locator('#btnSaveTemplateDef').click();
+
+    await expect.poll(() => page.evaluate(() => window.__templateSaveCall__)).not.toBeNull();
+    const call = await page.evaluate(() => window.__templateSaveCall__);
+    expect(call.action).toBe('upsertChecklistTemplateDef');
+    expect(call.payload.templateId).toBe('ca_sang');
+    expect(call.payload.templateName).toBe('Ca Sáng cập nhật');
+    expect(call.payload.def).toBeUndefined();
+    expect(call.options.timeout).toBeGreaterThanOrEqual(60000);
+    expect(call.options.retries).toBe(0);
+    await expect(page.locator('#templateFormModal')).toBeHidden();
+  });
+
+  test('Timeout khi lưu mẫu hiển thị hướng dẫn thay cho lỗi Fetch is aborted', async ({ page }) => {
+    await page.evaluate(() => {
+      window.bdsApiPost = async () => {
+        throw new DOMException('Fetch is aborted', 'AbortError');
+      };
+    });
+
+    await page.locator('#btnManageTemplates').click();
+    await page.locator('.admin-tpl-card').first().getByRole('button', { name: /Sửa ca/i }).click();
+    await page.locator('#btnSaveTemplateDef').click();
+
+    await expect(page.locator('#tplFormError')).toContainText('Máy chủ phản hồi quá lâu');
+    await expect(page.locator('#tplFormError')).not.toContainText('Fetch is aborted');
+    await expect(page.locator('#btnSaveTemplateDef')).toBeEnabled();
   });
 
   test('Ngừng áp dụng mẫu hiển thị mác giữ lịch sử và gọi deleteChecklistTemplateDef', async ({ page }) => {

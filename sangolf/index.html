@@ -1376,6 +1376,8 @@ function openTemplateForm(templateId) {
 
 async function saveTemplateDef() {
     const btn = $('btnSaveTemplateDef');
+    $('tplFormError').style.display = 'none';
+    $('tplFormError').textContent = '';
     const tName = $('tplNameInput').value.trim();
     const loc = $('tplLocationInput').value.trim();
 
@@ -1407,7 +1409,13 @@ async function saveTemplateDef() {
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang lưu...';
 
     try {
-        const res = await bdsApiPost('upsertChecklistTemplateDef', { def });
+        const res = await bdsApiPost('upsertChecklistTemplateDef', {
+            ...def,
+            user: getOperator()
+        }, {
+            timeout: 60000,
+            retries: 0
+        });
         if (res && res.status === 'success') {
             const idx = (templateDefs || []).findIndex(d => d.templateId === templateId);
             if (idx >= 0) templateDefs[idx] = def;
@@ -1423,7 +1431,11 @@ async function saveTemplateDef() {
             showTplError((res && res.message) || 'Lỗi khi lưu mẫu');
         }
     } catch (err) {
-        showTplError('Không thể kết nối máy chủ: ' + err.message);
+        const detail = String((err && err.message) || '');
+        const timedOut = (err && err.name === 'AbortError') || /abort|timeout/i.test(detail);
+        showTplError(timedOut
+            ? 'Máy chủ phản hồi quá lâu. Mẫu chưa được xác nhận lưu, vui lòng kiểm tra mạng rồi thử lại.'
+            : 'Không thể kết nối máy chủ: ' + detail);
     } finally {
         btn.disabled = false;
         btn.innerHTML = originalText;

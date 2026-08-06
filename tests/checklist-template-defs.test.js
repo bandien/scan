@@ -27,6 +27,37 @@ test('router công bố route định nghĩa mẫu checklist', () => {
   assert.match(router, /deleteChecklistTemplateDef\s*:\s*handleDeleteChecklistTemplateDef/);
 });
 
+test('upsert định nghĩa mẫu tương thích payload lồng def từ client cũ', () => {
+  const writes = [];
+  context.contentResponse = obj => obj;
+  context.writeAuditLog = () => {};
+  context.findChecklistTemplateDefRow_ = () => 2;
+  context.ensureChecklistTemplateDefsSheet_ = () => ({
+    getRange: (row, column) => ({
+      setValues: values => writes.push({ row, column, values }),
+      setValue: value => writes.push({ row, column, value })
+    })
+  });
+
+  const result = context.handleUpsertChecklistTemplateDef({
+    def: {
+      templateId: 'ca_toi',
+      templateName: 'Ca Tối (14h00 – 22h00)',
+      location: 'Sân Golf Kỳ Sơn',
+      shiftCode: 'ca_toi_san_golf_14h',
+      frequency: 'daily',
+      timeStart: '14:00',
+      timeEnd: '22:00',
+      active: true
+    },
+    user: 'Quản lý test'
+  });
+
+  assert.equal(result.status, 'success');
+  assert.equal(result.templateId, 'ca_toi');
+  assert.ok(writes.length >= 3);
+});
+
 test('seed phủ đủ 4 mẫu golf hiện hành', () => {
   // const trong script không gắn vào context object → đọc bằng biểu thức
   const seed = vm.runInContext('CHECKLIST_TEMPLATE_DEF_SEED', context);

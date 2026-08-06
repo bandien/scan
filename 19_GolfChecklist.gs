@@ -1163,7 +1163,8 @@ function cloneChecklistTemplateItems_(sourceTemplateId, targetTemplateId, target
 //   note?, active?, cloneFromTemplateId?, user?}
 // templateId trống → tạo mẫu mới (ID tự sinh); trùng ID có sẵn → cập nhật tại chỗ.
 function handleUpsertChecklistTemplateDef(params) {
-  const payload = params.payload || params;
+  // Client mới gửi payload phẳng; vẫn nhận { def } để tương thích bản web đã cache.
+  const payload = params.payload || params.def || params;
   const def = {
     templateId:   String(payload.templateId || "").trim(),
     templateName: String(payload.templateName || "").trim(),
