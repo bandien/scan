@@ -179,6 +179,7 @@ function doPost(e) {
       acceptGolfHandoverAndStartRun: handleAcceptGolfHandoverAndStartRun,
       seedGolfTemplates:    handleSeedGolfTemplates,
       upsertGolfTemplateItem: handleUpsertGolfTemplateItem,
+      updateGolfTemplateSectionTitle: handleUpdateGolfTemplateSectionTitle,
       deleteGolfTemplateItem: handleDeleteGolfTemplateItem,
       // Khởi tạo mẫu checklist theo địa điểm/thời gian/ca trực (Quản lý)
       upsertChecklistTemplateDef: handleUpsertChecklistTemplateDef,

@@ -359,6 +359,43 @@ function handleUpsertGolfTemplateItem(params) {
   return contentResponse({ status: "success", message: "Đã thêm hạng mục", itemId: itemId });
 }
 
+// POST action=updateGolfTemplateSectionTitle — đổi tiêu đề cho toàn bộ hạng mục
+// thuộc cùng một phần trong một mẫu.
+function handleUpdateGolfTemplateSectionTitle(params) {
+  const templateId = String(params.templateId || "").trim();
+  const section = String(params.section || "").trim();
+  const sectionTitle = String(params.sectionTitle || "").trim();
+  if (!templateId) return contentResponse({ status: "error", message: "Thiếu mã mẫu (templateId)" });
+  if (!section) return contentResponse({ status: "error", message: "Thiếu mã phần" });
+  if (!sectionTitle) return contentResponse({ status: "error", message: "Tiêu đề phần không được để trống" });
+
+  const sheet = ensureGolfTemplatesSheet_();
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return contentResponse({ status: "error", message: "Mẫu chưa có hạng mục" });
+
+  const rowCount = lastRow - 1;
+  const rows = sheet.getRange(2, 1, rowCount, 4).getValues();
+  let updatedItems = 0;
+  const titles = rows.map(function(row) {
+    const matches = String(row[0]).trim() === templateId && String(row[2]).trim() === section;
+    if (matches) updatedItems += 1;
+    return [matches ? sectionTitle : String(row[3] || "")];
+  });
+
+  if (updatedItems === 0) {
+    return contentResponse({ status: "error", message: "Không tìm thấy phần " + section + " trong mẫu " + templateId });
+  }
+
+  sheet.getRange(2, 4, rowCount, 1).setValues(titles);
+  writeAuditLog(params.user || "System", "updateGolfTemplateSectionTitle",
+    templateId + "/" + section, "Updated " + updatedItems + " items: " + sectionTitle);
+  return contentResponse({
+    status: "success",
+    message: "Đã cập nhật tiêu đề Phần " + section,
+    updatedItems: updatedItems
+  });
+}
+
 // POST action=deleteGolfTemplateItem — payload {templateId, itemId, user}
 function handleDeleteGolfTemplateItem(params) {
   const templateId = String(params.templateId || "").trim();

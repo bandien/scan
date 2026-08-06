@@ -140,6 +140,24 @@ test.describe('Checklist Template Admin - Quản lý mẫu', () => {
     await expect(page.locator('#btnSaveTemplateDef')).toBeEnabled();
   });
 
+  test('Sửa tiêu đề phần cập nhật đồng loạt và gửi payload đúng', async ({ page }) => {
+    await page.locator('#btnManageTemplates').click();
+    await page.locator('.admin-tpl-card').filter({ hasText: 'Ca Tối' })
+      .getByRole('button', { name: /Sửa hạng mục/i }).click();
+
+    await page.locator('.btn-edit-section-title').first().click();
+    await expect(page.locator('#editSectionTitleModal')).toBeVisible();
+    await page.locator('#sectionTitleInput').fill('Nhận ca & kiểm tra nước (17h30 – 19h30)');
+    await page.locator('#btnSaveSectionTitle').click();
+
+    await page.waitForFunction(() => window.__lastApiCall__ && window.__lastApiCall__.action === 'updateGolfTemplateSectionTitle');
+    const call = await page.evaluate(() => window.__lastApiCall__);
+    expect(call.templateId).toBe('ca_toi');
+    expect(call.section).toBe('A');
+    expect(call.sectionTitle).toBe('Nhận ca & kiểm tra nước (17h30 – 19h30)');
+    await expect(page.locator('#adminItemsList')).toContainText('Nhận ca & kiểm tra nước (17h30 – 19h30)');
+  });
+
   test('Ngừng áp dụng mẫu hiển thị mác giữ lịch sử và gọi deleteChecklistTemplateDef', async ({ page }) => {
     await page.locator('#btnManageTemplates').click();
     await expect(page.locator('.btn-soft-delete-tpl').first()).toContainText('Ngừng áp dụng');

@@ -328,6 +328,33 @@
     </div>
 </div>
 
+<!-- ═══════════ EDIT SECTION TITLE MODAL ═══════════ -->
+<div class="modal fade" id="editSectionTitleModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:20px;">
+            <div class="modal-header border-0 pb-0">
+                <h6 class="fw-bold mb-0"><i class="bi bi-type text-primary me-1"></i>Sửa tiêu đề phần</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="sectionTitleTemplateId">
+                <input type="hidden" id="sectionTitleSection">
+                <div id="sectionTitleError" class="alert alert-danger py-2 small" style="display:none;"></div>
+                <label class="fw-bold small text-secondary" for="sectionTitleInput">
+                    Tiêu đề Phần <span id="sectionTitleCode"></span> <span class="text-danger">*</span>
+                </label>
+                <textarea id="sectionTitleInput" class="text-input" rows="3"
+                    placeholder="VD: Nhận ca & kiểm tra nước (17h30 – 19h30)"></textarea>
+                <div class="form-text">Tiêu đề mới sẽ áp dụng cho tất cả hạng mục trong phần này.</div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light btn-sm rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" id="btnSaveSectionTitle" class="btn btn-primary btn-sm rounded-pill px-3" onclick="saveSectionTitle()">Lưu tiêu đề</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- ═══════════ EDIT TEMPLATE ITEM MODAL ═══════════ -->
 <div class="modal fade" id="editItemModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -1164,7 +1191,14 @@ function renderAdminItemsList(templateId) {
     items.forEach(it => {
         if (it.section !== lastSection) {
             lastSection = it.section;
-            html += `<div class="fw-bold text-primary small mt-3 mb-1 border-bottom pb-1">Phần ${esc(it.section)}: ${esc(it.sectionTitle || '')}</div>`;
+            html += `
+            <div class="d-flex align-items-center justify-content-between gap-2 mt-3 mb-1 border-bottom pb-1">
+                <div class="fw-bold text-primary small">Phần ${esc(it.section)}: ${esc(it.sectionTitle || '')}</div>
+                <button type="button" class="btn btn-sm btn-outline-primary py-1 px-2 flex-shrink-0 btn-edit-section-title"
+                    onclick="openEditSectionTitleModal('${esc(templateId)}','${esc(it.section)}')">
+                    <i class="bi bi-pencil me-1"></i>Sửa tiêu đề
+                </button>
+            </div>`;
         }
 
         let fieldsDetailHtml = '';
@@ -1206,6 +1240,59 @@ function renderAdminItemsList(templateId) {
     });
 
     container.innerHTML = html;
+}
+
+function openEditSectionTitleModal(templateId, section) {
+    const item = templateItems(templateId).find(x => String(x.section) === String(section));
+    if (!item) return;
+    $('sectionTitleTemplateId').value = templateId;
+    $('sectionTitleSection').value = section;
+    $('sectionTitleCode').textContent = section;
+    $('sectionTitleInput').value = item.sectionTitle || '';
+    $('sectionTitleError').textContent = '';
+    $('sectionTitleError').style.display = 'none';
+    bootstrap.Modal.getOrCreateInstance($('editSectionTitleModal')).show();
+}
+
+async function saveSectionTitle() {
+    const btn = $('btnSaveSectionTitle');
+    const templateId = $('sectionTitleTemplateId').value;
+    const section = $('sectionTitleSection').value;
+    const sectionTitle = $('sectionTitleInput').value.trim();
+    const errorEl = $('sectionTitleError');
+    if (!sectionTitle) {
+        errorEl.textContent = 'Vui lòng nhập tiêu đề phần';
+        errorEl.style.display = '';
+        return;
+    }
+
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang lưu...';
+    errorEl.style.display = 'none';
+    try {
+        const res = await bdsApiPost('updateGolfTemplateSectionTitle', {
+            templateId, section, sectionTitle, user: getOperator()
+        }, { timeout: 60000, retries: 0 });
+        if (!res || res.status !== 'success') {
+            throw new Error((res && res.message) || 'Không cập nhật được tiêu đề phần');
+        }
+        (templates || []).forEach(item => {
+            if (String(item.templateId) === templateId && String(item.section) === section) {
+                item.sectionTitle = sectionTitle;
+            }
+        });
+        bootstrap.Modal.getOrCreateInstance($('editSectionTitleModal')).hide();
+        renderAdminItemsList(templateId);
+        if (currentRun) renderRunBody();
+        bdsShowToast('Đã cập nhật tiêu đề Phần ' + section);
+    } catch (err) {
+        errorEl.textContent = 'Không thể lưu tiêu đề: ' + err.message;
+        errorEl.style.display = '';
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
 }
 
 function openAddTemplateItemModal() {

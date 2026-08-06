@@ -25,6 +25,47 @@ test('router công bố route định nghĩa mẫu checklist', () => {
   assert.match(router, /getChecklistSchedule.*handleGetChecklistSchedule/);
   assert.match(router, /upsertChecklistTemplateDef\s*:\s*handleUpsertChecklistTemplateDef/);
   assert.match(router, /deleteChecklistTemplateDef\s*:\s*handleDeleteChecklistTemplateDef/);
+  assert.match(router, /updateGolfTemplateSectionTitle\s*:\s*handleUpdateGolfTemplateSectionTitle/);
+});
+
+test('đổi tiêu đề phần cập nhật đồng loạt các hạng mục cùng mẫu và phần', () => {
+  const sectionContext = vm.createContext({ console });
+  new vm.Script(source, { filename: backendPath }).runInContext(sectionContext);
+  let writtenTitles = null;
+  const rows = [
+    ['ca_toi', 'Ca Tối', 'A', 'Tiêu đề cũ', 'A01'],
+    ['ca_toi', 'Ca Tối', 'A', 'Tiêu đề cũ', 'A02'],
+    ['ca_toi', 'Ca Tối', 'B', 'Đóng ca', 'B01'],
+    ['ca_sang', 'Ca Sáng', 'A', 'Nhận ca', 'A01']
+  ];
+  sectionContext.contentResponse = obj => obj;
+  sectionContext.writeAuditLog = () => {};
+  sectionContext.ensureGolfTemplatesSheet_ = () => ({
+    getLastRow: () => rows.length + 1,
+    getRange: (row, column, count) => {
+      if (row === 2 && column === 1) return { getValues: () => rows };
+      if (row === 2 && column === 4 && count === rows.length) {
+        return { setValues: values => { writtenTitles = values; } };
+      }
+      throw new Error(`Unexpected range ${row}/${column}/${count}`);
+    }
+  });
+
+  const result = sectionContext.handleUpdateGolfTemplateSectionTitle({
+    templateId: 'ca_toi',
+    section: 'A',
+    sectionTitle: 'Nhận ca & kiểm tra nước (17h30 – 19h30)',
+    user: 'Quản lý test'
+  });
+
+  assert.equal(result.status, 'success');
+  assert.equal(result.updatedItems, 2);
+  assert.deepEqual(JSON.parse(JSON.stringify(writtenTitles)), [
+    ['Nhận ca & kiểm tra nước (17h30 – 19h30)'],
+    ['Nhận ca & kiểm tra nước (17h30 – 19h30)'],
+    ['Đóng ca'],
+    ['Nhận ca']
+  ]);
 });
 
 test('upsert định nghĩa mẫu tương thích payload lồng def từ client cũ', () => {
