@@ -351,6 +351,7 @@ let allLogs = [];
 let checklistRuns = [];
 let checklistRunsState = 'idle';
 let checklistSummaryRequest = 0;
+let currentOpenPlanId = '';
 
 function saveToCache() {
   localStorage.setItem('nk_plans', JSON.stringify(allPlans));
@@ -484,6 +485,12 @@ function navigateToContacts() {
   window.location.hash = '#contacts';
 }
 
+function openTaskDetail(id) {
+  currentOpenPlanId = String(id || '');
+  renderDetailScreen(currentOpenPlanId);
+  showScreen('detail');
+}
+
 window.addEventListener('hashchange', handleRoute);
 window.addEventListener('load', handleRoute);
 
@@ -502,9 +509,11 @@ function handleRoute() {
     const m = hash.match(/^#detail\/(.+)$/);
     if (m) {
       const id = decodeURIComponent(m[1]);
+      currentOpenPlanId = id;
       renderDetailScreen(id);
       showScreen('detail');
     } else {
+      currentOpenPlanId = '';
       showScreen('main');
     }
   }
@@ -841,6 +850,7 @@ function renderMainBoard() {
 // RENDER DETAIL SCREEN
 // ─────────────────────────────────────────────────────────────────────────────
 function renderDetailScreen(id) {
+  currentOpenPlanId = String(id || '');
   const plan = allPlans.find(p => {
     const pid = String(planField(p, 'PlanID', 'id', 'planId'));
     return pid === String(id);
