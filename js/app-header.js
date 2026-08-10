@@ -2,13 +2,26 @@
   'use strict';
 
   const script = document.currentScript;
+  const configuredBack = script && script.dataset.back
+    ? script.dataset.back
+    : ((script && script.dataset.root) || '') + 'index.html';
+
+  function safeReturnTarget(candidate, fallback) {
+    if (!candidate) return fallback;
+    try {
+      const target = new URL(candidate, window.location.href);
+      return target.origin === window.location.origin ? candidate : fallback;
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  const requestedReturn = new URLSearchParams(window.location.search).get('returnTo');
   const options = {
     title: script && script.dataset.title ? script.dataset.title : 'BanDienScan',
     subtitle: script && script.dataset.sub ? script.dataset.sub : '',
     icon: script && script.dataset.icon ? script.dataset.icon : 'bi-grid-fill',
-    back: script && script.dataset.back
-      ? script.dataset.back
-      : ((script && script.dataset.root) || '') + 'index.html'
+    back: safeReturnTarget(requestedReturn, configuredBack)
   };
 
   function addStyles() {
@@ -116,7 +129,7 @@
     const back = document.createElement('a');
     back.className = 'bds-app-header__back';
     back.href = options.back;
-    back.setAttribute('aria-label', 'Quay lại trang chính');
+    back.setAttribute('aria-label', 'Quay lại màn hình trước');
     back.innerHTML = '<i class="bi bi-arrow-left" aria-hidden="true"></i><span class="bds-app-header__back-label">Quay lại</span>';
 
     const identity = document.createElement('div');

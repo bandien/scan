@@ -77,6 +77,35 @@ test('Nhật ký mở được checklist Ca Sáng khi backend không khả dụn
   await expect(page.locator('#progressText')).not.toContainText('0/0');
 });
 
+test('route checklist theo đối tượng mở đúng tab và giữ đường quay về', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('bd_current_user', JSON.stringify({
+      username: 'e2e', name: 'KTV E2E', role: 'staff'
+    }));
+  });
+  await page.route(/script\.google\.com|script\.googleusercontent\.com/, route => route.abort());
+
+  await page.goto('/nhatky/index.html#checklist/golf');
+
+  await expect(page.locator('#subtabChecklist')).toHaveClass(/is-active/);
+  await expect(page.locator('.nk-current-shift')).toBeVisible();
+  const href = await page.locator('.nk-current-shift')
+    .getByRole('link', { name: /checklist Golf/i })
+    .getAttribute('href');
+  const target = new URL(href, page.url());
+  expect(target.searchParams.get('returnTo')).toBe('../nhatky/#checklist/golf');
+
+  await page.goto('/nhatky/index.html#checklist/equipment/PUMP-01');
+  await expect(page.locator('#subtabChecklist')).toHaveClass(/is-active/);
+  await expect(page.locator('.nk-current-shift')).toHaveCount(0);
+  await expect(page.locator('#mainBoard')).toContainText('equipment');
+  await expect(page.locator('#mainBoard')).toContainText('PUMP-01');
+
+  await page.goto('/sangolf/index.html?returnTo=..%2Fnhatky%2F%23checklist%2Fgolf');
+  await expect(page.locator('.bds-app-header__back'))
+    .toHaveAttribute('href', '../nhatky/#checklist/golf');
+});
+
 test('mở nhanh màn hình hiện trạng và thấy bơm đang chạy', async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem('currentUser', JSON.stringify({

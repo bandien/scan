@@ -105,7 +105,12 @@ test.describe('Golf Checklist â€“ VÃ²ng Ä‘á»i Ä‘áº§y Ä‘á
     await expect(header).toBeVisible();
     await expect(header).toContainText('Checklist Cơ Điện Sân Golf');
     await expect(backButton).toBeVisible();
-    await expect(backButton).toHaveAttribute('href', '../index.html');
+    await expect(backButton).toHaveAttribute('href', '../nhatky/#checklist/golf');
+  });
+
+  test('không chấp nhận đường quay lại ra ngoài hệ thống', async ({ page }) => {
+    await page.goto('/sangolf/index.html?returnTo=https%3A%2F%2Fevil.example%2F');
+    await expect(page.locator('.bds-app-header__back')).toHaveAttribute('href', '../nhatky/#checklist/golf');
   });
 
   test('đồng bộ khung nội dung và thanh điều hướng dưới với màn hình Công việc', async ({ page }) => {

@@ -339,6 +339,7 @@
 <script src="../js/config.js"></script>
 <script src="../js/api.js"></script>
 <script src="../js/sso.js"></script>
+<script src="../js/checklist-routes.js"></script>
 <script src="../js/checklist-shifts.js"></script>
 <script>
 'use strict';
@@ -387,6 +388,7 @@ let staffList = [];
 let staffDirectory = [];
 let filterDate = 'today';   // 'today' | 'week' | 'all'
 let filterTab  = 'all';     // 'all' | 'plan' | 'checklist'
+let checklistContext = { scope: 'all', objectId: '' };
 
 let searchQuery = '';
 
@@ -473,6 +475,25 @@ function navigateToMain() {
   window.location.hash = '';
 }
 
+function selectMainTab(tab) {
+  filterTab = tab;
+  document.querySelectorAll('.nk-subtab').forEach(button => {
+    button.classList.toggle('is-active', button.dataset.tab === tab);
+  });
+}
+
+function navigateToChecklist(scope, objectId) {
+  const routes = window.BD_ChecklistRoutes;
+  const target = routes ? routes.buildHash(scope, objectId) : '#checklist';
+  if (window.location.hash === target) handleRoute();
+  else window.location.hash = target;
+}
+
+function checklistReturnTo(scope, objectId) {
+  const routes = window.BD_ChecklistRoutes;
+  return routes ? routes.returnTo(scope, objectId) : '../nhatky/#checklist';
+}
+
 function navigateToReport() {
   window.location.hash = '#report';
 }
@@ -496,7 +517,18 @@ window.addEventListener('load', handleRoute);
 
 function handleRoute() {
   const hash = window.location.hash;
-  if (hash === '#report') {
+  const checklistRoute = window.BD_ChecklistRoutes
+    ? BD_ChecklistRoutes.parseHash(hash)
+    : (hash === '#checklist' ? { scope: 'all', objectId: '' } : null);
+  if (checklistRoute) {
+    checklistContext = checklistRoute;
+    selectMainTab('checklist');
+    showScreen('main');
+    renderMainBoard();
+    if (checklistRoute.scope === 'all' || checklistRoute.scope === 'golf') {
+      loadChecklistSummary();
+    }
+  } else if (hash === '#report') {
     renderReportScreen();
     showScreen('report');
   } else if (hash === '#profile') {
@@ -808,7 +840,8 @@ function renderMainBoard() {
   html += buildGroup('Lịch sắp tới',           gPlanned, 'var(--dot-planned)','planned');
 
   let shortcutsHtml = '';
-  if (filterTab === 'checklist') {
+  const showGolfChecklist = checklistContext.scope === 'all' || checklistContext.scope === 'golf';
+  if (filterTab === 'checklist' && showGolfChecklist) {
     const shiftContext = window.BD_ChecklistShifts
       ? BD_ChecklistShifts.context(new Date())
       : null;
@@ -819,7 +852,7 @@ function renderMainBoard() {
       <div class="nk-checklist-shortcuts">
         <div class="nk-checklist-heading">
           <div><span>CHECKLIST CA TRỰC</span><strong>Nhận bàn giao, làm ngay</strong></div>
-          <a href="../sangolf/index.html?manageTemplates=1" class="nk-template-link">
+          <a href="../sangolf/index.html?manageTemplates=1&returnTo=${encodeURIComponent(checklistReturnTo('golf'))}" class="nk-template-link">
             ⚙️ Mẫu
           </a>
         </div>
@@ -837,6 +870,11 @@ function renderMainBoard() {
           </section>
           ${renderPreviousChecklistSummary(shiftContext.previous, summary)}` : ''}
       </div>`;
+  } else if (filterTab === 'checklist') {
+    const objectLabel = checklistContext.objectId
+      ? ` · ${escapeHtml(checklistContext.objectId)}`
+      : '';
+    shortcutsHtml = `<div class="nk-empty"><div class="nk-empty__icon">✅</div>Chưa có màn hình checklist cho nhóm <b>${escapeHtml(checklistContext.scope)}</b>${objectLabel}.</div>`;
   }
 
   if (!html) {
@@ -1528,12 +1566,16 @@ document.getElementById('subtabBar').addEventListener('click', e => {
   const btn = e.target.closest('.nk-subtab');
   if (!btn) return;
   const tab = btn.dataset.tab;
-  filterTab = tab;
-  // Update active state
-  document.querySelectorAll('.nk-subtab').forEach(b => b.classList.remove('is-active'));
-  btn.classList.add('is-active');
+  if (tab === 'checklist') {
+    navigateToChecklist('all');
+    return;
+  }
+  checklistContext = { scope: 'all', objectId: '' };
+  selectMainTab(tab);
+  if (window.location.hash.startsWith('#checklist')) {
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+  }
   renderMainBoard();
-  if (tab === 'checklist') loadChecklistSummary();
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
