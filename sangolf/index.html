@@ -33,7 +33,7 @@
             padding-bottom: 90px;
         }
 
-        .app-shell { max-width: 520px; margin: 0 auto; padding: 16px; }
+        .app-shell { max-width: 640px; margin: 0 auto; padding: 12px 13px 90px; }
 
         .header-bar {
             display: flex; align-items: center; justify-content: space-between;
@@ -157,6 +157,35 @@
         .date-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
         .date-nav input { flex: 1; border: 2px solid var(--bds-line); border-radius: 14px; padding: 10px 12px; font-weight: 700; }
         .date-nav button { border: 2px solid var(--bds-line); background: #fff; border-radius: 12px; width: 42px; height: 42px; }
+
+        .golf-bottomnav {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: min(100%, 640px); min-height: 65px; z-index: 1040;
+            display: flex; align-items: flex-end; justify-content: space-around;
+            padding: 6px 8px env(safe-area-inset-bottom, 4px);
+            background: #fff; border-top: 1px solid var(--bds-line);
+            box-shadow: 0 -2px 12px rgba(8,40,50,.08);
+        }
+        .golf-bottomnav.is-hidden { display: none; }
+        .golf-bottomnav__item {
+            flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+            padding: 4px 2px 2px; border-radius: 8px; color: #64748b;
+            font-size: 10px; font-weight: 700; line-height: 1.15; text-decoration: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .golf-bottomnav__item:hover { color: #0b4d5e; }
+        .golf-bottomnav__icon { font-size: 20px; line-height: 1; }
+        .golf-bottomnav__item.is-active { color: var(--bds-primary); }
+        .golf-bottomnav__active-wrap {
+            flex: 0 0 64px; display: flex; align-items: center; justify-content: center;
+            padding-bottom: 2px;
+        }
+        .golf-bottomnav__active {
+            width: 52px; height: 52px; display: grid; place-items: center;
+            margin-bottom: 4px; border-radius: 50%; background: var(--bds-primary);
+            color: #fff; font-size: 23px; text-decoration: none;
+            box-shadow: 0 4px 16px rgba(5,150,105,.38);
+        }
     </style>
     <script src="../js/app-header.js" data-root="../" data-title="Checklist Cơ Điện Sân Golf" data-sub="Sân Golf Kỳ Sơn Montana" data-icon="bi-flag-fill" data-back="../index.html"></script>
 </head>
@@ -222,6 +251,30 @@
         <div id="submitArea" class="mt-3"></div>
     </div>
 </div>
+
+<nav class="golf-bottomnav" id="golfBottomNav" aria-label="Điều hướng chính">
+    <a class="golf-bottomnav__item" href="../nhatky/">
+        <i class="bi bi-briefcase-fill golf-bottomnav__icon" aria-hidden="true"></i>
+        <span>Công việc</span>
+    </a>
+    <a class="golf-bottomnav__item" href="../nhatky/#contacts">
+        <i class="bi bi-people-fill golf-bottomnav__icon" aria-hidden="true"></i>
+        <span>Danh bạ</span>
+    </a>
+    <div class="golf-bottomnav__active-wrap">
+        <a class="golf-bottomnav__active" href="./" aria-label="Checklist Sân Golf" aria-current="page">
+            <i class="bi bi-clipboard2-check-fill" aria-hidden="true"></i>
+        </a>
+    </div>
+    <a class="golf-bottomnav__item" href="../nhatky/#report">
+        <i class="bi bi-bar-chart-fill golf-bottomnav__icon" aria-hidden="true"></i>
+        <span>Báo cáo</span>
+    </a>
+    <a class="golf-bottomnav__item" href="../nhatky/#profile">
+        <i class="bi bi-person-fill golf-bottomnav__icon" aria-hidden="true"></i>
+        <span>Cá nhân</span>
+    </a>
+</nav>
 
 <!-- ═══════════ SUBMIT MODAL ═══════════ -->
 <div class="modal fade" id="submitModal" tabindex="-1">
@@ -458,6 +511,13 @@ function getOperator() {
 
 function selectedDate() { return $('datePicker').value || todayStr(); }
 
+function setPageChromeVisible(visible) {
+    const bottomNav = $('golfBottomNav');
+    if (bottomNav) bottomNav.classList.toggle('is-hidden', !visible);
+    const appHeader = document.querySelector('.bds-app-header');
+    if (appHeader) appHeader.style.display = visible ? '' : 'none';
+}
+
 function golfRunId(templateId, date) { return 'GOLF-' + templateId + '-' + date.replace(/-/g, ''); }
 
 function prevDate(dateStr) {
@@ -658,7 +718,7 @@ function renderHome() {
                 <div style="font-size:1.6rem;color:var(--bds-primary);"><i class="bi ${iconClass}"></i></div>
                 <div class="flex-grow-1">
                     <div class="tpl-name">${esc(templateName(tid))}</div>
-                    <div class="tpl-meta">${state.total} hạng mục ${due ? '' : '· không bắt buộc hôm nay'}</div>
+                    <div class="tpl-meta">${state.total} hạng mục ${due ? '' : '· ngoài khung giờ thực hiện'}</div>
                 </div>
                 <i class="bi bi-chevron-right text-muted"></i>
             </div>
@@ -737,6 +797,7 @@ function openRun(templateId) {
         taskId: taskId,
         dirty: !!(state.draft && state.draft.dirty)
     };
+    setPageChromeVisible(false);
     $('homeView').style.display = 'none';
     $('runView').style.display = '';
     $('runTitle').textContent = templateName(templateId);
@@ -748,6 +809,7 @@ function openRun(templateId) {
 function backHome() {
     flushSave();
     currentRun = null;
+    setPageChromeVisible(true);
     $('runView').style.display = 'none';
     $('homeView').style.display = '';
     loadRuns();
@@ -1083,6 +1145,7 @@ async function doSubmitRun() {
 let currentEditingTemplateId = null;
 
 function openAdminTemplates() {
+    setPageChromeVisible(false);
     $('homeView').style.display = 'none';
     $('runView').style.display = 'none';
     $('adminTemplatesView').style.display = '';
@@ -1090,6 +1153,7 @@ function openAdminTemplates() {
 }
 
 function closeAdminTemplates() {
+    setPageChromeVisible(true);
     $('adminTemplatesView').style.display = 'none';
     $('homeView').style.display = '';
     loadTemplates();
@@ -1597,6 +1661,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadRuns({ timeout: 5000, retries: 0 }).then(() => {
             if (pendingHandoverFor(autoTemplate)) {
                 currentRun = null;
+                setPageChromeVisible(true);
                 $('runView').style.display = 'none';
                 $('homeView').style.display = '';
                 renderHome();

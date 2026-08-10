@@ -98,6 +98,43 @@ test.describe('Golf Checklist â€“ VÃ²ng Ä‘á»i Ä‘áº§y Ä‘á
     await expect(page.locator('#operatorInput')).toBeVisible();
   });
 
+  test('hiển thị thanh điều hướng và nút quay lại trang chính', async ({ page }) => {
+    const header = page.locator('.bds-app-header');
+    const backButton = header.getByRole('link', { name: /quay lại/i });
+
+    await expect(header).toBeVisible();
+    await expect(header).toContainText('Checklist Cơ Điện Sân Golf');
+    await expect(backButton).toBeVisible();
+    await expect(backButton).toHaveAttribute('href', '../index.html');
+  });
+
+  test('đồng bộ khung nội dung và thanh điều hướng dưới với màn hình Công việc', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
+
+    const headerNav = page.locator('.bds-app-header__nav');
+    const shell = page.locator('.app-shell');
+    const bottomNav = page.locator('.golf-bottomnav');
+
+    await expect(bottomNav).toBeVisible();
+    await expect(bottomNav).toHaveAttribute('aria-label', 'Điều hướng chính');
+    expect(Math.round((await headerNav.boundingBox()).width)).toBe(640);
+    expect(Math.round((await shell.boundingBox()).width)).toBe(640);
+    expect(Math.round((await bottomNav.boundingBox()).width)).toBe(640);
+  });
+
+  test('ẩn thanh điều hướng dưới khi đang thực hiện checklist', async ({ page }) => {
+    await page.evaluate((tpls) => {
+      templates = tpls;
+      serverRuns = {};
+      renderHome();
+      openRun('ca_sang');
+    }, MOCK_TEMPLATES);
+
+    await expect(page.locator('#runView')).toBeVisible();
+    await expect(page.locator('.golf-bottomnav')).toHaveCount(1);
+    await expect(page.locator('.golf-bottomnav')).toBeHidden();
+  });
+
   test('templateCards hiá»ƒn thá»‹ sau khi load templates', async ({ page }) => {
     if (!IS_STAGING) {
       await page.evaluate((tpls) => {
@@ -108,6 +145,24 @@ test.describe('Golf Checklist â€“ VÃ²ng Ä‘á»i Ä‘áº§y Ä‘á
     await expect(
       page.locator('#templateCards .card-custom, #templateCards button, #templateCards .nk-empty').first()
     ).toBeVisible({ timeout: IS_STAGING ? 45000 : 10000 });
+  });
+
+  test('template ngoài giờ hiển thị đúng trạng thái', async ({ page }) => {
+    test.skip(IS_STAGING, 'Chỉ chạy trong mock mode');
+
+    await page.evaluate((tpls) => {
+      templates = tpls;
+      scheduleData = [{
+        templateId: 'ca_sang',
+        templateName: 'Ca Sáng',
+        matchesDate: true,
+        inWindow: false
+      }];
+      serverRuns = {};
+      renderHome();
+    }, MOCK_TEMPLATES);
+
+    await expect(page.locator('#templateCards .tpl-meta')).toContainText('ngoài khung giờ thực hiện');
   });
 
   // 2. Má»Ÿ Run View
