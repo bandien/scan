@@ -1,4 +1,4 @@
-﻿const { test, expect } = require('@playwright/test');
+const { test, expect } = require('@playwright/test');
 
 // â”€â”€ Mock Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const MOCK_PLAN_NO_PHASES = {
@@ -619,15 +619,45 @@ test.describe('A6 â€” Screen Danh báº¡', () => {
     await expect(page.locator('.nk-contact-card')).toHaveCount(0);
   });
 
-  test('Báº¥m CÃ´ng viá»‡c trong bnavContacts â†’ quay vá» screenMain', async ({ page }) => {
+  test('Báº¥m CÃ´ng viá»‡c trong bnavContacts â†’ quay vá»  screenMain', async ({ page }) => {
     await page.evaluate(() => navigateToContacts());
     await page.locator('#bnavContacts a').first().click();
     await expect(page.locator('#screenMain')).toBeVisible();
     await expect(page.locator('#screenContacts')).not.toBeVisible();
   });
+
+  test('Render badge Label tren card va loc theo chip Label', async ({ page }) => {
+    await page.evaluate(() => {
+      staffDirectory = [
+        { fullName: 'Nguyen Van A', dept: 'Dien', labels: 'San Golf, Van hanh', phone: '0901' },
+        { fullName: 'Tran Thi B', dept: 'Co', labels: 'Tram bom', phone: '0902' }
+      ];
+      navigateToContacts();
+    });
+    await expect(page.locator('.nk-contact-badge')).toHaveCount(3);
+    await expect(page.locator('.nk-contact-chip').first()).toBeVisible();
+
+    await page.locator('#contactSearch').fill('Golf');
+    await expect(page.locator('.nk-contact-card')).toHaveCount(1);
+    await expect(page.locator('.nk-contact-card')).toContainText('Nguyen Van A');
+  });
 });
 
+test.describe('Hash Route - #checklist/golf navigation', () => {
+  test.beforeEach(async ({ page }) => {
+    await setupMocks(page);
+  });
 
+  test('Truy cập /nhatky/index.html#checklist/golf tự chọn subtabChecklist và hiện khối Ca trực & Checklist', async ({ page }) => {
+    await page.goto('/nhatky/index.html#checklist/golf?autoTemplate=ca_toi&date=2026-08-11');
+    await expect(page.locator('#subtabChecklist')).toHaveClass(/is-active/);
+    await expect(page.locator('.nk-checklist-shortcuts')).toBeVisible();
+  });
 
-
-
+  test('Bấm shortcut Golf tạo URL dạng #checklist/golf', async ({ page }) => {
+    await page.goto('/nhatky/index.html#checklist');
+    const golfLink = page.locator('.nk-checklist-shortcuts a', { hasText: 'Golf' }).first();
+    await expect(golfLink).toBeVisible();
+    await expect(golfLink).toHaveAttribute('href', /#checklist\/golf\?autoTemplate=/);
+  });
+});

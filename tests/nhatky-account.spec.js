@@ -294,3 +294,23 @@ test.describe('Tài khoản — Logout SSO', () => {
     expect(state).toEqual({ called: true, user: null, plans: null, logs: null });
   });
 });
+
+test.describe('Tài khoản — Profile Team & Label', () => {
+  test('hiển thị thông tin Tổ và Label liên quan trên trang Cá nhân', async ({ page }) => {
+    await openAs(page, {
+      username: 'hau.dv',
+      name: 'Đinh Văn Hậu',
+      role: 'Manager',
+      dept: 'Ban Điện',
+      teams: 'Tổ điện, Tổ bảo trì',
+      labels: 'Sân Golf, Trạm bơm'
+    });
+    await page.evaluate(() => navigateToProfile());
+    await expect(page.locator('#profileBody')).toContainText('Tổ điện');
+    await expect(page.locator('#profileBody')).toContainText('Tổ bảo trì');
+    await expect(page.locator('#profileBody')).toContainText('Ban Điện');
+    await expect(page.locator('#profileBody')).toContainText('Sân Golf');
+    await expect(page.locator('#profileBody')).toContainText('Trạm bơm');
+  });
+});
+

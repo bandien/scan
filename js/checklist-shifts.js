@@ -41,7 +41,7 @@
 
   return {
     adjacent,
-    golfUrl: shift => `../sangolf/index.html?autoTemplate=${encodeURIComponent(shift.templateId)}&date=${encodeURIComponent(shift.date)}`,
+    golfUrl: shift => `../nhatky/index.html#checklist/golf?autoTemplate=${encodeURIComponent(shift.templateId)}&date=${encodeURIComponent(shift.date)}`,
     pumpUrl: shift => `../pump_info.html?autoCheck=1&${query(shift)}`
   };
 });

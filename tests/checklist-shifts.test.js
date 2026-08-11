@@ -28,7 +28,7 @@ test('2 giờ sáng vẫn thuộc ngày nghiệp vụ của ca tối hôm trư�
 
 test('URL Golf và Bơm mang đủ ca và ngày', () => {
   const shift = { templateId: 'ca_sang', date: '2026-07-29' };
-  assert.equal(shifts.golfUrl(shift), '../sangolf/index.html?autoTemplate=ca_sang&date=2026-07-29');
+  assert.equal(shifts.golfUrl(shift), '../nhatky/index.html#checklist/golf?autoTemplate=ca_sang&date=2026-07-29');
   assert.equal(shifts.pumpUrl(shift), '../pump_info.html?autoCheck=1&shift=ca_sang&date=2026-07-29');
 });
 

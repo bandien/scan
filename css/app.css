@@ -872,41 +872,94 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   padding: 12px 16px 16px;
 }
 
-.nk-field {
-  margin-bottom: 12px;
+.nk-field,
+.nk-form-group {
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
 }
 
-.nk-field label {
+.nk-field label,
+.nk-label {
   display: block;
+  width: 100%;
   font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: .04em;
   color: var(--ink-muted);
-  margin-bottom: 5px;
+  margin-bottom: 6px;
 }
 
 .nk-field input,
 .nk-field select,
-.nk-field textarea {
+.nk-field textarea,
+.nk-input,
+.nk-textarea,
+.nk-select {
+  display: block;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   background: var(--bg-panel);
   border: 1.5px solid var(--line);
   border-radius: var(--radius-sm);
   padding: 10px 12px;
-  font-size: 13.5px;
+  font-size: 14px;
+  font-family: inherit;
   color: var(--ink);
   outline: none;
-  transition: border-color var(--transition);
+  transition: border-color var(--transition), box-shadow var(--transition);
 }
 
 .nk-field input:focus,
 .nk-field select:focus,
-.nk-field textarea:focus {
+.nk-field textarea:focus,
+.nk-input:focus,
+.nk-textarea:focus,
+.nk-select:focus {
   border-color: var(--brand);
+  background: var(--bg-surface);
+  box-shadow: 0 0 0 3px rgba(11, 77, 94, 0.1);
 }
 
-.nk-field textarea { resize: vertical; min-height: 72px; }
+.nk-field textarea,
+.nk-textarea {
+  resize: vertical;
+  min-height: 84px;
+  line-height: 1.5;
+}
+
+.nk-quick-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.nk-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  color: var(--ink-muted);
+  cursor: pointer;
+  user-select: none;
+  transition: all var(--transition);
+}
+
+.nk-chip:hover,
+.nk-chip:active {
+  background: var(--brand-light);
+  color: var(--brand);
+  border-color: var(--brand);
+}
 
 .nk-expand-toggle {
   display: flex;
@@ -1269,7 +1322,127 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   background: rgba(220,53,69,.06);
 }
 
+/* ── Profile Account Info & Badges ─────────────────────────────────────────── */
+.nk-profile__info-card {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1.5px solid var(--line, #d3dadd);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nk-profile__info-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.nk-profile__info-title {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  letter-spacing: .5px;
+}
+
+.nk-profile__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.nk-profile__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: rgba(11, 77, 94, 0.1);
+  color: var(--brand, #0b4d5e);
+  border: 1px solid rgba(11, 77, 94, 0.2);
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+[data-theme="dark"] .nk-profile__badge {
+  background: rgba(26, 128, 153, 0.2);
+  color: #5edbf7;
+  border-color: rgba(26, 128, 153, 0.35);
+}
+
+.nk-profile__badge--label {
+  background: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+  border-color: rgba(40, 167, 69, 0.25);
+}
+
+[data-theme="dark"] .nk-profile__badge--label {
+  background: rgba(40, 167, 69, 0.25);
+  color: #75e08a;
+  border-color: rgba(40, 167, 69, 0.4);
+}
+
+/* ── Contact Labels Bar & Badges ────────────────────────────────────────────── */
+.nk-contact-labels-bar {
+  display: flex;
+  gap: 6px;
+  padding: 4px 12px 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nk-contact-labels-bar::-webkit-scrollbar { display: none; }
+
+.nk-contact-chip {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border: 1px solid var(--line, #d3dadd);
+  border-radius: 16px;
+  background: var(--bg-surface);
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.nk-contact-chip.is-active {
+  background: var(--brand, #0b4d5e);
+  color: #fff;
+  border-color: var(--brand, #0b4d5e);
+}
+
+.nk-contact-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.nk-contact-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  background: var(--bg-surface-hover, #e8eced);
+  color: var(--brand, #0b4d5e);
+  border-radius: 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+[data-theme="dark"] .nk-contact-badge {
+  background: rgba(255,255,255,0.08);
+  color: #6edcf0;
+}
+
 /* ── Subtabs (A4) ──────────────────────────────────────────────────────────── */
+
 .nk-subtabs {
   display: flex;
   gap: 6px;

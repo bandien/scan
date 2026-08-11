@@ -462,18 +462,22 @@ function navigateToDetail(id) {
 }
 
 function navigateToMain() {
+  window.currentOpenPlanId = null;
   window.location.hash = '';
 }
 
 function navigateToReport() {
+  window.currentOpenPlanId = null;
   window.location.hash = '#report';
 }
 
 function navigateToProfile() {
+  window.currentOpenPlanId = null;
   window.location.hash = '#profile';
 }
 
 function navigateToContacts() {
+  window.currentOpenPlanId = null;
   window.location.hash = '#contacts';
 }
 
@@ -491,6 +495,13 @@ function handleRoute() {
   } else if (hash === '#contacts') {
     renderContactsScreen();
     showScreen('contacts');
+  } else if (hash.startsWith('#checklist') || hash === '#plan') {
+    filterTab = hash.startsWith('#checklist') ? 'checklist' : 'plan';
+    document.querySelectorAll('.nk-subtab').forEach(b => {
+      b.classList.toggle('is-active', b.dataset.tab === filterTab);
+    });
+    showScreen('main');
+    renderMainBoard();
   } else {
     const m = hash.match(/^#detail\/(.+)$/);
     if (m) {
@@ -498,7 +509,12 @@ function handleRoute() {
       renderDetailScreen(id);
       showScreen('detail');
     } else {
+      filterTab = 'all';
+      document.querySelectorAll('.nk-subtab').forEach(b => {
+        b.classList.toggle('is-active', b.dataset.tab === 'all');
+      });
       showScreen('main');
+      renderMainBoard();
     }
   }
 }
@@ -757,6 +773,7 @@ function renderMainBoard() {
 // RENDER DETAIL SCREEN
 // ─────────────────────────────────────────────────────────────────────────────
 function renderDetailScreen(id) {
+  window.currentOpenPlanId = id;
   const plan = allPlans.find(p => {
     const pid = String(planField(p, 'PlanID', 'id', 'planId'));
     return pid === String(id);
@@ -907,7 +924,9 @@ function renderDetailScreen(id) {
 
     window.upgradeToPhases = function (planId) {
       updatePlanPhases(planId, phases => {
-        phases.push({ id: "PHASE-" + Date.now().toString(36), name: "Thực hiện", order: 1, status: "todo", steps: [] });
+        if (phases.length === 0) {
+          phases.push({ id: "PHASE-" + Date.now().toString(36), name: "Thực hiện", order: 1, status: "todo", steps: [] });
+        }
       });
     };
     
@@ -1197,11 +1216,40 @@ function renderReportScreen() {
 
 function renderProfileScreen() {
   const user = (typeof BD_SSO !== 'undefined') ? BD_SSO.getUser() : null;
-  const name = user ? (user.name || user.username || 'Ẩn danh') : 'Ẩn danh';
-  const role = user ? (user.role || user.position || '') : '';
-  const team = user ? (user.team || user.teamGroup || '') : '';
+  const name = user ? (user.name || user.fullName || user.username || 'Ẩn danh') : 'Ẩn danh';
+  const role = user ? (user.role || user.position || 'Nhân viên') : '';
   const uname = user ? (user.username || '') : '';
   const initial = name.charAt(0).toUpperCase();
+
+  // Tra cứu bổ sung từ staffDirectory
+  const person = user ? staffDirectory.find(p =>
+    (p.username && uname && p.username.toLowerCase() === uname.toLowerCase()) ||
+    (p.fullName && name && p.fullName.toLowerCase() === name.toLowerCase()) ||
+    (p.name && name && p.name.toLowerCase() === name.toLowerCase())
+  ) : null;
+
+  const rawTeams = (user && user.teams) || (user && user.team) || (user && user.teamGroup) || (person && (person.teams || person.team || person.teamGroup)) || '';
+  const rawLabels = (user && user.labels) || (person && (person.labels || person.label)) || '';
+  const dept = (user && user.dept) || (person && person.dept) || '';
+  const phone = (user && user.phone) || (person && (person.phone || person.mobile)) || '';
+
+  // Parse teams
+  let teamsHtml = '';
+  if (rawTeams === '*') {
+    teamsHtml = `<span class="nk-profile__badge">🌐 Tất cả các tổ (*)</span>`;
+  } else if (rawTeams) {
+    const list = String(rawTeams).split(',').map(t => t.trim()).filter(Boolean);
+    teamsHtml = list.map(t => `<span class="nk-profile__badge">🏢 ${escapeHtml(t)}</span>`).join('');
+  } else {
+    teamsHtml = `<span style="color:var(--ink-muted);font-style:italic;font-size:12px">Chưa phân tổ</span>`;
+  }
+
+  // Parse labels
+  let labelsHtml = '';
+  if (rawLabels) {
+    const list = String(rawLabels).split(',').map(l => l.trim()).filter(Boolean);
+    labelsHtml = list.map(l => `<span class="nk-profile__badge nk-profile__badge--label">🏷️ ${escapeHtml(l)}</span>`).join('');
+  }
 
   const body = document.getElementById('profileBody');
   if (!body) return;
@@ -1209,7 +1257,30 @@ function renderProfileScreen() {
     <div class="nk-profile">
       <div class="nk-profile__avatar">${escapeHtml(initial)}</div>
       <div class="nk-profile__name" id="profileName">${escapeHtml(name)}</div>
-      <div class="nk-profile__meta">${escapeHtml(role)}${team ? ' · ' + escapeHtml(team) : ''}${uname ? ' · @' + escapeHtml(uname) : ''}</div>
+      <div class="nk-profile__meta">${escapeHtml(role)}${uname ? ' · @' + escapeHtml(uname) : ''}</div>
+
+      <div class="nk-profile__section-label">Thông tin tài khoản</div>
+      <div class="nk-profile__info-card">
+        <div class="nk-profile__info-row">
+          <div class="nk-profile__info-title">Tổ quản lý / công tác</div>
+          <div class="nk-profile__badges">${teamsHtml}</div>
+        </div>
+        ${labelsHtml ? `
+        <div class="nk-profile__info-row">
+          <div class="nk-profile__info-title">Label liên quan</div>
+          <div class="nk-profile__badges">${labelsHtml}</div>
+        </div>` : ''}
+        ${dept ? `
+        <div class="nk-profile__info-row">
+          <div class="nk-profile__info-title">Bộ phận / Phòng ban</div>
+          <div style="font-weight:700">${escapeHtml(dept)}</div>
+        </div>` : ''}
+        ${phone ? `
+        <div class="nk-profile__info-row">
+          <div class="nk-profile__info-title">Số điện thoại</div>
+          <div style="font-weight:700">${escapeHtml(phone)}</div>
+        </div>` : ''}
+      </div>
 
       <div class="nk-profile__section-label">Giao diện</div>
       <div class="nk-profile__actions">
@@ -1220,10 +1291,15 @@ function renderProfileScreen() {
 
       <div class="nk-profile__section-label" style="margin-top:16px">Tài khoản</div>
       <div class="nk-profile__actions">
-        <button class="nk-profile__action nk-profile__action--danger" onclick="doLogout()">
+        ${user && (String(user.role).toLowerCase() === 'admin' || String(user.role).toLowerCase() === 'manager') ? `
+        <button class="nk-profile__action" id="btnManageAccounts" onclick="if(typeof openManageAccountsModal === 'function') openManageAccountsModal();">
+          👥 Quản lý tài khoản
+        </button>` : ''}
+        <button class="nk-profile__action nk-profile__action--danger" id="btnLogout" onclick="doLogout()">
           🚪 Đăng xuất
         </button>
       </div>
+
 
       <div style="margin-top:24px;font-size:10px;color:var(--ink-muted);text-align:center">
         Nhật ký Công việc · Ban Điện · v2.14
@@ -1253,17 +1329,66 @@ function doLogout() {
 // RENDER CONTACTS SCREEN (A6)
 // ─────────────────────────────────────────────────────────────────────────────
 let contactSearchQuery = '';
+let selectedContactLabel = 'all';
 
 function renderContactsScreen() {
   const q = contactSearchQuery.trim().toLowerCase();
   let list = [...staffDirectory];
 
+  // Thu thập danh sách tất cả labels từ staffDirectory
+  const allLabels = new Set();
+  staffDirectory.forEach(s => {
+    const raw = s.labels || s.label || '';
+    if (raw) {
+      String(raw).split(',').map(l => l.trim()).filter(Boolean).forEach(l => allLabels.add(l));
+    }
+  });
+
+  // Render Label Chips Bar bên dưới search bar
+  let labelsBarEl = document.getElementById('contactLabelsBar');
+  if (!labelsBarEl) {
+    const toolbar = document.querySelector('#screenContacts .nk-toolbar');
+    if (toolbar) {
+      labelsBarEl = document.createElement('div');
+      labelsBarEl.id = 'contactLabelsBar';
+      labelsBarEl.className = 'nk-contact-labels-bar';
+      toolbar.parentNode.insertBefore(labelsBarEl, toolbar.nextSibling);
+    }
+  }
+
+  if (labelsBarEl) {
+    const labelList = Array.from(allLabels).sort();
+    if (labelList.length > 0) {
+      labelsBarEl.style.display = 'flex';
+      labelsBarEl.innerHTML = `
+        <button class="nk-contact-chip ${selectedContactLabel === 'all' ? 'is-active' : ''}" onclick="selectContactLabel('all')">Tất cả</button>
+        ${labelList.map(l => `
+          <button class="nk-contact-chip ${selectedContactLabel === l ? 'is-active' : ''}" onclick="selectContactLabel('${escapeAttr(l)}')">🏷️ ${escapeHtml(l)}</button>
+        `).join('')}
+      `;
+    } else {
+      labelsBarEl.style.display = 'none';
+    }
+  }
+
+  // Filter theo selectedContactLabel
+  if (selectedContactLabel !== 'all') {
+    const sel = selectedContactLabel.toLowerCase();
+    list = list.filter(s => {
+      const labels = (s.labels || s.label || '').toLowerCase();
+      return labels.includes(sel);
+    });
+  }
+
+  // Filter theo q
   if (q) {
     list = list.filter(s => {
-      const name  = (s.fullName || s.name || '').toLowerCase();
-      const dept  = (s.dept || '').toLowerCase();
-      const phone = (s.phone || s.mobile || '').toLowerCase();
-      return name.includes(q) || dept.includes(q) || phone.includes(q);
+      const name   = (s.fullName || s.name || '').toLowerCase();
+      const dept   = (s.dept || '').toLowerCase();
+      const phone  = (s.phone || s.mobile || '').toLowerCase();
+      const labels = (s.labels || s.label || '').toLowerCase();
+      const teams  = (s.teams || s.team || s.teamGroup || '').toLowerCase();
+      return name.includes(q) || dept.includes(q) || phone.includes(q) || labels.includes(q) || teams.includes(q);
     });
   }
 
@@ -1274,7 +1399,7 @@ function renderContactsScreen() {
   if (list.length === 0) {
     document.getElementById('contactsBody').innerHTML =
       `<div class="nk-empty"><div class="nk-empty__icon">👤</div>
-       ${q ? 'Không tìm thấy kết quả.' : 'Danh bạ chưa có dữ liệu.'}</div>`;
+       ${(q || selectedContactLabel !== 'all') ? 'Không tìm thấy kết quả.' : 'Danh bạ chưa có dữ liệu.'}</div>`;
     return;
   }
 
@@ -1296,12 +1421,20 @@ function renderContactsScreen() {
           const phone  = s.phone || s.mobile || '';
           const initials = name.trim().charAt(0).toUpperCase();
           const role   = s.position || s.role || '';
+          const rawL   = s.labels || s.label || '';
+          const lList  = rawL ? String(rawL).split(',').map(l => l.trim()).filter(Boolean) : [];
+          const badgesHtml = lList.length ? `
+            <div class="nk-contact-badges">
+              ${lList.map(l => `<span class="nk-contact-badge">🏷️ ${escapeHtml(l)}</span>`).join('')}
+            </div>` : '';
+
           return `
             <div class="nk-contact-card">
               <div class="nk-contact-card__avatar">${initials}</div>
               <div class="nk-contact-card__info">
                 <div class="nk-contact-card__name">${escapeHtml(name)}</div>
                 <div class="nk-contact-card__meta">${escapeHtml(role || dept)}${phone ? ' · ' + escapeHtml(phone) : ''}</div>
+                ${badgesHtml}
               </div>
               ${phone ? `<a class="nk-contact-card__call" href="tel:${escapeAttr(phone)}" aria-label="Gọi ${escapeAttr(name)}">📞</a>` : ''}
             </div>`;
@@ -1310,6 +1443,12 @@ function renderContactsScreen() {
 
   document.getElementById('contactsBody').innerHTML = html;
 }
+
+function selectContactLabel(label) {
+  selectedContactLabel = label;
+  renderContactsScreen();
+}
+
 
 function toggleTheme() {
   const cur  = document.documentElement.getAttribute('data-theme') || 'light';
@@ -1434,11 +1573,16 @@ document.getElementById('subtabBar').addEventListener('click', e => {
   const btn = e.target.closest('.nk-subtab');
   if (!btn) return;
   const tab = btn.dataset.tab;
-  filterTab = tab;
-  // Update active state
-  document.querySelectorAll('.nk-subtab').forEach(b => b.classList.remove('is-active'));
-  btn.classList.add('is-active');
-  renderMainBoard();
+  const targetHash = (tab === 'checklist' || tab === 'plan') ? `#${tab}` : '';
+  if (window.location.hash !== targetHash) {
+    window.location.hash = targetHash;
+  } else {
+    filterTab = tab;
+    document.querySelectorAll('.nk-subtab').forEach(b => {
+      b.classList.toggle('is-active', b.dataset.tab === filterTab);
+    });
+    renderMainBoard();
+  }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1583,11 +1727,24 @@ document.addEventListener('DOMContentLoaded', () => {
       return `${mainName} ${initials}`; // "Thắng NQ", "Hậu DV"
     }
 
+    function cleanPhases(phases) {
+      if (!Array.isArray(phases) || phases.length <= 1) return phases || [];
+      let emptyDefaultSeen = false;
+      return phases.filter(ph => {
+        const isEmptyDefault = (ph.name === 'Thực hiện' || ph.name === 'Bước thực hiện') && (!ph.steps || ph.steps.length === 0);
+        if (isEmptyDefault) {
+          if (emptyDefaultSeen) return false;
+          emptyDefaultSeen = true;
+        }
+        return true;
+      });
+    }
+
     function planPhases(plan) {
       if (!plan || !plan.phases) return [];
       try {
-        const parsed = JSON.parse(plan.phases);
-        return Array.isArray(parsed) ? parsed : [];
+        const parsed = typeof plan.phases === 'string' ? JSON.parse(plan.phases) : plan.phases;
+        return cleanPhases(Array.isArray(parsed) ? parsed : []);
       } catch (e) { return []; }
     }
 
@@ -1698,8 +1855,8 @@ document.addEventListener('DOMContentLoaded', () => {
           localStorage.setItem('bandien_nhatky_staff_v2', JSON.stringify(staffList));
           localStorage.setItem('bandien_nhatky_staff_directory_v1', JSON.stringify(staffDirectory));
           
-          if (typeof currentOpenPlanId !== 'undefined' && currentOpenPlanId) {
-            openTaskDetail(currentOpenPlanId);
+          if (typeof window.currentOpenPlanId !== 'undefined' && window.currentOpenPlanId) {
+            renderDetailScreen(window.currentOpenPlanId);
           }
         }
       } catch (err) {
@@ -1780,7 +1937,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Optimistic Update
       saveToCache();
-      openTaskDetail(planId);
+      renderDetailScreen(planId);
       renderMainBoard();
       showSyncToast();
       
@@ -1795,7 +1952,7 @@ document.addEventListener('DOMContentLoaded', () => {
         plan.status = oldStatus;
         plan.Status = oldStatus;
         saveToCache();
-        openTaskDetail(planId);
+        renderDetailScreen(planId);
         renderMainBoard();
       }
     }
@@ -2293,10 +2450,21 @@ function renderTimelineHtml(planId) {
       <div class="nk-form-group">
         <label class="nk-label">NỘI DUNG / KẾT QUẢ *</label>
         <textarea id="logResult" class="nk-textarea" rows="3" placeholder="Nhập kết quả xử lý, nghiệm thu, sự cố phát sinh..."></textarea>
+        <div class="nk-quick-chips">
+          <span class="nk-chip" onclick="document.getElementById('logResult').value='Không bất thường'">Không bất thường</span>
+          <span class="nk-chip" onclick="document.getElementById('logResult').value='Đã xử lý dứt điểm'">Đã xử lý dứt điểm</span>
+          <span class="nk-chip" onclick="document.getElementById('logResult').value='Cần theo dõi thêm'">Cần theo dõi thêm</span>
+        </div>
       </div>
       <div class="nk-form-group">
         <label class="nk-label">ĐỘI THỰC HIỆN</label>
         <input type="text" id="logTeams" class="nk-input" placeholder="Ví dụ: Đội Điện, Đội Nước...">
+        <div class="nk-quick-chips">
+          <span class="nk-chip" onclick="(el=>el.value=el.value?(el.value.includes('Đội Điện')?el.value:el.value+', Đội Điện'):'Đội Điện')(document.getElementById('logTeams'))">⚡ Đội Điện</span>
+          <span class="nk-chip" onclick="(el=>el.value=el.value?(el.value.includes('Đội Nước')?el.value:el.value+', Đội Nước'):'Đội Nước')(document.getElementById('logTeams'))">💧 Đội Nước</span>
+          <span class="nk-chip" onclick="(el=>el.value=el.value?(el.value.includes('Tổ Sửa chữa')?el.value:el.value+', Tổ Sửa chữa'):'Tổ Sửa chữa')(document.getElementById('logTeams'))">🛠️ Tổ Sửa chữa</span>
+          <span class="nk-chip" onclick="(el=>el.value=el.value?(el.value.includes('Tổ Vận hành')?el.value:el.value+', Tổ Vận hành'):'Tổ Vận hành')(document.getElementById('logTeams'))">🔄 Tổ Vận hành</span>
+        </div>
       </div>
       <div class="nk-form-group">
         <label class="nk-label">ĐÍNH KÈM ẢNH (Tối đa 3)</label>
