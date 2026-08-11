@@ -680,10 +680,12 @@ test.describe('Hash Route - #checklist/golf navigation', () => {
     await setupMocks(page);
   });
 
-  test('Truy cập /nhatky/index.html#checklist/golf tự chọn subtabChecklist và hiện khối Ca trực & Checklist', async ({ page }) => {
+  test('Truy cập /nhatky/index.html#checklist/golf tự mở màn hình screenGolfChecklist và iframe nhúng', async ({ page }) => {
     await page.goto('/nhatky/index.html#checklist/golf?autoTemplate=ca_toi&date=2026-08-11');
-    await expect(page.locator('#subtabChecklist')).toHaveClass(/is-active/);
-    await expect(page.locator('.nk-checklist-shortcuts')).toBeVisible();
+    await expect(page.locator('#screenGolfChecklist')).toBeVisible();
+    const iframe = page.locator('#golfChecklistIframe');
+    await expect(iframe).toBeVisible();
+    await expect(iframe).toHaveAttribute('src', /sangolf\/index\.html\?embed=1/);
   });
 
   test('Bấm shortcut Golf tạo URL dạng #checklist/golf', async ({ page }) => {
@@ -691,5 +693,10 @@ test.describe('Hash Route - #checklist/golf navigation', () => {
     const golfLink = page.locator('.nk-checklist-shortcuts a', { hasText: 'Golf' }).first();
     await expect(golfLink).toBeVisible();
     await expect(golfLink).toHaveAttribute('href', /#checklist\/golf\?autoTemplate=/);
+  });
+
+  test('Truy cập trực tiếp sangolf/index.html tự chuyển hướng về nhatky/index.html#checklist/golf', async ({ page }) => {
+    await page.goto('/sangolf/index.html?autoTemplate=ca_toi&date=2026-08-11');
+    await expect(page).toHaveURL(/nhatky\/index\.html#checklist\/golf\?autoTemplate=ca_toi/);
   });
 });

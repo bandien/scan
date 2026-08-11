@@ -481,6 +481,20 @@
 <script src="../js/fontscale.js"></script>
 <script src="../js/pwa.js" data-root="../"></script>
 <script>
+// Tự động chuyển hướng về nhatky/#checklist/golf khi mở trực tiếp ca từ trình duyệt (không phải embed)
+(function () {
+  if (window === window.top && !window.location.search.includes('embed=1')) {
+    const params = new URLSearchParams(window.location.search);
+    const auto = params.get('autoTemplate') || params.get('templateId') || '';
+    if (auto) {
+      const date = params.get('date') || '';
+      let target = '../nhatky/index.html#checklist/golf?autoTemplate=' + encodeURIComponent(auto);
+      if (date) target += '&date=' + encodeURIComponent(date);
+      window.location.replace(target);
+    }
+  }
+})();
+
 // =============================================================================
 // sangolf — Checklist Cơ Điện Sân Golf (local-first, autosave)
 // Backend: 19_GolfChecklist.gs · Kế hoạch: docs/PLAN_ChecklistGolf_SoHoa.md

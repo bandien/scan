@@ -92,8 +92,7 @@ test('route checklist theo đối tượng mở đúng tab và giữ đường q
   const href = await page.locator('.nk-current-shift')
     .getByRole('link', { name: /checklist Golf/i })
     .getAttribute('href');
-  const target = new URL(href, page.url());
-  expect(target.searchParams.get('returnTo')).toBe('../nhatky/#checklist/golf');
+  expect(href).toMatch(/^#checklist\/golf\?autoTemplate=/);
 
   await page.goto('/nhatky/index.html#checklist/equipment/PUMP-01');
   await expect(page.locator('#subtabChecklist')).toHaveClass(/is-active/);

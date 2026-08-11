@@ -464,6 +464,8 @@ function showScreen(screen) {
   document.getElementById('screenReport').style.display  = screen === 'report'   ? '' : 'none';
   document.getElementById('screenProfile').style.display = screen === 'profile'  ? '' : 'none';
   document.getElementById('screenContacts').style.display= screen === 'contacts' ? '' : 'none';
+  const golfScreen = document.getElementById('screenGolfChecklist');
+  if (golfScreen) golfScreen.style.display = screen === 'golfChecklist' ? 'flex' : 'none';
   document.getElementById('screenDetail').classList.toggle('is-active', screen === 'detail');
 }
 
@@ -521,6 +523,32 @@ window.addEventListener('load', handleRoute);
 
 function handleRoute() {
   const hash = window.location.hash;
+
+  if (hash.startsWith('#checklist/golf')) {
+    filterTab = 'checklist';
+    document.querySelectorAll('.nk-subtab').forEach(b => {
+      b.classList.toggle('is-active', b.dataset.tab === 'checklist');
+    });
+
+    const rawQuery = hash.includes('?') ? hash.slice(hash.indexOf('?') + 1) : window.location.search.replace(/^\?/, '');
+    const params = new URLSearchParams(rawQuery);
+    const auto = params.get('autoTemplate') || params.get('templateId') || '';
+    const date = params.get('date') || '';
+
+    let embedSrc = '../sangolf/index.html?embed=1';
+    if (auto) embedSrc += '&autoTemplate=' + encodeURIComponent(auto);
+    if (date) embedSrc += '&date=' + encodeURIComponent(date);
+
+    const iframe = document.getElementById('golfChecklistIframe');
+    if (iframe && iframe.getAttribute('data-current-src') !== embedSrc) {
+      iframe.src = embedSrc;
+      iframe.setAttribute('data-current-src', embedSrc);
+    }
+
+    showScreen('golfChecklist');
+    return;
+  }
+
   const checklistRoute = window.BD_ChecklistRoutes
     ? BD_ChecklistRoutes.parseHash(hash)
     : (hash === '#checklist' ? { scope: 'all', objectId: '' } : null);
@@ -2637,6 +2665,15 @@ function renderTimelineHtml(planId) {
       <button class="nk-btn nk-btn--primary" id="btnSubmitHandover" onclick="submitHandover()">⇄ Xác nhận bàn giao</button>
     </div>
   </div>
+</div>
+
+<!-- SCREEN GOLF CHECKLIST (NHÚNG MƯỢT TRONG NHẬT KÝ) -->
+<div class="nk-app" id="screenGolfChecklist" style="display:none; padding:0; flex-direction:column; min-height:100vh;">
+  <div class="nk-appbar" style="position:sticky; top:0; z-index:100;">
+    <button class="nk-appbar__back" onclick="window.location.hash='#checklist'">‹</button>
+    <div class="nk-appbar__name">⛳ Checklist Sân Golf</div>
+  </div>
+  <iframe id="golfChecklistIframe" style="width:100%; height:calc(100vh - 56px); border:none; flex:1;" title="Checklist Sân Golf"></iframe>
 </div>
 
 </body>

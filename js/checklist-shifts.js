@@ -110,8 +110,7 @@
     adjacent,
     context,
     summarizePreviousRun,
-    golfUrl: shift => `../sangolf/index.html?autoTemplate=${encodeURIComponent(shift.templateId)}&date=${encodeURIComponent(shift.date)}&returnTo=${encodeURIComponent('../nhatky/#checklist/golf')}`,
+    golfUrl: shift => `#checklist/golf?autoTemplate=${encodeURIComponent(shift.templateId)}&date=${encodeURIComponent(shift.date)}`,
     pumpUrl: shift => `../pump_info.html?autoCheck=1&${query(shift)}`
   };
 });
-
