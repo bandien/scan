@@ -94,5 +94,6 @@ test('URL Golf mang đủ ca và ngày', () => {
   assert.equal(url.searchParams.get('autoTemplate'), 'ca_sang');
   assert.equal(url.searchParams.get('date'), '2026-07-29');
   assert.equal(url.searchParams.get('returnTo'), '../nhatky/#checklist/golf');
+  assert.equal(shifts.pumpUrl(shift), '../pump_info.html?autoCheck=1&shift=ca_sang&date=2026-07-29');
 });
 
