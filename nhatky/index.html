@@ -19,15 +19,6 @@
         extend: {
           fontFamily: {
             sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-          },
-          colors: {
-            brand: {
-              50: '#eef2ff',
-              100: '#e0e7ff',
-              500: '#6366f1',
-              600: '#4f46e5',
-              700: '#4338ca',
-            }
           }
         }
       }
@@ -49,7 +40,6 @@
       background: #cbd5e1;
       border-radius: 4px;
     }
-    /* Safe area for iOS devices */
     .pb-safe {
       padding-bottom: env(safe-area-inset-bottom, 1rem);
     }
@@ -77,13 +67,16 @@
       </div>
     </div>
     
-    <!-- User Quick Badge / Switch Shift -->
-    <div onclick="switchTab('personal')" class="flex items-center space-x-2 bg-indigo-700/60 hover:bg-indigo-700 border border-indigo-500/40 px-2.5 py-1 rounded-full cursor-pointer transition active:scale-95">
+    <!-- Shift / User Quick Badge -->
+    <button id="header-user-badge" onclick="openShiftModal()" aria-label="Đổi ca trực và nhân viên" class="flex items-center space-x-2 bg-indigo-700/60 hover:bg-indigo-700 border border-indigo-500/40 px-2.5 py-1 rounded-full cursor-pointer transition active:scale-95 text-left">
       <div class="w-6 h-6 rounded-full bg-amber-400 text-slate-900 font-bold text-xs flex items-center justify-center" id="header-avatar">
-        NV
+        NT
       </div>
-      <span class="text-xs font-semibold text-white tracking-wide pr-1" id="header-user-code">NV-8892</span>
-    </div>
+      <div class="flex flex-col pr-1">
+        <span class="text-xs font-bold text-white tracking-wide leading-none" id="header-user-code">Ngô Quyết Thắng</span>
+        <span class="text-[9px] text-indigo-200 font-medium leading-tight mt-0.5" id="header-shift-label">Ca 1 (06h - 14h)</span>
+      </div>
+    </button>
   </header>
 
   <!-- MAIN CONTENT CONTAINER -->
@@ -98,11 +91,11 @@
         <div class="relative flex-1">
           <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
           <input type="text" id="task-search" placeholder="Tìm kiếm đầu việc..." class="w-full pl-9 pr-8 py-2.5 bg-white rounded-xl border border-slate-200/80 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm placeholder:text-slate-400 transition" oninput="renderTasks()">
-          <button id="clear-search-btn" onclick="clearTaskSearch()" class="hidden absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600">
+          <button id="clear-search-btn" onclick="clearTaskSearch()" aria-label="Xóa tìm kiếm" class="hidden absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600">
             <i data-lucide="x" class="w-3.5 h-3.5"></i>
           </button>
         </div>
-        <button onclick="openTaskModal()" class="flex items-center space-x-1.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white px-3.5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition">
+        <button onclick="openTaskModal()" aria-label="Thêm công việc mới" class="flex items-center space-x-1.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white px-3.5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition">
           <i data-lucide="plus" class="w-4 h-4"></i>
           <span class="hidden sm:inline">Thêm việc</span>
         </button>
@@ -146,7 +139,7 @@
           <h2 class="text-base font-bold text-slate-800">Dòng thời gian nhật ký</h2>
           <span id="log-count-badge" class="text-xs font-bold px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">0</span>
         </div>
-        <button onclick="openLogModal()" class="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white px-3.5 py-2 rounded-xl text-sm font-semibold shadow-sm transition">
+        <button onclick="openLogModal()" aria-label="Ghi nhật ký mới" class="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white px-3.5 py-2 rounded-xl text-sm font-semibold shadow-sm transition">
           <i data-lucide="edit-3" class="w-4 h-4"></i>
           <span>Ghi nhật ký</span>
         </button>
@@ -181,9 +174,9 @@
       <div class="flex justify-between items-center">
         <div>
           <h2 class="text-base font-bold text-slate-800">Tổng kết ca trực</h2>
-          <p class="text-xs text-slate-500">Tự động tổng hợp dữ liệu thời gian thực</p>
+          <p class="text-xs text-slate-500" id="report-shift-subtitle">Báo cáo ca làm việc hiện hành</p>
         </div>
-        <button onclick="copyShiftReport()" class="flex items-center space-x-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-xl text-xs font-bold transition active:scale-95">
+        <button onclick="copyShiftReport()" aria-label="Sao chép báo cáo vào bộ nhớ tạm" class="flex items-center space-x-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-xl text-xs font-bold transition active:scale-95">
           <i data-lucide="copy" class="w-3.5 h-3.5"></i>
           <span>Sao chép báo cáo</span>
         </button>
@@ -193,7 +186,7 @@
       <div class="grid grid-cols-2 gap-3">
         <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200/80">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-slate-500">Tổng checklist</span>
+            <span class="text-xs font-semibold text-slate-500">Tổng checklist ca</span>
             <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center"><i data-lucide="list-todo" class="w-4 h-4"></i></div>
           </div>
           <p class="text-2xl font-extrabold text-indigo-600 mt-2" id="stat-total">0</p>
@@ -230,34 +223,60 @@
 
       <!-- Preview Report Box -->
       <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200/80 space-y-2">
-        <h3 class="text-xs font-bold text-slate-600 uppercase tracking-wider">Xem trước nội dung báo cáo ca</h3>
-        <div id="report-preview" class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs font-mono text-slate-700 whitespace-pre-wrap leading-relaxed">
+        <div class="flex justify-between items-center">
+          <h3 class="text-xs font-bold text-slate-600 uppercase tracking-wider">Xem trước nội dung báo cáo ca</h3>
+          <span class="text-[11px] text-slate-400 font-medium" id="report-view-all-label">Hiển thị đầy đủ</span>
+        </div>
+        <div id="report-preview" class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs font-mono text-slate-700 whitespace-pre-wrap leading-relaxed">
           Đang tạo báo cáo...
         </div>
       </div>
     </section>
 
     <!-- ========================================== -->
-    <!-- TAB 4: CÁ NHÂN & CÀI ĐẶT (#personal) -->
+    <!-- TAB 4: CÁ NHÂN & QUẢN LÝ CA (#personal) -->
     <!-- ========================================== -->
     <section id="tab-personal" class="space-y-4 hidden">
       <!-- Profile Card -->
       <div class="bg-gradient-to-br from-white to-slate-50 p-5 rounded-2xl shadow-xs border border-slate-200/80 text-center relative overflow-hidden">
         <div class="w-16 h-16 bg-gradient-to-tr from-indigo-600 to-indigo-400 text-white font-extrabold text-xl rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md shadow-indigo-600/20">
-          <span id="profile-avatar-char">NV</span>
+          <span id="profile-avatar-char">NT</span>
         </div>
-        <h3 class="font-bold text-slate-800 text-lg" id="profile-name">Nhân Viên Vận Hành</h3>
-        <p class="text-xs font-medium text-slate-500 mt-0.5" id="profile-code">Mã NV: NV-8892 • Ca Trực 1</p>
+        <h3 class="font-bold text-slate-800 text-lg" id="profile-name">Ngô Quyết Thắng</h3>
+        <p class="text-xs font-medium text-slate-500 mt-0.5" id="profile-code">Mã NV: EMP01 • Ca 1 (06h - 14h)</p>
         
-        <button onclick="openProfileModal()" class="mt-3 inline-flex items-center space-x-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition">
-          <i data-lucide="edit-2" class="w-3 h-3"></i>
-          <span>Đổi thông tin nhân viên</span>
+        <button onclick="openShiftModal()" aria-label="Chuyển đổi ca trực và nhân viên" class="mt-3 inline-flex items-center space-x-1.5 px-3.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-xl transition">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          <span>Đổi Ca Trực / Giao Ca</span>
         </button>
+      </div>
+
+      <!-- Active Employees List -->
+      <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200/80 space-y-3">
+        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Danh sách nhân sự Tổ Điện Hòa Bình (4 Active)</h3>
+        <div class="space-y-2 text-xs">
+          <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100">
+            <span class="font-bold text-slate-800">1. Ngô Quyết Thắng</span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold">Ca trưởng / Active</span>
+          </div>
+          <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100">
+            <span class="font-bold text-slate-800">2. Đinh Văn Hậu</span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold">Kỹ thuật viên / Active</span>
+          </div>
+          <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100">
+            <span class="font-bold text-slate-800">3. Hoàng Việt Hoàng</span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold">Kỹ thuật viên / Active</span>
+          </div>
+          <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100">
+            <span class="font-bold text-slate-800">4. Nguyễn Đức Phong</span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold">Kỹ thuật viên / Active</span>
+          </div>
+        </div>
       </div>
 
       <!-- Actions Menu -->
       <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 overflow-hidden divide-y divide-slate-100">
-        <button onclick="exportDataJSON()" class="w-full text-left px-4 py-3.5 flex items-center justify-between hover:bg-slate-50 transition text-sm text-slate-700 font-medium">
+        <button onclick="exportDataJSON()" aria-label="Xuất dữ liệu sao lưu định dạng JSON" class="w-full text-left px-4 py-3.5 flex items-center justify-between hover:bg-slate-50 transition text-sm text-slate-700 font-medium">
           <div class="flex items-center space-x-3">
             <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center"><i data-lucide="download" class="w-4 h-4"></i></div>
             <span>Xuất sao lưu dữ liệu (JSON)</span>
@@ -265,7 +284,7 @@
           <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
         </button>
 
-        <button onclick="resetSampleData()" class="w-full text-left px-4 py-3.5 flex items-center justify-between hover:bg-slate-50 transition text-sm text-slate-700 font-medium">
+        <button onclick="resetSampleData()" aria-label="Khôi phục lại dữ liệu mẫu của 4 nhân sự" class="w-full text-left px-4 py-3.5 flex items-center justify-between hover:bg-slate-50 transition text-sm text-slate-700 font-medium">
           <div class="flex items-center space-x-3">
             <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center"><i data-lucide="rotate-ccw" class="w-4 h-4"></i></div>
             <span>Khôi phục dữ liệu mẫu ban đầu</span>
@@ -273,7 +292,7 @@
           <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
         </button>
 
-        <button onclick="clearData()" class="w-full text-left px-4 py-3.5 flex items-center justify-between hover:bg-rose-50 transition text-sm text-rose-600 font-semibold">
+        <button onclick="clearData()" aria-label="Xóa toàn bộ dữ liệu trên thiết bị này" class="w-full text-left px-4 py-3.5 flex items-center justify-between hover:bg-rose-50 transition text-sm text-rose-600 font-semibold">
           <div class="flex items-center space-x-3">
             <div class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center"><i data-lucide="trash-2" class="w-4 h-4"></i></div>
             <span>Xóa sạch toàn bộ dữ liệu máy</span>
@@ -285,7 +304,7 @@
       <!-- System Info -->
       <div class="text-center text-xs text-slate-400 space-y-1 pt-2">
         <p>Hệ Thống Trực Vận Hành & CMMS WebApp</p>
-        <p>Phiên bản 2.1.0 • Lưu trữ trực tiếp trên thiết bị (Offline First)</p>
+        <p>Phiên bản 2.2.0 (Multi-User & Shift Isolation) • Lưu trữ độc lập</p>
       </div>
     </section>
 
@@ -293,32 +312,108 @@
 
   <!-- BOTTOM NAVIGATION BAR (FIXED) -->
   <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-200/90 px-3 py-2 flex justify-around items-center z-30 shadow-2xl pb-safe">
-    <button onclick="switchTab('tasks')" id="nav-tasks" class="flex flex-col items-center text-indigo-600 font-semibold transition-all duration-200 active:scale-90">
+    <button onclick="switchTab('tasks')" id="nav-tasks" aria-label="Tab Danh sách Checklist công việc" class="flex flex-col items-center text-indigo-600 font-semibold transition-all duration-200 active:scale-90">
       <div class="p-1 rounded-xl bg-indigo-50"><i data-lucide="check-square" class="w-5 h-5"></i></div>
       <span class="text-[10px] mt-0.5">Checklist</span>
     </button>
-    <button onclick="switchTab('journal')" id="nav-journal" class="flex flex-col items-center text-slate-400 font-medium transition-all duration-200 active:scale-90">
+    <button onclick="switchTab('journal')" id="nav-journal" aria-label="Tab Nhật ký hoạt động ca trực" class="flex flex-col items-center text-slate-400 font-medium transition-all duration-200 active:scale-90">
       <div class="p-1 rounded-xl"><i data-lucide="book-open" class="w-5 h-5"></i></div>
       <span class="text-[10px] mt-0.5">Nhật ký</span>
     </button>
-    <button onclick="switchTab('report')" id="nav-report" class="flex flex-col items-center text-slate-400 font-medium transition-all duration-200 active:scale-90">
+    <button onclick="switchTab('report')" id="nav-report" aria-label="Tab Báo cáo ca trực" class="flex flex-col items-center text-slate-400 font-medium transition-all duration-200 active:scale-90">
       <div class="p-1 rounded-xl"><i data-lucide="bar-chart-3" class="w-5 h-5"></i></div>
       <span class="text-[10px] mt-0.5">Báo cáo</span>
     </button>
-    <button onclick="switchTab('personal')" id="nav-personal" class="flex flex-col items-center text-slate-400 font-medium transition-all duration-200 active:scale-90">
+    <button onclick="switchTab('personal')" id="nav-personal" aria-label="Tab Cá nhân và đổi ca trực" class="flex flex-col items-center text-slate-400 font-medium transition-all duration-200 active:scale-90">
       <div class="p-1 rounded-xl"><i data-lucide="user" class="w-5 h-5"></i></div>
       <span class="text-[10px] mt-0.5">Cá nhân</span>
     </button>
   </nav>
 
   <!-- ========================================== -->
-  <!-- MODAL: THÊM / SỬA CÔNG VIỆC -->
+  <!-- MODAL: ĐỔI CA TRỰC & NHÂN VIÊN (#modal-shift-select) -->
+  <!-- ========================================== -->
+  <div id="modal-shift-select" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200">
+    <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 class="font-bold text-slate-800 text-base">Chọn Nhân Viên & Ca Trực</h3>
+        <button onclick="closeShiftModal()" aria-label="Đóng bảng chọn ca trực" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Nhân viên trực <span class="text-rose-500">*</span></label>
+          <select id="select-active-employee" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500">
+            <!-- Rendered by JS: Only 4 active employees -->
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Ca làm việc <span class="text-rose-500">*</span></label>
+          <select id="select-active-shift-type" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500">
+            <option value="Ca 1 (06h - 14h)">Ca 1 (06h - 14h)</option>
+            <option value="Ca 2 (14h - 22h)">Ca 2 (14h - 22h)</option>
+            <option value="Ca 3 (22h - 06h)">Ca 3 (22h - 06h)</option>
+            <option value="Ca Hành Chính">Ca Hành Chính</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Ngày trực</label>
+          <input type="date" id="input-shift-date" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500">
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100">
+        <button onclick="closeShiftModal()" aria-label="Hủy chọn ca trực" class="px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition">Hủy</button>
+        <button id="btn-save-shift" onclick="saveShiftSelection()" aria-label="Xác nhận vào ca trực" class="px-5 py-2.5 text-sm font-semibold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-sm transition">Vào ca trực</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: MỞ LẠI TASK ĐÃ XONG (#modal-reopen-task) -->
+  <!-- ========================================== -->
+  <div id="modal-reopen-task" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200">
+    <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center space-x-2 text-amber-600">
+          <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+          <h3 class="font-bold text-slate-800 text-base">Xác Nhận Mở Lại Công Việc</h3>
+        </div>
+        <button onclick="closeReopenModal()" aria-label="Đóng xác nhận mở lại" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <p class="text-xs text-slate-600 leading-relaxed">
+          Công việc này đã được đánh dấu hoàn tất trước đó. Bạn có chắc muốn mở lại không? Thao tác này sẽ được ghi nhận vào lịch sử kiểm toán ca trực.
+        </p>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Lý do mở lại công việc <span class="text-rose-500">*</span></label>
+          <textarea id="input-reopen-reason" rows="2" placeholder="VD: Phát hiện lỗi tái phát, cần kiểm tra bổ sung..." class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100">
+        <button onclick="closeReopenModal()" aria-label="Hủy mở lại task" class="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl">Hủy</button>
+        <button id="btn-confirm-reopen" onclick="confirmReopenTask()" aria-label="Xác nhận mở lại task" class="px-5 py-2 text-sm font-semibold bg-amber-600 text-white rounded-xl hover:bg-amber-700">Mở lại việc</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: THÊM CÔNG VIỆC -->
   <!-- ========================================== -->
   <div id="modal-task" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200">
     <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-4 transform transition-all">
       <div class="flex justify-between items-center">
         <h3 class="font-bold text-slate-800 text-base" id="task-modal-title">Thêm Checklist Mới</h3>
-        <button onclick="closeTaskModal()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
+        <button onclick="closeTaskModal()" aria-label="Đóng modal thêm công việc" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
@@ -332,7 +427,7 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1">Mức độ ưu tiên</label>
-            <select id="input-task-priority" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium">
+            <select id="input-task-priority" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium">
               <option value="Bình thường">⚪ Bình thường</option>
               <option value="Quan trọng">🟡 Quan trọng</option>
               <option value="Khẩn cấp">🔴 Khẩn cấp</option>
@@ -346,8 +441,8 @@
       </div>
 
       <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100">
-        <button onclick="closeTaskModal()" class="px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition">Hủy</button>
-        <button onclick="saveTask()" class="px-5 py-2.5 text-sm font-semibold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-sm transition">Lưu công việc</button>
+        <button onclick="closeTaskModal()" aria-label="Hủy thêm công việc" class="px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition">Hủy</button>
+        <button onclick="saveTask()" aria-label="Lưu công việc mới" class="px-5 py-2.5 text-sm font-semibold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-sm transition">Lưu công việc</button>
       </div>
     </div>
   </div>
@@ -359,7 +454,7 @@
     <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-4 transform transition-all">
       <div class="flex justify-between items-center">
         <h3 class="font-bold text-slate-800 text-base">Ghi Nhật Ký Hoạt Động</h3>
-        <button onclick="closeLogModal()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
+        <button onclick="closeLogModal()" aria-label="Đóng modal ghi nhật ký" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
@@ -386,85 +481,274 @@
       </div>
 
       <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100">
-        <button onclick="closeLogModal()" class="px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition">Hủy</button>
-        <button onclick="saveLog()" class="px-5 py-2.5 text-sm font-semibold bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 shadow-sm transition">Ghi vào sổ</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================== -->
-  <!-- MODAL: ĐỔI THÔNG TIN CÁ NHÂN -->
-  <!-- ========================================== -->
-  <div id="modal-profile" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-4">
-      <div class="flex justify-between items-center">
-        <h3 class="font-bold text-slate-800 text-base">Cập Nhật Thông Tin Trực</h3>
-        <button onclick="closeProfileModal()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
-          <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
-      </div>
-      <div class="space-y-3">
-        <div>
-          <label class="block text-xs font-bold text-slate-600 mb-1">Họ và tên</label>
-          <input type="text" id="input-profile-name" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500">
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold text-slate-600 mb-1">Mã NV</label>
-            <input type="text" id="input-profile-code" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-600 mb-1">Ca trực</label>
-            <select id="input-profile-shift" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500">
-              <option value="Ca Trực 1 (06h - 14h)">Ca 1 (06h - 14h)</option>
-              <option value="Ca Trực 2 (14h - 22h)">Ca 2 (14h - 22h)</option>
-              <option value="Ca Trực 3 (22h - 06h)">Ca 3 (22h - 06h)</option>
-              <option value="Ca Hành Chính">Ca Hành Chính</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100">
-        <button onclick="closeProfileModal()" class="px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl">Hủy</button>
-        <button onclick="saveProfile()" class="px-5 py-2.5 text-sm font-semibold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700">Lưu lại</button>
+        <button onclick="closeLogModal()" aria-label="Hủy ghi nhật ký" class="px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition">Hủy</button>
+        <button onclick="saveLog()" aria-label="Lưu nhật ký" class="px-5 py-2.5 text-sm font-semibold bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 shadow-sm transition">Ghi vào sổ</button>
       </div>
     </div>
   </div>
 
   <!-- APPLICATION LOGIC SCRIPT -->
   <script>
-    // Initial Seed Data
-    const DEFAULT_TASKS = [
-      { id: 1, title: 'Kiểm tra nhiệt độ & điện áp tủ điện tổng TBA', priority: 'Khẩn cấp', category: 'Trạm điện', done: false, time: '08:00' },
-      { id: 2, title: 'Kiểm tra áp lực nước và van phao bể ngầm', priority: 'Quan trọng', category: 'Trạm bơm', done: true, time: '09:30' },
-      { id: 3, title: 'Ghi chỉ số đồng hồ điện năng & lưu lượng nước', priority: 'Quan trọng', category: 'Đồng hồ', done: false, time: '17:30' },
-      { id: 4, title: 'Kiểm tra đèn thoát hiểm & bình PCCC hành lang', priority: 'Bình thường', category: 'An toàn', done: false, time: '14:00' },
-      { id: 5, title: 'Bàn giao chìa khóa & sổ nhật ký cho ca sau', priority: 'Bình thường', category: 'Bàn giao', done: false, time: '21:45' }
+    // ==========================================
+    // 1. DATA CONSTANTS & ACTIVE EMPLOYEES
+    // ==========================================
+    const ACTIVE_EMPLOYEES = [
+      { id: 'EMP01', fullName: 'Ngô Quyết Thắng', shortName: 'Thắng', role: 'Ca trưởng', status: 'active' },
+      { id: 'EMP02', fullName: 'Đinh Văn Hậu', shortName: 'Hậu', role: 'Kỹ thuật viên', status: 'active' },
+      { id: 'EMP03', fullName: 'Hoàng Việt Hoàng', shortName: 'Hoàng', role: 'Kỹ thuật viên', status: 'active' },
+      { id: 'EMP04', fullName: 'Nguyễn Đức Phong', shortName: 'Phong', role: 'Kỹ thuật viên', status: 'active' }
     ];
 
-    const DEFAULT_LOGS = [
-      { id: 1, content: 'Đã kiểm tra tủ điện tổng TBA, các pha cân bằng, nhiệt độ tiếp xúc 38°C (bình thường).', status: 'Không bất thường', area: 'Trạm điện TBA', time: '08:30 - Hôm nay' },
-      { id: 2, content: 'Xử lý rò rỉ nhẹ rắc-co ống bơm tăng áp số 2, đã xiết chặt lại và thử áp tốt.', status: 'Đã xử lý dứt điểm', area: 'Trạm bơm nước', time: '10:15 - Hôm nay' },
-      { id: 3, content: 'Đồng hồ đo áp suất bơm bù áp PCCC dao động nhẹ dưới 7 bar, đã báo kỹ thuật trưởng theo dõi.', status: 'Cần theo dõi thêm', area: 'Phòng PCCC', time: '11:00 - Hôm nay' }
+    const INACTIVE_EMPLOYEES = [
+      { id: 'EMP_INACTIVE_01', fullName: 'Bùi Hồng Quân', status: 'inactive' },
+      { id: 'EMP_INACTIVE_02', fullName: 'Nguyễn Đình Thủy', status: 'inactive' }
     ];
 
-    const DEFAULT_PROFILE = {
-      name: 'Nhân Viên Vận Hành',
-      code: 'NV-8892',
-      shift: 'Ca Trực 1 (06h - 14h)'
-    };
+    // Helper: Tạo initials sạch từ họ tên (loại bỏ ngoặc đơn)
+    function generateCleanInitials(name) {
+      if (!name) return 'NV';
+      const clean = name.replace(/\(.*?\)/g, '').trim();
+      const words = clean.split(/\s+/).filter(Boolean);
+      if (words.length === 0) return 'NV';
+      if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+      return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+    }
 
-    // State Variables
-    let tasks = JSON.parse(localStorage.getItem('app_tasks')) || DEFAULT_TASKS;
-    let logs = JSON.parse(localStorage.getItem('app_logs')) || DEFAULT_LOGS;
-    let profile = JSON.parse(localStorage.getItem('app_profile')) || DEFAULT_PROFILE;
+    // Helper: Lấy ngày ISO chuẩn (YYYY-MM-DD)
+    function getTodayIsoDate() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    }
+
+    // ==========================================
+    // 2. REPOSITORY & STATE MANAGEMENT
+    // ==========================================
+    class AppRepository {
+      constructor() {
+        this.migrateIfNeeded();
+        this.loadState();
+      }
+
+      migrateIfNeeded() {
+        const schemaVer = localStorage.getItem('app_schema_version');
+        if (!schemaVer) {
+          // Backup legacy data
+          const rawTasks = localStorage.getItem('app_tasks');
+          const rawLogs = localStorage.getItem('app_logs');
+          if (rawTasks) localStorage.setItem('app_backup_legacy_v1_tasks', rawTasks);
+          if (rawLogs) localStorage.setItem('app_backup_legacy_v1_logs', rawLogs);
+
+          // Tag legacy tasks with unattributed
+          if (rawTasks) {
+            try {
+              let tList = JSON.parse(rawTasks);
+              tList = tList.map(t => ({
+                ...t,
+                createdBy: t.createdBy || 'legacy-unattributed',
+                shiftId: t.shiftId || 'legacy-shift'
+              }));
+              localStorage.setItem('app_tasks', JSON.stringify(tList));
+            } catch (e) {}
+          }
+
+          if (rawLogs) {
+            try {
+              let lList = JSON.parse(rawLogs);
+              lList = lList.map(l => ({
+                ...l,
+                employeeId: l.employeeId || 'legacy-unattributed',
+                shiftId: l.shiftId || 'legacy-shift'
+              }));
+              localStorage.setItem('app_logs', JSON.stringify(lList));
+            } catch (e) {}
+          }
+
+          localStorage.setItem('app_schema_version', '2');
+        }
+      }
+
+      loadState() {
+        this.employees = ACTIVE_EMPLOYEES;
+        this.currentEmployeeId = localStorage.getItem('app_current_emp_id') || 'EMP01';
+        this.currentShiftType = localStorage.getItem('app_current_shift_type') || 'Ca 1 (06h - 14h)';
+        this.currentDate = localStorage.getItem('app_current_shift_date') || getTodayIsoDate();
+
+        this.tasks = JSON.parse(localStorage.getItem('app_tasks') || '[]');
+        this.logs = JSON.parse(localStorage.getItem('app_logs') || '[]');
+        this.taskEvents = JSON.parse(localStorage.getItem('app_task_events') || '[]');
+
+        // Khởi tạo dữ liệu mẫu nếu hoàn toàn trống
+        if (this.tasks.length === 0 && this.logs.length === 0) {
+          this.initSampleData();
+        }
+      }
+
+      get currentShiftId() {
+        return `shift_${this.currentDate}_${this.currentShiftType.replace(/\s+/g, '_')}_${this.currentEmployeeId}`;
+      }
+
+      getCurrentEmployee() {
+        return this.employees.find(e => e.id === this.currentEmployeeId) || this.employees[0];
+      }
+
+      setCurrentShift(empId, shiftType, date) {
+        this.currentEmployeeId = empId;
+        this.currentShiftType = shiftType;
+        this.currentDate = date || getTodayIsoDate();
+        localStorage.setItem('app_current_emp_id', this.currentEmployeeId);
+        localStorage.setItem('app_current_shift_type', this.currentShiftType);
+        localStorage.setItem('app_current_shift_date', this.currentDate);
+      }
+
+      saveTasks() {
+        localStorage.setItem('app_tasks', JSON.stringify(this.tasks));
+      }
+
+      saveLogs() {
+        localStorage.setItem('app_logs', JSON.stringify(this.logs));
+      }
+
+      saveTaskEvents() {
+        localStorage.setItem('app_task_events', JSON.stringify(this.taskEvents));
+      }
+
+      addTask(title, priority, category) {
+        const emp = this.getCurrentEmployee();
+        const newTask = {
+          id: Date.now(),
+          shiftId: this.currentShiftId,
+          title,
+          priority,
+          category: category || 'Chung',
+          done: false,
+          createdBy: emp.id,
+          createdByName: emp.fullName,
+          createdAt: new Date().toISOString(),
+          time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+        };
+        this.tasks.unshift(newTask);
+        this.saveTasks();
+
+        this.taskEvents.push({
+          id: Date.now(),
+          taskId: newTask.id,
+          action: 'CREATED',
+          actorId: emp.id,
+          actorName: emp.fullName,
+          occurredAt: new Date().toISOString()
+        });
+        this.saveTaskEvents();
+        return newTask;
+      }
+
+      completeTask(taskId) {
+        const emp = this.getCurrentEmployee();
+        const t = this.tasks.find(x => x.id === taskId);
+        if (t) {
+          t.done = true;
+          t.completedBy = emp.id;
+          t.completedByName = emp.fullName;
+          t.completedAt = new Date().toISOString();
+          this.saveTasks();
+
+          this.taskEvents.push({
+            id: Date.now(),
+            taskId: t.id,
+            action: 'COMPLETED',
+            actorId: emp.id,
+            actorName: emp.fullName,
+            occurredAt: new Date().toISOString()
+          });
+          this.saveTaskEvents();
+        }
+      }
+
+      reopenTask(taskId, reason) {
+        const emp = this.getCurrentEmployee();
+        const t = this.tasks.find(x => x.id === taskId);
+        if (t) {
+          t.done = false;
+          t.completedBy = null;
+          t.completedByName = null;
+          t.completedAt = null;
+          this.saveTasks();
+
+          this.taskEvents.push({
+            id: Date.now(),
+            taskId: t.id,
+            action: 'REOPENED',
+            actorId: emp.id,
+            actorName: emp.fullName,
+            reason: reason || 'Mở lại để kiểm tra bổ sung',
+            occurredAt: new Date().toISOString()
+          });
+          this.saveTaskEvents();
+        }
+      }
+
+      deleteTask(taskId) {
+        this.tasks = this.tasks.filter(t => t.id !== taskId);
+        this.saveTasks();
+      }
+
+      addLog(content, status, area) {
+        const emp = this.getCurrentEmployee();
+        const now = new Date();
+        const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} - Hôm nay`;
+
+        const newLog = {
+          id: Date.now(),
+          shiftId: this.currentShiftId,
+          employeeId: emp.id,
+          employeeName: emp.fullName,
+          content,
+          status,
+          area: area || '',
+          time: timeStr,
+          createdAt: now.toISOString()
+        };
+        this.logs.unshift(newLog);
+        this.saveLogs();
+        return newLog;
+      }
+
+      deleteLog(logId) {
+        this.logs = this.logs.filter(l => l.id !== logId);
+        this.saveLogs();
+      }
+
+      initSampleData() {
+        const sId = this.currentShiftId;
+        const emp = this.getCurrentEmployee();
+        this.tasks = [
+          { id: 101, shiftId: sId, title: 'Kiểm tra nhiệt độ & điện áp tủ điện tổng TBA', priority: 'Khẩn cấp', category: 'Trạm điện', done: false, createdBy: emp.id, createdByName: emp.fullName, time: '08:00' },
+          { id: 102, shiftId: sId, title: 'Kiểm tra áp lực nước và van phao bể ngầm', priority: 'Quan trọng', category: 'Trạm bơm', done: true, createdBy: emp.id, createdByName: emp.fullName, completedBy: emp.id, completedByName: emp.fullName, time: '09:30' },
+          { id: 103, shiftId: sId, title: 'Ghi chỉ số đồng hồ điện năng & lưu lượng nước', priority: 'Quan trọng', category: 'Đồng hồ', done: false, createdBy: emp.id, createdByName: emp.fullName, time: '17:30' }
+        ];
+        this.logs = [
+          { id: 201, shiftId: sId, employeeId: emp.id, employeeName: emp.fullName, content: 'Đã kiểm tra tủ điện tổng TBA, các pha cân bằng, nhiệt độ tiếp xúc 38°C (bình thường).', status: 'Không bất thường', area: 'Trạm điện TBA', time: '08:30 - Hôm nay' }
+        ];
+        this.taskEvents = [
+          { id: 301, taskId: 102, action: 'COMPLETED', actorId: emp.id, actorName: emp.fullName, occurredAt: new Date().toISOString() }
+        ];
+        this.saveTasks();
+        this.saveLogs();
+        this.saveTaskEvents();
+      }
+    }
+
+    const repo = new AppRepository();
     let currentTaskFilter = 'all';
+    let pendingReopenTaskId = null;
 
-    // Application Lifecycle
+    // ==========================================
+    // 3. UI INITIALIZATION & EVENT HANDLERS
+    // ==========================================
     document.addEventListener("DOMContentLoaded", () => {
       lucide.createIcons();
       updateDateDisplay();
-      updateProfileUI();
+      populateEmployeeSelect();
+      updateShiftHeaderUI();
       renderTasks();
       renderLogs();
       updateStats();
@@ -485,7 +769,6 @@
       });
     });
 
-    // Display Date
     function updateDateDisplay() {
       const now = new Date();
       const options = { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric' };
@@ -493,110 +776,178 @@
       document.getElementById('current-date').innerText = formatted.charAt(0).toUpperCase() + formatted.slice(1);
     }
 
-    // Profile Management
-    function updateProfileUI() {
-      document.getElementById('profile-name').innerText = profile.name;
-      document.getElementById('profile-code').innerText = `Mã NV: ${profile.code} • ${profile.shift}`;
-      document.getElementById('header-user-code').innerText = profile.code;
-      const initials = profile.name.split(' ').map(w => w[0]).slice(-2).join('').toUpperCase() || 'NV';
+    function populateEmployeeSelect() {
+      const sel = document.getElementById('select-active-employee');
+      sel.innerHTML = '';
+      repo.employees.forEach(emp => {
+        const opt = document.createElement('option');
+        opt.value = emp.id;
+        opt.innerText = `${emp.fullName} (${emp.role || 'Kỹ thuật viên'})`;
+        sel.appendChild(opt);
+      });
+    }
+
+    function updateShiftHeaderUI() {
+      const emp = repo.getCurrentEmployee();
+      const initials = generateCleanInitials(emp.fullName);
+
       document.getElementById('header-avatar').innerText = initials;
+      document.getElementById('header-user-code').innerText = `${emp.shortName || emp.fullName} (${emp.id})`;
+      document.getElementById('header-shift-label').innerText = `${repo.currentShiftType}`;
+
       document.getElementById('profile-avatar-char').innerText = initials;
-      localStorage.setItem('app_profile', JSON.stringify(profile));
+      document.getElementById('profile-name').innerText = emp.fullName;
+      document.getElementById('profile-code').innerText = `Mã NV: ${emp.id} • ${repo.currentShiftType}`;
+      document.getElementById('report-shift-subtitle').innerText = `Ca trực: ${repo.currentShiftType} • Người trực: ${emp.fullName}`;
     }
 
-    function openProfileModal() {
-      document.getElementById('input-profile-name').value = profile.name;
-      document.getElementById('input-profile-code').value = profile.code;
-      document.getElementById('input-profile-shift').value = profile.shift;
-      document.getElementById('modal-profile').classList.remove('hidden');
-      document.getElementById('modal-profile').classList.add('flex');
+    function openShiftModal() {
+      document.getElementById('select-active-employee').value = repo.currentEmployeeId;
+      document.getElementById('select-active-shift-type').value = repo.currentShiftType;
+      document.getElementById('input-shift-date').value = repo.currentDate;
+      document.getElementById('modal-shift-select').classList.remove('hidden');
+      document.getElementById('modal-shift-select').classList.add('flex');
     }
 
-    function closeProfileModal() {
-      document.getElementById('modal-profile').classList.add('hidden');
-      document.getElementById('modal-profile').classList.remove('flex');
+    function closeShiftModal() {
+      document.getElementById('modal-shift-select').classList.add('hidden');
+      document.getElementById('modal-shift-select').classList.remove('flex');
     }
 
-    function saveProfile() {
-      const name = document.getElementById('input-profile-name').value.trim();
-      const code = document.getElementById('input-profile-code').value.trim();
-      const shift = document.getElementById('input-profile-shift').value;
-      if (!name || !code) return;
+    function saveShiftSelection() {
+      const empId = document.getElementById('select-active-employee').value;
+      const shiftType = document.getElementById('select-active-shift-type').value;
+      const date = document.getElementById('input-shift-date').value || getTodayIsoDate();
 
-      profile = { name, code, shift };
-      updateProfileUI();
-      closeProfileModal();
-      showToast('Đã cập nhật thông tin cá nhân');
+      repo.setCurrentShift(empId, shiftType, date);
+      updateShiftHeaderUI();
+      closeShiftModal();
+      renderTasks();
+      renderLogs();
+      updateStats();
+      showToast(`Đã chuyển sang ca trực của ${repo.getCurrentEmployee().fullName}`);
+    }
+
+    // ==========================================
+    // 4. TASK CHECKLIST & REOPEN WORKFLOW
+    // ==========================================
+    function renderTasks() {
+      const listContainer = document.getElementById('task-list');
+      const searchQuery = (document.getElementById('task-search').value || '').trim().toLowerCase();
+      const clearBtn = document.getElementById('clear-search-btn');
+
+      if (searchQuery) {
+        clearBtn.classList.remove('hidden');
+      } else {
+        clearBtn.classList.add('hidden');
+      }
+
+      listContainer.innerHTML = '';
+
+      // Lọc task thuộc đúng ca hiện tại (hoặc legacy-shift)
+      const currentShiftTasks = repo.tasks.filter(t => t.shiftId === repo.currentShiftId);
+
+      let filtered = currentShiftTasks.filter(t => {
+        const matchesQuery = t.title.toLowerCase().includes(searchQuery) || (t.category && t.category.toLowerCase().includes(searchQuery));
+        if (!matchesQuery) return false;
+
+        if (currentTaskFilter === 'pending') return !t.done;
+        if (currentTaskFilter === 'done') return t.done;
+        if (currentTaskFilter === 'urgent') return t.priority === 'Khẩn cấp';
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        listContainer.innerHTML = `
+          <div class="bg-white p-8 rounded-2xl border border-slate-200/80 text-center space-y-2 shadow-xs">
+            <div class="w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto">
+              <i data-lucide="inbox" class="w-6 h-6"></i>
+            </div>
+            <p class="text-sm font-semibold text-slate-600">Không có công việc nào trong ca này</p>
+            <p class="text-xs text-slate-400">Nhấn 'Thêm việc' để bắt đầu checklist ca trực.</p>
+          </div>
+        `;
+      } else {
+        filtered.forEach(task => {
+          const badgeColor = task.priority === 'Khẩn cấp' ? 'bg-rose-50 text-rose-700 border-rose-200/60' :
+                             task.priority === 'Quan trọng' ? 'bg-amber-50 text-amber-700 border-amber-200/60' : 'bg-slate-100 text-slate-600 border-slate-200/60';
+
+          const item = document.createElement('div');
+          item.className = `bg-white p-3.5 rounded-2xl border ${task.done ? 'border-slate-200/60 bg-slate-50/70' : 'border-slate-200/90'} shadow-xs flex items-center justify-between gap-3 transition-all duration-200 hover:shadow-sm`;
+          
+          item.innerHTML = `
+            <div class="flex items-start space-x-3 flex-1 cursor-pointer select-none task-item-check" onclick="handleTaskCheck(${task.id})">
+              <div class="mt-0.5 w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-colors ${task.done ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-white'}">
+                ${task.done ? '<i data-lucide="check" class="w-3.5 h-3.5"></i>' : ''}
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold leading-snug break-words ${task.done ? 'line-through text-slate-400' : 'text-slate-800'}">${task.title}</p>
+                <div class="flex items-center gap-2 mt-1 flex-wrap">
+                  ${task.category ? `<span class="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded font-medium">${task.category}</span>` : ''}
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${badgeColor}">${task.priority}</span>
+                  ${task.completedByName ? `<span class="text-[10px] text-emerald-600 font-semibold">✓ ${task.completedByName}</span>` : ''}
+                </div>
+              </div>
+            </div>
+            <button onclick="deleteTask(${task.id})" aria-label="Xóa công việc ${task.title}" class="text-slate-300 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-50 transition active:scale-95">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          `;
+          listContainer.appendChild(item);
+        });
+      }
+
+      // Update Progress
+      const total = currentShiftTasks.length;
+      const totalDone = currentShiftTasks.filter(t => t.done).length;
+      const percent = total === 0 ? 0 : Math.round((totalDone / total) * 100);
+      document.getElementById('progress-bar').style.width = `${percent}%`;
+      document.getElementById('progress-percent').innerText = `${percent}%`;
+      document.getElementById('progress-count').innerText = `${totalDone}/${total} việc`;
+
+      lucide.createIcons();
       updateStats();
     }
 
-    // Toast Notification
-    function showToast(msg, isError = false) {
-      const toast = document.getElementById('toast');
-      const toastMsg = document.getElementById('toast-message');
-      const toastIcon = document.getElementById('toast-icon');
+    function handleTaskCheck(taskId) {
+      const task = repo.tasks.find(t => t.id === taskId);
+      if (!task) return;
 
-      toastMsg.innerText = msg;
-      if (isError) {
-        toastIcon.setAttribute('data-lucide', 'alert-circle');
-        toastIcon.classList.remove('text-emerald-400');
-        toastIcon.classList.add('text-rose-400');
+      if (task.done) {
+        // Đã hoàn thành -> Phải xác nhận và nhập lý do mở lại
+        pendingReopenTaskId = taskId;
+        document.getElementById('input-reopen-reason').value = '';
+        document.getElementById('modal-reopen-task').classList.remove('hidden');
+        document.getElementById('modal-reopen-task').classList.add('flex');
       } else {
-        toastIcon.setAttribute('data-lucide', 'check-circle-2');
-        toastIcon.classList.remove('text-rose-400');
-        toastIcon.classList.add('text-emerald-400');
-      }
-      lucide.createIcons();
-
-      toast.classList.remove('opacity-0', 'translate-y-[-20px]');
-      toast.classList.add('opacity-100', 'translate-y-0');
-
-      setTimeout(() => {
-        toast.classList.remove('opacity-100', 'translate-y-0');
-        toast.classList.add('opacity-0', 'translate-y-[-20px]');
-      }, 2500);
-    }
-
-    // Tab Navigation
-    function switchTab(tabName, updateHash = true) {
-      const tabs = ['tasks', 'journal', 'report', 'personal'];
-      const titles = {
-        tasks: 'Checklist & Công Việc',
-        journal: 'Nhật Ký Công Việc',
-        report: 'Báo Cáo Thống Kê',
-        personal: 'Thông Tin Cá Nhân'
-      };
-
-      tabs.forEach(tab => {
-        document.getElementById(`tab-${tab}`).classList.add('hidden');
-        const navBtn = document.getElementById(`nav-${tab}`);
-        navBtn.classList.remove('text-indigo-600', 'font-semibold');
-        navBtn.classList.add('text-slate-400', 'font-medium');
-        navBtn.querySelector('div').classList.remove('bg-indigo-50');
-      });
-
-      const currentSection = document.getElementById(`tab-${tabName}`);
-      if (currentSection) {
-        currentSection.classList.remove('hidden');
-      }
-
-      const activeNav = document.getElementById(`nav-${tabName}`);
-      if (activeNav) {
-        activeNav.classList.remove('text-slate-400', 'font-medium');
-        activeNav.classList.add('text-indigo-600', 'font-semibold');
-        activeNav.querySelector('div').classList.add('bg-indigo-50');
-      }
-
-      document.getElementById('header-title').innerText = titles[tabName] || 'Nhật Ký & Checklist';
-      if (updateHash) {
-        window.location.hash = tabName;
-      }
-      if (tabName === 'report') {
-        updateStats();
+        // Chưa hoàn thành -> Đánh dấu hoàn thành
+        repo.completeTask(taskId);
+        renderTasks();
+        showToast('Đã hoàn thành công việc');
       }
     }
 
-    // Task Filter Handling
+    function closeReopenModal() {
+      pendingReopenTaskId = null;
+      document.getElementById('modal-reopen-task').classList.add('hidden');
+      document.getElementById('modal-reopen-task').classList.remove('flex');
+    }
+
+    function confirmReopenTask() {
+      const reason = document.getElementById('input-reopen-reason').value.trim();
+      if (!reason) {
+        alert('Vui lòng nhập lý do mở lại công việc');
+        return;
+      }
+
+      if (pendingReopenTaskId) {
+        repo.reopenTask(pendingReopenTaskId, reason);
+        closeReopenModal();
+        renderTasks();
+        showToast('Đã mở lại công việc');
+      }
+    }
+
     function setTaskFilter(filter) {
       currentTaskFilter = filter;
       document.querySelectorAll('.task-filter-btn').forEach(btn => {
@@ -616,95 +967,6 @@
       document.getElementById('task-search').value = '';
       document.getElementById('clear-search-btn').classList.add('hidden');
       renderTasks();
-    }
-
-    // Tasks Render
-    function renderTasks() {
-      const listContainer = document.getElementById('task-list');
-      const searchQuery = (document.getElementById('task-search').value || '').trim().toLowerCase();
-      const clearBtn = document.getElementById('clear-search-btn');
-
-      if (searchQuery) {
-        clearBtn.classList.remove('hidden');
-      } else {
-        clearBtn.classList.add('hidden');
-      }
-
-      listContainer.innerHTML = '';
-
-      let filtered = tasks.filter(t => {
-        const matchesQuery = t.title.toLowerCase().includes(searchQuery) || (t.category && t.category.toLowerCase().includes(searchQuery));
-        if (!matchesQuery) return false;
-
-        if (currentTaskFilter === 'pending') return !t.done;
-        if (currentTaskFilter === 'done') return t.done;
-        if (currentTaskFilter === 'urgent') return t.priority === 'Khẩn cấp';
-        return true;
-      });
-
-      if (filtered.length === 0) {
-        listContainer.innerHTML = `
-          <div class="bg-white p-8 rounded-2xl border border-slate-200/80 text-center space-y-2 shadow-xs">
-            <div class="w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto">
-              <i data-lucide="inbox" class="w-6 h-6"></i>
-            </div>
-            <p class="text-sm font-semibold text-slate-600">Không tìm thấy công việc nào</p>
-            <p class="text-xs text-slate-400">Hãy thêm checklist mới hoặc thay đổi bộ lọc.</p>
-          </div>
-        `;
-      } else {
-        filtered.forEach(task => {
-          const badgeColor = task.priority === 'Khẩn cấp' ? 'bg-rose-50 text-rose-700 border-rose-200/60' :
-                             task.priority === 'Quan trọng' ? 'bg-amber-50 text-amber-700 border-amber-200/60' : 'bg-slate-100 text-slate-600 border-slate-200/60';
-
-          const item = document.createElement('div');
-          item.className = `bg-white p-3.5 rounded-2xl border ${task.done ? 'border-slate-200/60 bg-slate-50/70' : 'border-slate-200/90'} shadow-xs flex items-center justify-between gap-3 transition-all duration-200 hover:shadow-sm`;
-          
-          item.innerHTML = `
-            <div class="flex items-start space-x-3 flex-1 cursor-pointer select-none" onclick="toggleTask(${task.id})">
-              <div class="mt-0.5 w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-colors ${task.done ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-white'}">
-                ${task.done ? '<i data-lucide="check" class="w-3.5 h-3.5"></i>' : ''}
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-semibold leading-snug break-words ${task.done ? 'line-through text-slate-400' : 'text-slate-800'}">${task.title}</p>
-                <div class="flex items-center gap-2 mt-1">
-                  ${task.category ? `<span class="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded font-medium">${task.category}</span>` : ''}
-                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${badgeColor}">${task.priority}</span>
-                </div>
-              </div>
-            </div>
-            <button onclick="deleteTask(${task.id})" class="text-slate-300 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-50 transition active:scale-95">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-            </button>
-          `;
-          listContainer.appendChild(item);
-        });
-      }
-
-      // Update Progress
-      const total = tasks.length;
-      const totalDone = tasks.filter(t => t.done).length;
-      const percent = total === 0 ? 0 : Math.round((totalDone / total) * 100);
-      document.getElementById('progress-bar').style.width = `${percent}%`;
-      document.getElementById('progress-percent').innerText = `${percent}%`;
-      document.getElementById('progress-count').innerText = `${totalDone}/${total} việc`;
-
-      localStorage.setItem('app_tasks', JSON.stringify(tasks));
-      lucide.createIcons();
-      updateStats();
-    }
-
-    function toggleTask(id) {
-      tasks = tasks.map(t => t.id === id ? { ...t, done: !t.done } : t);
-      renderTasks();
-    }
-
-    function deleteTask(id) {
-      if (confirm('Xóa công việc này khỏi checklist?')) {
-        tasks = tasks.filter(t => t.id !== id);
-        renderTasks();
-        showToast('Đã xóa công việc');
-      }
     }
 
     function openTaskModal() {
@@ -728,41 +990,44 @@
         return;
       }
 
-      tasks.unshift({
-        id: Date.now(),
-        title,
-        priority,
-        category,
-        done: false,
-        time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
-      });
-
+      repo.addTask(title, priority, category);
       document.getElementById('input-task-title').value = '';
       document.getElementById('input-task-category').value = '';
       closeTaskModal();
       renderTasks();
-      showToast('Đã thêm checklist mới');
+      showToast('Đã thêm checklist mới vào ca trực');
     }
 
-    // Journal Logs Render
+    function deleteTask(id) {
+      if (confirm('Xóa công việc này khỏi checklist?')) {
+        repo.deleteTask(id);
+        renderTasks();
+        showToast('Đã xóa công việc');
+      }
+    }
+
+    // ==========================================
+    // 5. JOURNAL WORK LOGS
+    // ==========================================
     function renderLogs() {
       const logContainer = document.getElementById('journal-list');
       logContainer.innerHTML = '';
 
-      document.getElementById('log-count-badge').innerText = logs.length;
+      const currentShiftLogs = repo.logs.filter(l => l.shiftId === repo.currentShiftId);
+      document.getElementById('log-count-badge').innerText = currentShiftLogs.length;
 
-      if (logs.length === 0) {
+      if (currentShiftLogs.length === 0) {
         logContainer.innerHTML = `
           <div class="bg-white p-8 rounded-2xl border border-slate-200/80 text-center space-y-2 shadow-xs ml-6">
             <div class="w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto">
               <i data-lucide="book-open" class="w-6 h-6"></i>
             </div>
-            <p class="text-sm font-semibold text-slate-600">Chưa có nhật ký nào</p>
-            <p class="text-xs text-slate-400">Hãy nhấn 'Ghi nhật ký' để ghi nhận sự kiện ca trực.</p>
+            <p class="text-sm font-semibold text-slate-600">Chưa có nhật ký nào trong ca này</p>
+            <p class="text-xs text-slate-400">Nhấn 'Ghi nhật ký' để ghi nhận tình trạng vận hành.</p>
           </div>
         `;
       } else {
-        logs.forEach(log => {
+        currentShiftLogs.forEach(log => {
           let statusBadge = '';
           let dotColor = 'bg-emerald-500';
 
@@ -786,12 +1051,13 @@
                 <div>
                   <div class="flex items-center gap-2 flex-wrap">
                     <span class="text-xs font-bold text-slate-400">${log.time}</span>
+                    <span class="text-[11px] font-semibold text-slate-700">${log.employeeName || 'Nhân viên'}</span>
                     ${log.area ? `<span class="text-[10px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded">${log.area}</span>` : ''}
                   </div>
                 </div>
                 <div class="flex items-center space-x-1.5">
                   ${statusBadge}
-                  <button onclick="deleteLog(${log.id})" class="text-slate-300 hover:text-rose-500 p-1 rounded transition">
+                  <button onclick="deleteLog(${log.id})" aria-label="Xóa nhật ký này" class="text-slate-300 hover:text-rose-500 p-1 rounded transition">
                     <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                   </button>
                 </div>
@@ -803,7 +1069,6 @@
         });
       }
 
-      localStorage.setItem('app_logs', JSON.stringify(logs));
       lucide.createIcons();
       updateStats();
     }
@@ -836,69 +1101,69 @@
         return;
       }
 
-      const now = new Date();
-      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} - Hôm nay`;
-
-      logs.unshift({
-        id: Date.now(),
-        content,
-        status,
-        area,
-        time: timeStr
-      });
-
+      repo.addLog(content, status, area);
       document.getElementById('input-log-content').value = '';
       document.getElementById('input-log-area').value = '';
       closeLogModal();
       renderLogs();
-      showToast('Đã ghi vào sổ nhật ký');
+      showToast('Đã ghi vào sổ nhật ký ca trực');
     }
 
     function deleteLog(id) {
       if (confirm('Xóa mục nhật ký này?')) {
-        logs = logs.filter(l => l.id !== id);
+        repo.deleteLog(id);
         renderLogs();
         showToast('Đã xóa mục nhật ký');
       }
     }
 
-    // Report Statistics & Summary
+    // ==========================================
+    // 6. REPORT GENERATOR & STATISTICS
+    // ==========================================
     function updateStats() {
-      const total = tasks.length;
-      const done = tasks.filter(t => t.done).length;
-      const urgentRemaining = tasks.filter(t => !t.done && t.priority === 'Khẩn cấp').length;
-      const watchCount = logs.filter(l => l.status === 'Cần theo dõi thêm').length;
+      const currentShiftTasks = repo.tasks.filter(t => t.shiftId === repo.currentShiftId);
+      const currentShiftLogs = repo.logs.filter(l => l.shiftId === repo.currentShiftId);
+
+      const total = currentShiftTasks.length;
+      const done = currentShiftTasks.filter(t => t.done).length;
+      const urgentRemaining = currentShiftTasks.filter(t => !t.done && t.priority === 'Khẩn cấp').length;
+      const watchCount = currentShiftLogs.filter(l => l.status === 'Cần theo dõi thêm').length;
 
       document.getElementById('stat-total').innerText = total;
       document.getElementById('stat-done').innerText = done;
       const pct = total === 0 ? 0 : Math.round((done / total) * 100);
       document.getElementById('stat-done-pct').innerText = `Đạt ${pct}% hoàn thành`;
       document.getElementById('stat-urgent').innerText = urgentRemaining;
-      document.getElementById('stat-logs').innerText = logs.length;
+      document.getElementById('stat-logs').innerText = currentShiftLogs.length;
       document.getElementById('stat-logs-warning').innerText = `${watchCount} mục cần theo dõi`;
 
-      // Build text summary
+      // Build accurate shift report text
+      const emp = repo.getCurrentEmployee();
       const now = new Date();
-      const dateStr = now.toLocaleDateString('vi-VN');
       const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
       let reportText = `📋 BÁO CÁO NHẬT KÝ CA VẬN HÀNH\n`;
-      reportText += `📅 Thời gian: ${dateStr} - ${timeStr}\n`;
-      reportText += `👤 Nhân viên: ${profile.name} (${profile.code})\n`;
-      reportText += `⏰ Ca trực: ${profile.shift}\n`;
+      reportText += `📅 Ngày trực: ${repo.currentDate} (Ghi nhận: ${timeStr})\n`;
+      reportText += `👤 Nhân viên: ${emp.fullName} (${emp.id})\n`;
+      reportText += `⏰ Ca trực: ${repo.currentShiftType}\n`;
       reportText += `------------------------------------\n`;
       reportText += `✅ Tiến độ Checklist: ${done}/${total} việc (${pct}%)\n`;
       if (urgentRemaining > 0) {
         reportText += `🔴 Khẩn cấp tồn đọng: ${urgentRemaining} việc\n`;
       }
-      reportText += `📝 Nhật ký ca trực: ${logs.length} bản ghi\n`;
+      reportText += `📝 Nhật ký ca trực: ${currentShiftLogs.length} bản ghi\n`;
       if (watchCount > 0) {
         reportText += `⚠️ Cần theo dõi tiếp: ${watchCount} vấn đề\n`;
       }
-      reportText += `\n🔍 CHI TIẾT NHẬT KÝ:\n`;
-      logs.slice(0, 5).forEach((l, idx) => {
-        reportText += `${idx + 1}. [${l.time}] (${l.status}) ${l.area ? '[' + l.area + '] ' : ''}${l.content}\n`;
-      });
+
+      if (currentShiftLogs.length > 0) {
+        reportText += `\n🔍 CHI TIẾT NHẬT KÝ:\n`;
+        currentShiftLogs.forEach((l, idx) => {
+          reportText += `${idx + 1}. [${l.time}] (${l.status}) ${l.area ? '[' + l.area + '] ' : ''}${l.content}\n`;
+        });
+      } else {
+        reportText += `\n(Chưa có bản ghi nhật ký trong ca này)\n`;
+      }
 
       document.getElementById('report-preview').innerText = reportText;
     }
@@ -912,12 +1177,76 @@
       });
     }
 
-    // Data Management
+    // ==========================================
+    // 7. TOAST & DATA MANAGEMENT
+    // ==========================================
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-message');
+      const toastIcon = document.getElementById('toast-icon');
+
+      toastMsg.innerText = msg;
+      if (isError) {
+        toastIcon.setAttribute('data-lucide', 'alert-circle');
+        toastIcon.classList.remove('text-emerald-400');
+        toastIcon.classList.add('text-rose-400');
+      } else {
+        toastIcon.setAttribute('data-lucide', 'check-circle-2');
+        toastIcon.classList.remove('text-rose-400');
+        toastIcon.classList.add('text-emerald-400');
+      }
+      lucide.createIcons();
+
+      toast.classList.remove('opacity-0', 'translate-y-[-20px]');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'translate-y-[-20px]');
+      }, 2500);
+    }
+
+    function switchTab(tabName, updateHash = true) {
+      const tabs = ['tasks', 'journal', 'report', 'personal'];
+      const titles = {
+        tasks: 'Checklist & Công Việc',
+        journal: 'Nhật Ký Công Việc',
+        report: 'Báo Cáo Thống Kê',
+        personal: 'Thông Tin Cá Nhân & Ca Trực'
+      };
+
+      tabs.forEach(tab => {
+        document.getElementById(`tab-${tab}`).classList.add('hidden');
+        const navBtn = document.getElementById(`nav-${tab}`);
+        navBtn.classList.remove('text-indigo-600', 'font-semibold');
+        navBtn.classList.add('text-slate-400', 'font-medium');
+        navBtn.querySelector('div').classList.remove('bg-indigo-50');
+      });
+
+      const currentSection = document.getElementById(`tab-${tabName}`);
+      if (currentSection) currentSection.classList.remove('hidden');
+
+      const activeNav = document.getElementById(`nav-${tabName}`);
+      if (activeNav) {
+        activeNav.classList.remove('text-slate-400', 'font-medium');
+        activeNav.classList.add('text-indigo-600', 'font-semibold');
+        activeNav.querySelector('div').classList.add('bg-indigo-50');
+      }
+
+      document.getElementById('header-title').innerText = titles[tabName] || 'Nhật Ký & Checklist';
+      if (updateHash) window.location.hash = tabName;
+      if (tabName === 'report') updateStats();
+    }
+
     function exportDataJSON() {
       const data = {
-        profile,
-        tasks,
-        logs,
+        schemaVersion: 2,
+        currentEmployeeId: repo.currentEmployeeId,
+        currentShiftType: repo.currentShiftType,
+        currentDate: repo.currentDate,
+        tasks: repo.tasks,
+        logs: repo.logs,
+        taskEvents: repo.taskEvents,
         exportAt: new Date().toISOString()
       };
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -931,28 +1260,22 @@
     }
 
     function resetSampleData() {
-      if (confirm('Khôi phục lại danh sách dữ liệu mẫu ban đầu?')) {
-        tasks = [...DEFAULT_TASKS];
-        logs = [...DEFAULT_LOGS];
-        profile = { ...DEFAULT_PROFILE };
-        localStorage.setItem('app_tasks', JSON.stringify(tasks));
-        localStorage.setItem('app_logs', JSON.stringify(logs));
-        localStorage.setItem('app_profile', JSON.stringify(profile));
-        updateProfileUI();
+      if (confirm('Khôi phục lại danh sách dữ liệu mẫu của 4 nhân sự?')) {
+        repo.initSampleData();
         renderTasks();
         renderLogs();
+        updateStats();
         showToast('Đã khôi phục dữ liệu mẫu');
       }
     }
 
     function clearData() {
       if (confirm('CẢNH BÁO: Toàn bộ dữ liệu checklist và nhật ký sẽ bị xóa vĩnh viễn trên máy này. Bạn có chắc chắn không?')) {
-        localStorage.removeItem('app_tasks');
-        localStorage.removeItem('app_logs');
-        tasks = [];
-        logs = [];
+        localStorage.clear();
+        repo.loadState();
         renderTasks();
         renderLogs();
+        updateStats();
         showToast('Đã xóa sạch dữ liệu');
       }
     }
