@@ -80,6 +80,61 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên, Quản L�
     await expect(page.locator('#header-user-code')).toContainText('Thắng');
   });
 
+  test('Kịch bản Bảng Phân Ca Trực: 3 ca tiêu chuẩn (Ca 1: 06-14h, Ca 2: 14-22h, Ca 3: 22-06h) & Admin phân ca', async ({ page }) => {
+    await page.goto('/nhatky/index.html');
+
+    // 1. Admin đăng nhập
+    await performLogin(page, 'ADMIN01', '1234');
+
+    // 2. Mở Bảng Phân Ca Trực từ nút Header
+    await page.click('#btn-header-schedule');
+    await expect(page.locator('#modal-shift-schedule')).toBeVisible();
+    await expect(page.locator('#modal-shift-schedule')).toContainText('Ca 1 (06-14h)');
+    await expect(page.locator('#modal-shift-schedule')).toContainText('Ca 2 (14-22h)');
+    await expect(page.locator('#modal-shift-schedule')).toContainText('Ca 3 (22-06h)');
+
+    // 3. Admin phân công ca trực hôm nay:
+    // Ca 1 -> Ngô Quyết Thắng (EMP01), Ca 2 -> Đinh Văn Hậu (EMP02), Ca 3 -> Hoàng Việt Hoàng (EMP03)
+    const todayCard = page.locator('.schedule-day-card:has-text("HÔM NAY")');
+    await expect(todayCard).toBeVisible();
+
+    await todayCard.locator('select[data-shift="shift1"]').selectOption('EMP01');
+    await todayCard.locator('select[data-shift="shift2"]').selectOption('EMP02');
+    await todayCard.locator('select[data-shift="shift3"]').selectOption('EMP03');
+
+    // Bấm Lưu Bảng Phân Ca
+    await page.click('#btn-save-schedule-roster');
+
+    // Đóng modal lịch phân ca
+    await page.click('#modal-shift-schedule button:has-text("Đóng")');
+
+    // 4. Mở modal Đổi ca trực -> Kiểm tra gợi ý phân ca theo giờ thực tế
+    await page.click('#header-user-badge');
+    await expect(page.locator('#modal-shift-select')).toBeVisible();
+    await expect(page.locator('#shift-auto-recommend-box')).toBeVisible();
+
+    await page.click('#modal-shift-select button:has-text("Hủy")');
+
+    // 5. Đăng xuất Admin -> Kỹ thuật viên Ngô Quyết Thắng đăng nhập xem lịch trực
+    await page.click('#nav-personal');
+    await page.click('#btn-logout');
+    await performLogin(page, 'EMP01', '1234');
+
+    await page.click('#btn-header-schedule');
+    await expect(page.locator('#modal-shift-schedule')).toBeVisible();
+
+    // Nhân viên thấy rõ phân công trong ca trực
+    const todayCardKtv = page.locator('.schedule-day-card:has-text("HÔM NAY")');
+    await expect(todayCardKtv).toContainText('Ngô Quyết Thắng');
+    await expect(todayCardKtv).toContainText('Đinh Văn Hậu');
+    await expect(todayCardKtv).toContainText('Hoàng Việt Hoàng');
+
+    // Thử nút "Vào ca hôm nay ➔"
+    await todayCardKtv.locator('button:has-text("Vào ca hôm nay")').click();
+    await expect(page.locator('#modal-shift-schedule')).toBeHidden();
+    await expect(page.locator('#screen-app')).toBeVisible();
+  });
+
   test('Kịch bản Tài Khoản Admin: Đăng nhập quyền cao nhất và quản lý nhân sự', async ({ page }) => {
     await page.goto('/nhatky/index.html');
     
@@ -184,7 +239,7 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên, Quản L�
     await page.goto('/nhatky/index.html');
     await performLogin(page, 'EMP01', '1234'); // Ngô Quyết Thắng
 
-    // Kiểm tra UI hiển thị đúng Thắng Ca 1 (Kỹ thuật viên)
+    // Kiểm tra UI hiển thị đúng Thắng Ca 1 hoặc ca tương ứng (Kỹ thuật viên)
     await expect(page.locator('#header-user-code')).toContainText('Thắng');
 
     // Thắng thêm Task A và đánh dấu hoàn thành
@@ -209,7 +264,6 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên, Quản L�
     await page.click('#nav-report');
     await expect(page.locator('#report-preview')).toContainText('Ngô Quyết Thắng');
     await expect(page.locator('#report-preview')).toContainText('Kỹ thuật viên');
-    await expect(page.locator('#report-preview')).toContainText('Ca 1 (06h - 14h)');
     await expect(page.locator('#report-preview')).toContainText('Log A - Đã kiểm tra trạm điện an toàn');
 
     // 2. Chuyển sang Đinh Văn Hậu - Ca 2
