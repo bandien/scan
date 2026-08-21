@@ -80,11 +80,29 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên, Quản L�
     await expect(page.locator('#header-user-code')).toContainText('Thắng');
   });
 
+  test('Kịch bản Tài Khoản Admin: Đăng nhập quyền cao nhất và quản lý nhân sự', async ({ page }) => {
+    await page.goto('/nhatky/index.html');
+    
+    // Đăng nhập bằng tài khoản ADMIN01
+    await performLogin(page, 'ADMIN01', '1234');
+    await expect(page.locator('#header-user-code')).toContainText('Admin');
+
+    // Vào Tab Cá nhân kiểm tra danh sách có Admin và Thắng là Kỹ thuật viên
+    await page.click('#nav-personal');
+    await expect(page.locator('#active-employees-container')).toContainText('Quản Trị Viên');
+    await expect(page.locator('#active-employees-container')).toContainText('Ngô Quyết Thắng');
+    await expect(page.locator('#active-employees-container')).toContainText('Kỹ thuật viên');
+
+    // Admin có nút Reset PIN cho nhân sự
+    const resetButtons = await page.locator('#active-employees-container button[title*="Reset PIN"]').count();
+    expect(resetButtons).toBeGreaterThan(0);
+  });
+
   test('Kịch bản 1, 2, 3: Cô lập dữ liệu theo Ca và Nhân viên (Thắng Ca 1 vs Hậu Ca 2)', async ({ page }) => {
     await page.goto('/nhatky/index.html');
     await performLogin(page, 'EMP01', '1234'); // Ngô Quyết Thắng
 
-    // Kiểm tra UI hiển thị đúng Thắng Ca 1
+    // Kiểm tra UI hiển thị đúng Thắng Ca 1 (Kỹ thuật viên)
     await expect(page.locator('#header-user-code')).toContainText('Thắng');
 
     // Thắng thêm Task A và đánh dấu hoàn thành
@@ -108,6 +126,7 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên, Quản L�
     // Kiểm tra Báo cáo Ca 1
     await page.click('#nav-report');
     await expect(page.locator('#report-preview')).toContainText('Ngô Quyết Thắng');
+    await expect(page.locator('#report-preview')).toContainText('Kỹ thuật viên');
     await expect(page.locator('#report-preview')).toContainText('Ca 1 (06h - 14h)');
     await expect(page.locator('#report-preview')).toContainText('Log A - Đã kiểm tra trạm điện an toàn');
 
@@ -164,7 +183,7 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên, Quản L�
     expect(lastEvent.reason).toContain('áp suất tụt bất thường');
   });
 
-  test('Kịch bản 7 & 8: Danh sách nhân viên mặc định có 4 active, nhân viên nghỉ việc không có trong ca mới, migration an toàn', async ({ page }) => {
+  test('Kịch bản 7 & 8: Danh sách nhân viên mặc định có Admin + 4 KTV active, nhân viên nghỉ việc không có trong ca mới, migration an toàn', async ({ page }) => {
     // Giả lập dữ liệu legacy chưa có tác giả và chưa migrate
     await page.evaluate(() => {
       localStorage.removeItem('app_schema_version');
@@ -183,7 +202,8 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên, Quản L�
     await page.click('#header-user-badge');
     const options = await page.locator('#select-active-employee option').allInnerTexts();
     
-    // 4 người active
+    // 5 người active (1 Admin + 4 KTV)
+    expect(options.some(t => t.includes('Quản Trị Viên'))).toBe(true);
     expect(options.some(t => t.includes('Ngô Quyết Thắng'))).toBe(true);
     expect(options.some(t => t.includes('Đinh Văn Hậu'))).toBe(true);
     expect(options.some(t => t.includes('Hoàng Việt Hoàng'))).toBe(true);

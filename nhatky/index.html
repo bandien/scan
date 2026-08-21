@@ -74,12 +74,12 @@
       <div class="bg-white/10 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-2xl space-y-4">
         <div class="space-y-1">
           <h2 class="text-sm font-bold text-white tracking-wide">Đăng nhập ca trực</h2>
-          <p class="text-[11px] text-slate-300">Chọn tài khoản nhân viên và nhập mật khẩu</p>
+          <p class="text-[11px] text-slate-300">Chọn tài khoản nhân viên / admin và nhập mật khẩu</p>
         </div>
 
         <form id="form-login" onsubmit="handleLoginSubmit(event)" class="space-y-3.5">
           <div>
-            <label class="block text-[11px] font-bold text-indigo-200 uppercase tracking-wider mb-1">Nhân viên trực</label>
+            <label class="block text-[11px] font-bold text-indigo-200 uppercase tracking-wider mb-1">Tài khoản trực</label>
             <select id="select-login-employee" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
               <!-- Rendered by JS -->
             </select>
@@ -117,8 +117,8 @@
 
       <!-- Footer Info -->
       <div class="text-center space-y-1 text-[11px] text-slate-400">
-        <p>Mật khẩu đồng bộ danh sách Google Sheet (Mặc định: <span class="text-indigo-300 font-mono">1234</span>)</p>
-        <p>Phiên bản 2.4.0 • Xác thực & Cô lập ca trực</p>
+        <p>Tài khoản Admin có quyền quản trị cao nhất • Mật khẩu mặc định: <span class="text-indigo-300 font-mono">1234</span></p>
+        <p>Phiên bản 2.5.0 • Quyền Quản Trị & Đa Nhân Sự</p>
       </div>
 
     </div>
@@ -144,10 +144,10 @@
       <!-- Shift / User Quick Badge -->
       <button id="header-user-badge" onclick="openShiftModal()" aria-label="Đổi ca trực và nhân viên" class="flex items-center space-x-2 bg-indigo-700/60 hover:bg-indigo-700 border border-indigo-500/40 px-2.5 py-1 rounded-full cursor-pointer transition active:scale-95 text-left">
         <div class="w-6 h-6 rounded-full bg-amber-400 text-slate-900 font-bold text-xs flex items-center justify-center" id="header-avatar">
-          NT
+          AD
         </div>
         <div class="flex flex-col pr-1">
-          <span class="text-xs font-bold text-white tracking-wide leading-none" id="header-user-code">Ngô Quyết Thắng</span>
+          <span class="text-xs font-bold text-white tracking-wide leading-none" id="header-user-code">Quản Trị Viên</span>
           <span class="text-[9px] text-indigo-200 font-medium leading-tight mt-0.5" id="header-shift-label">Ca 1 (06h - 14h)</span>
         </div>
       </button>
@@ -314,10 +314,10 @@
         <!-- Profile Card -->
         <div class="bg-gradient-to-br from-white to-slate-50 p-5 rounded-2xl shadow-xs border border-slate-200/80 text-center relative overflow-hidden">
           <div class="w-16 h-16 bg-gradient-to-tr from-indigo-600 to-indigo-400 text-white font-extrabold text-xl rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md shadow-indigo-600/20">
-            <span id="profile-avatar-char">NT</span>
+            <span id="profile-avatar-char">AD</span>
           </div>
-          <h3 class="font-bold text-slate-800 text-lg" id="profile-name">Ngô Quyết Thắng</h3>
-          <p class="text-xs font-medium text-slate-500 mt-0.5" id="profile-code">Mã NV: EMP01 • Ca 1 (06h - 14h)</p>
+          <h3 class="font-bold text-slate-800 text-lg" id="profile-name">Quản Trị Viên</h3>
+          <p class="text-xs font-medium text-slate-500 mt-0.5" id="profile-code">Mã NV: ADMIN01 • Quản trị viên • Ca 1 (06h - 14h)</p>
           
           <div class="flex justify-center gap-2 mt-3 flex-wrap">
             <button onclick="openShiftModal()" aria-label="Chuyển đổi ca trực và nhân viên" class="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-xl transition">
@@ -338,7 +338,7 @@
         <!-- Active Employees List -->
         <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200/80 space-y-3">
           <div class="flex justify-between items-center">
-            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Danh sách nhân sự đang hoạt động</h3>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Danh sách nhân sự & Quản trị</h3>
             <button onclick="openAddEmployeeModal()" aria-label="Đăng ký thêm nhân sự" class="text-xs font-bold text-indigo-600 hover:text-indigo-800">
               + Thêm mới
             </button>
@@ -387,7 +387,7 @@
         <!-- System Info -->
         <div class="text-center text-xs text-slate-400 space-y-1 pt-2">
           <p>Hệ Thống Trực Vận Hành & CMMS WebApp</p>
-          <p>Phiên bản 2.4.0 (Auth & Multi-User) • Lưu trữ độc lập</p>
+          <p>Phiên bản 2.5.0 (Admin & Kỹ Thuật Viên) • Lưu trữ độc lập</p>
         </div>
       </section>
 
@@ -473,7 +473,7 @@
       <div class="space-y-3">
         <div>
           <div class="flex justify-between items-center mb-1">
-            <label class="block text-xs font-bold text-slate-600">Nhân viên trực <span class="text-rose-500">*</span></label>
+            <label class="block text-xs font-bold text-slate-600">Nhân viên / Admin trực <span class="text-rose-500">*</span></label>
             <button id="btn-open-add-employee" onclick="openAddEmployeeModalFromShift()" aria-label="Tạo tài khoản nhân viên hoặc thử việc mới" class="text-xs font-bold text-indigo-600 hover:text-indigo-800">
               + Thêm nhân viên / Thử việc mới
             </button>
@@ -531,11 +531,11 @@
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1">Vị trí / Vai trò</label>
             <select id="select-new-emp-role" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500">
-              <option value="Thử việc">Thử việc</option>
               <option value="Kỹ thuật viên" selected>Kỹ thuật viên</option>
+              <option value="Thử việc">Thử việc</option>
               <option value="Học việc">Học việc</option>
               <option value="Thực tập sinh">Thực tập sinh</option>
-              <option value="Ca trưởng">Ca trưởng</option>
+              <option value="Quản trị viên">Quản trị viên</option>
             </select>
           </div>
           <div>
@@ -676,7 +676,8 @@
     // 1. DATA CONSTANTS & DEFAULT SEED EMPLOYEES
     // ==========================================
     const DEFAULT_ACTIVE_EMPLOYEES = [
-      { id: 'EMP01', fullName: 'Ngô Quyết Thắng', shortName: 'Thắng', role: 'Ca trưởng', pin: '1234', status: 'active' },
+      { id: 'ADMIN01', fullName: 'Quản Trị Viên', shortName: 'Admin', role: 'Quản trị viên', pin: '1234', status: 'active' },
+      { id: 'EMP01', fullName: 'Ngô Quyết Thắng', shortName: 'Thắng', role: 'Kỹ thuật viên', pin: '1234', status: 'active' },
       { id: 'EMP02', fullName: 'Đinh Văn Hậu', shortName: 'Hậu', role: 'Kỹ thuật viên', pin: '1234', status: 'active' },
       { id: 'EMP03', fullName: 'Hoàng Việt Hoàng', shortName: 'Hoàng', role: 'Kỹ thuật viên', pin: '1234', status: 'active' },
       { id: 'EMP04', fullName: 'Nguyễn Đức Phong', shortName: 'Phong', role: 'Kỹ thuật viên', pin: '1234', status: 'active' }
@@ -768,10 +769,28 @@
           try {
             this.employees = JSON.parse(savedEmployees);
             // Ensure each employee has a default pin if missing
-            this.employees = this.employees.map(e => ({
-              ...e,
-              pin: e.pin || '1234'
-            }));
+            this.employees = this.employees.map(e => {
+              // Ensure Thắng is Kỹ thuật viên
+              if (e.id === 'EMP01' && (e.role === 'Ca trưởng' || !e.role)) {
+                e.role = 'Kỹ thuật viên';
+              }
+              return {
+                ...e,
+                pin: e.pin || '1234'
+              };
+            });
+
+            // Ensure ADMIN01 exists
+            if (!this.employees.some(e => e.id === 'ADMIN01')) {
+              this.employees.unshift({
+                id: 'ADMIN01',
+                fullName: 'Quản Trị Viên',
+                shortName: 'Admin',
+                role: 'Quản trị viên',
+                pin: '1234',
+                status: 'active'
+              });
+            }
           } catch (e) {
             this.employees = [...DEFAULT_ACTIVE_EMPLOYEES];
           }
@@ -818,6 +837,11 @@
         return !!this.currentAuthUser;
       }
 
+      isAdmin() {
+        const emp = this.getCurrentEmployee();
+        return emp && (emp.role === 'Quản trị viên' || emp.id === 'ADMIN01');
+      }
+
       login(empId, pin) {
         const emp = this.employees.find(e => e.id === empId && e.status !== 'inactive');
         if (!emp) return { success: false, message: 'Nhân viên không tồn tại' };
@@ -859,6 +883,26 @@
         emp.pin = newPin.trim();
         this.saveEmployees();
         return { success: true };
+      }
+
+      resetEmployeePin(empId) {
+        const emp = this.employees.find(e => e.id === empId);
+        if (emp) {
+          emp.pin = '1234';
+          this.saveEmployees();
+          return true;
+        }
+        return false;
+      }
+
+      toggleEmployeeStatus(empId) {
+        const emp = this.employees.find(e => e.id === empId);
+        if (emp && emp.id !== 'ADMIN01') {
+          emp.status = emp.status === 'active' ? 'inactive' : 'active';
+          this.saveEmployees();
+          return true;
+        }
+        return false;
       }
 
       addEmployee(fullName, role = 'Kỹ thuật viên', customCode = '', initialPin = '1234') {
@@ -1110,7 +1154,8 @@
       repo.getActiveEmployees().forEach(emp => {
         const opt = document.createElement('option');
         opt.value = emp.id;
-        opt.innerText = `${emp.fullName} (${emp.id} - ${emp.role || 'Kỹ thuật viên'})`;
+        const roleText = emp.role === 'Quản trị viên' ? '👑 Quản trị viên' : emp.role;
+        opt.innerText = `${emp.fullName} (${emp.id} - ${roleText})`;
         sel.appendChild(opt);
       });
     }
@@ -1122,7 +1167,8 @@
       repo.getActiveEmployees().forEach(emp => {
         const opt = document.createElement('option');
         opt.value = emp.id;
-        opt.innerText = `${emp.fullName} (${emp.role || 'Kỹ thuật viên'})`;
+        const roleText = emp.role === 'Quản trị viên' ? '👑 Quản trị viên' : emp.role;
+        opt.innerText = `${emp.fullName} (${roleText})`;
         if (emp.id === repo.currentEmployeeId) opt.selected = true;
         sel.appendChild(opt);
       });
@@ -1133,27 +1179,47 @@
       if (!container) return;
       container.innerHTML = '';
 
-      const activeList = repo.getActiveEmployees();
+      const isAdminUser = repo.isAdmin();
+      const activeList = repo.employees; // show all for admin or active only
+
       activeList.forEach((emp, index) => {
+        const isSelf = emp.id === repo.currentEmployeeId;
         const item = document.createElement('div');
-        item.className = 'flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100';
+        item.className = `flex items-center justify-between p-2.5 rounded-xl border ${emp.status === 'inactive' ? 'bg-slate-100 opacity-60 border-slate-200' : 'bg-slate-50 border-slate-100'}`;
         
         let roleBadgeColor = 'bg-slate-100 text-slate-700';
-        if (emp.role === 'Ca trưởng') roleBadgeColor = 'bg-indigo-100 text-indigo-700';
+        if (emp.role === 'Quản trị viên') roleBadgeColor = 'bg-purple-100 text-purple-800 font-bold border border-purple-200';
         else if (emp.role === 'Thử việc' || emp.role === 'Học việc') roleBadgeColor = 'bg-amber-100 text-amber-700';
         else if (emp.role === 'Thực tập sinh') roleBadgeColor = 'bg-cyan-100 text-cyan-700';
         else roleBadgeColor = 'bg-emerald-100 text-emerald-700';
 
         item.innerHTML = `
-          <div class="flex items-center space-x-2">
+          <div class="flex items-center space-x-2 min-w-0">
             <span class="font-bold text-slate-400">${index + 1}.</span>
-            <span class="font-bold text-slate-800">${emp.fullName}</span>
+            <span class="font-bold text-slate-800 truncate">${emp.fullName}</span>
             <span class="text-[10px] text-slate-400">(${emp.id})</span>
           </div>
-          <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold ${roleBadgeColor}">${emp.role}</span>
+          <div class="flex items-center space-x-1.5 shrink-0">
+            <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold ${roleBadgeColor}">
+              ${emp.role === 'Quản trị viên' ? '👑 Admin' : emp.role}
+            </span>
+            ${isAdminUser && !isSelf && emp.id !== 'ADMIN01' ? `
+              <button onclick="handleAdminResetPin('${emp.id}')" title="Reset PIN về 1234" aria-label="Reset PIN cho ${emp.fullName}" class="p-1 text-slate-400 hover:text-indigo-600 rounded">
+                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+              </button>
+            ` : ''}
+          </div>
         `;
         container.appendChild(item);
       });
+      lucide.createIcons();
+    }
+
+    function handleAdminResetPin(empId) {
+      if (confirm(`Đặt lại mật khẩu cho nhân viên ${empId} về mặc định (1234)?`)) {
+        repo.resetEmployeePin(empId);
+        showToast(`Đã reset PIN cho ${empId} về 1234`);
+      }
     }
 
     function updateShiftHeaderUI() {
@@ -1166,8 +1232,9 @@
 
       document.getElementById('profile-avatar-char').innerText = initials;
       document.getElementById('profile-name').innerText = emp.fullName;
-      document.getElementById('profile-code').innerText = `Mã NV: ${emp.id} • ${emp.role} • ${repo.currentShiftType}`;
-      document.getElementById('report-shift-subtitle').innerText = `Ca trực: ${repo.currentShiftType} • Người trực: ${emp.fullName} (${emp.role})`;
+      const rolePrefix = emp.role === 'Quản trị viên' ? '👑 Quản trị viên' : emp.role;
+      document.getElementById('profile-code').innerText = `Mã NV: ${emp.id} • ${rolePrefix} • ${repo.currentShiftType}`;
+      document.getElementById('report-shift-subtitle').innerText = `Ca trực: ${repo.currentShiftType} • Người trực: ${emp.fullName} (${rolePrefix})`;
     }
 
     // ==========================================
@@ -1742,7 +1809,7 @@
     }
 
     function resetSampleData() {
-      if (confirm('Khôi phục lại danh sách dữ liệu mẫu của 4 nhân sự gốc?')) {
+      if (confirm('Khôi phục lại danh sách dữ liệu mẫu của 4 nhân sự gốc & Admin?')) {
         repo.employees = [...DEFAULT_ACTIVE_EMPLOYEES];
         repo.saveEmployees();
         repo.initSampleData();
