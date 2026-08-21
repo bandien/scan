@@ -80,42 +80,48 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên, Quản L�
     await expect(page.locator('#header-user-code')).toContainText('Thắng');
   });
 
-  test('Kịch bản Bảng Phân Ca Trực: 3 ca tiêu chuẩn (Ca 1: 06-14h, Ca 2: 14-22h, Ca 3: 22-06h) & Admin phân ca', async ({ page }) => {
+  test('Kịch bản Bảng Phân Ca Dạng Bảng Ma Trận & Phân công nhiều nhân viên trong 1 ca', async ({ page }) => {
     await page.goto('/nhatky/index.html');
 
     // 1. Admin đăng nhập
     await performLogin(page, 'ADMIN01', '1234');
 
-    // 2. Mở Bảng Phân Ca Trực từ nút Header
+    // 2. Mở Bảng Phân Ca Trực dạng Bảng
     await page.click('#btn-header-schedule');
     await expect(page.locator('#modal-shift-schedule')).toBeVisible();
-    await expect(page.locator('#modal-shift-schedule')).toContainText('Ca 1 (06-14h)');
-    await expect(page.locator('#modal-shift-schedule')).toContainText('Ca 2 (14-22h)');
-    await expect(page.locator('#modal-shift-schedule')).toContainText('Ca 3 (22-06h)');
+    await expect(page.locator('#schedule-matrix-table')).toBeVisible();
+    await expect(page.locator('#schedule-matrix-table thead')).toContainText('Ca 1');
+    await expect(page.locator('#schedule-matrix-table thead')).toContainText('Ca 2');
+    await expect(page.locator('#schedule-matrix-table thead')).toContainText('Ca 3');
 
-    // 3. Admin phân công ca trực hôm nay:
-    // Ca 1 -> Ngô Quyết Thắng (EMP01), Ca 2 -> Đinh Văn Hậu (EMP02), Ca 3 -> Hoàng Việt Hoàng (EMP03)
-    const todayCard = page.locator('.schedule-day-card:has-text("HÔM NAY")');
-    await expect(todayCard).toBeVisible();
+    // 3. Admin gán đồng thời 2 nhân viên (Ngô Quyết Thắng & Đinh Văn Hậu) vào Ca 1 hôm nay
+    const todayRow = page.locator('.schedule-matrix-row:has-text("HÔM NAY")');
+    await expect(todayRow).toBeVisible();
 
-    await todayCard.locator('select[data-shift="shift1"]').selectOption('EMP01');
-    await todayCard.locator('select[data-shift="shift2"]').selectOption('EMP02');
-    await todayCard.locator('select[data-shift="shift3"]').selectOption('EMP03');
+    // Bấm nút phân công ở ô Ca 1
+    await todayRow.locator('button[aria-label*="Ca 1"]').click();
+    await expect(page.locator('#modal-assign-shift-staff')).toBeVisible();
 
-    // Bấm Lưu Bảng Phân Ca
-    await page.click('#btn-save-schedule-roster');
+    // Tích chọn cả EMP01 (Thắng) và EMP02 (Hậu)
+    const cbThang = page.locator('.assign-staff-checkbox[value="EMP01"]');
+    const cbHau = page.locator('.assign-staff-checkbox[value="EMP02"]');
+
+    if (!(await cbThang.isChecked())) await cbThang.check();
+    if (!(await cbHau.isChecked())) await cbHau.check();
+
+    // Lưu phân công
+    await page.click('#btn-save-shift-assign');
+    await expect(page.locator('#modal-assign-shift-staff')).toBeHidden();
+
+    // Kiểm tra trong ô Ca 1 của Bảng ma trận hiển thị cả Thắng và Hậu
+    const ca1Cell = todayRow.locator('td >> nth=1');
+    await expect(ca1Cell).toContainText('Thắng');
+    await expect(ca1Cell).toContainText('Hậu');
 
     // Đóng modal lịch phân ca
     await page.click('#modal-shift-schedule button:has-text("Đóng")');
 
-    // 4. Mở modal Đổi ca trực -> Kiểm tra gợi ý phân ca theo giờ thực tế
-    await page.click('#header-user-badge');
-    await expect(page.locator('#modal-shift-select')).toBeVisible();
-    await expect(page.locator('#shift-auto-recommend-box')).toBeVisible();
-
-    await page.click('#modal-shift-select button:has-text("Hủy")');
-
-    // 5. Đăng xuất Admin -> Kỹ thuật viên Ngô Quyết Thắng đăng nhập xem lịch trực
+    // 4. Đăng xuất Admin -> Kỹ thuật viên Ngô Quyết Thắng đăng nhập xem lịch trực dạng bảng
     await page.click('#nav-personal');
     await page.click('#btn-logout');
     await performLogin(page, 'EMP01', '1234');
@@ -123,14 +129,13 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên, Quản L�
     await page.click('#btn-header-schedule');
     await expect(page.locator('#modal-shift-schedule')).toBeVisible();
 
-    // Nhân viên thấy rõ phân công trong ca trực
-    const todayCardKtv = page.locator('.schedule-day-card:has-text("HÔM NAY")');
-    await expect(todayCardKtv).toContainText('Ngô Quyết Thắng');
-    await expect(todayCardKtv).toContainText('Đinh Văn Hậu');
-    await expect(todayCardKtv).toContainText('Hoàng Việt Hoàng');
+    // Nhân viên thấy rõ cả 2 người cùng trực Ca 1
+    const todayRowKtv = page.locator('.schedule-matrix-row:has-text("HÔM NAY")');
+    await expect(todayRowKtv.locator('td >> nth=1')).toContainText('Thắng');
+    await expect(todayRowKtv.locator('td >> nth=1')).toContainText('Hậu');
 
-    // Thử nút "Vào ca hôm nay ➔"
-    await todayCardKtv.locator('button:has-text("Vào ca hôm nay")').click();
+    // Bấm "Vào ca ➔"
+    await todayRowKtv.locator('button.btn-quick-enter-shift').click();
     await expect(page.locator('#modal-shift-schedule')).toBeHidden();
     await expect(page.locator('#screen-app')).toBeVisible();
   });
