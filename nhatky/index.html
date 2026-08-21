@@ -35,15 +35,18 @@
       user-select: text;
     }
     .custom-scrollbar::-webkit-scrollbar {
-      width: 4px;
-      height: 4px;
+      width: 5px;
+      height: 5px;
     }
     .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
+      background: #94a3b8;
       border-radius: 4px;
     }
     .pb-safe {
       padding-bottom: env(safe-area-inset-bottom, 1rem);
+    }
+    .schedule-table th, .schedule-table td {
+      border: 1px solid #cbd5e1;
     }
   </style>
 </head>
@@ -69,7 +72,7 @@
           <i data-lucide="shield-check" class="w-8 h-8 text-white"></i>
         </div>
         <h1 class="text-xl font-extrabold tracking-tight text-white">Nhật Ký & Checklist</h1>
-        <p class="text-xs text-indigo-200/80 font-medium">Hệ Thống Trực Vận Hành & Bảo Trì Thiết Bị</p>
+        <p class="text-xs text-indigo-200/80 font-medium">Tổ Cơ Điện Sân Golf • Vận Hành & Bảo Trì Thiết Bị</p>
       </div>
 
       <!-- Login Card -->
@@ -123,8 +126,8 @@
 
       <!-- Footer Info -->
       <div class="text-center space-y-1 text-[11px] text-slate-400">
-        <p>3 Ca Trực: <span class="text-indigo-300">Ca 1 (06-14h)</span> • <span class="text-indigo-300">Ca 2 (14-22h)</span> • <span class="text-indigo-300">Ca 3 (22-06h)</span></p>
-        <p>Phiên bản 2.9.0 • Bảng Phân Ca Ma Trận (1 Ca Nhiều Người)</p>
+        <p>Bảng phân ca: <span class="text-indigo-300">Ca 1 (06-14h)</span> • <span class="text-indigo-300">Ca 2 (14-22h)</span> • <span class="text-indigo-300">Ca 3 (22-06h)</span></p>
+        <p>Phiên bản 3.0.0 • Chuẩn Biểu Mẫu Tổ Cơ Điện Sân Golf</p>
       </div>
 
     </div>
@@ -413,7 +416,7 @@
         <!-- System Info -->
         <div class="text-center text-xs text-slate-400 space-y-1 pt-2">
           <p>Hệ Thống Trực Vận Hành & CMMS WebApp</p>
-          <p>Phiên bản 2.9.0 (Bảng Phân Ca Ma Trận - 1 Ca Nhiều Người)</p>
+          <p>Phiên bản 3.0.0 (Bảng Phân Ca Tổ Cơ Điện Sân Golf)</p>
         </div>
       </section>
 
@@ -442,110 +445,111 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- MODAL: BẢNG PHÂN CA TRỰC MA TRẬN (#modal-shift-schedule) -->
+  <!-- MODAL: BẢNG PHÂN CA TRỰC CHUẨN TỔ CƠ ĐIỆN (#modal-shift-schedule) -->
   <!-- ========================================== -->
-  <div id="modal-shift-schedule" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-2 sm:p-4 transition-all duration-200 overflow-y-auto">
-    <div class="bg-white rounded-3xl w-full max-w-4xl p-4 sm:p-6 shadow-2xl space-y-4 max-h-[94vh] flex flex-col">
+  <div id="modal-shift-schedule" class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs hidden items-center justify-center z-50 p-2 sm:p-4 transition-all duration-200 overflow-y-auto">
+    <div class="bg-white rounded-3xl w-full max-w-6xl p-4 sm:p-5 shadow-2xl space-y-3.5 max-h-[96vh] flex flex-col">
       
-      <!-- Modal Header -->
+      <!-- Modal Top Bar & Navigation -->
       <div class="flex justify-between items-center shrink-0">
-        <div class="flex items-center space-x-2 text-indigo-600">
-          <i data-lucide="calendar" class="w-6 h-6 text-indigo-600"></i>
-          <div>
-            <h3 class="font-extrabold text-slate-800 text-base sm:text-lg leading-tight">Bảng Phân Ca Trực Vận Hành</h3>
-            <p class="text-[11px] text-slate-400 font-medium">Bảng phân ca tuần • Cho phép phân công nhiều nhân viên / 1 ca trực</p>
-          </div>
-        </div>
-        <button onclick="closeShiftScheduleModal()" aria-label="Đóng bảng phân ca trực" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
-          <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
-      </div>
-
-      <!-- Week Navigation Bar -->
-      <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-2xl border border-slate-200/80 shrink-0">
-        <button onclick="navigateScheduleWeek(-1)" aria-label="Tuần trước" class="p-1.5 rounded-xl hover:bg-white text-slate-600 hover:text-indigo-600 border border-transparent hover:border-slate-200 transition">
-          <i data-lucide="chevron-left" class="w-5 h-5"></i>
-        </button>
-        
-        <div class="text-center">
-          <span id="schedule-week-range-label" class="text-xs sm:text-sm font-bold text-slate-800">Tuần ...</span>
-          <button onclick="jumpToCurrentWeek()" class="ml-2 text-[10px] font-bold px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-md hover:bg-indigo-100 transition">Hôm nay</button>
+        <div class="flex items-center space-x-2">
+          <button onclick="navigateScheduleWeek(-1)" aria-label="Tuần trước" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-1 transition">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            <span>Tuần trước</span>
+          </button>
+          <button onclick="jumpToCurrentWeek()" aria-label="Về tuần hiện tại" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold transition">
+            Tuần Hiện Tại
+          </button>
+          <button onclick="navigateScheduleWeek(1)" aria-label="Tuần sau" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-1 transition">
+            <span>Tuần sau</span>
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+          </button>
         </div>
 
-        <button onclick="navigateScheduleWeek(1)" aria-label="Tuần sau" class="p-1.5 rounded-xl hover:bg-white text-slate-600 hover:text-indigo-600 border border-transparent hover:border-slate-200 transition">
-          <i data-lucide="chevron-right" class="w-5 h-5"></i>
-        </button>
+        <div class="flex items-center space-x-2">
+          <span class="text-xs text-slate-500 font-medium hidden sm:inline">Ký hiệu: <span class="bg-rose-100 font-bold px-1 rounded">x: Trực ca</span> | <span class="bg-emerald-100 font-bold text-emerald-800 px-1 rounded">hc: Hành chính</span> | <span class="bg-yellow-300 font-bold px-1 rounded">CN: Nghỉ tuần</span> | <span class="font-bold px-1 rounded border">P: Nghỉ phép</span></span>
+          <button onclick="closeShiftScheduleModal()" aria-label="Đóng bảng phân ca trực" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
       </div>
 
-      <!-- Table Matrix Schedule Container -->
-      <div class="overflow-x-auto flex-1 border border-slate-200/80 rounded-2xl custom-scrollbar">
-        <table id="schedule-matrix-table" class="w-full text-left text-xs border-collapse min-w-[620px]">
-          <thead class="bg-slate-100/90 text-slate-700 font-bold border-b border-slate-200 sticky top-0 z-10">
-            <tr>
-              <th class="p-3 w-32 shrink-0">Ngày / Thứ</th>
-              <th class="p-3 w-1/3">
-                <div class="flex items-center space-x-1.5 text-amber-800">
-                  <span>🌅 Ca 1</span>
-                  <span class="text-[10px] font-medium text-slate-500">(06h - 14h)</span>
-                </div>
+      <!-- EXACT GOLF SHIFT MATRIX TABLE -->
+      <div class="overflow-x-auto flex-1 border border-slate-300 rounded-xl shadow-xs custom-scrollbar">
+        <table id="schedule-matrix-table" class="schedule-table w-full text-center text-xs border-collapse min-w-[920px] bg-white font-sans">
+          
+          <!-- TABLE HEADER -->
+          <thead>
+            <!-- Row 1: Header BẢNG PHÂN CA | Tuần: XX | Từ: DD/MM/YYYY Đến: DD/MM/YYYY -->
+            <tr class="bg-slate-50 text-slate-800 font-bold text-xs h-9">
+              <th colspan="2" class="px-3 text-center border-r border-slate-300 text-blue-700 font-extrabold tracking-wider underline">
+                BẢNG PHÂN CA
               </th>
-              <th class="p-3 w-1/3">
-                <div class="flex items-center space-x-1.5 text-indigo-800">
-                  <span>🌇 Ca 2</span>
-                  <span class="text-[10px] font-medium text-slate-500">(14h - 22h)</span>
-                </div>
+              <th colspan="7" class="px-2 text-center border-r border-slate-300">
+                <span class="text-rose-600 font-bold">Tuần: </span>
+                <span id="header-week-num" class="text-rose-600 font-extrabold text-sm">34</span>
               </th>
-              <th class="p-3 w-1/3">
-                <div class="flex items-center space-x-1.5 text-purple-800">
-                  <span>🌙 Ca 3</span>
-                  <span class="text-[10px] font-medium text-slate-500">(22h - 06h)</span>
-                </div>
+              <th colspan="14" class="px-3 text-center">
+                <span class="font-bold text-slate-700">Từ: </span>
+                <span id="header-start-date" class="font-extrabold text-slate-900 mr-4">17/8/2026</span>
+                <span class="font-bold text-slate-700">Đến: </span>
+                <span id="header-end-date" class="font-extrabold text-slate-900">23/8/2026</span>
               </th>
             </tr>
+
+            <!-- Row 2: STT | HỌ & TÊN | 7 Days (Colspan 3 each) -->
+            <tr id="schedule-days-header-row" class="bg-slate-100 text-slate-800 font-bold text-xs h-8">
+              <th class="w-8 py-1">STT</th>
+              <th class="w-48 py-1 text-center font-extrabold">HỌ & TÊN</th>
+              <!-- Rendered by JS: 7 Days (Thứ Hai 17/ 8 ... Chủ Nhật 23/ 8) -->
+            </tr>
+
+            <!-- Row 3: Tổ cơ điện Sân Golf | 21 Shift Columns (Ca.1, Ca.2, Ca.3 x 7) -->
+            <tr id="schedule-shifts-header-row" class="bg-slate-50 text-slate-700 font-semibold text-[11px] h-7">
+              <th class="w-8"></th>
+              <th class="w-48 text-left pl-3 text-slate-900 font-bold italic">Tổ cơ điện Sân Golf</th>
+              <!-- Rendered by JS: 21 columns (Ca.1, Ca.2, Ca.3) -->
+            </tr>
           </thead>
-          <tbody id="schedule-matrix-tbody" class="divide-y divide-slate-200/70 bg-white">
+
+          <!-- TABLE BODY (STAFF ROWS) -->
+          <tbody id="schedule-matrix-tbody" class="divide-y divide-slate-200">
             <!-- Rendered by JS -->
           </tbody>
+
+          <!-- TABLE FOOTER (TRỰC ĐIỆN NƯỚC SUMS) -->
+          <tfoot>
+            <tr id="schedule-summary-row" class="bg-slate-100 text-slate-900 font-bold text-xs h-8">
+              <td colspan="2" class="text-center font-extrabold border-r border-slate-300">
+                Trực điện nước
+              </td>
+              <!-- Rendered by JS: 21 sum cells -->
+            </tr>
+          </tfoot>
+
         </table>
       </div>
 
-      <!-- Footer Actions -->
-      <div class="flex justify-between items-center pt-2 border-t border-slate-100 shrink-0">
-        <div class="text-[11px] text-slate-400 font-medium">
-          💡 Bấm vào ô bất kỳ để gán hoặc thay đổi danh sách nhân viên trực ca
+      <!-- Quick Status Picker Popover (Floating when clicking cell) -->
+      <div id="schedule-cell-picker" class="hidden absolute z-50 bg-white p-2 rounded-2xl shadow-2xl border border-slate-300 flex items-center gap-1.5">
+        <button type="button" onclick="handleSelectCellStatus('x')" class="px-2.5 py-1 bg-rose-100 hover:bg-rose-200 text-slate-900 font-extrabold text-xs rounded-lg border border-rose-300 transition">x (Trực ca)</button>
+        <button type="button" onclick="handleSelectCellStatus('hc')" class="px-2.5 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 font-bold text-xs rounded-lg border border-emerald-300 transition">hc (Hành chính)</button>
+        <button type="button" onclick="handleSelectCellStatus('CN')" class="px-2.5 py-1 bg-yellow-300 hover:bg-yellow-400 text-slate-900 font-extrabold text-xs rounded-lg border border-yellow-400 transition">CN (Nghỉ)</button>
+        <button type="button" onclick="handleSelectCellStatus('P')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-lg border border-slate-300 transition">P (Phép)</button>
+        <button type="button" onclick="handleSelectCellStatus('')" class="px-2 py-1 bg-slate-50 hover:bg-rose-50 text-rose-600 text-xs font-bold rounded-lg border border-slate-200 transition">Xóa</button>
+      </div>
+
+      <!-- Footer Bar -->
+      <div class="flex justify-between items-center pt-1 border-t border-slate-100 shrink-0">
+        <div class="flex items-center space-x-2">
+          <button id="btn-quick-enter-today" onclick="handleQuickEnterTodayShift()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-95 flex items-center gap-1.5">
+            <i data-lucide="play-circle" class="w-4 h-4"></i>
+            <span>Vào ca trực hôm nay</span>
+          </button>
         </div>
         <button onclick="closeShiftScheduleModal()" aria-label="Đóng bảng phân ca" class="px-5 py-2 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition">Đóng</button>
       </div>
 
-    </div>
-  </div>
-
-  <!-- ========================================== -->
-  <!-- MODAL: GÁN NHIỀU NHÂN VIÊN CHO CA TRỰC (#modal-assign-shift-staff) -->
-  <!-- ========================================== -->
-  <div id="modal-assign-shift-staff" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200 overflow-y-auto">
-    <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
-      <div class="flex justify-between items-center shrink-0">
-        <div class="flex items-center space-x-2 text-indigo-600">
-          <i data-lucide="users" class="w-5 h-5 text-indigo-600"></i>
-          <div>
-            <h3 class="font-bold text-slate-800 text-base" id="assign-modal-title">Phân Công Nhân Sự Trực Ca</h3>
-            <p class="text-[11px] text-slate-400" id="assign-modal-subtitle">Chọn 1 hoặc nhiều nhân viên trực ca này</p>
-          </div>
-        </div>
-        <button onclick="closeAssignShiftStaffModal()" aria-label="Đóng phân công nhân sự" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
-          <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
-      </div>
-
-      <div id="assign-staff-checkbox-list" class="space-y-2 overflow-y-auto flex-1 pr-1 custom-scrollbar">
-        <!-- Rendered by JS -->
-      </div>
-
-      <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100 shrink-0">
-        <button onclick="closeAssignShiftStaffModal()" aria-label="Hủy phân công" class="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition">Hủy</button>
-        <button id="btn-save-shift-assign" onclick="saveShiftStaffAssignment()" aria-label="Lưu phân công ca trực" class="px-5 py-2 text-sm font-semibold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-sm transition">Cập nhật phân ca</button>
-      </div>
     </div>
   </div>
 
@@ -938,7 +942,9 @@
       { id: 'EMP01', fullName: 'Ngô Quyết Thắng', shortName: 'Thắng', role: 'Kỹ thuật viên', pin: '1234', status: 'active' },
       { id: 'EMP02', fullName: 'Đinh Văn Hậu', shortName: 'Hậu', role: 'Kỹ thuật viên', pin: '1234', status: 'active' },
       { id: 'EMP03', fullName: 'Hoàng Việt Hoàng', shortName: 'Hoàng', role: 'Kỹ thuật viên', pin: '1234', status: 'active' },
-      { id: 'EMP04', fullName: 'Nguyễn Đức Phong', shortName: 'Phong', role: 'Kỹ thuật viên', pin: '1234', status: 'active' }
+      { id: 'EMP04', fullName: 'Nguyễn Đức Phong', shortName: 'Phong', role: 'Kỹ thuật viên', pin: '1234', status: 'active' },
+      { id: 'EMP05', fullName: 'Nguyễn Văn Cường', shortName: 'Cường', role: 'Thử việc', pin: '1234', status: 'active' },
+      { id: 'EMP06', fullName: 'Nguyễn Quang Phú', shortName: 'Phú', role: 'Thử việc', pin: '1234', status: 'active' }
     ];
 
     const DEFAULT_CHECKLIST_TEMPLATES = [
@@ -965,6 +971,25 @@
         ]
       }
     ];
+
+    // Seed Sample Roster Matrix chuẩn theo ảnh mẫu Tổ cơ điện Sân Golf (Tuần 34)
+    const SEED_WEEK_34_ROSTER = {
+      'EMP01': { 'd0_c2': 'x', 'd1_c2': 'CN', 'd2_c2': 'x', 'd3_c3': 'P', 'd4_c2': 'x', 'd5_c2': 'x', 'd6_c1': 'x' },
+      'EMP02': { 'd0_c1': 'hc', 'd1_c1': 'hc', 'd2_c1': 'hc', 'd3_c1': 'CN', 'd4_c1': 'x', 'd5_c2': 'x', 'd6_c3': 'x' },
+      'EMP03': { 'd0_c1': 'x', 'd1_c1': 'x', 'd2_c1': 'x', 'd2_c2': 'HC', 'd3_c1': 'x', 'd4_c1': 'CN', 'd5_c1': 'x', 'd6_c1': 'hc' },
+      'EMP04': { 'd0_c1': 'hc', 'd1_c2': 'x', 'd2_c1': 'CN', 'd2_c2': 'HC', 'd3_c1': 'hc', 'd3_c2': 'HC', 'd4_c1': 'hc', 'd5_c1': 'hc', 'd6_c2': 'x' },
+      'EMP05': { 'd0_c1': 'hc', 'd1_c1': 'hc', 'd2_c1': 'hc', 'd3_c1': 'hc', 'd3_c2': 'HC', 'd4_c1': 'P', 'd5_c1': 'hc', 'd6_c2': 'CN' },
+      'EMP06': { 'd0_c2': 'x', 'd1_c2': 'x', 'd2_c2': 'x', 'd3_c2': 'x', 'd4_c2': 'x', 'd5_c2': 'CN', 'd6_c1': 'hc' }
+    };
+
+    // Helper: Tính số tuần ISO từ ngày bất kỳ
+    function getIsoWeekNumber(d) {
+      const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+      const dayNum = date.getUTCDay() || 7;
+      date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+      return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+    }
 
     // Helper: Tạo initials sạch từ họ tên (loại bỏ ngoặc đơn)
     function generateCleanInitials(name) {
@@ -1020,7 +1045,7 @@
 
       migrateIfNeeded() {
         const schemaVer = localStorage.getItem('app_schema_version');
-        if (!schemaVer) {
+        if (!schemaVer || schemaVer !== '3') {
           const rawTasks = localStorage.getItem('app_tasks');
           const rawLogs = localStorage.getItem('app_logs');
           if (rawTasks) localStorage.setItem('app_backup_legacy_v1_tasks', rawTasks);
@@ -1050,7 +1075,7 @@
             } catch (e) {}
           }
 
-          localStorage.setItem('app_schema_version', '2');
+          localStorage.setItem('app_schema_version', '3');
         }
       }
 
@@ -1080,6 +1105,13 @@
                 status: 'active'
               });
             }
+
+            // Đảm bảo có danh sách mẫu nhân sự Tổ cơ điện Sân Golf
+            DEFAULT_ACTIVE_EMPLOYEES.forEach(seedEmp => {
+              if (!this.employees.some(e => e.id === seedEmp.id)) {
+                this.employees.push(seedEmp);
+              }
+            });
           } catch (e) {
             this.employees = [...DEFAULT_ACTIVE_EMPLOYEES];
           }
@@ -1101,16 +1133,16 @@
           this.saveTemplates();
         }
 
-        // Shift Schedules Loading
-        const savedSchedules = localStorage.getItem('app_shift_schedules');
-        if (savedSchedules) {
+        // Shift Matrix Roster Loading (Mẫu ma trận Tổ cơ điện Sân Golf)
+        const savedRoster = localStorage.getItem('app_shift_roster_matrix');
+        if (savedRoster) {
           try {
-            this.schedules = JSON.parse(savedSchedules);
+            this.rosterMatrix = JSON.parse(savedRoster);
           } catch (e) {
-            this.schedules = {};
+            this.rosterMatrix = {};
           }
         } else {
-          this.schedules = {};
+          this.rosterMatrix = {};
         }
 
         // Current Session Auth
@@ -1146,8 +1178,8 @@
         localStorage.setItem('app_checklist_templates', JSON.stringify(this.templates));
       }
 
-      saveSchedules() {
-        localStorage.setItem('app_shift_schedules', JSON.stringify(this.schedules));
+      saveRosterMatrix() {
+        localStorage.setItem('app_shift_roster_matrix', JSON.stringify(this.rosterMatrix));
       }
 
       getActiveEmployees() {
@@ -1219,7 +1251,7 @@
       addEmployee(fullName, role = 'Kỹ thuật viên', customCode = '', initialPin = '1234') {
         let newId = customCode.trim();
         if (!newId) {
-          let maxNum = 4;
+          let maxNum = 6;
           this.employees.forEach(e => {
             const match = e.id.match(/^EMP(\d+)$/i);
             if (match) {
@@ -1246,46 +1278,58 @@
       }
 
       // ==========================================
-      // SHIFT SCHEDULE / ROSTER MANAGEMENT
+      // ROSTER MATRIX MANAGEMENT (TỔ CƠ ĐIỆN SÂN GOLF)
       // ==========================================
-      getScheduleForDate(dateIso) {
-        if (this.schedules[dateIso]) {
-          return this.schedules[dateIso];
+      getRosterForWeek(weekKey) {
+        if (!this.rosterMatrix[weekKey]) {
+          // Khởi tạo mặc định nếu là tuần 34 năm 2026 hoặc tự động sinh
+          if (weekKey.includes('W34') || weekKey === '2026_W34') {
+            this.rosterMatrix[weekKey] = JSON.parse(JSON.stringify(SEED_WEEK_34_ROSTER));
+          } else {
+            this.rosterMatrix[weekKey] = {};
+          }
         }
-
-        // Tạo lịch mặc định xoay ca theo ngày nếu chưa có
-        const activeKtv = this.employees.filter(e => e.id !== 'ADMIN01' && e.status !== 'inactive');
-        const num = activeKtv.length || 1;
-        const dayNum = parseInt((dateIso.replace(/-/g, '')), 10) || 0;
-
-        return {
-          date: dateIso,
-          shift1: [activeKtv[(dayNum) % num]?.id || 'EMP01'],
-          shift2: [activeKtv[(dayNum + 1) % num]?.id || 'EMP02'],
-          shift3: [activeKtv[(dayNum + 2) % num]?.id || 'EMP03']
-        };
+        return this.rosterMatrix[weekKey];
       }
 
-      saveScheduleForDate(dateIso, shift1EmpIds, shift2EmpIds, shift3EmpIds) {
-        this.schedules[dateIso] = {
-          date: dateIso,
-          shift1: Array.isArray(shift1EmpIds) ? shift1EmpIds : [shift1EmpIds].filter(Boolean),
-          shift2: Array.isArray(shift2EmpIds) ? shift2EmpIds : [shift2EmpIds].filter(Boolean),
-          shift3: Array.isArray(shift3EmpIds) ? shift3EmpIds : [shift3EmpIds].filter(Boolean),
-          updatedAt: new Date().toISOString()
-        };
-        this.saveSchedules();
+      setCellStatus(weekKey, empId, cellKey, status) {
+        if (!this.rosterMatrix[weekKey]) this.rosterMatrix[weekKey] = {};
+        if (!this.rosterMatrix[weekKey][empId]) this.rosterMatrix[weekKey][empId] = {};
+
+        if (status) {
+          this.rosterMatrix[weekKey][empId][cellKey] = status;
+        } else {
+          delete this.rosterMatrix[weekKey][empId][cellKey];
+        }
+        this.saveRosterMatrix();
       }
 
-      getScheduledEmployeeForShift(dateIso, shiftType) {
-        const sched = this.getScheduleForDate(dateIso);
-        let empIds = [];
-        if (shiftType.includes('Ca 1')) empIds = sched.shift1 || [];
-        else if (shiftType.includes('Ca 2')) empIds = sched.shift2 || [];
-        else if (shiftType.includes('Ca 3')) empIds = sched.shift3 || [];
-        else empIds = sched.shift1 || [];
+      getScheduledStaffForCurrentDayAndShift(dateIso, shiftType) {
+        const monday = getMonday(new Date(dateIso));
+        const weekNum = getIsoWeekNumber(monday);
+        const weekKey = `${monday.getFullYear()}_W${weekNum}`;
+        const roster = this.getRosterForWeek(weekKey);
 
-        return empIds.map(id => this.employees.find(e => e.id === id)).filter(Boolean);
+        const targetDate = new Date(dateIso);
+        const dayDiff = Math.round((targetDate - monday) / (1000 * 60 * 60 * 24));
+        const dayIdx = (dayDiff >= 0 && dayDiff < 7) ? dayDiff : 0;
+
+        let colIdx = 1;
+        if (shiftType.includes('Ca 2')) colIdx = 2;
+        else if (shiftType.includes('Ca 3')) colIdx = 3;
+
+        const cellKey = `d${dayIdx}_c${colIdx}`;
+        const activeStaff = [];
+
+        Object.keys(roster).forEach(empId => {
+          const val = roster[empId]?.[cellKey];
+          if (val === 'x' || val === 'hc' || val === 'HC') {
+            const emp = this.employees.find(e => e.id === empId);
+            if (emp) activeStaff.push(emp);
+          }
+        });
+
+        return activeStaff;
       }
 
       // Template Management (CRUD)
@@ -1477,7 +1521,7 @@
     let pendingReopenTaskId = null;
     let editingTemplateId = null;
     let scheduleViewingMonday = getMonday(new Date());
-    let currentAssignContext = null; // { dateIso, shiftKey, shiftTitle }
+    let activeCellTarget = null; // { weekKey, empId, cellKey }
 
     function getMonday(d) {
       const date = new Date(d);
@@ -1509,6 +1553,14 @@
         const h = window.location.hash.replace('#', '');
         if (['tasks', 'journal', 'report', 'personal'].includes(h)) {
           switchTab(h, false);
+        }
+      });
+
+      // Click outside to close cell picker
+      document.addEventListener('click', (e) => {
+        const picker = document.getElementById('schedule-cell-picker');
+        if (picker && !picker.contains(e.target) && !e.target.closest('.roster-cell')) {
+          picker.classList.add('hidden');
         }
       });
     });
@@ -1721,8 +1773,8 @@
     function updateShiftRecommendation() {
       const dateVal = document.getElementById('input-shift-date').value || getTodayIsoDate();
       const detected = detectShiftByHour();
-      const scheduledEmps = repo.getScheduledEmployeeForShift(dateVal, detected);
-      const names = scheduledEmps.map(e => `${e.fullName} (${e.id})`).join(', ') || 'Chưa phân công';
+      const scheduledEmps = repo.getScheduledStaffForCurrentDayAndShift(dateVal, detected);
+      const names = scheduledEmps.map(e => `${e.fullName} (${e.id})`).join(', ') || 'Theo bảng phân ca';
 
       document.getElementById('shift-recommend-text').innerHTML = `
         <span class="font-bold text-indigo-700">${detected}</span> • Theo lịch phân ca: <span class="font-bold text-slate-800">${names}</span>
@@ -1793,11 +1845,11 @@
     }
 
     // ==========================================
-    // 6. BẢNG PHÂN CA TRỰC MA TRẬN (TABLE ROSTER - 1 CA NHIỀU NGƯỜI)
+    // 6. BẢNG PHÂN CA MA TRẬN CHUẨN TỔ CƠ ĐIỆN SÂN GOLF
     // ==========================================
     function openShiftScheduleModal() {
       scheduleViewingMonday = getMonday(new Date(repo.currentDate || getTodayIsoDate()));
-      renderShiftScheduleMatrix();
+      renderGolfScheduleMatrix();
       document.getElementById('modal-shift-schedule').classList.remove('hidden');
       document.getElementById('modal-shift-schedule').classList.add('flex');
       lucide.createIcons();
@@ -1806,176 +1858,165 @@
     function closeShiftScheduleModal() {
       document.getElementById('modal-shift-schedule').classList.add('hidden');
       document.getElementById('modal-shift-schedule').classList.remove('flex');
+      const picker = document.getElementById('schedule-cell-picker');
+      if (picker) picker.classList.add('hidden');
     }
 
     function navigateScheduleWeek(deltaWeeks) {
       scheduleViewingMonday.setDate(scheduleViewingMonday.getDate() + deltaWeeks * 7);
-      renderShiftScheduleMatrix();
+      renderGolfScheduleMatrix();
     }
 
     function jumpToCurrentWeek() {
       scheduleViewingMonday = getMonday(new Date());
-      renderShiftScheduleMatrix();
+      renderGolfScheduleMatrix();
     }
 
-    function renderShiftScheduleMatrix() {
-      const tbody = document.getElementById('schedule-matrix-tbody');
-      const weekLabel = document.getElementById('schedule-week-range-label');
-      if (!tbody) return;
-
-      tbody.innerHTML = '';
-      const isAdmin = repo.isAdmin();
-
-      // Tính ngày Thứ 2 đến Chủ nhật của tuần đang xem
-      const weekDays = [];
+    function renderGolfScheduleMatrix() {
       const monday = new Date(scheduleViewingMonday);
+      const weekNum = getIsoWeekNumber(monday);
+      const weekKey = `${monday.getFullYear()}_W${weekNum}`;
+
+      // 7 Ngày trong tuần
+      const weekDays = [];
       for (let i = 0; i < 7; i++) {
         const d = new Date(monday);
         d.setDate(monday.getDate() + i);
         weekDays.push(d);
       }
 
-      const firstDayStr = `${String(weekDays[0].getDate()).padStart(2, '0')}/${String(weekDays[0].getMonth() + 1).padStart(2, '0')}`;
-      const lastDayStr = `${String(weekDays[6].getDate()).padStart(2, '0')}/${String(weekDays[6].getMonth() + 1).padStart(2, '0')}/${weekDays[6].getFullYear()}`;
-      weekLabel.innerText = `Tuần ${firstDayStr} — ${lastDayStr}`;
+      const startDateStr = `${weekDays[0].getDate()}/${weekDays[0].getMonth() + 1}/${weekDays[0].getFullYear()}`;
+      const endDateStr = `${weekDays[6].getDate()}/${weekDays[6].getMonth() + 1}/${weekDays[6].getFullYear()}`;
 
-      const todayIso = getTodayIsoDate();
+      document.getElementById('header-week-num').innerText = weekNum;
+      document.getElementById('header-start-date').innerText = startDateStr;
+      document.getElementById('header-end-date').innerText = endDateStr;
 
-      // Render 7 Hàng cho 7 Ngày trong tuần
-      weekDays.forEach(dayDate => {
-        const dateIso = `${dayDate.getFullYear()}-${String(dayDate.getMonth() + 1).padStart(2, '0')}-${String(dayDate.getDate()).padStart(2, '0')}`;
-        const isToday = dateIso === todayIso;
-        const sched = repo.getScheduleForDate(dateIso);
+      // Render Days Header Row (Thứ Hai 17/ 8 ... Chủ Nhật 23/ 8)
+      const dayNames = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'];
+      const daysHeaderRow = document.getElementById('schedule-days-header-row');
+      daysHeaderRow.innerHTML = `
+        <th class="w-8 py-1.5 text-center font-bold">STT</th>
+        <th class="w-52 py-1.5 text-center font-extrabold">HỌ & TÊN</th>
+        ${weekDays.map((d, idx) => {
+          const isSun = idx === 6;
+          const dayLabel = `${dayNames[idx]} ${d.getDate()}/ ${d.getMonth() + 1}`;
+          return `<th colspan="3" class="text-center py-1.5 font-extrabold ${isSun ? 'text-rose-600 bg-rose-50/50' : 'text-slate-800'}">${dayLabel}</th>`;
+        }).join('')}
+      `;
 
-        const dayName = dayDate.toLocaleDateString('vi-VN', { weekday: 'short' });
-        const displayDate = `${dayName}, ${String(dayDate.getDate()).padStart(2, '0')}/${String(dayDate.getMonth() + 1).padStart(2, '0')}`;
-
-        const tr = document.createElement('tr');
-        tr.className = `schedule-matrix-row ${isToday ? 'bg-indigo-50/80 font-semibold' : 'hover:bg-slate-50'} transition-colors`;
-
-        // Helper render Cell Ca
-        const renderShiftCell = (shiftKey, shiftTitle, shiftClass) => {
-          const empIds = sched[shiftKey] || [];
-          const emps = empIds.map(id => repo.employees.find(e => e.id === id)).filter(Boolean);
-
-          let badgesHtml = '';
-          if (emps.length === 0) {
-            badgesHtml = `<span class="text-[11px] text-slate-400 italic">Chưa gán</span>`;
-          } else {
-            badgesHtml = emps.map(e => `
-              <span class="inline-flex items-center space-x-1 px-2 py-0.5 rounded-lg ${shiftClass} text-[11px] font-bold shadow-2xs">
-                <span>${e.shortName || e.fullName}</span>
-              </span>
-            `).join(' ');
-          }
-
-          return `
-            <td class="p-2.5 align-top border-r border-slate-100/80 last:border-none">
-              <div class="flex flex-col gap-1.5 min-h-[44px] justify-between">
-                <div class="flex flex-wrap gap-1 items-center shift-cell-badges">
-                  ${badgesHtml}
-                </div>
-                ${isAdmin ? `
-                  <button onclick="openAssignShiftStaffModal('${dateIso}', '${shiftKey}', '${shiftTitle} (${displayDate})')" aria-label="Gán nhân viên ${shiftTitle} ngày ${dateIso}" class="btn-assign-shift-cell self-start text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-white hover:bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200 transition active:scale-95">
-                    + Phân công
-                  </button>
-                ` : ''}
-              </div>
-            </td>
-          `;
-        };
-
-        tr.innerHTML = `
-          <td class="p-3 align-top border-r border-slate-200/80 shrink-0">
-            <div class="flex flex-col">
-              <span class="font-extrabold ${isToday ? 'text-indigo-700' : 'text-slate-800'} capitalize text-xs">${displayDate}</span>
-              ${isToday ? `
-                <span class="text-[9px] px-1.5 py-0.5 rounded-md bg-indigo-600 text-white font-extrabold w-fit mt-1">HÔM NAY</span>
-                <button onclick="handleQuickEnterTodayShift('${dateIso}')" aria-label="Vào ca hôm nay" class="btn-quick-enter-shift mt-1.5 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-white px-2 py-0.5 rounded border border-indigo-200 shadow-2xs">
-                  Vào ca ➔
-                </button>
-              ` : ''}
-            </div>
-          </td>
-          ${renderShiftCell('shift1', 'Ca 1 (06h - 14h)', 'bg-amber-100 text-amber-900 border border-amber-300')}
-          ${renderShiftCell('shift2', 'Ca 2 (14h - 22h)', 'bg-indigo-100 text-indigo-900 border border-indigo-300')}
-          ${renderShiftCell('shift3', 'Ca 3 (22h - 06h)', 'bg-purple-100 text-purple-900 border border-purple-300')}
+      // Render Shifts Header Row (Ca.1, Ca.2, Ca.3 x 7)
+      const shiftsHeaderRow = document.getElementById('schedule-shifts-header-row');
+      let shiftsHeaderHtml = `
+        <th class="w-8"></th>
+        <th class="w-52 text-left pl-3 text-slate-900 font-extrabold italic">Tổ cơ điện Sân Golf</th>
+      `;
+      for (let i = 0; i < 7; i++) {
+        shiftsHeaderHtml += `
+          <th class="w-9 py-1 text-center font-bold text-slate-700 bg-slate-50">Ca.1</th>
+          <th class="w-9 py-1 text-center font-bold text-slate-700 bg-slate-50">Ca.2</th>
+          <th class="w-9 py-1 text-center font-bold text-slate-700 bg-slate-50">Ca.3</th>
         `;
+      }
+      shiftsHeaderRow.innerHTML = shiftsHeaderHtml;
+
+      // Render Staff Rows
+      const tbody = document.getElementById('schedule-matrix-tbody');
+      tbody.innerHTML = '';
+
+      const staffList = repo.employees.filter(e => e.id !== 'ADMIN01' && e.status !== 'inactive');
+      const roster = repo.getRosterForWeek(weekKey);
+
+      // Mảng đếm tổng số "x" cho 21 cột (7 ngày x 3 ca)
+      const columnSums = new Array(21).fill(0);
+
+      staffList.forEach((emp, staffIdx) => {
+        const tr = document.createElement('tr');
+        tr.className = 'h-9 hover:bg-slate-50/80 transition-colors';
+
+        let cellsHtml = `
+          <td class="text-center font-bold text-slate-500">${staffIdx + 1}</td>
+          <td class="text-left pl-3 font-bold text-slate-900 truncate" title="${emp.fullName}">
+            ${emp.fullName} ${emp.role === 'Thử việc' ? '<span class="text-[10px] text-slate-400 font-normal">(thử việc)</span>' : ''}
+          </td>
+        `;
+
+        for (let d = 0; d < 7; d++) {
+          for (let c = 1; c <= 3; c++) {
+            const colIndex = d * 3 + (c - 1);
+            const cellKey = `d${d}_c${c}`;
+            const val = roster[emp.id]?.[cellKey] || '';
+
+            if (val === 'x') columnSums[colIndex]++;
+
+            let cellClass = 'roster-cell cursor-pointer text-center text-xs transition select-none';
+            if (val === 'x') cellClass += ' bg-rose-100 text-slate-900 font-extrabold';
+            else if (val === 'hc' || val === 'HC') cellClass += ' bg-emerald-100 text-emerald-900 font-bold';
+            else if (val === 'CN') cellClass += ' bg-yellow-300 text-slate-900 font-extrabold';
+            else if (val === 'P') cellClass += ' font-extrabold text-slate-700';
+
+            cellsHtml += `
+              <td class="${cellClass}" onclick="openCellStatusPicker(event, '${weekKey}', '${emp.id}', '${cellKey}', '${val}')" title="${emp.fullName} - ${dayNames[d]} Ca ${c}: ${val || 'Trống'}">
+                ${val}
+              </td>
+            `;
+          }
+        }
+
+        tr.innerHTML = cellsHtml;
         tbody.appendChild(tr);
       });
 
-      lucide.createIcons();
-    }
-
-    // ==========================================
-    // MULTI-STAFF ASSIGNMENT MODAL
-    // ==========================================
-    function openAssignShiftStaffModal(dateIso, shiftKey, shiftTitle) {
-      currentAssignContext = { dateIso, shiftKey, shiftTitle };
-      document.getElementById('assign-modal-title').innerText = `Phân Công: ${shiftTitle}`;
-
-      const sched = repo.getScheduleForDate(dateIso);
-      const currentAssignedIds = sched[shiftKey] || [];
-
-      const container = document.getElementById('assign-staff-checkbox-list');
-      container.innerHTML = '';
-
-      const activeEmps = repo.getActiveEmployees();
-      activeEmps.forEach(emp => {
-        const isChecked = currentAssignedIds.includes(emp.id);
-        const div = document.createElement('label');
-        div.className = `flex items-center justify-between p-3 rounded-2xl border cursor-pointer select-none transition ${isChecked ? 'bg-indigo-50/80 border-indigo-300' : 'bg-slate-50 border-slate-200 hover:border-slate-300'}`;
-
-        div.innerHTML = `
-          <div class="flex items-center space-x-3">
-            <input type="checkbox" value="${emp.id}" ${isChecked ? 'checked' : ''} class="assign-staff-checkbox w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300">
-            <div>
-              <p class="text-sm font-bold text-slate-800">${emp.fullName}</p>
-              <p class="text-[10px] text-slate-400 font-medium">${emp.id} • ${emp.role}</p>
-            </div>
-          </div>
-          <span class="text-xs font-semibold px-2 py-0.5 rounded-full ${emp.role === 'Quản trị viên' ? 'bg-purple-100 text-purple-800' : 'bg-slate-200 text-slate-700'}">
-            ${emp.role === 'Quản trị viên' ? '👑 Admin' : emp.role}
-          </span>
-        `;
-        container.appendChild(div);
+      // Render Summary Footer Row (Trực điện nước)
+      const summaryRow = document.getElementById('schedule-summary-row');
+      let summaryHtml = `
+        <td colspan="2" class="text-center font-extrabold border-r border-slate-300 py-1.5 text-slate-900">
+          Trực điện nước
+        </td>
+      `;
+      columnSums.forEach(count => {
+        summaryHtml += `<td class="text-center font-extrabold text-slate-900 py-1.5">${count}</td>`;
       });
+      summaryRow.innerHTML = summaryHtml;
 
-      document.getElementById('modal-assign-shift-staff').classList.remove('hidden');
-      document.getElementById('modal-assign-shift-staff').classList.add('flex');
       lucide.createIcons();
     }
 
-    function closeAssignShiftStaffModal() {
-      currentAssignContext = null;
-      document.getElementById('modal-assign-shift-staff').classList.add('hidden');
-      document.getElementById('modal-assign-shift-staff').classList.remove('flex');
+    function openCellStatusPicker(e, weekKey, empId, cellKey, currentVal) {
+      if (!repo.isAdmin()) {
+        // Nếu là nhân viên thường, click để xem thông tin
+        return;
+      }
+
+      activeCellTarget = { weekKey, empId, cellKey, currentVal };
+      const picker = document.getElementById('schedule-cell-picker');
+      const rect = e.target.getBoundingClientRect();
+
+      picker.style.left = `${Math.min(window.innerWidth - 300, Math.max(10, rect.left - 50))}px`;
+      picker.style.top = `${rect.bottom + window.scrollY + 4}px`;
+      picker.classList.remove('hidden');
     }
 
-    function saveShiftStaffAssignment() {
-      if (!currentAssignContext) return;
-      const { dateIso, shiftKey } = currentAssignContext;
+    function handleSelectCellStatus(status) {
+      if (!activeCellTarget) return;
+      const { weekKey, empId, cellKey } = activeCellTarget;
+      repo.setCellStatus(weekKey, empId, cellKey, status);
+      
+      const picker = document.getElementById('schedule-cell-picker');
+      if (picker) picker.classList.add('hidden');
+      activeCellTarget = null;
 
-      const checkedBoxes = document.querySelectorAll('.assign-staff-checkbox:checked');
-      const selectedIds = Array.from(checkedBoxes).map(cb => cb.value);
-
-      const sched = repo.getScheduleForDate(dateIso);
-      const s1 = shiftKey === 'shift1' ? selectedIds : (sched.shift1 || []);
-      const s2 = shiftKey === 'shift2' ? selectedIds : (sched.shift2 || []);
-      const s3 = shiftKey === 'shift3' ? selectedIds : (sched.shift3 || []);
-
-      repo.saveScheduleForDate(dateIso, s1, s2, s3);
-      closeAssignShiftStaffModal();
-      renderShiftScheduleMatrix();
-      showToast('Đã cập nhật phân công ca trực');
+      renderGolfScheduleMatrix();
+      showToast('Đã cập nhật phân ca');
     }
 
-    function handleQuickEnterTodayShift(dateIso) {
+    function handleQuickEnterTodayShift() {
+      const todayIso = getTodayIsoDate();
       const currentDetectedShift = detectShiftByHour();
-      const scheduledEmps = repo.getScheduledEmployeeForShift(dateIso, currentDetectedShift);
-      const targetEmpId = scheduledEmps.length > 0 ? scheduledEmps[0].id : repo.currentEmployeeId;
+      const scheduledStaff = repo.getScheduledStaffForCurrentDayAndShift(todayIso, currentDetectedShift);
+      const targetEmpId = scheduledStaff.length > 0 ? scheduledStaff[0].id : repo.currentEmployeeId;
 
-      repo.setCurrentShift(targetEmpId, currentDetectedShift, dateIso);
+      repo.setCurrentShift(targetEmpId, currentDetectedShift, todayIso);
       updateShiftHeaderUI();
       closeShiftScheduleModal();
       renderTasks();
@@ -2643,13 +2684,13 @@
 
     function exportDataJSON() {
       const data = {
-        schemaVersion: 2,
+        schemaVersion: 3,
         currentEmployeeId: repo.currentEmployeeId,
         currentShiftType: repo.currentShiftType,
         currentDate: repo.currentDate,
         employees: repo.employees,
         templates: repo.templates,
-        schedules: repo.schedules,
+        rosterMatrix: repo.rosterMatrix,
         tasks: repo.tasks,
         logs: repo.logs,
         taskEvents: repo.taskEvents,
@@ -2669,10 +2710,10 @@
       if (confirm('Khôi phục lại danh sách dữ liệu mẫu gốc?')) {
         repo.employees = [...DEFAULT_ACTIVE_EMPLOYEES];
         repo.templates = [...DEFAULT_CHECKLIST_TEMPLATES];
-        repo.schedules = {};
+        repo.rosterMatrix = {};
         repo.saveEmployees();
         repo.saveTemplates();
-        repo.saveSchedules();
+        repo.saveRosterMatrix();
         repo.initSampleData();
         populateLoginEmployeeSelect();
         populateEmployeeSelect();

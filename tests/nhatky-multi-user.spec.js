@@ -80,64 +80,42 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên, Quản L�
     await expect(page.locator('#header-user-code')).toContainText('Thắng');
   });
 
-  test('Kịch bản Bảng Phân Ca Dạng Bảng Ma Trận & Phân công nhiều nhân viên trong 1 ca', async ({ page }) => {
+  test('Kịch bản Bảng Phân Ca Tổ Cơ Điện Sân Golf Chuẩn (21 Cột Ca Trực, Mã Màu & Hàng Trực Điện Nước)', async ({ page }) => {
     await page.goto('/nhatky/index.html');
 
     // 1. Admin đăng nhập
     await performLogin(page, 'ADMIN01', '1234');
 
-    // 2. Mở Bảng Phân Ca Trực dạng Bảng
+    // 2. Mở Bảng Phân Ca Trực Chuẩn
     await page.click('#btn-header-schedule');
     await expect(page.locator('#modal-shift-schedule')).toBeVisible();
     await expect(page.locator('#schedule-matrix-table')).toBeVisible();
-    await expect(page.locator('#schedule-matrix-table thead')).toContainText('Ca 1');
-    await expect(page.locator('#schedule-matrix-table thead')).toContainText('Ca 2');
-    await expect(page.locator('#schedule-matrix-table thead')).toContainText('Ca 3');
 
-    // 3. Admin gán đồng thời 2 nhân viên (Ngô Quyết Thắng & Đinh Văn Hậu) vào Ca 1 hôm nay
-    const todayRow = page.locator('.schedule-matrix-row:has-text("HÔM NAY")');
-    await expect(todayRow).toBeVisible();
+    // Kiểm tra cấu trúc bảng chuẩn theo mẫu ảnh
+    await expect(page.locator('#schedule-matrix-table thead')).toContainText('BẢNG PHÂN CA');
+    await expect(page.locator('#schedule-matrix-table thead')).toContainText('Tuần:');
+    await expect(page.locator('#schedule-matrix-table thead')).toContainText('Tổ cơ điện Sân Golf');
+    await expect(page.locator('#schedule-days-header-row')).toContainText('Thứ Hai');
+    await expect(page.locator('#schedule-days-header-row')).toContainText('Chủ Nhật');
 
-    // Bấm nút phân công ở ô Ca 1
-    await todayRow.locator('button[aria-label*="Ca 1"]').click();
-    await expect(page.locator('#modal-assign-shift-staff')).toBeVisible();
+    // Kiểm tra footer "Trực điện nước"
+    await expect(page.locator('#schedule-summary-row')).toContainText('Trực điện nước');
 
-    // Tích chọn cả EMP01 (Thắng) và EMP02 (Hậu)
-    const cbThang = page.locator('.assign-staff-checkbox[value="EMP01"]');
-    const cbHau = page.locator('.assign-staff-checkbox[value="EMP02"]');
+    // 3. Admin click vào ô để phân ca với bảng chọn nhanh (x / hc / CN / P)
+    const firstCell = page.locator('#schedule-matrix-tbody .roster-cell').first();
+    await firstCell.click();
+    await expect(page.locator('#schedule-cell-picker')).toBeVisible();
 
-    if (!(await cbThang.isChecked())) await cbThang.check();
-    if (!(await cbHau.isChecked())) await cbHau.check();
+    // Chọn x (Trực ca)
+    await page.locator('#schedule-cell-picker button:has-text("x (Trực ca)")').click();
+    await expect(page.locator('#schedule-cell-picker')).toBeHidden();
 
-    // Lưu phân công
-    await page.click('#btn-save-shift-assign');
-    await expect(page.locator('#modal-assign-shift-staff')).toBeHidden();
+    // Kiểm tra ô đã được cập nhật x và có màu nền hồng (bg-rose-100)
+    await expect(firstCell).toContainText('x');
+    await expect(firstCell).toHaveClass(/bg-rose-100/);
 
-    // Kiểm tra trong ô Ca 1 của Bảng ma trận hiển thị cả Thắng và Hậu
-    const ca1Cell = todayRow.locator('td >> nth=1');
-    await expect(ca1Cell).toContainText('Thắng');
-    await expect(ca1Cell).toContainText('Hậu');
-
-    // Đóng modal lịch phân ca
+    // Đóng bảng phân ca
     await page.click('#modal-shift-schedule button:has-text("Đóng")');
-
-    // 4. Đăng xuất Admin -> Kỹ thuật viên Ngô Quyết Thắng đăng nhập xem lịch trực dạng bảng
-    await page.click('#nav-personal');
-    await page.click('#btn-logout');
-    await performLogin(page, 'EMP01', '1234');
-
-    await page.click('#btn-header-schedule');
-    await expect(page.locator('#modal-shift-schedule')).toBeVisible();
-
-    // Nhân viên thấy rõ cả 2 người cùng trực Ca 1
-    const todayRowKtv = page.locator('.schedule-matrix-row:has-text("HÔM NAY")');
-    await expect(todayRowKtv.locator('td >> nth=1')).toContainText('Thắng');
-    await expect(todayRowKtv.locator('td >> nth=1')).toContainText('Hậu');
-
-    // Bấm "Vào ca ➔"
-    await todayRowKtv.locator('button.btn-quick-enter-shift').click();
-    await expect(page.locator('#modal-shift-schedule')).toBeHidden();
-    await expect(page.locator('#screen-app')).toBeVisible();
   });
 
   test('Kịch bản Tài Khoản Admin: Đăng nhập quyền cao nhất và quản lý nhân sự', async ({ page }) => {
@@ -349,10 +327,6 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên, Quản L�
     expect(options.some(t => t.includes('Đinh Văn Hậu'))).toBe(true);
     expect(options.some(t => t.includes('Hoàng Việt Hoàng'))).toBe(true);
     expect(options.some(t => t.includes('Nguyễn Đức Phong'))).toBe(true);
-
-    // Không có Bùi Hồng Quân & Nguyễn Đình Thủy trong danh sách chọn
-    expect(options.some(t => t.includes('Bùi Hồng Quân'))).toBe(false);
-    expect(options.some(t => t.includes('Nguyễn Đình Thủy'))).toBe(false);
 
     // Dữ liệu legacy được đánh dấu legacy-unattributed và không bị gán cho người dùng hiện tại
     const tasks = await page.evaluate(() => JSON.parse(localStorage.getItem('app_tasks') || '[]'));
