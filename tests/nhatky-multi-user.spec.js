@@ -1,8 +1,11 @@
 const { test, expect } = require('@playwright/test');
 
-test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên & Quản Lý Ca', () => {
+test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên, Quản Lý Ca & Xác Thực', () => {
 
   test.beforeEach(async ({ page }) => {
+    // Auto accept all dialogs (confirm / alert)
+    page.on('dialog', dialog => dialog.accept());
+
     await page.goto('/nhatky/index.html');
     await page.evaluate(() => {
       localStorage.clear();
@@ -11,15 +14,75 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên & Quản L
     await page.reload();
   });
 
-  test('Kịch bản 1, 2, 3: Cô lập dữ liệu theo Ca và Nhân viên (Thắng Ca 1 vs Hậu Ca 2)', async ({ page }) => {
-    await page.goto('/nhatky/index.html#tasks');
+  // Helper để đăng nhập nhanh trong các bài test vận hành
+  async function performLogin(page, empId = 'EMP01', pin = '1234') {
+    await expect(page.locator('#screen-login')).toBeVisible();
+    await page.selectOption('#select-login-employee', empId);
+    await page.fill('#input-login-pin', pin);
+    await page.click('#btn-submit-login');
+    await expect(page.locator('#screen-app')).toBeVisible();
+  }
 
-    // 1. Kiểm tra nhân viên mặc định và chọn Ngô Quyết Thắng - Ca 1
-    await page.click('#header-user-badge');
-    await expect(page.locator('#modal-shift-select')).toBeVisible();
-    await page.selectOption('#select-active-employee', 'EMP01'); // Ngô Quyết Thắng
-    await page.selectOption('#select-active-shift-type', 'Ca 1 (06h - 14h)');
-    await page.click('#btn-save-shift');
+  test('Kịch bản Xác Thực 1: Đăng nhập với mật khẩu mặc định (1234) & Đăng nhập sai báo lỗi', async ({ page }) => {
+    await page.goto('/nhatky/index.html');
+
+    // 1. Màn hình login xuất hiện
+    await expect(page.locator('#screen-login')).toBeVisible();
+    await expect(page.locator('#screen-app')).toBeHidden();
+
+    // 2. Đăng nhập sai mật khẩu -> Báo lỗi
+    await page.selectOption('#select-login-employee', 'EMP01'); // Ngô Quyết Thắng
+    await page.fill('#input-login-pin', '9999'); // Sai PIN
+    await page.click('#btn-submit-login');
+    await expect(page.locator('#login-error-msg')).toContainText('Mật khẩu không chính xác');
+    await expect(page.locator('#screen-app')).toBeHidden();
+
+    // 3. Đăng nhập đúng với mật khẩu mặc định 1234 -> Vào app
+    await page.fill('#input-login-pin', '1234');
+    await page.click('#btn-submit-login');
+    await expect(page.locator('#screen-app')).toBeVisible();
+    await expect(page.locator('#screen-login')).toBeHidden();
+    await expect(page.locator('#header-user-code')).toContainText('Thắng');
+  });
+
+  test('Kịch bản Xác Thực 2: Đổi mật khẩu cá nhân & Đăng xuất rồi đăng nhập lại bằng mật khẩu mới', async ({ page }) => {
+    await page.goto('/nhatky/index.html');
+    await performLogin(page, 'EMP01', '1234');
+
+    // Vào Tab Cá nhân
+    await page.click('#nav-personal');
+
+    // Mở modal Đổi mật khẩu
+    await page.click('#btn-open-change-password');
+    await expect(page.locator('#modal-change-password')).toBeVisible();
+
+    // Điền form đổi PIN: 1234 -> 5678
+    await page.fill('#input-current-pin', '1234');
+    await page.fill('#input-new-pin', '5678');
+    await page.fill('#input-confirm-new-pin', '5678');
+    await page.click('#btn-save-new-pin');
+
+    // Đăng xuất
+    await page.click('#btn-logout');
+    await expect(page.locator('#screen-login')).toBeVisible();
+    await expect(page.locator('#screen-app')).toBeHidden();
+
+    // Thử đăng nhập lại bằng mật khẩu cũ 1234 -> Báo lỗi
+    await page.selectOption('#select-login-employee', 'EMP01');
+    await page.fill('#input-login-pin', '1234');
+    await page.click('#btn-submit-login');
+    await expect(page.locator('#login-error-msg')).toBeVisible();
+
+    // Đăng nhập bằng mật khẩu mới 5678 -> Thành công
+    await page.fill('#input-login-pin', '5678');
+    await page.click('#btn-submit-login');
+    await expect(page.locator('#screen-app')).toBeVisible();
+    await expect(page.locator('#header-user-code')).toContainText('Thắng');
+  });
+
+  test('Kịch bản 1, 2, 3: Cô lập dữ liệu theo Ca và Nhân viên (Thắng Ca 1 vs Hậu Ca 2)', async ({ page }) => {
+    await page.goto('/nhatky/index.html');
+    await performLogin(page, 'EMP01', '1234'); // Ngô Quyết Thắng
 
     // Kiểm tra UI hiển thị đúng Thắng Ca 1
     await expect(page.locator('#header-user-code')).toContainText('Thắng');
@@ -72,12 +135,8 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên & Quản L
   });
 
   test('Kịch bản 4: Hoàng Việt Hoàng mở lại task đã xong -> Yêu cầu lý do và lưu audit taskEvents', async ({ page }) => {
-    await page.goto('/nhatky/index.html#tasks');
-
-    // Chọn Hoàng Việt Hoàng
-    await page.click('#header-user-badge');
-    await page.selectOption('#select-active-employee', 'EMP03'); // Hoàng Việt Hoàng
-    await page.click('#btn-save-shift');
+    await page.goto('/nhatky/index.html');
+    await performLogin(page, 'EMP03', '1234'); // Hoàng Việt Hoàng
 
     // Thêm task và hoàn thành
     await page.click('button:has-text("Thêm việc")');
@@ -118,6 +177,7 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên & Quản L
     });
 
     await page.reload();
+    await performLogin(page, 'EMP01', '1234');
 
     // Mở chọn nhân viên
     await page.click('#header-user-badge');
@@ -140,13 +200,11 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên & Quản L
     expect(legacyTask.createdBy).toBe('legacy-unattributed');
   });
 
-  test('Kịch bản Mở Rộng: Nhân viên mới / Thử việc tự tạo tài khoản và ghi nhật ký độc lập', async ({ page }) => {
-    await page.goto('/nhatky/index.html#tasks');
+  test('Kịch bản Mở Rộng: Nhân viên mới / Thử việc tự tạo tài khoản và đăng nhập ghi nhật ký độc lập', async ({ page }) => {
+    await page.goto('/nhatky/index.html');
 
-    // 1. Mở modal chọn ca và bấm "+ Thêm nhân viên / Thử việc mới"
-    await page.click('#header-user-badge');
-    await page.click('#btn-open-add-employee');
-
+    // 1. Mở modal đăng ký từ màn hình login
+    await page.click('#btn-login-open-register');
     await expect(page.locator('#modal-add-employee')).toBeVisible();
 
     // 2. Điền thông tin nhân viên thử việc mới
@@ -154,7 +212,8 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên & Quản L
     await page.selectOption('#select-new-emp-role', 'Thử việc');
     await page.click('#btn-save-new-employee');
 
-    // 3. Sau khi tạo, hệ thống tự động đưa Lê Văn An vào ca trực
+    // 3. Sau khi tạo, hệ thống tự động đăng nhập và đưa Lê Văn An vào ca trực
+    await expect(page.locator('#screen-app')).toBeVisible();
     await expect(page.locator('#header-user-code')).toContainText('An');
 
     // 4. Lê Văn An thêm công việc và ghi nhật ký
@@ -180,11 +239,10 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên & Quản L
     await expect(page.locator('#active-employees-container')).toContainText('Lê Văn An');
     await expect(page.locator('#active-employees-container')).toContainText('Thử việc');
 
-    // 7. Reload trang kiểm tra dữ liệu nhân viên mới vẫn được bảo toàn
+    // 7. Reload trang kiểm tra phiên vẫn được bảo toàn
     await page.reload();
-    await page.click('#header-user-badge');
-    const options = await page.locator('#select-active-employee option').allInnerTexts();
-    expect(options.some(t => t.includes('Lê Văn An'))).toBe(true);
+    await expect(page.locator('#screen-app')).toBeVisible();
+    await expect(page.locator('#header-user-code')).toContainText('An');
   });
 
   test('Kịch bản 10 & 12: Đảm bảo Accessibility (aria-label) và không có console error', async ({ page }) => {
@@ -196,6 +254,7 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên & Quản L
     });
 
     await page.goto('/nhatky/index.html');
+    await performLogin(page, 'EMP01', '1234');
 
     // Kiểm tra các button icon có aria-label
     const buttons = await page.locator('button').all();

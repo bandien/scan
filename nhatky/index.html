@@ -55,276 +55,408 @@
     </div>
   </div>
 
-  <!-- TOP HEADER -->
-  <header class="bg-indigo-600 text-white px-4 py-3.5 flex items-center justify-between shadow-lg shadow-indigo-600/10 z-20 shrink-0 border-b border-indigo-700">
-    <div class="flex items-center space-x-3">
-      <div class="w-10 h-10 bg-indigo-700/80 rounded-xl flex items-center justify-center border border-indigo-500/50 shadow-inner">
-        <i data-lucide="clipboard-check" class="w-5 h-5 text-indigo-100"></i>
+  <!-- ========================================== -->
+  <!-- SCREEN: ĐĂNG NHẬP (#screen-login) -->
+  <!-- ========================================== -->
+  <div id="screen-login" class="flex-1 flex flex-col justify-center items-center px-5 py-8 bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-900 text-white z-40">
+    <div class="w-full max-w-sm space-y-6">
+      
+      <!-- App Header / Logo -->
+      <div class="text-center space-y-2">
+        <div class="w-16 h-16 bg-gradient-to-tr from-indigo-500 to-indigo-600 rounded-3xl flex items-center justify-center mx-auto shadow-xl shadow-indigo-500/30 border border-indigo-400/40">
+          <i data-lucide="shield-check" class="w-8 h-8 text-white"></i>
+        </div>
+        <h1 class="text-xl font-extrabold tracking-tight text-white">Nhật Ký & Checklist</h1>
+        <p class="text-xs text-indigo-200/80 font-medium">Hệ Thống Trực Vận Hành & Bảo Trì Thiết Bị</p>
       </div>
-      <div>
-        <h1 class="font-bold text-base tracking-tight leading-tight" id="header-title">Checklist & Công Việc</h1>
-        <p class="text-[11px] text-indigo-200 font-medium" id="current-date">Hôm nay, ...</p>
+
+      <!-- Login Card -->
+      <div class="bg-white/10 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-2xl space-y-4">
+        <div class="space-y-1">
+          <h2 class="text-sm font-bold text-white tracking-wide">Đăng nhập ca trực</h2>
+          <p class="text-[11px] text-slate-300">Chọn tài khoản nhân viên và nhập mật khẩu</p>
+        </div>
+
+        <form id="form-login" onsubmit="handleLoginSubmit(event)" class="space-y-3.5">
+          <div>
+            <label class="block text-[11px] font-bold text-indigo-200 uppercase tracking-wider mb-1">Nhân viên trực</label>
+            <select id="select-login-employee" class="w-full px-3.5 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <!-- Rendered by JS -->
+            </select>
+          </div>
+
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label class="block text-[11px] font-bold text-indigo-200 uppercase tracking-wider">Mật khẩu (PIN)</label>
+              <span class="text-[10px] text-indigo-300 font-medium">Mặc định: 1234</span>
+            </div>
+            <div class="relative">
+              <input type="password" id="input-login-pin" placeholder="Nhập PIN (VD: 1234)" class="w-full pl-3.5 pr-10 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-slate-500">
+              <button type="button" onclick="togglePasswordVisibility('input-login-pin')" aria-label="Ẩn hiện mật khẩu" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white">
+                <i data-lucide="eye" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Error Alert -->
+          <div id="login-error-msg" class="hidden p-2.5 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs font-semibold">
+            Mật khẩu không chính xác. Vui lòng thử lại.
+          </div>
+
+          <button type="submit" id="btn-submit-login" aria-label="Đăng nhập vào hệ thống" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-bold rounded-xl text-sm shadow-lg shadow-indigo-600/30 transition">
+            Đăng Nhập Ca Trực
+          </button>
+        </form>
+
+        <div class="pt-2 border-t border-white/10 text-center">
+          <button id="btn-login-open-register" onclick="openAddEmployeeModalFromLogin()" class="text-xs font-bold text-indigo-300 hover:text-white transition">
+            + Đăng ký nhân viên / Thử việc mới
+          </button>
+        </div>
+      </div>
+
+      <!-- Footer Info -->
+      <div class="text-center space-y-1 text-[11px] text-slate-400">
+        <p>Mật khẩu đồng bộ danh sách Google Sheet (Mặc định: <span class="text-indigo-300 font-mono">1234</span>)</p>
+        <p>Phiên bản 2.4.0 • Xác thực & Cô lập ca trực</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MAIN APP CONTAINER (HEADER + CONTENT + NAV) (#screen-app) -->
+  <!-- ========================================== -->
+  <div id="screen-app" class="flex-1 flex flex-col h-screen overflow-hidden hidden">
+
+    <!-- TOP HEADER -->
+    <header class="bg-indigo-600 text-white px-4 py-3.5 flex items-center justify-between shadow-lg shadow-indigo-600/10 z-20 shrink-0 border-b border-indigo-700">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 bg-indigo-700/80 rounded-xl flex items-center justify-center border border-indigo-500/50 shadow-inner">
+          <i data-lucide="clipboard-check" class="w-5 h-5 text-indigo-100"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-base tracking-tight leading-tight" id="header-title">Checklist & Công Việc</h1>
+          <p class="text-[11px] text-indigo-200 font-medium" id="current-date">Hôm nay, ...</p>
+        </div>
+      </div>
+      
+      <!-- Shift / User Quick Badge -->
+      <button id="header-user-badge" onclick="openShiftModal()" aria-label="Đổi ca trực và nhân viên" class="flex items-center space-x-2 bg-indigo-700/60 hover:bg-indigo-700 border border-indigo-500/40 px-2.5 py-1 rounded-full cursor-pointer transition active:scale-95 text-left">
+        <div class="w-6 h-6 rounded-full bg-amber-400 text-slate-900 font-bold text-xs flex items-center justify-center" id="header-avatar">
+          NT
+        </div>
+        <div class="flex flex-col pr-1">
+          <span class="text-xs font-bold text-white tracking-wide leading-none" id="header-user-code">Ngô Quyết Thắng</span>
+          <span class="text-[9px] text-indigo-200 font-medium leading-tight mt-0.5" id="header-shift-label">Ca 1 (06h - 14h)</span>
+        </div>
+      </button>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-1 overflow-y-auto px-4 py-3.5 custom-scrollbar pb-28" id="main-content">
+
+      <!-- ========================================== -->
+      <!-- TAB 1: CHECKLIST & CÔNG VIỆC (#tasks) -->
+      <!-- ========================================== -->
+      <section id="tab-tasks" class="space-y-3.5">
+        <!-- Search & Add Bar -->
+        <div class="flex items-center gap-2">
+          <div class="relative flex-1">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+            <input type="text" id="task-search" placeholder="Tìm kiếm đầu việc..." class="w-full pl-9 pr-8 py-2.5 bg-white rounded-xl border border-slate-200/80 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm placeholder:text-slate-400 transition" oninput="renderTasks()">
+            <button id="clear-search-btn" onclick="clearTaskSearch()" aria-label="Xóa tìm kiếm" class="hidden absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600">
+              <i data-lucide="x" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+          <button onclick="openTaskModal()" aria-label="Thêm công việc mới" class="flex items-center space-x-1.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white px-3.5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Thêm việc</span>
+          </button>
+        </div>
+
+        <!-- Filter Chips -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-medium no-scrollbar">
+          <button onclick="setTaskFilter('all')" id="filter-all" class="task-filter-btn px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-semibold shadow-xs">Tất cả</button>
+          <button onclick="setTaskFilter('pending')" id="filter-pending" class="task-filter-btn px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50">Chưa xong</button>
+          <button onclick="setTaskFilter('done')" id="filter-done" class="task-filter-btn px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50">Đã xong</button>
+          <button onclick="setTaskFilter('urgent')" id="filter-urgent" class="task-filter-btn px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-rose-600 hover:bg-rose-50">🔴 Khẩn cấp</button>
+        </div>
+
+        <!-- Progress Summary Card -->
+        <div class="bg-gradient-to-br from-white to-slate-50/80 p-4 rounded-2xl shadow-xs border border-slate-200/80">
+          <div class="flex justify-between items-center mb-2">
+            <div class="flex items-center space-x-1.5">
+              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Tiến độ ca trực</span>
+              <span id="progress-count" class="text-[11px] font-bold px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded-md">0/0</span>
+            </div>
+            <span class="text-sm font-extrabold text-indigo-600" id="progress-percent">0%</span>
+          </div>
+          <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden p-0.5 border border-slate-200/50">
+            <div id="progress-bar" class="bg-gradient-to-r from-indigo-500 to-indigo-600 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Checklist Items Container -->
+        <div id="task-list" class="space-y-2.5">
+          <!-- Rendered by JS -->
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB 2: NHẬT KÝ WORK LOG (#journal) -->
+      <!-- ========================================== -->
+      <section id="tab-journal" class="space-y-3.5 hidden">
+        <!-- Action Bar -->
+        <div class="flex justify-between items-center gap-2">
+          <div class="flex items-center space-x-2">
+            <h2 class="text-base font-bold text-slate-800">Dòng thời gian nhật ký</h2>
+            <span id="log-count-badge" class="text-xs font-bold px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">0</span>
+          </div>
+          <button onclick="openLogModal()" aria-label="Ghi nhật ký mới" class="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white px-3.5 py-2 rounded-xl text-sm font-semibold shadow-sm transition">
+            <i data-lucide="edit-3" class="w-4 h-4"></i>
+            <span>Ghi nhật ký</span>
+          </button>
+        </div>
+
+        <!-- Quick Template Chips -->
+        <div class="space-y-1.5">
+          <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Mẫu nhanh:</span>
+          <div class="flex gap-1.5 overflow-x-auto pb-1 text-xs">
+            <button onclick="applyLogTemplate('Kiểm tra tủ điện chính: Các thông số điện áp và dòng tải ổn định.', 'Không bất thường', 'Trạm điện')" class="whitespace-nowrap px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-slate-600 hover:border-emerald-400 active:bg-slate-100">
+              ⚡ Trạm điện ổn định
+            </button>
+            <button onclick="applyLogTemplate('Bảo dưỡng máy bơm nước sinh hoạt: Đã tra dầu, xả cặn định kỳ.', 'Đã xử lý dứt điểm', 'Trạm bơm')" class="whitespace-nowrap px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-slate-600 hover:border-emerald-400 active:bg-slate-100">
+              💧 Bảo dưỡng máy bơm
+            </button>
+            <button onclick="applyLogTemplate('Phát hiện tiếng kêu lạ tại quạt thông gió hầm B2, cần kiểm tra tiếp ca sau.', 'Cần theo dõi thêm', 'Hầm B2')" class="whitespace-nowrap px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-slate-600 hover:border-emerald-400 active:bg-slate-100">
+              ⚠️ Tiếng ồn quạt gió
+            </button>
+          </div>
+        </div>
+
+        <!-- Journal Timeline List -->
+        <div id="journal-list" class="space-y-3 relative before:absolute before:inset-0 before:left-3.5 before:w-0.5 before:bg-slate-200">
+          <!-- Rendered by JS -->
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB 3: BÁO CÁO THỐNG KÊ (#report) -->
+      <!-- ========================================== -->
+      <section id="tab-report" class="space-y-4 hidden">
+        <div class="flex justify-between items-center">
+          <div>
+            <h2 class="text-base font-bold text-slate-800">Tổng kết ca trực</h2>
+            <p class="text-xs text-slate-500" id="report-shift-subtitle">Báo cáo ca làm việc hiện hành</p>
+          </div>
+          <button onclick="copyShiftReport()" aria-label="Sao chép báo cáo vào bộ nhớ tạm" class="flex items-center space-x-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-xl text-xs font-bold transition active:scale-95">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            <span>Sao chép báo cáo</span>
+          </button>
+        </div>
+
+        <!-- KPI Grid -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200/80">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-500">Tổng checklist ca</span>
+              <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center"><i data-lucide="list-todo" class="w-4 h-4"></i></div>
+            </div>
+            <p class="text-2xl font-extrabold text-indigo-600 mt-2" id="stat-total">0</p>
+            <p class="text-[11px] text-slate-400 mt-0.5">Nhiệm vụ được giao</p>
+          </div>
+
+          <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200/80">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-500">Đã hoàn tất</span>
+              <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"><i data-lucide="check-check" class="w-4 h-4"></i></div>
+            </div>
+            <p class="text-2xl font-extrabold text-emerald-600 mt-2" id="stat-done">0</p>
+            <p class="text-[11px] text-emerald-500 font-medium mt-0.5" id="stat-done-pct">Đạt 0%</p>
+          </div>
+
+          <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200/80">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-500">Khẩn cấp còn lại</span>
+              <div class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center"><i data-lucide="alert-triangle" class="w-4 h-4"></i></div>
+            </div>
+            <p class="text-2xl font-extrabold text-rose-600 mt-2" id="stat-urgent">0</p>
+            <p class="text-[11px] text-slate-400 mt-0.5">Cần xử lý ngay</p>
+          </div>
+
+          <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200/80">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-500">Nhật ký đã ghi</span>
+              <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center"><i data-lucide="book-open-check" class="w-4 h-4"></i></div>
+            </div>
+            <p class="text-2xl font-extrabold text-amber-600 mt-2" id="stat-logs">0</p>
+            <p class="text-[11px] text-slate-400 mt-0.5" id="stat-logs-warning">0 cần theo dõi</p>
+          </div>
+        </div>
+
+        <!-- Preview Report Box -->
+        <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200/80 space-y-2">
+          <div class="flex justify-between items-center">
+            <h3 class="text-xs font-bold text-slate-600 uppercase tracking-wider">Xem trước nội dung báo cáo ca</h3>
+            <span class="text-[11px] text-slate-400 font-medium" id="report-view-all-label">Hiển thị đầy đủ</span>
+          </div>
+          <div id="report-preview" class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs font-mono text-slate-700 whitespace-pre-wrap leading-relaxed">
+            Đang tạo báo cáo...
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB 4: CÁ NHÂN & QUẢN LÝ NHÂN SỰ (#personal) -->
+      <!-- ========================================== -->
+      <section id="tab-personal" class="space-y-4 hidden">
+        <!-- Profile Card -->
+        <div class="bg-gradient-to-br from-white to-slate-50 p-5 rounded-2xl shadow-xs border border-slate-200/80 text-center relative overflow-hidden">
+          <div class="w-16 h-16 bg-gradient-to-tr from-indigo-600 to-indigo-400 text-white font-extrabold text-xl rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md shadow-indigo-600/20">
+            <span id="profile-avatar-char">NT</span>
+          </div>
+          <h3 class="font-bold text-slate-800 text-lg" id="profile-name">Ngô Quyết Thắng</h3>
+          <p class="text-xs font-medium text-slate-500 mt-0.5" id="profile-code">Mã NV: EMP01 • Ca 1 (06h - 14h)</p>
+          
+          <div class="flex justify-center gap-2 mt-3 flex-wrap">
+            <button onclick="openShiftModal()" aria-label="Chuyển đổi ca trực và nhân viên" class="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-xl transition">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              <span>Đổi Ca / Giao Ca</span>
+            </button>
+            <button id="btn-open-change-password" onclick="openChangePasswordModal()" aria-label="Đổi mật khẩu cá nhân" class="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">
+              <i data-lucide="key" class="w-3.5 h-3.5"></i>
+              <span>Đổi Mật Khẩu</span>
+            </button>
+            <button onclick="openAddEmployeeModal()" aria-label="Thêm nhân viên hoặc thử việc mới" class="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold rounded-xl transition">
+              <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+              <span>+ Thêm Nhân Viên</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Active Employees List -->
+        <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200/80 space-y-3">
+          <div class="flex justify-between items-center">
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Danh sách nhân sự đang hoạt động</h3>
+            <button onclick="openAddEmployeeModal()" aria-label="Đăng ký thêm nhân sự" class="text-xs font-bold text-indigo-600 hover:text-indigo-800">
+              + Thêm mới
+            </button>
+          </div>
+          <div id="active-employees-container" class="space-y-2 text-xs">
+            <!-- Rendered dynamically by JS -->
+          </div>
+        </div>
+
+        <!-- Actions Menu -->
+        <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 overflow-hidden divide-y divide-slate-100">
+          <button onclick="exportDataJSON()" aria-label="Xuất dữ liệu sao lưu định dạng JSON" class="w-full text-left px-4 py-3.5 flex items-center justify-between hover:bg-slate-50 transition text-sm text-slate-700 font-medium">
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center"><i data-lucide="download" class="w-4 h-4"></i></div>
+              <span>Xuất sao lưu dữ liệu (JSON)</span>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+          </button>
+
+          <button onclick="resetSampleData()" aria-label="Khôi phục lại dữ liệu mẫu gốc" class="w-full text-left px-4 py-3.5 flex items-center justify-between hover:bg-slate-50 transition text-sm text-slate-700 font-medium">
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center"><i data-lucide="rotate-ccw" class="w-4 h-4"></i></div>
+              <span>Khôi phục dữ liệu mẫu ban đầu</span>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+          </button>
+
+          <button onclick="clearData()" aria-label="Xóa toàn bộ dữ liệu trên thiết bị này" class="w-full text-left px-4 py-3.5 flex items-center justify-between hover:bg-rose-50 transition text-sm text-rose-600 font-semibold">
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center"><i data-lucide="trash-2" class="w-4 h-4"></i></div>
+              <span>Xóa sạch toàn bộ dữ liệu máy</span>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-rose-400"></i>
+          </button>
+
+          <!-- Logout Button -->
+          <button id="btn-logout" onclick="handleLogout()" aria-label="Đăng xuất khỏi tài khoản ca trực" class="w-full text-left px-4 py-3.5 flex items-center justify-between hover:bg-slate-50 transition text-sm text-slate-700 font-bold">
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center"><i data-lucide="log-out" class="w-4 h-4"></i></div>
+              <span>Đăng Xuất Ca Trực</span>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+          </button>
+        </div>
+
+        <!-- System Info -->
+        <div class="text-center text-xs text-slate-400 space-y-1 pt-2">
+          <p>Hệ Thống Trực Vận Hành & CMMS WebApp</p>
+          <p>Phiên bản 2.4.0 (Auth & Multi-User) • Lưu trữ độc lập</p>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- BOTTOM NAVIGATION BAR (FIXED) -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-200/90 px-3 py-2 flex justify-around items-center z-30 shadow-2xl pb-safe">
+      <button onclick="switchTab('tasks')" id="nav-tasks" aria-label="Tab Danh sách Checklist công việc" class="flex flex-col items-center text-indigo-600 font-semibold transition-all duration-200 active:scale-90">
+        <div class="p-1 rounded-xl bg-indigo-50"><i data-lucide="check-square" class="w-5 h-5"></i></div>
+        <span class="text-[10px] mt-0.5">Checklist</span>
+      </button>
+      <button onclick="switchTab('journal')" id="nav-journal" aria-label="Tab Nhật ký hoạt động ca trực" class="flex flex-col items-center text-slate-400 font-medium transition-all duration-200 active:scale-90">
+        <div class="p-1 rounded-xl"><i data-lucide="book-open" class="w-5 h-5"></i></div>
+        <span class="text-[10px] mt-0.5">Nhật ký</span>
+      </button>
+      <button onclick="switchTab('report')" id="nav-report" aria-label="Tab Báo cáo ca trực" class="flex flex-col items-center text-slate-400 font-medium transition-all duration-200 active:scale-90">
+        <div class="p-1 rounded-xl"><i data-lucide="bar-chart-3" class="w-5 h-5"></i></div>
+        <span class="text-[10px] mt-0.5">Báo cáo</span>
+      </button>
+      <button onclick="switchTab('personal')" id="nav-personal" aria-label="Tab Cá nhân và đổi ca trực" class="flex flex-col items-center text-slate-400 font-medium transition-all duration-200 active:scale-90">
+        <div class="p-1 rounded-xl"><i data-lucide="user" class="w-5 h-5"></i></div>
+        <span class="text-[10px] mt-0.5">Cá nhân</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: ĐỔI MẬT KHẨU (#modal-change-password) -->
+  <!-- ========================================== -->
+  <div id="modal-change-password" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200">
+    <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center space-x-2 text-indigo-600">
+          <i data-lucide="key" class="w-5 h-5"></i>
+          <h3 class="font-bold text-slate-800 text-base">Đổi Mật Khẩu Cá Nhân</h3>
+        </div>
+        <button onclick="closeChangePasswordModal()" aria-label="Đóng đổi mật khẩu" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Mật khẩu hiện tại <span class="text-rose-500">*</span></label>
+          <input type="password" id="input-current-pin" placeholder="Nhập PIN cũ (VD: 1234)" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Mật khẩu mới <span class="text-rose-500">*</span></label>
+          <input type="password" id="input-new-pin" placeholder="Tối thiểu 4 ký tự" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Xác nhận mật khẩu mới <span class="text-rose-500">*</span></label>
+          <input type="password" id="input-confirm-new-pin" placeholder="Nhập lại mật khẩu mới" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div id="change-password-error" class="hidden p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-xs font-semibold">
+          Lỗi đổi mật khẩu
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100">
+        <button onclick="closeChangePasswordModal()" aria-label="Hủy đổi mật khẩu" class="px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition">Hủy</button>
+        <button id="btn-save-new-pin" onclick="saveNewPassword()" aria-label="Lưu mật khẩu mới" class="px-5 py-2.5 text-sm font-semibold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-sm transition">Cập nhật mật khẩu</button>
       </div>
     </div>
-    
-    <!-- Shift / User Quick Badge -->
-    <button id="header-user-badge" onclick="openShiftModal()" aria-label="Đổi ca trực và nhân viên" class="flex items-center space-x-2 bg-indigo-700/60 hover:bg-indigo-700 border border-indigo-500/40 px-2.5 py-1 rounded-full cursor-pointer transition active:scale-95 text-left">
-      <div class="w-6 h-6 rounded-full bg-amber-400 text-slate-900 font-bold text-xs flex items-center justify-center" id="header-avatar">
-        NT
-      </div>
-      <div class="flex flex-col pr-1">
-        <span class="text-xs font-bold text-white tracking-wide leading-none" id="header-user-code">Ngô Quyết Thắng</span>
-        <span class="text-[9px] text-indigo-200 font-medium leading-tight mt-0.5" id="header-shift-label">Ca 1 (06h - 14h)</span>
-      </div>
-    </button>
-  </header>
-
-  <!-- MAIN CONTENT CONTAINER -->
-  <main class="flex-1 overflow-y-auto px-4 py-3.5 custom-scrollbar pb-28" id="main-content">
-
-    <!-- ========================================== -->
-    <!-- TAB 1: CHECKLIST & CÔNG VIỆC (#tasks) -->
-    <!-- ========================================== -->
-    <section id="tab-tasks" class="space-y-3.5">
-      <!-- Search & Add Bar -->
-      <div class="flex items-center gap-2">
-        <div class="relative flex-1">
-          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-          <input type="text" id="task-search" placeholder="Tìm kiếm đầu việc..." class="w-full pl-9 pr-8 py-2.5 bg-white rounded-xl border border-slate-200/80 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm placeholder:text-slate-400 transition" oninput="renderTasks()">
-          <button id="clear-search-btn" onclick="clearTaskSearch()" aria-label="Xóa tìm kiếm" class="hidden absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600">
-            <i data-lucide="x" class="w-3.5 h-3.5"></i>
-          </button>
-        </div>
-        <button onclick="openTaskModal()" aria-label="Thêm công việc mới" class="flex items-center space-x-1.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white px-3.5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition">
-          <i data-lucide="plus" class="w-4 h-4"></i>
-          <span class="hidden sm:inline">Thêm việc</span>
-        </button>
-      </div>
-
-      <!-- Filter Chips -->
-      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-medium no-scrollbar">
-        <button onclick="setTaskFilter('all')" id="filter-all" class="task-filter-btn px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-semibold shadow-xs">Tất cả</button>
-        <button onclick="setTaskFilter('pending')" id="filter-pending" class="task-filter-btn px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50">Chưa xong</button>
-        <button onclick="setTaskFilter('done')" id="filter-done" class="task-filter-btn px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50">Đã xong</button>
-        <button onclick="setTaskFilter('urgent')" id="filter-urgent" class="task-filter-btn px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-rose-600 hover:bg-rose-50">🔴 Khẩn cấp</button>
-      </div>
-
-      <!-- Progress Summary Card -->
-      <div class="bg-gradient-to-br from-white to-slate-50/80 p-4 rounded-2xl shadow-xs border border-slate-200/80">
-        <div class="flex justify-between items-center mb-2">
-          <div class="flex items-center space-x-1.5">
-            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Tiến độ ca trực</span>
-            <span id="progress-count" class="text-[11px] font-bold px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded-md">0/0</span>
-          </div>
-          <span class="text-sm font-extrabold text-indigo-600" id="progress-percent">0%</span>
-        </div>
-        <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden p-0.5 border border-slate-200/50">
-          <div id="progress-bar" class="bg-gradient-to-r from-indigo-500 to-indigo-600 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
-        </div>
-      </div>
-
-      <!-- Checklist Items Container -->
-      <div id="task-list" class="space-y-2.5">
-        <!-- Rendered by JS -->
-      </div>
-    </section>
-
-    <!-- ========================================== -->
-    <!-- TAB 2: NHẬT KÝ WORK LOG (#journal) -->
-    <!-- ========================================== -->
-    <section id="tab-journal" class="space-y-3.5 hidden">
-      <!-- Action Bar -->
-      <div class="flex justify-between items-center gap-2">
-        <div class="flex items-center space-x-2">
-          <h2 class="text-base font-bold text-slate-800">Dòng thời gian nhật ký</h2>
-          <span id="log-count-badge" class="text-xs font-bold px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">0</span>
-        </div>
-        <button onclick="openLogModal()" aria-label="Ghi nhật ký mới" class="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white px-3.5 py-2 rounded-xl text-sm font-semibold shadow-sm transition">
-          <i data-lucide="edit-3" class="w-4 h-4"></i>
-          <span>Ghi nhật ký</span>
-        </button>
-      </div>
-
-      <!-- Quick Template Chips -->
-      <div class="space-y-1.5">
-        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Mẫu nhanh:</span>
-        <div class="flex gap-1.5 overflow-x-auto pb-1 text-xs">
-          <button onclick="applyLogTemplate('Kiểm tra tủ điện chính: Các thông số điện áp và dòng tải ổn định.', 'Không bất thường', 'Trạm điện')" class="whitespace-nowrap px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-slate-600 hover:border-emerald-400 active:bg-slate-100">
-            ⚡ Trạm điện ổn định
-          </button>
-          <button onclick="applyLogTemplate('Bảo dưỡng máy bơm nước sinh hoạt: Đã tra dầu, xả cặn định kỳ.', 'Đã xử lý dứt điểm', 'Trạm bơm')" class="whitespace-nowrap px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-slate-600 hover:border-emerald-400 active:bg-slate-100">
-            💧 Bảo dưỡng máy bơm
-          </button>
-          <button onclick="applyLogTemplate('Phát hiện tiếng kêu lạ tại quạt thông gió hầm B2, cần kiểm tra tiếp ca sau.', 'Cần theo dõi thêm', 'Hầm B2')" class="whitespace-nowrap px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-slate-600 hover:border-emerald-400 active:bg-slate-100">
-            ⚠️ Tiếng ồn quạt gió
-          </button>
-        </div>
-      </div>
-
-      <!-- Journal Timeline List -->
-      <div id="journal-list" class="space-y-3 relative before:absolute before:inset-0 before:left-3.5 before:w-0.5 before:bg-slate-200">
-        <!-- Rendered by JS -->
-      </div>
-    </section>
-
-    <!-- ========================================== -->
-    <!-- TAB 3: BÁO CÁO THỐNG KÊ (#report) -->
-    <!-- ========================================== -->
-    <section id="tab-report" class="space-y-4 hidden">
-      <div class="flex justify-between items-center">
-        <div>
-          <h2 class="text-base font-bold text-slate-800">Tổng kết ca trực</h2>
-          <p class="text-xs text-slate-500" id="report-shift-subtitle">Báo cáo ca làm việc hiện hành</p>
-        </div>
-        <button onclick="copyShiftReport()" aria-label="Sao chép báo cáo vào bộ nhớ tạm" class="flex items-center space-x-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-xl text-xs font-bold transition active:scale-95">
-          <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-          <span>Sao chép báo cáo</span>
-        </button>
-      </div>
-
-      <!-- KPI Grid -->
-      <div class="grid grid-cols-2 gap-3">
-        <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200/80">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-slate-500">Tổng checklist ca</span>
-            <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center"><i data-lucide="list-todo" class="w-4 h-4"></i></div>
-          </div>
-          <p class="text-2xl font-extrabold text-indigo-600 mt-2" id="stat-total">0</p>
-          <p class="text-[11px] text-slate-400 mt-0.5">Nhiệm vụ được giao</p>
-        </div>
-
-        <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200/80">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-slate-500">Đã hoàn tất</span>
-            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"><i data-lucide="check-check" class="w-4 h-4"></i></div>
-          </div>
-          <p class="text-2xl font-extrabold text-emerald-600 mt-2" id="stat-done">0</p>
-          <p class="text-[11px] text-emerald-500 font-medium mt-0.5" id="stat-done-pct">Đạt 0%</p>
-        </div>
-
-        <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200/80">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-slate-500">Khẩn cấp còn lại</span>
-            <div class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center"><i data-lucide="alert-triangle" class="w-4 h-4"></i></div>
-          </div>
-          <p class="text-2xl font-extrabold text-rose-600 mt-2" id="stat-urgent">0</p>
-          <p class="text-[11px] text-slate-400 mt-0.5">Cần xử lý ngay</p>
-        </div>
-
-        <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200/80">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-slate-500">Nhật ký đã ghi</span>
-            <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center"><i data-lucide="book-open-check" class="w-4 h-4"></i></div>
-          </div>
-          <p class="text-2xl font-extrabold text-amber-600 mt-2" id="stat-logs">0</p>
-          <p class="text-[11px] text-slate-400 mt-0.5" id="stat-logs-warning">0 cần theo dõi</p>
-        </div>
-      </div>
-
-      <!-- Preview Report Box -->
-      <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200/80 space-y-2">
-        <div class="flex justify-between items-center">
-          <h3 class="text-xs font-bold text-slate-600 uppercase tracking-wider">Xem trước nội dung báo cáo ca</h3>
-          <span class="text-[11px] text-slate-400 font-medium" id="report-view-all-label">Hiển thị đầy đủ</span>
-        </div>
-        <div id="report-preview" class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs font-mono text-slate-700 whitespace-pre-wrap leading-relaxed">
-          Đang tạo báo cáo...
-        </div>
-      </div>
-    </section>
-
-    <!-- ========================================== -->
-    <!-- TAB 4: CÁ NHÂN & QUẢN LÝ NHÂN SỰ (#personal) -->
-    <!-- ========================================== -->
-    <section id="tab-personal" class="space-y-4 hidden">
-      <!-- Profile Card -->
-      <div class="bg-gradient-to-br from-white to-slate-50 p-5 rounded-2xl shadow-xs border border-slate-200/80 text-center relative overflow-hidden">
-        <div class="w-16 h-16 bg-gradient-to-tr from-indigo-600 to-indigo-400 text-white font-extrabold text-xl rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md shadow-indigo-600/20">
-          <span id="profile-avatar-char">NT</span>
-        </div>
-        <h3 class="font-bold text-slate-800 text-lg" id="profile-name">Ngô Quyết Thắng</h3>
-        <p class="text-xs font-medium text-slate-500 mt-0.5" id="profile-code">Mã NV: EMP01 • Ca 1 (06h - 14h)</p>
-        
-        <div class="flex justify-center gap-2 mt-3 flex-wrap">
-          <button onclick="openShiftModal()" aria-label="Chuyển đổi ca trực và nhân viên" class="inline-flex items-center space-x-1.5 px-3.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-xl transition">
-            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-            <span>Đổi Ca / Giao Ca</span>
-          </button>
-          <button onclick="openAddEmployeeModal()" aria-label="Thêm nhân viên hoặc thử việc mới" class="inline-flex items-center space-x-1.5 px-3.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold rounded-xl transition">
-            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
-            <span>+ Thêm Nhân Viên</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Active Employees List -->
-      <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200/80 space-y-3">
-        <div class="flex justify-between items-center">
-          <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Danh sách nhân sự đang hoạt động</h3>
-          <button onclick="openAddEmployeeModal()" aria-label="Đăng ký thêm nhân sự" class="text-xs font-bold text-indigo-600 hover:text-indigo-800">
-            + Thêm mới
-          </button>
-        </div>
-        <div id="active-employees-container" class="space-y-2 text-xs">
-          <!-- Rendered dynamically by JS -->
-        </div>
-      </div>
-
-      <!-- Actions Menu -->
-      <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 overflow-hidden divide-y divide-slate-100">
-        <button onclick="exportDataJSON()" aria-label="Xuất dữ liệu sao lưu định dạng JSON" class="w-full text-left px-4 py-3.5 flex items-center justify-between hover:bg-slate-50 transition text-sm text-slate-700 font-medium">
-          <div class="flex items-center space-x-3">
-            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center"><i data-lucide="download" class="w-4 h-4"></i></div>
-            <span>Xuất sao lưu dữ liệu (JSON)</span>
-          </div>
-          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
-        </button>
-
-        <button onclick="resetSampleData()" aria-label="Khôi phục lại dữ liệu mẫu gốc" class="w-full text-left px-4 py-3.5 flex items-center justify-between hover:bg-slate-50 transition text-sm text-slate-700 font-medium">
-          <div class="flex items-center space-x-3">
-            <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center"><i data-lucide="rotate-ccw" class="w-4 h-4"></i></div>
-            <span>Khôi phục dữ liệu mẫu ban đầu</span>
-          </div>
-          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
-        </button>
-
-        <button onclick="clearData()" aria-label="Xóa toàn bộ dữ liệu trên thiết bị này" class="w-full text-left px-4 py-3.5 flex items-center justify-between hover:bg-rose-50 transition text-sm text-rose-600 font-semibold">
-          <div class="flex items-center space-x-3">
-            <div class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center"><i data-lucide="trash-2" class="w-4 h-4"></i></div>
-            <span>Xóa sạch toàn bộ dữ liệu máy</span>
-          </div>
-          <i data-lucide="chevron-right" class="w-4 h-4 text-rose-400"></i>
-        </button>
-      </div>
-
-      <!-- System Info -->
-      <div class="text-center text-xs text-slate-400 space-y-1 pt-2">
-        <p>Hệ Thống Trực Vận Hành & CMMS WebApp</p>
-        <p>Phiên bản 2.3.0 (Dynamic Staff Onboarding) • Lưu trữ độc lập</p>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- BOTTOM NAVIGATION BAR (FIXED) -->
-  <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-200/90 px-3 py-2 flex justify-around items-center z-30 shadow-2xl pb-safe">
-    <button onclick="switchTab('tasks')" id="nav-tasks" aria-label="Tab Danh sách Checklist công việc" class="flex flex-col items-center text-indigo-600 font-semibold transition-all duration-200 active:scale-90">
-      <div class="p-1 rounded-xl bg-indigo-50"><i data-lucide="check-square" class="w-5 h-5"></i></div>
-      <span class="text-[10px] mt-0.5">Checklist</span>
-    </button>
-    <button onclick="switchTab('journal')" id="nav-journal" aria-label="Tab Nhật ký hoạt động ca trực" class="flex flex-col items-center text-slate-400 font-medium transition-all duration-200 active:scale-90">
-      <div class="p-1 rounded-xl"><i data-lucide="book-open" class="w-5 h-5"></i></div>
-      <span class="text-[10px] mt-0.5">Nhật ký</span>
-    </button>
-    <button onclick="switchTab('report')" id="nav-report" aria-label="Tab Báo cáo ca trực" class="flex flex-col items-center text-slate-400 font-medium transition-all duration-200 active:scale-90">
-      <div class="p-1 rounded-xl"><i data-lucide="bar-chart-3" class="w-5 h-5"></i></div>
-      <span class="text-[10px] mt-0.5">Báo cáo</span>
-    </button>
-    <button onclick="switchTab('personal')" id="nav-personal" aria-label="Tab Cá nhân và đổi ca trực" class="flex flex-col items-center text-slate-400 font-medium transition-all duration-200 active:scale-90">
-      <div class="p-1 rounded-xl"><i data-lucide="user" class="w-5 h-5"></i></div>
-      <span class="text-[10px] mt-0.5">Cá nhân</span>
-    </button>
-  </nav>
+  </div>
 
   <!-- ========================================== -->
   <!-- MODAL: ĐỔI CA TRỰC & NHÂN VIÊN (#modal-shift-select) -->
@@ -413,7 +545,7 @@
         </div>
 
         <p class="text-[11px] text-slate-400">
-          Sau khi tạo, hồ sơ mới sẽ sẵn sàng để vào ca trực ngay lập tức và ghi nhận checklist/nhật ký độc lập.
+          Sau khi tạo, hồ sơ mới sẽ có mật khẩu mặc định là <span class="font-bold text-slate-600">1234</span> và sẵn sàng vào ca trực ngay lập tức.
         </p>
       </div>
 
@@ -544,10 +676,10 @@
     // 1. DATA CONSTANTS & DEFAULT SEED EMPLOYEES
     // ==========================================
     const DEFAULT_ACTIVE_EMPLOYEES = [
-      { id: 'EMP01', fullName: 'Ngô Quyết Thắng', shortName: 'Thắng', role: 'Ca trưởng', status: 'active' },
-      { id: 'EMP02', fullName: 'Đinh Văn Hậu', shortName: 'Hậu', role: 'Kỹ thuật viên', status: 'active' },
-      { id: 'EMP03', fullName: 'Hoàng Việt Hoàng', shortName: 'Hoàng', role: 'Kỹ thuật viên', status: 'active' },
-      { id: 'EMP04', fullName: 'Nguyễn Đức Phong', shortName: 'Phong', role: 'Kỹ thuật viên', status: 'active' }
+      { id: 'EMP01', fullName: 'Ngô Quyết Thắng', shortName: 'Thắng', role: 'Ca trưởng', pin: '1234', status: 'active' },
+      { id: 'EMP02', fullName: 'Đinh Văn Hậu', shortName: 'Hậu', role: 'Kỹ thuật viên', pin: '1234', status: 'active' },
+      { id: 'EMP03', fullName: 'Hoàng Việt Hoàng', shortName: 'Hoàng', role: 'Kỹ thuật viên', pin: '1234', status: 'active' },
+      { id: 'EMP04', fullName: 'Nguyễn Đức Phong', shortName: 'Phong', role: 'Kỹ thuật viên', pin: '1234', status: 'active' }
     ];
 
     // Helper: Tạo initials sạch từ họ tên (loại bỏ ngoặc đơn)
@@ -572,6 +704,14 @@
     function getTodayIsoDate() {
       const now = new Date();
       return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    }
+
+    // Helper: Ẩn/Hiện mật khẩu
+    function togglePasswordVisibility(inputId) {
+      const input = document.getElementById(inputId);
+      if (input) {
+        input.type = input.type === 'password' ? 'text' : 'password';
+      }
     }
 
     // ==========================================
@@ -627,6 +767,11 @@
         if (savedEmployees) {
           try {
             this.employees = JSON.parse(savedEmployees);
+            // Ensure each employee has a default pin if missing
+            this.employees = this.employees.map(e => ({
+              ...e,
+              pin: e.pin || '1234'
+            }));
           } catch (e) {
             this.employees = [...DEFAULT_ACTIVE_EMPLOYEES];
           }
@@ -635,7 +780,19 @@
           this.saveEmployees();
         }
 
-        this.currentEmployeeId = localStorage.getItem('app_current_emp_id') || (this.employees[0] ? this.employees[0].id : 'EMP01');
+        // Current Session Auth
+        const savedSession = localStorage.getItem('currentUser');
+        if (savedSession) {
+          try {
+            this.currentAuthUser = JSON.parse(savedSession);
+          } catch (e) {
+            this.currentAuthUser = null;
+          }
+        } else {
+          this.currentAuthUser = null;
+        }
+
+        this.currentEmployeeId = this.currentAuthUser ? this.currentAuthUser.employeeId : (this.employees[0] ? this.employees[0].id : 'EMP01');
         this.currentShiftType = localStorage.getItem('app_current_shift_type') || 'Ca 1 (06h - 14h)';
         this.currentDate = localStorage.getItem('app_current_shift_date') || getTodayIsoDate();
 
@@ -657,7 +814,54 @@
         return this.employees.filter(e => e.status !== 'inactive');
       }
 
-      addEmployee(fullName, role = 'Kỹ thuật viên', customCode = '') {
+      isLoggedIn() {
+        return !!this.currentAuthUser;
+      }
+
+      login(empId, pin) {
+        const emp = this.employees.find(e => e.id === empId && e.status !== 'inactive');
+        if (!emp) return { success: false, message: 'Nhân viên không tồn tại' };
+
+        const currentPin = emp.pin || '1234';
+        if (pin.trim() !== currentPin) {
+          return { success: false, message: 'Mật khẩu không chính xác' };
+        }
+
+        this.currentAuthUser = {
+          employeeId: emp.id,
+          fullName: emp.fullName,
+          role: emp.role,
+          loginAt: new Date().toISOString()
+        };
+        localStorage.setItem('currentUser', JSON.stringify(this.currentAuthUser));
+        this.setCurrentShift(emp.id, this.currentShiftType, this.currentDate);
+        return { success: true, user: this.currentAuthUser };
+      }
+
+      logout() {
+        this.currentAuthUser = null;
+        localStorage.removeItem('currentUser');
+      }
+
+      changePin(empId, oldPin, newPin) {
+        const emp = this.employees.find(e => e.id === empId);
+        if (!emp) return { success: false, message: 'Không tìm thấy tài khoản' };
+
+        const currentPin = emp.pin || '1234';
+        if (oldPin.trim() !== currentPin) {
+          return { success: false, message: 'Mật khẩu hiện tại không đúng' };
+        }
+
+        if (!newPin || newPin.trim().length < 4) {
+          return { success: false, message: 'Mật khẩu mới phải có tối thiểu 4 ký tự' };
+        }
+
+        emp.pin = newPin.trim();
+        this.saveEmployees();
+        return { success: true };
+      }
+
+      addEmployee(fullName, role = 'Kỹ thuật viên', customCode = '', initialPin = '1234') {
         let newId = customCode.trim();
         if (!newId) {
           // Find max index in EMPxx
@@ -677,6 +881,7 @@
           fullName: fullName.trim(),
           shortName: extractShortName(fullName),
           role: role.trim() || 'Kỹ thuật viên',
+          pin: initialPin || '1234',
           status: 'active',
           createdAt: new Date().toISOString()
         };
@@ -850,12 +1055,11 @@
     document.addEventListener("DOMContentLoaded", () => {
       lucide.createIcons();
       updateDateDisplay();
+      populateLoginEmployeeSelect();
       populateEmployeeSelect();
       renderEmployeesList();
-      updateShiftHeaderUI();
-      renderTasks();
-      renderLogs();
-      updateStats();
+
+      checkAuthAndRenderScreen();
 
       // Read Hash URL
       const hash = window.location.hash.replace('#', '');
@@ -873,6 +1077,25 @@
       });
     });
 
+    function checkAuthAndRenderScreen() {
+      const loginScreen = document.getElementById('screen-login');
+      const appScreen = document.getElementById('screen-app');
+
+      if (repo.isLoggedIn()) {
+        loginScreen.classList.add('hidden');
+        appScreen.classList.remove('hidden');
+        updateShiftHeaderUI();
+        renderTasks();
+        renderLogs();
+        updateStats();
+      } else {
+        loginScreen.classList.remove('hidden');
+        appScreen.classList.add('hidden');
+        populateLoginEmployeeSelect();
+      }
+      lucide.createIcons();
+    }
+
     function updateDateDisplay() {
       const now = new Date();
       const options = { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric' };
@@ -880,8 +1103,21 @@
       document.getElementById('current-date').innerText = formatted.charAt(0).toUpperCase() + formatted.slice(1);
     }
 
+    function populateLoginEmployeeSelect() {
+      const sel = document.getElementById('select-login-employee');
+      if (!sel) return;
+      sel.innerHTML = '';
+      repo.getActiveEmployees().forEach(emp => {
+        const opt = document.createElement('option');
+        opt.value = emp.id;
+        opt.innerText = `${emp.fullName} (${emp.id} - ${emp.role || 'Kỹ thuật viên'})`;
+        sel.appendChild(opt);
+      });
+    }
+
     function populateEmployeeSelect() {
       const sel = document.getElementById('select-active-employee');
+      if (!sel) return;
       sel.innerHTML = '';
       repo.getActiveEmployees().forEach(emp => {
         const opt = document.createElement('option');
@@ -934,6 +1170,71 @@
       document.getElementById('report-shift-subtitle').innerText = `Ca trực: ${repo.currentShiftType} • Người trực: ${emp.fullName} (${emp.role})`;
     }
 
+    // ==========================================
+    // 4. AUTHENTICATION & LOGIN HANDLERS
+    // ==========================================
+    function handleLoginSubmit(e) {
+      if (e) e.preventDefault();
+      const empId = document.getElementById('select-login-employee').value;
+      const pin = document.getElementById('input-login-pin').value;
+      const errorMsg = document.getElementById('login-error-msg');
+
+      const result = repo.login(empId, pin);
+      if (result.success) {
+        errorMsg.classList.add('hidden');
+        document.getElementById('input-login-pin').value = '';
+        checkAuthAndRenderScreen();
+        showToast(`Chào mừng ${repo.getCurrentEmployee().fullName} vào ca trực`);
+      } else {
+        errorMsg.innerText = result.message || 'Mật khẩu không chính xác';
+        errorMsg.classList.remove('hidden');
+      }
+    }
+
+    function handleLogout() {
+      if (confirm('Bạn có chắc chắn muốn đăng xuất ca trực?')) {
+        repo.logout();
+        checkAuthAndRenderScreen();
+        showToast('Đã đăng xuất');
+      }
+    }
+
+    function openChangePasswordModal() {
+      document.getElementById('input-current-pin').value = '';
+      document.getElementById('input-new-pin').value = '';
+      document.getElementById('input-confirm-new-pin').value = '';
+      document.getElementById('change-password-error').classList.add('hidden');
+      document.getElementById('modal-change-password').classList.remove('hidden');
+      document.getElementById('modal-change-password').classList.add('flex');
+    }
+
+    function closeChangePasswordModal() {
+      document.getElementById('modal-change-password').classList.add('hidden');
+      document.getElementById('modal-change-password').classList.remove('flex');
+    }
+
+    function saveNewPassword() {
+      const oldPin = document.getElementById('input-current-pin').value;
+      const newPin = document.getElementById('input-new-pin').value;
+      const confirmPin = document.getElementById('input-confirm-new-pin').value;
+      const errBox = document.getElementById('change-password-error');
+
+      if (newPin !== confirmPin) {
+        errBox.innerText = 'Xác nhận mật khẩu mới không khớp';
+        errBox.classList.remove('hidden');
+        return;
+      }
+
+      const res = repo.changePin(repo.currentEmployeeId, oldPin, newPin);
+      if (res.success) {
+        closeChangePasswordModal();
+        showToast('Đã đổi mật khẩu thành công');
+      } else {
+        errBox.innerText = res.message || 'Lỗi đổi mật khẩu';
+        errBox.classList.remove('hidden');
+      }
+    }
+
     function openShiftModal() {
       populateEmployeeSelect();
       document.getElementById('select-active-employee').value = repo.currentEmployeeId;
@@ -977,6 +1278,10 @@
       openAddEmployeeModal();
     }
 
+    function openAddEmployeeModalFromLogin() {
+      openAddEmployeeModal();
+    }
+
     function closeAddEmployeeModal() {
       document.getElementById('modal-add-employee').classList.add('hidden');
       document.getElementById('modal-add-employee').classList.remove('flex');
@@ -992,22 +1297,20 @@
         return;
       }
 
-      const newEmp = repo.addEmployee(fullName, role, customCode);
-      // Auto switch to newly created employee's shift
-      repo.setCurrentShift(newEmp.id, repo.currentShiftType, repo.currentDate);
+      const newEmp = repo.addEmployee(fullName, role, customCode, '1234');
+      // Auto login & switch to newly created employee's shift
+      repo.login(newEmp.id, '1234');
 
       closeAddEmployeeModal();
+      populateLoginEmployeeSelect();
       populateEmployeeSelect();
       renderEmployeesList();
-      updateShiftHeaderUI();
-      renderTasks();
-      renderLogs();
-      updateStats();
+      checkAuthAndRenderScreen();
       showToast(`Đã tạo tài khoản cho ${newEmp.fullName} (${newEmp.id})`);
     }
 
     // ==========================================
-    // 4. TASK CHECKLIST & REOPEN WORKFLOW
+    // 5. TASK CHECKLIST & REOPEN WORKFLOW
     // ==========================================
     function renderTasks() {
       const listContainer = document.getElementById('task-list');
@@ -1185,7 +1488,7 @@
     }
 
     // ==========================================
-    // 5. JOURNAL WORK LOGS
+    // 6. JOURNAL WORK LOGS
     // ==========================================
     function renderLogs() {
       const logContainer = document.getElementById('journal-list');
@@ -1296,7 +1599,7 @@
     }
 
     // ==========================================
-    // 6. REPORT GENERATOR & STATISTICS
+    // 7. REPORT GENERATOR & STATISTICS
     // ==========================================
     function updateStats() {
       const currentShiftTasks = repo.tasks.filter(t => t.shiftId === repo.currentShiftId);
@@ -1356,7 +1659,7 @@
     }
 
     // ==========================================
-    // 7. TOAST & DATA MANAGEMENT
+    // 8. TOAST & DATA MANAGEMENT
     // ==========================================
     function showToast(msg, isError = false) {
       const toast = document.getElementById('toast');
@@ -1443,6 +1746,7 @@
         repo.employees = [...DEFAULT_ACTIVE_EMPLOYEES];
         repo.saveEmployees();
         repo.initSampleData();
+        populateLoginEmployeeSelect();
         populateEmployeeSelect();
         renderEmployeesList();
         updateShiftHeaderUI();
@@ -1454,15 +1758,13 @@
     }
 
     function clearData() {
-      if (confirm('CẢNH BÁO: Toàn bộ dữ liệu checklist, nhật ký và nhân sự sẽ bị xóa vĩnh viễn trên máy này. Bạn có chắc chắn không?')) {
+      if (confirm('CẢNH BÁO: Toàn bộ dữ liệu checklist, nhật ký và tài khoản sẽ bị xóa vĩnh viễn trên máy này. Bạn có chắc chắn không?')) {
         localStorage.clear();
         repo.loadState();
+        populateLoginEmployeeSelect();
         populateEmployeeSelect();
         renderEmployeesList();
-        updateShiftHeaderUI();
-        renderTasks();
-        renderLogs();
-        updateStats();
+        checkAuthAndRenderScreen();
         showToast('Đã xóa sạch dữ liệu');
       }
     }
