@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Bright Red Base with Rounded Corners -->
+  <rect width="32" height="32" rx="7" fill="#dc2626"/>
+  <!-- Book Cover Structure -->
+  <path d="M6.5 6C6.5 4.9 7.4 4 8.5 4H24C24.8 4 25.5 4.7 25.5 5.5V24C25.5 24.8 24.8 25.5 24 25.5H8.5C7.4 25.5 6.5 24.6 6.5 23.5V6Z" fill="#b91c1c"/>
+  <!-- Spine -->
+  <path d="M8.5 4H12.5V25.5H8.5C7.4 25.5 6.5 24.6 6.5 23.5V6C6.5 4.9 7.4 4 8.5 4Z" fill="#991b1b"/>
+  <line x1="12.5" y1="4" x2="12.5" y2="25.5" stroke="#fca5a5" stroke-width="0.8" opacity="0.7"/>
+  <!-- Golden Bookmark Ribbon -->
+  <path d="M18.5 4V13L20.75 11.2L23 13V4H18.5Z" fill="#fbbf24"/>
+  <!-- Pages/Journal White Emboss Lines -->
+  <rect x="15" y="16" width="7.5" height="1.8" rx="0.9" fill="#ffffff"/>
+  <rect x="15" y="19.5" width="5.5" height="1.8" rx="0.9" fill="#ffffff"/>
+  <!-- Book Page Edge Accent -->
+  <rect x="8.5" y="25.5" width="16" height="2.5" rx="0.8" fill="#fecaca"/>
+</svg>
