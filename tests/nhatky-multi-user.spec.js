@@ -98,6 +98,58 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên, Quản L�
     expect(resetButtons).toBeGreaterThan(0);
   });
 
+  test('Kịch bản Mẫu Sổ Checklist: Admin tạo mẫu sổ kèm tiêu chí đạt & Nhân viên áp dụng vào ca trực', async ({ page }) => {
+    await page.goto('/nhatky/index.html');
+
+    // 1. Admin đăng nhập và tạo Mẫu Sổ mới
+    await performLogin(page, 'ADMIN01', '1234');
+    await page.click('#nav-personal');
+    await page.click('#btn-open-template-manager');
+    await expect(page.locator('#modal-template-builder')).toBeVisible();
+
+    // Tạo Mẫu: "Sổ kiểm tra Máy Phát Điện Dự Phòng"
+    await page.fill('#input-template-name', 'Sổ kiểm tra Máy Phát Điện Dự Phòng');
+    await page.fill('#input-template-category', 'Máy phát điện');
+
+    // Hạng mục 1
+    await page.fill('.tpl-item-title >> nth=0', 'Kiểm tra mức nhiên liệu dầu Diesel');
+    await page.selectOption('.tpl-item-priority >> nth=0', 'Khẩn cấp');
+    await page.fill('.tpl-item-criteria >> nth=0', 'Mức dầu tối thiểu đạt trên 80% dung tích bồn');
+
+    // Thêm hạng mục 2
+    await page.click('#btn-add-template-item');
+    await page.fill('.tpl-item-title >> nth=1', 'Kiểm tra điện áp bình ắc quy đề máy');
+    await page.selectOption('.tpl-item-priority >> nth=1', 'Quan trọng');
+    await page.fill('.tpl-item-criteria >> nth=1', 'Điện áp ắc quy từ 24V - 27V, cọc bình không bị muối hóa');
+
+    await page.click('#btn-save-template');
+    await expect(page.locator('#modal-template-builder')).toBeHidden();
+
+    // 2. Đăng xuất Admin -> Nhân viên Ngô Quyết Thắng đăng nhập Ca 1
+    await page.click('#btn-logout');
+    await performLogin(page, 'EMP01', '1234');
+
+    // 3. Nhân viên mở "Áp dụng Mẫu Sổ"
+    await page.click('#nav-tasks');
+    await page.click('#btn-open-apply-template');
+    await expect(page.locator('#modal-apply-template')).toBeVisible();
+    await expect(page.locator('#modal-apply-template')).toContainText('Sổ kiểm tra Máy Phát Điện Dự Phòng');
+
+    // Áp dụng mẫu sổ vào ca
+    await page.locator('.template-card:has-text("Sổ kiểm tra Máy Phát Điện Dự Phòng") .btn-apply-tpl').click();
+    await expect(page.locator('#modal-apply-template')).toBeHidden();
+
+    // 4. Checklist của ca trực được nạp và hiển thị đầy đủ tiêu chí đạt
+    await expect(page.locator('#task-list')).toContainText('Kiểm tra mức nhiên liệu dầu Diesel');
+    await expect(page.locator('#task-list')).toContainText('Mức dầu tối thiểu đạt trên 80% dung tích bồn');
+    await expect(page.locator('#task-list')).toContainText('Kiểm tra điện áp bình ắc quy đề máy');
+    await expect(page.locator('#task-list')).toContainText('Điện áp ắc quy từ 24V - 27V');
+
+    // 5. Đánh dấu hoàn thành
+    await page.locator('.task-item-check').first().click();
+    await expect(page.locator('#progress-percent')).toHaveText('50%');
+  });
+
   test('Kịch bản 1, 2, 3: Cô lập dữ liệu theo Ca và Nhân viên (Thắng Ca 1 vs Hậu Ca 2)', async ({ page }) => {
     await page.goto('/nhatky/index.html');
     await performLogin(page, 'EMP01', '1234'); // Ngô Quyết Thắng

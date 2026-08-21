@@ -118,7 +118,7 @@
       <!-- Footer Info -->
       <div class="text-center space-y-1 text-[11px] text-slate-400">
         <p>Tài khoản Admin có quyền quản trị cao nhất • Mật khẩu mặc định: <span class="text-indigo-300 font-mono">1234</span></p>
-        <p>Phiên bản 2.5.0 • Quyền Quản Trị & Đa Nhân Sự</p>
+        <p>Phiên bản 2.5.0 • Quyền Quản Trị & Mẫu Sổ Checklist</p>
       </div>
 
     </div>
@@ -147,7 +147,7 @@
           AD
         </div>
         <div class="flex flex-col pr-1">
-          <span class="text-xs font-bold text-white tracking-wide leading-none" id="header-user-code">Quản Trị Viên</span>
+          <span class="text-xs font-bold text-white tracking-wide leading-none" id="header-user-code">Admin</span>
           <span class="text-[9px] text-indigo-200 font-medium leading-tight mt-0.5" id="header-shift-label">Ca 1 (06h - 14h)</span>
         </div>
       </button>
@@ -160,7 +160,7 @@
       <!-- TAB 1: CHECKLIST & CÔNG VIỆC (#tasks) -->
       <!-- ========================================== -->
       <section id="tab-tasks" class="space-y-3.5">
-        <!-- Search & Add Bar -->
+        <!-- Search, Template & Add Bar -->
         <div class="flex items-center gap-2">
           <div class="relative flex-1">
             <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
@@ -169,6 +169,10 @@
               <i data-lucide="x" class="w-3.5 h-3.5"></i>
             </button>
           </div>
+          <button id="btn-open-apply-template" onclick="openApplyTemplateModal()" aria-label="Áp dụng mẫu sổ checklist" class="flex items-center space-x-1 bg-amber-50 hover:bg-amber-100 active:scale-95 text-amber-800 border border-amber-300 px-3 py-2.5 rounded-xl text-xs font-bold transition shadow-xs">
+            <i data-lucide="book-template" class="w-4 h-4 text-amber-600"></i>
+            <span>Mẫu Sổ</span>
+          </button>
           <button onclick="openTaskModal()" aria-label="Thêm công việc mới" class="flex items-center space-x-1.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white px-3.5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition">
             <i data-lucide="plus" class="w-4 h-4"></i>
             <span class="hidden sm:inline">Thêm việc</span>
@@ -316,7 +320,7 @@
           <div class="w-16 h-16 bg-gradient-to-tr from-indigo-600 to-indigo-400 text-white font-extrabold text-xl rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md shadow-indigo-600/20">
             <span id="profile-avatar-char">AD</span>
           </div>
-          <h3 class="font-bold text-slate-800 text-lg" id="profile-name">Quản Trị Viên</h3>
+          <h3 class="font-bold text-slate-800 text-lg" id="profile-name">Admin</h3>
           <p class="text-xs font-medium text-slate-500 mt-0.5" id="profile-code">Mã NV: ADMIN01 • Quản trị viên • Ca 1 (06h - 14h)</p>
           
           <div class="flex justify-center gap-2 mt-3 flex-wrap">
@@ -327,6 +331,10 @@
             <button id="btn-open-change-password" onclick="openChangePasswordModal()" aria-label="Đổi mật khẩu cá nhân" class="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">
               <i data-lucide="key" class="w-3.5 h-3.5"></i>
               <span>Đổi Mật Khẩu</span>
+            </button>
+            <button id="btn-open-template-manager" onclick="openTemplateBuilderModal()" aria-label="Quản lý thiết kế mẫu sổ checklist" class="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold rounded-xl transition">
+              <i data-lucide="layout-template" class="w-3.5 h-3.5 text-amber-600"></i>
+              <span>Mẫu Sổ Checklist</span>
             </button>
             <button onclick="openAddEmployeeModal()" aria-label="Thêm nhân viên hoặc thử việc mới" class="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold rounded-xl transition">
               <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
@@ -387,7 +395,7 @@
         <!-- System Info -->
         <div class="text-center text-xs text-slate-400 space-y-1 pt-2">
           <p>Hệ Thống Trực Vận Hành & CMMS WebApp</p>
-          <p>Phiên bản 2.5.0 (Admin & Kỹ Thuật Viên) • Lưu trữ độc lập</p>
+          <p>Phiên bản 2.6.0 (Template Builder & Criteria) • Lưu trữ độc lập</p>
         </div>
       </section>
 
@@ -413,6 +421,84 @@
       </button>
     </nav>
 
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: ADMIN THIẾT KẾ MẪU SỔ CHECKLIST (#modal-template-builder) -->
+  <!-- ========================================== -->
+  <div id="modal-template-builder" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200 overflow-y-auto">
+    <div class="bg-white rounded-3xl w-full max-w-lg p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+      <div class="flex justify-between items-center shrink-0">
+        <div class="flex items-center space-x-2 text-amber-700">
+          <i data-lucide="layout-template" class="w-5 h-5 text-amber-600"></i>
+          <h3 class="font-bold text-slate-800 text-base" id="template-modal-title">Thiết Kế Mẫu Sổ Checklist</h3>
+        </div>
+        <button onclick="closeTemplateBuilderModal()" aria-label="Đóng thiết kế mẫu sổ" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 overflow-y-auto flex-1 pr-1 custom-scrollbar">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Tên mẫu sổ checklist <span class="text-rose-500">*</span></label>
+            <input type="text" id="input-template-name" placeholder="VD: Sổ kiểm tra Máy Phát Điện..." class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-amber-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Phân loại / Khu vực</label>
+            <input type="text" id="input-template-category" placeholder="VD: Máy phát điện, Trạm bơm..." class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-amber-500">
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex justify-between items-center">
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Danh sách hạng mục & Tiêu chí đạt</label>
+            <button type="button" id="btn-add-template-item" onclick="addTemplateItemRow()" class="text-xs font-bold text-indigo-600 hover:text-indigo-800">
+              + Thêm hạng mục
+            </button>
+          </div>
+
+          <!-- Dynamic Item Rows Container -->
+          <div id="template-items-container" class="space-y-3">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100 shrink-0">
+        <button onclick="closeTemplateBuilderModal()" aria-label="Hủy thiết kế mẫu sổ" class="px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition">Hủy</button>
+        <button id="btn-save-template" onclick="saveTemplateFromModal()" aria-label="Lưu mẫu sổ checklist" class="px-5 py-2.5 text-sm font-semibold bg-amber-600 text-white rounded-xl hover:bg-amber-700 shadow-sm transition">Lưu Mẫu Sổ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: ÁP DỤNG MẪU SỔ VÀO CA TRỰC (#modal-apply-template) -->
+  <!-- ========================================== -->
+  <div id="modal-apply-template" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200 overflow-y-auto">
+    <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
+      <div class="flex justify-between items-center shrink-0">
+        <div class="flex items-center space-x-2 text-indigo-600">
+          <i data-lucide="book-template" class="w-5 h-5 text-indigo-600"></i>
+          <h3 class="font-bold text-slate-800 text-base">Chọn Mẫu Sổ Checklist</h3>
+        </div>
+        <button onclick="closeApplyTemplateModal()" aria-label="Đóng áp dụng mẫu sổ" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-500 shrink-0">
+        Chọn mẫu sổ checklist định kỳ để tự động nạp các đầu việc và tiêu chí kỹ thuật chuẩn vào ca trực hiện tại.
+      </p>
+
+      <div id="available-templates-container" class="space-y-2.5 overflow-y-auto flex-1 pr-1 custom-scrollbar">
+        <!-- Rendered by JS -->
+      </div>
+
+      <div class="flex justify-end pt-2 border-t border-slate-100 shrink-0">
+        <button onclick="closeApplyTemplateModal()" aria-label="Đóng bảng chọn mẫu sổ" class="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl">Đóng</button>
+      </div>
+    </div>
   </div>
 
   <!-- ========================================== -->
@@ -621,6 +707,11 @@
             <input type="text" id="input-task-category" placeholder="VD: Trạm bơm, Tủ điện..." class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
           </div>
         </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Tiêu chí đạt được (Tùy chọn)</label>
+          <input type="text" id="input-task-criteria" placeholder="VD: Áp suất duy trì 4 - 6 bar, không rò rỉ nước..." class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
       </div>
 
       <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100">
@@ -673,7 +764,7 @@
   <!-- APPLICATION LOGIC SCRIPT -->
   <script>
     // ==========================================
-    // 1. DATA CONSTANTS & DEFAULT SEED EMPLOYEES
+    // 1. DATA CONSTANTS & DEFAULT SEED DATA
     // ==========================================
     const DEFAULT_ACTIVE_EMPLOYEES = [
       { id: 'ADMIN01', fullName: 'Quản Trị Viên', shortName: 'Admin', role: 'Quản trị viên', pin: '1234', status: 'active' },
@@ -681,6 +772,31 @@
       { id: 'EMP02', fullName: 'Đinh Văn Hậu', shortName: 'Hậu', role: 'Kỹ thuật viên', pin: '1234', status: 'active' },
       { id: 'EMP03', fullName: 'Hoàng Việt Hoàng', shortName: 'Hoàng', role: 'Kỹ thuật viên', pin: '1234', status: 'active' },
       { id: 'EMP04', fullName: 'Nguyễn Đức Phong', shortName: 'Phong', role: 'Kỹ thuật viên', pin: '1234', status: 'active' }
+    ];
+
+    const DEFAULT_CHECKLIST_TEMPLATES = [
+      {
+        id: 'tpl_tba',
+        name: 'Sổ kiểm tra Trạm Biến Áp (TBA)',
+        category: 'Trạm điện',
+        createdBy: 'ADMIN01',
+        items: [
+          { title: 'Kiểm tra nhiệt độ tiếp xúc cáp tổng & máy biến áp', priority: 'Khẩn cấp', criteria: 'Nhiệt độ các điểm đấu nối ≤ 65°C, không có điểm nóng cục bộ' },
+          { title: 'Kiểm tra điện áp 3 pha và tần số lưới', priority: 'Quan trọng', criteria: 'Điện áp 380V ± 5%, tần số 50Hz ± 0.2Hz' },
+          { title: 'Kiểm tra mức dầu và độ kín van máy biến áp', priority: 'Quan trọng', criteria: 'Mức dầu trong vạch cho phép, không rò rỉ dầu' }
+        ]
+      },
+      {
+        id: 'tpl_pump',
+        name: 'Sổ kiểm tra Trạm Bơm Nước & PCCC',
+        category: 'Trạm bơm',
+        createdBy: 'ADMIN01',
+        items: [
+          { title: 'Kiểm tra áp lực đường ống cấp nước sinh hoạt', priority: 'Quan trọng', criteria: 'Áp lực duy trì ổn định từ 4.0 - 5.5 bar' },
+          { title: 'Kiểm tra rò rỉ van một chiều và khớp nối mềm', priority: 'Bình thường', criteria: 'Khớp nối khô ráo, không rung lắc dị thường' },
+          { title: 'Kiểm tra tủ điều khiển bơm tự động (Auto)', priority: 'Khẩn cấp', criteria: 'Đèn báo nguồn sáng đủ, chế độ Auto kích hoạt sẵn sàng' }
+        ]
+      }
     ];
 
     // Helper: Tạo initials sạch từ họ tên (loại bỏ ngoặc đơn)
@@ -733,7 +849,6 @@
           if (rawTasks) localStorage.setItem('app_backup_legacy_v1_tasks', rawTasks);
           if (rawLogs) localStorage.setItem('app_backup_legacy_v1_logs', rawLogs);
 
-          // Tag legacy tasks with unattributed
           if (rawTasks) {
             try {
               let tList = JSON.parse(rawTasks);
@@ -768,9 +883,7 @@
         if (savedEmployees) {
           try {
             this.employees = JSON.parse(savedEmployees);
-            // Ensure each employee has a default pin if missing
             this.employees = this.employees.map(e => {
-              // Ensure Thắng is Kỹ thuật viên
               if (e.id === 'EMP01' && (e.role === 'Ca trưởng' || !e.role)) {
                 e.role = 'Kỹ thuật viên';
               }
@@ -780,7 +893,6 @@
               };
             });
 
-            // Ensure ADMIN01 exists
             if (!this.employees.some(e => e.id === 'ADMIN01')) {
               this.employees.unshift({
                 id: 'ADMIN01',
@@ -797,6 +909,19 @@
         } else {
           this.employees = [...DEFAULT_ACTIVE_EMPLOYEES];
           this.saveEmployees();
+        }
+
+        // Checklist Templates Loading
+        const savedTemplates = localStorage.getItem('app_checklist_templates');
+        if (savedTemplates) {
+          try {
+            this.templates = JSON.parse(savedTemplates);
+          } catch (e) {
+            this.templates = [...DEFAULT_CHECKLIST_TEMPLATES];
+          }
+        } else {
+          this.templates = [...DEFAULT_CHECKLIST_TEMPLATES];
+          this.saveTemplates();
         }
 
         // Current Session Auth
@@ -819,7 +944,6 @@
         this.logs = JSON.parse(localStorage.getItem('app_logs') || '[]');
         this.taskEvents = JSON.parse(localStorage.getItem('app_task_events') || '[]');
 
-        // Khởi tạo dữ liệu mẫu nếu hoàn toàn trống
         if (this.tasks.length === 0 && this.logs.length === 0) {
           this.initSampleData();
         }
@@ -827,6 +951,10 @@
 
       saveEmployees() {
         localStorage.setItem('app_employees', JSON.stringify(this.employees));
+      }
+
+      saveTemplates() {
+        localStorage.setItem('app_checklist_templates', JSON.stringify(this.templates));
       }
 
       getActiveEmployees() {
@@ -895,20 +1023,9 @@
         return false;
       }
 
-      toggleEmployeeStatus(empId) {
-        const emp = this.employees.find(e => e.id === empId);
-        if (emp && emp.id !== 'ADMIN01') {
-          emp.status = emp.status === 'active' ? 'inactive' : 'active';
-          this.saveEmployees();
-          return true;
-        }
-        return false;
-      }
-
       addEmployee(fullName, role = 'Kỹ thuật viên', customCode = '', initialPin = '1234') {
         let newId = customCode.trim();
         if (!newId) {
-          // Find max index in EMPxx
           let maxNum = 4;
           this.employees.forEach(e => {
             const match = e.id.match(/^EMP(\d+)$/i);
@@ -933,6 +1050,37 @@
         this.employees.push(newEmp);
         this.saveEmployees();
         return newEmp;
+      }
+
+      // Template Management
+      saveTemplate(template) {
+        const existingIndex = this.templates.findIndex(t => t.id === template.id);
+        if (existingIndex >= 0) {
+          this.templates[existingIndex] = template;
+        } else {
+          this.templates.push(template);
+        }
+        this.saveTemplates();
+      }
+
+      deleteTemplate(templateId) {
+        this.templates = this.templates.filter(t => t.id !== templateId);
+        this.saveTemplates();
+      }
+
+      applyTemplateToShift(templateId) {
+        const tpl = this.templates.find(t => t.id === templateId);
+        if (!tpl || !tpl.items || tpl.items.length === 0) return 0;
+
+        const emp = this.getCurrentEmployee();
+        let addedCount = 0;
+
+        tpl.items.forEach(item => {
+          this.addTask(item.title, item.priority || 'Bình thường', tpl.category || 'Chung', item.criteria || '');
+          addedCount++;
+        });
+
+        return addedCount;
       }
 
       get currentShiftId() {
@@ -964,14 +1112,15 @@
         localStorage.setItem('app_task_events', JSON.stringify(this.taskEvents));
       }
 
-      addTask(title, priority, category) {
+      addTask(title, priority, category, criteria = '') {
         const emp = this.getCurrentEmployee();
         const newTask = {
-          id: Date.now(),
+          id: Date.now() + Math.floor(Math.random() * 1000),
           shiftId: this.currentShiftId,
           title,
           priority,
           category: category || 'Chung',
+          criteria: criteria || '',
           done: false,
           createdBy: emp.id,
           createdByName: emp.fullName,
@@ -1073,9 +1222,9 @@
         const sId = this.currentShiftId;
         const emp = this.getCurrentEmployee();
         this.tasks = [
-          { id: 101, shiftId: sId, title: 'Kiểm tra nhiệt độ & điện áp tủ điện tổng TBA', priority: 'Khẩn cấp', category: 'Trạm điện', done: false, createdBy: emp.id, createdByName: emp.fullName, time: '08:00' },
-          { id: 102, shiftId: sId, title: 'Kiểm tra áp lực nước và van phao bể ngầm', priority: 'Quan trọng', category: 'Trạm bơm', done: true, createdBy: emp.id, createdByName: emp.fullName, completedBy: emp.id, completedByName: emp.fullName, time: '09:30' },
-          { id: 103, shiftId: sId, title: 'Ghi chỉ số đồng hồ điện năng & lưu lượng nước', priority: 'Quan trọng', category: 'Đồng hồ', done: false, createdBy: emp.id, createdByName: emp.fullName, time: '17:30' }
+          { id: 101, shiftId: sId, title: 'Kiểm tra nhiệt độ & điện áp tủ điện tổng TBA', priority: 'Khẩn cấp', category: 'Trạm điện', criteria: 'Nhiệt độ các điểm đấu nối ≤ 65°C', done: false, createdBy: emp.id, createdByName: emp.fullName, time: '08:00' },
+          { id: 102, shiftId: sId, title: 'Kiểm tra áp lực nước và van phao bể ngầm', priority: 'Quan trọng', category: 'Trạm bơm', criteria: 'Áp suất duy trì 4 - 6 bar, không rò rỉ', done: true, createdBy: emp.id, createdByName: emp.fullName, completedBy: emp.id, completedByName: emp.fullName, time: '09:30' },
+          { id: 103, shiftId: sId, title: 'Ghi chỉ số đồng hồ điện năng & lưu lượng nước', priority: 'Quan trọng', category: 'Đồng hồ', criteria: 'Chỉ số ghi nhận đúng định dạng kWh/m3', done: false, createdBy: emp.id, createdByName: emp.fullName, time: '17:30' }
         ];
         this.logs = [
           { id: 201, shiftId: sId, employeeId: emp.id, employeeName: emp.fullName, content: 'Đã kiểm tra tủ điện tổng TBA, các pha cân bằng, nhiệt độ tiếp xúc 38°C (bình thường).', status: 'Không bất thường', area: 'Trạm điện TBA', time: '08:30 - Hôm nay' }
@@ -1092,6 +1241,7 @@
     const repo = new AppRepository();
     let currentTaskFilter = 'all';
     let pendingReopenTaskId = null;
+    let editingTemplateId = null;
 
     // ==========================================
     // 3. UI INITIALIZATION & EVENT HANDLERS
@@ -1132,6 +1282,16 @@
         renderTasks();
         renderLogs();
         updateStats();
+
+        // Control Admin Only Buttons
+        const tplMgrBtn = document.getElementById('btn-open-template-manager');
+        if (tplMgrBtn) {
+          if (repo.isAdmin()) {
+            tplMgrBtn.classList.remove('hidden');
+          } else {
+            tplMgrBtn.classList.add('hidden');
+          }
+        }
       } else {
         loginScreen.classList.remove('hidden');
         appScreen.classList.add('hidden');
@@ -1180,7 +1340,7 @@
       container.innerHTML = '';
 
       const isAdminUser = repo.isAdmin();
-      const activeList = repo.employees; // show all for admin or active only
+      const activeList = repo.employees;
 
       activeList.forEach((emp, index) => {
         const isSelf = emp.id === repo.currentEmployeeId;
@@ -1330,7 +1490,6 @@
       showToast(`Đã chuyển sang ca trực của ${repo.getCurrentEmployee().fullName}`);
     }
 
-    // Modal Thêm nhân sự mới
     function openAddEmployeeModal() {
       document.getElementById('input-new-emp-name').value = '';
       document.getElementById('input-new-emp-code').value = '';
@@ -1365,7 +1524,6 @@
       }
 
       const newEmp = repo.addEmployee(fullName, role, customCode, '1234');
-      // Auto login & switch to newly created employee's shift
       repo.login(newEmp.id, '1234');
 
       closeAddEmployeeModal();
@@ -1377,7 +1535,158 @@
     }
 
     // ==========================================
-    // 5. TASK CHECKLIST & REOPEN WORKFLOW
+    // 5. CHECKLIST TEMPLATE BUILDER & APPLICATOR
+    // ==========================================
+    function openTemplateBuilderModal(templateId = null) {
+      editingTemplateId = templateId;
+      const container = document.getElementById('template-items-container');
+      container.innerHTML = '';
+
+      if (templateId) {
+        const tpl = repo.templates.find(t => t.id === templateId);
+        document.getElementById('template-modal-title').innerText = 'Chỉnh Sửa Mẫu Sổ Checklist';
+        document.getElementById('input-template-name').value = tpl.name;
+        document.getElementById('input-template-category').value = tpl.category || '';
+        tpl.items.forEach(item => addTemplateItemRow(item.title, item.priority, item.criteria));
+      } else {
+        document.getElementById('template-modal-title').innerText = 'Thiết Kế Mẫu Sổ Checklist';
+        document.getElementById('input-template-name').value = '';
+        document.getElementById('input-template-category').value = '';
+        // Add 1 blank row by default
+        addTemplateItemRow();
+      }
+
+      document.getElementById('modal-template-builder').classList.remove('hidden');
+      document.getElementById('modal-template-builder').classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeTemplateBuilderModal() {
+      document.getElementById('modal-template-builder').classList.add('hidden');
+      document.getElementById('modal-template-builder').classList.remove('flex');
+    }
+
+    function addTemplateItemRow(title = '', priority = 'Bình thường', criteria = '') {
+      const container = document.getElementById('template-items-container');
+      const rowId = `tpl_row_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+      const div = document.createElement('div');
+      div.id = rowId;
+      div.className = 'p-3 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2 relative';
+
+      div.innerHTML = `
+        <div class="flex items-center gap-2">
+          <input type="text" placeholder="Tên hạng mục checklist..." value="${title}" class="tpl-item-title flex-1 px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-amber-500">
+          <select class="tpl-item-priority px-2.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-amber-500">
+            <option value="Bình thường" ${priority === 'Bình thường' ? 'selected' : ''}>⚪ Bình thường</option>
+            <option value="Quan trọng" ${priority === 'Quan trọng' ? 'selected' : ''}>🟡 Quan trọng</option>
+            <option value="Khẩn cấp" ${priority === 'Khẩn cấp' ? 'selected' : ''}>🔴 Khẩn cấp</option>
+          </select>
+          <button type="button" onclick="document.getElementById('${rowId}').remove()" aria-label="Xóa dòng hạng mục" class="text-slate-400 hover:text-rose-600 p-1 rounded">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <div>
+          <input type="text" placeholder="🎯 Tiêu chí đạt được (VD: Nhiệt độ ≤ 65°C, Áp suất 4-6 bar...)" value="${criteria}" class="tpl-item-criteria w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-[11px] text-slate-600 focus:ring-2 focus:ring-amber-500">
+        </div>
+      `;
+      container.appendChild(div);
+      lucide.createIcons();
+    }
+
+    function saveTemplateFromModal() {
+      const name = document.getElementById('input-template-name').value.trim();
+      const category = document.getElementById('input-template-category').value.trim() || 'Chung';
+
+      if (!name) {
+        alert('Vui lòng nhập tên mẫu sổ checklist');
+        return;
+      }
+
+      const rows = document.querySelectorAll('#template-items-container > div');
+      const items = [];
+      rows.forEach(row => {
+        const itemTitle = row.querySelector('.tpl-item-title').value.trim();
+        const itemPriority = row.querySelector('.tpl-item-priority').value;
+        const itemCriteria = row.querySelector('.tpl-item-criteria').value.trim();
+        if (itemTitle) {
+          items.push({
+            title: itemTitle,
+            priority: itemPriority,
+            criteria: itemCriteria
+          });
+        }
+      });
+
+      if (items.length === 0) {
+        alert('Vui lòng thêm ít nhất một hạng mục checklist vào mẫu sổ');
+        return;
+      }
+
+      const tpl = {
+        id: editingTemplateId || `tpl_${Date.now()}`,
+        name,
+        category,
+        createdBy: repo.currentEmployeeId,
+        updatedAt: new Date().toISOString(),
+        items
+      };
+
+      repo.saveTemplate(tpl);
+      closeTemplateBuilderModal();
+      showToast(`Đã lưu Mẫu sổ: ${tpl.name}`);
+    }
+
+    function openApplyTemplateModal() {
+      const container = document.getElementById('available-templates-container');
+      container.innerHTML = '';
+
+      if (repo.templates.length === 0) {
+        container.innerHTML = `
+          <div class="p-6 text-center text-slate-400 bg-slate-50 rounded-2xl">
+            Chưa có mẫu sổ checklist nào. Quản trị viên có thể tạo thêm trong Tab Cá nhân.
+          </div>
+        `;
+      } else {
+        repo.templates.forEach(tpl => {
+          const div = document.createElement('div');
+          div.className = 'template-card p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-indigo-300 transition space-y-2';
+          div.innerHTML = `
+            <div class="flex justify-between items-start">
+              <div>
+                <h4 class="text-sm font-bold text-slate-800">${tpl.name}</h4>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span class="text-[10px] px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 font-semibold">${tpl.category || 'Chung'}</span>
+                  <span class="text-[10px] text-slate-400 font-medium">${tpl.items ? tpl.items.length : 0} hạng mục kiểm tra</span>
+                </div>
+              </div>
+              <button onclick="handleApplyTemplate('${tpl.id}')" aria-label="Áp dụng mẫu sổ ${tpl.name}" class="btn-apply-tpl px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs font-bold rounded-xl shadow-xs transition">
+                Áp dụng vào ca
+              </button>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      }
+
+      document.getElementById('modal-apply-template').classList.remove('hidden');
+      document.getElementById('modal-apply-template').classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeApplyTemplateModal() {
+      document.getElementById('modal-apply-template').classList.add('hidden');
+      document.getElementById('modal-apply-template').classList.remove('flex');
+    }
+
+    function handleApplyTemplate(templateId) {
+      const count = repo.applyTemplateToShift(templateId);
+      closeApplyTemplateModal();
+      renderTasks();
+      showToast(`Đã áp dụng ${count} hạng mục checklist vào ca trực`);
+    }
+
+    // ==========================================
+    // 6. TASK CHECKLIST & REOPEN WORKFLOW
     // ==========================================
     function renderTasks() {
       const listContainer = document.getElementById('task-list');
@@ -1392,7 +1701,6 @@
 
       listContainer.innerHTML = '';
 
-      // Lọc task thuộc đúng ca hiện tại (hoặc legacy-shift)
       const currentShiftTasks = repo.tasks.filter(t => t.shiftId === repo.currentShiftId);
 
       let filtered = currentShiftTasks.filter(t => {
@@ -1412,7 +1720,7 @@
               <i data-lucide="inbox" class="w-6 h-6"></i>
             </div>
             <p class="text-sm font-semibold text-slate-600">Không có công việc nào trong ca này</p>
-            <p class="text-xs text-slate-400">Nhấn 'Thêm việc' để bắt đầu checklist ca trực.</p>
+            <p class="text-xs text-slate-400">Nhấn 'Thêm việc' hoặc 'Mẫu Sổ' để bắt đầu checklist ca trực.</p>
           </div>
         `;
       } else {
@@ -1421,23 +1729,29 @@
                              task.priority === 'Quan trọng' ? 'bg-amber-50 text-amber-700 border-amber-200/60' : 'bg-slate-100 text-slate-600 border-slate-200/60';
 
           const item = document.createElement('div');
-          item.className = `bg-white p-3.5 rounded-2xl border ${task.done ? 'border-slate-200/60 bg-slate-50/70' : 'border-slate-200/90'} shadow-xs flex items-center justify-between gap-3 transition-all duration-200 hover:shadow-sm`;
+          item.className = `bg-white p-3.5 rounded-2xl border ${task.done ? 'border-slate-200/60 bg-slate-50/70' : 'border-slate-200/90'} shadow-xs flex items-start justify-between gap-3 transition-all duration-200 hover:shadow-sm`;
           
           item.innerHTML = `
             <div class="flex items-start space-x-3 flex-1 cursor-pointer select-none task-item-check" onclick="handleTaskCheck(${task.id})">
-              <div class="mt-0.5 w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-colors ${task.done ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-white'}">
+              <div class="mt-0.5 w-5 h-5 rounded-lg border-2 shrink-0 flex items-center justify-center transition-colors ${task.done ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-white'}">
                 ${task.done ? '<i data-lucide="check" class="w-3.5 h-3.5"></i>' : ''}
               </div>
               <div class="flex-1 min-w-0">
                 <p class="text-sm font-semibold leading-snug break-words ${task.done ? 'line-through text-slate-400' : 'text-slate-800'}">${task.title}</p>
-                <div class="flex items-center gap-2 mt-1 flex-wrap">
+                ${task.criteria ? `
+                  <div class="mt-1 flex items-start space-x-1 text-[11px] text-indigo-700 bg-indigo-50/80 px-2 py-1 rounded-lg border border-indigo-100">
+                    <span class="font-bold shrink-0">🎯 Tiêu chí đạt:</span>
+                    <span class="font-medium">${task.criteria}</span>
+                  </div>
+                ` : ''}
+                <div class="flex items-center gap-2 mt-1.5 flex-wrap">
                   ${task.category ? `<span class="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded font-medium">${task.category}</span>` : ''}
                   <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${badgeColor}">${task.priority}</span>
                   ${task.completedByName ? `<span class="text-[10px] text-emerald-600 font-semibold">✓ ${task.completedByName}</span>` : ''}
                 </div>
               </div>
             </div>
-            <button onclick="deleteTask(${task.id})" aria-label="Xóa công việc ${task.title}" class="text-slate-300 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-50 transition active:scale-95">
+            <button onclick="deleteTask(${task.id})" aria-label="Xóa công việc ${task.title}" class="text-slate-300 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-50 transition active:scale-95 shrink-0">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
           `;
@@ -1462,13 +1776,11 @@
       if (!task) return;
 
       if (task.done) {
-        // Đã hoàn thành -> Phải xác nhận và nhập lý do mở lại
         pendingReopenTaskId = taskId;
         document.getElementById('input-reopen-reason').value = '';
         document.getElementById('modal-reopen-task').classList.remove('hidden');
         document.getElementById('modal-reopen-task').classList.add('flex');
       } else {
-        // Chưa hoàn thành -> Đánh dấu hoàn thành
         repo.completeTask(taskId);
         renderTasks();
         showToast('Đã hoàn thành công việc');
@@ -1532,15 +1844,17 @@
       const title = document.getElementById('input-task-title').value.trim();
       const priority = document.getElementById('input-task-priority').value;
       const category = document.getElementById('input-task-category').value.trim() || 'Chung';
+      const criteria = document.getElementById('input-task-criteria').value.trim();
 
       if (!title) {
         alert('Vui lòng nhập nội dung công việc');
         return;
       }
 
-      repo.addTask(title, priority, category);
+      repo.addTask(title, priority, category, criteria);
       document.getElementById('input-task-title').value = '';
       document.getElementById('input-task-category').value = '';
+      document.getElementById('input-task-criteria').value = '';
       closeTaskModal();
       renderTasks();
       showToast('Đã thêm checklist mới vào ca trực');
@@ -1555,7 +1869,7 @@
     }
 
     // ==========================================
-    // 6. JOURNAL WORK LOGS
+    // 7. JOURNAL WORK LOGS
     // ==========================================
     function renderLogs() {
       const logContainer = document.getElementById('journal-list');
@@ -1666,7 +1980,7 @@
     }
 
     // ==========================================
-    // 7. REPORT GENERATOR & STATISTICS
+    // 8. REPORT GENERATOR & STATISTICS
     // ==========================================
     function updateStats() {
       const currentShiftTasks = repo.tasks.filter(t => t.shiftId === repo.currentShiftId);
@@ -1685,7 +1999,6 @@
       document.getElementById('stat-logs').innerText = currentShiftLogs.length;
       document.getElementById('stat-logs-warning').innerText = `${watchCount} mục cần theo dõi`;
 
-      // Build accurate shift report text
       const emp = repo.getCurrentEmployee();
       const now = new Date();
       const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
@@ -1726,7 +2039,7 @@
     }
 
     // ==========================================
-    // 8. TOAST & DATA MANAGEMENT
+    // 9. TOAST & DATA MANAGEMENT
     // ==========================================
     function showToast(msg, isError = false) {
       const toast = document.getElementById('toast');
@@ -1793,6 +2106,7 @@
         currentShiftType: repo.currentShiftType,
         currentDate: repo.currentDate,
         employees: repo.employees,
+        templates: repo.templates,
         tasks: repo.tasks,
         logs: repo.logs,
         taskEvents: repo.taskEvents,
@@ -1809,9 +2123,11 @@
     }
 
     function resetSampleData() {
-      if (confirm('Khôi phục lại danh sách dữ liệu mẫu của 4 nhân sự gốc & Admin?')) {
+      if (confirm('Khôi phục lại danh sách dữ liệu mẫu gốc?')) {
         repo.employees = [...DEFAULT_ACTIVE_EMPLOYEES];
+        repo.templates = [...DEFAULT_CHECKLIST_TEMPLATES];
         repo.saveEmployees();
+        repo.saveTemplates();
         repo.initSampleData();
         populateLoginEmployeeSelect();
         populateEmployeeSelect();
