@@ -98,17 +98,20 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên, Quản L�
     expect(resetButtons).toBeGreaterThan(0);
   });
 
-  test('Kịch bản Mẫu Sổ Checklist: Admin tạo mẫu sổ kèm tiêu chí đạt & Nhân viên áp dụng vào ca trực', async ({ page }) => {
+  test('Kịch bản Mẫu Sổ Checklist: Admin tạo mới, chỉnh sửa, xóa mẫu sổ & Nhân viên áp dụng vào ca trực', async ({ page }) => {
     await page.goto('/nhatky/index.html');
 
-    // 1. Admin đăng nhập và tạo Mẫu Sổ mới
+    // 1. Admin đăng nhập và mở Danh sách Quản lý Mẫu Sổ
     await performLogin(page, 'ADMIN01', '1234');
     await page.click('#nav-personal');
     await page.click('#btn-open-template-manager');
+    await expect(page.locator('#modal-template-manager')).toBeVisible();
+
+    // 2. Tạo Mẫu Sổ mới
+    await page.click('#btn-create-new-template');
     await expect(page.locator('#modal-template-builder')).toBeVisible();
 
-    // Tạo Mẫu: "Sổ kiểm tra Máy Phát Điện Dự Phòng"
-    await page.fill('#input-template-name', 'Sổ kiểm tra Máy Phát Điện Dự Phòng');
+    await page.fill('#input-template-name', 'Sổ kiểm tra Máy Phát Điện');
     await page.fill('#input-template-category', 'Máy phát điện');
 
     // Hạng mục 1
@@ -124,30 +127,57 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên, Quản L�
 
     await page.click('#btn-save-template');
     await expect(page.locator('#modal-template-builder')).toBeHidden();
+    await expect(page.locator('#modal-template-manager')).toContainText('Sổ kiểm tra Máy Phát Điện');
 
-    // 2. Đăng xuất Admin -> Nhân viên Ngô Quyết Thắng đăng nhập Ca 1
+    // 3. Admin Chỉnh sửa Mẫu Sổ (Edit)
+    const editBtn = page.locator('.template-item-card:has-text("Sổ kiểm tra Máy Phát Điện") .btn-edit-template');
+    await editBtn.click();
+    await expect(page.locator('#modal-template-builder')).toBeVisible();
+
+    // Đổi tên và sửa tiêu chí
+    await page.fill('#input-template-name', 'Sổ kiểm tra Máy Phát Điện Dự Phòng');
+    await page.fill('.tpl-item-criteria >> nth=0', 'Mức dầu tối thiểu đạt trên 90% dung tích bồn');
+    await page.click('#btn-save-template');
+    await expect(page.locator('#modal-template-builder')).toBeHidden();
+    await expect(page.locator('#modal-template-manager')).toContainText('Sổ kiểm tra Máy Phát Điện Dự Phòng');
+
+    // Đóng modal quản lý mẫu sổ
+    await page.click('#modal-template-manager button:has-text("Đóng")');
+
+    // 4. Đăng xuất Admin -> Nhân viên Ngô Quyết Thắng đăng nhập Ca 1
     await page.click('#btn-logout');
     await performLogin(page, 'EMP01', '1234');
 
-    // 3. Nhân viên mở "Áp dụng Mẫu Sổ"
+    // 5. Nhân viên mở "Áp dụng Mẫu Sổ"
     await page.click('#nav-tasks');
     await page.click('#btn-open-apply-template');
     await expect(page.locator('#modal-apply-template')).toBeVisible();
     await expect(page.locator('#modal-apply-template')).toContainText('Sổ kiểm tra Máy Phát Điện Dự Phòng');
 
-    // Áp dụng mẫu sổ vào ca
+    // Áp dụng mẫu sổ đã sửa vào ca
     await page.locator('.template-card:has-text("Sổ kiểm tra Máy Phát Điện Dự Phòng") .btn-apply-tpl').click();
     await expect(page.locator('#modal-apply-template')).toBeHidden();
 
-    // 4. Checklist của ca trực được nạp và hiển thị đầy đủ tiêu chí đạt
+    // 6. Checklist của ca trực được nạp và hiển thị đầy đủ tiêu chí đã sửa
     await expect(page.locator('#task-list')).toContainText('Kiểm tra mức nhiên liệu dầu Diesel');
-    await expect(page.locator('#task-list')).toContainText('Mức dầu tối thiểu đạt trên 80% dung tích bồn');
+    await expect(page.locator('#task-list')).toContainText('Mức dầu tối thiểu đạt trên 90% dung tích bồn');
     await expect(page.locator('#task-list')).toContainText('Kiểm tra điện áp bình ắc quy đề máy');
     await expect(page.locator('#task-list')).toContainText('Điện áp ắc quy từ 24V - 27V');
 
-    // 5. Đánh dấu hoàn thành
+    // Đánh dấu hoàn thành
     await page.locator('.task-item-check').first().click();
     await expect(page.locator('#progress-percent')).toHaveText('50%');
+
+    // 7. Kiểm tra chức năng Xóa Mẫu Sổ (Admin Delete)
+    await page.click('#nav-personal');
+    await page.click('#btn-logout');
+    await performLogin(page, 'ADMIN01', '1234');
+    await page.click('#nav-personal');
+    await page.click('#btn-open-template-manager');
+
+    const deleteBtn = page.locator('.template-item-card:has-text("Sổ kiểm tra Máy Phát Điện Dự Phòng") .btn-delete-template');
+    await deleteBtn.click();
+    await expect(page.locator('#modal-template-manager')).not.toContainText('Sổ kiểm tra Máy Phát Điện Dự Phòng');
   });
 
   test('Kịch bản 1, 2, 3: Cô lập dữ liệu theo Ca và Nhân viên (Thắng Ca 1 vs Hậu Ca 2)', async ({ page }) => {

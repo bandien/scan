@@ -118,7 +118,7 @@
       <!-- Footer Info -->
       <div class="text-center space-y-1 text-[11px] text-slate-400">
         <p>Tài khoản Admin có quyền quản trị cao nhất • Mật khẩu mặc định: <span class="text-indigo-300 font-mono">1234</span></p>
-        <p>Phiên bản 2.5.0 • Quyền Quản Trị & Mẫu Sổ Checklist</p>
+        <p>Phiên bản 2.7.0 • Quản Lý Mẫu Sổ Checklist & CRUD</p>
       </div>
 
     </div>
@@ -332,7 +332,7 @@
               <i data-lucide="key" class="w-3.5 h-3.5"></i>
               <span>Đổi Mật Khẩu</span>
             </button>
-            <button id="btn-open-template-manager" onclick="openTemplateBuilderModal()" aria-label="Quản lý thiết kế mẫu sổ checklist" class="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold rounded-xl transition">
+            <button id="btn-open-template-manager" onclick="openTemplateManagerModal()" aria-label="Quản lý thiết kế mẫu sổ checklist" class="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold rounded-xl transition">
               <i data-lucide="layout-template" class="w-3.5 h-3.5 text-amber-600"></i>
               <span>Mẫu Sổ Checklist</span>
             </button>
@@ -395,7 +395,7 @@
         <!-- System Info -->
         <div class="text-center text-xs text-slate-400 space-y-1 pt-2">
           <p>Hệ Thống Trực Vận Hành & CMMS WebApp</p>
-          <p>Phiên bản 2.6.0 (Template Builder & Criteria) • Lưu trữ độc lập</p>
+          <p>Phiên bản 2.7.0 (Template Builder & CRUD) • Lưu trữ độc lập</p>
         </div>
       </section>
 
@@ -424,13 +424,45 @@
   </div>
 
   <!-- ========================================== -->
+  <!-- MODAL: QUẢN LÝ DANH SÁCH MẪU SỔ (#modal-template-manager) -->
+  <!-- ========================================== -->
+  <div id="modal-template-manager" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200 overflow-y-auto">
+    <div class="bg-white rounded-3xl w-full max-w-lg p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+      <div class="flex justify-between items-center shrink-0">
+        <div class="flex items-center space-x-2 text-amber-700">
+          <i data-lucide="layout-template" class="w-5 h-5 text-amber-600"></i>
+          <h3 class="font-bold text-slate-800 text-base">Quản Lý Mẫu Sổ Checklist</h3>
+        </div>
+        <button onclick="closeTemplateManagerModal()" aria-label="Đóng quản lý mẫu sổ" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="flex justify-between items-center shrink-0 pb-1">
+        <p class="text-xs text-slate-500">Danh sách các mẫu sổ checklist định kỳ tiêu chuẩn</p>
+        <button id="btn-create-new-template" onclick="openTemplateBuilderModal(null)" aria-label="Tạo mẫu sổ checklist mới" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-95">
+          + Tạo Mẫu Mới
+        </button>
+      </div>
+
+      <div id="template-manager-list" class="space-y-3 overflow-y-auto flex-1 pr-1 custom-scrollbar">
+        <!-- Rendered by JS -->
+      </div>
+
+      <div class="flex justify-end pt-2 border-t border-slate-100 shrink-0">
+        <button onclick="closeTemplateManagerModal()" aria-label="Đóng quản lý mẫu sổ" class="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
   <!-- MODAL: ADMIN THIẾT KẾ MẪU SỔ CHECKLIST (#modal-template-builder) -->
   <!-- ========================================== -->
   <div id="modal-template-builder" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200 overflow-y-auto">
     <div class="bg-white rounded-3xl w-full max-w-lg p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
       <div class="flex justify-between items-center shrink-0">
         <div class="flex items-center space-x-2 text-amber-700">
-          <i data-lucide="layout-template" class="w-5 h-5 text-amber-600"></i>
+          <i data-lucide="edit-3" class="w-5 h-5 text-amber-600"></i>
           <h3 class="font-bold text-slate-800 text-base" id="template-modal-title">Thiết Kế Mẫu Sổ Checklist</h3>
         </div>
         <button onclick="closeTemplateBuilderModal()" aria-label="Đóng thiết kế mẫu sổ" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
@@ -843,7 +875,6 @@
       migrateIfNeeded() {
         const schemaVer = localStorage.getItem('app_schema_version');
         if (!schemaVer) {
-          // Backup legacy data
           const rawTasks = localStorage.getItem('app_tasks');
           const rawLogs = localStorage.getItem('app_logs');
           if (rawTasks) localStorage.setItem('app_backup_legacy_v1_tasks', rawTasks);
@@ -1052,7 +1083,7 @@
         return newEmp;
       }
 
-      // Template Management
+      // Template Management (CRUD)
       saveTemplate(template) {
         const existingIndex = this.templates.findIndex(t => t.id === template.id);
         if (existingIndex >= 0) {
@@ -1072,9 +1103,7 @@
         const tpl = this.templates.find(t => t.id === templateId);
         if (!tpl || !tpl.items || tpl.items.length === 0) return 0;
 
-        const emp = this.getCurrentEmployee();
         let addedCount = 0;
-
         tpl.items.forEach(item => {
           this.addTask(item.title, item.priority || 'Bình thường', tpl.category || 'Chung', item.criteria || '');
           addedCount++;
@@ -1255,7 +1284,6 @@
 
       checkAuthAndRenderScreen();
 
-      // Read Hash URL
       const hash = window.location.hash.replace('#', '');
       if (['tasks', 'journal', 'report', 'personal'].includes(hash)) {
         switchTab(hash);
@@ -1535,8 +1563,87 @@
     }
 
     // ==========================================
-    // 5. CHECKLIST TEMPLATE BUILDER & APPLICATOR
+    // 5. CHECKLIST TEMPLATE BUILDER & CRUD MANAGEMENT
     // ==========================================
+    function openTemplateManagerModal() {
+      renderTemplateManagerList();
+      document.getElementById('modal-template-manager').classList.remove('hidden');
+      document.getElementById('modal-template-manager').classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeTemplateManagerModal() {
+      document.getElementById('modal-template-manager').classList.add('hidden');
+      document.getElementById('modal-template-manager').classList.remove('flex');
+    }
+
+    function renderTemplateManagerList() {
+      const container = document.getElementById('template-manager-list');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (repo.templates.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 text-center text-slate-400 bg-slate-50 rounded-2xl">
+            Chưa có mẫu sổ checklist nào. Nhấn "+ Tạo Mẫu Mới" để bắt đầu thiết kế.
+          </div>
+        `;
+        return;
+      }
+
+      repo.templates.forEach((tpl, idx) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'template-item-card p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5';
+        
+        let itemsHtml = '';
+        if (tpl.items && tpl.items.length > 0) {
+          itemsHtml = tpl.items.map((it, i) => `
+            <div class="text-[11px] text-slate-600 bg-white p-2 rounded-lg border border-slate-100 flex flex-col gap-0.5">
+              <div class="flex justify-between items-center">
+                <span class="font-semibold text-slate-700">${i + 1}. ${it.title}</span>
+                <span class="text-[9px] px-1.5 py-0.5 rounded font-bold ${it.priority === 'Khẩn cấp' ? 'bg-rose-50 text-rose-600' : it.priority === 'Quan trọng' ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-500'}">${it.priority}</span>
+              </div>
+              ${it.criteria ? `<span class="text-indigo-600 font-medium">🎯 ${it.criteria}</span>` : ''}
+            </div>
+          `).join('');
+        }
+
+        itemDiv.innerHTML = `
+          <div class="flex justify-between items-start">
+            <div>
+              <h4 class="text-sm font-bold text-slate-800">${tpl.name}</h4>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="text-[10px] px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 font-bold">${tpl.category || 'Chung'}</span>
+                <span class="text-[10px] text-slate-400">${tpl.items ? tpl.items.length : 0} hạng mục</span>
+              </div>
+            </div>
+            <div class="flex items-center space-x-1.5">
+              <button onclick="openTemplateBuilderModal('${tpl.id}')" aria-label="Sửa mẫu sổ ${tpl.name}" class="btn-edit-template p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 transition">
+                <i data-lucide="edit" class="w-4 h-4"></i>
+              </button>
+              <button onclick="handleDeleteTemplate('${tpl.id}', '${tpl.name}')" aria-label="Xóa mẫu sổ ${tpl.name}" class="btn-delete-template p-1.5 text-slate-400 hover:text-rose-600 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 transition">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-1.5 pt-1">
+            ${itemsHtml}
+          </div>
+        `;
+        container.appendChild(itemDiv);
+      });
+      lucide.createIcons();
+    }
+
+    function handleDeleteTemplate(templateId, templateName) {
+      if (confirm(`Bạn có chắc chắn muốn xóa mẫu sổ checklist "${templateName}"?`)) {
+        repo.deleteTemplate(templateId);
+        renderTemplateManagerList();
+        showToast(`Đã xóa mẫu sổ "${templateName}"`);
+      }
+    }
+
     function openTemplateBuilderModal(templateId = null) {
       editingTemplateId = templateId;
       const container = document.getElementById('template-items-container');
@@ -1544,15 +1651,16 @@
 
       if (templateId) {
         const tpl = repo.templates.find(t => t.id === templateId);
-        document.getElementById('template-modal-title').innerText = 'Chỉnh Sửa Mẫu Sổ Checklist';
-        document.getElementById('input-template-name').value = tpl.name;
-        document.getElementById('input-template-category').value = tpl.category || '';
-        tpl.items.forEach(item => addTemplateItemRow(item.title, item.priority, item.criteria));
+        if (tpl) {
+          document.getElementById('template-modal-title').innerText = 'Chỉnh Sửa Mẫu Sổ Checklist';
+          document.getElementById('input-template-name').value = tpl.name;
+          document.getElementById('input-template-category').value = tpl.category || '';
+          tpl.items.forEach(item => addTemplateItemRow(item.title, item.priority, item.criteria));
+        }
       } else {
         document.getElementById('template-modal-title').innerText = 'Thiết Kế Mẫu Sổ Checklist';
         document.getElementById('input-template-name').value = '';
         document.getElementById('input-template-category').value = '';
-        // Add 1 blank row by default
         addTemplateItemRow();
       }
 
@@ -1633,6 +1741,7 @@
 
       repo.saveTemplate(tpl);
       closeTemplateBuilderModal();
+      renderTemplateManagerList();
       showToast(`Đã lưu Mẫu sổ: ${tpl.name}`);
     }
 
@@ -1647,6 +1756,7 @@
           </div>
         `;
       } else {
+        const isAdmin = repo.isAdmin();
         repo.templates.forEach(tpl => {
           const div = document.createElement('div');
           div.className = 'template-card p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-indigo-300 transition space-y-2';
@@ -1659,9 +1769,19 @@
                   <span class="text-[10px] text-slate-400 font-medium">${tpl.items ? tpl.items.length : 0} hạng mục kiểm tra</span>
                 </div>
               </div>
-              <button onclick="handleApplyTemplate('${tpl.id}')" aria-label="Áp dụng mẫu sổ ${tpl.name}" class="btn-apply-tpl px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs font-bold rounded-xl shadow-xs transition">
-                Áp dụng vào ca
-              </button>
+              <div class="flex items-center space-x-1.5 shrink-0">
+                ${isAdmin ? `
+                  <button onclick="closeApplyTemplateModal(); openTemplateBuilderModal('${tpl.id}')" title="Sửa mẫu" aria-label="Sửa mẫu sổ ${tpl.name}" class="p-1.5 text-slate-400 hover:text-indigo-600 rounded-lg hover:bg-white transition">
+                    <i data-lucide="edit" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button onclick="handleDeleteTemplate('${tpl.id}', '${tpl.name}'); openApplyTemplateModal()" title="Xóa mẫu" aria-label="Xóa mẫu sổ ${tpl.name}" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-white transition">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                ` : ''}
+                <button onclick="handleApplyTemplate('${tpl.id}')" aria-label="Áp dụng mẫu sổ ${tpl.name}" class="btn-apply-tpl px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs font-bold rounded-xl shadow-xs transition">
+                  Áp dụng vào ca
+                </button>
+              </div>
             </div>
           `;
           container.appendChild(div);
