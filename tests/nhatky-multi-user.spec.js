@@ -3,11 +3,12 @@ const { test, expect } = require('@playwright/test');
 test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên & Quản Lý Ca', () => {
 
   test.beforeEach(async ({ page }) => {
-    // Clear storage before test
-    await page.addInitScript(() => {
+    await page.goto('/nhatky/index.html');
+    await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
     });
+    await page.reload();
   });
 
   test('Kịch bản 1, 2, 3: Cô lập dữ liệu theo Ca và Nhân viên (Thắng Ca 1 vs Hậu Ca 2)', async ({ page }) => {
@@ -104,9 +105,10 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên & Quản L
     expect(lastEvent.reason).toContain('áp suất tụt bất thường');
   });
 
-  test('Kịch bản 7 & 8: Danh sách nhân viên chỉ có 4 active, nhân viên nghỉ việc không có trong ca mới, migration an toàn', async ({ page }) => {
-    // Giả lập dữ liệu legacy chưa có tác giả
-    await page.addInitScript(() => {
+  test('Kịch bản 7 & 8: Danh sách nhân viên mặc định có 4 active, nhân viên nghỉ việc không có trong ca mới, migration an toàn', async ({ page }) => {
+    // Giả lập dữ liệu legacy chưa có tác giả và chưa migrate
+    await page.evaluate(() => {
+      localStorage.removeItem('app_schema_version');
       localStorage.setItem('app_tasks', JSON.stringify([
         { id: 999, title: 'Việc cũ legacy', priority: 'Bình thường', done: true }
       ]));
@@ -115,7 +117,7 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên & Quản L
       ]));
     });
 
-    await page.goto('/nhatky/index.html');
+    await page.reload();
 
     // Mở chọn nhân viên
     await page.click('#header-user-badge');
@@ -136,6 +138,53 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên & Quản L
     const legacyTask = tasks.find(t => t.id === 999);
     expect(legacyTask).toBeDefined();
     expect(legacyTask.createdBy).toBe('legacy-unattributed');
+  });
+
+  test('Kịch bản Mở Rộng: Nhân viên mới / Thử việc tự tạo tài khoản và ghi nhật ký độc lập', async ({ page }) => {
+    await page.goto('/nhatky/index.html#tasks');
+
+    // 1. Mở modal chọn ca và bấm "+ Thêm nhân viên / Thử việc mới"
+    await page.click('#header-user-badge');
+    await page.click('#btn-open-add-employee');
+
+    await expect(page.locator('#modal-add-employee')).toBeVisible();
+
+    // 2. Điền thông tin nhân viên thử việc mới
+    await page.fill('#input-new-emp-name', 'Lê Văn An');
+    await page.selectOption('#select-new-emp-role', 'Thử việc');
+    await page.click('#btn-save-new-employee');
+
+    // 3. Sau khi tạo, hệ thống tự động đưa Lê Văn An vào ca trực
+    await expect(page.locator('#header-user-code')).toContainText('An');
+
+    // 4. Lê Văn An thêm công việc và ghi nhật ký
+    await page.click('button:has-text("Thêm việc")');
+    await page.fill('#input-task-title', 'Học việc - Đọc sơ đồ tủ điện hạ thế');
+    await page.click('button:has-text("Lưu công việc")');
+    await expect(page.locator('#task-list')).toContainText('Học việc - Đọc sơ đồ tủ điện hạ thế');
+
+    await page.click('#nav-journal');
+    await page.click('button:has-text("Ghi nhật ký")');
+    await page.fill('#input-log-content', 'Nhật ký thử việc: Đã nắm bắt vị trí các tủ điện phân phối');
+    await page.click('button:has-text("Ghi vào sổ")');
+    await expect(page.locator('#journal-list')).toContainText('Lê Văn An');
+    await expect(page.locator('#journal-list')).toContainText('Nhật ký thử việc: Đã nắm bắt vị trí các tủ điện phân phối');
+
+    // 5. Báo cáo hiển thị chính xác tên và mã của nhân viên thử việc mới
+    await page.click('#nav-report');
+    await expect(page.locator('#report-preview')).toContainText('Lê Văn An');
+    await expect(page.locator('#report-preview')).toContainText('Nhật ký thử việc: Đã nắm bắt vị trí các tủ điện phân phối');
+
+    // 6. Chuyển sang Tab Cá nhân kiểm tra danh sách nhân sự đã có Lê Văn An
+    await page.click('#nav-personal');
+    await expect(page.locator('#active-employees-container')).toContainText('Lê Văn An');
+    await expect(page.locator('#active-employees-container')).toContainText('Thử việc');
+
+    // 7. Reload trang kiểm tra dữ liệu nhân viên mới vẫn được bảo toàn
+    await page.reload();
+    await page.click('#header-user-badge');
+    const options = await page.locator('#select-active-employee option').allInnerTexts();
+    expect(options.some(t => t.includes('Lê Văn An'))).toBe(true);
   });
 
   test('Kịch bản 10 & 12: Đảm bảo Accessibility (aria-label) và không có console error', async ({ page }) => {
