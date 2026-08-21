@@ -177,22 +177,64 @@
       <!-- TAB 1: CHECKLIST & CÔNG VIỆC (#tasks) -->
       <!-- ========================================== -->
       <section id="tab-tasks" class="space-y-3.5">
+        <!-- SCOPE SUB-TABS: CA TRỰC | KẾ HOẠCH TUẦN | THÁNG | NĂM -->
+        <div class="flex items-center p-1 bg-slate-200/80 rounded-2xl gap-1 text-xs font-bold select-none">
+          <button id="subtab-shift" onclick="setTaskScope('shift')" class="task-scope-btn flex-1 py-2 rounded-xl transition-all shadow-xs bg-indigo-600 text-white font-bold flex items-center justify-center gap-1">
+            <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
+            <span>Ca trực</span>
+          </button>
+          <button id="subtab-week" onclick="setTaskScope('week')" class="task-scope-btn flex-1 py-2 rounded-xl transition-all text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1">
+            <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+            <span>Tuần</span>
+          </button>
+          <button id="subtab-month" onclick="setTaskScope('month')" class="task-scope-btn flex-1 py-2 rounded-xl transition-all text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1">
+            <i data-lucide="calendar-days" class="w-3.5 h-3.5"></i>
+            <span>Tháng</span>
+          </button>
+          <button id="subtab-year" onclick="setTaskScope('year')" class="task-scope-btn flex-1 py-2 rounded-xl transition-all text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1">
+            <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
+            <span>Năm / PM</span>
+          </button>
+        </div>
+
+        <!-- TIME NAVIGATOR (Visible when in week/month/year mode) -->
+        <div id="plan-time-navigator" class="hidden flex items-center justify-between bg-white px-3.5 py-2.5 rounded-2xl border border-slate-200/80 shadow-xs">
+          <button onclick="navigatePlanTime(-1)" aria-label="Kỳ trước" class="p-1.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-700 transition active:scale-95">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+          </button>
+          <div class="text-center">
+            <div id="plan-time-title" class="text-xs font-extrabold text-indigo-950">Tuần 34 (17/08 - 23/08/2026)</div>
+            <button id="plan-time-jump-btn" onclick="jumpPlanToCurrent()" class="text-[10px] font-bold text-indigo-600 hover:underline">Về tuần hiện tại</button>
+          </div>
+          <button onclick="navigatePlanTime(1)" aria-label="Kỳ sau" class="p-1.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-700 transition active:scale-95">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+
         <!-- Search, Template & Add Bar -->
         <div class="flex items-center gap-2">
           <div class="relative flex-1">
             <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-            <input type="text" id="task-search" placeholder="Tìm kiếm đầu việc..." class="w-full pl-9 pr-8 py-2.5 bg-white rounded-xl border border-slate-200/80 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm placeholder:text-slate-400 transition" oninput="renderTasks()">
+            <input type="text" id="task-search" placeholder="Tìm kiếm công việc, kế hoạch..." class="w-full pl-9 pr-8 py-2.5 bg-white rounded-xl border border-slate-200/80 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm placeholder:text-slate-400 transition" oninput="renderTasks()">
             <button id="clear-search-btn" onclick="clearTaskSearch()" aria-label="Xóa tìm kiếm" class="hidden absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600">
               <i data-lucide="x" class="w-3.5 h-3.5"></i>
             </button>
           </div>
-          <button id="btn-open-apply-template" onclick="openApplyTemplateModal()" aria-label="Áp dụng mẫu sổ checklist" class="flex items-center space-x-1 bg-amber-50 hover:bg-amber-100 active:scale-95 text-amber-800 border border-amber-300 px-3 py-2.5 rounded-xl text-xs font-bold transition shadow-xs">
+          
+          <!-- Shift Actions -->
+          <button id="btn-open-apply-template" onclick="openApplyTemplateModal()" aria-label="Áp dụng mẫu sổ checklist" class="flex items-center space-x-1 bg-amber-50 hover:bg-amber-100 active:scale-95 text-amber-800 border border-amber-300 px-3 py-2.5 rounded-xl text-xs font-bold transition shadow-xs shrink-0">
             <i data-lucide="book-template" class="w-4 h-4 text-amber-600"></i>
-            <span>Mẫu Sổ</span>
+            <span class="hidden sm:inline">Mẫu Sổ</span>
           </button>
-          <button onclick="openTaskModal()" aria-label="Thêm công việc mới" class="flex items-center space-x-1.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white px-3.5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition">
+          <button id="btn-open-add-task" onclick="openTaskModal()" aria-label="Thêm công việc ca trực mới" class="flex items-center space-x-1.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white px-3.5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition shrink-0">
             <i data-lucide="plus" class="w-4 h-4"></i>
             <span class="hidden sm:inline">Thêm việc</span>
+          </button>
+
+          <!-- Plan Actions (Visible in week/month/year mode) -->
+          <button id="btn-open-add-plan" onclick="openPlanModal()" aria-label="Lập kế hoạch công việc mới" class="hidden flex items-center space-x-1.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white px-3.5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition shrink-0">
+            <i data-lucide="calendar-plus" class="w-4 h-4"></i>
+            <span>Lập kế hoạch</span>
           </button>
         </div>
 
@@ -208,7 +250,7 @@
         <div class="bg-gradient-to-br from-white to-slate-50/80 p-4 rounded-2xl shadow-xs border border-slate-200/80">
           <div class="flex justify-between items-center mb-2">
             <div class="flex items-center space-x-1.5">
-              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Tiến độ ca trực</span>
+              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider" id="progress-card-title">Tiến độ ca trực</span>
               <span id="progress-count" class="text-[11px] font-bold px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded-md">0/0</span>
             </div>
             <span class="text-sm font-extrabold text-indigo-600" id="progress-percent">0%</span>
@@ -218,8 +260,8 @@
           </div>
         </div>
 
-        <!-- Checklist Items Container -->
-        <div id="task-list" class="space-y-2.5">
+        <!-- Checklist & Plans Items Container -->
+        <div id="task-list" class="space-y-3">
           <!-- Rendered by JS -->
         </div>
       </section>
@@ -814,6 +856,57 @@
   </div>
 
   <!-- ========================================== -->
+  <!-- MODAL: ĐIỀU CHUYỂN / TẠM NGƯNG NHÂN SỰ (#modal-transfer-employee) -->
+  <!-- ========================================== -->
+  <div id="modal-transfer-employee" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200">
+    <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center space-x-2 text-amber-600">
+          <i data-lucide="user-minus" class="w-5 h-5"></i>
+          <h3 class="font-bold text-slate-800 text-base" id="transfer-modal-title">Điều Chuyển / Tạm Ngưng Nhân Sự</h3>
+        </div>
+        <button onclick="closeTransferEmployeeModal()" aria-label="Đóng bảng điều chuyển" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3.5 text-xs">
+        <input type="hidden" id="input-transfer-emp-id" value="">
+        
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+          <p class="text-slate-500 font-medium">Nhân viên thực hiện:</p>
+          <p class="text-sm font-bold text-slate-900 mt-0.5" id="transfer-emp-name-label">Ngô Quyết Thắng (EMP01)</p>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Hình thức điều chuyển / Trạng thái <span class="text-rose-500">*</span></label>
+          <select id="select-transfer-status" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl font-semibold text-xs focus:ring-2 focus:ring-amber-500">
+            <option value="inactive_transfer">🏢 Điều chuyển sang tổ / bộ phận khác</option>
+            <option value="inactive_leave">🚪 Nghỉ việc / Tạm hoãn hợp đồng</option>
+            <option value="inactive_extended_leave">🏥 Nghỉ chế độ dài ngày (thai sản, ốm đau...)</option>
+            <option value="active">🟢 Tiếp nhận lại / Kích hoạt về tổ</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Mốc thời gian áp dụng <span class="text-rose-500">*</span></label>
+          <input type="date" id="input-transfer-date" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl font-semibold text-xs focus:ring-2 focus:ring-amber-500">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Đơn vị tiếp nhận / Lý do điều chuyển</label>
+          <input type="text" id="input-transfer-reason" placeholder="VD: Chuyển sang Tổ Cơ điện Tòa nhà, Nghỉ theo nguyện vọng..." class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-amber-500">
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100">
+        <button onclick="closeTransferEmployeeModal()" aria-label="Hủy điều chuyển" class="px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl">Hủy</button>
+        <button id="btn-save-transfer-employee" onclick="saveEmployeeTransfer()" aria-label="Lưu điều chuyển nhân sự" class="px-5 py-2.5 text-sm font-bold bg-amber-600 text-white rounded-xl hover:bg-amber-700 shadow-xs transition">Lưu Thay Đổi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
   <!-- MODAL: MỞ LẠI TASK ĐÃ XONG (#modal-reopen-task) -->
   <!-- ========================================== -->
   <div id="modal-reopen-task" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200">
@@ -843,6 +936,120 @@
         <button onclick="closeReopenModal()" aria-label="Hủy mở lại task" class="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl">Hủy</button>
         <button id="btn-confirm-reopen" onclick="confirmReopenTask()" aria-label="Xác nhận mở lại task" class="px-5 py-2 text-sm font-semibold bg-amber-600 text-white rounded-xl hover:bg-amber-700">Mở lại việc</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: LẬP KẾ HOẠCH CÔNG VIỆC MỚI (#modal-plan-builder) -->
+  <!-- ========================================== -->
+  <div id="modal-plan-builder" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200 overflow-y-auto">
+    <div class="bg-white rounded-3xl w-full max-w-lg p-5 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] flex flex-col">
+      <div class="flex justify-between items-center shrink-0">
+        <div class="flex items-center space-x-2 text-indigo-600">
+          <i data-lucide="calendar-plus" class="w-5 h-5 text-indigo-600"></i>
+          <h3 class="font-bold text-slate-800 text-base" id="plan-modal-title">Lập Kế Hoạch Công Việc</h3>
+        </div>
+        <button onclick="closePlanModal()" aria-label="Đóng bảng lập kế hoạch" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form id="form-plan-builder" onsubmit="handleSavePlanSubmit(event)" class="space-y-3.5 overflow-y-auto flex-1 pr-1 custom-scrollbar text-xs font-semibold">
+        <input type="hidden" id="input-plan-id" value="">
+
+        <div>
+          <label class="block text-slate-600 mb-1">Nội dung công việc / Kế hoạch <span class="text-rose-500">*</span></label>
+          <input type="text" id="input-plan-title" required placeholder="VD: Bảo trì định kỳ máy biến áp MBA1..." class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-600 mb-1">Loại kế hoạch</label>
+            <select id="select-plan-type" class="w-full px-3 py-2 border border-slate-200 rounded-xl font-semibold focus:ring-2 focus:ring-indigo-500">
+              <option value="Kế hoạch Tuần" selected>📅 Kế hoạch Tuần</option>
+              <option value="Kế hoạch Tháng">🗓️ Kế hoạch Tháng</option>
+              <option value="Bảo dưỡng định kỳ PM">⚙️ Bảo dưỡng định kỳ PM</option>
+              <option value="Kiểm định an toàn">🛡️ Kiểm định an toàn Năm</option>
+              <option value="Sửa chữa khắc phục">🔧 Sửa chữa / Khắc phục</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-600 mb-1">Hệ thống / Khu vực</label>
+            <input type="text" id="input-plan-category" placeholder="VD: Trạm điện TBA, Bơm tưới..." class="w-full px-3 py-2 border border-slate-200 rounded-xl font-semibold focus:ring-2 focus:ring-indigo-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-600 mb-1">Ngày thực hiện / Bắt đầu <span class="text-rose-500">*</span></label>
+            <input type="date" id="input-plan-date" required class="w-full px-3 py-2 border border-slate-200 rounded-xl font-semibold focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div>
+            <label class="block text-slate-600 mb-1">Hạn chót / Ngày kết thúc</label>
+            <input type="date" id="input-plan-date-end" class="w-full px-3 py-2 border border-slate-200 rounded-xl font-semibold focus:ring-2 focus:ring-indigo-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-600 mb-1">Khung giờ thực hiện (Tùy chọn)</label>
+            <input type="text" id="input-plan-time" placeholder="VD: 08:00 - 10:30" class="w-full px-3 py-2 border border-slate-200 rounded-xl font-semibold focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div>
+            <label class="block text-slate-600 mb-1">Mức độ ưu tiên</label>
+            <select id="select-plan-priority" class="w-full px-3 py-2 border border-slate-200 rounded-xl font-semibold focus:ring-2 focus:ring-indigo-500">
+              <option value="Quan trọng" selected>🟡 Quan trọng</option>
+              <option value="Bình thường">⚪ Bình thường</option>
+              <option value="Khẩn cấp">🔴 Khẩn cấp</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-600 mb-1">Người phụ trách chính <span class="text-rose-500">*</span></label>
+            <select id="select-plan-assignee" class="w-full px-3 py-2 border border-slate-200 rounded-xl font-semibold focus:ring-2 focus:ring-indigo-500">
+              <!-- Rendered by JS -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-600 mb-1">Người phối hợp</label>
+            <input type="text" id="input-plan-collaborators" placeholder="VD: Hậu, Hoàng..." class="w-full px-3 py-2 border border-slate-200 rounded-xl font-semibold focus:ring-2 focus:ring-indigo-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-600 mb-1">Khối lượng kế hoạch</label>
+            <input type="number" step="any" id="input-plan-qty" placeholder="VD: 1, 5, 24..." class="w-full px-3 py-2 border border-slate-200 rounded-xl font-semibold focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div>
+            <label class="block text-slate-600 mb-1">Đơn vị tính</label>
+            <input type="text" id="input-plan-unit" placeholder="VD: Trạm, Cột, Vòi, Máy..." class="w-full px-3 py-2 border border-slate-200 rounded-xl font-semibold focus:ring-2 focus:ring-indigo-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-600 mb-1">Tiêu chí nghiệm thu kỹ thuật</label>
+          <input type="text" id="input-plan-criteria" placeholder="VD: Nhiệt độ tiếp xúc ≤ 65°C, Điện trở R ≤ 10Ω..." class="w-full px-3.5 py-2 border border-slate-200 rounded-xl font-semibold focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div>
+          <label class="block text-slate-600 mb-1">Chu kỳ lặp lại</label>
+          <select id="select-plan-repeat" class="w-full px-3 py-2 border border-slate-200 rounded-xl font-semibold focus:ring-2 focus:ring-indigo-500">
+            <option value="none">Không lặp lại (Một lần)</option>
+            <option value="weekly">Lặp lại hàng tuần</option>
+            <option value="monthly">Lặp lại hàng tháng</option>
+            <option value="quarterly">Lặp lại hàng quý</option>
+            <option value="yearly">Lặp lại hàng năm</option>
+          </select>
+        </div>
+
+        <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100 shrink-0">
+          <button type="button" onclick="closePlanModal()" aria-label="Hủy lập kế hoạch" class="px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition">Hủy</button>
+          <button type="submit" id="btn-save-plan" aria-label="Lưu kế hoạch công việc" class="px-5 py-2.5 text-sm font-semibold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-sm transition">Lưu Kế Hoạch</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -1164,10 +1371,19 @@
         this.tasks = JSON.parse(localStorage.getItem('app_tasks') || '[]');
         this.logs = JSON.parse(localStorage.getItem('app_logs') || '[]');
         this.taskEvents = JSON.parse(localStorage.getItem('app_task_events') || '[]');
+        this.plans = JSON.parse(localStorage.getItem('app_plans') || '[]');
 
         if (this.tasks.length === 0 && this.logs.length === 0) {
           this.initSampleData();
         }
+
+        if (this.plans.length === 0) {
+          this.initSamplePlans();
+        }
+      }
+
+      savePlans() {
+        localStorage.setItem('app_plans', JSON.stringify(this.plans));
       }
 
       saveEmployees() {
@@ -1275,6 +1491,35 @@
         this.employees.push(newEmp);
         this.saveEmployees();
         return newEmp;
+      }
+
+      toggleEmployeeStatus(empId) {
+        const emp = this.employees.find(e => e.id === empId);
+        if (emp) {
+          emp.status = emp.status === 'inactive' ? 'active' : 'inactive';
+          this.saveEmployees();
+          return emp;
+        }
+        return null;
+      }
+
+      setEmployeeTransfer(empId, transferData) {
+        const emp = this.employees.find(e => e.id === empId);
+        if (emp) {
+          emp.status = transferData.status === 'active' ? 'active' : 'inactive';
+          emp.transferType = transferData.transferType || '';
+          emp.transferDate = transferData.transferDate || getTodayIsoDate();
+          emp.transferReason = transferData.transferReason || '';
+          emp.updatedAt = new Date().toISOString();
+          this.saveEmployees();
+          return emp;
+        }
+        return null;
+      }
+
+      deleteEmployee(empId) {
+        this.employees = this.employees.filter(e => e.id !== empId);
+        this.saveEmployees();
       }
 
       // ==========================================
@@ -1496,6 +1741,257 @@
         this.saveLogs();
       }
 
+      // ==========================================
+      // PLAN MANAGEMENT (KẾ HOẠCH TUẦN / THÁNG / NĂM / PM)
+      // ==========================================
+      addPlan(planData) {
+        const emp = this.getCurrentEmployee();
+        const newPlan = {
+          id: `plan_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+          task: planData.task,
+          category: planData.category || 'Chung',
+          type: planData.type || 'Kế hoạch Tuần',
+          priority: planData.priority || 'Quan trọng',
+          date: planData.date || getTodayIsoDate(),
+          dateEnd: planData.dateEnd || planData.date || getTodayIsoDate(),
+          time: planData.time || '',
+          assignee: planData.assignee || emp.id,
+          assigneeName: planData.assigneeName || emp.fullName,
+          collaborators: planData.collaborators || '',
+          planQty: planData.planQty !== undefined && planData.planQty !== '' ? Number(planData.planQty) : null,
+          doneQty: planData.doneQty !== undefined && planData.doneQty !== '' ? Number(planData.doneQty) : 0,
+          unit: planData.unit || '',
+          criteria: planData.criteria || '',
+          repeat: planData.repeat || 'none',
+          done: false,
+          createdBy: emp.id,
+          createdByName: emp.fullName,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        this.plans.unshift(newPlan);
+        this.savePlans();
+        return newPlan;
+      }
+
+      updatePlan(planId, data) {
+        const p = this.plans.find(x => x.id === planId);
+        if (p) {
+          Object.assign(p, data, { updatedAt: new Date().toISOString() });
+          this.savePlans();
+          return p;
+        }
+        return null;
+      }
+
+      deletePlan(planId) {
+        this.plans = this.plans.filter(p => p.id !== planId);
+        this.savePlans();
+      }
+
+      togglePlanDone(planId) {
+        const emp = this.getCurrentEmployee();
+        const p = this.plans.find(x => x.id === planId);
+        if (p) {
+          p.done = !p.done;
+          if (p.done) {
+            p.completedBy = emp.id;
+            p.completedByName = emp.fullName;
+            p.completedAt = new Date().toISOString();
+            if (p.planQty && (!p.doneQty || p.doneQty < p.planQty)) {
+              p.doneQty = p.planQty;
+            }
+          } else {
+            p.completedBy = null;
+            p.completedByName = null;
+            p.completedAt = null;
+          }
+          p.updatedAt = new Date().toISOString();
+          this.savePlans();
+          return p;
+        }
+        return null;
+      }
+
+      importPlanToShift(planId) {
+        const plan = this.plans.find(p => p.id === planId);
+        if (!plan) return null;
+        
+        let criteriaText = plan.criteria || '';
+        if (plan.planQty && plan.unit) {
+          criteriaText = `[KL: ${plan.planQty} ${plan.unit}] ${criteriaText}`.trim();
+        }
+
+        const taskTitle = `[Kế hoạch] ${plan.task}`;
+        const newTask = this.addTask(
+          taskTitle,
+          plan.priority || 'Quan trọng',
+          plan.category || 'Kế hoạch',
+          criteriaText
+        );
+        return newTask;
+      }
+
+      initSamplePlans() {
+        this.plans = [
+          {
+            id: 'plan_w34_01',
+            task: 'Bảo trì định kỳ máy biến áp MBA1 - Trạm điện chính',
+            category: 'Trạm điện TBA',
+            type: 'Bảo dưỡng định kỳ PM',
+            priority: 'Khẩn cấp',
+            date: '2026-08-17',
+            dateEnd: '2026-08-17',
+            time: '08:00 - 10:30',
+            assignee: 'EMP01',
+            assigneeName: 'Ngô Quyết Thắng',
+            collaborators: 'Đinh Văn Hậu',
+            planQty: 1,
+            doneQty: 1,
+            unit: 'Trạm',
+            criteria: 'Siết lực đầu cốt, đo nhiệt độ tiếp xúc ≤ 65°C, mức dầu đạt chuẩn',
+            repeat: 'monthly',
+            done: true,
+            completedAt: '2026-08-17T10:30:00.000Z',
+            completedByName: 'Thắng'
+          },
+          {
+            id: 'plan_w34_02',
+            task: 'Kiểm tra đo dòng tải và bảo dưỡng cụm bơm tăng áp Booster 2',
+            category: 'Trạm bơm',
+            type: 'Kế hoạch Tuần',
+            priority: 'Quan trọng',
+            date: '2026-08-18',
+            dateEnd: '2026-08-18',
+            time: '09:00 - 11:00',
+            assignee: 'EMP02',
+            assigneeName: 'Đinh Văn Hậu',
+            collaborators: 'Hoàng Việt Hoàng',
+            planQty: 2,
+            doneQty: 0,
+            unit: 'Cụm bơm',
+            criteria: 'Áp suất duy trì 4 - 6 bar, dòng điện định mức I ≤ 22A',
+            repeat: 'weekly',
+            done: false
+          },
+          {
+            id: 'plan_w34_03',
+            task: 'Kiểm tra bảo dưỡng van điện từ & vòi phun nước sân tập Golf Line 1-10',
+            category: 'Hệ thống tưới',
+            type: 'Kế hoạch Tuần',
+            priority: 'Quan trọng',
+            date: '2026-08-20',
+            dateEnd: '2026-08-20',
+            time: '14:30 - 16:30',
+            assignee: 'EMP03',
+            assigneeName: 'Hoàng Việt Hoàng',
+            collaborators: '',
+            planQty: 10,
+            doneQty: 4,
+            unit: 'Vòi phun',
+            criteria: 'Góc xoay 360 độ chuẩn, không nghẹt béc, đóng mở van 24VAC tốt',
+            repeat: 'weekly',
+            done: false
+          },
+          {
+            id: 'plan_w34_04',
+            task: 'Đo kiểm tra tiếp địa chống sét cột đèn sân tập phía Tây',
+            category: 'Chiếu sáng',
+            type: 'Kế hoạch Tuần',
+            priority: 'Quan trọng',
+            date: '2026-08-22',
+            dateEnd: '2026-08-22',
+            time: '08:30 - 11:00',
+            assignee: 'EMP04',
+            assigneeName: 'Nguyễn Đức Phong',
+            collaborators: 'Nguyễn Văn Cường',
+            planQty: 8,
+            doneQty: 0,
+            unit: 'Cột đèn',
+            criteria: 'Điện trở tiếp địa đạt chuẩn R ≤ 10Ω, liên kết kim thu sét chắc chắn',
+            repeat: 'none',
+            done: false
+          },
+          {
+            id: 'plan_m08_01',
+            task: 'Kiểm tra bảo dưỡng định kỳ toàn bộ 24 cột đèn sân golf & tủ điều khiển',
+            category: 'Chiếu sáng',
+            type: 'Kế hoạch Tháng',
+            priority: 'Quan trọng',
+            date: '2026-08-15',
+            dateEnd: '2026-08-28',
+            time: '08:00 - 17:00',
+            assignee: 'EMP04',
+            assigneeName: 'Nguyễn Đức Phong',
+            collaborators: 'Phú, Cường',
+            planQty: 24,
+            doneQty: 16,
+            unit: 'Cột',
+            criteria: 'Độ rọi Lux đạt chuẩn, khởi động từ contactor không rung rè',
+            repeat: 'monthly',
+            done: false
+          },
+          {
+            id: 'plan_m08_02',
+            task: 'Vệ sinh súc rửa bể chứa nước sinh hoạt trung tâm & bể ngầm PCCC',
+            category: 'Trạm bơm',
+            type: 'Kế hoạch Tháng',
+            priority: 'Quan trọng',
+            date: '2026-08-28',
+            dateEnd: '2026-08-30',
+            time: 'Ca Hành chính',
+            assignee: 'EMP01',
+            assigneeName: 'Ngô Quyết Thắng',
+            collaborators: 'Hậu, Hoàng',
+            planQty: 2,
+            doneQty: 0,
+            unit: 'Bể nước',
+            criteria: 'Nước xả sạch cặn đáy, khử khuẩn đúng quy trình an toàn',
+            repeat: 'quarterly',
+            done: false
+          },
+          {
+            id: 'plan_y2026_01',
+            task: 'Kiểm định định kỳ & thí nghiệm cao áp tủ trung thế RMU 22kV',
+            category: 'Trạm điện TBA',
+            type: 'Kiểm định an toàn',
+            priority: 'Khẩn cấp',
+            date: '2026-09-15',
+            dateEnd: '2026-09-18',
+            time: '08:00 - 17:00',
+            assignee: 'ADMIN01',
+            assigneeName: 'Quản Trị Viên',
+            collaborators: 'Đơn vị thí nghiệm điện lực',
+            planQty: 3,
+            doneQty: 0,
+            unit: 'Ngăn tủ',
+            criteria: 'Có chứng chỉ kiểm định an toàn điện lực, cách điện SF6 đạt chuẩn',
+            repeat: 'yearly',
+            done: false
+          },
+          {
+            id: 'plan_y2026_02',
+            task: 'Đại tu thay dầu nhớt, nước làm mát & lọc gió máy phát điện dự phòng 500kVA',
+            category: 'Máy phát điện',
+            type: 'Bảo dưỡng định kỳ PM',
+            priority: 'Quan trọng',
+            date: '2026-11-10',
+            dateEnd: '2026-11-12',
+            time: '08:30 - 16:30',
+            assignee: 'EMP01',
+            assigneeName: 'Ngô Quyết Thắng',
+            collaborators: 'Hậu, Phong',
+            planQty: 1,
+            doneQty: 0,
+            unit: 'Máy phát',
+            criteria: 'Chạy thử có tải đạt 100% công suất trong 2 giờ, nhiệt độ nước ≤ 85°C',
+            repeat: 'yearly',
+            done: false
+          }
+        ];
+        this.savePlans();
+      }
+
       initSampleData() {
         const sId = this.currentShiftId;
         const emp = this.getCurrentEmployee();
@@ -1513,13 +2009,19 @@
         this.saveTasks();
         this.saveLogs();
         this.saveTaskEvents();
+        this.initSamplePlans();
       }
     }
 
     const repo = new AppRepository();
     let currentTaskFilter = 'all';
+    let currentTaskScope = 'shift'; // 'shift' | 'week' | 'month' | 'year'
+    let planViewingMonday = getMonday(new Date(repo.currentDate || getTodayIsoDate()));
+    let planViewingMonth = new Date().getMonth();
+    let planViewingYear = new Date().getFullYear();
     let pendingReopenTaskId = null;
     let editingTemplateId = null;
+    let editingPlanId = null;
     let scheduleViewingMonday = getMonday(new Date());
     let activeCellTarget = null; // { weekKey, empId, cellKey }
 
@@ -1638,8 +2140,9 @@
 
       activeList.forEach((emp, index) => {
         const isSelf = emp.id === repo.currentEmployeeId;
+        const isInactive = emp.status === 'inactive';
         const item = document.createElement('div');
-        item.className = `flex items-center justify-between p-2.5 rounded-xl border ${emp.status === 'inactive' ? 'bg-slate-100 opacity-60 border-slate-200' : 'bg-slate-50 border-slate-100'}`;
+        item.className = `p-3 rounded-2xl border transition ${isInactive ? 'bg-slate-100/90 border-dashed border-slate-300 opacity-85' : 'bg-slate-50 border-slate-200/80 shadow-xs'}`;
         
         let roleBadgeColor = 'bg-slate-100 text-slate-700';
         if (emp.role === 'Quản trị viên') roleBadgeColor = 'bg-purple-100 text-purple-800 font-bold border border-purple-200';
@@ -1647,26 +2150,119 @@
         else if (emp.role === 'Thực tập sinh') roleBadgeColor = 'bg-cyan-100 text-cyan-700';
         else roleBadgeColor = 'bg-emerald-100 text-emerald-700';
 
+        let transferBadge = '';
+        if (isInactive) {
+          let dateStr = '';
+          if (emp.transferDate) {
+            const parts = emp.transferDate.split('-');
+            if (parts.length === 3) dateStr = ` từ ${parts[2]}/${parts[1]}/${parts[0]}`;
+          }
+          const reasonStr = emp.transferReason ? ` • ${emp.transferReason}` : '';
+          transferBadge = `
+            <div class="mt-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200/70">
+              <i data-lucide="user-x" class="w-3.5 h-3.5 shrink-0 text-rose-500"></i>
+              <span>Đã điều chuyển / Nghỉ${dateStr}${reasonStr}</span>
+            </div>
+          `;
+        }
+
         item.innerHTML = `
-          <div class="flex items-center space-x-2 min-w-0">
-            <span class="font-bold text-slate-400">${index + 1}.</span>
-            <span class="font-bold text-slate-800 truncate">${emp.fullName}</span>
-            <span class="text-[10px] text-slate-400">(${emp.id})</span>
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center space-x-2 min-w-0">
+              <span class="font-bold text-slate-400 text-xs">${index + 1}.</span>
+              <span class="font-bold text-sm ${isInactive ? 'line-through text-slate-500' : 'text-slate-900'} truncate">${emp.fullName}</span>
+              <span class="text-[11px] text-slate-400 font-medium">(${emp.id})</span>
+            </div>
+            <div class="flex items-center space-x-1.5 shrink-0">
+              <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold ${roleBadgeColor}">
+                ${emp.role === 'Quản trị viên' ? '👑 Admin' : emp.role}
+              </span>
+              ${isAdminUser && !isSelf && emp.id !== 'ADMIN01' ? `
+                <button onclick="openTransferEmployeeModal('${emp.id}')" title="${isInactive ? 'Tiếp nhận lại / Sửa mốc thời gian' : 'Điều chuyển rời tổ / Tạm ngưng'}" aria-label="Điều chuyển ${emp.fullName}" class="p-1.5 ${isInactive ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200' : 'bg-white text-slate-600 hover:text-amber-700 hover:bg-amber-50 border border-slate-200'} rounded-lg transition active:scale-95 flex items-center gap-1 text-xs font-semibold">
+                  <i data-lucide="${isInactive ? 'user-check' : 'arrow-right-left'}" class="w-3.5 h-3.5"></i>
+                  <span class="hidden sm:inline">${isInactive ? 'Tiếp nhận lại' : 'Điều chuyển'}</span>
+                </button>
+                <button onclick="handleAdminResetPin('${emp.id}')" title="Reset PIN về 1234" aria-label="Reset PIN cho ${emp.fullName}" class="p-1.5 text-slate-400 hover:text-indigo-600 rounded-lg hover:bg-white transition">
+                  <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="handleAdminDeleteEmployee('${emp.id}')" title="Xóa hồ sơ vĩnh viễn" aria-label="Xóa hồ sơ ${emp.fullName}" class="p-1.5 text-slate-300 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              ` : ''}
+            </div>
           </div>
-          <div class="flex items-center space-x-1.5 shrink-0">
-            <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold ${roleBadgeColor}">
-              ${emp.role === 'Quản trị viên' ? '👑 Admin' : emp.role}
-            </span>
-            ${isAdminUser && !isSelf && emp.id !== 'ADMIN01' ? `
-              <button onclick="handleAdminResetPin('${emp.id}')" title="Reset PIN về 1234" aria-label="Reset PIN cho ${emp.fullName}" class="p-1 text-slate-400 hover:text-indigo-600 rounded">
-                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-              </button>
-            ` : ''}
-          </div>
+          ${transferBadge}
         `;
         container.appendChild(item);
       });
       lucide.createIcons();
+    }
+
+    function openTransferEmployeeModal(empId) {
+      const emp = repo.employees.find(e => e.id === empId);
+      if (!emp) return;
+
+      document.getElementById('input-transfer-emp-id').value = emp.id;
+      document.getElementById('transfer-emp-name-label').innerText = `${emp.fullName} (${emp.id} - ${emp.role})`;
+      
+      const isInactive = emp.status === 'inactive';
+      if (isInactive) {
+        document.getElementById('select-transfer-status').value = emp.transferType || 'inactive_transfer';
+      } else {
+        document.getElementById('select-transfer-status').value = 'inactive_transfer';
+      }
+
+      document.getElementById('input-transfer-date').value = emp.transferDate || getTodayIsoDate();
+      document.getElementById('input-transfer-reason').value = emp.transferReason || '';
+
+      document.getElementById('modal-transfer-employee').classList.remove('hidden');
+      document.getElementById('modal-transfer-employee').classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeTransferEmployeeModal() {
+      document.getElementById('modal-transfer-employee').classList.add('hidden');
+      document.getElementById('modal-transfer-employee').classList.remove('flex');
+    }
+
+    function saveEmployeeTransfer() {
+      const empId = document.getElementById('input-transfer-emp-id').value;
+      const statusValue = document.getElementById('select-transfer-status').value;
+      const transferDate = document.getElementById('input-transfer-date').value || getTodayIsoDate();
+      const transferReason = document.getElementById('input-transfer-reason').value.trim();
+
+      const isActivating = statusValue === 'active';
+      const status = isActivating ? 'active' : 'inactive';
+
+      const updated = repo.setEmployeeTransfer(empId, {
+        status,
+        transferType: statusValue,
+        transferDate,
+        transferReason
+      });
+
+      if (updated) {
+        closeTransferEmployeeModal();
+        populateLoginEmployeeSelect();
+        populateEmployeeSelect();
+        renderEmployeesList();
+        renderGolfScheduleMatrix();
+        showToast(isActivating ? `Đã tiếp nhận lại ${updated.fullName} vào tổ` : `Đã lưu điều chuyển nhân sự từ ngày ${transferDate}`);
+      }
+    }
+
+    function handleAdminDeleteEmployee(empId) {
+      const emp = repo.employees.find(e => e.id === empId);
+      if (!emp) return;
+
+      if (confirm(`CẢNH BÁO: Xóa hoàn toàn hồ sơ của nhân viên ${emp.fullName} (${emp.id}) khỏi hệ thống?`)) {
+        repo.deleteEmployee(empId);
+        populateLoginEmployeeSelect();
+        populateEmployeeSelect();
+        renderEmployeesList();
+        renderGolfScheduleMatrix();
+        showToast(`Đã xóa hồ sơ ${emp.fullName}`);
+      }
     }
 
     function handleAdminResetPin(empId) {
@@ -2172,7 +2768,6 @@
         alert('Vui lòng nhập tên mẫu sổ checklist');
         return;
       }
-
       const rows = document.querySelectorAll('#template-items-container > div');
       const items = [];
       rows.forEach(row => {
@@ -2208,68 +2803,253 @@
       showToast(`Đã lưu Mẫu sổ: ${tpl.name}`);
     }
 
-    function openApplyTemplateModal() {
-      const container = document.getElementById('available-templates-container');
-      container.innerHTML = '';
+    // ==========================================
+    // 8. SCOPE & TIME NAVIGATOR MANAGEMENT
+    // ==========================================
+    function setTaskScope(scope) {
+      currentTaskScope = scope;
+      
+      // Update Subtabs styling
+      const scopes = ['shift', 'week', 'month', 'year'];
+      scopes.forEach(sc => {
+        const btn = document.getElementById(`subtab-${sc}`);
+        if (btn) {
+          if (sc === scope) {
+            btn.classList.remove('text-slate-600', 'hover:text-slate-900');
+            btn.classList.add('bg-indigo-600', 'text-white', 'shadow-xs');
+          } else {
+            btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-xs');
+            btn.classList.add('text-slate-600', 'hover:text-slate-900');
+          }
+        }
+      });
 
-      if (repo.templates.length === 0) {
-        container.innerHTML = `
-          <div class="p-6 text-center text-slate-400 bg-slate-50 rounded-2xl">
-            Chưa có mẫu sổ checklist nào. Quản trị viên có thể tạo thêm trong Tab Cá nhân.
-          </div>
-        `;
+      // Show/Hide Time Navigator & Action buttons
+      const timeNav = document.getElementById('plan-time-navigator');
+      const btnApplyTpl = document.getElementById('btn-open-apply-template');
+      const btnAddTask = document.getElementById('btn-open-add-task');
+      const btnAddPlan = document.getElementById('btn-open-add-plan');
+
+      if (scope === 'shift') {
+        if (timeNav) timeNav.classList.add('hidden');
+        if (btnApplyTpl) btnApplyTpl.classList.remove('hidden');
+        if (btnAddTask) btnAddTask.classList.remove('hidden');
+        if (btnAddPlan) btnAddPlan.classList.add('hidden');
       } else {
-        const isAdmin = repo.isAdmin();
-        repo.templates.forEach(tpl => {
-          const div = document.createElement('div');
-          div.className = 'template-card p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-indigo-300 transition space-y-2';
-          div.innerHTML = `
-            <div class="flex justify-between items-start">
-              <div>
-                <h4 class="text-sm font-bold text-slate-800">${tpl.name}</h4>
-                <div class="flex items-center gap-2 mt-0.5">
-                  <span class="text-[10px] px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 font-semibold">${tpl.category || 'Chung'}</span>
-                  <span class="text-[10px] text-slate-400 font-medium">${tpl.items ? tpl.items.length : 0} hạng mục kiểm tra</span>
-                </div>
-              </div>
-              <div class="flex items-center space-x-1.5 shrink-0">
-                ${isAdmin ? `
-                  <button onclick="closeApplyTemplateModal(); openTemplateBuilderModal('${tpl.id}')" title="Sửa mẫu" aria-label="Sửa mẫu sổ ${tpl.name}" class="p-1.5 text-slate-400 hover:text-indigo-600 rounded-lg hover:bg-white transition">
-                    <i data-lucide="edit" class="w-3.5 h-3.5"></i>
-                  </button>
-                  <button onclick="handleDeleteTemplate('${tpl.id}', '${tpl.name}'); openApplyTemplateModal()" title="Xóa mẫu" aria-label="Xóa mẫu sổ ${tpl.name}" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-white transition">
-                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                  </button>
-                ` : ''}
-                <button onclick="handleApplyTemplate('${tpl.id}')" aria-label="Áp dụng mẫu sổ ${tpl.name}" class="btn-apply-tpl px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs font-bold rounded-xl shadow-xs transition">
-                  Áp dụng vào ca
-                </button>
-              </div>
-            </div>
-          `;
-          container.appendChild(div);
-        });
+        if (timeNav) timeNav.classList.remove('hidden');
+        if (btnApplyTpl) btnApplyTpl.classList.add('hidden');
+        if (btnAddTask) btnAddTask.classList.add('hidden');
+        if (btnAddPlan) btnAddPlan.classList.remove('hidden');
+        updatePlanNavigatorUI();
       }
 
-      document.getElementById('modal-apply-template').classList.remove('hidden');
-      document.getElementById('modal-apply-template').classList.add('flex');
+      renderTasks();
       lucide.createIcons();
     }
 
-    function closeApplyTemplateModal() {
-      document.getElementById('modal-apply-template').classList.add('hidden');
-      document.getElementById('modal-apply-template').classList.remove('flex');
+    function updatePlanNavigatorUI() {
+      const titleEl = document.getElementById('plan-time-title');
+      const jumpBtn = document.getElementById('plan-time-jump-btn');
+      if (!titleEl || !jumpBtn) return;
+
+      if (currentTaskScope === 'week') {
+        const mon = new Date(planViewingMonday);
+        const weekNum = getIsoWeekNumber(mon);
+        const sun = new Date(mon);
+        sun.setDate(mon.getDate() + 6);
+        const startStr = `${mon.getDate()}/${mon.getMonth() + 1}`;
+        const endStr = `${sun.getDate()}/${sun.getMonth() + 1}/${sun.getFullYear()}`;
+        titleEl.innerText = `Tuần ${weekNum} (${startStr} - ${endStr})`;
+        jumpBtn.innerText = 'Về tuần hiện tại';
+      } else if (currentTaskScope === 'month') {
+        titleEl.innerText = `Tháng ${String(planViewingMonth + 1).padStart(2, '0')}/${planViewingYear}`;
+        jumpBtn.innerText = 'Về tháng hiện tại';
+      } else if (currentTaskScope === 'year') {
+        titleEl.innerText = `Năm ${planViewingYear} (Kế Hoạch & PM Định Kỳ)`;
+        jumpBtn.innerText = 'Về năm hiện tại';
+      }
     }
 
-    function handleApplyTemplate(templateId) {
-      const count = repo.applyTemplateToShift(templateId);
-      closeApplyTemplateModal();
+    function navigatePlanTime(delta) {
+      if (currentTaskScope === 'week') {
+        planViewingMonday.setDate(planViewingMonday.getDate() + delta * 7);
+      } else if (currentTaskScope === 'month') {
+        planViewingMonth += delta;
+        if (planViewingMonth > 11) {
+          planViewingMonth = 0;
+          planViewingYear++;
+        } else if (planViewingMonth < 0) {
+          planViewingMonth = 11;
+          planViewingYear--;
+        }
+      } else if (currentTaskScope === 'year') {
+        planViewingYear += delta;
+      }
+      updatePlanNavigatorUI();
       renderTasks();
-      showToast(`Đã áp dụng ${count} hạng mục checklist vào ca trực`);
+    }
+
+    function jumpPlanToCurrent() {
+      planViewingMonday = getMonday(new Date());
+      planViewingMonth = new Date().getMonth();
+      planViewingYear = new Date().getFullYear();
+      updatePlanNavigatorUI();
+      renderTasks();
     }
 
     // ==========================================
-    // 8. TASK CHECKLIST & REOPEN WORKFLOW
+    // 9. PLAN BUILDER MODAL HANDLERS
+    // ==========================================
+    function populatePlanAssigneeSelect() {
+      const sel = document.getElementById('select-plan-assignee');
+      if (!sel) return;
+      sel.innerHTML = '';
+      repo.getActiveEmployees().forEach(emp => {
+        const opt = document.createElement('option');
+        opt.value = emp.id;
+        const roleText = emp.role === 'Quản trị viên' ? '👑 Admin' : emp.role;
+        opt.innerText = `${emp.fullName} (${roleText})`;
+        sel.appendChild(opt);
+      });
+    }
+
+    function openPlanModal(planId = null) {
+      populatePlanAssigneeSelect();
+      editingPlanId = planId;
+
+      if (planId) {
+        const plan = repo.plans.find(p => p.id === planId);
+        if (plan) {
+          document.getElementById('plan-modal-title').innerText = 'Chỉnh Sửa Kế Hoạch Công Việc';
+          document.getElementById('input-plan-id').value = plan.id;
+          document.getElementById('input-plan-title').value = plan.task || '';
+          document.getElementById('select-plan-type').value = plan.type || 'Kế hoạch Tuần';
+          document.getElementById('input-plan-category').value = plan.category || '';
+          document.getElementById('input-plan-date').value = plan.date || getTodayIsoDate();
+          document.getElementById('input-plan-date-end').value = plan.dateEnd || plan.date || getTodayIsoDate();
+          document.getElementById('input-plan-time').value = plan.time || '';
+          document.getElementById('select-plan-priority').value = plan.priority || 'Quan trọng';
+          document.getElementById('select-plan-assignee').value = plan.assignee || repo.currentEmployeeId;
+          document.getElementById('input-plan-collaborators').value = plan.collaborators || '';
+          document.getElementById('input-plan-qty').value = plan.planQty !== null && plan.planQty !== undefined ? plan.planQty : '';
+          document.getElementById('input-plan-unit').value = plan.unit || '';
+          document.getElementById('input-plan-criteria').value = plan.criteria || '';
+          document.getElementById('select-plan-repeat').value = plan.repeat || 'none';
+        }
+      } else {
+        document.getElementById('plan-modal-title').innerText = 'Lập Kế Hoạch Công Việc Mới';
+        document.getElementById('input-plan-id').value = '';
+        document.getElementById('input-plan-title').value = '';
+        
+        let defaultType = 'Kế hoạch Tuần';
+        if (currentTaskScope === 'month') defaultType = 'Kế hoạch Tháng';
+        else if (currentTaskScope === 'year') defaultType = 'Kiểm định an toàn';
+        
+        document.getElementById('select-plan-type').value = defaultType;
+        document.getElementById('input-plan-category').value = '';
+        document.getElementById('input-plan-date').value = repo.currentDate || getTodayIsoDate();
+        document.getElementById('input-plan-date-end').value = repo.currentDate || getTodayIsoDate();
+        document.getElementById('input-plan-time').value = '';
+        document.getElementById('select-plan-priority').value = 'Quan trọng';
+        document.getElementById('select-plan-assignee').value = repo.currentEmployeeId;
+        document.getElementById('input-plan-collaborators').value = '';
+        document.getElementById('input-plan-qty').value = '';
+        document.getElementById('input-plan-unit').value = '';
+        document.getElementById('input-plan-criteria').value = '';
+        document.getElementById('select-plan-repeat').value = 'none';
+      }
+
+      document.getElementById('modal-plan-builder').classList.remove('hidden');
+      document.getElementById('modal-plan-builder').classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closePlanModal() {
+      editingPlanId = null;
+      document.getElementById('modal-plan-builder').classList.add('hidden');
+      document.getElementById('modal-plan-builder').classList.remove('flex');
+    }
+
+    function handleSavePlanSubmit(e) {
+      if (e) e.preventDefault();
+
+      const title = document.getElementById('input-plan-title').value.trim();
+      const type = document.getElementById('select-plan-type').value;
+      const category = document.getElementById('input-plan-category').value.trim() || 'Chung';
+      const date = document.getElementById('input-plan-date').value || getTodayIsoDate();
+      const dateEnd = document.getElementById('input-plan-date-end').value || date;
+      const time = document.getElementById('input-plan-time').value.trim();
+      const priority = document.getElementById('select-plan-priority').value;
+      const assigneeId = document.getElementById('select-plan-assignee').value;
+      const collaborators = document.getElementById('input-plan-collaborators').value.trim();
+      const planQty = document.getElementById('input-plan-qty').value;
+      const unit = document.getElementById('input-plan-unit').value.trim();
+      const criteria = document.getElementById('input-plan-criteria').value.trim();
+      const repeat = document.getElementById('select-plan-repeat').value;
+
+      if (!title) {
+        alert('Vui lòng nhập nội dung kế hoạch');
+        return;
+      }
+
+      const emp = repo.employees.find(e => e.id === assigneeId) || repo.getCurrentEmployee();
+
+      const planData = {
+        task: title,
+        type,
+        category,
+        date,
+        dateEnd,
+        time,
+        priority,
+        assignee: emp.id,
+        assigneeName: emp.fullName,
+        collaborators,
+        planQty: planQty !== '' ? Number(planQty) : null,
+        unit,
+        criteria,
+        repeat
+      };
+
+      if (editingPlanId) {
+        repo.updatePlan(editingPlanId, planData);
+        showToast('Đã cập nhật kế hoạch công việc');
+      } else {
+        repo.addPlan(planData);
+        showToast('Đã lập kế hoạch công việc mới');
+      }
+
+      closePlanModal();
+      renderTasks();
+    }
+
+    function handleImportPlanToShift(planId) {
+      const newTask = repo.importPlanToShift(planId);
+      if (newTask) {
+        showToast('Đã đưa việc kế hoạch vào checklist ca trực');
+      }
+    }
+
+    function handleTogglePlan(planId) {
+      const p = repo.togglePlanDone(planId);
+      if (p) {
+        showToast(p.done ? 'Đã đánh dấu hoàn thành kế hoạch' : 'Đã mở lại kế hoạch');
+        renderTasks();
+      }
+    }
+
+    function handleDeletePlan(planId) {
+      const p = repo.plans.find(x => x.id === planId);
+      const name = p ? p.task : 'công việc';
+      if (confirm(`Bạn có chắc muốn xóa kế hoạch "${name}"?`)) {
+        repo.deletePlan(planId);
+        showToast('Đã xóa kế hoạch');
+        renderTasks();
+      }
+    }
+
+    // ==========================================
+    // 10. TASK CHECKLIST & PLANS RENDERING
     // ==========================================
     function renderTasks() {
       const listContainer = document.getElementById('task-list');
@@ -2284,171 +3064,343 @@
 
       listContainer.innerHTML = '';
 
-      const currentShiftTasks = repo.tasks.filter(t => t.shiftId === repo.currentShiftId);
+      if (currentTaskScope === 'shift') {
+        // ==========================================
+        // 10A. RENDER SHIFT CHECKLIST
+        // ==========================================
+        document.getElementById('progress-card-title').innerText = 'Tiến độ ca trực';
+        const currentShiftTasks = repo.tasks.filter(t => t.shiftId === repo.currentShiftId);
 
-      let filtered = currentShiftTasks.filter(t => {
-        const matchesQuery = t.title.toLowerCase().includes(searchQuery) || (t.category && t.category.toLowerCase().includes(searchQuery));
-        if (!matchesQuery) return false;
+        let filtered = currentShiftTasks.filter(t => {
+          const matchesQuery = t.title.toLowerCase().includes(searchQuery) || (t.category && t.category.toLowerCase().includes(searchQuery));
+          if (!matchesQuery) return false;
 
-        if (currentTaskFilter === 'pending') return !t.done;
-        if (currentTaskFilter === 'done') return t.done;
-        if (currentTaskFilter === 'urgent') return t.priority === 'Khẩn cấp';
-        return true;
-      });
+          if (currentTaskFilter === 'pending') return !t.done;
+          if (currentTaskFilter === 'done') return t.done;
+          if (currentTaskFilter === 'urgent') return t.priority === 'Khẩn cấp';
+          return true;
+        });
 
-      if (filtered.length === 0) {
-        listContainer.innerHTML = `
-          <div class="bg-white p-8 rounded-2xl border border-slate-200/80 text-center space-y-2 shadow-xs">
-            <div class="w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto">
-              <i data-lucide="inbox" class="w-6 h-6"></i>
-            </div>
-            <p class="text-sm font-semibold text-slate-600">Không có công việc nào trong ca này</p>
-            <p class="text-xs text-slate-400">Nhấn 'Thêm việc' hoặc 'Mẫu Sổ' để bắt đầu checklist ca trực.</p>
-          </div>
-        `;
-      } else {
-        filtered.forEach(task => {
-          const badgeColor = task.priority === 'Khẩn cấp' ? 'bg-rose-50 text-rose-700 border-rose-200/60' :
-                             task.priority === 'Quan trọng' ? 'bg-amber-50 text-amber-700 border-amber-200/60' : 'bg-slate-100 text-slate-600 border-slate-200/60';
-
-          const item = document.createElement('div');
-          item.className = `bg-white p-3.5 rounded-2xl border ${task.done ? 'border-slate-200/60 bg-slate-50/70' : 'border-slate-200/90'} shadow-xs flex items-start justify-between gap-3 transition-all duration-200 hover:shadow-sm`;
-          
-          item.innerHTML = `
-            <div class="flex items-start space-x-3 flex-1 cursor-pointer select-none task-item-check" onclick="handleTaskCheck(${task.id})">
-              <div class="mt-0.5 w-5 h-5 rounded-lg border-2 shrink-0 flex items-center justify-center transition-colors ${task.done ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-white'}">
-                ${task.done ? '<i data-lucide="check" class="w-3.5 h-3.5"></i>' : ''}
+        if (filtered.length === 0) {
+          listContainer.innerHTML = `
+            <div class="bg-white p-8 rounded-2xl border border-slate-200/80 text-center space-y-2 shadow-xs">
+              <div class="w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto">
+                <i data-lucide="inbox" class="w-6 h-6"></i>
               </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-semibold leading-snug break-words ${task.done ? 'line-through text-slate-400' : 'text-slate-800'}">${task.title}</p>
-                ${task.criteria ? `
-                  <div class="mt-1 flex items-start space-x-1 text-[11px] text-indigo-700 bg-indigo-50/80 px-2 py-1 rounded-lg border border-indigo-100">
-                    <span class="font-bold shrink-0">🎯 Tiêu chí đạt:</span>
-                    <span class="font-medium">${task.criteria}</span>
+              <p class="text-sm font-semibold text-slate-600">Không có công việc nào trong ca này</p>
+              <p class="text-xs text-slate-400">Nhấn 'Thêm việc' hoặc 'Mẫu Sổ' để bắt đầu checklist ca trực.</p>
+            </div>
+          `;
+        } else {
+          filtered.forEach(task => {
+            const badgeColor = task.priority === 'Khẩn cấp' ? 'bg-rose-50 text-rose-700 border-rose-200/60' :
+                               task.priority === 'Quan trọng' ? 'bg-amber-50 text-amber-700 border-amber-200/60' : 'bg-slate-100 text-slate-600 border-slate-200/60';
+
+            const item = document.createElement('div');
+            item.className = `bg-white p-3.5 rounded-2xl border ${task.done ? 'border-slate-200/60 bg-slate-50/70' : 'border-slate-200/90'} shadow-xs flex items-start justify-between gap-3 transition-all duration-200 hover:shadow-sm`;
+            
+            item.innerHTML = `
+              <div class="flex items-start space-x-3 flex-1 cursor-pointer select-none task-item-check" onclick="handleTaskCheck(${task.id})">
+                <div class="mt-0.5 w-5 h-5 rounded-lg border-2 shrink-0 flex items-center justify-center transition-colors ${task.done ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-white'}">
+                  ${task.done ? '<i data-lucide="check" class="w-3.5 h-3.5"></i>' : ''}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-semibold leading-snug break-words ${task.done ? 'line-through text-slate-400' : 'text-slate-800'}">${task.title}</p>
+                  ${task.criteria ? `
+                    <div class="mt-1 flex items-start space-x-1 text-[11px] text-indigo-700 bg-indigo-50/80 px-2 py-1 rounded-lg border border-indigo-100">
+                      <span class="font-bold shrink-0">🎯 Tiêu chí đạt:</span>
+                      <span class="font-medium">${task.criteria}</span>
+                    </div>
+                  ` : ''}
+                  <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+                    ${task.category ? `<span class="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded font-medium">${task.category}</span>` : ''}
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${badgeColor}">${task.priority}</span>
+                    ${task.completedByName ? `<span class="text-[10px] text-emerald-600 font-semibold">✓ ${task.completedByName}</span>` : ''}
                   </div>
-                ` : ''}
-                <div class="flex items-center gap-2 mt-1.5 flex-wrap">
-                  ${task.category ? `<span class="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded font-medium">${task.category}</span>` : ''}
-                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${badgeColor}">${task.priority}</span>
-                  ${task.completedByName ? `<span class="text-[10px] text-emerald-600 font-semibold">✓ ${task.completedByName}</span>` : ''}
                 </div>
               </div>
-            </div>
-            <button onclick="deleteTask(${task.id})" aria-label="Xóa công việc ${task.title}" class="text-slate-300 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-50 transition active:scale-95 shrink-0">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-            </button>
-          `;
-          listContainer.appendChild(item);
-        });
-      }
+              <button onclick="deleteTask(${task.id})" aria-label="Xóa công việc ${task.title}" class="text-slate-300 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-50 transition active:scale-95 shrink-0">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            `;
+            listContainer.appendChild(item);
+          });
+        }
 
-      // Update Progress
-      const total = currentShiftTasks.length;
-      const totalDone = currentShiftTasks.filter(t => t.done).length;
-      const percent = total === 0 ? 0 : Math.round((totalDone / total) * 100);
-      document.getElementById('progress-bar').style.width = `${percent}%`;
-      document.getElementById('progress-percent').innerText = `${percent}%`;
-      document.getElementById('progress-count').innerText = `${totalDone}/${total} việc`;
+        // Update Progress
+        const total = currentShiftTasks.length;
+        const totalDone = currentShiftTasks.filter(t => t.done).length;
+        const percent = total === 0 ? 0 : Math.round((totalDone / total) * 100);
+        document.getElementById('progress-bar').style.width = `${percent}%`;
+        document.getElementById('progress-percent').innerText = `${percent}%`;
+        document.getElementById('progress-count').innerText = `${totalDone}/${total} việc`;
+
+      } else if (currentTaskScope === 'week') {
+        // ==========================================
+        // 10B. RENDER WEEKLY PLANS (7 DAYS GROUPED)
+        // ==========================================
+        document.getElementById('progress-card-title').innerText = 'Tiến độ kế hoạch tuần';
+        const mon = new Date(planViewingMonday);
+        const weekDays = [];
+        for (let i = 0; i < 7; i++) {
+          const d = new Date(mon);
+          d.setDate(mon.getDate() + i);
+          weekDays.push(d);
+        }
+
+        const startIso = `${weekDays[0].getFullYear()}-${String(weekDays[0].getMonth() + 1).padStart(2, '0')}-${String(weekDays[0].getDate()).padStart(2, '0')}`;
+        const endIso = `${weekDays[6].getFullYear()}-${String(weekDays[6].getMonth() + 1).padStart(2, '0')}-${String(weekDays[6].getDate()).padStart(2, '0')}`;
+
+        let weekPlans = repo.plans.filter(p => {
+          const pDate = p.date || '';
+          const pEnd = p.dateEnd || pDate;
+          const isInWeek = (pDate <= endIso && pEnd >= startIso) || (p.type === 'Kế hoạch Tuần' && pDate >= startIso && pDate <= endIso);
+          if (!isInWeek) return false;
+
+          const matchesQuery = (p.task && p.task.toLowerCase().includes(searchQuery)) ||
+                               (p.category && p.category.toLowerCase().includes(searchQuery)) ||
+                               (p.assigneeName && p.assigneeName.toLowerCase().includes(searchQuery));
+          if (!matchesQuery) return false;
+
+          if (currentTaskFilter === 'pending') return !p.done;
+          if (currentTaskFilter === 'done') return p.done;
+          if (currentTaskFilter === 'urgent') return p.priority === 'Khẩn cấp';
+          return true;
+        });
+
+        const dayNames = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'];
+
+        if (weekPlans.length === 0) {
+          listContainer.innerHTML = `
+            <div class="bg-white p-8 rounded-2xl border border-slate-200/80 text-center space-y-2 shadow-xs">
+              <div class="w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto">
+                <i data-lucide="calendar" class="w-6 h-6"></i>
+              </div>
+              <p class="text-sm font-semibold text-slate-600">Chưa có kế hoạch công việc nào trong tuần này</p>
+              <p class="text-xs text-slate-400">Nhấn '+ Lập kế hoạch' để thêm công việc theo tuần.</p>
+            </div>
+          `;
+        } else {
+          // Render grouped by 7 Days
+          weekDays.forEach((d, dayIdx) => {
+            const dayIso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            const dayPlans = weekPlans.filter(p => {
+              const pDate = p.date || '';
+              const pEnd = p.dateEnd || pDate;
+              return dayIso >= pDate && dayIso <= pEnd;
+            });
+
+            if (dayPlans.length === 0) return;
+
+            const isToday = dayIso === getTodayIsoDate();
+            const daySection = document.createElement('div');
+            daySection.className = 'space-y-2';
+
+            const dayHeader = `
+              <div class="flex items-center justify-between px-1 pt-1">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-xs font-bold ${isToday ? 'text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md' : 'text-slate-700'}">
+                    ${dayNames[dayIdx]} • ${d.getDate()}/${d.getMonth() + 1} ${isToday ? '(Hôm nay)' : ''}
+                  </span>
+                  <span class="text-[10px] font-semibold text-slate-400">(${dayPlans.length} việc)</span>
+                </div>
+              </div>
+            `;
+
+            let itemsHtml = '';
+            dayPlans.forEach(p => {
+              itemsHtml += renderPlanCardHtml(p);
+            });
+
+            daySection.innerHTML = dayHeader + `<div class="space-y-2">${itemsHtml}</div>`;
+            listContainer.appendChild(daySection);
+          });
+        }
+
+        // Progress for week
+        const total = weekPlans.length;
+        const totalDone = weekPlans.filter(p => p.done).length;
+        const percent = total === 0 ? 0 : Math.round((totalDone / total) * 100);
+        document.getElementById('progress-bar').style.width = `${percent}%`;
+        document.getElementById('progress-percent').innerText = `${percent}%`;
+        document.getElementById('progress-count').innerText = `${totalDone}/${total} việc tuần`;
+
+      } else if (currentTaskScope === 'month') {
+        // ==========================================
+        // 10C. RENDER MONTHLY PLANS
+        // ==========================================
+        document.getElementById('progress-card-title').innerText = 'Tiến độ kế hoạch tháng';
+        const targetMonthStr = `${planViewingYear}-${String(planViewingMonth + 1).padStart(2, '0')}`;
+
+        let monthPlans = repo.plans.filter(p => {
+          const pDate = (p.date || '').slice(0, 7);
+          const pEnd = (p.dateEnd || p.date || '').slice(0, 7);
+          const isInMonth = (targetMonthStr >= pDate && targetMonthStr <= pEnd) || p.type === 'Kế hoạch Tháng' || (p.repeat === 'monthly');
+          if (!isInMonth) return false;
+
+          const matchesQuery = (p.task && p.task.toLowerCase().includes(searchQuery)) ||
+                               (p.category && p.category.toLowerCase().includes(searchQuery)) ||
+                               (p.assigneeName && p.assigneeName.toLowerCase().includes(searchQuery));
+          if (!matchesQuery) return false;
+
+          if (currentTaskFilter === 'pending') return !p.done;
+          if (currentTaskFilter === 'done') return p.done;
+          if (currentTaskFilter === 'urgent') return p.priority === 'Khẩn cấp';
+          return true;
+        });
+
+        if (monthPlans.length === 0) {
+          listContainer.innerHTML = `
+            <div class="bg-white p-8 rounded-2xl border border-slate-200/80 text-center space-y-2 shadow-xs">
+              <div class="w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto">
+                <i data-lucide="calendar-days" class="w-6 h-6"></i>
+              </div>
+              <p class="text-sm font-semibold text-slate-600">Chưa có kế hoạch công việc trong tháng ${planViewingMonth + 1}/${planViewingYear}</p>
+              <p class="text-xs text-slate-400">Nhấn '+ Lập kế hoạch' để lên lịch bảo dưỡng định kỳ tháng.</p>
+            </div>
+          `;
+        } else {
+          monthPlans.forEach(p => {
+            const cardEl = document.createElement('div');
+            cardEl.innerHTML = renderPlanCardHtml(p);
+            listContainer.appendChild(cardEl.firstElementChild);
+          });
+        }
+
+        const total = monthPlans.length;
+        const totalDone = monthPlans.filter(p => p.done).length;
+        const percent = total === 0 ? 0 : Math.round((totalDone / total) * 100);
+        document.getElementById('progress-bar').style.width = `${percent}%`;
+        document.getElementById('progress-percent').innerText = `${percent}%`;
+        document.getElementById('progress-count').innerText = `${totalDone}/${total} việc tháng`;
+
+      } else if (currentTaskScope === 'year') {
+        // ==========================================
+        // 10D. RENDER YEARLY / PM / AUDIT PLANS
+        // ==========================================
+        document.getElementById('progress-card-title').innerText = 'Tiến độ kiểm định & PM năm';
+        const targetYearStr = String(planViewingYear);
+
+        let yearPlans = repo.plans.filter(p => {
+          const pYear = (p.date || '').slice(0, 4);
+          const pEndYear = (p.dateEnd || p.date || '').slice(0, 4);
+          const isInYear = (targetYearStr >= pYear && targetYearStr <= pEndYear) || p.type === 'Kiểm định an toàn' || p.type === 'Bảo dưỡng định kỳ PM' || (p.repeat === 'yearly');
+          if (!isInYear) return false;
+
+          const matchesQuery = (p.task && p.task.toLowerCase().includes(searchQuery)) ||
+                               (p.category && p.category.toLowerCase().includes(searchQuery)) ||
+                               (p.assigneeName && p.assigneeName.toLowerCase().includes(searchQuery));
+          if (!matchesQuery) return false;
+
+          if (currentTaskFilter === 'pending') return !p.done;
+          if (currentTaskFilter === 'done') return p.done;
+          if (currentTaskFilter === 'urgent') return p.priority === 'Khẩn cấp';
+          return true;
+        });
+
+        if (yearPlans.length === 0) {
+          listContainer.innerHTML = `
+            <div class="bg-white p-8 rounded-2xl border border-slate-200/80 text-center space-y-2 shadow-xs">
+              <div class="w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto">
+                <i data-lucide="shield-check" class="w-6 h-6"></i>
+              </div>
+              <p class="text-sm font-semibold text-slate-600">Chưa có kế hoạch đại tu / kiểm định năm ${planViewingYear}</p>
+              <p class="text-xs text-slate-400">Nhấn '+ Lập kế hoạch' để bổ sung mốc kiểm định an toàn.</p>
+            </div>
+          `;
+        } else {
+          yearPlans.forEach(p => {
+            const cardEl = document.createElement('div');
+            cardEl.innerHTML = renderPlanCardHtml(p);
+            listContainer.appendChild(cardEl.firstElementChild);
+          });
+        }
+
+        const total = yearPlans.length;
+        const totalDone = yearPlans.filter(p => p.done).length;
+        const percent = total === 0 ? 0 : Math.round((totalDone / total) * 100);
+        document.getElementById('progress-bar').style.width = `${percent}%`;
+        document.getElementById('progress-percent').innerText = `${percent}%`;
+        document.getElementById('progress-count').innerText = `${totalDone}/${total} kế hoạch năm`;
+      }
 
       lucide.createIcons();
       updateStats();
     }
 
-    function handleTaskCheck(taskId) {
-      const task = repo.tasks.find(t => t.id === taskId);
-      if (!task) return;
+    // Helper: Render HTML cho 1 thẻ Kế Hoạch
+    function renderPlanCardHtml(p) {
+      const priorityColor = p.priority === 'Khẩn cấp' ? 'bg-rose-50 text-rose-700 border-rose-200/60' :
+                            p.priority === 'Quan trọng' ? 'bg-amber-50 text-amber-700 border-amber-200/60' : 'bg-slate-100 text-slate-600 border-slate-200/60';
+      
+      const typeBadge = p.type === 'Bảo dưỡng định kỳ PM' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                        p.type === 'Kiểm định an toàn' ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                        p.type === 'Kế hoạch Tháng' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200';
 
-      if (task.done) {
-        pendingReopenTaskId = taskId;
-        document.getElementById('input-reopen-reason').value = '';
-        document.getElementById('modal-reopen-task').classList.remove('hidden');
-        document.getElementById('modal-reopen-task').classList.add('flex');
-      } else {
-        repo.completeTask(taskId);
-        renderTasks();
-        showToast('Đã hoàn thành công việc');
-      }
-    }
+      const assigneeInitials = generateCleanInitials(p.assigneeName || 'NV');
 
-    function closeReopenModal() {
-      pendingReopenTaskId = null;
-      document.getElementById('modal-reopen-task').classList.add('hidden');
-      document.getElementById('modal-reopen-task').classList.remove('flex');
-    }
-
-    function confirmReopenTask() {
-      const reason = document.getElementById('input-reopen-reason').value.trim();
-      if (!reason) {
-        alert('Vui lòng nhập lý do mở lại công việc');
-        return;
+      let qtyBadge = '';
+      if (p.planQty) {
+        qtyBadge = `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">Σ ${p.doneQty || 0}/${p.planQty} ${p.unit || ''}</span>`;
       }
 
-      if (pendingReopenTaskId) {
-        repo.reopenTask(pendingReopenTaskId, reason);
-        closeReopenModal();
-        renderTasks();
-        showToast('Đã mở lại công việc');
-      }
-    }
+      return `
+        <div class="bg-white p-3.5 rounded-2xl border ${p.done ? 'border-slate-200/60 bg-slate-50/70' : 'border-slate-200/90'} shadow-xs space-y-2.5 transition hover:shadow-sm">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-start space-x-3 flex-1 cursor-pointer select-none" onclick="handleTogglePlan('${p.id}')">
+              <div class="mt-0.5 w-5 h-5 rounded-lg border-2 shrink-0 flex items-center justify-center transition-colors ${p.done ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-white'}">
+                ${p.done ? '<i data-lucide="check" class="w-3.5 h-3.5"></i>' : ''}
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold leading-snug break-words ${p.done ? 'line-through text-slate-400' : 'text-slate-800'}">${p.task}</p>
+                
+                <div class="flex items-center gap-1.5 mt-1.5 flex-wrap text-xs">
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${typeBadge}">${p.type || 'Kế hoạch'}</span>
+                  ${p.category ? `<span class="text-[10px] text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded font-medium">${p.category}</span>` : ''}
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${priorityColor}">${p.priority}</span>
+                  ${p.time ? `<span class="text-[10px] font-semibold text-slate-500 flex items-center gap-0.5"><i data-lucide="clock" class="w-3 h-3"></i>${p.time}</span>` : ''}
+                  ${qtyBadge}
+                </div>
+              </div>
+            </div>
 
-    function setTaskFilter(filter) {
-      currentTaskFilter = filter;
-      document.querySelectorAll('.task-filter-btn').forEach(btn => {
-        btn.classList.remove('bg-indigo-600', 'text-white', 'font-semibold');
-        btn.classList.add('bg-white', 'text-slate-600');
-      });
+            <!-- Action buttons -->
+            <div class="flex items-center space-x-1 shrink-0">
+              <button onclick="openPlanModal('${p.id}')" title="Sửa kế hoạch" aria-label="Sửa kế hoạch ${p.task}" class="text-slate-400 hover:text-indigo-600 p-1.5 rounded-lg hover:bg-slate-100 transition">
+                <i data-lucide="edit" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="handleDeletePlan('${p.id}')" title="Xóa kế hoạch" aria-label="Xóa kế hoạch ${p.task}" class="text-slate-300 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
 
-      const activeBtn = document.getElementById(`filter-${filter}`);
-      if (activeBtn) {
-        activeBtn.classList.remove('bg-white', 'text-slate-600', 'text-rose-600');
-        activeBtn.classList.add('bg-indigo-600', 'text-white', 'font-semibold');
-      }
-      renderTasks();
-    }
+          ${p.criteria ? `
+            <div class="flex items-start space-x-1.5 text-[11px] text-indigo-800 bg-indigo-50/70 p-2 rounded-xl border border-indigo-100">
+              <span class="font-bold shrink-0">🎯 Nghiệm thu:</span>
+              <span class="font-medium">${p.criteria}</span>
+            </div>
+          ` : ''}
 
-    function clearTaskSearch() {
-      document.getElementById('task-search').value = '';
-      document.getElementById('clear-search-btn').classList.add('hidden');
-      renderTasks();
-    }
+          <!-- Footer: Assignee & 1-Click Import to Shift -->
+          <div class="flex items-center justify-between pt-1 border-t border-slate-100 text-xs">
+            <div class="flex items-center space-x-2 min-w-0">
+              <div class="w-5 h-5 rounded-full bg-amber-400 text-slate-900 font-extrabold text-[10px] flex items-center justify-center shrink-0">
+                ${assigneeInitials}
+              </div>
+              <div class="truncate text-slate-600 text-[11px]">
+                <span class="font-bold text-slate-800">${p.assigneeName || 'Chưa gán'}</span>
+                ${p.collaborators ? `<span class="text-slate-400"> (với ${p.collaborators})</span>` : ''}
+              </div>
+            </div>
 
-    function openTaskModal() {
-      document.getElementById('modal-task').classList.remove('hidden');
-      document.getElementById('modal-task').classList.add('flex');
-      document.getElementById('input-task-title').focus();
-    }
-
-    function closeTaskModal() {
-      document.getElementById('modal-task').classList.add('hidden');
-      document.getElementById('modal-task').classList.remove('flex');
-    }
-
-    function saveTask() {
-      const title = document.getElementById('input-task-title').value.trim();
-      const priority = document.getElementById('input-task-priority').value;
-      const category = document.getElementById('input-task-category').value.trim() || 'Chung';
-      const criteria = document.getElementById('input-task-criteria').value.trim();
-
-      if (!title) {
-        alert('Vui lòng nhập nội dung công việc');
-        return;
-      }
-
-      repo.addTask(title, priority, category, criteria);
-      document.getElementById('input-task-title').value = '';
-      document.getElementById('input-task-category').value = '';
-      document.getElementById('input-task-criteria').value = '';
-      closeTaskModal();
-      renderTasks();
-      showToast('Đã thêm checklist mới vào ca trực');
-    }
-
-    function deleteTask(id) {
-      if (confirm('Xóa công việc này khỏi checklist?')) {
-        repo.deleteTask(id);
-        renderTasks();
-        showToast('Đã xóa công việc');
-      }
+            <button onclick="handleImportPlanToShift('${p.id}')" title="Đưa vào checklist ca trực hôm nay" aria-label="Nạp vào ca trực" class="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[11px] font-bold rounded-lg transition active:scale-95 shrink-0">
+              <i data-lucide="arrow-down-to-dot" class="w-3.5 h-3.5 text-indigo-600"></i>
+              <span>Đẩy vào ca</span>
+            </button>
+          </div>
+        </div>
+      `;
     }
 
     // ==========================================
@@ -2692,6 +3644,7 @@
         templates: repo.templates,
         rosterMatrix: repo.rosterMatrix,
         tasks: repo.tasks,
+        plans: repo.plans,
         logs: repo.logs,
         taskEvents: repo.taskEvents,
         exportAt: new Date().toISOString()
@@ -2715,6 +3668,7 @@
         repo.saveTemplates();
         repo.saveRosterMatrix();
         repo.initSampleData();
+        repo.initSamplePlans();
         populateLoginEmployeeSelect();
         populateEmployeeSelect();
         renderEmployeesList();
