@@ -516,6 +516,11 @@
             <i data-lucide="wand-2" class="w-4 h-4 text-emerald-200"></i>
             <span>⚡ Xếp Ca Tuần Sau</span>
           </button>
+
+          <button id="btn-clear-week-schedule" onclick="handleClearWeekSchedule()" aria-label="Xóa lịch phân ca tuần này" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 rounded-xl text-xs font-bold transition flex items-center gap-1 active:scale-95">
+            <i data-lucide="trash-2" class="w-4 h-4 text-rose-600"></i>
+            <span>Xóa Lịch Tuần</span>
+          </button>
         </div>
 
         <div class="flex items-center space-x-2">
@@ -2904,6 +2909,24 @@
       scheduleViewingMonday = nextMonday;
       renderGolfScheduleMatrix();
       showToast(`⚡ Đã tự động xếp ca Tuần ${nextWeekNum} theo quy tắc chuẩn Tổ Cơ Điện`);
+    }
+
+    function handleClearWeekSchedule() {
+      const monday = new Date(scheduleViewingMonday);
+      const weekNum = getIsoWeekNumber(monday);
+      const weekKey = `${monday.getFullYear()}_W${weekNum}`;
+
+      const sun = new Date(monday);
+      sun.setDate(monday.getDate() + 6);
+      const startStr = `${monday.getDate()}/${monday.getMonth() + 1}`;
+      const endStr = `${sun.getDate()}/${sun.getMonth() + 1}/${sun.getFullYear()}`;
+
+      if (confirm(`Bạn có chắc chắn muốn xóa toàn bộ lịch phân ca của Tuần ${weekNum} (${startStr} - ${endStr})? Thao tác này sẽ làm trống bảng phân ca tuần này.`)) {
+        repo.rosterMatrix[weekKey] = {};
+        repo.saveRosterMatrix();
+        renderGolfScheduleMatrix();
+        showToast(`Đã xóa toàn bộ lịch phân ca Tuần ${weekNum}`);
+      }
     }
 
     // ==========================================

@@ -140,6 +140,16 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên, Quản L�
     expect(summaryCells[2].trim()).toBe('2');
     expect(summaryCells[3].trim()).toBe('0');
 
+    // 6. Kiểm thử tính năng 🗑️ Xóa Lịch Tuần (có xác nhận xóa)
+    await page.click('#btn-clear-week-schedule');
+
+    // Sau khi xóa, tất cả các ô trong bảng của tuần này đều trống
+    const clearedSummaryCells = await page.locator('#schedule-summary-row td').allInnerTexts();
+    // Ca 1 thứ 2 = 0, Ca 2 thứ 2 = 0, Ca 3 thứ 2 = 0
+    expect(clearedSummaryCells[1].trim()).toBe('0');
+    expect(clearedSummaryCells[2].trim()).toBe('0');
+    expect(clearedSummaryCells[3].trim()).toBe('0');
+
     // Đóng bảng phân ca
     await page.click('#modal-shift-schedule button:has-text("Đóng")');
   });
