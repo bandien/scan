@@ -224,11 +224,11 @@
           <!-- Shift Actions -->
           <button id="btn-open-apply-template" onclick="openApplyTemplateModal()" aria-label="Áp dụng mẫu sổ checklist" class="flex items-center space-x-1 bg-amber-50 hover:bg-amber-100 active:scale-95 text-amber-800 border border-amber-300 px-3 py-2.5 rounded-xl text-xs font-bold transition shadow-xs shrink-0">
             <i data-lucide="book-template" class="w-4 h-4 text-amber-600"></i>
-            <span class="hidden sm:inline">Mẫu Sổ</span>
+            <span>Mẫu Sổ</span>
           </button>
           <button id="btn-open-add-task" onclick="openTaskModal()" aria-label="Thêm công việc ca trực mới" class="flex items-center space-x-1.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white px-3.5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition shrink-0">
             <i data-lucide="plus" class="w-4 h-4"></i>
-            <span class="hidden sm:inline">Thêm việc</span>
+            <span>Thêm việc</span>
           </button>
 
           <!-- Plan Actions (Visible in week/month/year mode) -->
@@ -493,23 +493,33 @@
     <div class="bg-white rounded-3xl w-full max-w-6xl p-4 sm:p-5 shadow-2xl space-y-3.5 max-h-[96vh] flex flex-col">
       
       <!-- Modal Top Bar & Navigation -->
-      <div class="flex justify-between items-center shrink-0">
-        <div class="flex items-center space-x-2">
+      <div class="flex flex-wrap justify-between items-center gap-2 shrink-0">
+        <div class="flex items-center space-x-1.5 sm:space-x-2 flex-wrap">
           <button onclick="navigateScheduleWeek(-1)" aria-label="Tuần trước" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-1 transition">
             <i data-lucide="chevron-left" class="w-4 h-4"></i>
-            <span>Tuần trước</span>
+            <span class="hidden sm:inline">Tuần trước</span>
           </button>
           <button onclick="jumpToCurrentWeek()" aria-label="Về tuần hiện tại" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold transition">
             Tuần Hiện Tại
           </button>
           <button onclick="navigateScheduleWeek(1)" aria-label="Tuần sau" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-1 transition">
-            <span>Tuần sau</span>
+            <span class="hidden sm:inline">Tuần sau</span>
             <i data-lucide="chevron-right" class="w-4 h-4"></i>
+          </button>
+
+          <button onclick="openShiftRulesModal()" aria-label="Xem quy tắc phân ca" class="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-xl text-xs font-bold transition flex items-center gap-1">
+            <i data-lucide="book-open-check" class="w-4 h-4 text-amber-600"></i>
+            <span>Quy Tắc Phân Ca</span>
+          </button>
+
+          <button id="btn-auto-schedule-next-week" onclick="handleAutoGenerateNextWeek()" aria-label="Tự động xếp ca tuần sau" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-95 flex items-center gap-1.5">
+            <i data-lucide="wand-2" class="w-4 h-4 text-emerald-200"></i>
+            <span>⚡ Xếp Ca Tuần Sau</span>
           </button>
         </div>
 
         <div class="flex items-center space-x-2">
-          <span class="text-xs text-slate-500 font-medium hidden sm:inline">Ký hiệu: <span class="bg-rose-100 font-bold px-1 rounded">x: Trực ca</span> | <span class="bg-emerald-100 font-bold text-emerald-800 px-1 rounded">hc: Hành chính</span> | <span class="bg-yellow-300 font-bold px-1 rounded">CN: Nghỉ tuần</span> | <span class="font-bold px-1 rounded border">P: Nghỉ phép</span></span>
+          <span class="text-xs text-slate-500 font-medium hidden md:inline">Ký hiệu: <span class="bg-rose-100 font-bold px-1 rounded">x: Trực ca</span> | <span class="bg-emerald-100 font-bold text-emerald-800 px-1 rounded">hc: Hành chính</span> | <span class="bg-yellow-300 font-bold px-1 rounded">CN: Nghỉ tuần</span> | <span class="font-bold px-1 rounded border">P: Nghỉ phép</span></span>
           <button onclick="closeShiftScheduleModal()" aria-label="Đóng bảng phân ca trực" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
             <i data-lucide="x" class="w-4 h-4"></i>
           </button>
@@ -592,6 +602,120 @@
         <button onclick="closeShiftScheduleModal()" aria-label="Đóng bảng phân ca" class="px-5 py-2 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition">Đóng</button>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: QUY TẮC PHÂN CA VẬN HÀNH (#modal-shift-rules) -->
+  <!-- ========================================== -->
+  <div id="modal-shift-rules" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200 overflow-y-auto">
+    <div class="bg-white rounded-3xl w-full max-w-2xl p-5 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] flex flex-col">
+      <div class="flex justify-between items-center shrink-0 border-b border-slate-100 pb-3">
+        <div class="flex items-center space-x-2 text-amber-700">
+          <div class="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700">
+            <i data-lucide="book-open-check" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-extrabold text-slate-900 text-base">Quy Tắc Phân Ca Vận Hành</h3>
+            <p class="text-xs text-slate-500 font-medium">Tổ Cơ Điện Sân Golf • Tiêu Chuẩn Phân Bổ & Xoay Ca Tuần</p>
+          </div>
+        </div>
+        <button onclick="closeShiftRulesModal()" aria-label="Đóng bảng quy tắc phân ca" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3.5 overflow-y-auto flex-1 pr-1 custom-scrollbar text-xs text-slate-700">
+        
+        <!-- Quy tắc 1: Định Mức Phân Ca Trực -->
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+          <div class="flex items-center space-x-2 text-indigo-700 font-bold text-sm">
+            <i data-lucide="clock" class="w-4 h-4 text-indigo-600"></i>
+            <span>1. Khung Giờ & Định Mức Quân Số Mỗi Ngày</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+            <div class="bg-white p-3 rounded-xl border border-slate-200">
+              <div class="flex justify-between items-center mb-1">
+                <span class="font-bold text-slate-900">🌅 Ca 1</span>
+                <span class="px-1.5 py-0.5 bg-rose-100 text-slate-900 font-extrabold rounded text-[11px]">1 Trực (x)</span>
+              </div>
+              <p class="text-[11px] text-slate-500 font-medium">06:00 – 14:00 (Sáng)</p>
+              <p class="text-[10px] text-slate-400 mt-1">+ Các nhân sự đi ca Hành chính (hc) hỗ trợ.</p>
+            </div>
+
+            <div class="bg-white p-3 rounded-xl border border-slate-200">
+              <div class="flex justify-between items-center mb-1">
+                <span class="font-bold text-slate-900">🌇 Ca 2</span>
+                <span class="px-1.5 py-0.5 bg-rose-100 text-slate-900 font-extrabold rounded text-[11px]">2 Trực (x)</span>
+              </div>
+              <p class="text-[11px] text-slate-500 font-medium">14:00 – 22:00 (Chiều/Tối)</p>
+              <p class="text-[10px] text-rose-600 font-semibold mt-1">Cao điểm: Chiếu sáng sân golf & phụ tải đêm.</p>
+            </div>
+
+            <div class="bg-white p-3 rounded-xl border border-slate-200">
+              <div class="flex justify-between items-center mb-1">
+                <span class="font-bold text-slate-900">🌙 Ca 3</span>
+                <span class="px-1.5 py-0.5 bg-slate-100 text-slate-700 font-bold rounded text-[11px]">0 Trực</span>
+              </div>
+              <p class="text-[11px] text-slate-500 font-medium">22:00 – 06:00 (Đêm)</p>
+              <p class="text-[10px] text-slate-400 mt-1">Trực On-call khi phát sinh sự cố khẩn cấp.</p>
+            </div>
+          </div>
+          <div class="p-2 bg-indigo-50/80 rounded-xl border border-indigo-100 text-[11px] text-indigo-900 font-semibold">
+            👉 Dòng <span class="font-bold underline">Trực điện nước</span> ở cuối bảng mỗi ngày luôn đạt chuẩn: <span class="font-bold text-indigo-700">Ca 1 = 1, Ca 2 = 2, Ca 3 = 0</span>.
+          </div>
+        </div>
+
+        <!-- Quy tắc 2: Chế độ Nghỉ tuần (CN) -->
+        <div class="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/80 space-y-2">
+          <div class="flex items-center space-x-2 text-amber-800 font-bold text-sm">
+            <i data-lucide="calendar-heart" class="w-4 h-4 text-amber-600"></i>
+            <span>2. Chế Độ Nghỉ Tuần (Ký Hiệu CN) & Nghỉ Phép (P)</span>
+          </div>
+          <ul class="space-y-1.5 text-slate-700 pl-4 list-disc text-xs leading-relaxed">
+            <li>Mỗi nhân viên được bố trí nghỉ tuần <span class="font-bold text-slate-900">1 ngày/tuần (ký hiệu <span class="bg-yellow-300 px-1.5 py-0.5 rounded font-extrabold text-slate-900">CN</span>)</span>.</li>
+            <li>Ngày nghỉ tuần được xếp <span class="font-semibold text-amber-900">so le từ Thứ Hai đến Chủ Nhật</span> giữa các thành viên, không để nhiều KTV cùng nghỉ 1 ngày làm thiếu quân số trực.</li>
+            <li>Nghỉ phép chế độ ghi nhận bằng ký hiệu <span class="font-bold border bg-white px-1.5 py-0.5 rounded text-slate-800">P</span>.</li>
+          </ul>
+        </div>
+
+        <!-- Quy tắc 3: Nhân sự thử việc & Ca Hành chính -->
+        <div class="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 space-y-2">
+          <div class="flex items-center space-x-2 text-emerald-800 font-bold text-sm">
+            <i data-lucide="users" class="w-4 h-4 text-emerald-600"></i>
+            <span>3. Phân Bổ Nhân Sự Thử Việc & Ca Hành Chính (hc)</span>
+          </div>
+          <ul class="space-y-1.5 text-slate-700 pl-4 list-disc text-xs leading-relaxed">
+            <li>Nhân viên thử việc / học việc ưu tiên đi <span class="bg-emerald-100 font-bold text-emerald-900 px-1.5 py-0.5 rounded">hc (Hành chính 08h-17h)</span> để nắm bắt kỹ thuật và bảo dưỡng ban ngày.</li>
+            <li>Khi đi ca tối (Ca 2), nhân viên thử việc luôn được <span class="font-semibold text-emerald-900">đi kèm cùng Kỹ thuật viên chính</span> để đảm bảo an toàn vận hành.</li>
+          </ul>
+        </div>
+
+        <!-- Quy tắc 4: Nguyên tắc xoay ca tuần kế tiếp -->
+        <div class="p-4 rounded-2xl bg-blue-50/60 border border-blue-200/80 space-y-2">
+          <div class="flex items-center space-x-2 text-blue-800 font-bold text-sm">
+            <i data-lucide="rotate-cw" class="w-4 h-4 text-blue-600"></i>
+            <span>4. Căn Cứ Xếp Ca Tuần Kế Tiếp (Weekly Shift Rotation)</span>
+          </div>
+          <p class="leading-relaxed">
+            Hệ thống tự động sử dụng bảng phân ca của tuần hiện hành làm căn cứ luân chuyển:
+          </p>
+          <ul class="space-y-1.5 text-slate-700 pl-4 list-disc text-xs leading-relaxed">
+            <li><span class="font-bold text-slate-900">Xoay vòng phiên trực:</span> Nhân sự tuần này trực nhiều Ca 2 (chiều/tối) sẽ được luân chuyển sang Ca 1 hoặc Hành chính vào tuần sau.</li>
+            <li><span class="font-bold text-slate-900">Tịnh tiến ngày nghỉ:</span> Ngày nghỉ tuần <span class="bg-yellow-300 font-extrabold px-1 rounded">CN</span> được tịnh tiến công bằng qua các ngày khác nhau giữa các tuần.</li>
+            <li>Nhấn nút <span class="bg-emerald-600 text-white font-bold px-2 py-0.5 rounded text-[11px]">⚡ Xếp Ca Tuần Sau</span> để sinh lịch tự động trong 1 giây!</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="flex justify-between items-center pt-2 border-t border-slate-100 shrink-0">
+        <button onclick="handleAutoGenerateNextWeek(); closeShiftRulesModal();" aria-label="Xếp ca tự động cho tuần sau" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-95 flex items-center gap-1.5">
+          <i data-lucide="wand-2" class="w-4 h-4 text-emerald-200"></i>
+          <span>Áp Dụng Xếp Ca Tuần Sau ➔</span>
+        </button>
+        <button onclick="closeShiftRulesModal()" aria-label="Đóng bảng quy tắc" class="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl">Đóng</button>
+      </div>
     </div>
   </div>
 
@@ -935,6 +1059,92 @@
       <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100">
         <button onclick="closeReopenModal()" aria-label="Hủy mở lại task" class="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl">Hủy</button>
         <button id="btn-confirm-reopen" onclick="confirmReopenTask()" aria-label="Xác nhận mở lại task" class="px-5 py-2 text-sm font-semibold bg-amber-600 text-white rounded-xl hover:bg-amber-700">Mở lại việc</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: THÊM CÔNG VIỆC CHECKLIST (#modal-task) -->
+  <!-- ========================================== -->
+  <div id="modal-task" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200">
+    <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-4 transform transition-all">
+      <div class="flex justify-between items-center">
+        <h3 class="font-bold text-slate-800 text-base" id="task-modal-title">Thêm Checklist Mới</h3>
+        <button onclick="closeTaskModal()" aria-label="Đóng modal thêm công việc" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Nội dung công việc <span class="text-rose-500">*</span></label>
+          <input type="text" id="input-task-title" placeholder="VD: Kiểm tra áp lực đường ống nước B2..." class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Mức độ ưu tiên</label>
+            <select id="input-task-priority" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium">
+              <option value="Bình thường">⚪ Bình thường</option>
+              <option value="Quan trọng">🟡 Quan trọng</option>
+              <option value="Khẩn cấp">🔴 Khẩn cấp</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Khu vực / Phân loại</label>
+            <input type="text" id="input-task-category" placeholder="VD: Trạm bơm, Tủ điện..." class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Tiêu chí đạt được (Tùy chọn)</label>
+          <input type="text" id="input-task-criteria" placeholder="VD: Áp suất duy trì 4 - 6 bar, không rò rỉ nước..." class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100">
+        <button onclick="closeTaskModal()" aria-label="Hủy thêm công việc" class="px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition">Hủy</button>
+        <button onclick="saveTask()" aria-label="Lưu công việc mới" class="px-5 py-2.5 text-sm font-semibold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-sm transition">Lưu công việc</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: GHI NHẬT KÝ (#modal-log) -->
+  <!-- ========================================== -->
+  <div id="modal-log" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200">
+    <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-4 transform transition-all">
+      <div class="flex justify-between items-center">
+        <h3 class="font-bold text-slate-800 text-base">Ghi Nhật Ký Hoạt Động</h3>
+        <button onclick="closeLogModal()" aria-label="Đóng modal ghi nhật ký" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Tình trạng / Đánh giá</label>
+          <select id="input-log-status" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-700">
+            <option value="Không bất thường">🟢 Không bất thường</option>
+            <option value="Đã xử lý dứt điểm">🔵 Đã xử lý dứt điểm</option>
+            <option value="Cần theo dõi thêm">🟠 Cần theo dõi thêm</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Vị trí / Hệ thống liên quan</label>
+          <input type="text" id="input-log-area" placeholder="VD: Phòng máy biến áp, Tòa A..." class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Nội dung ghi nhận chi tiết <span class="text-rose-500">*</span></label>
+          <textarea id="input-log-content" rows="3" placeholder="Mô tả công việc đã hoàn thành, sự cố phát sinh hoặc các lưu ý..." class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100">
+        <button onclick="closeLogModal()" aria-label="Hủy ghi nhật ký" class="px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition">Hủy</button>
+        <button onclick="saveLog()" aria-label="Lưu nhật ký" class="px-5 py-2.5 text-sm font-semibold bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 shadow-sm transition">Ghi vào sổ</button>
       </div>
     </div>
   </div>
@@ -2622,6 +2832,81 @@
     }
 
     // ==========================================
+    // 6.1. QUY TẮC PHÂN CA & TỰ ĐỘNG XẾP CA TUẦN KẾ TIẾP
+    // ==========================================
+    function openShiftRulesModal() {
+      document.getElementById('modal-shift-rules').classList.remove('hidden');
+      document.getElementById('modal-shift-rules').classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeShiftRulesModal() {
+      document.getElementById('modal-shift-rules').classList.add('hidden');
+      document.getElementById('modal-shift-rules').classList.remove('flex');
+    }
+
+    function handleAutoGenerateNextWeek() {
+      const currentMonday = new Date(scheduleViewingMonday);
+      const currentWeekNum = getIsoWeekNumber(currentMonday);
+      const currentWeekKey = `${currentMonday.getFullYear()}_W${currentWeekNum}`;
+
+      const nextMonday = new Date(currentMonday);
+      nextMonday.setDate(nextMonday.getDate() + 7);
+      const nextWeekNum = getIsoWeekNumber(nextMonday);
+      const nextWeekKey = `${nextMonday.getFullYear()}_W${nextWeekNum}`;
+
+      const activeStaff = repo.employees.filter(e => e.id !== 'ADMIN01' && e.status !== 'inactive');
+      if (activeStaff.length === 0) {
+        alert('Không có nhân sự khả dụng để xếp ca');
+        return;
+      }
+
+      const newRoster = {};
+      activeStaff.forEach(emp => {
+        newRoster[emp.id] = {};
+      });
+
+      const staffCount = activeStaff.length;
+
+      // Thuật toán xoay ca tuần kế tiếp theo 4 Quy Tắc Tổ Cơ Điện Sân Golf:
+      // Định mức mỗi ngày: 1 Ca 1 ('x'), 2 Ca 2 ('x'), 0 Ca 3, 1 Nghỉ tuần ('CN'), còn lại 'hc' (hành chính)
+      for (let d = 0; d < 7; d++) {
+        // Luân chuyển chỉ số nhân sự theo ngày và theo tuần (rotation offset)
+        const offset = (d + (nextWeekNum % staffCount)) % staffCount;
+
+        // 1 KTV trực Ca 1 (Sáng)
+        const ca1Emp = activeStaff[(0 + offset) % staffCount];
+        // 2 KTV trực Ca 2 (Chiều/Tối - Sân golf cao điểm)
+        const ca2Emp1 = activeStaff[(1 + offset) % staffCount];
+        const ca2Emp2 = activeStaff[(2 + offset) % staffCount];
+        // 1 KTV nghỉ tuần CN
+        const cnEmp = activeStaff[(3 + offset) % staffCount];
+
+        if (ca1Emp) newRoster[ca1Emp.id][`d${d}_c1`] = 'x';
+        if (ca2Emp1) newRoster[ca2Emp1.id][`d${d}_c2`] = 'x';
+        if (ca2Emp2) newRoster[ca2Emp2.id][`d${d}_c2`] = 'x';
+        if (cnEmp) newRoster[cnEmp.id][`d${d}_c1`] = 'CN';
+
+        // Các nhân viên còn lại xếp đi ca hành chính 'hc'
+        activeStaff.forEach(emp => {
+          const hasAssignment = newRoster[emp.id][`d${d}_c1`] || newRoster[emp.id][`d${d}_c2`] || newRoster[emp.id][`d${d}_c3`];
+          if (!hasAssignment) {
+            newRoster[emp.id][`d${d}_c1`] = 'hc';
+          }
+        });
+      }
+
+      // Lưu lịch tuần mới vào Repository
+      repo.rosterMatrix[nextWeekKey] = newRoster;
+      repo.saveRosterMatrix();
+
+      // Chuyển view sang tuần kế tiếp và render lại ma trận
+      scheduleViewingMonday = nextMonday;
+      renderGolfScheduleMatrix();
+      showToast(`⚡ Đã tự động xếp ca Tuần ${nextWeekNum} theo quy tắc chuẩn Tổ Cơ Điện`);
+    }
+
+    // ==========================================
     // 7. CHECKLIST TEMPLATE BUILDER & CRUD MANAGEMENT
     // ==========================================
     function openTemplateManagerModal() {
@@ -3403,6 +3688,124 @@
       `;
     }
 
+    function openApplyTemplateModal() {
+      const container = document.getElementById('available-templates-container');
+      container.innerHTML = '';
+
+      if (repo.templates.length === 0) {
+        container.innerHTML = `
+          <div class="p-6 text-center text-slate-400 bg-slate-50 rounded-2xl">
+            Chưa có mẫu sổ checklist nào. Quản trị viên có thể tạo thêm trong Tab Cá nhân.
+          </div>
+        `;
+      } else {
+        const isAdmin = repo.isAdmin();
+        repo.templates.forEach(tpl => {
+          const div = document.createElement('div');
+          div.className = 'template-card p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-indigo-300 transition space-y-2';
+          div.innerHTML = `
+            <div class="flex justify-between items-start">
+              <div>
+                <h4 class="text-sm font-bold text-slate-800">${tpl.name}</h4>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span class="text-[10px] px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 font-semibold">${tpl.category || 'Chung'}</span>
+                  <span class="text-[10px] text-slate-400 font-medium">${tpl.items ? tpl.items.length : 0} hạng mục kiểm tra</span>
+                </div>
+              </div>
+              <div class="flex items-center space-x-1.5 shrink-0">
+                ${isAdmin ? `
+                  <button onclick="closeApplyTemplateModal(); openTemplateBuilderModal('${tpl.id}')" title="Sửa mẫu" aria-label="Sửa mẫu sổ ${tpl.name}" class="p-1.5 text-slate-400 hover:text-indigo-600 rounded-lg hover:bg-white transition">
+                    <i data-lucide="edit" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button onclick="handleDeleteTemplate('${tpl.id}', '${tpl.name}'); openApplyTemplateModal()" title="Xóa mẫu" aria-label="Xóa mẫu sổ ${tpl.name}" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-white transition">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                ` : ''}
+                <button onclick="handleApplyTemplate('${tpl.id}')" aria-label="Áp dụng mẫu sổ ${tpl.name}" class="btn-apply-tpl px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs font-bold rounded-xl shadow-xs transition">
+                  Áp dụng vào ca
+                </button>
+              </div>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      }
+
+      document.getElementById('modal-apply-template').classList.remove('hidden');
+      document.getElementById('modal-apply-template').classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeApplyTemplateModal() {
+      document.getElementById('modal-apply-template').classList.add('hidden');
+      document.getElementById('modal-apply-template').classList.remove('flex');
+    }
+
+    function handleApplyTemplate(templateId) {
+      const count = repo.applyTemplateToShift(templateId);
+      closeApplyTemplateModal();
+      renderTasks();
+      showToast(`Đã áp dụng ${count} hạng mục checklist vào ca trực`);
+    }
+
+    function handleTaskCheck(taskId) {
+      const task = repo.tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      if (task.done) {
+        pendingReopenTaskId = taskId;
+        document.getElementById('input-reopen-reason').value = '';
+        document.getElementById('modal-reopen-task').classList.remove('hidden');
+        document.getElementById('modal-reopen-task').classList.add('flex');
+      } else {
+        repo.completeTask(taskId);
+        renderTasks();
+        showToast('Đã hoàn thành công việc');
+      }
+    }
+
+    function closeReopenModal() {
+      pendingReopenTaskId = null;
+      document.getElementById('modal-reopen-task').classList.add('hidden');
+      document.getElementById('modal-reopen-task').classList.remove('flex');
+    }
+
+    function confirmReopenTask() {
+      const reason = document.getElementById('input-reopen-reason').value.trim();
+      if (!reason) {
+        alert('Vui lòng nhập lý do mở lại công việc');
+        return;
+      }
+
+      if (pendingReopenTaskId) {
+        repo.reopenTask(pendingReopenTaskId, reason);
+        closeReopenModal();
+        renderTasks();
+        showToast('Đã mở lại công việc');
+      }
+    }
+
+    function setTaskFilter(filter) {
+      currentTaskFilter = filter;
+      document.querySelectorAll('.task-filter-btn').forEach(btn => {
+        btn.classList.remove('bg-indigo-600', 'text-white', 'font-semibold');
+        btn.classList.add('bg-white', 'text-slate-600');
+      });
+
+      const activeBtn = document.getElementById(`filter-${filter}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('bg-white', 'text-slate-600', 'text-rose-600');
+        activeBtn.classList.add('bg-indigo-600', 'text-white', 'font-semibold');
+      }
+      renderTasks();
+    }
+
+    function clearTaskSearch() {
+      document.getElementById('task-search').value = '';
+      document.getElementById('clear-search-btn').classList.add('hidden');
+      renderTasks();
+    }
+
     // ==========================================
     // 9. JOURNAL WORK LOGS
     // ==========================================
@@ -3468,6 +3871,45 @@
 
       lucide.createIcons();
       updateStats();
+    }
+
+    function openTaskModal() {
+      document.getElementById('modal-task').classList.remove('hidden');
+      document.getElementById('modal-task').classList.add('flex');
+      document.getElementById('input-task-title').focus();
+    }
+
+    function closeTaskModal() {
+      document.getElementById('modal-task').classList.add('hidden');
+      document.getElementById('modal-task').classList.remove('flex');
+    }
+
+    function saveTask() {
+      const title = document.getElementById('input-task-title').value.trim();
+      const priority = document.getElementById('input-task-priority').value;
+      const category = document.getElementById('input-task-category').value.trim() || 'Chung';
+      const criteria = document.getElementById('input-task-criteria').value.trim();
+
+      if (!title) {
+        alert('Vui lòng nhập nội dung công việc');
+        return;
+      }
+
+      repo.addTask(title, priority, category, criteria);
+      document.getElementById('input-task-title').value = '';
+      document.getElementById('input-task-category').value = '';
+      document.getElementById('input-task-criteria').value = '';
+      closeTaskModal();
+      renderTasks();
+      showToast('Đã thêm checklist mới vào ca trực');
+    }
+
+    function deleteTask(id) {
+      if (confirm('Xóa công việc này khỏi checklist?')) {
+        repo.deleteTask(id);
+        renderTasks();
+        showToast('Đã xóa công việc');
+      }
     }
 
     function openLogModal() {

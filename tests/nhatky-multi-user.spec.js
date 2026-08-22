@@ -101,7 +101,16 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên, Quản L�
     // Kiểm tra footer "Trực điện nước"
     await expect(page.locator('#schedule-summary-row')).toContainText('Trực điện nước');
 
-    // 3. Admin click vào ô để phân ca với bảng chọn nhanh (x / hc / CN / P)
+    // 3. Mở xem Quy Tắc Phân Ca Vận Hành
+    await page.click('button:has-text("Quy Tắc Phân Ca")');
+    await expect(page.locator('#modal-shift-rules')).toBeVisible();
+    await expect(page.locator('#modal-shift-rules')).toContainText('Khung Giờ & Định Mức Quân Số');
+    await expect(page.locator('#modal-shift-rules')).toContainText('Chế Độ Nghỉ Tuần');
+    await expect(page.locator('#modal-shift-rules')).toContainText('Căn Cứ Xếp Ca Tuần Kế Tiếp');
+    await page.click('#modal-shift-rules button:has-text("Đóng")');
+    await expect(page.locator('#modal-shift-rules')).toBeHidden();
+
+    // 4. Admin click vào ô để phân ca với bảng chọn nhanh (x / hc / CN / P)
     const firstCell = page.locator('#schedule-matrix-tbody .roster-cell').first();
     await firstCell.click();
     await expect(page.locator('#schedule-cell-picker')).toBeVisible();
@@ -113,6 +122,23 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên, Quản L�
     // Kiểm tra ô đã được cập nhật x và có màu nền hồng (bg-rose-100)
     await expect(firstCell).toContainText('x');
     await expect(firstCell).toHaveClass(/bg-rose-100/);
+
+    // 5. Kiểm thử tính năng ⚡ Tự Động Xếp Ca Tuần Sau
+    const initialWeekNum = await page.locator('#header-week-num').innerText();
+    await page.click('#btn-auto-schedule-next-week');
+
+    // Số tuần đã được tăng lên tuần kế tiếp
+    const nextWeekNum = await page.locator('#header-week-num').innerText();
+    expect(Number(nextWeekNum)).toBe(Number(initialWeekNum) + 1);
+
+    // Kiểm tra các định mức chuẩn hàng Trực điện nước trong tuần kế tiếp: 1, 2, 0 lặp lại
+    const summaryCells = await page.locator('#schedule-summary-row td').allInnerTexts();
+    // Ô đầu là "Trực điện nước", 21 ô tiếp theo là số lượng nhân sự trực
+    expect(summaryCells.length).toBe(22);
+    // Ca 1 thứ 2 = 1, Ca 2 thứ 2 = 2, Ca 3 thứ 2 = 0
+    expect(summaryCells[1].trim()).toBe('1');
+    expect(summaryCells[2].trim()).toBe('2');
+    expect(summaryCells[3].trim()).toBe('0');
 
     // Đóng bảng phân ca
     await page.click('#modal-shift-schedule button:has-text("Đóng")');
