@@ -521,6 +521,16 @@
             <i data-lucide="trash-2" class="w-4 h-4 text-rose-600"></i>
             <span>Xóa Lịch Tuần</span>
           </button>
+
+          <button id="btn-copy-schedule-sheet" onclick="handleCopyScheduleForSheets()" aria-label="Sao chép bảng phân ca cho Google Sheets" class="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-300 rounded-xl text-xs font-bold transition flex items-center gap-1 active:scale-95 shadow-xs">
+            <i data-lucide="copy" class="w-4 h-4 text-blue-600"></i>
+            <span>📋 Sao Chép Cho Sheet</span>
+          </button>
+
+          <button id="btn-export-schedule-csv" onclick="handleExportScheduleCSV()" aria-label="Xuất bảng phân ca ra file CSV" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-xl text-xs font-bold transition flex items-center gap-1 active:scale-95">
+            <i data-lucide="download" class="w-4 h-4 text-slate-600"></i>
+            <span>📥 Xuất CSV</span>
+          </button>
         </div>
 
         <div class="flex items-center space-x-2">
@@ -2927,6 +2937,129 @@
         renderGolfScheduleMatrix();
         showToast(`Đã xóa toàn bộ lịch phân ca Tuần ${weekNum}`);
       }
+    }
+
+    // ==========================================
+    // 6.2. XUẤT & SAO CHÉP BẢNG PHÂN CA RA GOOGLE SHEETS / EXCEL
+    // ==========================================
+    function buildScheduleExportData() {
+      const monday = new Date(scheduleViewingMonday);
+      const weekNum = getIsoWeekNumber(monday);
+      const weekKey = `${monday.getFullYear()}_W${weekNum}`;
+
+      const weekDays = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        weekDays.push(d);
+      }
+
+      const dayNames = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'];
+      const startDateStr = `${weekDays[0].getDate()}/${weekDays[0].getMonth() + 1}/${weekDays[0].getFullYear()}`;
+      const endDateStr = `${weekDays[6].getDate()}/${weekDays[6].getMonth() + 1}/${weekDays[6].getFullYear()}`;
+
+      const staffList = repo.employees.filter(e => e.id !== 'ADMIN01' && e.status !== 'inactive');
+      const roster = repo.getRosterForWeek(weekKey);
+      const columnSums = new Array(21).fill(0);
+
+      const tsvRows = [];
+      const csvRows = [];
+
+      // Row 1: Tiêu đề | Tuần | Từ ngày Đến ngày
+      const r1_tsv = ['BẢNG PHÂN CA', '', `Tuần: ${weekNum}`, '', '', '', '', '', '', `Từ: ${startDateStr}`, '', '', '', '', '', `Đến: ${endDateStr}`, '', '', '', '', '', '', ''];
+      tsvRows.push(r1_tsv.join('\t'));
+      csvRows.push(r1_tsv.map(c => `"${c.replace(/"/g, '""')}"`).join(','));
+
+      // Row 2: Header Ngày
+      const r2_tsv = ['STT', 'HỌ & TÊN'];
+      weekDays.forEach((d, idx) => {
+        const label = `${dayNames[idx]} ${d.getDate()}/${d.getMonth() + 1}`;
+        r2_tsv.push(label, '', '');
+      });
+      tsvRows.push(r2_tsv.join('\t'));
+      csvRows.push(r2_tsv.map(c => `"${c.replace(/"/g, '""')}"`).join(','));
+
+      // Row 3: Header Ca trực (Ca.1, Ca.2, Ca.3 x 7)
+      const r3_tsv = ['', 'Tổ cơ điện Sân Golf'];
+      for (let i = 0; i < 7; i++) {
+        r3_tsv.push('Ca.1', 'Ca.2', 'Ca.3');
+      }
+      tsvRows.push(r3_tsv.join('\t'));
+      csvRows.push(r3_tsv.map(c => `"${c.replace(/"/g, '""')}"`).join(','));
+
+      // Staff Rows
+      staffList.forEach((emp, sIdx) => {
+        const r_tsv = [String(sIdx + 1), `${emp.fullName}${emp.role === 'Thử việc' ? ' (thử việc)' : ''}`];
+        for (let d = 0; d < 7; d++) {
+          for (let c = 1; c <= 3; c++) {
+            const colIndex = d * 3 + (c - 1);
+            const cellKey = `d${d}_c${c}`;
+            const val = roster[emp.id]?.[cellKey] || '';
+            if (val === 'x') columnSums[colIndex]++;
+            r_tsv.push(val);
+          }
+        }
+        tsvRows.push(r_tsv.join('\t'));
+        csvRows.push(r_tsv.map(c => `"${c.replace(/"/g, '""')}"`).join(','));
+      });
+
+      // Footer Row: Trực điện nước
+      const r_sum_tsv = ['', 'Trực điện nước'];
+      columnSums.forEach(sum => r_sum_tsv.push(String(sum)));
+      tsvRows.push(r_sum_tsv.join('\t'));
+      csvRows.push(r_sum_tsv.map(c => `"${c.replace(/"/g, '""')}"`).join(','));
+
+      return {
+        weekNum,
+        startDateStr,
+        endDateStr,
+        tsvText: tsvRows.join('\n'),
+        csvText: '\uFEFF' + csvRows.join('\n')
+      };
+    }
+
+    function handleCopyScheduleForSheets() {
+      const data = buildScheduleExportData();
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(data.tsvText).then(() => {
+          showToast(`📋 Đã sao chép bảng phân ca Tuần ${data.weekNum}! Mở Google Sheet và bấm Ctrl + V`);
+        }).catch(() => {
+          fallbackCopyText(data.tsvText);
+          showToast(`📋 Đã sao chép bảng phân ca Tuần ${data.weekNum}! Mở Google Sheet và bấm Ctrl + V`);
+        });
+      } else {
+        fallbackCopyText(data.tsvText);
+        showToast(`📋 Đã sao chép bảng phân ca Tuần ${data.weekNum}! Mở Google Sheet và bấm Ctrl + V`);
+      }
+    }
+
+    function fallbackCopyText(text) {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-9999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+      } catch (err) {}
+      document.body.removeChild(textArea);
+    }
+
+    function handleExportScheduleCSV() {
+      const data = buildScheduleExportData();
+      const blob = new Blob([data.csvText], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const year = scheduleViewingMonday.getFullYear();
+      a.download = `Bang_Phan_Ca_Tuan_${data.weekNum}_${year}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`📥 Đã xuất file CSV Bảng phân ca Tuần ${data.weekNum}`);
     }
 
     // ==========================================

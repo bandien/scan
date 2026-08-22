@@ -140,7 +140,18 @@ test.describe('Nhật Ký & Checklist Vận Hành — Đa Nhân Viên, Quản L�
     expect(summaryCells[2].trim()).toBe('2');
     expect(summaryCells[3].trim()).toBe('0');
 
-    // 6. Kiểm thử tính năng 🗑️ Xóa Lịch Tuần (có xác nhận xóa)
+    // 6. Kiểm thử tính năng 📋 Sao Chép Cho Google Sheets & 📥 Xuất CSV
+    await page.click('#btn-copy-schedule-sheet');
+    await expect(page.locator('#toast')).toContainText('Đã sao chép');
+
+    // Kiểm thử hàm sinh dữ liệu xuất bảng phân ca
+    const exportData = await page.evaluate(() => buildScheduleExportData());
+    expect(exportData.tsvText).toContain('BẢNG PHÂN CA');
+    expect(exportData.tsvText).toContain('Tổ cơ điện Sân Golf');
+    expect(exportData.tsvText).toContain('Trực điện nước');
+    expect(exportData.csvText).toContain('BẢNG PHÂN CA');
+
+    // 7. Kiểm thử tính năng 🗑️ Xóa Lịch Tuần (có xác nhận xóa)
     await page.click('#btn-clear-week-schedule');
 
     // Sau khi xóa, tất cả các ô trong bảng của tuần này đều trống
