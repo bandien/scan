@@ -4311,19 +4311,9 @@
         });
 
         // 2. Phân Ca 1 (CHỈ CHỌN KTV CHÍNH THỨC, kiểm tra chống đổi ca gấp)
-        if (ca1TargetKtv && dayOffMap[ca1TargetKtv.id] !== d) {
-          if (workedCa2OnDay(ca1TargetKtv.id, d - 1)) {
-            // KTV trực chính Ca 1 hôm qua vừa đi Ca 2 -> Chèn ngày nghỉ CN làm đệm an toàn vào hôm nay
-            const oldDayOff = dayOffMap[ca1TargetKtv.id];
-            if (oldDayOff !== undefined && oldDayOff !== d) {
-              delete newRoster[ca1TargetKtv.id][`d${oldDayOff}_c1`];
-            }
-            dayOffMap[ca1TargetKtv.id] = d;
-            newRoster[ca1TargetKtv.id][`d${d}_c1`] = 'CN';
-          } else {
-            newRoster[ca1TargetKtv.id][`d${d}_c1`] = 'x';
-            ca1AssignedId = ca1TargetKtv.id;
-          }
+        if (ca1TargetKtv && dayOffMap[ca1TargetKtv.id] !== d && !workedCa2OnDay(ca1TargetKtv.id, d - 1)) {
+          newRoster[ca1TargetKtv.id][`d${d}_c1`] = 'x';
+          ca1AssignedId = ca1TargetKtv.id;
         }
 
         // 3. Phân Ca 2 (Người 1 - KTV chính)
