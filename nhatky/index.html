@@ -2403,46 +2403,6 @@
       "d5_c3": "hc",
       "d6_c3": "CN"
     }
-  },
-  "2026_W35": {
-    "EMP01": {
-      "d0_c3": "CN",
-      "d2_c1": "x",
-      "d3_c1": "x",
-      "d3_c3": "x",
-      "d4_c3": "hc"
-    },
-    "EMP02": {
-      "d0_c3": "hc",
-      "d1_c3": "CN",
-      "d3_c1": "x",
-      "d4_c1": "x",
-      "d4_c3": "x"
-    },
-    "EMP03": {
-      "d0_c1": "x",
-      "d0_c3": "x",
-      "d1_c3": "hc",
-      "d2_c3": "CN",
-      "d4_c1": "x",
-      "d5_c1": "x"
-    },
-    "EMP04": {
-      "d0_c1": "x",
-      "d1_c1": "x",
-      "d1_c3": "x",
-      "d2_c3": "hc",
-      "d3_c3": "CN",
-      "d5_c1": "x"
-    },
-    "EMP05": {},
-    "EMP06": {
-      "d1_c1": "x",
-      "d2_c1": "x",
-      "d2_c3": "x",
-      "d3_c3": "hc",
-      "d4_c3": "CN"
-    }
   }
 };
 
@@ -2630,10 +2590,10 @@
           this.saveRosterMatrix();
         }
 
-        // Tự động gộp dữ liệu lịch sử các tuần từ Google Sheet nếu chưa có
+        // Tự động gộp dữ liệu lịch sử các tuần từ Google Sheet nếu chưa từng có
         let hasNewHistoricalWeek = false;
         Object.keys(HISTORICAL_GOLF_ROSTER_MATRIX).forEach(wk => {
-          if (!this.rosterMatrix[wk] || Object.keys(this.rosterMatrix[wk]).length === 0) {
+          if (this.rosterMatrix[wk] === undefined) {
             this.rosterMatrix[wk] = JSON.parse(JSON.stringify(HISTORICAL_GOLF_ROSTER_MATRIX[wk]));
             hasNewHistoricalWeek = true;
           }
@@ -2842,7 +2802,7 @@
       // ROSTER MATRIX MANAGEMENT (TỔ CƠ ĐIỆN SÂN GOLF)
       // ==========================================
       getRosterForWeek(weekKey) {
-        if (!this.rosterMatrix[weekKey] || Object.keys(this.rosterMatrix[weekKey]).length === 0) {
+        if (this.rosterMatrix[weekKey] === undefined) {
           if (HISTORICAL_GOLF_ROSTER_MATRIX[weekKey]) {
             this.rosterMatrix[weekKey] = JSON.parse(JSON.stringify(HISTORICAL_GOLF_ROSTER_MATRIX[weekKey]));
           } else {
