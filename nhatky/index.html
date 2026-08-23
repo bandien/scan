@@ -1857,14 +1857,594 @@
     ];
 
     // Seed Sample Roster Matrix chuẩn theo ảnh mẫu Tổ cơ điện Sân Golf (Tuần 34)
-    const SEED_WEEK_34_ROSTER = {
-      'EMP01': { 'd0_c2': 'x', 'd1_c2': 'CN', 'd2_c2': 'x', 'd3_c3': 'P', 'd4_c2': 'x', 'd5_c2': 'x', 'd6_c1': 'x' },
-      'EMP02': { 'd0_c1': 'hc', 'd1_c1': 'hc', 'd2_c1': 'hc', 'd3_c1': 'CN', 'd4_c1': 'x', 'd5_c2': 'x', 'd6_c3': 'x' },
-      'EMP03': { 'd0_c1': 'x', 'd1_c1': 'x', 'd2_c1': 'x', 'd2_c2': 'HC', 'd3_c1': 'x', 'd4_c1': 'CN', 'd5_c1': 'x', 'd6_c1': 'hc' },
-      'EMP04': { 'd0_c1': 'hc', 'd1_c2': 'x', 'd2_c1': 'CN', 'd2_c2': 'HC', 'd3_c1': 'hc', 'd3_c2': 'HC', 'd4_c1': 'hc', 'd5_c1': 'hc', 'd6_c2': 'x' },
-      'EMP05': { 'd0_c1': 'hc', 'd1_c1': 'hc', 'd2_c1': 'hc', 'd3_c1': 'hc', 'd3_c2': 'HC', 'd4_c1': 'P', 'd5_c1': 'hc', 'd6_c2': 'CN' },
-      'EMP06': { 'd0_c2': 'x', 'd1_c2': 'x', 'd2_c2': 'x', 'd3_c2': 'x', 'd4_c2': 'x', 'd5_c2': 'CN', 'd6_c1': 'hc' }
-    };
+    const HISTORICAL_GOLF_ROSTER_MATRIX = {
+  "2026_W25": {
+    "EMP01": {
+      "d0_c3": "hc",
+      "d2_c1": "x",
+      "d2_c3": "CN",
+      "d4_c1": "x",
+      "d5_c1": "x",
+      "d5_c3": "CN"
+    },
+    "EMP02": {
+      "d0_c3": "hc",
+      "d1_c3": "hc",
+      "d2_c3": "hc",
+      "d3_c3": "hc",
+      "d4_c3": "hc",
+      "d6_c1": "x",
+      "d6_c3": "hc"
+    },
+    "EMP03": {
+      "d0_c3": "x",
+      "d1_c3": "x",
+      "d2_c3": "x",
+      "d3_c3": "hc",
+      "d4_c3": "CN",
+      "d5_c3": "CN",
+      "d6_c3": "hc"
+    },
+    "EMP04": {
+      "d0_c1": "x",
+      "d1_c1": "x",
+      "d1_c3": "CN",
+      "d3_c1": "x",
+      "d3_c3": "x",
+      "d4_c3": "x",
+      "d5_c3": "x",
+      "d6_c3": "x"
+    },
+    "EMP05": {
+      "d0_c3": "hc",
+      "d1_c3": "hc",
+      "d2_c3": "hc",
+      "d3_c3": "hc",
+      "d4_c3": "CN",
+      "d5_c3": "hc",
+      "d6_c3": "hc"
+    },
+    "EMP06": {
+      "d5_c2": "Nguyễn Đình Thủy (Montana)",
+      "d5_c3": "hc",
+      "d6_c3": "hc"
+    }
+  },
+  "2026_W26": {
+    "EMP01": {
+      "d0_c1": "x",
+      "d1_c1": "x",
+      "d2_c1": "x",
+      "d3_c1": "x",
+      "d4_c1": "x",
+      "d4_c3": "x",
+      "d6_c1": "x",
+      "d6_c3": "CN"
+    },
+    "EMP02": {
+      "d0_c3": "hc",
+      "d1_c3": "hc",
+      "d2_c3": "hc",
+      "d3_c3": "CN",
+      "d5_c1": "x",
+      "d5_c3": "x",
+      "d6_c3": "x"
+    },
+    "EMP03": {
+      "d0_c3": "hc",
+      "d1_c3": "hc",
+      "d3_c1": "x",
+      "d4_c1": "x",
+      "d4_c3": "hc",
+      "d5_c3": "P"
+    },
+    "EMP04": {
+      "d0_c3": "x",
+      "d1_c3": "x",
+      "d2_c3": "x",
+      "d3_c3": "x",
+      "d4_c3": "CN",
+      "d6_c1": "x",
+      "d6_c3": "CN"
+    },
+    "EMP05": {
+      "d0_c3": "hc",
+      "d1_c3": "hc",
+      "d2_c3": "hc",
+      "d3_c3": "hc",
+      "d4_c3": "CN",
+      "d5_c3": "hc"
+    },
+    "EMP06": {
+      "d0_c3": "hc",
+      "d1_c3": "hc",
+      "d2_c3": "hc",
+      "d3_c3": "CN",
+      "d4_c3": "N",
+      "d5_c3": "hc",
+      "d6_c3": "hc"
+    }
+  },
+  "2026_W27": {
+    "EMP01": {
+      "d1_c1": "x",
+      "d2_c1": "x",
+      "d3_c1": "x",
+      "d4_c1": "x",
+      "d5_c1": "x",
+      "d5_c3": "x",
+      "d6_c3": "x"
+    },
+    "EMP02": {
+      "d0_c3": "x",
+      "d1_c3": "x",
+      "d2_c3": "x",
+      "d3_c3": "x",
+      "d4_c3": "CN",
+      "d6_c1": "x"
+    },
+    "EMP03": {
+      "d0_c1": "x",
+      "d0_c3": "hc",
+      "d1_c3": "hc",
+      "d2_c3": "hc",
+      "d3_c3": "hc",
+      "d4_c3": "CN",
+      "d5_c3": "hc",
+      "d6_c3": "hc"
+    },
+    "EMP04": {
+      "d1_c1": "x",
+      "d2_c1": "x",
+      "d3_c1": "x",
+      "d4_c1": "x",
+      "d4_c3": "x",
+      "d5_c3": "hc",
+      "d6_c3": "CN"
+    },
+    "EMP05": {
+      "d0_c1": "x",
+      "d0_c3": "hc",
+      "d1_c3": "hc",
+      "d2_c3": "hc",
+      "d3_c3": "CN",
+      "d4_c3": "hc",
+      "d5_c3": "CN"
+    },
+    "EMP06": {
+      "d0_c3": "CN",
+      "d1_c3": "hc",
+      "d2_c3": "hc",
+      "d3_c3": "hc",
+      "d4_c3": "N",
+      "d6_c1": "x",
+      "d6_c3": "hc"
+    }
+  },
+  "2026_W28": {
+    "EMP01": {
+      "d0_c3": "x",
+      "d1_c3": "CN",
+      "d2_c3": "x",
+      "d3_c3": "x",
+      "d4_c3": "x",
+      "d5_c3": "x",
+      "d6_c3": "hc"
+    },
+    "EMP02": {
+      "d0_c1": "x",
+      "d1_c1": "x",
+      "d2_c1": "x",
+      "d3_c1": "x",
+      "d4_c1": "x",
+      "d4_c3": "CN",
+      "d5_c3": "hc",
+      "d6_c3": "x"
+    },
+    "EMP03": {
+      "d0_c3": "CN",
+      "d1_c3": "x",
+      "d2_c3": "hc",
+      "d3_c3": "hc",
+      "d5_c1": "P",
+      "d6_c1": "P"
+    },
+    "EMP04": {
+      "d0_c3": "hc",
+      "d1_c3": "hc",
+      "d2_c3": "hc",
+      "d3_c3": "hc",
+      "d4_c3": "hc",
+      "d5_c1": "X",
+      "d6_c1": "x"
+    },
+    "EMP05": {
+      "d0_c1": "x",
+      "d1_c1": "x",
+      "d2_c1": "x",
+      "d3_c1": "x",
+      "d4_c1": "N",
+      "d5_c1": "N",
+      "d6_c1": "x"
+    },
+    "EMP06": {
+      "d0_c3": "hc",
+      "d1_c3": "hc",
+      "d2_c3": "hc",
+      "d3_c3": "CN",
+      "d4_c3": "x",
+      "d5_c3": "Ô",
+      "d6_c3": "hc"
+    }
+  },
+  "2026_W29": {
+    "EMP01": {
+      "d0_c3": "x",
+      "d1_c3": "hc",
+      "d2_c3": "hc",
+      "d3_c3": "CN",
+      "d4_c3": "hc",
+      "d5_c3": "x",
+      "d6_c3": "CN"
+    },
+    "EMP02": {
+      "d0_c3": "hc",
+      "d1_c3": "hc",
+      "d2_c3": "CN",
+      "d3_c3": "hc",
+      "d5_c1": "x",
+      "d6_c1": "x"
+    },
+    "EMP03": {
+      "d0_c1": "P",
+      "d1_c1": "CN",
+      "d1_c3": "x",
+      "d2_c3": "x",
+      "d3_c3": "x",
+      "d4_c3": "x",
+      "d6_c1": "CN",
+      "d6_c3": "x"
+    },
+    "EMP04": {
+      "d0_c1": "x",
+      "d1_c1": "x",
+      "d2_c1": "x",
+      "d3_c1": "x",
+      "d4_c1": "x",
+      "d5_c1": "CN",
+      "d5_c3": "hc",
+      "d6_c3": "hc"
+    },
+    "EMP05": {
+      "d0_c1": "x",
+      "d1_c1": "x"
+    },
+    "EMP06": {
+      "d0_c3": "hc",
+      "d1_c3": "hc",
+      "d2_c3": "hc",
+      "d3_c3": "N",
+      "d4_c3": "hc",
+      "d6_c1": "x"
+    }
+  },
+  "2026_W30": {
+    "EMP01": {
+      "d0_c3": "x",
+      "d1_c3": "x",
+      "d2_c3": "x",
+      "d3_c3": "x",
+      "d4_c3": "x",
+      "d6_c1": "x"
+    },
+    "EMP02": {
+      "d0_c1": "x",
+      "d0_c3": "hc",
+      "d1_c3": "hc",
+      "d2_c3": "hc",
+      "d3_c3": "hc",
+      "d4_c3": "CN",
+      "d5_c3": "x",
+      "d6_c3": "CN"
+    },
+    "EMP03": {
+      "d1_c1": "x",
+      "d2_c1": "x",
+      "d3_c1": "x",
+      "d4_c1": "x",
+      "d5_c1": "x",
+      "d5_c3": "hc",
+      "d6_c3": "x"
+    },
+    "EMP04": {
+      "d0_c3": "CN",
+      "d1_c3": "hc",
+      "d2_c3": "hc",
+      "d4_c1": "x",
+      "d4_c3": "hc",
+      "d5_c3": "hc",
+      "d6_c3": "hc"
+    },
+    "EMP05": {
+      "d2_c2": "Nguyễn Văn Cường (thử việc Montana)",
+      "d2_c3": "hc",
+      "d3_c3": "hc",
+      "d4_c3": "hc",
+      "d5_c3": "hc",
+      "d6_c3": "hc"
+    },
+    "EMP06": {
+      "d0_c1": "x",
+      "d1_c1": "x",
+      "d2_c1": "x",
+      "d3_c1": "x",
+      "d4_c1": "CN",
+      "d5_c1": "x",
+      "d6_c1": "CN"
+    }
+  },
+  "2026_W31": {
+    "EMP01": {
+      "d0_c1": "CN",
+      "d1_c1": "x",
+      "d2_c1": "x",
+      "d3_c1": "x",
+      "d4_c1": "x",
+      "d4_c3": "hc",
+      "d5_c3": "CN",
+      "d6_c3": "hc"
+    },
+    "EMP02": {
+      "d0_c3": "x",
+      "d1_c3": "x",
+      "d2_c3": "x",
+      "d3_c3": "x",
+      "d4_c3": "x",
+      "d6_c1": "x"
+    },
+    "EMP03": {
+      "d0_c3": "hc",
+      "d1_c3": "hc",
+      "d2_c3": "hc",
+      "d3_c3": "hc",
+      "d4_c3": "CN",
+      "d5_c3": "x",
+      "d6_c3": "CN"
+    },
+    "EMP04": {
+      "d0_c3": "CN",
+      "d1_c3": "hc",
+      "d2_c3": "hc",
+      "d3_c3": "hc",
+      "d5_c1": "x",
+      "d5_c3": "hc",
+      "d6_c3": "x"
+    },
+    "EMP05": {
+      "d0_c3": "hc",
+      "d1_c3": "hc",
+      "d2_c3": "CN",
+      "d3_c3": "hc",
+      "d4_c3": "hc",
+      "d6_c1": "x"
+    },
+    "EMP06": {
+      "d0_c1": "x",
+      "d1_c1": "x",
+      "d2_c1": "x",
+      "d3_c1": "P"
+    }
+  },
+  "2026_W32": {
+    "EMP01": {
+      "d0_c3": "hc",
+      "d1_c3": "hc",
+      "d2_c3": "hc",
+      "d3_c3": "hc",
+      "d4_c3": "hc",
+      "d5_c3": "x",
+      "d6_c3": "CN"
+    },
+    "EMP02": {
+      "d0_c1": "x",
+      "d1_c1": "CN",
+      "d2_c1": "x",
+      "d3_c1": "x",
+      "d3_c3": "HC",
+      "d4_c1": "x",
+      "d4_c3": "hc",
+      "d5_c3": "hc",
+      "d6_c3": "hc"
+    },
+    "EMP03": {
+      "d0_c3": "x",
+      "d1_c3": "x",
+      "d2_c3": "x",
+      "d3_c3": "x",
+      "d4_c1": "TC",
+      "d5_c1": "x",
+      "d6_c1": "x"
+    },
+    "EMP04": {
+      "d1_c1": "x",
+      "d2_c1": "x",
+      "d2_c3": "CN",
+      "d3_c3": "hc",
+      "d4_c3": "x",
+      "d5_c3": "CN",
+      "d6_c3": "x"
+    },
+    "EMP05": {
+      "d0_c1": "x",
+      "d1_c1": "x",
+      "d2_c1": "CN",
+      "d3_c1": "x",
+      "d3_c3": "HC",
+      "d4_c1": "x",
+      "d5_c1": "x",
+      "d6_c1": "x"
+    },
+    "EMP06": {
+      "d5_c2": "Nguyễn Quang Phú (thử việc Montana)",
+      "d5_c3": "hc",
+      "d6_c3": "hc"
+    }
+  },
+  "2026_W33": {
+    "EMP01": {
+      "d0_c3": "hc",
+      "d1_c3": "hc",
+      "d2_c3": "hc",
+      "d3_c3": "hc",
+      "d4_c3": "hc",
+      "d6_c1": "x"
+    },
+    "EMP02": {
+      "d0_c3": "hc",
+      "d2_c1": "x",
+      "d2_c3": "CN",
+      "d3_c3": "hc",
+      "d4_c3": "hc",
+      "d5_c3": "hc",
+      "d6_c3": "hc"
+    },
+    "EMP03": {
+      "d0_c1": "x",
+      "d1_c1": "x",
+      "d2_c1": "CN",
+      "d3_c1": "x",
+      "d4_c1": "x",
+      "d5_c1": "x",
+      "d5_c3": "x",
+      "d6_c3": "x"
+    },
+    "EMP04": {
+      "d0_c3": "x",
+      "d1_c3": "x",
+      "d2_c3": "x",
+      "d3_c3": "x",
+      "d4_c3": "x",
+      "d5_c3": "hc"
+    },
+    "EMP05": {
+      "d0_c1": "x",
+      "d1_c1": "x",
+      "d2_c1": "x",
+      "d3_c1": "x",
+      "d4_c1": "CN",
+      "d5_c1": "x",
+      "d5_c3": "hc",
+      "d6_c3": "hc"
+    },
+    "EMP06": {
+      "d0_c3": "hc",
+      "d1_c3": "hc",
+      "d2_c3": "hc",
+      "d4_c1": "x",
+      "d4_c3": "CN",
+      "d6_c1": "x"
+    }
+  },
+  "2026_W34": {
+    "EMP01": {
+      "d0_c1": "CN",
+      "d1_c1": "x",
+      "d2_c1": "P",
+      "d3_c1": "x",
+      "d4_c1": "x",
+      "d4_c3": "x",
+      "d5_c3": "x",
+      "d6_c3": "hc"
+    },
+    "EMP02": {
+      "d0_c3": "hc",
+      "d1_c3": "CN",
+      "d2_c3": "x",
+      "d4_c1": "x",
+      "d5_c1": "x",
+      "d6_c1": "x",
+      "d6_c3": "x"
+    },
+    "EMP03": {
+      "d0_c3": "x",
+      "d1_c1": "HC",
+      "d1_c3": "x",
+      "d2_c3": "CN",
+      "d3_c3": "x",
+      "d4_c3": "P",
+      "d6_c1": "x"
+    },
+    "EMP04": {
+      "d0_c1": "x",
+      "d0_c3": "CN",
+      "d1_c1": "HC",
+      "d1_c3": "hc",
+      "d2_c1": "HC",
+      "d2_c3": "hc",
+      "d3_c3": "hc",
+      "d5_c1": "x",
+      "d5_c3": "CN"
+    },
+    "EMP05": {
+      "d0_c3": "hc",
+      "d1_c3": "hc",
+      "d2_c1": "HC",
+      "d2_c3": "P",
+      "d3_c3": "hc",
+      "d4_c3": "CN"
+    },
+    "EMP06": {
+      "d0_c1": "x",
+      "d1_c1": "x",
+      "d2_c1": "x",
+      "d3_c1": "x",
+      "d4_c1": "CN",
+      "d4_c3": "hc",
+      "d5_c3": "hc",
+      "d6_c3": "CN"
+    }
+  },
+  "2026_W35": {
+    "EMP01": {
+      "d0_c3": "CN",
+      "d2_c1": "x",
+      "d3_c1": "x",
+      "d3_c3": "x",
+      "d4_c3": "hc"
+    },
+    "EMP02": {
+      "d0_c3": "hc",
+      "d1_c3": "CN",
+      "d3_c1": "x",
+      "d4_c1": "x",
+      "d4_c3": "x"
+    },
+    "EMP03": {
+      "d0_c1": "x",
+      "d0_c3": "x",
+      "d1_c3": "hc",
+      "d2_c3": "CN",
+      "d4_c1": "x",
+      "d5_c1": "x"
+    },
+    "EMP04": {
+      "d0_c1": "x",
+      "d1_c1": "x",
+      "d1_c3": "x",
+      "d2_c3": "hc",
+      "d3_c3": "CN",
+      "d5_c1": "x"
+    },
+    "EMP05": {},
+    "EMP06": {
+      "d1_c1": "x",
+      "d2_c1": "x",
+      "d2_c3": "x",
+      "d3_c3": "hc",
+      "d4_c3": "CN"
+    }
+  }
+};
 
     // Helper: Tính số tuần ISO từ ngày bất kỳ
     function getIsoWeekNumber(d) {
@@ -2045,6 +2625,22 @@
           } catch (e) {
             this.rosterMatrix = {};
           }
+        } else {
+          this.rosterMatrix = JSON.parse(JSON.stringify(HISTORICAL_GOLF_ROSTER_MATRIX));
+          this.saveRosterMatrix();
+        }
+
+        // Tự động gộp dữ liệu lịch sử các tuần từ Google Sheet nếu chưa có
+        let hasNewHistoricalWeek = false;
+        Object.keys(HISTORICAL_GOLF_ROSTER_MATRIX).forEach(wk => {
+          if (!this.rosterMatrix[wk] || Object.keys(this.rosterMatrix[wk]).length === 0) {
+            this.rosterMatrix[wk] = JSON.parse(JSON.stringify(HISTORICAL_GOLF_ROSTER_MATRIX[wk]));
+            hasNewHistoricalWeek = true;
+          }
+        });
+        if (hasNewHistoricalWeek) {
+          this.saveRosterMatrix();
+        }
         } else {
           this.rosterMatrix = {};
         }
@@ -2249,10 +2845,9 @@
       // ROSTER MATRIX MANAGEMENT (TỔ CƠ ĐIỆN SÂN GOLF)
       // ==========================================
       getRosterForWeek(weekKey) {
-        if (!this.rosterMatrix[weekKey]) {
-          // Khởi tạo mặc định nếu là tuần 34 năm 2026 hoặc tự động sinh
-          if (weekKey.includes('W34') || weekKey === '2026_W34') {
-            this.rosterMatrix[weekKey] = JSON.parse(JSON.stringify(SEED_WEEK_34_ROSTER));
+        if (!this.rosterMatrix[weekKey] || Object.keys(this.rosterMatrix[weekKey]).length === 0) {
+          if (HISTORICAL_GOLF_ROSTER_MATRIX[weekKey]) {
+            this.rosterMatrix[weekKey] = JSON.parse(JSON.stringify(HISTORICAL_GOLF_ROSTER_MATRIX[weekKey]));
           } else {
             this.rosterMatrix[weekKey] = {};
           }
