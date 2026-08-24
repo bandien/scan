@@ -290,9 +290,9 @@
               <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-slate-600" id="btn-refresh-logs-icon"></i>
               <span>Làm mới</span>
             </button>
-            <button onclick="openLogModal()" aria-label="Ghi nhật ký mới" class="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white px-3.5 py-2 rounded-xl text-sm font-semibold shadow-sm transition">
+            <button onclick="openLogModal('log')" aria-label="Ghi nhật ký hoặc thêm đầu việc mới" class="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white px-3.5 py-2 rounded-xl text-sm font-semibold shadow-sm transition">
               <i data-lucide="edit-3" class="w-4 h-4"></i>
-              <span>Ghi nhật ký</span>
+              <span>Ghi nhật ký / Thêm việc</span>
             </button>
           </div>
         </div>
@@ -325,9 +325,9 @@
                 <span id="journal-tasks-badge" class="text-[10px] font-bold text-indigo-700 bg-indigo-100 px-1.5 py-0.5 rounded-full ml-1.5">0 việc</span>
               </div>
             </div>
-            <button onclick="openTaskModal()" aria-label="Thêm đầu việc mới vào ca trực" class="px-2.5 py-1 bg-white hover:bg-indigo-50 text-indigo-700 font-bold border border-indigo-200 rounded-xl text-xs flex items-center gap-1 transition shadow-2xs active:scale-95">
+            <button onclick="openLogModal('task')" aria-label="Thêm đầu việc mới vào ca trực" class="px-2.5 py-1 bg-white hover:bg-indigo-50 text-indigo-700 font-bold border border-indigo-200 rounded-xl text-xs flex items-center gap-1 transition shadow-2xs active:scale-95">
               <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-              <span>Thêm việc</span>
+              <span>+ Thêm việc</span>
             </button>
           </div>
 
@@ -2078,18 +2078,18 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- MODAL: GHI NHẬT KÝ (#modal-log) -->
+  <!-- MODAL: GHI NHẬT KÝ & THÊM ĐẦU VIỆC (#modal-log) -->
   <!-- ========================================== -->
   <div id="modal-log" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200 overflow-y-auto">
     <div class="bg-white rounded-3xl w-full max-w-lg p-5 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] flex flex-col transform transition-all">
       <div class="flex justify-between items-center shrink-0 border-b border-slate-100 pb-3">
-        <div class="flex items-center space-x-2 text-emerald-700">
-          <div class="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700">
-            <i data-lucide="book-open" class="w-5 h-5"></i>
+        <div class="flex items-center space-x-2">
+          <div id="modal-log-icon-container" class="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700">
+            <i id="modal-log-icon" data-lucide="book-open" class="w-5 h-5"></i>
           </div>
           <div>
-            <h3 class="font-extrabold text-slate-900 text-base">Ghi Nhật Ký Hoạt Động</h3>
-            <p class="text-xs text-slate-500 font-medium">Lưu nhật ký ca trực & đồng bộ tự động lên Google Sheets</p>
+            <h3 id="modal-log-title" class="font-extrabold text-slate-900 text-base">Ghi Nhật Ký & Đầu Việc</h3>
+            <p id="modal-log-subtitle" class="text-xs text-slate-500 font-medium">Ghi nhật ký vận hành hoặc thêm đầu việc mới vào ca trực</p>
           </div>
         </div>
         <button onclick="closeLogModal()" aria-label="Đóng modal ghi nhật ký" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
@@ -2097,11 +2097,24 @@
         </button>
       </div>
 
-      <div class="space-y-3.5 overflow-y-auto flex-1 pr-1 custom-scrollbar text-xs font-semibold">
+      <!-- Mode Switcher Tabs: Ghi Nhật Ký vs Thêm Đầu Việc -->
+      <div class="flex p-1 bg-slate-100 rounded-xl text-xs font-bold select-none shrink-0">
+        <button type="button" id="btn-mode-log" onclick="switchModalLogMode('log')" class="flex-1 py-2 rounded-lg bg-emerald-600 text-white shadow-xs transition flex items-center justify-center gap-1.5">
+          <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+          <span>1. Ghi Nhật Ký Thực Hiện</span>
+        </button>
+        <button type="button" id="btn-mode-task" onclick="switchModalLogMode('task')" class="flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1.5">
+          <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+          <span>2. Thêm Đầu Việc Vào Ca</span>
+        </button>
+      </div>
+
+      <!-- FORM BODY: MODE 1 (GHI NHẬT KÝ) -->
+      <div id="container-mode-log" class="space-y-3.5 overflow-y-auto flex-1 pr-1 custom-scrollbar text-xs font-semibold">
         <!-- Chọn đầu việc liên kết -->
         <div>
           <label class="block text-slate-600 mb-1 flex items-center justify-between">
-            <span class="flex items-center gap-1 font-bold text-slate-700"><i data-lucide="link" class="w-3.5 h-3.5 text-indigo-600"></i> Liên kết đầu việc ca trực (Tùy chọn)</span>
+            <span class="flex items-center gap-1 font-bold text-slate-700"><i data-lucide="link" class="w-3.5 h-3.5 text-indigo-600"></i> Chọn đầu việc có sẵn (Tùy chọn)</span>
             <span class="text-[10px] text-indigo-600 font-medium">Tự động điền dữ liệu</span>
           </label>
           <select id="select-log-linked-task" onchange="handleLogTaskSelectChange()" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-emerald-500 text-slate-700 bg-white">
@@ -2152,11 +2165,51 @@
           <label class="block text-slate-600 mb-1">Ghi chú / Lưu ý bàn giao cho ca sau</label>
           <input type="text" id="input-log-notes" placeholder="VD: Theo dõi thêm mực dầu MBA2, bàn giao chìa khóa cho Ca 2..." class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-emerald-500">
         </div>
+
+        <!-- Checkbox: Đồng thời thêm vào checklist ca trực nếu là việc mới -->
+        <label class="flex items-center gap-2 p-2.5 bg-emerald-50/70 rounded-xl border border-emerald-200/80 cursor-pointer select-none">
+          <input type="checkbox" id="checkbox-log-sync-task" checked class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500">
+          <span class="text-xs text-emerald-950 font-semibold">Tự động thêm vào checklist ca trực nếu đây là công việc mới</span>
+        </label>
+      </div>
+
+      <!-- FORM BODY: MODE 2 (THÊM ĐẦU VIỆC MỚI VÀO CA) -->
+      <div id="container-mode-task" class="space-y-3.5 overflow-y-auto flex-1 pr-1 custom-scrollbar text-xs font-semibold hidden">
+        <div>
+          <label class="block text-slate-600 mb-1">Nội dung công việc cần làm <span class="text-rose-500">*</span></label>
+          <input type="text" id="input-mode-task-title" placeholder="VD: Kiểm tra áp lực đường ống nước B2..." class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-600 mb-1">Mức độ ưu tiên</label>
+            <select id="input-mode-task-priority" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500">
+              <option value="Bình thường">⚪ Bình thường</option>
+              <option value="Quan trọng" selected>🟡 Quan trọng</option>
+              <option value="Khẩn cấp">🔴 Khẩn cấp</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-600 mb-1">Khu vực / Phân loại</label>
+            <input type="text" id="input-mode-task-category" placeholder="VD: Trạm bơm, Tủ điện..." class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-600 mb-1">Tiêu chí nghiệm thu (Tùy chọn)</label>
+          <input type="text" id="input-mode-task-criteria" placeholder="VD: Áp suất duy trì 4 - 6 bar, không rò rỉ nước..." class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <!-- Checkbox: Ghi luôn vào nhật ký sau khi tạo -->
+        <label class="flex items-center gap-2 p-2.5 bg-indigo-50/70 rounded-xl border border-indigo-200/80 cursor-pointer select-none">
+          <input type="checkbox" id="checkbox-task-auto-log" class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500">
+          <span class="text-xs text-indigo-950 font-semibold">Chuyển sang ghi nhật ký hoàn thành ngay sau khi tạo</span>
+        </label>
       </div>
 
       <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100 shrink-0">
-        <button onclick="closeLogModal()" aria-label="Hủy ghi nhật ký" class="px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition">Hủy</button>
-        <button onclick="saveLog()" aria-label="Lưu nhật ký" class="px-5 py-2.5 text-sm font-semibold bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 shadow-sm transition">Ghi vào sổ</button>
+        <button type="button" onclick="closeLogModal()" aria-label="Hủy thao tác" class="px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition">Hủy</button>
+        <button type="button" id="btn-modal-log-submit" onclick="handleUnifiedLogSubmit()" aria-label="Lưu nhật ký hoặc đầu việc" class="px-5 py-2.5 text-sm font-semibold bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 shadow-sm transition">Ghi vào sổ</button>
       </div>
     </div>
   </div>
@@ -6713,19 +6766,59 @@
       showToast('Đã thêm đầu việc mới vào ca trực');
     }
 
-    function deleteTask(id) {
-      if (confirm('Xóa công việc này khỏi checklist?')) {
-        repo.deleteTask(id);
-        renderTasks();
-        renderJournalTaskSelector();
-        showToast('Đã xóa công việc');
+    let modalLogCurrentMode = 'log';
+
+    function switchModalLogMode(mode) {
+      modalLogCurrentMode = mode;
+      const btnLog = document.getElementById('btn-mode-log');
+      const btnTask = document.getElementById('btn-mode-task');
+      const containerLog = document.getElementById('container-mode-log');
+      const containerTask = document.getElementById('container-mode-task');
+      const title = document.getElementById('modal-log-title');
+      const subtitle = document.getElementById('modal-log-subtitle');
+      const iconContainer = document.getElementById('modal-log-icon-container');
+      const icon = document.getElementById('modal-log-icon');
+      const submitBtn = document.getElementById('btn-modal-log-submit');
+
+      if (!btnLog || !btnTask) return;
+
+      if (mode === 'log') {
+        btnLog.className = 'flex-1 py-2 rounded-lg bg-emerald-600 text-white shadow-xs transition flex items-center justify-center gap-1.5 font-bold';
+        btnTask.className = 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1.5 font-bold';
+        if (containerLog) containerLog.classList.remove('hidden');
+        if (containerTask) containerTask.classList.add('hidden');
+        if (title) title.innerText = 'Ghi Nhật Ký Hoạt Động';
+        if (subtitle) subtitle.innerText = 'Lưu nhật ký ca trực & đồng bộ tự động lên Google Sheets';
+        if (iconContainer) iconContainer.className = 'w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700';
+        if (icon) icon.setAttribute('data-lucide', 'book-open');
+        if (submitBtn) {
+          submitBtn.innerText = 'Ghi vào sổ';
+          submitBtn.className = 'px-5 py-2.5 text-sm font-semibold bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 shadow-sm transition active:scale-95';
+        }
+      } else {
+        btnTask.className = 'flex-1 py-2 rounded-lg bg-indigo-600 text-white shadow-xs transition flex items-center justify-center gap-1.5 font-bold';
+        btnLog.className = 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1.5 font-bold';
+        if (containerTask) containerTask.classList.remove('hidden');
+        if (containerLog) containerLog.classList.add('hidden');
+        if (title) title.innerText = 'Thêm Đầu Việc Vào Ca';
+        if (subtitle) subtitle.innerText = 'Lập danh sách việc cần làm trong ca trực hoặc ghi nhận hoàn thành';
+        if (iconContainer) iconContainer.className = 'w-8 h-8 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-700';
+        if (icon) icon.setAttribute('data-lucide', 'plus-circle');
+        if (submitBtn) {
+          submitBtn.innerText = 'Tạo đầu việc';
+          submitBtn.className = 'px-5 py-2.5 text-sm font-semibold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-sm transition active:scale-95';
+        }
       }
+
+      lucide.createIcons();
     }
 
-    function openLogModal() {
+    function openLogModal(mode = 'log') {
       document.getElementById('modal-log').classList.remove('hidden');
       document.getElementById('modal-log').classList.add('flex');
       
+      switchModalLogMode(mode);
+
       const now = new Date();
       const currentHours = String(now.getHours()).padStart(2, '0');
       const currentMinutes = String(now.getMinutes()).padStart(2, '0');
@@ -6740,7 +6833,14 @@
       }
 
       renderJournalTaskSelector();
-      document.getElementById('input-log-content').focus();
+
+      if (mode === 'task') {
+        const taskTitleInput = document.getElementById('input-mode-task-title');
+        if (taskTitleInput) taskTitleInput.focus();
+      } else {
+        const contentInput = document.getElementById('input-log-content');
+        if (contentInput) contentInput.focus();
+      }
     }
 
     function closeLogModal() {
@@ -6756,7 +6856,39 @@
       if (endTime) document.getElementById('input-log-end-time').value = endTime;
       if (result) document.getElementById('input-log-result').value = result;
       if (notes) document.getElementById('input-log-notes').value = notes;
-      openLogModal();
+      openLogModal('log');
+    }
+
+    function handleUnifiedLogSubmit() {
+      if (modalLogCurrentMode === 'task') {
+        const title = document.getElementById('input-mode-task-title').value.trim();
+        const priority = document.getElementById('input-mode-task-priority').value;
+        const category = document.getElementById('input-mode-task-category').value.trim() || 'Chung';
+        const criteria = document.getElementById('input-mode-task-criteria').value.trim();
+        const autoLog = document.getElementById('checkbox-task-auto-log') ? document.getElementById('checkbox-task-auto-log').checked : false;
+
+        if (!title) {
+          alert('Vui lòng nhập nội dung công việc cần làm');
+          return;
+        }
+
+        const newTask = repo.addTask(title, priority, category, criteria);
+        document.getElementById('input-mode-task-title').value = '';
+        document.getElementById('input-mode-task-category').value = '';
+        document.getElementById('input-mode-task-criteria').value = '';
+
+        if (autoLog && newTask) {
+          logFromTask(newTask.id, null);
+          showToast('Đã thêm việc! Vui lòng hoàn tất ghi nhật ký');
+        } else {
+          closeLogModal();
+          renderTasks();
+          renderJournalTaskSelector();
+          showToast('Đã thêm đầu việc mới vào ca trực');
+        }
+      } else {
+        saveLog();
+      }
     }
 
     function saveLog() {
@@ -6769,6 +6901,7 @@
       const notes = document.getElementById('input-log-notes').value.trim();
       const linkedTaskId = document.getElementById('input-log-linked-task-id') ? document.getElementById('input-log-linked-task-id').value : '';
       const linkedPlanId = document.getElementById('input-log-linked-plan-id') ? document.getElementById('input-log-linked-plan-id').value : '';
+      const syncTaskChecked = document.getElementById('checkbox-log-sync-task') ? document.getElementById('checkbox-log-sync-task').checked : true;
 
       if (!content) {
         alert('Vui lòng nhập nội dung công việc thực hiện');
@@ -6782,6 +6915,14 @@
         const task = repo.tasks.find(t => String(t.id) === String(linkedTaskId));
         if (task && (status === 'Không bất thường' || status === 'Đã xử lý dứt điểm')) {
           task.done = true;
+          repo.saveTasks();
+        }
+      } else if (syncTaskChecked) {
+        // Tự động thêm vào checklist ca trực nếu chưa liên kết
+        const isCompleted = (status === 'Không bất thường' || status === 'Đã xử lý dứt điểm');
+        const newTask = repo.addTask(content, 'Quan trọng', area || 'Chung', result || '');
+        if (newTask && isCompleted) {
+          newTask.done = true;
           repo.saveTasks();
         }
       }
