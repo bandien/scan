@@ -2056,37 +2056,68 @@
   <!-- ========================================== -->
   <!-- MODAL: GHI NHẬT KÝ (#modal-log) -->
   <!-- ========================================== -->
-  <div id="modal-log" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200">
-    <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-4 transform transition-all">
-      <div class="flex justify-between items-center">
-        <h3 class="font-bold text-slate-800 text-base">Ghi Nhật Ký Hoạt Động</h3>
+  <div id="modal-log" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200 overflow-y-auto">
+    <div class="bg-white rounded-3xl w-full max-w-lg p-5 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] flex flex-col transform transition-all">
+      <div class="flex justify-between items-center shrink-0 border-b border-slate-100 pb-3">
+        <div class="flex items-center space-x-2 text-emerald-700">
+          <div class="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700">
+            <i data-lucide="book-open" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-extrabold text-slate-900 text-base">Ghi Nhật Ký Hoạt Động</h3>
+            <p class="text-xs text-slate-500 font-medium">Lưu nhật ký ca trực & đồng bộ tự động lên Google Sheets</p>
+          </div>
+        </div>
         <button onclick="closeLogModal()" aria-label="Đóng modal ghi nhật ký" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
 
-      <div class="space-y-3">
-        <div>
-          <label class="block text-xs font-bold text-slate-600 mb-1">Tình trạng / Đánh giá</label>
-          <select id="input-log-status" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-700">
-            <option value="Không bất thường">🟢 Không bất thường</option>
-            <option value="Đã xử lý dứt điểm">🔵 Đã xử lý dứt điểm</option>
-            <option value="Cần theo dõi thêm">🟠 Cần theo dõi thêm</option>
-          </select>
+      <div class="space-y-3.5 overflow-y-auto flex-1 pr-1 custom-scrollbar text-xs font-semibold">
+        <!-- Khung giờ bắt đầu - kết thúc -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-600 mb-1 flex items-center gap-1"><i data-lucide="play-circle" class="w-3.5 h-3.5 text-emerald-600"></i> Giờ bắt đầu</label>
+            <input type="time" id="input-log-start-time" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-emerald-500">
+          </div>
+          <div>
+            <label class="block text-slate-600 mb-1 flex items-center gap-1"><i data-lucide="stop-circle" class="w-3.5 h-3.5 text-rose-600"></i> Giờ kết thúc</label>
+            <input type="time" id="input-log-end-time" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-emerald-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-600 mb-1">Tình trạng / Đánh giá</label>
+            <select id="input-log-status" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-700">
+              <option value="Không bất thường">🟢 Không bất thường</option>
+              <option value="Đã xử lý dứt điểm">🔵 Đã xử lý dứt điểm</option>
+              <option value="Cần theo dõi thêm">🟠 Cần theo dõi thêm</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-600 mb-1">Vị trí / Hệ thống liên quan</label>
+            <input type="text" id="input-log-area" placeholder="VD: Trạm MBA, Tòa A..." class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-emerald-500">
+          </div>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-600 mb-1">Vị trí / Hệ thống liên quan</label>
-          <input type="text" id="input-log-area" placeholder="VD: Phòng máy biến áp, Tòa A..." class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <label class="block text-slate-600 mb-1">Nội dung công việc thực hiện <span class="text-rose-500">*</span></label>
+          <textarea id="input-log-content" rows="2.5" placeholder="Mô tả công việc đã hoàn thành, sự cố phát sinh..." class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 font-semibold"></textarea>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-600 mb-1">Nội dung ghi nhận chi tiết <span class="text-rose-500">*</span></label>
-          <textarea id="input-log-content" rows="3" placeholder="Mô tả công việc đã hoàn thành, sự cố phát sinh hoặc các lưu ý..." class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+          <label class="block text-slate-600 mb-1">Kết quả thực hiện / Thông số kỹ thuật</label>
+          <input type="text" id="input-log-result" placeholder="VD: Hoàn thành 100%, Điện áp 380V ổn định, Đạt tiêu chuẩn..." class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-emerald-500">
+        </div>
+
+        <div>
+          <label class="block text-slate-600 mb-1">Ghi chú / Lưu ý bàn giao cho ca sau</label>
+          <input type="text" id="input-log-notes" placeholder="VD: Theo dõi thêm mực dầu MBA2, bàn giao chìa khóa cho Ca 2..." class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-emerald-500">
         </div>
       </div>
 
-      <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100">
+      <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100 shrink-0">
         <button onclick="closeLogModal()" aria-label="Hủy ghi nhật ký" class="px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition">Hủy</button>
         <button onclick="saveLog()" aria-label="Lưu nhật ký" class="px-5 py-2.5 text-sm font-semibold bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 shadow-sm transition">Ghi vào sổ</button>
       </div>
@@ -2249,46 +2280,6 @@
       <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100">
         <button onclick="closeTaskModal()" aria-label="Hủy thêm công việc" class="px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition">Hủy</button>
         <button onclick="saveTask()" aria-label="Lưu công việc mới" class="px-5 py-2.5 text-sm font-semibold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-sm transition">Lưu công việc</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================== -->
-  <!-- MODAL: GHI NHẬT KÝ -->
-  <!-- ========================================== -->
-  <div id="modal-log" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200">
-    <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-4 transform transition-all">
-      <div class="flex justify-between items-center">
-        <h3 class="font-bold text-slate-800 text-base">Ghi Nhật Ký Hoạt Động</h3>
-        <button onclick="closeLogModal()" aria-label="Đóng modal ghi nhật ký" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
-          <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
-      </div>
-
-      <div class="space-y-3">
-        <div>
-          <label class="block text-xs font-bold text-slate-600 mb-1">Tình trạng / Đánh giá</label>
-          <select id="input-log-status" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-700">
-            <option value="Không bất thường">🟢 Không bất thường</option>
-            <option value="Đã xử lý dứt điểm">🔵 Đã xử lý dứt điểm</option>
-            <option value="Cần theo dõi thêm">🟠 Cần theo dõi thêm</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-600 mb-1">Vị trí / Hệ thống liên quan</label>
-          <input type="text" id="input-log-area" placeholder="VD: Phòng máy biến áp, Tòa A..." class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-600 mb-1">Nội dung ghi nhận chi tiết <span class="text-rose-500">*</span></label>
-          <textarea id="input-log-content" rows="3" placeholder="Mô tả công việc đã hoàn thành, sự cố phát sinh hoặc các lưu ý..." class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
-        </div>
-      </div>
-
-      <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100">
-        <button onclick="closeLogModal()" aria-label="Hủy ghi nhật ký" class="px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition">Hủy</button>
-        <button onclick="saveLog()" aria-label="Lưu nhật ký" class="px-5 py-2.5 text-sm font-semibold bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 shadow-sm transition">Ghi vào sổ</button>
       </div>
     </div>
   </div>
@@ -3551,7 +3542,7 @@
         this.saveTasks();
       }
 
-      addLog(content, status, area) {
+      addLog(content, status, area, startTime = '', endTime = '', result = '', notes = '') {
         const emp = this.getCurrentEmployee();
         const now = new Date();
         const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} - Hôm nay`;
@@ -3565,6 +3556,10 @@
           content,
           status,
           area: area || '',
+          startTime: startTime || '',
+          endTime: endTime || '',
+          result: result || '',
+          notes: notes || '',
           time: timeStr,
           createdAt: now.toISOString(),
           syncStatus: 'pending'
@@ -3632,9 +3627,13 @@
                 workDate: workDate,
                 employeeId: r.recordedBy || 'EMP01',
                 employeeName: r.employee || r.recordedBy || 'Kỹ thuật viên',
-                content: r.selectedTask || r.task || r.result || 'Nhật ký vận hành',
+                content: r.selectedTask || r.task || 'Nhật ký vận hành',
                 status: statusLabel,
                 area: r.teams || r.area || '',
+                startTime: r.startTime || '',
+                endTime: r.endTime || '',
+                result: r.result || '',
+                notes: r.issue || r.nextAction || '',
                 time: timeDisplay,
                 createdAt: r.createdAt || new Date().toISOString(),
                 syncStatus: 'synced'
@@ -3669,14 +3668,17 @@
           const payload = {
             id: String(log.id).startsWith('LOG-') ? String(log.id) : `LOG-${log.id}`,
             createdAt: log.createdAt || new Date().toISOString(),
-            workDate: this.currentDate || getTodayIsoDate(),
+            workDate: log.workDate || this.currentDate || getTodayIsoDate(),
             employee: log.employeeName || emp.fullName,
             recordedBy: 'admin',
             shift: this.currentShiftType || 'Ca 1 (05h00 - 13h30)',
             progress: log.status === 'Đã xử lý dứt điểm' ? 'Đã xử lý' : (log.status === 'Cần theo dõi thêm' ? 'Cần hỗ trợ' : 'Hoàn thành'),
+            startTime: log.startTime || '',
+            endTime: log.endTime || '',
             selectedTask: log.content,
-            result: log.status,
-            issue: log.status === 'Cần theo dõi thêm' ? log.content : '',
+            result: log.result || log.status,
+            issue: log.notes || (log.status === 'Cần theo dõi thêm' ? log.content : ''),
+            nextAction: log.notes || '',
             area: log.area || '',
             teams: 'Tổ cơ điện Sân Golf'
           };
@@ -6398,6 +6400,40 @@
             cloudTag = '<span class="inline-flex items-center gap-0.5 text-[9px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200" title="Đang chờ gửi Google Sheets"><i data-lucide="clock" class="w-2.5 h-2.5 animate-pulse"></i><span>Chờ gửi</span></span>';
           }
 
+          // Duration badge
+          let timeRangeBadge = '';
+          if (log.startTime || log.endTime) {
+            timeRangeBadge = `<span class="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-50/90 px-2 py-0.5 rounded-md border border-amber-200"><i data-lucide="clock-4" class="w-3 h-3 text-amber-600"></i>${log.startTime || '...'} – ${log.endTime || '...'}</span>`;
+          }
+
+          // Result block
+          let resultBlock = '';
+          if (log.result && log.result !== log.status) {
+            resultBlock = `
+              <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200/80 text-xs text-slate-700 flex items-start gap-1.5 mt-1.5">
+                <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5"></i>
+                <div>
+                  <span class="font-bold text-slate-700">Kết quả:</span>
+                  <span class="text-slate-800 font-medium ml-1">${log.result}</span>
+                </div>
+              </div>
+            `;
+          }
+
+          // Notes / Issues block
+          let notesBlock = '';
+          if (log.notes) {
+            notesBlock = `
+              <div class="p-2.5 bg-amber-50/70 rounded-xl border border-amber-200/80 text-xs text-amber-900 flex items-start gap-1.5 mt-1.5">
+                <i data-lucide="info" class="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5"></i>
+                <div>
+                  <span class="font-bold text-amber-800">Ghi chú / Lưu ý:</span>
+                  <span class="text-amber-950 font-medium ml-1">${log.notes}</span>
+                </div>
+              </div>
+            `;
+          }
+
           const item = document.createElement('div');
           item.className = "relative pl-8";
           item.innerHTML = `
@@ -6407,6 +6443,7 @@
                 <div>
                   <div class="flex items-center gap-1.5 flex-wrap">
                     <span class="text-xs font-bold text-slate-500">${log.time}</span>
+                    ${timeRangeBadge}
                     <span class="text-[11px] font-bold text-indigo-900 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">${log.employeeName || 'Nhân viên'}</span>
                     ${log.area ? `<span class="text-[10px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded">${log.area}</span>` : ''}
                     ${cloudTag}
@@ -6419,7 +6456,9 @@
                   </button>
                 </div>
               </div>
-              <p class="text-sm text-slate-700 leading-relaxed">${log.content}</p>
+              <p class="text-sm font-semibold text-slate-800 leading-relaxed">${log.content}</p>
+              ${resultBlock}
+              ${notesBlock}
             </div>
           `;
           logContainer.appendChild(item);
@@ -6472,6 +6511,20 @@
     function openLogModal() {
       document.getElementById('modal-log').classList.remove('hidden');
       document.getElementById('modal-log').classList.add('flex');
+      
+      const now = new Date();
+      const currentHours = String(now.getHours()).padStart(2, '0');
+      const currentMinutes = String(now.getMinutes()).padStart(2, '0');
+      const timeNow = `${currentHours}:${currentMinutes}`;
+
+      if (!document.getElementById('input-log-end-time').value) {
+        document.getElementById('input-log-end-time').value = timeNow;
+      }
+      if (!document.getElementById('input-log-start-time').value) {
+        const startD = new Date(now.getTime() - 30 * 60000);
+        document.getElementById('input-log-start-time').value = `${String(startD.getHours()).padStart(2, '0')}:${String(startD.getMinutes()).padStart(2, '0')}`;
+      }
+
       document.getElementById('input-log-content').focus();
     }
 
@@ -6480,10 +6533,14 @@
       document.getElementById('modal-log').classList.remove('flex');
     }
 
-    function applyLogTemplate(content, status, area) {
-      document.getElementById('input-log-content').value = content;
-      document.getElementById('input-log-status').value = status;
-      document.getElementById('input-log-area').value = area;
+    function applyLogTemplate(content, status, area, startTime = '', endTime = '', result = '', notes = '') {
+      document.getElementById('input-log-content').value = content || '';
+      document.getElementById('input-log-status').value = status || 'Không bất thường';
+      document.getElementById('input-log-area').value = area || '';
+      if (startTime) document.getElementById('input-log-start-time').value = startTime;
+      if (endTime) document.getElementById('input-log-end-time').value = endTime;
+      if (result) document.getElementById('input-log-result').value = result;
+      if (notes) document.getElementById('input-log-notes').value = notes;
       openLogModal();
     }
 
@@ -6491,15 +6548,23 @@
       const content = document.getElementById('input-log-content').value.trim();
       const status = document.getElementById('input-log-status').value;
       const area = document.getElementById('input-log-area').value.trim();
+      const startTime = document.getElementById('input-log-start-time').value.trim();
+      const endTime = document.getElementById('input-log-end-time').value.trim();
+      const result = document.getElementById('input-log-result').value.trim();
+      const notes = document.getElementById('input-log-notes').value.trim();
 
       if (!content) {
-        alert('Vui lòng nhập nội dung nhật ký');
+        alert('Vui lòng nhập nội dung công việc thực hiện');
         return;
       }
 
-      repo.addLog(content, status, area);
+      repo.addLog(content, status, area, startTime, endTime, result, notes);
       document.getElementById('input-log-content').value = '';
       document.getElementById('input-log-area').value = '';
+      document.getElementById('input-log-start-time').value = '';
+      document.getElementById('input-log-end-time').value = '';
+      document.getElementById('input-log-result').value = '';
+      document.getElementById('input-log-notes').value = '';
       closeLogModal();
       renderLogs();
       showToast('Đã ghi vào sổ nhật ký ca trực');
