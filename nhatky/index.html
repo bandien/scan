@@ -313,6 +313,30 @@
           </button>
         </div>
 
+        <!-- Section: Danh Sách Đầu Việc Ca Trực (Bấm vào để ghi nhật ký) -->
+        <div class="bg-gradient-to-r from-slate-50 via-indigo-50/40 to-slate-50 p-3.5 rounded-2xl border border-indigo-100 shadow-xs space-y-2.5">
+          <div class="flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+              <div class="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center shadow-2xs">
+                <i data-lucide="list-checks" class="w-3.5 h-3.5"></i>
+              </div>
+              <div class="flex items-center">
+                <span class="font-extrabold text-slate-900 text-xs uppercase tracking-wide">Đầu việc ca trực — Bấm để ghi nhật ký</span>
+                <span id="journal-tasks-badge" class="text-[10px] font-bold text-indigo-700 bg-indigo-100 px-1.5 py-0.5 rounded-full ml-1.5">0 việc</span>
+              </div>
+            </div>
+            <button onclick="openTaskModal()" aria-label="Thêm đầu việc mới vào ca trực" class="px-2.5 py-1 bg-white hover:bg-indigo-50 text-indigo-700 font-bold border border-indigo-200 rounded-xl text-xs flex items-center gap-1 transition shadow-2xs active:scale-95">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>Thêm việc</span>
+            </button>
+          </div>
+
+          <!-- Danh sách thẻ đầu việc có thể bấm để ghi nhật ký -->
+          <div id="journal-task-quick-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto custom-scrollbar pt-0.5">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
         <!-- Quick Template Chips -->
         <div class="space-y-1.5">
           <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Mẫu nhanh:</span>
@@ -2074,6 +2098,19 @@
       </div>
 
       <div class="space-y-3.5 overflow-y-auto flex-1 pr-1 custom-scrollbar text-xs font-semibold">
+        <!-- Chọn đầu việc liên kết -->
+        <div>
+          <label class="block text-slate-600 mb-1 flex items-center justify-between">
+            <span class="flex items-center gap-1 font-bold text-slate-700"><i data-lucide="link" class="w-3.5 h-3.5 text-indigo-600"></i> Liên kết đầu việc ca trực (Tùy chọn)</span>
+            <span class="text-[10px] text-indigo-600 font-medium">Tự động điền dữ liệu</span>
+          </label>
+          <select id="select-log-linked-task" onchange="handleLogTaskSelectChange()" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-emerald-500 text-slate-700 bg-white">
+            <option value="">-- Ghi nhật ký tự do (Không liên kết) --</option>
+          </select>
+          <input type="hidden" id="input-log-linked-task-id" value="">
+          <input type="hidden" id="input-log-linked-plan-id" value="">
+        </div>
+
         <!-- Khung giờ bắt đầu - kết thúc -->
         <div class="grid grid-cols-2 gap-3">
           <div>
@@ -6465,8 +6502,183 @@
         });
       }
 
+      renderJournalTaskSelector();
       lucide.createIcons();
       updateStats();
+    }
+
+    function renderJournalTaskSelector() {
+      const container = document.getElementById('journal-task-quick-list');
+      const badge = document.getElementById('journal-tasks-badge');
+      const select = document.getElementById('select-log-linked-task');
+      if (!container) return;
+
+      const currentTasks = repo.tasks.filter(t => t.shiftId === repo.currentShiftId);
+      const todayIso = repo.currentDate || getTodayIsoDate();
+      const currentPlans = repo.plans.filter(p => !p.done && (p.date === todayIso || (p.dateEnd && p.dateEnd >= todayIso)));
+
+      const totalWorkItems = currentTasks.length + currentPlans.length;
+      if (badge) badge.innerText = `${totalWorkItems} việc`;
+
+      // Cập nhật selector bên trong modal-log
+      if (select) {
+        const currentVal = select.value;
+        select.innerHTML = '<option value="">-- Ghi nhật ký tự do (Không liên kết) --</option>';
+
+        if (currentTasks.length > 0) {
+          const optGroup = document.createElement('optgroup');
+          optGroup.label = '📋 Checklist Ca Trực';
+          currentTasks.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = `task_${t.id}`;
+            opt.innerText = `${t.done ? '✓ ' : '○ '}${t.title} (${t.category || 'Chung'})`;
+            optGroup.appendChild(opt);
+          });
+          select.appendChild(optGroup);
+        }
+
+        if (currentPlans.length > 0) {
+          const optGroupPlans = document.createElement('optgroup');
+          optGroupPlans.label = '📅 Kế Hoạch Đang Phụ Trách';
+          currentPlans.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = `plan_${p.id}`;
+            opt.innerText = `${p.task} (${p.category || 'Kế hoạch'})`;
+            optGroupPlans.appendChild(opt);
+          });
+          select.appendChild(optGroupPlans);
+        }
+
+        if (currentVal) select.value = currentVal;
+      }
+
+      // Render danh sách thẻ trên giao diện Tab Nhật Ký
+      container.innerHTML = '';
+      if (totalWorkItems === 0) {
+        container.innerHTML = `
+          <div class="col-span-full py-3 px-4 bg-white rounded-xl border border-dashed border-slate-200 text-center text-xs text-slate-500">
+            <span>Chưa có đầu việc nào trong ca này. Bấm <strong class="text-indigo-600 cursor-pointer underline font-bold" onclick="openTaskModal()">+ Thêm việc</strong> để tạo việc mới hoặc ghi nhật ký tự do bên dưới.</span>
+          </div>
+        `;
+        return;
+      }
+
+      // Render các task trong ca
+      currentTasks.forEach(t => {
+        const isDone = t.done;
+        const priorityColor = t.priority === 'Khẩn cấp' ? 'text-rose-700 bg-rose-50 border-rose-200' :
+                              t.priority === 'Quan trọng' ? 'text-amber-700 bg-amber-50 border-amber-200' :
+                              'text-slate-600 bg-slate-100 border-slate-200';
+        
+        const card = document.createElement('div');
+        card.className = `p-2.5 rounded-xl border ${isDone ? 'bg-slate-50/80 border-slate-200 text-slate-500' : 'bg-white border-indigo-100 hover:border-indigo-300 hover:shadow-xs'} transition flex items-center justify-between gap-2 cursor-pointer group`;
+        card.onclick = () => logFromTask(t.id, null);
+        card.title = 'Bấm để ghi nhật ký cho công việc này';
+
+        card.innerHTML = `
+          <div class="flex items-start space-x-2 min-w-0 flex-1">
+            <div class="mt-0.5 w-4 h-4 rounded-md border shrink-0 flex items-center justify-center ${isDone ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-300 bg-slate-50 text-transparent'}">
+              <i data-lucide="check" class="w-3 h-3 ${isDone ? 'block' : 'hidden'}"></i>
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-bold text-slate-800 truncate group-hover:text-indigo-600 transition ${isDone ? 'line-through text-slate-400' : ''}">${t.title}</p>
+              <div class="flex items-center gap-1 mt-0.5">
+                <span class="text-[10px] px-1.5 py-0.2 rounded font-semibold border ${priorityColor}">${t.priority}</span>
+                ${t.category ? `<span class="text-[10px] text-slate-500 font-medium truncate">${t.category}</span>` : ''}
+              </div>
+            </div>
+          </div>
+          <button type="button" class="shrink-0 px-2 py-1 bg-indigo-50 group-hover:bg-indigo-600 group-hover:text-white text-indigo-700 rounded-lg text-[10px] font-extrabold flex items-center gap-0.5 transition">
+            <span>Log</span>
+            <i data-lucide="arrow-right" class="w-2.5 h-2.5"></i>
+          </button>
+        `;
+        container.appendChild(card);
+      });
+
+      // Render các plan trong ngày
+      currentPlans.forEach(p => {
+        const card = document.createElement('div');
+        card.className = "p-2.5 rounded-xl border bg-white border-purple-100 hover:border-purple-300 hover:shadow-xs transition flex items-center justify-between gap-2 cursor-pointer group";
+        card.onclick = () => logFromTask(null, p.id);
+        card.title = 'Bấm để ghi nhật ký cho kế hoạch này';
+
+        card.innerHTML = `
+          <div class="flex items-start space-x-2 min-w-0 flex-1">
+            <div class="mt-0.5 w-4 h-4 rounded-md bg-purple-100 text-purple-700 shrink-0 flex items-center justify-center">
+              <i data-lucide="calendar" class="w-2.5 h-2.5"></i>
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-bold text-slate-800 truncate group-hover:text-purple-700 transition">${p.task}</p>
+              <div class="flex items-center gap-1 mt-0.5">
+                <span class="text-[10px] px-1.5 py-0.2 rounded font-semibold bg-purple-50 text-purple-700 border border-purple-200">Kế hoạch</span>
+                <span class="text-[10px] text-slate-500 font-medium truncate">${p.assigneeName || p.category || ''}</span>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="shrink-0 px-2 py-1 bg-purple-50 group-hover:bg-purple-600 group-hover:text-white text-purple-700 rounded-lg text-[10px] font-extrabold flex items-center gap-0.5 transition">
+            <span>Log</span>
+            <i data-lucide="arrow-right" class="w-2.5 h-2.5"></i>
+          </button>
+        `;
+        container.appendChild(card);
+      });
+
+      lucide.createIcons();
+    }
+
+    function logFromTask(taskId, planId) {
+      const select = document.getElementById('select-log-linked-task');
+      const inputTaskId = document.getElementById('input-log-linked-task-id');
+      const inputPlanId = document.getElementById('input-log-linked-plan-id');
+      
+      let content = '';
+      let area = '';
+      let result = '';
+      let status = 'Không bất thường';
+
+      if (taskId) {
+        const task = repo.tasks.find(t => t.id === taskId);
+        if (task) {
+          content = `Thực hiện: ${task.title}`;
+          area = task.category || '';
+          result = task.criteria ? `Đạt tiêu chuẩn: ${task.criteria}` : 'Hoàn thành tốt, thông số vận hành bình thường.';
+          if (inputTaskId) inputTaskId.value = String(task.id);
+          if (inputPlanId) inputPlanId.value = '';
+          if (select) select.value = `task_${task.id}`;
+        }
+      } else if (planId) {
+        const plan = repo.plans.find(p => p.id === planId);
+        if (plan) {
+          content = `Thực hiện kế hoạch: ${plan.task}`;
+          area = plan.category || '';
+          result = plan.criteria ? `Nghiệm thu: ${plan.criteria}` : 'Đã triển khai hoàn tất theo kế hoạch.';
+          if (inputTaskId) inputTaskId.value = '';
+          if (inputPlanId) inputPlanId.value = String(plan.id);
+          if (select) select.value = `plan_${plan.id}`;
+        }
+      }
+
+      applyLogTemplate(content, status, area, '', '', result, '');
+    }
+
+    function handleLogTaskSelectChange() {
+      const select = document.getElementById('select-log-linked-task');
+      if (!select) return;
+      const val = select.value;
+      if (!val) {
+        if (document.getElementById('input-log-linked-task-id')) document.getElementById('input-log-linked-task-id').value = '';
+        if (document.getElementById('input-log-linked-plan-id')) document.getElementById('input-log-linked-plan-id').value = '';
+        return;
+      }
+
+      if (val.startsWith('task_')) {
+        const taskId = Number(val.replace('task_', ''));
+        logFromTask(taskId, null);
+      } else if (val.startsWith('plan_')) {
+        const planId = val.replace('plan_', '');
+        logFromTask(null, planId);
+      }
     }
 
     function openTaskModal() {
@@ -6497,13 +6709,15 @@
       document.getElementById('input-task-criteria').value = '';
       closeTaskModal();
       renderTasks();
-      showToast('Đã thêm checklist mới vào ca trực');
+      renderJournalTaskSelector();
+      showToast('Đã thêm đầu việc mới vào ca trực');
     }
 
     function deleteTask(id) {
       if (confirm('Xóa công việc này khỏi checklist?')) {
         repo.deleteTask(id);
         renderTasks();
+        renderJournalTaskSelector();
         showToast('Đã xóa công việc');
       }
     }
@@ -6525,6 +6739,7 @@
         document.getElementById('input-log-start-time').value = `${String(startD.getHours()).padStart(2, '0')}:${String(startD.getMinutes()).padStart(2, '0')}`;
       }
 
+      renderJournalTaskSelector();
       document.getElementById('input-log-content').focus();
     }
 
@@ -6552,6 +6767,8 @@
       const endTime = document.getElementById('input-log-end-time').value.trim();
       const result = document.getElementById('input-log-result').value.trim();
       const notes = document.getElementById('input-log-notes').value.trim();
+      const linkedTaskId = document.getElementById('input-log-linked-task-id') ? document.getElementById('input-log-linked-task-id').value : '';
+      const linkedPlanId = document.getElementById('input-log-linked-plan-id') ? document.getElementById('input-log-linked-plan-id').value : '';
 
       if (!content) {
         alert('Vui lòng nhập nội dung công việc thực hiện');
@@ -6559,14 +6776,41 @@
       }
 
       repo.addLog(content, status, area, startTime, endTime, result, notes);
+
+      // Nếu có liên kết với checklist, tự động cập nhật task hoàn thành nếu không bất thường
+      if (linkedTaskId) {
+        const task = repo.tasks.find(t => String(t.id) === String(linkedTaskId));
+        if (task && (status === 'Không bất thường' || status === 'Đã xử lý dứt điểm')) {
+          task.done = true;
+          repo.saveTasks();
+        }
+      }
+
+      // Nếu có liên kết với plan
+      if (linkedPlanId) {
+        const plan = repo.plans.find(p => String(p.id) === String(linkedPlanId));
+        if (plan && (status === 'Không bất thường' || status === 'Đã xử lý dứt điểm')) {
+          if (plan.planQty && (!plan.doneQty || plan.doneQty < plan.planQty)) {
+            plan.doneQty = plan.planQty;
+          }
+          repo.savePlans();
+        }
+      }
+
       document.getElementById('input-log-content').value = '';
       document.getElementById('input-log-area').value = '';
       document.getElementById('input-log-start-time').value = '';
       document.getElementById('input-log-end-time').value = '';
       document.getElementById('input-log-result').value = '';
       document.getElementById('input-log-notes').value = '';
+      if (document.getElementById('input-log-linked-task-id')) document.getElementById('input-log-linked-task-id').value = '';
+      if (document.getElementById('input-log-linked-plan-id')) document.getElementById('input-log-linked-plan-id').value = '';
+      if (document.getElementById('select-log-linked-task')) document.getElementById('select-log-linked-task').value = '';
+
       closeLogModal();
       renderLogs();
+      renderTasks();
+      renderJournalTaskSelector();
       showToast('Đã ghi vào sổ nhật ký ca trực');
     }
 
@@ -6574,6 +6818,7 @@
       if (confirm('Xóa mục nhật ký này?')) {
         repo.deleteLog(id);
         renderLogs();
+        renderJournalTaskSelector();
         showToast('Đã xóa mục nhật ký');
       }
     }
@@ -6696,6 +6941,10 @@
       document.getElementById('header-title').innerText = titles[tabName] || 'Nhật Ký & Checklist';
       if (updateHash) window.location.hash = tabName;
       if (tabName === 'report') updateStats();
+      if (tabName === 'journal') {
+        renderJournalTaskSelector();
+        renderLogs();
+      }
     }
 
     function exportDataJSON() {
