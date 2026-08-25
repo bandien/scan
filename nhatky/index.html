@@ -280,21 +280,9 @@
       <!-- ========================================== -->
       <section id="tab-journal" class="space-y-3.5 hidden">
         <!-- Action Bar -->
-        <div class="flex justify-between items-center gap-2 flex-wrap">
-          <div class="flex items-center space-x-2">
-            <h2 class="text-base font-bold text-slate-800">Dòng thời gian nhật ký</h2>
-            <span id="log-count-badge" class="text-xs font-bold px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">0</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <button id="btn-refresh-logs" onclick="triggerManualSync()" aria-label="Làm mới và đồng bộ Google Sheets" class="flex items-center space-x-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 active:scale-95 px-3 py-2 rounded-xl text-xs font-bold border border-slate-300 transition">
-              <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-slate-600" id="btn-refresh-logs-icon"></i>
-              <span>Làm mới</span>
-            </button>
-            <button onclick="openLogModal('log')" aria-label="Ghi nhật ký hoặc thêm đầu việc mới" class="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white px-3.5 py-2 rounded-xl text-sm font-semibold shadow-sm transition">
-              <i data-lucide="edit-3" class="w-4 h-4"></i>
-              <span>Ghi nhật ký / Thêm việc</span>
-            </button>
-          </div>
+        <div class="flex items-center space-x-2">
+          <h2 class="text-base font-bold text-slate-800">Dòng thời gian nhật ký</h2>
+          <span id="log-count-badge" class="text-xs font-bold px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">0</span>
         </div>
 
         <!-- Filter Scope Chips: Ca hiện tại | Hôm nay | 7 ngày | Tất cả -->
@@ -327,29 +315,13 @@
             </div>
             <button onclick="openLogModal('task')" aria-label="Thêm đầu việc mới vào ca trực" class="px-2.5 py-1 bg-white hover:bg-indigo-50 text-indigo-700 font-bold border border-indigo-200 rounded-xl text-xs flex items-center gap-1 transition shadow-2xs active:scale-95">
               <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-              <span>+ Thêm việc</span>
+              <span>Thêm việc</span>
             </button>
           </div>
 
           <!-- Danh sách thẻ đầu việc có thể bấm để ghi nhật ký -->
           <div id="journal-task-quick-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto custom-scrollbar pt-0.5">
             <!-- Rendered by JS -->
-          </div>
-        </div>
-
-        <!-- Quick Template Chips -->
-        <div class="space-y-1.5">
-          <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Mẫu nhanh:</span>
-          <div class="flex gap-1.5 overflow-x-auto pb-1 text-xs">
-            <button onclick="applyLogTemplate('Kiểm tra tủ điện chính: Các thông số điện áp và dòng tải ổn định.', 'Không bất thường', 'Trạm điện')" class="whitespace-nowrap px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-slate-600 hover:border-emerald-400 active:bg-slate-100">
-              ⚡ Trạm điện ổn định
-            </button>
-            <button onclick="applyLogTemplate('Bảo dưỡng máy bơm nước sinh hoạt: Đã tra dầu, xả cặn định kỳ.', 'Đã xử lý dứt điểm', 'Trạm bơm')" class="whitespace-nowrap px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-slate-600 hover:border-emerald-400 active:bg-slate-100">
-              💧 Bảo dưỡng máy bơm
-            </button>
-            <button onclick="applyLogTemplate('Phát hiện tiếng kêu lạ tại quạt thông gió hầm B2, cần kiểm tra tiếp ca sau.', 'Cần theo dõi thêm', 'Hầm B2')" class="whitespace-nowrap px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-slate-600 hover:border-emerald-400 active:bg-slate-100">
-              ⚠️ Tiếng ồn quạt gió
-            </button>
           </div>
         </div>
 
@@ -624,6 +596,11 @@
             <span>Xóa Lịch Tuần</span>
           </button>
 
+          <button id="btn-sync-schedule-cloud" onclick="triggerManualSync(true)" aria-label="Đồng bộ bảng phân ca với Google Sheets" class="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-300 rounded-xl text-xs font-bold transition flex items-center gap-1 active:scale-95 shadow-2xs">
+            <i data-lucide="cloud" class="w-4 h-4 text-indigo-600"></i>
+            <span>☁️ Đồng Bộ Cloud</span>
+          </button>
+
           <button id="btn-copy-schedule-sheet" onclick="handleCopyScheduleForSheets()" aria-label="Sao chép bảng phân ca cho Google Sheets" class="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-300 rounded-xl text-xs font-bold transition flex items-center gap-1 active:scale-95 shadow-xs">
             <i data-lucide="copy" class="w-4 h-4 text-blue-600"></i>
             <span>📋 Sao Chép Cho Sheet</span>
@@ -643,15 +620,11 @@
         </div>
       </div>
 
-      <!-- Autumn Schedule & Handover Quick Info Banner -->
-      <div class="bg-amber-50/90 border border-amber-300 rounded-2xl p-2.5 flex items-center justify-between flex-wrap gap-2 text-xs shrink-0 shadow-2xs">
+      <!-- Autumn Schedule Quick Info Banner -->
+      <div class="bg-amber-50/90 border border-amber-300 rounded-2xl p-2.5 flex items-center gap-2 text-xs shrink-0 shadow-2xs">
         <div class="flex items-center gap-1.5 text-amber-950 font-bold">
           <i data-lucide="sun-medium" class="w-4 h-4 text-amber-600"></i>
           <span>Khung giờ Mùa Thu: <span class="text-amber-900 font-extrabold">Ca 1: 05h00 – 13h30</span> | <span class="text-emerald-900 font-extrabold">HC: 07h00 – 11h30 & 13h30 – 17h00</span> | <span class="text-rose-900 font-extrabold">Ca 2: 13h30 – 21h30</span></span>
-        </div>
-        <div class="flex items-center gap-1 text-[11px] font-extrabold text-slate-900 bg-yellow-300 px-2.5 py-1 rounded-xl border border-yellow-400 shadow-2xs">
-          <i data-lucide="clock-alert" class="w-3.5 h-3.5 text-slate-900"></i>
-          <span>Quy định: Có mặt trước 15 phút nhận bàn giao. Đến giờ làm việc luôn.</span>
         </div>
       </div>
 
@@ -739,9 +712,9 @@
   <!-- ========================================== -->
   <div id="modal-shift-rules" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200 overflow-y-auto" style="z-index: 50;">
     <div class="bg-white rounded-3xl w-full max-w-3xl p-5 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] flex flex-col">
-      <div class="flex justify-between items-center shrink-0 border-b border-slate-100 pb-3">
-        <div class="flex items-center space-x-2 text-amber-700">
-          <div class="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700">
+      <div class="flex justify-between items-center shrink-0 border-b border-slate-100 pb-3 flex-wrap gap-2">
+        <div class="flex items-center space-x-2.5 text-amber-700">
+          <div class="w-9 h-9 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-700 shadow-xs">
             <i data-lucide="book-open-check" class="w-5 h-5"></i>
           </div>
           <div>
@@ -749,127 +722,137 @@
             <p class="text-xs text-slate-500 font-medium">Tổ Cơ Điện Sân Golf • Tiêu Chuẩn Phân Bổ & Xoay Ca Tuần</p>
           </div>
         </div>
-        <div class="flex items-center gap-1.5">
-          <button onclick="openChangelogModal()" title="Xem lịch sử cập nhật phiên bản" class="px-2.5 py-1 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-xl text-[11px] font-bold transition flex items-center gap-1">
+        <div class="flex items-center gap-2">
+          <!-- Nút Đồng Bộ Đám Mây -->
+          <button id="btn-sync-rules-cloud" onclick="triggerManualSync(true)" type="button" title="Đồng bộ quy tắc ca với Google Sheets" class="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+            <i data-lucide="cloud" class="w-3.5 h-3.5 text-indigo-600"></i>
+            <span>Đồng bộ Cloud</span>
+          </button>
+          <!-- Nút Sao Chép Dạng Tin Nhắn Nhanh -->
+          <button onclick="copyShiftRulesAsTextMessage()" type="button" title="Sao chép toàn bộ quy tắc dưới dạng tin nhắn Zalo/Telegram" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold shadow-xs flex items-center gap-1.5 transition active:scale-95 cursor-pointer">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            <span>Sao chép tin nhắn</span>
+          </button>
+          <button onclick="openChangelogModal()" title="Xem lịch sử cập nhật phiên bản" class="px-2.5 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer">
             <i data-lucide="history" class="w-3.5 h-3.5 text-purple-600"></i>
             <span>Log v3.2.0</span>
           </button>
-          <button onclick="closeShiftRulesModal()" aria-label="Đóng bảng quy tắc phân ca" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
+          <button onclick="closeShiftRulesModal()" aria-label="Đóng bảng quy tắc phân ca" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700 cursor-pointer">
             <i data-lucide="x" class="w-4 h-4"></i>
           </button>
         </div>
       </div>
 
-      <div class="space-y-3.5 overflow-y-auto flex-1 pr-1 custom-scrollbar text-xs text-slate-700">
+      <div class="space-y-4 overflow-y-auto flex-1 pr-1 custom-scrollbar text-xs text-slate-800 select-text leading-relaxed">
         
-        <!-- BẢNG QUY ĐỊNH KHUNG GIỜ MÙA THU & GIỜ ĂN CA (CHÍNH THỨC) -->
-        <div class="rounded-2xl border-2 border-amber-400 shadow-sm overflow-hidden bg-white">
-          <div class="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-400 p-3 text-slate-900 flex justify-between items-center">
-            <div class="flex items-center space-x-2 font-extrabold text-sm">
-              <i data-lucide="clock" class="w-4 h-4 text-slate-900"></i>
-              <span class="uppercase tracking-wider">Quy Định Khung Giờ Làm Việc Mùa Thu & Giờ Ăn Ca</span>
-            </div>
-            <span class="px-2.5 py-0.5 bg-slate-900 text-yellow-300 text-[10px] font-extrabold rounded-full">Áp Dụng Tổ Cơ Điện</span>
-          </div>
-
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs border-collapse min-w-[580px] font-sans">
-              <thead>
-                <tr class="bg-yellow-300 text-slate-950 font-extrabold text-xs border-b border-slate-400">
-                  <th class="py-2.5 px-3 border-r border-slate-400 w-36 text-center">Vị trí</th>
-                  <th class="py-2.5 px-3 border-r border-slate-400 w-64 text-center">Khung giờ làm việc mùa thu</th>
-                  <th class="py-2.5 px-3 text-center">Giờ ăn ca</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-300 font-semibold text-slate-900">
-                <!-- Ca 1 -->
-                <tr class="hover:bg-amber-50/40">
-                  <td class="py-3 px-3 border-r border-slate-300 font-extrabold text-slate-900 text-center bg-amber-50/60">
-                    <div class="text-sm">Ca 1</div>
-                    <div class="text-[11px] text-amber-800 font-bold">(1 người)</div>
-                  </td>
-                  <td class="py-3 px-3 border-r border-slate-300 font-extrabold text-slate-900 text-base">
-                    5h00 – 13h30
-                  </td>
-                  <td class="py-3 px-3 space-y-0.5">
-                    <div class="font-extrabold text-slate-900 text-sm">11h00 – 11h30</div>
-                    <div class="text-[11px] text-slate-600 font-medium italic">(tạm bàn giao cho ca hành chính trước khi đi ăn)</div>
-                  </td>
-                </tr>
-                <!-- Hành chính -->
-                <tr class="hover:bg-emerald-50/30">
-                  <td class="py-3 px-3 border-r border-slate-300 font-extrabold text-slate-900 text-center bg-emerald-50/50">
-                    <div class="text-sm">Hành chính</div>
-                    <div class="text-[11px] text-emerald-800 font-bold">(Bảo trì ngày)</div>
-                  </td>
-                  <td class="py-3 px-3 border-r border-slate-300 space-y-1">
-                    <div class="font-extrabold text-slate-900 text-base">7h00 – 11h30 & 13h30 – 17h00</div>
-                    <div class="text-[11px] text-rose-700 font-bold bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200 inline-block">
-                      (11h00-11h30 chịu trách nhiệm mọi sự cố trong 30 phút này)
-                    </div>
-                  </td>
-                  <td class="py-3 px-3">
-                    <div class="font-extrabold text-slate-900 text-sm">11h30 – 13h30</div>
-                  </td>
-                </tr>
-                <!-- Ca 2 -->
-                <tr class="hover:bg-rose-50/30">
-                  <td class="py-3 px-3 border-r border-slate-300 font-extrabold text-slate-900 text-center bg-rose-50/50">
-                    <div class="text-sm">Ca 2</div>
-                    <div class="text-[11px] text-rose-800 font-bold">(2 người)</div>
-                  </td>
-                  <td class="py-3 px-3 border-r border-slate-300 font-extrabold text-slate-900 text-base">
-                    13h30 – 21h30
-                  </td>
-                  <td class="py-3 px-3 space-y-1">
-                    <div class="font-extrabold text-slate-900 text-xs">
-                      • Người 1 ăn: <span class="text-rose-700 font-extrabold text-sm">17h00 – 17h30</span>
-                    </div>
-                    <div class="font-extrabold text-slate-900 text-xs">
-                      • Người 2 ăn: <span class="text-rose-700 font-extrabold text-sm">17h30 – 18h00</span>
-                    </div>
-                    <div class="text-[11px] text-emerald-700 font-bold italic">
-                      👉 Để luôn có 1 người trực sẵn sàng tại sân
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Bottom Banner Rule -->
-          <div class="p-3 bg-yellow-300 border-t border-slate-400 flex items-center gap-2 text-slate-950 font-extrabold text-xs">
-            <i data-lucide="shield-alert" class="w-4 h-4 text-slate-900 shrink-0"></i>
-            <span>Quy định bắt buộc: Các ca có mặt trước giờ làm việc 15 phút để nhận bàn giao. Đến giờ làm việc luôn.</span>
-          </div>
-        </div>
-
-        <!-- Quy tắc 1: Định Mức Phân Ca Trực (Động - Tạo/Sửa/Xóa) -->
-        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-2 text-indigo-700 font-bold text-sm">
-              <i data-lucide="clock" class="w-4 h-4 text-indigo-600"></i>
+        <!-- Quy tắc 1: Định Mức Phân Ca Trực (Động - Tạo/Sửa/Xóa & Dễ Bôi Đen Copy) -->
+        <div class="p-4 rounded-2xl bg-indigo-50/40 border border-indigo-200/80 space-y-3">
+          <div class="flex items-center justify-between border-b border-indigo-100 pb-2">
+            <div class="flex items-center space-x-2 text-indigo-800 font-extrabold text-sm">
+              <i data-lucide="clock" class="w-4 h-4 text-indigo-600 select-none"></i>
               <span>1. Chi Tiết Khung Giờ & Định Mức Quân Số Mỗi Ngày</span>
             </div>
-            <button onclick="openEditShiftDefinitionModal()" type="button" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[11px] font-bold shadow-xs flex items-center gap-1 transition active:scale-95">
+            <button onclick="openEditShiftDefinitionModal()" type="button" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[11px] font-bold shadow-xs flex items-center gap-1 transition active:scale-95 select-none cursor-pointer">
               <i data-lucide="plus" class="w-3.5 h-3.5"></i>
               <span>Tạo thêm Ca</span>
             </button>
           </div>
           
-          <div id="shift-definitions-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-            <!-- Dynamic Shift Cards Rendered via JS -->
+          <div id="shift-definitions-grid" class="space-y-2.5 pt-0.5">
+            <!-- Ca 1 -->
+            <div class="bg-white p-3 rounded-xl border border-slate-200/90 shadow-2xs flex justify-between items-start gap-2 hover:border-indigo-300 transition">
+              <div class="space-y-1 flex-1">
+                <div class="font-extrabold text-slate-900 text-xs">
+                  • Ca 1 (Sáng): <span class="text-indigo-700 font-bold">05:45 – 14:15</span> <span class="bg-rose-100 text-slate-900 px-1.5 py-0.5 rounded text-[11px] font-bold">[1 Trực (x)]</span>
+                </div>
+                <div class="text-[11px] text-slate-600 pl-3 leading-relaxed">
+                  - Ăn ca: 11h00 – 11h30 (tạm bàn giao cho ca hành chính trước khi đi ăn).
+                </div>
+              </div>
+              <div class="flex items-center gap-1 shrink-0 select-none">
+                <button type="button" onclick="openEditShiftDefinitionModal('ca1')" title="Chỉnh sửa ca này" class="px-2 py-1 rounded-lg text-indigo-700 bg-indigo-50 hover:bg-indigo-100 flex items-center gap-1 transition font-bold text-[11px] cursor-pointer">
+                  <i data-lucide="pencil" class="w-3 h-3 text-indigo-600"></i>
+                  <span>Sửa</span>
+                </button>
+                <button type="button" onclick="handleDeleteShiftDefinition('ca1')" title="Xóa ca này" class="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition cursor-pointer">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Ca 2 -->
+            <div class="bg-white p-3 rounded-xl border border-slate-200/90 shadow-2xs flex justify-between items-start gap-2 hover:border-indigo-300 transition">
+              <div class="space-y-1 flex-1">
+                <div class="font-extrabold text-slate-900 text-xs">
+                  • Ca 2 (Chiều/Tối): <span class="text-indigo-700 font-bold">13:45 – 22:15</span> <span class="bg-rose-100 text-slate-900 px-1.5 py-0.5 rounded text-[11px] font-bold">[2 Trực (x)]</span>
+                </div>
+                <div class="text-[11px] text-slate-600 pl-3 leading-relaxed">
+                  - Ăn ca: Người 1 (17h00–17h30), Người 2 (17h30–18h00). Luôn có 1 người trực sẵn sàng tại sân.
+                </div>
+              </div>
+              <div class="flex items-center gap-1 shrink-0 select-none">
+                <button type="button" onclick="openEditShiftDefinitionModal('ca2')" title="Chỉnh sửa ca này" class="px-2 py-1 rounded-lg text-indigo-700 bg-indigo-50 hover:bg-indigo-100 flex items-center gap-1 transition font-bold text-[11px] cursor-pointer">
+                  <i data-lucide="pencil" class="w-3 h-3 text-indigo-600"></i>
+                  <span>Sửa</span>
+                </button>
+                <button type="button" onclick="handleDeleteShiftDefinition('ca2')" title="Xóa ca này" class="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition cursor-pointer">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Ca 3 -->
+            <div class="bg-white p-3 rounded-xl border border-slate-200/90 shadow-2xs flex justify-between items-start gap-2 hover:border-indigo-300 transition">
+              <div class="space-y-1 flex-1">
+                <div class="font-extrabold text-slate-900 text-xs">
+                  • Ca 3 (Đêm): <span class="text-indigo-700 font-bold">22:00 – 06:00</span> <span class="bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded text-[11px] font-bold">[0 Trực (x)]</span>
+                </div>
+                <div class="text-[11px] text-slate-600 pl-3 leading-relaxed">
+                  - Trực On-call khi phát sinh sự cố khẩn cấp ban đêm.
+                </div>
+              </div>
+              <div class="flex items-center gap-1 shrink-0 select-none">
+                <button type="button" onclick="openEditShiftDefinitionModal('ca3')" title="Chỉnh sửa ca này" class="px-2 py-1 rounded-lg text-indigo-700 bg-indigo-50 hover:bg-indigo-100 flex items-center gap-1 transition font-bold text-[11px] cursor-pointer">
+                  <i data-lucide="pencil" class="w-3 h-3 text-indigo-600"></i>
+                  <span>Sửa</span>
+                </button>
+                <button type="button" onclick="handleDeleteShiftDefinition('ca3')" title="Xóa ca này" class="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition cursor-pointer">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Hành chính -->
+            <div class="bg-white p-3 rounded-xl border border-slate-200/90 shadow-2xs flex justify-between items-start gap-2 hover:border-indigo-300 transition">
+              <div class="space-y-1 flex-1">
+                <div class="font-extrabold text-slate-900 text-xs">
+                  • Hành chính (hc): <span class="text-indigo-700 font-bold">07:00 – 11:30 & 13:30 – 17:00</span> <span class="bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded text-[11px] font-bold">[0 Hỗ trợ (hc)]</span>
+                </div>
+                <div class="text-[11px] text-slate-600 pl-3 leading-relaxed">
+                  - Ăn/nghỉ: 11h30–13h30. (11h00–11h30 chịu trách nhiệm vận hành trong 30 phút này).
+                </div>
+              </div>
+              <div class="flex items-center gap-1 shrink-0 select-none">
+                <button type="button" onclick="openEditShiftDefinitionModal('hc')" title="Chỉnh sửa ca này" class="px-2 py-1 rounded-lg text-indigo-700 bg-indigo-50 hover:bg-indigo-100 flex items-center gap-1 transition font-bold text-[11px] cursor-pointer">
+                  <i data-lucide="pencil" class="w-3 h-3 text-indigo-600"></i>
+                  <span>Sửa</span>
+                </button>
+                <button type="button" onclick="handleDeleteShiftDefinition('hc')" title="Xóa ca này" class="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition cursor-pointer">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div id="shift-definitions-summary" class="p-2 bg-indigo-50/80 rounded-xl border border-indigo-100 text-[11px] text-indigo-900 font-semibold">
-            👉 Dòng <span class="font-bold underline">Trực điện nước</span> ở cuối bảng mỗi ngày luôn đạt chuẩn: <span id="shift-summary-quota-text" class="font-bold text-indigo-700">Ca 1 = 1, Ca 2 = 2, Ca 3 = 0</span>.
+          <div id="shift-definitions-summary" class="p-2.5 bg-indigo-100/70 rounded-xl border border-indigo-200 text-xs text-indigo-950 font-semibold">
+            Dòng <span class="font-bold underline">Trực điện nước</span> ở cuối bảng mỗi ngày luôn đạt chuẩn: <span id="shift-summary-quota-text" class="font-bold text-indigo-800">Ca 1 = 1, Ca 2 = 2, Ca 3 = 0</span>.
           </div>
         </div>
 
         <!-- Quy tắc 2: Chế độ Nghỉ tuần (CN) & Tăng cường Cuối Tuần -->
         <div class="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/80 space-y-2">
-          <div class="flex items-center space-x-2 text-amber-800 font-bold text-sm">
-            <i data-lucide="calendar-heart" class="w-4 h-4 text-amber-600"></i>
+          <div class="flex items-center space-x-2 text-amber-900 font-extrabold text-sm border-b border-amber-200 pb-1.5">
+            <i data-lucide="calendar-heart" class="w-4 h-4 text-amber-600 select-none"></i>
             <span>2. Chế Độ Nghỉ Tuần (CN) & Tăng Cường Hành Chính Cuối Tuần (T7 & CN)</span>
           </div>
           <ul class="space-y-1.5 text-slate-700 pl-4 list-disc text-xs leading-relaxed">
@@ -881,12 +864,12 @@
 
         <!-- Quy tắc 3: Nhân sự thử việc & Ca Hành chính -->
         <div class="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 space-y-2">
-          <div class="flex items-center space-x-2 text-emerald-800 font-bold text-sm">
-            <i data-lucide="users" class="w-4 h-4 text-emerald-600"></i>
+          <div class="flex items-center space-x-2 text-emerald-900 font-extrabold text-sm border-b border-emerald-200 pb-1.5">
+            <i data-lucide="users" class="w-4 h-4 text-emerald-600 select-none"></i>
             <span>3. Phân Bổ Nhân Sự Thử Việc & Ca Hành Chính (hc)</span>
           </div>
           <ul class="space-y-1.5 text-slate-700 pl-4 list-disc text-xs leading-relaxed">
-            <li>Nhân viên thử việc / học việc ưu tiên đi <span class="bg-emerald-100 font-bold text-emerald-900 px-1.5 py-0.5 rounded">hc (Hành chính <span id="rule-3-hc-time">08:00 – 17:00</span>)</span> để học việc, nắm bắt hệ thống kỹ thuật và thực hiện bảo dưỡng ban ngày.</li>
+            <li>Nhân viên thử việc / học việc ưu tiên đi <span class="bg-emerald-100 font-bold text-emerald-900 px-1.5 py-0.5 rounded">hc (Hành chính <span id="rule-3-hc-time">07:00 – 11:30 & 13:30 – 17:00</span>)</span> để học việc, nắm bắt hệ thống kỹ thuật và thực hiện bảo dưỡng ban ngày.</li>
             <li><span class="font-bold text-slate-900">An toàn vận hành Ca 1:</span> Suất trực chính Ca 1 bắt buộc do KTV chính thức đảm nhận; nhân viên thử việc <span class="font-bold text-rose-700">tuyệt đối không trực độc lập Ca 1</span>.</li>
             <li>Khi đi ca tối (Ca 2), nhân viên thử việc luôn được <span class="font-semibold text-emerald-900">đi kèm cùng Kỹ thuật viên chính</span> để đảm bảo an toàn vận hành.</li>
           </ul>
@@ -894,8 +877,8 @@
 
         <!-- Quy tắc 4: Ổn định ca trong tuần (T2-T7) & Chuyển tiếp ca Chủ Nhật -->
         <div class="p-4 rounded-2xl bg-purple-50/70 border border-purple-200/80 space-y-2">
-          <div class="flex items-center space-x-2 text-purple-800 font-bold text-sm">
-            <i data-lucide="calendar-sync" class="w-4 h-4 text-purple-600"></i>
+          <div class="flex items-center space-x-2 text-purple-900 font-extrabold text-sm border-b border-purple-200 pb-1.5">
+            <i data-lucide="calendar-sync" class="w-4 h-4 text-purple-600 select-none"></i>
             <span>4. Ổn Định Ca (Thứ 2 – Thứ 7) & Chủ Nhật Chuyển Tiếp Ca Tuần Mới</span>
           </div>
           <ul class="space-y-1.5 text-slate-700 pl-4 list-disc text-xs leading-relaxed">
@@ -904,15 +887,14 @@
           </ul>
         </div>
 
-        <!-- Quy tắc 5: Căn Cứ Xếp Ca Tuần Kế Tiếp & Chủ Nhật Chuyển Tiếp Ca Tuần Mới -->
-        <div class="p-4 rounded-2xl bg-purple-50/70 border border-purple-200/80 space-y-2">
-          <div class="flex items-center space-x-2 text-purple-800 font-bold text-sm">
-            <i data-lucide="calendar-sync" class="w-4 h-4 text-purple-600"></i>
-            <span>5. Căn Cứ Xếp Ca Tuần Kế Tiếp & Chủ Nhật Chuyển Tiếp Ca Tuần Mới</span>
+        <!-- Quy tắc 5: Căn Cứ Xếp Ca Tuần Kế Tiếp -->
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+          <div class="flex items-center space-x-2 text-slate-900 font-extrabold text-sm border-b border-slate-200 pb-1.5">
+            <i data-lucide="sparkles" class="w-4 h-4 text-indigo-600 select-none"></i>
+            <span>5. Căn Cứ Xếp Ca Tuần Kế Tiếp</span>
           </div>
           <ul class="space-y-1.5 text-slate-700 pl-4 list-disc text-xs leading-relaxed">
-            <li><span class="font-bold text-slate-900">Từ Thứ 2 đến Thứ 7:</span> Giữ cố định ca trực chính trong tuần để duy trì nhịp làm việc ổn định, hạn chế đổi ca giữa tuần.</li>
-            <li><span class="font-bold text-purple-900 bg-purple-100 px-1.5 py-0.5 rounded">Chủ Nhật (Thể hiện ca tuần kế tiếp):</span> Ngày Chủ Nhật là ngày chuyển tiếp — thể hiện chính xác ca mà KTV đó sẽ đi ở tuần tiếp theo để bắt nhịp êm ái, đảm bảo thời gian nghỉ chuyển ca từ <strong class="text-purple-950">24h – 40h</strong>.</li>
+            <li>Hệ thống căn cứ vào lịch sử phân ca và ca trực ngày Chủ Nhật của tuần hiện tại để tự động tính toán, xoay vòng phân ca công bằng, luân phiên ca sáng - chiều - hành chính và ngày nghỉ tuần chuẩn xác cho tuần kế tiếp.</li>
           </ul>
         </div>
 
@@ -931,40 +913,40 @@
             <div class="p-2 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-900 flex flex-col justify-between items-center">
               <span class="text-[9px] uppercase tracking-wider text-indigo-500 font-extrabold">Bước 1</span>
               <span class="text-xs font-extrabold my-1 text-slate-900">🌙 Ca 3</span>
-              <span class="text-[9px] text-slate-500 font-normal">22h – 06h</span>
+              <span class="text-[9px] text-slate-500 font-normal">21h30 – 05h00</span>
               <span class="mt-1 text-[9px] text-indigo-700 font-bold">➔ Sang Ca 2 (T1)</span>
             </div>
             <div class="p-2 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 flex flex-col justify-between items-center">
               <span class="text-[9px] uppercase tracking-wider text-rose-500 font-extrabold">Bước 2</span>
               <span class="text-xs font-extrabold my-1 text-slate-900">🔴 Ca 2 (T1)</span>
-              <span class="text-[9px] text-slate-500 font-normal">14h – 22h</span>
+              <span class="text-[9px] text-slate-500 font-normal">13h30 – 21h30</span>
               <span class="mt-1 text-[9px] text-rose-700 font-bold">➔ Giữ Ca 2 (T2)</span>
             </div>
             <div class="p-2 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 flex flex-col justify-between items-center">
               <span class="text-[9px] uppercase tracking-wider text-rose-500 font-extrabold">Bước 3</span>
               <span class="text-xs font-extrabold my-1 text-slate-900">🔴 Ca 2 (T2)</span>
-              <span class="text-[9px] text-slate-500 font-normal">14h – 22h</span>
+              <span class="text-[9px] text-slate-500 font-normal">13h30 – 21h30</span>
               <span class="mt-1 text-[9px] text-rose-700 font-bold">➔ Sang Ca 1</span>
             </div>
             <div class="p-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 flex flex-col justify-between items-center">
               <span class="text-[9px] uppercase tracking-wider text-amber-500 font-extrabold">Bước 4</span>
               <span class="text-xs font-extrabold my-1 text-slate-900">🌅 Ca 1</span>
-              <span class="text-[9px] text-slate-500 font-normal">06h – 14h</span>
+              <span class="text-[9px] text-slate-500 font-normal">05h00 – 13h30</span>
               <span class="mt-1 text-[9px] text-amber-800 font-bold">➔ Sang HC & Bù</span>
             </div>
             <div class="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-900 flex flex-col justify-between items-center">
               <span class="text-[9px] uppercase tracking-wider text-emerald-500 font-extrabold">Bước 5</span>
               <span class="text-xs font-extrabold my-1 text-slate-900">🟢 HC & Bù</span>
-              <span class="text-[9px] text-slate-500 font-normal">08h – 17h</span>
+              <span class="text-[9px] text-slate-500 font-normal">07h00 – 17h00</span>
               <span class="mt-1 text-[9px] text-emerald-700 font-bold">➔ Quay lại Ca 3</span>
             </div>
           </div>
 
           <ul class="space-y-1.5 text-slate-700 pl-4 list-disc text-xs leading-relaxed">
-            <li><span class="font-bold text-slate-900">Từ Ca 3 sang Ca 2:</span> Hết ca đêm lúc 06h00 sáng Thứ Bảy ➔ Thứ Bảy nghỉ tuần <strong class="text-amber-800">CN</strong> ➔ Chủ Nhật vào Ca 2 lúc 14h00 chiều (<strong class="text-emerald-700">nghỉ 32 tiếng liên tục</strong>).</li>
-            <li><span class="font-bold text-slate-900">Từ Ca 2 sang Ca 1:</span> Hết Ca 2 lúc 22h00 đêm Thứ Bảy ➔ Chủ Nhật nghỉ tuần <strong class="text-amber-800">CN</strong> ➔ Thứ Hai vào Ca 1 lúc 06h00 sáng (<strong class="text-emerald-700">nghỉ 32 tiếng liên tục</strong>).</li>
-            <li><span class="font-bold text-slate-900">Từ Ca 1 sang HC:</span> Hết Ca 1 lúc 14h00 chiều ➔ sáng hôm sau làm Hành chính lúc 08h00 (<strong class="text-emerald-700">nghỉ 18 tiếng</strong>, cùng nhịp ngày).</li>
-            <li><span class="font-bold text-slate-900">Từ HC sang Ca 3:</span> Thứ Bảy trực bù Ca 3 ➔ Chủ Nhật vào Ca 3 lúc 22h00 (<strong class="text-emerald-700">nghỉ 40 tiếng liên tục</strong> từ sáng T7).</li>
+            <li><span class="font-bold text-slate-900">Từ Ca 3 sang Ca 2:</span> Hết ca đêm lúc 05h00 sáng Thứ Bảy ➔ Thứ Bảy nghỉ tuần <strong class="text-amber-800">CN</strong> ➔ Chủ Nhật vào Ca 2 lúc 13h30 chiều (<strong class="text-emerald-700">nghỉ 32.5 tiếng liên tục</strong>).</li>
+            <li><span class="font-bold text-slate-900">Từ Ca 2 sang Ca 1:</span> Hết Ca 2 lúc 21h30 đêm Thứ Bảy ➔ Chủ Nhật nghỉ tuần <strong class="text-amber-800">CN</strong> ➔ Thứ Hai vào Ca 1 lúc 05h00 sáng (<strong class="text-emerald-700">nghỉ 31.5 tiếng liên tục</strong>).</li>
+            <li><span class="font-bold text-slate-900">Từ Ca 1 sang HC:</span> Hết Ca 1 lúc 13h30 chiều ➔ sáng hôm sau làm Hành chính lúc 07h00 (<strong class="text-emerald-700">nghỉ 17.5 tiếng</strong>, cùng nhịp ngày).</li>
+            <li><span class="font-bold text-slate-900">Từ HC sang Ca 3:</span> Thứ Bảy trực bù Ca 3 ➔ Chủ Nhật vào Ca 3 lúc 21h30.</li>
             <li><span class="font-bold text-slate-900">Đảm bảo định mức:</span> Mỗi KTV đi làm đúng <strong>6 công/tuần = 30 công/tháng (5 tuần)</strong> và đúng <strong>1 ngày nghỉ tuần (CN)/tuần</strong>.</li>
           </ul>
         </div>
@@ -1360,6 +1342,10 @@
   <!-- ========================================== -->
   <!-- MODAL: NHẬT KÝ THAY ĐỔI & PHIÊN BẢN (#modal-changelog) -->
   <!-- ========================================== -->
+
+  <!-- ========================================== -->
+  <!-- MODAL: NHẬT KÝ THAY ĐỔI & PHIÊN BẢN (#modal-changelog) -->
+  <!-- ========================================== -->
   <div id="modal-changelog" class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs hidden items-center justify-center z-[100] p-4 transition-all duration-200 overflow-y-auto" style="z-index: 100;">
     <div class="bg-white rounded-3xl w-full max-w-xl p-5 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] flex flex-col">
       
@@ -1589,6 +1575,7 @@
             <div class="flex items-center gap-2">
               <select id="select-db-table" onchange="loadTableJsonToInspector()" class="px-3 py-1.5 bg-white border border-indigo-300 rounded-xl text-xs font-bold text-indigo-950 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 <option value="app_shift_roster_matrix">📅 Bảng Phân Ca (app_shift_roster_matrix)</option>
+                <option value="app_official_shift_table">📋 Bảng Giờ Mùa Thu & Giờ Ăn (app_official_shift_table)</option>
                 <option value="app_shift_definitions">⏰ Định Mức Ca Trực (app_shift_definitions)</option>
                 <option value="app_tasks">✅ Checklist & Việc (app_tasks)</option>
                 <option value="app_logs">📝 Nhật Ký Vận Hành (app_logs)</option>
@@ -1880,7 +1867,8 @@
             <option value="Ca 2 (14h - 22h)">Ca 2 (14h - 22h)</option>
             <option value="Ca 3 (21h30 - 05h00)">Ca 3 (21h30 - 05h00) — Ca Đêm</option>
             <option value="Ca 3 (22h - 06h)">Ca 3 (22h - 06h)</option>
-            <option value="Ca Hành Chính">Ca Hành Chính (07h00 - 11h30 & 13h30 - 17h00)</option>
+            <option value="Ca Hành Chính (07h00 - 11h30 & 13h30 - 17h00)">Ca Hành Chính (07h00 - 11h30 & 13h30 - 17h00)</option>
+            <option value="Ca Hành Chính">Ca Hành Chính</option>
           </select>
         </div>
 
@@ -2418,46 +2406,46 @@
       {
         id: 'ca1',
         name: 'Ca 1',
-        icon: '🌅',
-        timeRange: '05:00 – 13:30',
-        shiftType: 'Sáng Mùa Thu',
+        icon: '',
+        timeRange: '05:45 – 14:15',
+        shiftType: 'Sáng',
         quota: 1,
         quotaUnit: 'Trực (x)',
         color: 'amber',
-        description: 'Ăn ca: 11h00 – 11h30 (tạm bàn giao cho Hành chính). Có mặt trước 15p nhận bàn giao.'
+        description: 'Ăn ca: 11h00 – 11h30 (tạm bàn giao cho ca hành chính trước khi đi ăn).'
       },
       {
         id: 'ca2',
         name: 'Ca 2',
-        icon: '🌇',
-        timeRange: '13:30 – 21:30',
-        shiftType: 'Chiều/Tối Mùa Thu',
+        icon: '',
+        timeRange: '13:45 – 22:15',
+        shiftType: 'Chiều/Tối',
         quota: 2,
         quotaUnit: 'Trực (x)',
         color: 'rose',
-        description: 'Ăn ca: Người 1 (17h–17h30), Người 2 (17h30–18h). Có mặt trước 15p nhận bàn giao.'
+        description: 'Ăn ca: Người 1 (17h00–17h30), Người 2 (17h30–18h00). Luôn có 1 người trực sẵn sàng tại sân.'
       },
       {
         id: 'ca3',
         name: 'Ca 3',
-        icon: '🌙',
-        timeRange: '21:30 – 05:00',
+        icon: '',
+        timeRange: '22:00 – 06:00',
         shiftType: 'Đêm',
         quota: 0,
-        quotaUnit: 'Trực',
+        quotaUnit: 'Trực (x)',
         color: 'slate',
-        description: 'Trực On-call khi phát sinh sự cố khẩn cấp.'
+        description: 'Trực On-call khi phát sinh sự cố khẩn cấp ban đêm.'
       },
       {
         id: 'hc',
         name: 'Hành chính (hc)',
-        icon: '💼',
+        icon: '',
         timeRange: '07:00 – 11:30 & 13:30 – 17:00',
         shiftType: 'Hành chính',
         quota: 0,
         quotaUnit: 'Hỗ trợ (hc)',
         color: 'emerald',
-        description: 'Giờ ăn/nghỉ: 11h30–13h30. Từ 11h00–11h30 trực thay Ca 1 & chịu trách nhiệm mọi sự cố.'
+        description: 'Ăn/nghỉ: 11h30–13h30. (11h00–11h30 chịu trách nhiệm vận hành trong 30 phút này).'
       }
     ];
 
@@ -3092,7 +3080,175 @@
     let lastSyncTime = null;
 
     // ==========================================
-    // 2. REPOSITORY & STATE MANAGEMENT
+    // 2.1. CLOUD SYNC ENGINE (GOOGLE SHEETS ⇄ LOCALSTORAGE)
+    // ==========================================
+    const CloudSync = {
+      isSyncing: false,
+
+      async getShiftDefinitions() {
+        if (!CONFIG.gasUrl) return null;
+        try {
+          const url = `${CONFIG.gasUrl}?action=getShiftDefinitions&token=${encodeURIComponent(CONFIG.apiToken)}&_t=${Date.now()}`;
+          const res = await fetch(url, { method: 'GET', mode: 'cors' });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const json = await res.json();
+          if (json && json.status === 'success' && Array.isArray(json.items) && json.items.length > 0) {
+            return json.items;
+          }
+        } catch (err) {
+          console.warn('[CloudSync] getShiftDefinitions error:', err);
+        }
+        return null;
+      },
+
+      async saveShiftDefinitions(items, user = 'Web') {
+        if (!CONFIG.gasUrl || !items || items.length === 0) return false;
+        try {
+          const payload = {
+            action: 'saveShiftDefinitions',
+            token: CONFIG.apiToken,
+            items: items,
+            user: user
+          };
+          const res = await fetch(CONFIG.gasUrl, {
+            method: 'POST',
+            mode: 'cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+          });
+          const json = await res.json();
+          return json && json.status === 'success';
+        } catch (err) {
+          console.warn('[CloudSync] saveShiftDefinitions error:', err);
+          return false;
+        }
+      },
+
+      async getRosterMatrix() {
+        if (!CONFIG.gasUrl) return null;
+        try {
+          const url = `${CONFIG.gasUrl}?action=getRosterMatrix&token=${encodeURIComponent(CONFIG.apiToken)}&_t=${Date.now()}`;
+          const res = await fetch(url, { method: 'GET', mode: 'cors' });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const json = await res.json();
+          if (json && json.status === 'success' && json.rosterMatrix && typeof json.rosterMatrix === 'object') {
+            return json.rosterMatrix;
+          }
+        } catch (err) {
+          console.warn('[CloudSync] getRosterMatrix error:', err);
+        }
+        return null;
+      },
+
+      async saveRosterMatrix(matrix, weekKey = '', user = 'Web') {
+        if (!CONFIG.gasUrl || !matrix) return false;
+        try {
+          const payload = {
+            action: 'saveRosterMatrix',
+            token: CONFIG.apiToken,
+            rosterMatrix: matrix,
+            weekKey: weekKey,
+            user: user
+          };
+          const res = await fetch(CONFIG.gasUrl, {
+            method: 'POST',
+            mode: 'cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+          });
+          const json = await res.json();
+          return json && json.status === 'success';
+        } catch (err) {
+          console.warn('[CloudSync] saveRosterMatrix error:', err);
+          return false;
+        }
+      }
+    };
+
+    function updateCloudSyncIndicator(status = 'synced', message = '') {
+      cloudSyncStatus = status;
+      const iconEl = document.getElementById('header-sync-icon');
+      const textEl = document.getElementById('header-sync-text');
+      const btnEl = document.getElementById('btn-header-sync');
+      if (!iconEl) return;
+
+      if (status === 'syncing') {
+        iconEl.className = 'w-4 h-4 text-amber-300 animate-spin';
+        if (textEl) textEl.textContent = 'Đang đồng bộ...';
+        if (btnEl) btnEl.title = 'Đang đồng bộ dữ liệu với Google Sheets...';
+      } else if (status === 'synced') {
+        iconEl.className = 'w-4 h-4 text-emerald-300';
+        if (textEl) textEl.textContent = 'Đã đồng bộ';
+        lastSyncTime = new Date();
+        const timeStr = lastSyncTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        if (btnEl) btnEl.title = `Đã đồng bộ với Google Sheets (${timeStr})`;
+      } else if (status === 'offline') {
+        iconEl.className = 'w-4 h-4 text-slate-400';
+        if (textEl) textEl.textContent = 'Offline';
+        if (btnEl) btnEl.title = 'Chế độ ngoại tuyến (Local-First)';
+      } else {
+        iconEl.className = 'w-4 h-4 text-rose-300';
+        if (textEl) textEl.textContent = 'Lỗi sync';
+        if (btnEl) btnEl.title = message || 'Lỗi kết nối đồng bộ đám mây';
+      }
+    }
+
+    function updateCloudSyncHeaderUI(status = 'synced', message = '') {
+      updateCloudSyncIndicator(status, message);
+    }
+
+    async function triggerManualSync(showToastMsg = true) {
+      if (CloudSync.isSyncing) return;
+      CloudSync.isSyncing = true;
+      updateCloudSyncIndicator('syncing');
+
+      try {
+        const user = repo.getCurrentEmployee()?.fullName || 'Web';
+        
+        // 1. Đồng bộ lên Cloud
+        await Promise.all([
+          CloudSync.saveShiftDefinitions(repo.shiftDefinitions, user),
+          CloudSync.saveRosterMatrix(repo.rosterMatrix, '', user)
+        ]);
+
+        // 2. Kéo dữ liệu mới nhất từ Cloud
+        const [cloudShiftDefs, cloudRoster] = await Promise.all([
+          CloudSync.getShiftDefinitions(),
+          CloudSync.getRosterMatrix()
+        ]);
+
+        let hasUpdates = false;
+        if (cloudShiftDefs && Array.isArray(cloudShiftDefs) && cloudShiftDefs.length > 0) {
+          repo.shiftDefinitions = cloudShiftDefs;
+          localStorage.setItem('app_shift_definitions', JSON.stringify(repo.shiftDefinitions));
+          if (typeof renderShiftDefinitions === 'function') renderShiftDefinitions();
+          hasUpdates = true;
+        }
+
+        if (cloudRoster && typeof cloudRoster === 'object' && Object.keys(cloudRoster).length > 0) {
+          repo.rosterMatrix = { ...repo.rosterMatrix, ...cloudRoster };
+          localStorage.setItem('app_shift_roster_matrix', JSON.stringify(repo.rosterMatrix));
+          if (typeof renderShiftScheduleMatrix === 'function') renderShiftScheduleMatrix();
+          hasUpdates = true;
+        }
+
+        updateCloudSyncIndicator('synced');
+        if (showToastMsg) {
+          showToast('Đã đồng bộ dữ liệu Ca & Phân ca với Google Sheets thành công!');
+        }
+      } catch (err) {
+        console.warn('[triggerManualSync] Sync error:', err);
+        updateCloudSyncIndicator('error', err.message);
+        if (showToastMsg) {
+          showToast('Đã lưu cục bộ (Local). Chưa thể kết nối Cloud lúc này.');
+        }
+      } finally {
+        CloudSync.isSyncing = false;
+      }
+    }
+
+    // ==========================================
+    // 2.2. REPOSITORY & STATE MANAGEMENT
     // ==========================================
     class AppRepository {
       constructor() {
@@ -3196,27 +3352,20 @@
           try {
             this.shiftDefinitions = JSON.parse(savedShiftDefs);
             
-            // Cập nhật khung giờ Mùa Thu và giờ ăn ca nếu còn khung giờ cũ
-            this.shiftDefinitions = this.shiftDefinitions.map(def => {
-              if (def.id === 'ca1' && (def.timeRange === '06:00 – 14:00' || def.timeRange === '06:00 - 14:00')) {
-                return { ...def, timeRange: '05:00 – 13:30', description: 'Ăn ca: 11h00 – 11h30 (tạm bàn giao cho Hành chính). Có mặt trước 15p.' };
+            // Đảm bảo không bị thiếu ca mặc định nếu có ca mới
+            DEFAULT_SHIFT_DEFINITIONS.forEach(defDefault => {
+              if (!this.shiftDefinitions.some(d => d.id === defDefault.id)) {
+                this.shiftDefinitions.push(JSON.parse(JSON.stringify(defDefault)));
+                this.saveShiftDefinitions(false);
               }
-              if (def.id === 'ca2' && (def.timeRange === '14:00 – 22:00' || def.timeRange === '14:00 - 22:00')) {
-                return { ...def, timeRange: '13:30 – 21:30', description: 'Ăn ca: Người 1 (17h–17h30), Người 2 (17h30–18h). Có mặt trước 15p.' };
-              }
-              if (def.id === 'hc' && (def.timeRange === '08:00 – 17:00' || def.timeRange === '08:00 - 17:00')) {
-                return { ...def, timeRange: '07:00 – 11:30 & 13:30 – 17:00', description: 'Ăn/nghỉ: 11h30–13h30. Trực 11h00–11h30 chịu trách nhiệm mọi sự cố.' };
-              }
-              return def;
             });
-            this.saveShiftDefinitions();
           } catch (e) {
-            this.shiftDefinitions = [...DEFAULT_SHIFT_DEFINITIONS];
-            this.saveShiftDefinitions();
+            this.shiftDefinitions = JSON.parse(JSON.stringify(DEFAULT_SHIFT_DEFINITIONS));
+            this.saveShiftDefinitions(false);
           }
         } else {
-          this.shiftDefinitions = [...DEFAULT_SHIFT_DEFINITIONS];
-          this.saveShiftDefinitions();
+          this.shiftDefinitions = JSON.parse(JSON.stringify(DEFAULT_SHIFT_DEFINITIONS));
+          this.saveShiftDefinitions(false);
         }
 
         // Shift Matrix Roster Loading (Mẫu ma trận Tổ cơ điện Sân Golf)
@@ -3229,7 +3378,7 @@
           }
         } else {
           this.rosterMatrix = JSON.parse(JSON.stringify(HISTORICAL_GOLF_ROSTER_MATRIX));
-          this.saveRosterMatrix();
+          this.saveRosterMatrix('', false);
         }
 
         // Tự động gộp dữ liệu lịch sử các tuần từ Google Sheet nếu chưa từng có
@@ -3241,7 +3390,7 @@
           }
         });
         if (hasNewHistoricalWeek) {
-          this.saveRosterMatrix();
+          this.saveRosterMatrix('', false);
         }
 
         // Current Session Auth
@@ -3274,8 +3423,14 @@
         }
       }
 
-      saveShiftDefinitions() {
+      saveShiftDefinitions(syncToCloud = true) {
         localStorage.setItem('app_shift_definitions', JSON.stringify(this.shiftDefinitions));
+        if (syncToCloud) {
+          const user = this.getCurrentEmployee()?.fullName || 'Web';
+          CloudSync.saveShiftDefinitions(this.shiftDefinitions, user).then(ok => {
+            if (ok) updateCloudSyncIndicator('synced');
+          });
+        }
       }
 
       savePlans() {
@@ -3290,8 +3445,18 @@
         localStorage.setItem('app_checklist_templates', JSON.stringify(this.templates));
       }
 
-      saveRosterMatrix() {
+      saveRosterMatrix(weekKey = '', syncToCloud = true) {
         localStorage.setItem('app_shift_roster_matrix', JSON.stringify(this.rosterMatrix));
+        if (syncToCloud) {
+          const user = this.getCurrentEmployee()?.fullName || 'Web';
+          CloudSync.saveRosterMatrix(this.rosterMatrix, weekKey, user).then(ok => {
+            if (ok) updateCloudSyncIndicator('synced');
+          });
+        }
+      }
+
+      async syncAllFromCloud(showToastMsg = false) {
+        return triggerManualSync(showToastMsg);
       }
 
       getActiveEmployees() {
@@ -4214,6 +4379,7 @@
       populateLoginEmployeeSelect();
       populateEmployeeSelect();
       renderEmployeesList();
+      renderShiftDefinitions();
 
       checkAuthAndRenderScreen();
 
@@ -4831,6 +4997,75 @@
     }
 
     // ==========================================
+    // 6.0. SAO CHÉP QUY TẮC PHÂN CA (DẠNG TIN NHẮN)
+    // ==========================================
+    function copyShiftRulesAsTextMessage() {
+      const defs = repo.shiftDefinitions && repo.shiftDefinitions.length > 0 
+        ? repo.shiftDefinitions 
+        : DEFAULT_SHIFT_DEFINITIONS;
+
+      let msg = `QUY TẮC PHÂN CA VẬN HÀNH TỔ CƠ ĐIỆN SÂN GOLF\n`;
+      msg += `━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+      // Mục 1
+      msg += `1. Chi Tiết Khung Giờ & Định Mức Quân Số Mỗi Ngày:\n`;
+      defs.forEach(d => {
+        msg += `• ${d.name} (${d.shiftType || 'Ca trực'}): ${d.timeRange} [${d.quota} ${d.quotaUnit || 'Trực'}]\n`;
+        if (d.description) {
+          const cleanDesc = (d.description || '').replace(/👉\s*/g, '').trim();
+          msg += `  - ${cleanDesc}\n`;
+        }
+      });
+      const summaryText = document.getElementById('shift-summary-quota-text')?.textContent || 'Ca 1 = 1, Ca 2 = 2, Ca 3 = 0';
+      msg += `Dòng Trực điện nước ở cuối bảng mỗi ngày luôn đạt chuẩn: ${summaryText}.\n\n`;
+
+      // Mục 2
+      msg += `2. Chế Độ Nghỉ Tuần (CN) & Tăng Cường Cuối Tuần (T7 & CN):\n`;
+      msg += `• Nghỉ tuần ngày thường (Thứ 2 – Thứ 6): Mỗi KTV được bố trí nghỉ tuần 1 ngày/tuần (ký hiệu CN) so le từ Thứ Hai đến Thứ Sáu.\n`;
+      msg += `• Cuối tuần khách chơi đông (Thứ 7 & CN): Toàn đội đi làm đủ 100% quân số 5 người. Luôn có 1 KTV đi ca Hành chính (hc) ban ngày túc trực xử lý sự cố sân, trạm bơm và hỗ trợ kỹ thuật.\n`;
+      msg += `• Nghỉ phép chế độ ghi nhận bằng ký hiệu P.\n\n`;
+
+      // Mục 3
+      const hcDef = defs.find(d => d.id === 'hc');
+      const hcTime = hcDef?.timeRange || '07:00 – 11:30 & 13:30 – 17:00';
+      msg += `3. Phân Bổ Nhân Sự Thử Việc & Ca Hành Chính (hc):\n`;
+      msg += `• Nhân viên thử việc / học việc ưu tiên đi hc (Hành chính ${hcTime}) để học việc, nắm bắt hệ thống kỹ thuật và thực hiện bảo dưỡng ban ngày.\n`;
+      msg += `• An toàn vận hành Ca 1: Suất trực chính Ca 1 bắt buộc do KTV chính thức đảm nhận; nhân viên thử việc tuyệt đối không trực độc lập Ca 1.\n`;
+      msg += `• Khi đi ca tối (Ca 2), nhân viên thử việc luôn đi kèm cùng Kỹ thuật viên chính.\n\n`;
+
+      // Mục 4
+      msg += `4. Ổn Định Ca (Thứ 2 – Thứ 7) & Chủ Nhật Chuyển Tiếp Ca Tuần Mới:\n`;
+      msg += `• Từ Thứ 2 đến Thứ 7: Duy trì ca trực ổn định (Ca 1 / Ca 2 / hc) cho từng KTV trong suốt tuần để đảm bảo nhịp sinh học và ổn định vận hành.\n`;
+      msg += `• Chủ Nhật: Là ngày chuyển tiếp — thể hiện ca trực mà nhân sự đó sẽ phụ trách trong tuần kế tiếp.\n\n`;
+
+      // Mục 5
+      msg += `5. Căn Cứ Xếp Ca Tuần Kế Tiếp:\n`;
+      msg += `• Hệ thống tự động tính toán, xoay vòng phân ca công bằng, luân phiên ca sáng - chiều - hành chính và ngày nghỉ tuần chuẩn xác cho tuần kế tiếp.\n`;
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(msg).then(() => {
+          showToast('Đã sao chép tin nhắn Quy Tắc Phân Ca');
+        }).catch(() => {
+          fallbackCopyText(msg);
+        });
+      } else {
+        fallbackCopyText(msg);
+      }
+    }
+
+    function fallbackCopyText(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('Đã sao chép tin nhắn Quy Tắc Phân Ca');
+    }
+
+    // ==========================================
     // 6.1. QUY TẮC PHÂN CA & TỰ ĐỘNG XẾP CA TUẦN KẾ TIẾP
     // ==========================================
     function renderShiftDefinitions() {
@@ -4839,56 +5074,48 @@
       if (!container) return;
 
       if (!repo.shiftDefinitions || repo.shiftDefinitions.length === 0) {
-        repo.shiftDefinitions = [...DEFAULT_SHIFT_DEFINITIONS];
+        repo.shiftDefinitions = JSON.parse(JSON.stringify(DEFAULT_SHIFT_DEFINITIONS));
         repo.saveShiftDefinitions();
       }
 
-      if (!repo.shiftDefinitions.some(d => d.id === 'hc')) {
-        const defaultHc = DEFAULT_SHIFT_DEFINITIONS.find(d => d.id === 'hc');
-        if (defaultHc) {
-          repo.shiftDefinitions.push(defaultHc);
+      DEFAULT_SHIFT_DEFINITIONS.forEach(defDefault => {
+        if (!repo.shiftDefinitions.some(d => d.id === defDefault.id)) {
+          repo.shiftDefinitions.push(JSON.parse(JSON.stringify(defDefault)));
           repo.saveShiftDefinitions();
         }
-      }
+      });
 
       container.innerHTML = '';
       const summaryParts = [];
 
       repo.shiftDefinitions.forEach(def => {
-        const card = document.createElement('div');
-        card.className = 'bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs flex flex-col justify-between space-y-2 relative group hover:border-indigo-300 transition';
+        const item = document.createElement('div');
+        item.className = 'bg-white p-3 rounded-xl border border-slate-200/90 shadow-2xs flex justify-between items-start gap-2 hover:border-indigo-300 transition';
         
         const quotaBadgeColor = def.quota > 0 
           ? 'bg-rose-100 text-slate-900 font-extrabold' 
           : (def.id === 'hc' ? 'bg-emerald-100 text-emerald-800 font-bold' : 'bg-slate-100 text-slate-700 font-bold');
         
-        card.innerHTML = `
-          <div>
-            <div class="flex justify-between items-center mb-1.5 gap-1.5">
-              <span class="font-extrabold text-slate-900 flex items-center gap-1.5 text-xs truncate" title="${def.name}">
-                <span class="text-base shrink-0">${def.icon || '⏰'}</span>
-                <span class="truncate">${def.name}</span>
-              </span>
-              <div class="flex items-center gap-1 shrink-0">
-                <span class="px-2 py-0.5 ${quotaBadgeColor} rounded-md text-[11px] font-bold whitespace-nowrap">${def.quota} ${def.quotaUnit || 'Trực'}</span>
-                <button type="button" onclick="openEditShiftDefinitionModal('${def.id}')" title="Chỉnh sửa ca này" class="px-2 py-1 rounded-lg text-indigo-700 bg-indigo-50 hover:bg-indigo-100 flex items-center gap-1 transition font-bold text-[11px]">
-                  <i data-lucide="pencil" class="w-3 h-3 text-indigo-600"></i>
-                  <span>Sửa</span>
-                </button>
-                <button type="button" onclick="handleDeleteShiftDefinition('${def.id}')" title="Xóa ca này" class="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition">
-                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                </button>
-              </div>
+        const cleanDesc = (def.description || '').replace(/👉\s*/g, '').trim();
+
+        item.innerHTML = `
+          <div class="space-y-1 flex-1">
+            <div class="font-extrabold text-slate-900 text-xs">
+              • ${def.name} ${def.shiftType ? `(${def.shiftType})` : ''}: <span class="text-indigo-700 font-bold">${def.timeRange || ''}</span> <span class="px-1.5 py-0.5 ${quotaBadgeColor} rounded text-[11px] font-bold">[${def.quota} ${def.quotaUnit || 'Trực'}]</span>
             </div>
-            <div class="flex items-center gap-1.5 text-[11px] font-semibold text-slate-700 mt-1">
-              <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400"></i>
-              <span>${def.timeRange || ''}</span>
-              ${def.shiftType ? `<span class="text-slate-400 font-normal">(${def.shiftType})</span>` : ''}
-            </div>
-            <p class="text-[11px] text-slate-500 mt-1 line-clamp-2">${def.description || ''}</p>
+            ${cleanDesc ? `<div class="text-[11px] text-slate-600 pl-3 leading-relaxed">- ${cleanDesc}</div>` : ''}
+          </div>
+          <div class="flex items-center gap-1 shrink-0 select-none">
+            <button type="button" onclick="openEditShiftDefinitionModal('${def.id}')" title="Chỉnh sửa ca này" class="px-2 py-1 rounded-lg text-indigo-700 bg-indigo-50 hover:bg-indigo-100 flex items-center gap-1 transition font-bold text-[11px] cursor-pointer">
+              <i data-lucide="pencil" class="w-3 h-3 text-indigo-600"></i>
+              <span>Sửa</span>
+            </button>
+            <button type="button" onclick="handleDeleteShiftDefinition('${def.id}')" title="Xóa ca này" class="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition cursor-pointer">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
           </div>
         `;
-        container.appendChild(card);
+        container.appendChild(item);
 
         if (def.quota > 0 || def.id === 'ca1' || def.id === 'ca2' || def.id === 'ca3') {
           summaryParts.push(`${def.name} = ${def.quota}`);
@@ -5106,6 +5333,7 @@
         localStorage.setItem(key, JSON.stringify(parsed));
         repo.loadState();
         if (key === 'app_shift_definitions') renderShiftDefinitions();
+        if (key === 'app_official_shift_table') renderOfficialShiftTable();
         if (key === 'app_shift_roster_matrix') renderScheduleMatrixTable();
         if (key === 'app_employees') {
           populateLoginEmployeeSelect();
@@ -5139,11 +5367,13 @@
             if (data.logs) localStorage.setItem('app_logs', JSON.stringify(data.logs));
             if (data.taskEvents) localStorage.setItem('app_task_events', JSON.stringify(data.taskEvents));
             if (data.shiftDefinitions) localStorage.setItem('app_shift_definitions', JSON.stringify(data.shiftDefinitions));
+            if (data.officialShiftTable) localStorage.setItem('app_official_shift_table', JSON.stringify(data.officialShiftTable));
 
             repo.loadState();
             populateLoginEmployeeSelect();
             populateEmployeeSelect();
             renderEmployeesList();
+            renderOfficialShiftTable();
             renderShiftDefinitions();
             renderTasks();
             renderLogs();
@@ -6467,44 +6697,45 @@
           </div>
         `;
       } else {
+        const isAdmin = repo.isAdmin();
         displayLogs.forEach(log => {
           let statusBadge = '';
           let dotColor = 'bg-emerald-500';
 
           if (log.status === 'Không bất thường') {
-            statusBadge = '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">🟢 Không bất thường</span>';
+            statusBadge = '<span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">🟢 Không bất thường</span>';
             dotColor = 'bg-emerald-500 ring-emerald-100';
           } else if (log.status === 'Đã xử lý dứt điểm') {
-            statusBadge = '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">🔵 Đã xử lý dứt điểm</span>';
+            statusBadge = '<span class="text-xs font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">🔵 Đã xử lý dứt điểm</span>';
             dotColor = 'bg-blue-500 ring-blue-100';
           } else {
-            statusBadge = '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">🟠 Cần theo dõi thêm</span>';
+            statusBadge = '<span class="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">🟠 Cần theo dõi thêm</span>';
             dotColor = 'bg-amber-500 ring-amber-100';
           }
 
           // Cloud sync indicator tag
           let cloudTag = '';
           if (log.syncStatus === 'synced') {
-            cloudTag = '<span class="inline-flex items-center gap-0.5 text-[9px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200" title="Đã đồng bộ lên Google Sheets"><i data-lucide="cloud-check" class="w-2.5 h-2.5"></i><span>Sheet</span></span>';
+            cloudTag = '<span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200" title="Đã đồng bộ lên Google Sheets"><i data-lucide="cloud-check" class="w-3 h-3"></i><span>Sheet</span></span>';
           } else if (log.syncStatus === 'pending') {
-            cloudTag = '<span class="inline-flex items-center gap-0.5 text-[9px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200" title="Đang chờ gửi Google Sheets"><i data-lucide="clock" class="w-2.5 h-2.5 animate-pulse"></i><span>Chờ gửi</span></span>';
+            cloudTag = '<span class="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200" title="Đang chờ gửi Google Sheets"><i data-lucide="clock" class="w-3 h-3 animate-pulse"></i><span>Chờ gửi</span></span>';
           }
 
           // Duration badge
           let timeRangeBadge = '';
           if (log.startTime || log.endTime) {
-            timeRangeBadge = `<span class="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-50/90 px-2 py-0.5 rounded-md border border-amber-200"><i data-lucide="clock-4" class="w-3 h-3 text-amber-600"></i>${log.startTime || '...'} – ${log.endTime || '...'}</span>`;
+            timeRangeBadge = `<span class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-extrabold text-amber-900 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 shadow-2xs"><i data-lucide="clock-4" class="w-3.5 h-3.5 text-amber-600"></i>${log.startTime || '...'} – ${log.endTime || '...'}</span>`;
           }
 
           // Result block
           let resultBlock = '';
           if (log.result && log.result !== log.status) {
             resultBlock = `
-              <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200/80 text-xs text-slate-700 flex items-start gap-1.5 mt-1.5">
-                <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5"></i>
+              <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm text-slate-800 flex items-start gap-2 mt-2 leading-relaxed">
+                <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
                 <div>
                   <span class="font-bold text-slate-700">Kết quả:</span>
-                  <span class="text-slate-800 font-medium ml-1">${log.result}</span>
+                  <span class="text-slate-900 font-medium ml-1">${log.result}</span>
                 </div>
               </div>
             `;
@@ -6514,39 +6745,43 @@
           let notesBlock = '';
           if (log.notes) {
             notesBlock = `
-              <div class="p-2.5 bg-amber-50/70 rounded-xl border border-amber-200/80 text-xs text-amber-900 flex items-start gap-1.5 mt-1.5">
-                <i data-lucide="info" class="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5"></i>
+              <div class="p-3 bg-amber-50/80 rounded-xl border border-amber-200 text-sm text-amber-950 flex items-start gap-2 mt-2 leading-relaxed">
+                <i data-lucide="info" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
                 <div>
-                  <span class="font-bold text-amber-800">Ghi chú / Lưu ý:</span>
+                  <span class="font-bold text-amber-900">Ghi chú / Lưu ý:</span>
                   <span class="text-amber-950 font-medium ml-1">${log.notes}</span>
                 </div>
               </div>
             `;
           }
 
+          const deleteBtn = isAdmin ? `
+            <button onclick="deleteLog('${log.id}')" aria-label="Xóa nhật ký này" class="text-slate-300 hover:text-rose-600 hover:bg-rose-50 p-1.5 rounded-lg transition" title="Xóa nhật ký (Chỉ Quản trị viên)">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          ` : '';
+
           const item = document.createElement('div');
           item.className = "relative pl-8";
           item.innerHTML = `
-            <div class="absolute left-2.5 top-3 -translate-x-1/2 w-3 h-3 rounded-full ${dotColor} ring-4 bg-white"></div>
-            <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs space-y-2">
-              <div class="flex justify-between items-start gap-2">
+            <div class="absolute left-2.5 top-3 -translate-x-1/2 w-3.5 h-3.5 rounded-full ${dotColor} ring-4 bg-white"></div>
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-xs space-y-2.5">
+              <div class="flex justify-between items-start gap-2 flex-wrap sm:flex-nowrap">
                 <div>
-                  <div class="flex items-center gap-1.5 flex-wrap">
-                    <span class="text-xs font-bold text-slate-500">${log.time}</span>
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-sm font-bold text-slate-600">${log.time}</span>
                     ${timeRangeBadge}
-                    <span class="text-[11px] font-bold text-indigo-900 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">${log.employeeName || 'Nhân viên'}</span>
-                    ${log.area ? `<span class="text-[10px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded">${log.area}</span>` : ''}
+                    <span class="text-xs sm:text-sm font-bold text-indigo-900 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-200">${log.employeeName || 'Nhân viên'}</span>
+                    ${log.area ? `<span class="text-xs font-semibold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-200">${log.area}</span>` : ''}
                     ${cloudTag}
                   </div>
                 </div>
-                <div class="flex items-center space-x-1.5">
+                <div class="flex items-center space-x-2 shrink-0">
                   ${statusBadge}
-                  <button onclick="deleteLog('${log.id}')" aria-label="Xóa nhật ký này" class="text-slate-300 hover:text-rose-500 p-1 rounded transition">
-                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                  </button>
+                  ${deleteBtn}
                 </div>
               </div>
-              <p class="text-sm font-semibold text-slate-800 leading-relaxed">${log.content}</p>
+              <p class="text-base sm:text-lg font-bold text-slate-900 leading-relaxed pt-1">${log.content}</p>
               ${resultBlock}
               ${notesBlock}
             </div>
@@ -6624,26 +6859,26 @@
                               'text-slate-600 bg-slate-100 border-slate-200';
         
         const card = document.createElement('div');
-        card.className = `p-2.5 rounded-xl border ${isDone ? 'bg-slate-50/80 border-slate-200 text-slate-500' : 'bg-white border-indigo-100 hover:border-indigo-300 hover:shadow-xs'} transition flex items-center justify-between gap-2 cursor-pointer group`;
+        card.className = `p-3 rounded-xl border ${isDone ? 'bg-slate-50/80 border-slate-200 text-slate-500' : 'bg-white border-indigo-100 hover:border-indigo-300 hover:shadow-xs'} transition flex items-center justify-between gap-2.5 cursor-pointer group`;
         card.onclick = () => logFromTask(t.id, null);
         card.title = 'Bấm để ghi nhật ký cho công việc này';
 
         card.innerHTML = `
-          <div class="flex items-start space-x-2 min-w-0 flex-1">
+          <div class="flex items-start space-x-2.5 min-w-0 flex-1">
             <div class="mt-0.5 w-4 h-4 rounded-md border shrink-0 flex items-center justify-center ${isDone ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-300 bg-slate-50 text-transparent'}">
               <i data-lucide="check" class="w-3 h-3 ${isDone ? 'block' : 'hidden'}"></i>
             </div>
             <div class="min-w-0 flex-1">
-              <p class="text-xs font-bold text-slate-800 truncate group-hover:text-indigo-600 transition ${isDone ? 'line-through text-slate-400' : ''}">${t.title}</p>
-              <div class="flex items-center gap-1 mt-0.5">
-                <span class="text-[10px] px-1.5 py-0.2 rounded font-semibold border ${priorityColor}">${t.priority}</span>
-                ${t.category ? `<span class="text-[10px] text-slate-500 font-medium truncate">${t.category}</span>` : ''}
+              <p class="text-sm font-bold text-slate-800 truncate group-hover:text-indigo-600 transition ${isDone ? 'line-through text-slate-400' : ''}">${t.title}</p>
+              <div class="flex items-center gap-1.5 mt-0.5">
+                <span class="text-xs px-2 py-0.5 rounded font-semibold border ${priorityColor}">${t.priority}</span>
+                ${t.category ? `<span class="text-xs text-slate-500 font-medium truncate">${t.category}</span>` : ''}
               </div>
             </div>
           </div>
-          <button type="button" class="shrink-0 px-2 py-1 bg-indigo-50 group-hover:bg-indigo-600 group-hover:text-white text-indigo-700 rounded-lg text-[10px] font-extrabold flex items-center gap-0.5 transition">
-            <span>Log</span>
-            <i data-lucide="arrow-right" class="w-2.5 h-2.5"></i>
+          <button type="button" class="shrink-0 px-2.5 py-1.5 bg-indigo-50 group-hover:bg-indigo-600 group-hover:text-white text-indigo-700 rounded-lg text-xs font-extrabold flex items-center gap-1 transition">
+            <span>Ghi chép</span>
+            <i data-lucide="arrow-right" class="w-3 h-3"></i>
           </button>
         `;
         container.appendChild(card);
@@ -6652,26 +6887,26 @@
       // Render các plan trong ngày
       currentPlans.forEach(p => {
         const card = document.createElement('div');
-        card.className = "p-2.5 rounded-xl border bg-white border-purple-100 hover:border-purple-300 hover:shadow-xs transition flex items-center justify-between gap-2 cursor-pointer group";
+        card.className = "p-3 rounded-xl border bg-white border-purple-100 hover:border-purple-300 hover:shadow-xs transition flex items-center justify-between gap-2.5 cursor-pointer group";
         card.onclick = () => logFromTask(null, p.id);
         card.title = 'Bấm để ghi nhật ký cho kế hoạch này';
 
         card.innerHTML = `
-          <div class="flex items-start space-x-2 min-w-0 flex-1">
+          <div class="flex items-start space-x-2.5 min-w-0 flex-1">
             <div class="mt-0.5 w-4 h-4 rounded-md bg-purple-100 text-purple-700 shrink-0 flex items-center justify-center">
-              <i data-lucide="calendar" class="w-2.5 h-2.5"></i>
+              <i data-lucide="calendar" class="w-3 h-3"></i>
             </div>
             <div class="min-w-0 flex-1">
-              <p class="text-xs font-bold text-slate-800 truncate group-hover:text-purple-700 transition">${p.task}</p>
-              <div class="flex items-center gap-1 mt-0.5">
-                <span class="text-[10px] px-1.5 py-0.2 rounded font-semibold bg-purple-50 text-purple-700 border border-purple-200">Kế hoạch</span>
-                <span class="text-[10px] text-slate-500 font-medium truncate">${p.assigneeName || p.category || ''}</span>
+              <p class="text-sm font-bold text-slate-800 truncate group-hover:text-purple-700 transition">${p.task}</p>
+              <div class="flex items-center gap-1.5 mt-0.5">
+                <span class="text-xs px-2 py-0.5 rounded font-semibold bg-purple-50 text-purple-700 border border-purple-200">Kế hoạch</span>
+                <span class="text-xs text-slate-500 font-medium truncate">${p.assigneeName || p.category || ''}</span>
               </div>
             </div>
           </div>
-          <button type="button" class="shrink-0 px-2 py-1 bg-purple-50 group-hover:bg-purple-600 group-hover:text-white text-purple-700 rounded-lg text-[10px] font-extrabold flex items-center gap-0.5 transition">
-            <span>Log</span>
-            <i data-lucide="arrow-right" class="w-2.5 h-2.5"></i>
+          <button type="button" class="shrink-0 px-2.5 py-1.5 bg-purple-50 group-hover:bg-purple-600 group-hover:text-white text-purple-700 rounded-lg text-xs font-extrabold flex items-center gap-1 transition">
+            <span>Ghi chép</span>
+            <i data-lucide="arrow-right" class="w-3 h-3"></i>
           </button>
         `;
         container.appendChild(card);
@@ -6956,6 +7191,10 @@
     }
 
     function deleteLog(id) {
+      if (!repo.isAdmin()) {
+        showToast('Chỉ Quản trị viên mới có quyền xóa nhật ký!', 'warning');
+        return;
+      }
       if (confirm('Xóa mục nhật ký này?')) {
         repo.deleteLog(id);
         renderLogs();
@@ -7101,6 +7340,7 @@
         plans: repo.plans,
         logs: repo.logs,
         taskEvents: repo.taskEvents,
+        officialShiftTable: repo.officialShiftTable,
         exportAt: new Date().toISOString()
       };
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });

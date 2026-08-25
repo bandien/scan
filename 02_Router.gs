@@ -68,6 +68,8 @@ function doGet(e) {
       case 'getChecklistTemplateDefs': return handleGetChecklistTemplateDefs(e); // Định nghĩa mẫu checklist theo địa điểm/ca
       case 'getChecklistSchedule':     return handleGetChecklistSchedule(e);     // Mẫu áp dụng tại (ngày, giờ) — ngày nghiệp vụ tính ở server
       case 'getWorkLogs':       return handleGetWorkLogs(e);        // Nhật ký cả tổ (trang nhatky)
+      case 'getShiftDefinitions': return handleGetShiftDefinitions(e); // Danh mục ca trực (trang nhatky)
+      case 'getRosterMatrix':     return handleGetRosterMatrix(e);     // Ma trận phân ca (trang nhatky)
       case 'nhatkyAccounts':    return handleListAccounts(e);       // Danh sách tài khoản trang nhatky
       case 'tempDumpDevices':   return handleTempDumpDevices(e);
       case 'migrateDevicesData':return handleMigrateDevicesData(e);
@@ -184,6 +186,11 @@ function doPost(e) {
       // Khởi tạo mẫu checklist theo địa điểm/thời gian/ca trực (Quản lý)
       upsertChecklistTemplateDef: handleUpsertChecklistTemplateDef,
       deleteChecklistTemplateDef: handleDeleteChecklistTemplateDef,
+      // Quản lý ca trực & Ma trận phân ca (Trang nhatky)
+      getShiftDefinitions:  handleGetShiftDefinitions,
+      saveShiftDefinitions: handleSaveShiftDefinitions,
+      getRosterMatrix:      handleGetRosterMatrix,
+      saveRosterMatrix:     handleSaveRosterMatrix,
     };
 
     const handler = DISPATCH[params.action];
@@ -849,4 +856,182 @@ function handleSavePump(params) {
   }
 
   return contentResponse({ status: "success", message: "Đã lưu thông tin máy bơm" });
+}
+
+// ==========================================
+// QUẢN LÝ ĐỒNG BỘ CA TRỰC & MA TRẬN PHÂN CA (TRANG NHẬT KÝ)
+// ==========================================
+
+const SHIFT_DEF_HEADERS = ["ID", "Name", "TimeRange", "ShiftType", "Quota", "QuotaUnit", "Color", "Description", "UpdatedAt", "UpdatedBy"];
+
+function ensureShiftDefinitionsSheet_() {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  let sheet = ss.getSheetByName("ShiftDefinitions");
+  if (!sheet) sheet = ss.insertSheet("ShiftDefinitions");
+  if (sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, SHIFT_DEF_HEADERS.length).setValues([SHIFT_DEF_HEADERS]).setFontWeight("bold");
+    const defaultSeeds = [
+      ["ca1", "Ca 1", "05:45 – 14:15", "Sáng", 1, "Trực (x)", "amber", "Ăn ca: 11h00 – 11h30 (tạm bàn giao cho ca hành chính trước khi đi ăn).", new Date(), "System"],
+      ["ca2", "Ca 2", "13:45 – 22:15", "Chiều/Tối", 2, "Trực (x)", "rose", "Ăn ca: Người 1 (17h00–17h30), Người 2 (17h30–18h00). Luôn có 1 người trực sẵn sàng tại sân.", new Date(), "System"],
+      ["ca3", "Ca 3", "22:00 – 06:00", "Đêm", 0, "Trực (x)", "slate", "Trực On-call khi phát sinh sự cố khẩn cấp ban đêm.", new Date(), "System"],
+      ["hc", "Hành chính (hc)", "07:00 – 11:30 & 13:30 – 17:00", "Hành chính", 0, "Hỗ trợ (hc)", "emerald", "Ăn/nghỉ: 11h30–13h30. (11h00–11h30 chịu trách nhiệm vận hành trong 30 phút này).", new Date(), "System"]
+    ];
+    sheet.getRange(2, 1, defaultSeeds.length, SHIFT_DEF_HEADERS.length).setValues(defaultSeeds);
+  }
+  return sheet;
+}
+
+function handleGetShiftDefinitions(e) {
+  const sheet = ensureShiftDefinitionsSheet_();
+  const rows = sheet.getLastRow() > 1
+    ? sheet.getRange(2, 1, sheet.getLastRow() - 1, SHIFT_DEF_HEADERS.length).getValues()
+    : [];
+
+  const items = rows
+    .filter(function(r) { return String(r[0]).trim() !== ""; })
+    .map(function(r) {
+      return {
+        id:          String(r[0]),
+        name:        String(r[1]),
+        timeRange:   String(r[2]),
+        shiftType:   String(r[3]),
+        quota:       Number(r[4]) || 0,
+        quotaUnit:   String(r[5] || "Trực (x)"),
+        color:       String(r[6] || "indigo"),
+        description: String(r[7] || ""),
+        updatedAt:   r[8] ? new Date(r[8]).toISOString() : null,
+        updatedBy:   String(r[9] || "Web")
+      };
+    });
+
+  return contentResponse({
+    status: "success",
+    items: items,
+    updatedAt: new Date().toISOString()
+  });
+}
+
+function handleSaveShiftDefinitions(params) {
+  const items = params.items || params.payload || [];
+  if (!Array.isArray(items) || items.length === 0) {
+    return contentResponse({ status: "error", message: "Danh sách ca trực không hợp lệ" });
+  }
+
+  const sheet = ensureShiftDefinitionsSheet_();
+  if (sheet.getLastRow() > 1) {
+    sheet.getRange(2, 1, sheet.getLastRow() - 1, SHIFT_DEF_HEADERS.length).clearContent();
+  }
+
+  const now = new Date();
+  const user = params.user || params.updatedBy || "Web";
+  const rows = items.map(function(item) {
+    return [
+      item.id || "",
+      item.name || "",
+      item.timeRange || "",
+      item.shiftType || "",
+      Number(item.quota) || 0,
+      item.quotaUnit || "Trực (x)",
+      item.color || "indigo",
+      item.description || "",
+      now,
+      user
+    ];
+  });
+
+  sheet.getRange(2, 1, rows.length, SHIFT_DEF_HEADERS.length).setValues(rows);
+  writeAuditLog(user, "saveShiftDefinitions", "ShiftDefinitions", "Cập nhật " + rows.length + " ca trực");
+
+  return contentResponse({
+    status: "success",
+    message: "Đã lưu " + rows.length + " ca trực lên Google Sheets",
+    updatedAt: now.toISOString()
+  });
+}
+
+const ROSTER_MATRIX_HEADERS = ["WeekKey", "RosterDataJson", "UpdatedAt", "UpdatedBy"];
+
+function ensureRosterMatrixSheet_() {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  let sheet = ss.getSheetByName("RosterMatrix");
+  if (!sheet) sheet = ss.insertSheet("RosterMatrix");
+  if (sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, ROSTER_MATRIX_HEADERS.length).setValues([ROSTER_MATRIX_HEADERS]).setFontWeight("bold");
+  }
+  return sheet;
+}
+
+function handleGetRosterMatrix(e) {
+  const sheet = ensureRosterMatrixSheet_();
+  const rows = sheet.getLastRow() > 1
+    ? sheet.getRange(2, 1, sheet.getLastRow() - 1, ROSTER_MATRIX_HEADERS.length).getValues()
+    : [];
+
+  const rosterMatrix = {};
+  rows.forEach(function(r) {
+    const weekKey = String(r[0]).trim();
+    const rawJson = String(r[1]).trim();
+    if (weekKey && rawJson) {
+      try {
+        rosterMatrix[weekKey] = JSON.parse(rawJson);
+      } catch (_) {}
+    }
+  });
+
+  return contentResponse({
+    status: "success",
+    rosterMatrix: rosterMatrix,
+    updatedAt: new Date().toISOString()
+  });
+}
+
+function handleSaveRosterMatrix(params) {
+  const matrix = params.rosterMatrix || params.payload || {};
+  const weekKey = params.weekKey || "";
+  const user = params.user || params.updatedBy || "Web";
+  const now = new Date();
+
+  const sheet = ensureRosterMatrixSheet_();
+  const values = sheet.getDataRange().getValues();
+
+  if (weekKey && matrix[weekKey]) {
+    // Lưu 1 tuần cụ thể
+    const jsonStr = JSON.stringify(matrix[weekKey]);
+    let targetRow = -1;
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][0]) === weekKey) {
+        targetRow = i + 1;
+        break;
+      }
+    }
+    const row = [weekKey, jsonStr, now, user];
+    if (targetRow > 0) {
+      sheet.getRange(targetRow, 1, 1, row.length).setValues([row]);
+    } else {
+      sheet.appendRow(row);
+    }
+  } else {
+    // Lưu toàn bộ matrix
+    const keys = Object.keys(matrix);
+    if (keys.length === 0) {
+      return contentResponse({ status: "error", message: "Ma trận phân ca trống" });
+    }
+
+    if (sheet.getLastRow() > 1) {
+      sheet.getRange(2, 1, sheet.getLastRow() - 1, ROSTER_MATRIX_HEADERS.length).clearContent();
+    }
+
+    const rows = keys.map(function(k) {
+      return [k, JSON.stringify(matrix[k]), now, user];
+    });
+    sheet.getRange(2, 1, rows.length, ROSTER_MATRIX_HEADERS.length).setValues(rows);
+  }
+
+  writeAuditLog(user, "saveRosterMatrix", "RosterMatrix", "Cập nhật ma trận phân ca: " + (weekKey || "toàn bộ"));
+
+  return contentResponse({
+    status: "success",
+    message: "Đã lưu ma trận phân ca lên Google Sheets",
+    updatedAt: now.toISOString()
+  });
 }
