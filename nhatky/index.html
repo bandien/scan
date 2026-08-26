@@ -2154,8 +2154,8 @@
           <input type="text" id="input-log-notes" placeholder="VD: Theo dõi thêm mực dầu MBA2, bàn giao chìa khóa cho Ca 2..." class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-emerald-500">
         </div>
 
-        <!-- Checkbox: Đồng thời thêm vào checklist ca trực nếu là việc mới -->
-        <label class="flex items-center gap-2 p-2.5 bg-emerald-50/70 rounded-xl border border-emerald-200/80 cursor-pointer select-none">
+        <!-- Checkbox: Đồng thời thêm vào checklist ca trực nếu là việc mới (Chỉ Admin) -->
+        <label id="container-log-sync-task" class="hidden items-center gap-2 p-2.5 bg-emerald-50/70 rounded-xl border border-emerald-200/80 cursor-pointer select-none">
           <input type="checkbox" id="checkbox-log-sync-task" checked class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500">
           <span class="text-xs text-emerald-950 font-semibold">Tự động thêm vào checklist ca trực nếu đây là công việc mới</span>
         </label>
@@ -7069,6 +7069,18 @@
 
       renderJournalTaskSelector();
 
+      // Ẩn/hiện checkbox tự động thêm vào checklist chỉ cho Admin
+      const syncTaskWrapper = document.getElementById('container-log-sync-task');
+      if (syncTaskWrapper) {
+        if (repo.isAdmin()) {
+          syncTaskWrapper.classList.remove('hidden');
+          syncTaskWrapper.classList.add('flex');
+        } else {
+          syncTaskWrapper.classList.add('hidden');
+          syncTaskWrapper.classList.remove('flex');
+        }
+      }
+
       if (mode === 'task') {
         const taskTitleInput = document.getElementById('input-mode-task-title');
         if (taskTitleInput) taskTitleInput.focus();
@@ -7136,7 +7148,7 @@
       const notes = document.getElementById('input-log-notes').value.trim();
       const linkedTaskId = document.getElementById('input-log-linked-task-id') ? document.getElementById('input-log-linked-task-id').value : '';
       const linkedPlanId = document.getElementById('input-log-linked-plan-id') ? document.getElementById('input-log-linked-plan-id').value : '';
-      const syncTaskChecked = document.getElementById('checkbox-log-sync-task') ? document.getElementById('checkbox-log-sync-task').checked : true;
+      const syncTaskChecked = (document.getElementById('checkbox-log-sync-task') && repo.isAdmin()) ? document.getElementById('checkbox-log-sync-task').checked : false;
 
       if (!content) {
         alert('Vui lòng nhập nội dung công việc thực hiện');
