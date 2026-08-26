@@ -302,25 +302,25 @@
         </div>
 
         <!-- Section: Danh Sách Đầu Việc Ca Trực (Bấm vào để ghi nhật ký) -->
-        <div class="bg-gradient-to-r from-slate-50 via-indigo-50/40 to-slate-50 p-3.5 rounded-2xl border border-indigo-100 shadow-xs space-y-2.5">
-          <div class="flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-              <div class="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center shadow-2xs">
-                <i data-lucide="list-checks" class="w-3.5 h-3.5"></i>
+        <div class="bg-gradient-to-r from-slate-50 via-indigo-50/40 to-slate-50 p-4 rounded-2xl border border-indigo-100 shadow-xs space-y-3">
+          <div class="flex justify-between items-center gap-2 flex-wrap sm:flex-nowrap">
+            <div class="flex items-center space-x-2.5">
+              <div class="w-7 h-7 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-2xs">
+                <i data-lucide="list-checks" class="w-4 h-4"></i>
               </div>
-              <div class="flex items-center">
-                <span class="font-extrabold text-slate-900 text-xs uppercase tracking-wide">Đầu việc ca trực — Bấm để ghi nhật ký</span>
-                <span id="journal-tasks-badge" class="text-[10px] font-bold text-indigo-700 bg-indigo-100 px-1.5 py-0.5 rounded-full ml-1.5">0 việc</span>
+              <div class="flex items-center gap-2">
+                <span class="font-extrabold text-slate-900 text-sm sm:text-base tracking-wide">Đầu việc ca trực — Bấm để ghi nhật ký</span>
+                <span id="journal-tasks-badge" class="text-xs sm:text-sm font-extrabold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-full">0 việc</span>
               </div>
             </div>
-            <button onclick="openLogModal('task')" aria-label="Thêm đầu việc mới vào ca trực" class="px-2.5 py-1 bg-white hover:bg-indigo-50 text-indigo-700 font-bold border border-indigo-200 rounded-xl text-xs flex items-center gap-1 transition shadow-2xs active:scale-95">
-              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <button onclick="openLogModal('task')" aria-label="Thêm đầu việc mới vào ca trực" class="px-3.5 py-1.5 bg-white hover:bg-indigo-50 text-indigo-700 font-extrabold border border-indigo-200 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 transition shadow-2xs active:scale-95 shrink-0">
+              <i data-lucide="plus" class="w-4 h-4"></i>
               <span>Thêm việc</span>
             </button>
           </div>
 
           <!-- Danh sách thẻ đầu việc có thể bấm để ghi nhật ký -->
-          <div id="journal-task-quick-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto custom-scrollbar pt-0.5">
+          <div id="journal-task-quick-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-64 overflow-y-auto custom-scrollbar pt-0.5">
             <!-- Rendered by JS -->
           </div>
         </div>
@@ -6859,26 +6859,26 @@
                               'text-slate-600 bg-slate-100 border-slate-200';
         
         const card = document.createElement('div');
-        card.className = `p-3 rounded-xl border ${isDone ? 'bg-slate-50/80 border-slate-200 text-slate-500' : 'bg-white border-indigo-100 hover:border-indigo-300 hover:shadow-xs'} transition flex items-center justify-between gap-2.5 cursor-pointer group`;
+        card.className = `p-3.5 sm:p-4 rounded-2xl border ${isDone ? 'bg-slate-50/80 border-slate-200 text-slate-500' : 'bg-white border-indigo-100/90 hover:border-indigo-300 hover:shadow-xs'} transition flex items-center justify-between gap-3 cursor-pointer group`;
         card.onclick = () => logFromTask(t.id, null);
         card.title = 'Bấm để ghi nhật ký cho công việc này';
 
         card.innerHTML = `
-          <div class="flex items-start space-x-2.5 min-w-0 flex-1">
-            <div class="mt-0.5 w-4 h-4 rounded-md border shrink-0 flex items-center justify-center ${isDone ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-300 bg-slate-50 text-transparent'}">
-              <i data-lucide="check" class="w-3 h-3 ${isDone ? 'block' : 'hidden'}"></i>
+          <div class="flex items-start space-x-3 min-w-0 flex-1">
+            <div class="mt-0.5 w-6 h-6 rounded-lg border shrink-0 flex items-center justify-center ${isDone ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-300 bg-slate-50 text-transparent'}">
+              <i data-lucide="check" class="w-4 h-4 ${isDone ? 'block' : 'hidden'}"></i>
             </div>
             <div class="min-w-0 flex-1">
-              <p class="text-sm font-bold text-slate-800 truncate group-hover:text-indigo-600 transition ${isDone ? 'line-through text-slate-400' : ''}">${t.title}</p>
-              <div class="flex items-center gap-1.5 mt-0.5">
-                <span class="text-xs px-2 py-0.5 rounded font-semibold border ${priorityColor}">${t.priority}</span>
-                ${t.category ? `<span class="text-xs text-slate-500 font-medium truncate">${t.category}</span>` : ''}
+              <p class="text-base sm:text-lg font-bold text-slate-900 leading-snug group-hover:text-indigo-600 transition ${isDone ? 'line-through text-slate-400' : ''}">${t.title}</p>
+              <div class="flex items-center gap-2 mt-1 flex-wrap">
+                <span class="text-xs sm:text-sm px-2.5 py-0.5 rounded-lg font-bold border ${priorityColor}">${t.priority}</span>
+                ${t.category ? `<span class="text-xs sm:text-sm text-slate-600 font-semibold truncate">${t.category}</span>` : ''}
               </div>
             </div>
           </div>
-          <button type="button" class="shrink-0 px-2.5 py-1.5 bg-indigo-50 group-hover:bg-indigo-600 group-hover:text-white text-indigo-700 rounded-lg text-xs font-extrabold flex items-center gap-1 transition">
+          <button type="button" class="shrink-0 px-3.5 py-2 bg-indigo-50 group-hover:bg-indigo-600 group-hover:text-white text-indigo-700 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-1.5 transition shadow-2xs">
             <span>Ghi chép</span>
-            <i data-lucide="arrow-right" class="w-3 h-3"></i>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
           </button>
         `;
         container.appendChild(card);
@@ -6887,26 +6887,26 @@
       // Render các plan trong ngày
       currentPlans.forEach(p => {
         const card = document.createElement('div');
-        card.className = "p-3 rounded-xl border bg-white border-purple-100 hover:border-purple-300 hover:shadow-xs transition flex items-center justify-between gap-2.5 cursor-pointer group";
+        card.className = "p-3.5 sm:p-4 rounded-2xl border bg-white border-purple-100/90 hover:border-purple-300 hover:shadow-xs transition flex items-center justify-between gap-3 cursor-pointer group";
         card.onclick = () => logFromTask(null, p.id);
         card.title = 'Bấm để ghi nhật ký cho kế hoạch này';
 
         card.innerHTML = `
-          <div class="flex items-start space-x-2.5 min-w-0 flex-1">
-            <div class="mt-0.5 w-4 h-4 rounded-md bg-purple-100 text-purple-700 shrink-0 flex items-center justify-center">
-              <i data-lucide="calendar" class="w-3 h-3"></i>
+          <div class="flex items-start space-x-3 min-w-0 flex-1">
+            <div class="mt-0.5 w-6 h-6 rounded-lg bg-purple-100 text-purple-700 shrink-0 flex items-center justify-center">
+              <i data-lucide="calendar" class="w-4 h-4"></i>
             </div>
             <div class="min-w-0 flex-1">
-              <p class="text-sm font-bold text-slate-800 truncate group-hover:text-purple-700 transition">${p.task}</p>
-              <div class="flex items-center gap-1.5 mt-0.5">
-                <span class="text-xs px-2 py-0.5 rounded font-semibold bg-purple-50 text-purple-700 border border-purple-200">Kế hoạch</span>
-                <span class="text-xs text-slate-500 font-medium truncate">${p.assigneeName || p.category || ''}</span>
+              <p class="text-base sm:text-lg font-bold text-slate-900 leading-snug group-hover:text-purple-700 transition">${p.task}</p>
+              <div class="flex items-center gap-2 mt-1 flex-wrap">
+                <span class="text-xs sm:text-sm px-2.5 py-0.5 rounded-lg font-bold bg-purple-50 text-purple-700 border border-purple-200">Kế hoạch</span>
+                <span class="text-xs sm:text-sm text-slate-600 font-semibold truncate">${p.assigneeName || p.category || ''}</span>
               </div>
             </div>
           </div>
-          <button type="button" class="shrink-0 px-2.5 py-1.5 bg-purple-50 group-hover:bg-purple-600 group-hover:text-white text-purple-700 rounded-lg text-xs font-extrabold flex items-center gap-1 transition">
+          <button type="button" class="shrink-0 px-3.5 py-2 bg-purple-50 group-hover:bg-purple-600 group-hover:text-white text-purple-700 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-1.5 transition shadow-2xs">
             <span>Ghi chép</span>
-            <i data-lucide="arrow-right" class="w-3 h-3"></i>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
           </button>
         `;
         container.appendChild(card);
