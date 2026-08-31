@@ -85,10 +85,7 @@
       <!-- Login Card -->
       <div class="bg-white/10 backdrop-blur-xl p-5 sm:p-6 rounded-3xl border border-white/15 shadow-2xl space-y-4">
         <div class="space-y-1">
-          <div class="flex items-center justify-between">
-            <h2 class="text-sm font-bold text-white tracking-wide">Đăng nhập ca trực</h2>
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">Bảo mật RBAC</span>
-          </div>
+          <h2 class="text-sm font-bold text-white tracking-wide">Đăng nhập ca trực</h2>
           <p class="text-[11px] text-slate-300">Chọn tài khoản nhân viên đang hoạt động và nhập mã PIN</p>
         </div>
 
@@ -103,10 +100,9 @@
           <div>
             <div class="flex justify-between items-center mb-1">
               <label class="block text-[11px] font-bold text-sky-200 uppercase tracking-wider">Mật khẩu (PIN)</label>
-              <span class="text-[10px] text-sky-300 font-medium">Mặc định: 1234</span>
             </div>
             <div class="relative">
-              <input type="password" id="input-login-pin" placeholder="Nhập PIN (VD: 1234)" class="w-full pl-3.5 pr-10 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-sky-500 placeholder:text-slate-500">
+              <input type="password" id="input-login-pin" placeholder="Nhập mã PIN" class="w-full pl-3.5 pr-10 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-sky-500 placeholder:text-slate-500">
               <button type="button" onclick="togglePasswordVisibility('input-login-pin')" aria-label="Ẩn hiện mật khẩu" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white">
                 <i data-lucide="eye" class="w-4 h-4"></i>
               </button>
@@ -123,25 +119,11 @@
             <span>Vào Bàn Làm Việc</span>
           </button>
         </form>
-
-        <div class="pt-2 border-t border-white/10 flex justify-between items-center text-xs font-bold">
-          <button id="btn-login-open-schedule" onclick="openShiftScheduleModal()" class="text-amber-300 hover:text-white transition flex items-center gap-1">
-            <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
-            <span>Bảng phân ca trực</span>
-          </button>
-          <button id="btn-login-open-register" onclick="openAddEmployeeModalFromLogin()" class="text-sky-300 hover:text-white transition">
-            + Tạo tài khoản mới
-          </button>
-        </div>
       </div>
 
       <!-- Footer Info -->
       <div class="text-center space-y-1.5 text-[11px] text-slate-400">
         <p>Khung giờ ca: <span class="text-amber-300 font-bold">Ca 1 (05h45–14h15)</span> • <span class="text-rose-300 font-bold">Ca 2 (13h45–22h15)</span> • <span class="text-emerald-300 font-bold">HC (07h–17h)</span></p>
-        <button type="button" onclick="openChangelogModal()" class="text-sky-300 hover:text-white underline font-semibold transition inline-flex items-center gap-1">
-          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-sky-300"></i>
-          <span>Phiên bản v4.0.0 • Dashboard & Hướng Dẫn SOP</span>
-        </button>
       </div>
 
     </div>
@@ -1180,7 +1162,7 @@
 
       <div class="space-y-2 text-left">
         <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Mã PIN mới áp dụng chung</label>
-        <input type="text" id="input-bulk-new-pin" value="1234" maxlength="8" class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 text-center font-mono font-bold text-base text-slate-900">
+        <input type="text" id="input-bulk-new-pin" value="0204" maxlength="8" class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 text-center font-mono font-bold text-base text-slate-900">
       </div>
 
       <div class="p-3 bg-amber-50 rounded-2xl border border-amber-200 text-[11px] text-amber-900 text-left space-y-1">
@@ -2394,7 +2376,7 @@
       <div class="space-y-3">
         <div>
           <label class="block text-xs font-bold text-slate-600 mb-1">Mật khẩu hiện tại <span class="text-rose-500">*</span></label>
-          <input type="password" id="input-current-pin" placeholder="Nhập PIN cũ (VD: 1234)" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500">
+          <input type="password" id="input-current-pin" placeholder="Nhập PIN cũ" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500">
         </div>
 
         <div>
@@ -2519,7 +2501,7 @@
         </div>
 
         <p class="text-[11px] text-slate-400">
-          Sau khi tạo, hồ sơ mới sẽ có mật khẩu mặc định là <span class="font-bold text-slate-600">1234</span> và sẵn sàng vào ca trực ngay lập tức.
+          Sau khi tạo, hồ sơ mới sẽ có mật khẩu mặc định là <span class="font-bold text-slate-600">0204</span> và sẵn sàng vào ca trực ngay lập tức.
         </p>
       </div>
 
@@ -2966,12 +2948,12 @@
     // 1. DATA CONSTANTS & DEFAULT SEED DATA
     // ==========================================
     const DEFAULT_ACTIVE_EMPLOYEES = [
-      { id: 'ADMIN01', fullName: 'Quản Trị Viên', shortName: 'Admin', role: 'Quản trị viên', pin: '1234', status: 'active' },
-      { id: 'EMP01', fullName: 'Ngô Quyết Thắng', shortName: 'Thắng', role: 'Kỹ thuật viên', pin: '1234', status: 'active' },
-      { id: 'EMP02', fullName: 'Đinh Văn Hậu', shortName: 'Hậu', role: 'Kỹ thuật viên', pin: '1234', status: 'active' },
-      { id: 'EMP03', fullName: 'Hoàng Việt Hoàng', shortName: 'Hoàng', role: 'Kỹ thuật viên', pin: '1234', status: 'active' },
-      { id: 'EMP04', fullName: 'Nguyễn Đức Phong', shortName: 'Phong', role: 'Kỹ thuật viên', pin: '1234', status: 'active' },
-      { id: 'EMP05', fullName: 'Nguyễn Văn Cường', shortName: 'Cường', role: 'Kỹ thuật viên', pin: '1234', status: 'active' }
+      { id: 'ADMIN01', fullName: 'Quản Trị Viên', shortName: 'Admin', role: 'Quản trị viên', pin: '0204', status: 'active' },
+      { id: 'EMP01', fullName: 'Ngô Quyết Thắng', shortName: 'Thắng', role: 'Kỹ thuật viên', pin: '0204', status: 'active' },
+      { id: 'EMP02', fullName: 'Đinh Văn Hậu', shortName: 'Hậu', role: 'Kỹ thuật viên', pin: '0204', status: 'active' },
+      { id: 'EMP03', fullName: 'Hoàng Việt Hoàng', shortName: 'Hoàng', role: 'Kỹ thuật viên', pin: '0204', status: 'active' },
+      { id: 'EMP04', fullName: 'Nguyễn Đức Phong', shortName: 'Phong', role: 'Kỹ thuật viên', pin: '0204', status: 'active' },
+      { id: 'EMP05', fullName: 'Nguyễn Văn Cường', shortName: 'Cường', role: 'Kỹ thuật viên', pin: '0204', status: 'active' }
     ];
 
     // Cấu hình Biểu Mẫu Google Forms
@@ -4132,7 +4114,15 @@ const CONFIG = {
       loadEmployees() {
         try {
           const raw = localStorage.getItem(this.STORAGE_KEYS.ACTIVE_EMPLOYEES);
-          return raw ? JSON.parse(raw) : DEFAULT_ACTIVE_EMPLOYEES;
+          if (!raw) return DEFAULT_ACTIVE_EMPLOYEES;
+          const list = JSON.parse(raw);
+          // Tự động chuyển mã PIN mặc định cũ (1234) sang 0204
+          list.forEach(emp => {
+            if (!emp.pin || emp.pin === '1234') {
+              emp.pin = '0204';
+            }
+          });
+          return list;
         } catch (e) {
           return DEFAULT_ACTIVE_EMPLOYEES;
         }
@@ -4352,15 +4342,15 @@ const CONFIG = {
       resetEmployeePin(empId) {
         const emp = this.employees.find(e => e.id === empId);
         if (emp) {
-          emp.pin = '1234';
+          emp.pin = '0204';
           this.saveEmployees();
-          this.logSecurityEvent('RESET_PIN_NHÂN_VIÊN', this.getCurrentEmployee().fullName, 'Đặt lại PIN cho ' + emp.fullName + ' về mặc định (1234)');
+          this.logSecurityEvent('RESET_PIN_NHÂN_VIÊN', this.getCurrentEmployee().fullName, 'Đặt lại PIN cho ' + emp.fullName + ' về mặc định (0204)');
           return true;
         }
         return false;
       }
 
-      bulkResetPins(newPin = '1234') {
+      bulkResetPins(newPin = '0204') {
         const adminId = this.currentEmployeeId;
         this.employees.forEach(emp => {
           if (emp.id !== adminId && emp.role !== 'Quản trị viên') {
@@ -4372,7 +4362,7 @@ const CONFIG = {
         return true;
       }
 
-      addEmployee(fullName, role = 'Kỹ thuật viên', customCode = '', initialPin = '1234') {
+      addEmployee(fullName, role = 'Kỹ thuật viên', customCode = '', initialPin = '0204') {
         const shortName = extractShortName(fullName);
         let id = customCode;
         if (!id) {
@@ -4387,7 +4377,7 @@ const CONFIG = {
           fullName: fullName,
           shortName: shortName,
           role: role,
-          pin: initialPin || '1234',
+          pin: initialPin || '0204',
           status: 'active'
         };
         this.employees.push(newEmp);
@@ -5190,7 +5180,7 @@ const CONFIG = {
       const emp = repo.getCurrentEmployee();
       const errMsg = document.getElementById('unlock-error-msg');
 
-      if (pin === emp.pin || pin === '1234') {
+      if (pin === emp.pin || pin === '0204') {
         isWorkstationLocked = false;
         document.getElementById('modal-workstation-lock').classList.add('hidden');
         document.getElementById('modal-workstation-lock').classList.remove('flex');
@@ -5218,7 +5208,7 @@ const CONFIG = {
     }
 
     function executeBulkPinReset() {
-      const pin = document.getElementById('input-bulk-new-pin').value.trim() || '1234';
+      const pin = document.getElementById('input-bulk-new-pin').value.trim() || '0204';
       repo.bulkResetPins(pin);
       closeBulkPinResetModal();
       renderSecurityAuditLogs();
@@ -5486,7 +5476,7 @@ const repo = new AppRepository();
                 <button onclick="handleToggleEmployeeStatus('${emp.id}')" class="px-2 py-1 rounded-lg text-[10px] font-bold transition ${isInactive ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' : 'bg-rose-100 text-rose-800 hover:bg-rose-200'}">
                   ${isInactive ? '🔓 Mở khóa' : '🔒 Khóa'}
                 </button>
-                <button onclick="handleAdminResetPin('${emp.id}')" class="px-2 py-1 bg-slate-200 hover:bg-slate-300 rounded-lg text-[10px] font-bold text-slate-700 transition" title="Đặt lại PIN về 1234">
+                <button onclick="handleAdminResetPin('${emp.id}')" class="px-2 py-1 bg-slate-200 hover:bg-slate-300 rounded-lg text-[10px] font-bold text-slate-700 transition" title="Đặt lại PIN về 0204">
                   Reset PIN
                 </button>
                 ${!isSelf ? `
@@ -5571,9 +5561,9 @@ const repo = new AppRepository();
     }
 
     function handleAdminResetPin(empId) {
-      if (confirm(`Đặt lại mật khẩu cho nhân viên ${empId} về mặc định (1234)?`)) {
+      if (confirm(`Đặt lại mật khẩu cho nhân viên ${empId} về mặc định (0204)?`)) {
         repo.resetEmployeePin(empId);
-        showToast(`Đã reset PIN cho ${empId} về 1234`);
+        showToast(`Đã reset PIN cho ${empId} về 0204`);
       }
     }
 
@@ -5734,8 +5724,8 @@ const repo = new AppRepository();
         return;
       }
 
-      const newEmp = repo.addEmployee(fullName, role, customCode, '1234');
-      repo.login(newEmp.id, '1234');
+      const newEmp = repo.addEmployee(fullName, role, customCode, '0204');
+      repo.login(newEmp.id, '0204');
 
       closeAddEmployeeModal();
       populateLoginEmployeeSelect();
