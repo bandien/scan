@@ -181,240 +181,89 @@
     <main class="flex-1 overflow-y-auto px-3 sm:px-4 py-3 custom-scrollbar pb-28" id="main-content">
 
       <!-- ============================================================== -->
-      <!-- TAB 0: BÀN LÀM VIỆC DASHBOARD NHÂN VIÊN (#tab-dashboard) [MỚI] -->
+      <!-- TAB 0: BÀN LÀM VIỆC DASHBOARD NHÂN VIÊN (#tab-dashboard) -->
       <!-- ============================================================== -->
       <section id="tab-dashboard" class="space-y-3.5">
         
-        <!-- STAFF WORKSTATION HERO BANNER -->
-        <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-sky-950 text-white p-4 sm:p-5 rounded-3xl border border-white/10 shadow-lg relative overflow-hidden">
-          <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-sky-500/10 rounded-full blur-2xl pointer-events-none"></div>
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 relative z-10">
-            <div class="flex items-center space-x-3.5">
-              <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center font-black text-xl text-white shadow-xl shadow-sky-500/30 border border-sky-400/40 shrink-0" id="dash-hero-avatar">
-                AD
-              </div>
-              <div class="space-y-0.5">
-                <div class="flex items-center gap-2 flex-wrap">
-                  <h2 class="text-base sm:text-lg font-black text-white tracking-tight" id="dash-hero-name">Quản Trị Viên</h2>
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-500/30 text-sky-200 border border-sky-400/30" id="dash-hero-role">👑 Quản trị viên</span>
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-                    <span>Đang trực ca</span>
-                  </span>
-                </div>
-                <p class="text-xs text-sky-200/80 font-medium" id="dash-hero-shift-info">
-                  Ca trực: <span class="font-bold text-amber-300" id="dash-hero-shift-name">Ca 1 (05h45 – 14h15)</span> • Mã NV: <span class="font-bold text-white" id="dash-hero-empid">ADMIN01</span>
-                </p>
-                <div class="text-[11px] text-slate-300 flex items-center gap-2 font-mono">
-                  <span id="dash-live-clock" class="font-bold text-sky-300">00:00:00</span>
-                  <span>•</span>
-                  <span id="dash-live-date">Thứ Hai, ...</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Quick Shift Switching & Lock Buttons -->
-            <div class="flex items-center gap-2 w-full sm:w-auto shrink-0 justify-end">
-              <button onclick="openShiftModal()" class="flex-1 sm:flex-initial px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/15 rounded-xl text-xs font-bold transition active:scale-95 flex items-center justify-center gap-1.5 text-white">
-                <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-sky-300"></i>
-                <span>Giao / Đổi Ca</span>
-              </button>
-              <button onclick="lockWorkstation()" class="px-3 py-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 rounded-xl text-xs font-bold transition active:scale-95 flex items-center gap-1.5 text-amber-200">
-                <i data-lucide="lock" class="w-3.5 h-3.5 text-amber-300"></i>
-                <span>Khóa Máy</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- KPI SUMMARY METRICS -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          <!-- KPI 1: Google Calendar -->
-          <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
-            <div class="flex items-center justify-between text-slate-500 text-xs font-bold">
-              <span>Lịch Ca Trực</span>
-              <div class="w-7 h-7 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                <i data-lucide="calendar" class="w-4 h-4"></i>
-              </div>
-            </div>
-            <div class="flex items-baseline gap-1.5">
-              <span class="text-xl font-black text-blue-700">Google</span>
-              <span class="text-[10px] text-slate-400 font-semibold truncate">trucdienhapulico</span>
-            </div>
-            <button onclick="switchTab('calendar')" class="text-[11px] font-bold text-blue-600 hover:underline flex items-center gap-0.5 pt-0.5">
-              <span>Mở xem Lịch ➔</span>
-            </button>
-          </div>
-
-          <!-- KPI 2: Google Forms Hub -->
-          <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
-            <div class="flex items-center justify-between text-slate-500 text-xs font-bold">
-              <span>Biểu Mẫu Form</span>
-              <div class="w-7 h-7 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
-                <i data-lucide="file-check-2" class="w-4 h-4"></i>
-              </div>
-            </div>
-            <div class="flex items-baseline gap-1.5">
-              <span class="text-xl font-black text-purple-700" id="dash-kpi-form-count">4</span>
-              <span class="text-[10px] text-slate-400 font-semibold">Form kiểm tra</span>
-            </div>
-            <button onclick="switchTab('checklist')" class="text-[11px] font-bold text-purple-600 hover:underline flex items-center gap-0.5 pt-0.5">
-              <span>Điền Form ngay ➔</span>
-            </button>
-          </div>
-
-          <!-- KPI 3: In-App Shift Checklist Progress -->
-          <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
-            <div class="flex items-center justify-between text-slate-500 text-xs font-bold">
-              <span>Checklist Ca</span>
-              <div class="w-7 h-7 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                <i data-lucide="check-square" class="w-4 h-4"></i>
-              </div>
-            </div>
-            <div class="flex items-baseline gap-1.5">
-              <span class="text-xl font-black text-emerald-700" id="dash-kpi-task-progress">0%</span>
-              <span class="text-[10px] text-slate-400 font-semibold" id="dash-kpi-task-counts">0/0 việc</span>
-            </div>
-            <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-              <div id="dash-kpi-task-bar" class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
-            </div>
-          </div>
-
-          <!-- KPI 4: Guides / SOPs Available -->
-          <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
-            <div class="flex items-center justify-between text-slate-500 text-xs font-bold">
-              <span>Hướng Dẫn SOP</span>
-              <div class="w-7 h-7 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                <i data-lucide="book-marked" class="w-4 h-4"></i>
-              </div>
-            </div>
-            <div class="flex items-baseline gap-1.5">
-              <span class="text-xl font-black text-amber-700" id="dash-kpi-guide-count">6</span>
-              <span class="text-[10px] text-slate-400 font-semibold">Quy chuẩn M&E</span>
-            </div>
-            <button onclick="switchTab('guides')" class="text-[11px] font-bold text-amber-600 hover:underline flex items-center gap-0.5 pt-0.5">
-              <span>Tra cứu SOP ➔</span>
-            </button>
-          </div>
-        </div>
-
         <!-- QUICK ACTION DESK (BÀN THAO TÁC NHANH 1-CHẠM) -->
-        <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-xs space-y-3">
-          <div class="flex items-center justify-between">
-            <h3 class="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-              <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i>
-              <span>Thao Tác Nhanh Bàn Làm Việc</span>
-            </h3>
-            <span class="text-[11px] text-slate-400 font-medium">Chạm để xử lý ngay</span>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <!-- Action 1: Google Calendar Log Helper -->
+          <button onclick="openQuickCalendarEventModal()" class="p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-blue-400 hover:shadow-md text-left transition active:scale-95 group shadow-xs">
+            <div class="flex items-center justify-between">
+              <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition">
+                <i data-lucide="calendar-plus" class="w-5 h-5"></i>
+              </div>
+              <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">1-Chạm</span>
+            </div>
+            <div class="mt-2.5">
+              <div class="font-extrabold text-xs text-slate-800 leading-tight">Ghi Lịch Nhật Ký</div>
+              <div class="text-[10px] text-slate-400 font-medium mt-0.5">Google Calendar</div>
+            </div>
+          </button>
+
+          <!-- Action 2: Open Google Forms Checklist -->
+          <button onclick="switchTab('checklist')" class="p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-purple-400 hover:shadow-md text-left transition active:scale-95 group shadow-xs">
+            <div class="flex items-center justify-between">
+              <div class="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition">
+                <i data-lucide="clipboard-edit" class="w-5 h-5"></i>
+              </div>
+              <span class="text-[10px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">Biểu Mẫu</span>
+            </div>
+            <div class="mt-2.5">
+              <div class="font-extrabold text-xs text-slate-800 leading-tight">Điền Form Checklist</div>
+              <div class="text-[10px] text-slate-400 font-medium mt-0.5">Google Forms M&E</div>
+            </div>
+          </button>
+
+          <!-- Action 3: Open Guides Library -->
+          <button onclick="switchTab('guides')" class="p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-amber-400 hover:shadow-md text-left transition active:scale-95 group shadow-xs">
+            <div class="flex items-center justify-between">
+              <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition">
+                <i data-lucide="book-open-check" class="w-5 h-5"></i>
+              </div>
+              <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">SOP M&E</span>
+            </div>
+            <div class="mt-2.5">
+              <div class="font-extrabold text-xs text-slate-800 leading-tight">Sổ Tay Hướng Dẫn</div>
+              <div class="text-[10px] text-slate-400 font-medium mt-0.5">Quy trình kỹ thuật</div>
+            </div>
+          </button>
+
+          <!-- Action 4: Shift Roster Matrix -->
+          <button onclick="openShiftScheduleModal()" class="p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-emerald-400 hover:shadow-md text-left transition active:scale-95 group shadow-xs">
+            <div class="flex items-center justify-between">
+              <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition">
+                <i data-lucide="calendar-range" class="w-5 h-5"></i>
+              </div>
+              <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Lịch Trực</span>
+            </div>
+            <div class="mt-2.5">
+              <div class="font-extrabold text-xs text-slate-800 leading-tight">Bảng Phân Ca Tuần</div>
+              <div class="text-[10px] text-slate-400 font-medium mt-0.5">Toàn bộ tổ điện</div>
+            </div>
+          </button>
+        </div>
+
+        <!-- PROGRESS BAR SUMMARY -->
+        <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs space-y-2">
+          <div class="flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+              <div class="w-6 h-6 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
+              </div>
+              <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Tiến độ công việc ca trực</span>
+            </div>
+            <div class="flex items-baseline gap-1.5">
+              <span class="text-xs font-black text-emerald-600" id="dash-kpi-task-progress">0%</span>
+              <span class="text-[11px] text-slate-400 font-semibold" id="dash-kpi-task-counts">(0/0 việc)</span>
+            </div>
           </div>
-
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <!-- Action 1: Google Calendar Log Helper -->
-            <button onclick="openQuickCalendarEventModal()" class="p-3 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50/80 border border-blue-200/80 hover:border-blue-400 text-left transition active:scale-95 group">
-              <div class="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 group-hover:scale-105 transition">
-                <i data-lucide="calendar-plus" class="w-4 h-4"></i>
-              </div>
-              <div class="mt-2">
-                <div class="font-extrabold text-xs text-blue-950 leading-tight">Ghi Lịch Nhật Ký</div>
-                <div class="text-[10px] text-blue-700/80 font-medium mt-0.5">Google Calendar</div>
-              </div>
-            </button>
-
-            <!-- Action 2: Open Google Forms Checklist -->
-            <button onclick="switchTab('checklist')" class="p-3 rounded-2xl bg-gradient-to-br from-purple-50 to-indigo-50/80 border border-purple-200/80 hover:border-purple-400 text-left transition active:scale-95 group">
-              <div class="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-md shadow-purple-500/20 group-hover:scale-105 transition">
-                <i data-lucide="clipboard-edit" class="w-4 h-4"></i>
-              </div>
-              <div class="mt-2">
-                <div class="font-extrabold text-xs text-purple-950 leading-tight">Điền Form Checklist</div>
-                <div class="text-[10px] text-purple-700/80 font-medium mt-0.5">Google Form M&E</div>
-              </div>
-            </button>
-
-            <!-- Action 3: Open Guides Library -->
-            <button onclick="switchTab('guides')" class="p-3 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50/80 border border-amber-200/80 hover:border-amber-400 text-left transition active:scale-95 group">
-              <div class="w-8 h-8 rounded-xl bg-amber-600 text-white flex items-center justify-center shadow-md shadow-amber-500/20 group-hover:scale-105 transition">
-                <i data-lucide="book-open-check" class="w-4 h-4"></i>
-              </div>
-              <div class="mt-2">
-                <div class="font-extrabold text-xs text-amber-950 leading-tight">Sổ Tay Hướng Dẫn</div>
-                <div class="text-[10px] text-amber-700/80 font-medium mt-0.5">Quy trình SOP & Kỹ thuật</div>
-              </div>
-            </button>
-
-            <!-- Action 4: Shift Roster Matrix -->
-            <button onclick="openShiftScheduleModal()" class="p-3 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50/80 border border-emerald-200/80 hover:border-emerald-400 text-left transition active:scale-95 group">
-              <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-500/20 group-hover:scale-105 transition">
-                <i data-lucide="calendar-range" class="w-4 h-4"></i>
-              </div>
-              <div class="mt-2">
-                <div class="font-extrabold text-xs text-emerald-950 leading-tight">Bảng Phân Ca Tuần</div>
-                <div class="text-[10px] text-emerald-700/80 font-medium mt-0.5">Lịch trực toàn tổ</div>
-              </div>
-            </button>
+          <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+            <div id="dash-kpi-task-bar" class="bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
           </div>
         </div>
 
-        <!-- SECTION: LIVE GOOGLE CALENDAR EMBED VIEW -->
-        <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-xs space-y-3">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <div class="flex items-center gap-2">
-                <div class="w-7 h-7 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs">
-                  <i data-lucide="calendar" class="w-4 h-4"></i>
-                </div>
-                <h3 class="font-black text-slate-900 text-sm sm:text-base">Lịch Nhật Ký Ca Trực (Google Calendar)</h3>
-              </div>
-              <p class="text-xs text-slate-500 mt-0.5">Lịch chung: <span class="font-mono font-bold text-blue-700">trucdienhapulico@gmail.com</span></p>
-            </div>
-            
-            <div class="flex items-center gap-1.5 flex-wrap">
-              <button onclick="openQuickCalendarEventModal()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-extrabold transition active:scale-95 flex items-center gap-1 shadow-xs">
-                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
-                <span>➕ Thêm Nhật Ký</span>
-              </button>
-              <a href="https://calendar.google.com/calendar/r" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1">
-                <i data-lucide="external-link" class="w-3.5 h-3.5 text-slate-500"></i>
-                <span>Mở Google Lớn</span>
-              </a>
-              <button onclick="reloadCalendarIframe('dash-calendar-iframe')" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition" title="Tải lại lịch">
-                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
-          </div>
-
-          <!-- Calendar Iframe Container -->
-          <div class="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50 relative min-h-[360px]">
-            <iframe id="dash-calendar-iframe" src="https://calendar.google.com/calendar/embed?src=trucdienhapulico%40gmail.com&ctz=Asia%2FHo_Chi_Minh" style="border: 0" width="100%" height="380" frameborder="0" scrolling="no" class="w-full"></iframe>
-          </div>
-        </div>
-
-        <!-- SECTION: QUICK GOOGLE FORMS CHECKLIST CARDS -->
-        <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-xs space-y-3">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <div class="w-7 h-7 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-xs">
-                <i data-lucide="file-check" class="w-4 h-4"></i>
-              </div>
-              <div>
-                <h3 class="font-black text-slate-900 text-sm sm:text-base">Biểu Mẫu Checklist Google Forms</h3>
-                <p class="text-xs text-slate-500">Chọn biểu mẫu để ghi nhận kiểm tra kỹ thuật</p>
-              </div>
-            </div>
-
-            <button id="btn-admin-config-forms-dash" onclick="openFormConfigModal()" class="text-xs font-bold text-purple-700 hover:text-purple-900 flex items-center gap-1 bg-purple-50 px-2.5 py-1 rounded-xl border border-purple-200">
-              <i data-lucide="settings" class="w-3.5 h-3.5"></i>
-              <span>Cấu hình Link</span>
-            </button>
-          </div>
-
-          <!-- 4 Main Form Cards -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5" id="dash-google-forms-grid">
-            <!-- Rendered by JS -->
-          </div>
-        </div>
-
-        <!-- SECTION: IN-APP SHIFT TASKS & TODAY'S WORK -->
+        <!-- SECTION: IN-APP SHIFT TASKS & TODAY'S WORK (TRỌNG TÂM) -->
         <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-xs space-y-3">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -423,14 +272,14 @@
               </div>
               <div>
                 <h3 class="font-black text-slate-900 text-sm sm:text-base">Checklist & Đầu Việc Ca Trực</h3>
-                <p class="text-xs text-slate-500">Tích hoàn tất hoặc chuyển thành nhật ký</p>
+                <p class="text-xs text-slate-500">Tích hoàn tất hoặc chuyển thành nhật ký Calendar</p>
               </div>
             </div>
 
             <div class="flex items-center gap-1.5">
               <button onclick="openApplyTemplateModal()" class="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-xl text-xs font-bold transition flex items-center gap-1">
                 <i data-lucide="book-template" class="w-3.5 h-3.5 text-amber-600"></i>
-                <span class="hidden sm:inline">Mẫu Sổ</span>
+                <span>Mẫu Sổ</span>
               </button>
               <button onclick="openTaskModal()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-extrabold transition active:scale-95 flex items-center gap-1 shadow-xs">
                 <i data-lucide="plus" class="w-3.5 h-3.5"></i>
@@ -440,15 +289,13 @@
           </div>
 
           <!-- Quick Shift Task List -->
-          <div id="dash-shift-task-list" class="space-y-2 max-h-80 overflow-y-auto custom-scrollbar">
+          <div id="dash-shift-task-list" class="space-y-2">
             <!-- Rendered by JS -->
           </div>
         </div>
 
       </section>
 
-      <!-- ============================================================== -->
-      <!-- TAB 1: LỊCH NHẬT KÝ GOOGLE CALENDAR (#tab-calendar) [MỚI] -->
       <!-- ============================================================== -->
       <section id="tab-calendar" class="space-y-3.5 hidden">
         <!-- Top Action Header -->
@@ -481,7 +328,7 @@
             <i data-lucide="info" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5"></i>
             <div class="space-y-0.5">
               <span class="font-bold text-white">Quy chuẩn đặt tên sự kiện: </span>
-              <span class="font-mono text-amber-200 bg-blue-950/80 px-2 py-0.5 rounded border border-blue-700/50">[Ca trực - Ngày] [NV: Tên] Nội dung công việc / Sự cố</span>
+              <span class="font-mono text-amber-200 bg-blue-950/80 px-2 py-0.5 rounded border border-blue-700/50">Nội dung công việc / Sự cố - [Kết quả nếu đã thực hiện] - [NV: Tên]</span>
             </div>
           </div>
         </div>
@@ -945,76 +792,72 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- MODAL: GHI NHẬT KÝ GOOGLE CALENDAR NHANH (#modal-quick-calendar-event) [MỚI] -->
+  <!-- MODAL: GHI NHẬT KÝ GOOGLE CALENDAR NHANH (#modal-quick-calendar-event) -->
   <!-- ========================================== -->
   <div id="modal-quick-calendar-event" class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200 overflow-y-auto">
-    <div class="bg-white rounded-3xl w-full max-w-lg p-5 shadow-2xl space-y-4 max-h-[95vh] flex flex-col">
+    <div class="bg-white rounded-3xl w-full max-w-md p-5 shadow-2xl space-y-4">
+      
+      <!-- Header -->
       <div class="flex justify-between items-center border-b border-slate-100 pb-3">
         <div class="flex items-center space-x-2.5">
           <div class="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
             <i data-lucide="calendar-plus" class="w-4 h-4"></i>
           </div>
           <div>
-            <h3 class="font-extrabold text-slate-900 text-base">Ghi Nhật Ký Google Calendar</h3>
-            <p class="text-xs text-slate-500 font-medium">Tạo sự kiện chuẩn hóa vào lịch <span class="text-blue-700 font-bold">trucdienhapulico@gmail.com</span></p>
+            <h3 class="font-extrabold text-slate-900 text-base">Ghi Lịch Google Calendar</h3>
+            <p class="text-xs text-slate-500 font-medium">Lịch: <span class="text-blue-700 font-bold font-mono">trucdienhapulico@gmail.com</span></p>
           </div>
         </div>
-        <button onclick="closeQuickCalendarEventModal()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
+        <button onclick="closeQuickCalendarEventModal()" aria-label="Đóng popup" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
 
-      <div class="space-y-3.5 flex-1 overflow-y-auto custom-scrollbar">
-        <!-- Quick Template Buttons -->
+      <!-- Main Form -->
+      <div class="space-y-3">
+        <!-- 1. Content Input -->
         <div>
-          <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Mẫu sự kiện nhanh</label>
-          <div class="grid grid-cols-2 gap-1.5">
-            <button type="button" onclick="applyCalPreset('Kiểm tra Trạm Biến Áp TBA: Điện áp, nhiệt độ tiếp xúc bình thường')" class="text-left p-2 rounded-xl bg-slate-50 hover:bg-blue-50 border border-slate-200 text-xs font-semibold text-slate-700 transition">
-              ⚡ Kiểm tra TBA định kỳ
-            </button>
-            <button type="button" onclick="applyCalPreset('Kiểm tra Trạm Bơm Nước & PCCC: Áp lực 4.8 bar, biến tần Auto')" class="text-left p-2 rounded-xl bg-slate-50 hover:bg-blue-50 border border-slate-200 text-xs font-semibold text-slate-700 transition">
-              💧 Kiểm tra Trạm Bơm & PCCC
-            </button>
-            <button type="button" onclick="applyCalPreset('Bàn giao ca trực: Chỉ số công tơ điện nước và chìa khóa trạm đầy đủ')" class="text-left p-2 rounded-xl bg-slate-50 hover:bg-blue-50 border border-slate-200 text-xs font-semibold text-slate-700 transition">
-              🔄 Bàn giao ca trực
-            </button>
-            <button type="button" onclick="applyCalPreset('SỰ CỐ XỬ LÝ: ')" class="text-left p-2 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-xs font-semibold text-rose-800 transition">
-              🚨 Báo cáo sự cố khẩn cấp
-            </button>
-          </div>
+          <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">1. Nội dung công việc / Sự cố:</label>
+          <input type="text" id="cal-input-content" placeholder="VD: Kiểm tra TBA, Thay aptomat đèn..." oninput="updateCalTitlePreview()" class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
 
+        <!-- 3. Result Input + Quick Tag Pills -->
         <div>
-          <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Tiêu đề sự kiện (Tự động chuẩn hóa)</label>
-          <input type="text" id="cal-event-title" class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <div class="flex justify-between items-center mb-1">
+            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">2. Kết quả thực hiện:</label>
+            <div class="flex gap-1">
+              <button type="button" onclick="setResultTag('Bình thường')" class="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-bold hover:bg-emerald-100">+ Bình thường</button>
+              <button type="button" onclick="setResultTag('Đã hoàn thành')" class="text-[10px] text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded font-bold hover:bg-blue-100">+ Đã xong</button>
+              <button type="button" onclick="setResultTag('Đang xử lý')" class="text-[10px] text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded font-bold hover:bg-amber-100">+ Đang xử lý</button>
+            </div>
+          </div>
+          <input type="text" id="cal-input-result" placeholder="VD: Đã hoàn thành, Hoạt động tốt..." oninput="updateCalTitlePreview()" class="w-full px-3.5 py-2 bg-slate-50 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
 
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Giờ bắt đầu</label>
-            <input type="time" id="cal-event-start-time" class="w-full px-3 py-2 bg-slate-50 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800">
+        <!-- 4. Live Preview Banner -->
+        <div class="p-3 bg-blue-50/70 border border-blue-200 rounded-2xl space-y-1">
+          <div class="text-[10px] font-bold uppercase text-blue-700 tracking-wider flex items-center gap-1">
+            <i data-lucide="sparkles" class="w-3 h-3 text-blue-600"></i>
+            <span>Tiêu đề sự kiện chuẩn hóa:</span>
           </div>
-          <div>
-            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Giờ kết thúc</label>
-            <input type="time" id="cal-event-end-time" class="w-full px-3 py-2 bg-slate-50 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800">
+          <div id="cal-preview-text" class="text-xs font-black text-blue-950 break-words leading-tight">
+            ...
           </div>
-        </div>
-
-        <div>
-          <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Chi tiết nội dung / Ghi chú</label>
-          <textarea id="cal-event-details" rows="3" placeholder="Ghi chú thêm thông số kỹ thuật, khu vực, thiết bị..." class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
         </div>
       </div>
 
+      <!-- Action Buttons -->
       <div class="flex gap-2 pt-2 border-t border-slate-100">
-        <button type="button" onclick="closeQuickCalendarEventModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 font-bold rounded-xl text-xs text-slate-600 transition">
-          Hủy
+        <button type="button" onclick="copyCalEventTitle()" class="px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition flex items-center justify-center gap-1" title="Sao chép tiêu đề">
+          <i data-lucide="copy" class="w-4 h-4"></i>
+          <span>Copy</span>
         </button>
         <button type="button" onclick="launchGoogleCalendarCreate()" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold rounded-xl text-xs shadow-md transition flex items-center justify-center gap-1.5">
           <i data-lucide="external-link" class="w-4 h-4"></i>
-          <span>Mở Thêm Trên Google Calendar</span>
+          <span>Tạo Sự Kiện Lịch ➔</span>
         </button>
       </div>
+
     </div>
   </div>
 
@@ -2017,7 +1860,7 @@
               </div>
               <ul class="pl-4 list-disc space-y-1 text-[11.5px]">
                 <li>Nhúng trực tiếp lịch chung <code class="bg-blue-50 text-blue-700 px-1 py-0.2 rounded font-bold">trucdienhapulico@gmail.com</code>.</li>
-                <li>Popup ghi nhật ký nhanh chuẩn hóa cú pháp: <code class="bg-slate-100 px-1 rounded">[Ca 1 - 31/08] [NV: Tên] Nội dung công việc...</code> với các mẫu sự kiện TBA, Trạm bơm, Bàn giao ca và Báo cáo sự cố.</li>
+                <li>Popup ghi nhật ký nhanh chuẩn hóa cú pháp: <code class="bg-slate-100 px-1 rounded">Nội dung công việc / Sự cố - [Kết quả nếu đã thực hiện] - [NV: Tên]</code> với các mẫu sự kiện TBA, Trạm bơm, Bàn giao ca và Báo cáo sự cố.</li>
               </ul>
             </div>
 
@@ -2956,6 +2799,17 @@
     // Cấu hình Biểu Mẫu Google Forms
     const DEFAULT_GOOGLE_FORMS = [
       {
+        id: 'form_checklist_ca',
+        title: 'Checklist Ca Vận Hành Điện Nước Sân Golf',
+        category: 'Checklist ca',
+        icon: 'clipboard-check',
+        color: 'purple',
+        badge: 'Biểu mẫu chính',
+        desc: 'Biểu mẫu kiểm tra thông số kỹ thuật Trạm Biến Áp TBA, Trạm Bơm Cấp Nước, Hệ Thống PCCC & Bàn Giao Ca.',
+        url: 'https://forms.gle/7gNBsFcX12ikeNXX9',
+        frequency: 'Mỗi ca trực'
+      },
+      {
         id: 'form_tba',
         title: 'Kiểm Tra Trạm Biến Áp (TBA) & Lưới Điện',
         category: 'Trạm điện',
@@ -2963,7 +2817,7 @@
         color: 'amber',
         badge: 'Điện lực 22kV / 0.4kV',
         desc: 'Ghi nhận điện áp 3 pha, nhiệt độ tiếp xúc máy biến áp, dòng cân pha & tình trạng tủ hạ thế.',
-        url: 'https://docs.google.com/forms/d/e/1FAIpQLScX_sample_tba_form/viewform',
+        url: 'https://forms.gle/7gNBsFcX12ikeNXX9',
         frequency: 'Mỗi ca trực'
       },
       {
@@ -2974,7 +2828,7 @@
         color: 'blue',
         badge: 'Cấp nước & PCCC 24/7',
         desc: 'Ghi nhận áp lực 4.0 - 5.5 bar, biến tần GD200A, mực nước bể ngầm & động cơ diesel.',
-        url: 'https://docs.google.com/forms/d/e/1FAIpQLScX_sample_pump_form/viewform',
+        url: 'https://forms.gle/7gNBsFcX12ikeNXX9',
         frequency: 'Mỗi ca trực'
       },
       {
@@ -2985,7 +2839,7 @@
         color: 'emerald',
         badge: 'Bàn giao tài sản',
         desc: 'Chốt chỉ số đồng hồ điện nước, bàn giao chìa khóa trạm, vật tư & thiết bị đo.',
-        url: 'https://docs.google.com/forms/d/e/1FAIpQLScX_sample_handover_form/viewform',
+        url: 'https://forms.gle/7gNBsFcX12ikeNXX9',
         frequency: 'Đầu / Cuối ca'
       },
       {
@@ -2996,7 +2850,7 @@
         color: 'rose',
         badge: 'Sự cố khẩn cấp',
         desc: 'Báo cáo nhanh sự cố chập điện, rò nước, kẹt bơm và đề xuất vật tư thay thế.',
-        url: 'https://docs.google.com/forms/d/e/1FAIpQLScX_sample_incident_form/viewform',
+        url: 'https://forms.gle/7gNBsFcX12ikeNXX9',
         frequency: 'Khi phát sinh'
       }
     ];
@@ -3079,7 +2933,7 @@
         target: 'Chuẩn hóa việc theo dõi dòng thời gian ca trực trên Google Calendar chung.',
         safetyNotes: 'Ghi trung thực, rõ ràng thời điểm phát sinh sự cố và phương án xử lý.',
         steps: [
-          '1. Cú pháp đặt tên sự kiện: [Tên Ca - Ngày] [NV: Tên Nhân Viên] Nội dung tóm tắt. (VD: [Ca 1 - 31/08] [NV: Thắng] Kiểm tra TBA và xử lý rơ le bơm số 2).',
+          '1. Cú pháp đặt tên sự kiện: Nội dung công việc / Sự cố - [Kết quả nếu đã thực hiện] - [NV: Tên]. (VD: Kiểm tra TBA - [Điện áp bình thường, nhiệt độ 38°C] - [NV: Thắng]).',
           '2. Màu sắc sự kiện: \\n• Xanh lá / Xanh dương: Ca trực bình thường, kiểm tra định kỳ.\\n• Đỏ / Cam: Sự cố kỹ thuật khẩn cấp cần theo dõi hoặc bàn giao ca sau.',
           '3. Phần mô tả sự kiện (Description): Ghi rõ thông số đo đạc, thiết bị liên quan và người phối hợp.'
         ]
@@ -3087,18 +2941,17 @@
       {
         id: 'sop_forms_01',
         code: 'SOP-FORMS-01',
-        title: 'Hướng Dẫn Điền Biểu Mẫu Checklist Google Forms & Bàn Giao Ca',
+        title: 'Quy Trình Kiểm Tra & Điền Checklist Ca Vận Hành Sân Golf',
         category: 'workflow',
         categoryName: '📅 Lịch & Form',
         author: 'Ban Kỹ Thuật M&E',
-        target: 'Đảm bảo dữ liệu kiểm tra hiện trường được ghi nhận đầy đủ, không bỏ sót hạng mục.',
-        safetyNotes: 'Chụp ảnh hiện trường rõ nét đối với các điểm bất thường hoặc thông số quá nhiệt.',
+        target: 'Kiểm tra định kỳ và ghi nhận số liệu kỹ thuật đúng khung giờ từng ca trực.',
+        safetyNotes: 'Chụp ảnh hiện trường nếu phát hiện thông số bất thường hoặc nguy cơ sự cố.',
         steps: [
-          '1. Mở biểu mẫu tương ứng trên Bàn Làm Việc (Form TBA, Form Bơm, Form Giao Ca).',
-          '2. Điền đầy đủ họ tên người trực và ngày giờ thực hiện.',
-          '3. Đánh giá từng tiêu chí: Đạt / Không đạt kèm số đo cụ thể (Điện áp, Áp lực bar, Nhiệt độ °C).',
-          '4. Đính kèm hình ảnh hiện trường nếu phát hiện sự cố hoặc thông số lệch chuẩn.',
-          '5. Bấm Gửi (Submit) và thông báo cho ca sau nếu có nội dung bàn giao đặc biệt.'
+          '⏰ BƯỚC 1: Khung giờ kiểm tra quy định theo từng ca:\n• Ca 1: Thực hiện lúc 12h30 – 13h30\n• Ca 2: Thực hiện lúc 16h15 – 17h15\n• Ca 3: Thực hiện 2 lần lúc 22h00 – 23h00 và 04h30 – 05h30',
+          '📋 BƯỚC 2: Mở biểu mẫu Checklist:\n• Đường link Form: https://forms.gle/7gNBsFcX12ikeNXX9\n• Chọn đúng Ca trực và Tên nhân viên kiểm tra',
+          '🔍 BƯỚC 3: Ghi nhận thông tin kiểm tra hiện trường:\n• Kiểm tra thực tế và điền đầy đủ các mục theo từng câu hỏi trong biểu mẫu\n• Ghi nhận chính xác các thông số kỹ thuật và trạng thái vận hành của các hệ thống thiết bị',
+          '🚨 BƯỚC 4: Gửi biểu mẫu & Xử lý sự cố bất thường:\n• Rà soát lại số liệu và bấm Gửi biểu mẫu\n• Nếu phát hiện sự cố bất thường: Báo cáo trực tiếp ngay lên nhóm trao đổi thông tin vận hành liên quan có phụ trách, hoặc nhóm nhà thầu để có thông tin và hướng xử lý nhanh nhất'
         ]
       }
     ];
@@ -4028,7 +3881,18 @@ const CONFIG = {
       loadGoogleForms() {
         try {
           const raw = localStorage.getItem(this.STORAGE_KEYS.GOOGLE_FORMS);
-          return raw ? JSON.parse(raw) : DEFAULT_GOOGLE_FORMS;
+          if (!raw) return DEFAULT_GOOGLE_FORMS;
+          const forms = JSON.parse(raw);
+          // Tự động cập nhật các form có link mẫu cũ sang link chính thức
+          forms.forEach(f => {
+            if (f.id === 'form_checklist_ca') {
+              f.title = 'Checklist Ca Vận Hành Điện Nước Sân Golf';
+            }
+            if (!f.url || f.url.includes('sample_') || f.url.includes('example.com')) {
+              f.url = 'https://forms.gle/7gNBsFcX12ikeNXX9';
+            }
+          });
+          return forms;
         } catch (e) {
           return DEFAULT_GOOGLE_FORMS;
         }
@@ -4055,7 +3919,18 @@ const CONFIG = {
       loadSopGuides() {
         try {
           const raw = localStorage.getItem(this.STORAGE_KEYS.SOP_GUIDES);
-          return raw ? JSON.parse(raw) : DEFAULT_SOP_GUIDES;
+          if (!raw) return DEFAULT_SOP_GUIDES;
+          const guides = JSON.parse(raw);
+          // Tự động đồng bộ nội dung chuẩn cho SOP-FORMS-01
+          const formGuide = guides.find(g => g.code === 'SOP-FORMS-01');
+          const defaultFormGuide = DEFAULT_SOP_GUIDES.find(g => g.code === 'SOP-FORMS-01');
+          if (formGuide && defaultFormGuide) {
+            formGuide.title = defaultFormGuide.title;
+            formGuide.steps = defaultFormGuide.steps;
+            formGuide.target = defaultFormGuide.target;
+            formGuide.safetyNotes = defaultFormGuide.safetyNotes;
+          }
+          return guides;
         } catch (e) {
           return DEFAULT_SOP_GUIDES;
         }
@@ -4683,20 +4558,6 @@ const CONFIG = {
     }
 
     function renderDashboard() {
-      const emp = repo.getCurrentEmployee();
-      
-      const hAvatar = document.getElementById('dash-hero-avatar');
-      const hName = document.getElementById('dash-hero-name');
-      const hRole = document.getElementById('dash-hero-role');
-      const hShiftName = document.getElementById('dash-hero-shift-name');
-      const hEmpId = document.getElementById('dash-hero-empid');
-
-      if (hAvatar) hAvatar.innerText = generateCleanInitials(emp.fullName);
-      if (hName) hName.innerText = emp.fullName;
-      if (hRole) hRole.innerText = emp.role === 'Quản trị viên' ? '👑 Quản trị viên' : (emp.role === 'Thử việc' ? '🔰 Thử việc' : '👷 Kỹ thuật viên');
-      if (hShiftName) hShiftName.innerText = repo.currentShiftType;
-      if (hEmpId) hEmpId.innerText = emp.id;
-
       const sId = 'shift_' + repo.currentDate + '_' + repo.currentShiftType.replace(/\s+/g, '_');
       const shiftTasks = repo.tasks.filter(t => t.shiftId === sId);
       const doneCount = shiftTasks.filter(t => t.done).length;
@@ -4707,16 +4568,9 @@ const CONFIG = {
       const countsEl = document.getElementById('dash-kpi-task-counts');
       const barEl = document.getElementById('dash-kpi-task-bar');
       if (progressEl) progressEl.innerText = pct + '%';
-      if (countsEl) countsEl.innerText = doneCount + '/' + totalTasks + ' việc';
+      if (countsEl) countsEl.innerText = '(' + doneCount + '/' + totalTasks + ' việc)';
       if (barEl) barEl.style.width = pct + '%';
 
-      const formCountEl = document.getElementById('dash-kpi-form-count');
-      if (formCountEl) formCountEl.innerText = repo.googleForms.length;
-
-      const guideCountEl = document.getElementById('dash-kpi-guide-count');
-      if (guideCountEl) guideCountEl.innerText = repo.sopGuides.length;
-
-      renderDashboardFormsGrid();
       renderDashboardShiftTasks();
     }
 
@@ -4790,7 +4644,7 @@ const CONFIG = {
               </div>
             </div>
           </div>
-          <button onclick="openQuickCalendarEventModal('Kiểm tra: ' + '${task.title.replace(/'/g, '')}')" class="p-1.5 bg-white hover:bg-blue-50 text-blue-600 border border-slate-200 rounded-xl transition text-[10px] font-bold flex items-center gap-1 shrink-0" title="Ghi vào lịch Google">
+          <button onclick="openQuickCalendarEventModal('${task.title.replace(/'/g, '')}', '${task.done ? 'Đã hoàn thành' : 'Đang xử lý'}')" class="p-1.5 bg-white hover:bg-blue-50 text-blue-600 border border-slate-200 rounded-xl transition text-[10px] font-bold flex items-center gap-1 shrink-0" title="Ghi vào lịch Google">
             <i data-lucide="calendar-plus" class="w-3.5 h-3.5"></i>
             <span class="hidden sm:inline">Ghi Lịch</span>
           </button>
@@ -5011,7 +4865,7 @@ const CONFIG = {
           <div class="space-y-2">
             ${(guide.steps || []).map((step, idx) => `
               <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-slate-800 leading-relaxed font-medium">
-                ${step}
+                ${step.replace(/\n/g, '<br>')}
               </div>
             `).join('')}
           </div>
@@ -5097,38 +4951,62 @@ const CONFIG = {
       }
     }
 
-    function openQuickCalendarEventModal(presetText = '') {
+    function openQuickCalendarEventModal(content = '', result = '') {
       const emp = repo.getCurrentEmployee();
-      const shiftShort = repo.currentShiftType.split(' ')[0] || 'Ca 1';
-      const now = new Date();
-      const dateStr = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0');
+      const contentInput = document.getElementById('cal-input-content');
+      const resultInput = document.getElementById('cal-input-result');
 
-      const titleInput = document.getElementById('cal-event-title');
-      const startInput = document.getElementById('cal-event-start-time');
-      const endInput = document.getElementById('cal-event-end-time');
-      const detailsInput = document.getElementById('cal-event-details');
+      if (contentInput) contentInput.value = content || '';
+      if (resultInput) resultInput.value = result || '';
 
-      if (presetText) {
-        titleInput.value = '[' + shiftShort + ' - ' + dateStr + '] [NV: ' + emp.shortName + '] ' + presetText;
-      } else {
-        titleInput.value = '[' + shiftShort + ' - ' + dateStr + '] [NV: ' + emp.shortName + '] Nhật ký ca trực';
-      }
-
-      startInput.value = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
-      const endHour = (now.getHours() + 1) % 24;
-      endInput.value = String(endHour).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
-      detailsInput.value = 'Người trực: ' + emp.fullName + ' (' + emp.id + ')\nCa: ' + repo.currentShiftType + '\nNgày: ' + now.toLocaleDateString('vi-VN') + '\nNội dung công việc và thông số kỹ thuật...';
+      updateCalTitlePreview();
 
       document.getElementById('modal-quick-calendar-event').classList.remove('hidden');
       document.getElementById('modal-quick-calendar-event').classList.add('flex');
+      lucide.createIcons();
     }
 
-    function applyCalPreset(preset) {
+    function setCalForm(content, result) {
+      const contentInput = document.getElementById('cal-input-content');
+      const resultInput = document.getElementById('cal-input-result');
+      if (contentInput) contentInput.value = content;
+      if (resultInput) resultInput.value = result;
+      updateCalTitlePreview();
+    }
+
+    function setResultTag(tag) {
+      const resultInput = document.getElementById('cal-input-result');
+      if (resultInput) resultInput.value = tag;
+      updateCalTitlePreview();
+    }
+
+    function getFormattedCalTitle() {
       const emp = repo.getCurrentEmployee();
-      const shiftShort = repo.currentShiftType.split(' ')[0] || 'Ca 1';
-      const now = new Date();
-      const dateStr = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0');
-      document.getElementById('cal-event-title').value = '[' + shiftShort + ' - ' + dateStr + '] [NV: ' + emp.shortName + '] ' + preset;
+      const name = emp.shortName || extractShortName(emp.fullName);
+
+      const contentInput = document.getElementById('cal-input-content');
+      const resultInput = document.getElementById('cal-input-result');
+
+      const content = (contentInput && contentInput.value.trim()) || 'Nhật ký công việc';
+      const result = resultInput ? resultInput.value.trim() : '';
+
+      if (result) {
+        return content + ' - [' + result + '] - [NV: ' + name + ']';
+      } else {
+        return content + ' - [NV: ' + name + ']';
+      }
+    }
+
+    function updateCalTitlePreview() {
+      const previewEl = document.getElementById('cal-preview-text');
+      if (previewEl) {
+        previewEl.innerText = getFormattedCalTitle();
+      }
+    }
+
+    function copyCalEventTitle() {
+      const title = getFormattedCalTitle();
+      copyToClipboard(title, 'Đã sao chép tiêu đề sự kiện');
     }
 
     function closeQuickCalendarEventModal() {
@@ -5137,13 +5015,10 @@ const CONFIG = {
     }
 
     function launchGoogleCalendarCreate() {
-      const title = document.getElementById('cal-event-title').value.trim();
-      const details = document.getElementById('cal-event-details').value.trim();
-
-      const url = 'https://calendar.google.com/calendar/r/eventedit?text=' + encodeURIComponent(title) + '&details=' + encodeURIComponent(details) + '&src=trucdienhapulico%40gmail.com';
+      const title = getFormattedCalTitle();
+      const url = 'https://calendar.google.com/calendar/r/eventedit?text=' + encodeURIComponent(title) + '&src=trucdienhapulico%40gmail.com';
       window.open(url, '_blank');
       closeQuickCalendarEventModal();
-      showToast('Đang mở trang thêm lịch Google Calendar...');
     }
 
     function reloadCalendarIframe(iframeId) {
