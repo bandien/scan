@@ -48,6 +48,68 @@
     .schedule-table th, .schedule-table td {
       border: 1px solid #cbd5e1;
     }
+    /* Mobile sticky column for staff name & STT */
+    .schedule-table thead th:nth-child(1),
+    .schedule-table tbody td:nth-child(1) {
+      position: sticky;
+      left: 0;
+      z-index: 10;
+      background-color: #f8fafc;
+      width: 34px;
+      min-width: 34px;
+      max-width: 34px;
+    }
+    .schedule-table thead th:nth-child(2),
+    .schedule-table tbody td:nth-child(2) {
+      position: sticky;
+      left: 34px;
+      z-index: 10;
+      background-color: #f8fafc;
+      width: 145px;
+      min-width: 145px;
+      max-width: 145px;
+      box-shadow: 2px 0 6px -1px rgba(0, 0, 0, 0.12);
+    }
+    .schedule-table thead tr:nth-child(1) th:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 20;
+      background-color: #f1f5f9;
+      box-shadow: 2px 0 6px -1px rgba(0, 0, 0, 0.12);
+    }
+    .schedule-table thead tr:nth-child(2) th:nth-child(1),
+    .schedule-table thead tr:nth-child(3) th:nth-child(1) {
+      position: sticky;
+      left: 0;
+      z-index: 20;
+      background-color: #f1f5f9;
+    }
+    .schedule-table thead tr:nth-child(2) th:nth-child(2),
+    .schedule-table thead tr:nth-child(3) th:nth-child(2) {
+      position: sticky;
+      left: 34px;
+      z-index: 20;
+      background-color: #f1f5f9;
+      box-shadow: 2px 0 6px -1px rgba(0, 0, 0, 0.12);
+    }
+    .schedule-table tfoot td:nth-child(1) {
+      position: sticky;
+      left: 0;
+      z-index: 10;
+      background-color: #f1f5f9;
+      box-shadow: 2px 0 6px -1px rgba(0, 0, 0, 0.12);
+    }
+    .roster-cell {
+      min-width: 38px;
+      width: 38px;
+      height: 38px;
+      font-size: 13px;
+      touch-action: manipulation;
+    }
+    /* Group border between days for clear reading */
+    .day-border-right {
+      border-right: 2px solid #64748b !important;
+    }
     .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
@@ -954,69 +1016,89 @@
     <div class="bg-white rounded-3xl w-full max-w-6xl p-4 sm:p-5 shadow-2xl space-y-3.5 max-h-[96vh] flex flex-col">
       
       <!-- Modal Top Bar & Navigation -->
-      <div class="flex flex-wrap justify-between items-center gap-2 shrink-0">
-        <div class="flex items-center space-x-1.5 sm:space-x-2 flex-wrap">
-          <button onclick="navigateScheduleWeek(-1)" aria-label="Tuần trước" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-1 transition">
-            <i data-lucide="chevron-left" class="w-4 h-4"></i>
-            <span class="hidden sm:inline">Tuần trước</span>
-          </button>
-          <button onclick="jumpToCurrentWeek()" aria-label="Về tuần hiện tại" class="px-3 py-1.5 bg-indigo-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold transition">
-            Tuần Hiện Tại
-          </button>
-          <button onclick="navigateScheduleWeek(1)" aria-label="Tuần sau" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-1 transition">
-            <span class="hidden sm:inline">Tuần sau</span>
-            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+      <div class="space-y-2 shrink-0">
+        <!-- Row 1: Primary Navigation & Close -->
+        <div class="flex items-center justify-between gap-1.5">
+          <div class="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+            <button onclick="navigateScheduleWeek(-1)" aria-label="Tuần trước" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-1 transition active:scale-95">
+              <i data-lucide="chevron-left" class="w-4 h-4"></i>
+              <span class="hidden sm:inline">Tuần trước</span>
+            </button>
+            <button onclick="jumpToCurrentWeek()" aria-label="Về tuần hiện tại" class="px-2.5 sm:px-3 py-1.5 bg-indigo-50 hover:bg-slate-100 text-slate-800 rounded-xl text-xs font-bold transition border border-indigo-200/60 active:scale-95">
+              Tuần Hiện Tại
+            </button>
+            <button onclick="navigateScheduleWeek(1)" aria-label="Tuần sau" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-1 transition active:scale-95">
+              <span class="hidden sm:inline">Tuần sau</span>
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <button id="btn-sync-schedule-cloud" onclick="triggerManualSync(true)" aria-label="Đồng bộ bảng phân ca với Google Sheets" class="px-2 py-1.5 sm:px-2.5 bg-indigo-50 hover:bg-slate-100 text-slate-700 border border-indigo-200 rounded-xl text-xs font-bold transition flex items-center gap-1 active:scale-95 shadow-2xs" title="Đồng bộ Google Sheets">
+              <i data-lucide="cloud" class="w-3.5 h-3.5 text-slate-600"></i>
+              <span class="hidden sm:inline">☁️ Cloud</span>
+            </button>
+            <button onclick="closeShiftScheduleModal()" aria-label="Đóng bảng phân ca trực" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700 active:scale-90 transition">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Row 2: Secondary Tools & Rule Views (Scrollable horizontally on narrow screens) -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
+          <button onclick="openShiftRulesModal()" aria-label="Xem quy tắc phân ca" class="px-2.5 py-1.5 bg-amber-50 hover:bg-slate-100 text-slate-700 border border-amber-300 rounded-xl text-xs font-bold transition flex items-center gap-1 shrink-0">
+            <i data-lucide="book-open-check" class="w-3.5 h-3.5 text-slate-600"></i>
+            <span>Quy Tắc Ca</span>
           </button>
 
-          <button onclick="openShiftRulesModal()" aria-label="Xem quy tắc phân ca" class="px-2.5 py-1.5 bg-amber-50 hover:bg-slate-100 text-slate-700 border border-amber-300 rounded-xl text-xs font-bold transition flex items-center gap-1">
-            <i data-lucide="book-open-check" class="w-4 h-4 text-slate-600"></i>
-            <span>Quy Tắc Phân Ca</span>
-          </button>
-
-          <button onclick="openRotationCycleModal()" aria-label="Xem bảng theo dõi chu trình cá nhân tuần 35 đến 40" class="px-2.5 py-1.5 bg-purple-50 hover:bg-slate-100 text-slate-700 border border-purple-300 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-2xs">
-            <i data-lucide="rotate-cw" class="w-4 h-4 text-purple-600"></i>
+          <button onclick="openRotationCycleModal()" aria-label="Xem bảng theo dõi chu trình cá nhân tuần 35 đến 40" class="px-2.5 py-1.5 bg-purple-50 hover:bg-slate-100 text-slate-700 border border-purple-300 rounded-xl text-xs font-bold transition flex items-center gap-1 shrink-0 shadow-2xs">
+            <i data-lucide="rotate-cw" class="w-3.5 h-3.5 text-purple-600"></i>
             <span>Chu Trình T35–T40</span>
           </button>
 
-          <button id="btn-auto-schedule-next-week" onclick="handleAutoGenerateNextWeek()" aria-label="Tự động xếp ca tuần sau" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-95 flex items-center gap-1.5">
-            <i data-lucide="wand-2" class="w-4 h-4 text-emerald-200"></i>
-            <span>⚡ Xếp Ca Tuần Sau</span>
+          <button id="btn-auto-schedule-next-week" onclick="handleAutoGenerateNextWeek()" aria-label="Tự động xếp ca tuần sau" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-95 flex items-center gap-1 shrink-0">
+            <i data-lucide="wand-2" class="w-3.5 h-3.5 text-emerald-200"></i>
+            <span>⚡ Xếp Ca Sau</span>
           </button>
 
-          <button id="btn-clear-week-schedule" onclick="handleClearWeekSchedule()" aria-label="Xóa lịch phân ca tuần này" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 rounded-xl text-xs font-bold transition flex items-center gap-1 active:scale-95">
-            <i data-lucide="trash-2" class="w-4 h-4 text-rose-600"></i>
-            <span>Xóa Lịch Tuần</span>
+          <button id="btn-clear-week-schedule" onclick="handleClearWeekSchedule()" aria-label="Xóa lịch phân ca tuần này" class="px-2 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 rounded-xl text-xs font-bold transition flex items-center gap-1 active:scale-95 shrink-0">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-600"></i>
+            <span>Xóa Tuần</span>
           </button>
 
-          <button id="btn-sync-schedule-cloud" onclick="triggerManualSync(true)" aria-label="Đồng bộ bảng phân ca với Google Sheets" class="px-2.5 py-1.5 bg-indigo-50 hover:bg-slate-100 text-slate-700 border border-indigo-300 rounded-xl text-xs font-bold transition flex items-center gap-1 active:scale-95 shadow-2xs">
-            <i data-lucide="cloud" class="w-4 h-4 text-slate-600"></i>
-            <span>☁️ Đồng Bộ Cloud</span>
+          <button id="btn-copy-schedule-sheet" onclick="handleCopyScheduleForSheets()" aria-label="Sao chép bảng phân ca cho Google Sheets" class="px-2.5 py-1.5 bg-blue-50 hover:bg-slate-100 text-slate-700 border border-blue-300 rounded-xl text-xs font-bold transition flex items-center gap-1 active:scale-95 shadow-xs shrink-0">
+            <i data-lucide="copy" class="w-3.5 h-3.5 text-slate-600"></i>
+            <span>Sao Chép Sheet</span>
           </button>
 
-          <button id="btn-copy-schedule-sheet" onclick="handleCopyScheduleForSheets()" aria-label="Sao chép bảng phân ca cho Google Sheets" class="px-2.5 py-1.5 bg-blue-50 hover:bg-slate-100 text-slate-700 border border-blue-300 rounded-xl text-xs font-bold transition flex items-center gap-1 active:scale-95 shadow-xs">
-            <i data-lucide="copy" class="w-4 h-4 text-slate-600"></i>
-            <span>📋 Sao Chép Cho Sheet</span>
-          </button>
-
-          <button id="btn-export-schedule-csv" onclick="handleExportScheduleCSV()" aria-label="Xuất bảng phân ca ra file CSV" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-xl text-xs font-bold transition flex items-center gap-1 active:scale-95">
-            <i data-lucide="download" class="w-4 h-4 text-slate-600"></i>
-            <span>📥 Xuất CSV</span>
+          <button id="btn-export-schedule-csv" onclick="handleExportScheduleCSV()" aria-label="Xuất bảng phân ca ra file CSV" class="px-2 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-xl text-xs font-bold transition flex items-center gap-1 active:scale-95 shrink-0">
+            <i data-lucide="download" class="w-3.5 h-3.5 text-slate-600"></i>
+            <span>CSV</span>
           </button>
         </div>
 
-        <div class="flex items-center space-x-2">
-          <span class="text-xs text-slate-500 font-medium hidden md:inline">Ký hiệu: <span class="bg-rose-100 font-bold px-1 rounded">x: Trực ca</span> | <span class="bg-emerald-100 font-bold text-emerald-800 px-1 rounded">hc: Hành chính</span> | <span class="bg-yellow-300 font-bold px-1 rounded">CN: Nghỉ tuần</span> | <span class="font-bold px-1 rounded border">P: Nghỉ phép</span></span>
-          <button onclick="closeShiftScheduleModal()" aria-label="Đóng bảng phân ca trực" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
-            <i data-lucide="x" class="w-4 h-4"></i>
-          </button>
+        <!-- Legend & Autumn Schedule Quick Info Banner -->
+        <div class="bg-amber-50/90 border border-amber-300 rounded-xl p-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] shrink-0 shadow-2xs">
+          <div class="flex items-center gap-1 text-amber-950 font-bold">
+            <i data-lucide="sun-medium" class="w-3.5 h-3.5 text-amber-700 shrink-0"></i>
+            <span>Mùa Thu: <span class="text-amber-900 font-extrabold">Ca 1: 05h00–13h30</span> | <span class="text-emerald-900 font-extrabold">HC: 07h–17h</span> | <span class="text-rose-900 font-extrabold">Ca 2: 13h30–21h30</span></span>
+          </div>
+          <div class="text-slate-600 flex items-center gap-1 flex-wrap font-medium">
+            <span>Ký hiệu:</span>
+            <span class="bg-rose-100 font-bold px-1 rounded text-slate-900">x: Ca</span>
+            <span class="bg-emerald-100 font-bold text-emerald-900 px-1 rounded">hc: HC</span>
+            <span class="bg-yellow-300 font-bold px-1 rounded text-slate-900">CN: Nghỉ</span>
+            <span class="font-bold px-1 rounded border bg-white">P: Phép</span>
+          </div>
         </div>
-      </div>
 
-      <!-- Autumn Schedule Quick Info Banner -->
-      <div class="bg-amber-50/90 border border-amber-300 rounded-2xl p-2.5 flex items-center gap-2 text-xs shrink-0 shadow-2xs">
-        <div class="flex items-center gap-1.5 text-amber-950 font-bold">
-          <i data-lucide="sun-medium" class="w-4 h-4 text-slate-600"></i>
-          <span>Khung giờ Mùa Thu: <span class="text-amber-900 font-extrabold">Ca 1: 05h00 – 13h30</span> | <span class="text-emerald-900 font-extrabold">HC: 07h00 – 11h30 & 13h30 – 17h00</span> | <span class="text-rose-900 font-extrabold">Ca 2: 13h30 – 21h30</span></span>
+        <!-- Mobile swipe indicator -->
+        <div class="flex items-center justify-between text-[11px] text-slate-500 px-1 pt-0.5 sm:hidden">
+          <span class="flex items-center gap-1 font-semibold text-slate-600">
+            <i data-lucide="arrow-left-right" class="w-3.5 h-3.5 text-indigo-600"></i>
+            <span>Vuốt ngang để xem 7 ngày • Cột tên cố định</span>
+          </span>
+          <span class="text-[10px] text-indigo-700 font-bold bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-200">21 Ca Trực</span>
         </div>
       </div>
 
@@ -1077,12 +1159,12 @@
       </div>
 
       <!-- Quick Status Picker Popover (Floating when clicking cell) -->
-      <div id="schedule-cell-picker" class="hidden absolute z-50 bg-white p-2 rounded-2xl shadow-2xl border border-slate-300 flex items-center gap-1.5">
-        <button type="button" onclick="handleSelectCellStatus('x')" class="px-2.5 py-1 bg-rose-100 hover:bg-rose-200 text-slate-900 font-extrabold text-xs rounded-lg border border-rose-300 transition">x (Trực ca)</button>
-        <button type="button" onclick="handleSelectCellStatus('hc')" class="px-2.5 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 font-bold text-xs rounded-lg border border-emerald-300 transition">hc (Hành chính)</button>
-        <button type="button" onclick="handleSelectCellStatus('CN')" class="px-2.5 py-1 bg-yellow-300 hover:bg-yellow-400 text-slate-900 font-extrabold text-xs rounded-lg border border-yellow-400 transition">CN (Nghỉ)</button>
-        <button type="button" onclick="handleSelectCellStatus('P')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-lg border border-slate-300 transition">P (Phép)</button>
-        <button type="button" onclick="handleSelectCellStatus('')" class="px-2 py-1 bg-slate-50 hover:bg-rose-50 text-rose-600 text-xs font-bold rounded-lg border border-slate-200 transition">Xóa</button>
+      <div id="schedule-cell-picker" class="hidden absolute z-50 bg-white/95 backdrop-blur-md p-2.5 rounded-2xl shadow-2xl border border-slate-300 flex flex-wrap items-center gap-2 max-w-[92vw] sm:max-w-none">
+        <button type="button" onclick="handleSelectCellStatus('x')" class="px-3 py-2 bg-rose-100 hover:bg-rose-200 active:scale-95 text-slate-900 font-extrabold text-xs rounded-xl border border-rose-300 transition shadow-2xs">x (Trực ca)</button>
+        <button type="button" onclick="handleSelectCellStatus('hc')" class="px-3 py-2 bg-emerald-100 hover:bg-emerald-200 active:scale-95 text-emerald-900 font-bold text-xs rounded-xl border border-emerald-300 transition shadow-2xs">hc (Hành chính)</button>
+        <button type="button" onclick="handleSelectCellStatus('CN')" class="px-3 py-2 bg-yellow-300 hover:bg-yellow-400 active:scale-95 text-slate-900 font-extrabold text-xs rounded-xl border border-yellow-400 transition shadow-2xs">CN (Nghỉ)</button>
+        <button type="button" onclick="handleSelectCellStatus('P')" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-800 font-bold text-xs rounded-xl border border-slate-300 transition shadow-2xs">P (Phép)</button>
+        <button type="button" onclick="handleSelectCellStatus('')" class="px-2.5 py-2 bg-rose-50 hover:bg-rose-100 active:scale-95 text-rose-600 text-xs font-bold rounded-xl border border-rose-200 transition">Xóa</button>
       </div>
 
       <!-- Footer Bar -->
@@ -5933,7 +6015,7 @@ const repo = new AppRepository();
         ${weekDays.map((d, idx) => {
           const isSun = idx === 6;
           const dayLabel = `${dayNames[idx]} ${d.getDate()}/ ${d.getMonth() + 1}`;
-          return `<th colspan="3" class="text-center py-1.5 font-extrabold ${isSun ? 'text-rose-600 bg-rose-50/50' : 'text-slate-800'}">${dayLabel}</th>`;
+          return `<th colspan="3" class="text-center py-1.5 font-extrabold day-border-right ${isSun ? 'text-rose-600 bg-rose-50/70' : 'text-slate-800'}">${dayLabel}</th>`;
         }).join('')}
       `;
 
@@ -5947,7 +6029,7 @@ const repo = new AppRepository();
         shiftsHeaderHtml += `
           <th class="w-9 py-1 text-center font-bold text-slate-700 bg-slate-50">Ca.1</th>
           <th class="w-9 py-1 text-center font-bold text-slate-700 bg-slate-50">Ca.2</th>
-          <th class="w-9 py-1 text-center font-bold text-slate-700 bg-slate-50">Ca.3</th>
+          <th class="w-9 py-1 text-center font-bold text-slate-700 bg-slate-50 day-border-right">Ca.3</th>
         `;
       }
       shiftsHeaderRow.innerHTML = shiftsHeaderHtml;
@@ -5964,11 +6046,11 @@ const repo = new AppRepository();
 
       staffList.forEach((emp, staffIdx) => {
         const tr = document.createElement('tr');
-        tr.className = 'h-9 hover:bg-slate-50/80 transition-colors';
+        tr.className = 'h-10 hover:bg-slate-50/80 transition-colors';
 
         let cellsHtml = `
-          <td class="text-center font-bold text-slate-500">${staffIdx + 1}</td>
-          <td class="text-left pl-3 font-bold text-slate-900 truncate" title="${emp.fullName}">
+          <td class="text-center font-bold text-slate-500 bg-white">${staffIdx + 1}</td>
+          <td class="text-left pl-2.5 font-bold text-slate-900 truncate bg-white" title="${emp.fullName}">
             ${emp.fullName} ${emp.role === 'Thử việc' ? '<span class="text-[10px] text-slate-400 font-normal">(thử việc)</span>' : ''}
           </td>
         `;
@@ -5978,14 +6060,17 @@ const repo = new AppRepository();
             const colIndex = d * 3 + (c - 1);
             const cellKey = `d${d}_c${c}`;
             const val = roster[emp.id]?.[cellKey] || '';
+            const isLastShiftOfDay = (c === 3);
 
             if (val === 'x') columnSums[colIndex]++;
 
             let cellClass = 'roster-cell cursor-pointer text-center text-xs transition select-none';
-            if (val === 'x') cellClass += ' bg-slate-900 text-white font-bold rounded-sm';
+            if (isLastShiftOfDay) cellClass += ' day-border-right';
+
+            if (val === 'x') cellClass += ' bg-slate-900 text-white font-bold rounded-xs';
             else if (val === 'hc' || val === 'HC') cellClass += ' bg-slate-200 text-slate-800 font-semibold';
             else if (val === 'CN') cellClass += ' bg-slate-300 text-slate-900 font-bold';
-            else if (val === 'P') cellClass += ' font-extrabold text-slate-700';
+            else if (val === 'P') cellClass += ' font-extrabold text-slate-700 bg-amber-50';
 
             cellsHtml += `
               <td class="${cellClass}" onclick="openCellStatusPicker(event, '${weekKey}', '${emp.id}', '${cellKey}', '${val}')" title="${emp.fullName} - ${dayNames[d]} Ca ${c}: ${val || 'Trống'}">
@@ -6002,12 +6087,13 @@ const repo = new AppRepository();
       // Render Summary Footer Row (Trực điện nước)
       const summaryRow = document.getElementById('schedule-summary-row');
       let summaryHtml = `
-        <td colspan="2" class="text-center font-extrabold border-r border-slate-300 py-1.5 text-slate-900">
+        <td colspan="2" class="text-center font-extrabold border-r border-slate-300 py-1.5 text-slate-900 bg-slate-100">
           Trực điện nước
         </td>
       `;
-      columnSums.forEach(count => {
-        summaryHtml += `<td class="text-center font-extrabold text-slate-900 py-1.5">${count}</td>`;
+      columnSums.forEach((count, idx) => {
+        const isDayEnd = ((idx + 1) % 3 === 0);
+        summaryHtml += `<td class="text-center font-extrabold text-slate-900 py-1.5 ${isDayEnd ? 'day-border-right' : ''}">${count}</td>`;
       });
       summaryRow.innerHTML = summaryHtml;
 
@@ -6024,8 +6110,15 @@ const repo = new AppRepository();
       const picker = document.getElementById('schedule-cell-picker');
       const rect = e.target.getBoundingClientRect();
 
-      picker.style.left = `${Math.min(window.innerWidth - 300, Math.max(10, rect.left - 50))}px`;
-      picker.style.top = `${rect.bottom + window.scrollY + 4}px`;
+      // Mobile smart positioning: center horizontally if on narrow screen, otherwise align with cell
+      if (window.innerWidth < 640) {
+        picker.style.left = '50%';
+        picker.style.transform = 'translateX(-50%)';
+      } else {
+        picker.style.transform = 'none';
+        picker.style.left = `${Math.min(window.innerWidth - 320, Math.max(10, rect.left - 40))}px`;
+      }
+      picker.style.top = `${rect.bottom + window.scrollY + 6}px`;
       picker.classList.remove('hidden');
     }
 
