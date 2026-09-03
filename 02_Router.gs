@@ -70,6 +70,8 @@ function doGet(e) {
       case 'getWorkLogs':       return handleGetWorkLogs(e);        // Nhật ký cả tổ (trang nhatky)
       case 'getShiftDefinitions': return handleGetShiftDefinitions(e); // Danh mục ca trực (trang nhatky)
       case 'getRosterMatrix':     return handleGetRosterMatrix(e);     // Ma trận phân ca (trang nhatky)
+      case 'getUserPins':         return handleGetUserPins(e);         // Lấy mã PIN nhân sự (trang nhatky)
+      case 'getAllData':          return handleGetAllData(e);          // Lấy toàn bộ dữ liệu (trang nhatky)
       case 'nhatkyAccounts':    return handleListAccounts(e);       // Danh sách tài khoản trang nhatky
       case 'tempDumpDevices':   return handleTempDumpDevices(e);
       case 'migrateDevicesData':return handleMigrateDevicesData(e);
@@ -191,6 +193,8 @@ function doPost(e) {
       saveShiftDefinitions: handleSaveShiftDefinitions,
       getRosterMatrix:      handleGetRosterMatrix,
       saveRosterMatrix:     handleSaveRosterMatrix,
+      saveUserPin:          handleSaveUserPin,
+      saveWorkLog:          handleCreateWorkLog,
     };
 
     const handler = DISPATCH[params.action];
@@ -1033,5 +1037,99 @@ function handleSaveRosterMatrix(params) {
     status: "success",
     message: "Đã lưu ma trận phân ca lên Google Sheets",
     updatedAt: now.toISOString()
+  });
+}
+
+// ==========================================
+// ĐỒNG BỘ MÃ PIN TÀI KHOẢN (TRANG NHATKY)
+// ==========================================
+function handleSaveUserPin(params) {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  let userSheet = ss.getSheetByName(SHEETS.USERS);
+  if (!userSheet) {
+    userSheet = ss.insertSheet(SHEETS.USERS);
+    userSheet.appendRow(["Username", "PIN", "Role", "Teams", "FullName"]);
+    userSheet.getRange("A1:E1").setFontWeight("bold");
+  }
+
+  const data = userSheet.getDataRange().getValues();
+  const targetId = String(params.empId || '').trim().toLowerCase();
+  const newPin = String(params.newPin || '').trim();
+  const actor = String(params.user || 'Web').trim();
+  let updated = false;
+
+  for (let i = 1; i < data.length; i++) {
+    const rowUser = String(data[i][0]).trim().toLowerCase();
+    if (rowUser === targetId || (rowUser === "admin01" && (targetId === "admin01" || targetId === "admin"))) {
+      userSheet.getRange(i + 1, 2).setValue(newPin).setNumberFormat("@");
+      updated = true;
+      break;
+    }
+  }
+
+  if (!updated && targetId) {
+    userSheet.appendRow([params.empId, newPin, "User", "", params.empId]);
+    userSheet.getRange(userSheet.getLastRow(), 2).setNumberFormat("@");
+  }
+
+  writeAuditLog(actor, "saveUserPin", params.empId, "Đã cập nhật mã PIN tài khoản");
+
+  return contentResponse({
+    status: "success",
+    message: "Đã cập nhật mã PIN lên Google Sheets"
+  });
+}
+
+function handleGetUserPins(e) {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  const userSheet = ss.getSheetByName(SHEETS.USERS);
+  const pins = {};
+
+  if (userSheet && userSheet.getLastRow() > 1) {
+    const data = userSheet.getDataRange().getValues();
+    for (let i = 1; i < data.length; i++) {
+      const uId = String(data[i][0] || '').trim();
+      const uPin = String(data[i][1] || '').trim();
+      if (uId && uPin) {
+        pins[uId] = uPin;
+      }
+    }
+  }
+
+  return contentResponse({
+    status: "success",
+    pins: pins
+  });
+}
+
+function handleGetAllData(e) {
+  const rosterRes = handleGetRosterMatrix(e);
+  const shiftRes = handleGetShiftDefinitions(e);
+  const pinsRes = handleGetUserPins(e);
+
+  let rosterMatrix = {};
+  let shiftDefinitions = [];
+  let pins = {};
+
+  try {
+    const rData = JSON.parse(rosterRes.getContent());
+    if (rData && rData.rosterMatrix) rosterMatrix = rData.rosterMatrix;
+  } catch (_) {}
+
+  try {
+    const sData = JSON.parse(shiftRes.getContent());
+    if (sData && sData.items) shiftDefinitions = sData.items;
+  } catch (_) {}
+
+  try {
+    const pData = JSON.parse(pinsRes.getContent());
+    if (pData && pData.pins) pins = pData.pins;
+  } catch (_) {}
+
+  return contentResponse({
+    status: "success",
+    rosterMatrix: rosterMatrix,
+    shiftDefinitions: shiftDefinitions,
+    pins: pins
   });
 }
