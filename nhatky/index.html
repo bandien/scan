@@ -3829,6 +3829,47 @@ const CONFIG = {
           console.warn('[CloudSync] saveRosterMatrix error:', err);
           return false;
         }
+      },
+
+      async saveUserPin(empId, newPin, oldPin = '', user = 'Web') {
+        if (!CONFIG.gasUrl || !empId || !newPin) return false;
+        try {
+          const payload = {
+            action: 'saveUserPin',
+            token: CONFIG.apiToken,
+            empId: empId,
+            newPin: String(newPin),
+            oldPin: String(oldPin || ''),
+            user: user
+          };
+          const res = await fetch(CONFIG.gasUrl, {
+            method: 'POST',
+            mode: 'cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+          });
+          const json = await res.json();
+          return json && json.status === 'success';
+        } catch (err) {
+          console.warn('[CloudSync] saveUserPin error:', err);
+          return false;
+        }
+      },
+
+      async getUserPins() {
+        if (!CONFIG.gasUrl) return null;
+        try {
+          const url = `${CONFIG.gasUrl}?action=getUserPins&token=${encodeURIComponent(CONFIG.apiToken)}&_t=${Date.now()}`;
+          const res = await fetch(url, { method: 'GET', mode: 'cors' });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const json = await res.json();
+          if (json && json.status === 'success' && json.pins && typeof json.pins === 'object') {
+            return json.pins;
+          }
+        } catch (err) {
+          console.warn('[CloudSync] getUserPins error:', err);
+        }
+        return null;
       }
     };
 
@@ -3879,12 +3920,18 @@ const CONFIG = {
         ]);
 
         // 2. Kéo dữ liệu mới nhất từ Cloud
-        const [cloudShiftDefs, cloudRoster] = await Promise.all([
+        const [cloudShiftDefs, cloudRoster, cloudPins] = await Promise.all([
           CloudSync.getShiftDefinitions(),
-          CloudSync.getRosterMatrix()
+          CloudSync.getRosterMatrix(),
+          CloudSync.getUserPins()
         ]);
 
         let hasUpdates = false;
+        if (cloudPins && typeof cloudPins === 'object') {
+          repo.applyCloudPins(cloudPins);
+          hasUpdates = true;
+        }
+
         if (cloudShiftDefs && Array.isArray(cloudShiftDefs) && cloudShiftDefs.length > 0) {
           repo.shiftDefinitions = cloudShiftDefs;
           localStorage.setItem('app_shift_definitions', JSON.stringify(repo.shiftDefinitions));
@@ -4308,15 +4355,21 @@ const CONFIG = {
         emp.pin = newPin;
         this.saveEmployees();
         this.logSecurityEvent('ĐỔI_PIN_CÁ_NHÂN', emp.fullName, 'Đổi mã PIN thành công');
+        // Đồng bộ mã PIN mới lên Google Sheets Cloud
+        const actorName = this.getCurrentEmployee()?.fullName || emp.fullName || 'Web';
+        CloudSync.saveUserPin(empId, newPin, oldPin, actorName).catch(() => {});
         return { success: true };
       }
 
       resetEmployeePin(empId) {
         const emp = this.employees.find(e => e.id === empId);
         if (emp) {
+          const oldPin = emp.pin || '';
           emp.pin = '0204';
           this.saveEmployees();
           this.logSecurityEvent('RESET_PIN_NHÂN_VIÊN', this.getCurrentEmployee().fullName, 'Đặt lại PIN cho ' + emp.fullName + ' về mặc định (0204)');
+          const actorName = this.getCurrentEmployee()?.fullName || 'Quản trị viên';
+          CloudSync.saveUserPin(empId, '0204', oldPin, actorName).catch(() => {});
           return true;
         }
         return false;
@@ -4557,8 +4610,37 @@ const CONFIG = {
           if (json && json.status === 'success') {
             if (json.rosterMatrix) this.rosterMatrix = Object.assign(this.rosterMatrix, json.rosterMatrix);
             this.saveRosterMatrix('', false);
+
+            // Đồng bộ mã PIN người dùng từ Cloud (nếu backend trả về pins hoặc users)
+            if (json.pins && typeof json.pins === 'object') {
+              this.applyCloudPins(json.pins);
+            } else if (Array.isArray(json.users)) {
+              const pinMap = {};
+              json.users.forEach(u => {
+                if (u.id && u.pin) pinMap[u.id] = u.pin;
+                if (u.username && u.pin) pinMap[u.username] = u.pin;
+                if (u.name && u.pin) pinMap[u.name] = u.pin;
+              });
+              this.applyCloudPins(pinMap);
+            }
           }
         } catch (e) {}
+      }
+
+      applyCloudPins(pinMap) {
+        if (!pinMap || typeof pinMap !== 'object') return;
+        let hasChanges = false;
+        this.employees.forEach(emp => {
+          const cloudPin = pinMap[emp.id] || pinMap[emp.fullName] || pinMap[emp.shortName];
+          if (cloudPin && String(cloudPin).trim() !== '' && String(cloudPin).trim() !== emp.pin) {
+            emp.pin = String(cloudPin).trim();
+            hasChanges = true;
+          }
+        });
+        if (hasChanges) {
+          this.saveEmployees();
+          console.log('[CloudSync] Đã cập nhật mã PIN mới nhất từ Google Sheets Cloud');
+        }
       }
 
       addPlan(planData) {
