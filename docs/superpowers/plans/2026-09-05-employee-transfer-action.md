@@ -4,3 +4,4 @@
 2. Bổ sung nút mở biểu mẫu trên thẻ nhân viên và nhãn trạng thái theo loại.
 3. Bổ sung phương thức repository lưu trạng thái, ngày, lý do và nhật ký bảo mật.
 4. Chạy kiểm thử mục tiêu và toàn bộ nhóm kiểm thử nhật ký liên quan.
+5. Bổ sung ký hiệu TX/tx, mô tả giờ Thanh Xuân và kiểm thử lưu cả hai dạng ký hiệu.

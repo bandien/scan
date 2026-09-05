@@ -27,3 +27,20 @@ test('admin ghi nhận nhân viên không được tiếp nhận sau thử việ
   expect(saved.probationEnd).toBe('2026-08-23');
   await expect(page.locator('#select-login-employee option[value="EMP05"]')).toHaveCount(0);
 });
+
+test('bảng phân ca hỗ trợ TX và tx theo giờ công trường Thanh Xuân', async ({ page }) => {
+  await page.goto('/nhatky/index.html');
+  await page.selectOption('#select-login-employee', 'ADMIN01');
+  await page.fill('#input-login-pin', '0204');
+  await page.click('#btn-submit-login');
+  await page.click('#btn-header-schedule');
+
+  await expect(page.locator('#modal-shift-schedule')).toContainText('TX/tx: Thanh Xuân 05:50–10:00, 13:50–18:00');
+  await page.locator('td[title="Ngô Quyết Thắng - Thứ Ba Ca 1: Trống"]').click();
+  await page.getByRole('button', { name: 'TX (Thanh Xuân)', exact: true }).click();
+  await expect(page.locator('td[title="Ngô Quyết Thắng - Thứ Ba Ca 1: TX"]')).toHaveText('TX');
+
+  await page.locator('td[title="Ngô Quyết Thắng - Thứ Năm Ca 1: Trống"]').click();
+  await page.getByRole('button', { name: 'tx (Thanh Xuân)', exact: true }).click();
+  await expect(page.locator('td[title="Ngô Quyết Thắng - Thứ Năm Ca 1: tx"]')).toHaveText('tx');
+});

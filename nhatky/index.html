@@ -1081,12 +1081,13 @@
         <div class="bg-amber-50/90 border border-amber-300 rounded-xl p-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] shrink-0 shadow-2xs">
           <div class="flex items-center gap-1 text-amber-950 font-bold">
             <i data-lucide="sun-medium" class="w-3.5 h-3.5 text-amber-700 shrink-0"></i>
-            <span>Mùa Thu: <span class="text-amber-900 font-extrabold">Ca 1: 05h00–13h30</span> | <span class="text-emerald-900 font-extrabold">HC: 07h–17h</span> | <span class="text-rose-900 font-extrabold">Ca 2: 13h30–21h30</span></span>
+            <span>Mùa Thu: <span class="text-amber-900 font-extrabold">Ca 1: 05h00–13h30</span> | <span class="text-emerald-900 font-extrabold">HC: 07h–17h</span> | <span class="text-rose-900 font-extrabold">Ca 2: 13h30–21h30</span> | <span class="text-blue-900 font-extrabold">TX/tx: Thanh Xuân 05:50–10:00, 13:50–18:00</span></span>
           </div>
           <div class="text-slate-600 flex items-center gap-1 flex-wrap font-medium">
             <span>Ký hiệu:</span>
             <span class="bg-rose-100 font-bold px-1 rounded text-slate-900">x: Ca</span>
             <span class="bg-emerald-100 font-bold text-emerald-900 px-1 rounded">hc: HC</span>
+            <span class="bg-blue-100 font-bold text-blue-900 px-1 rounded">TX/tx: Thanh Xuân</span>
             <span class="bg-yellow-300 font-bold px-1 rounded text-slate-900">CN: Nghỉ</span>
             <span class="font-bold px-1 rounded border bg-white">P: Phép</span>
           </div>
@@ -1162,6 +1163,8 @@
       <div id="schedule-cell-picker" class="hidden absolute z-50 bg-white/95 backdrop-blur-md p-2.5 rounded-2xl shadow-2xl border border-slate-300 flex flex-wrap items-center gap-2 max-w-[92vw] sm:max-w-none">
         <button type="button" onclick="handleSelectCellStatus('x')" class="px-3 py-2 bg-rose-100 hover:bg-rose-200 active:scale-95 text-slate-900 font-extrabold text-xs rounded-xl border border-rose-300 transition shadow-2xs">x (Trực ca)</button>
         <button type="button" onclick="handleSelectCellStatus('hc')" class="px-3 py-2 bg-emerald-100 hover:bg-emerald-200 active:scale-95 text-emerald-900 font-bold text-xs rounded-xl border border-emerald-300 transition shadow-2xs">hc (Hành chính)</button>
+        <button type="button" onclick="handleSelectCellStatus('TX')" class="px-3 py-2 bg-blue-100 hover:bg-blue-200 active:scale-95 text-blue-900 font-bold text-xs rounded-xl border border-blue-300 transition shadow-2xs">TX (Thanh Xuân)</button>
+        <button type="button" onclick="handleSelectCellStatus('tx')" class="px-3 py-2 bg-cyan-100 hover:bg-cyan-200 active:scale-95 text-cyan-900 font-bold text-xs rounded-xl border border-cyan-300 transition shadow-2xs">tx (Thanh Xuân)</button>
         <button type="button" onclick="handleSelectCellStatus('CN')" class="px-3 py-2 bg-yellow-300 hover:bg-yellow-400 active:scale-95 text-slate-900 font-extrabold text-xs rounded-xl border border-yellow-400 transition shadow-2xs">CN (Nghỉ)</button>
         <button type="button" onclick="handleSelectCellStatus('P')" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-800 font-bold text-xs rounded-xl border border-slate-300 transition shadow-2xs">P (Phép)</button>
         <button type="button" onclick="handleSelectCellStatus('')" class="px-2.5 py-2 bg-rose-50 hover:bg-rose-100 active:scale-95 text-rose-600 text-xs font-bold rounded-xl border border-rose-200 transition">Xóa</button>
@@ -6184,6 +6187,8 @@ const repo = new AppRepository();
 
             if (val === 'x') cellClass += ' bg-slate-900 text-white font-bold rounded-xs';
             else if (val === 'hc' || val === 'HC') cellClass += ' bg-slate-200 text-slate-800 font-semibold';
+            else if (val === 'TX') cellClass += ' bg-blue-700 text-white font-extrabold rounded-xs';
+            else if (val === 'tx') cellClass += ' bg-cyan-100 text-cyan-950 font-extrabold';
             else if (val === 'CN') cellClass += ' bg-slate-300 text-slate-900 font-bold';
             else if (val === 'P') cellClass += ' font-extrabold text-slate-700 bg-amber-50';
 
