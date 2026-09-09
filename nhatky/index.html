@@ -334,7 +334,7 @@
                   </div>
                 </div>
               </div>
-              <p class="text-xs text-gray-600 leading-relaxed">Kiểm tra thông số kỹ thuật Trạm Biến Áp TBA, Trạm Bơm, PCCC và tình trạng vận hành.</p>
+              <p class="text-xs text-gray-600 leading-relaxed">Kiểm tra TBA, Trạm Bơm Tăng Áp, Vận Hành Bơm Suối Cun (Không chạy/Tự động/Giờ bật-tắt), PCCC & Bàn Giao Ca.</p>
               <div class="pt-2 border-t border-gray-100 flex items-center gap-2">
                 <a href="https://forms.gle/7gNBsFcX12ikeNXX9" target="_blank" rel="noopener noreferrer" class="flex-1 py-2 bg-gray-900 hover:bg-black text-white font-medium rounded-lg text-xs flex items-center justify-center gap-1.5 transition">
                   <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
@@ -437,8 +437,8 @@
           <div class="bg-gray-50 rounded-lg p-2.5 border border-gray-200 text-xs text-gray-600 flex items-center gap-2">
             <i data-lucide="info" class="w-4 h-4 text-gray-500 shrink-0"></i>
             <div>
-              <span class="font-medium text-gray-900">Quy chuẩn đặt tên: </span>
-              <span class="font-mono text-gray-700 bg-white px-2 py-0.5 rounded border border-gray-200">Nội dung công việc / Sự cố - [Kết quả nếu đã thực hiện] - [NV: Tên]</span>
+              <span class="font-medium text-gray-900">Quy tắc ghi nhật ký: </span>
+              <span class="font-mono text-gray-700 bg-white px-2 py-0.5 rounded border border-gray-200">Nội dung công việc / Sự cố - [Số lượng đã thực hiện, kết quả xong hay chưa xong] - [NV: Tên]</span>
             </div>
           </div>
         </div>
@@ -1874,7 +1874,7 @@
               </div>
               <ul class="pl-4 list-disc space-y-1 text-[11.5px]">
                 <li>Nhúng trực tiếp lịch chung <code class="bg-blue-50 text-slate-700 px-1 py-0.2 rounded font-bold">trucdienhapulico@gmail.com</code>.</li>
-                <li>Popup ghi nhật ký nhanh chuẩn hóa cú pháp: <code class="bg-slate-100 px-1 rounded">Nội dung công việc / Sự cố - [Kết quả nếu đã thực hiện] - [NV: Tên]</code> với các mẫu sự kiện TBA, Trạm bơm, Bàn giao ca và Báo cáo sự cố.</li>
+                <li>Popup ghi nhật ký nhanh chuẩn hóa cú pháp: <code class="bg-slate-100 px-1 rounded">Nội dung công việc / Sự cố - [Số lượng đã thực hiện, kết quả xong hay chưa xong] - [NV: Tên]</code> với các mẫu sự kiện TBA, Trạm bơm, Bàn giao ca và Báo cáo sự cố.</li>
               </ul>
             </div>
 
@@ -2864,7 +2864,7 @@
         color: 'purple',
         badge: 'Biểu mẫu chính',
         sopCode: 'SOP-FORMS-01',
-        desc: 'Biểu mẫu kiểm tra thông số kỹ thuật Trạm Biến Áp TBA, Trạm Bơm Cấp Nước, Hệ Thống PCCC & Bàn Giao Ca.',
+        desc: 'Kiểm tra thông số TBA, Trạm Bơm Cấp Nước, Vận Hành Bơm Suối Cun (Không chạy/Tự động/Giờ bật/Giờ tắt), Hệ Thống PCCC & Giao Ca.',
         url: 'https://forms.gle/7gNBsFcX12ikeNXX9',
         frequency: 'Mỗi ca trực'
       },
@@ -2899,7 +2899,7 @@
         icon: 'droplets',
         color: 'blue',
         badge: 'Cấp nước & PCCC 24/7',
-        sopCode: 'SOP-BOM-01',
+        sopCode: 'SOP-FORMS-01',
         desc: 'Ghi nhận áp lực 4.0 - 5.5 bar, biến tần GD200A, mực nước bể ngầm & động cơ diesel.',
         url: 'https://forms.gle/7gNBsFcX12ikeNXX9',
         frequency: 'Mỗi ca trực'
@@ -2951,24 +2951,6 @@
         ]
       },
       {
-        id: 'sop_pump_01',
-        code: 'SOP-BOM-01',
-        title: 'Quy Trình Vận Hành & Kiểm Tra Trạm Bơm Tăng Áp Sinh Hoạt, Tưới Cỏ & PCCC',
-        category: 'pump',
-        categoryName: '💧 Trạm Bơm & PCCC',
-        author: 'Ban Kỹ Thuật M&E',
-        target: 'Duy trì áp lực nước ổn định phục vụ sinh hoạt, tưới sân golf và sẵn sàng cho hệ thống PCCC 24/7.',
-        safetyNotes: 'Kiểm tra tiếp địa tủ điều khiển và động cơ trước khi thao tác. Cắt nguồn cô lập trước khi tháo lắp cánh bơm.',
-        steps: [
-          '1. Kiểm tra mực nước bể ngầm: Mực nước đảm bảo trên mức hút tối thiểu của rọ bơm (tránh hiện tượng hút chân không / chạy khô).',
-          '2. Kiểm tra áp lực đường ống: Đồng hồ áp duy trì ổn định 4.0 - 5.5 bar.',
-          '3. Kiểm tra tủ điều khiển biến tần (GD200A / INVT): Chế độ vận hành ở vị trí AUTO, đèn báo nguồn đủ pha, không báo lỗi quá tải (OL) hay thấp áp (LU).',
-          '4. Kiểm tra độ rung lắc và rò rỉ: Bơm chạy êm, khớp nối mềm không rách, mặt bích và van một chiều không rò rỉ nước.',
-          '5. Kiểm tra bơm PCCC động cơ Diesel: Ắc quy đề đủ điện áp (≥ 24V), mức dầu nhớt và nhiên liệu dầu diesel đầy đủ.',
-          '6. Ghi chép chỉ số áp lực vào Biểu Mẫu Google Form Trạm Bơm.'
-        ]
-      },
-      {
         id: 'sop_safety_01',
         code: 'SOP-ANTOAN-01',
         title: 'Quy Chuẩn An Toàn Lao Động, Cắt Điện Cô Lập (LOTO) & Cứu Hộ Khẩn Cấp',
@@ -3008,7 +2990,7 @@
         target: 'Chuẩn hóa việc theo dõi dòng thời gian ca trực trên Google Calendar chung.',
         safetyNotes: 'Ghi trung thực, rõ ràng thời điểm phát sinh sự cố và phương án xử lý.',
         steps: [
-          '1. Cú pháp đặt tên sự kiện: Nội dung công việc / Sự cố - [Kết quả nếu đã thực hiện] - [NV: Tên]. (VD: Kiểm tra TBA - [Điện áp bình thường, nhiệt độ 38°C] - [NV: Thắng]).',
+          '1. Cú pháp đặt tên sự kiện: Nội dung công việc / Sự cố - [Số lượng đã thực hiện, kết quả xong hay chưa xong] - [NV: Tên]. (VD: Kiểm tra TBA - [Điện áp bình thường, nhiệt độ 38°C] - [NV: Thắng]).',
           '2. Màu sắc sự kiện: \\n• Xanh lá / Xanh dương: Ca trực bình thường, kiểm tra định kỳ.\\n• Đỏ / Cam: Sự cố kỹ thuật khẩn cấp cần theo dõi hoặc bàn giao ca sau.',
           '3. Phần mô tả sự kiện (Description): Ghi rõ thông số đo đạc, thiết bị liên quan và người phối hợp.'
         ]
@@ -3025,7 +3007,7 @@
         steps: [
           '⏰ BƯỚC 1: Khung giờ kiểm tra quy định theo từng ca:\n• Ca 1: Thực hiện lúc 12h30 – 13h30\n• Ca 2: Thực hiện lúc 16h15 – 17h15\n• Ca 3: Thực hiện 2 lần lúc 22h00 – 23h00 và 04h30 – 05h30',
           '📋 BƯỚC 2: Mở biểu mẫu Checklist:\n• Đường link Form: https://forms.gle/7gNBsFcX12ikeNXX9\n• Chọn đúng Ca trực và Tên nhân viên kiểm tra',
-          '🔍 BƯỚC 3: Ghi nhận thông tin kiểm tra hiện trường:\n• Kiểm tra thực tế và điền đầy đủ các mục theo từng câu hỏi trong biểu mẫu\n• Ghi nhận chính xác các thông số kỹ thuật và trạng thái vận hành của các hệ thống thiết bị',
+          '🔍 BƯỚC 3: Ghi nhận thông tin kiểm tra hiện trường:\n• Kiểm tra thực tế và điền đầy đủ các mục trong Form https://forms.gle/7gNBsFcX12ikeNXX9\n• Thông số kỹ thuật TBA & Áp lực Trạm Bơm\n• Vận hành Bơm Suối Cun: Ghi nhận trạng thái (Không chạy / Tự động / Giờ bật / Giờ tắt)\n• Hệ thống PCCC & Bàn giao tài sản ca trực',
           '🚨 BƯỚC 4: Gửi biểu mẫu & Xử lý sự cố bất thường:\n• Rà soát lại số liệu và bấm Gửi biểu mẫu\n• Nếu phát hiện sự cố bất thường: Báo cáo trực tiếp ngay lên nhóm trao đổi thông tin vận hành liên quan có phụ trách, hoặc nhóm nhà thầu để có thông tin và hướng xử lý nhanh nhất'
         ]
       },
@@ -4065,6 +4047,9 @@ const CONFIG = {
           const raw = localStorage.getItem(this.STORAGE_KEYS.SOP_GUIDES);
           if (!raw) return DEFAULT_SOP_GUIDES;
           let guides = JSON.parse(raw);
+          // Purge removed SOP-BOM-01
+          guides = guides.filter(g => g.code !== 'SOP-BOM-01' && g.id !== 'sop_pump_01');
+
           // Tự động bổ sung hoặc đồng bộ SOP-CONGTO-01
           const meterSopIndex = guides.findIndex(g => g.code === 'SOP-CONGTO-01');
           const defaultMeterSop = DEFAULT_SOP_GUIDES.find(g => g.code === 'SOP-CONGTO-01');
@@ -4080,6 +4065,14 @@ const CONFIG = {
             formGuide.steps = defaultFormGuide.steps;
             formGuide.target = defaultFormGuide.target;
             formGuide.safetyNotes = defaultFormGuide.safetyNotes;
+          }
+          const calGuide = guides.find(g => g.code === 'SOP-CAL-01');
+          const defaultCalGuide = DEFAULT_SOP_GUIDES.find(g => g.code === 'SOP-CAL-01');
+          if (calGuide && defaultCalGuide) {
+            calGuide.title = defaultCalGuide.title;
+            calGuide.steps = defaultCalGuide.steps;
+            calGuide.target = defaultCalGuide.target;
+            calGuide.safetyNotes = defaultCalGuide.safetyNotes;
           }
           return guides;
         } catch (e) {
@@ -5185,7 +5178,7 @@ const CONFIG = {
       const combined = ((text || '') + ' ' + (category || '')).toLowerCase();
       if (combined.includes('công tơ') || combined.includes('chốt số') || combined.includes('đồng hồ nước')) return 'SOP-CONGTO-01';
       if (combined.includes('tba') || combined.includes('biến áp') || combined.includes('trạm điện')) return 'SOP-TBA-01';
-      if (combined.includes('bơm') || combined.includes('áp lực') || combined.includes('pccc') || combined.includes('cấp nước')) return 'SOP-BOM-01';
+      if (combined.includes('bơm') || combined.includes('áp lực') || combined.includes('pccc') || combined.includes('cấp nước')) return 'SOP-FORMS-01';
       if (combined.includes('an toàn') || combined.includes('cắt điện') || combined.includes('loto') || combined.includes('cứu hộ')) return 'SOP-ANTOAN-01';
       if (combined.includes('sân golf') || combined.includes('cột đèn') || combined.includes('sân tập') || combined.includes('chống sét')) return 'SOP-GOLF-01';
       if (combined.includes('calendar') || combined.includes('lịch trực')) return 'SOP-CAL-01';
