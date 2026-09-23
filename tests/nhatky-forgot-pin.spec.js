@@ -15,13 +15,11 @@ test.describe('Quên mã PIN', () => {
     await expect(page.locator('#forgot-pin-employee')).toContainText('Đinh Văn Hậu');
     await expect(modal).toContainText('không hiển thị mã PIN');
     const emailLink = modal.locator('#forgot-pin-email');
-    const smsLink = modal.locator('#forgot-pin-sms');
     await expect(emailLink).toBeVisible();
     await expect(emailLink).toHaveAttribute('href', /^mailto:trucdienhapulico@gmail\.com\?/);
     await expect(emailLink).toHaveAttribute('href', /EMP02/);
-    await expect(smsLink).toBeVisible();
-    await expect(smsLink).toHaveAttribute('href', /^sms:0392966368\?/);
-    await expect(smsLink).toHaveAttribute('href', /EMP02/);
+    await expect(modal.locator('#forgot-pin-sms')).toHaveCount(0);
+    await expect(modal.locator('a[href^="sms:"]')).toHaveCount(0);
     await expect(modal.locator('a[href^="tel:"]')).toHaveCount(0);
     await expect(modal).not.toContainText('0204');
   });

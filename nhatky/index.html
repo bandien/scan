@@ -203,14 +203,10 @@
         <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs leading-relaxed text-amber-900">
           Vì lý do bảo mật, hệ thống không hiển thị mã PIN hiện tại. Vui lòng liên hệ Quản trị viên để xác minh danh tính và đặt lại mã PIN.
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div>
           <a id="forgot-pin-email" href="mailto:trucdienhapulico@gmail.com" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition">
             <i data-lucide="mail" class="w-4 h-4"></i>
             Gửi email
-          </a>
-          <a id="forgot-pin-sms" href="sms:0392966368" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition">
-            <i data-lucide="message-square" class="w-4 h-4"></i>
-            Gửi tin nhắn
           </a>
         </div>
         <p class="text-[11px] leading-relaxed text-slate-500">Sau khi được đặt lại, hãy đăng nhập và đổi sang mã PIN cá nhân mới tại mục Cá nhân.</p>
@@ -5930,7 +5926,6 @@ const repo = new AppRepository();
       const subject = encodeURIComponent(`Yêu cầu đặt lại mã PIN - ${employeeLabel}`);
       const body = encodeURIComponent(`Tôi quên mã PIN tài khoản ${employeeLabel}. Vui lòng xác minh danh tính và hỗ trợ đặt lại mã PIN. Tôi sẽ đổi PIN cá nhân ngay sau khi đăng nhập.`);
       document.getElementById('forgot-pin-email').href = `mailto:trucdienhapulico@gmail.com?subject=${subject}&body=${body}`;
-      document.getElementById('forgot-pin-sms').href = `sms:0392966368?body=${body}`;
       const modal = document.getElementById('modal-forgot-pin');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
