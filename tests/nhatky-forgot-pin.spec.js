@@ -1,0 +1,27 @@
+const { test, expect } = require('@playwright/test');
+
+test.describe('Quên mã PIN', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => localStorage.clear());
+    await page.goto('/nhatky/index.html');
+  });
+
+  test('hiển thị hướng dẫn khôi phục an toàn cho nhân viên đang chọn', async ({ page }) => {
+    await page.locator('#select-login-employee').selectOption('EMP02');
+    await page.locator('#btn-forgot-pin').click();
+
+    const modal = page.locator('#modal-forgot-pin');
+    await expect(modal).toBeVisible();
+    await expect(page.locator('#forgot-pin-employee')).toContainText('Đinh Văn Hậu');
+    await expect(modal).toContainText('không hiển thị mã PIN');
+    await expect(modal.locator('a[href="tel:0392966368"]')).toBeVisible();
+    await expect(modal).not.toContainText('0204');
+  });
+
+  test('có thể đóng hộp thoại và quay lại đăng nhập', async ({ page }) => {
+    await page.locator('#btn-forgot-pin').click();
+    await page.locator('#btn-close-forgot-pin').click();
+    await expect(page.locator('#modal-forgot-pin')).toBeHidden();
+    await expect(page.locator('#input-login-pin')).toBeFocused();
+  });
+});
