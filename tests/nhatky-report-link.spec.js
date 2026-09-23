@@ -24,3 +24,17 @@ test('Checklist có liên kết mở báo cáo Google Sheet', async ({ page }) =
   await expect(reportLink).toHaveAttribute('target', '_blank');
   await expect(reportLink).toHaveAttribute('rel', /noopener/);
 });
+
+test('Checklist có liên kết mở báo cáo Hapulico', async ({ page }) => {
+  await page.goto('/nhatky/index.html#checklist');
+
+  const reportLink = page.locator('#checklist-hapulico-report-link');
+  await expect(reportLink).toHaveCount(1);
+  await expect(reportLink).toHaveText(/Báo cáo Hapulico/);
+  await expect(reportLink).toHaveAttribute(
+    'href',
+    'https://docs.google.com/spreadsheets/d/1CKwy_SNbXnyZEkwgMZWRtBgzlg6NI6Ob/edit?gid=1271630179#gid=1271630179'
+  );
+  await expect(reportLink).toHaveAttribute('target', '_blank');
+  await expect(reportLink).toHaveAttribute('rel', /noopener/);
+});

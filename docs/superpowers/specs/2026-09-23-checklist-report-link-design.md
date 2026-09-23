@@ -7,10 +7,11 @@ Thêm một liên kết dễ nhận biết tại phần đầu màn hình `#chec
 ## Thiết kế
 
 - Nhãn hiển thị: `Báo cáo`.
+- Thêm liên kết độc lập `Báo cáo Hapulico` tới bảng tính có `gid=1271630179`, không thay thế báo cáo hiện có.
 - Vị trí: nhóm thao tác bên phải tiêu đề “Quy Trình & Biểu Mẫu Vận Hành”.
 - Đích: trang tính và sheet có `gid=2114189017` do người dùng cung cấp.
 - Bảo mật và khả năng truy cập: dùng `target="_blank"`, `rel="noopener noreferrer"` và `aria-label` mô tả rõ đích đến.
-- Giữ nguyên các luồng checklist và quyền quản trị hiện có.
+- Nhóm thao tác cho phép xuống dòng trên màn hình hẹp; giữ nguyên các luồng checklist và quyền quản trị hiện có.
 
 ## Nghiệm thu
 
