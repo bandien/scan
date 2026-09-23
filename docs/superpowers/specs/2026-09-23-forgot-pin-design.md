@@ -9,8 +9,9 @@ Cho phép nhân viên đang ở màn hình đăng nhập biết cách khôi ph�
 1. Nhân viên chọn tài khoản và bấm `Quên mã PIN?`.
 2. Hộp thoại hiển thị đúng họ tên/mã nhân viên đang chọn.
 3. Hệ thống giải thích PIN hiện tại không được hiển thị và yêu cầu xác minh với Quản trị viên.
-4. Nhân viên có thể gọi hotline Ban Điện `0392966368` bằng liên kết `tel:`.
-5. Sau khi Quản trị viên dùng chức năng Reset PIN hiện có, nhân viên đăng nhập và đổi PIN cá nhân.
+4. Nhân viên có thể gửi email tới `trucdienhapulico@gmail.com` hoặc gửi SMS tới Ban Điện qua số `0392966368`.
+5. Tiêu đề/nội dung email và SMS được điền sẵn họ tên, mã nhân viên cùng yêu cầu xác minh và đặt lại PIN.
+6. Sau khi Quản trị viên dùng chức năng Reset PIN hiện có, nhân viên đăng nhập và đổi PIN cá nhân.
 
 ## Bảo mật và khả năng truy cập
 
