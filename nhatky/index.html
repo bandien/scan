@@ -276,6 +276,34 @@
       <!-- TAB 0: BÀN LÀM VIỆC DASHBOARD NHÂN VIÊN (#tab-dashboard) -->
       <!-- ============================================================== -->
       <section id="tab-dashboard" class="space-y-4">
+        <section class="bg-white rounded-xl border border-gray-200 p-4 space-y-3" aria-labelledby="timer-heading">
+          <div class="flex items-center justify-between gap-3">
+            <h2 id="timer-heading" class="text-sm font-bold">Thông số hẹn giờ bật/tắt</h2>
+            <button type="button" onclick="openDeviceTimer()" class="px-3 py-2 rounded-lg bg-gray-900 text-white text-xs font-semibold">Thêm hẹn giờ</button>
+          </div>
+          <p class="text-xs text-gray-500">Lưu trên trình duyệt này. Bảng ghi nhận thông số cài đặt, không tự điều khiển thiết bị. Giờ tắt trước giờ bật được hiểu là ngày kế tiếp.</p>
+          <p id="timer-error" role="alert" class="text-xs text-rose-700"></p>
+          <form id="timer-form" hidden onsubmit="saveDeviceTimer(event)" class="border rounded-lg p-3 space-y-3">
+            <input id="timer-id" type="hidden">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+              <label class="space-y-1">Thiết bị/khu vực<input id="timer-device" required maxlength="160" class="block w-full border rounded-lg p-2" placeholder="VD: Đèn sân tập – Tủ số 1"></label>
+              <label class="space-y-1">Chế độ<select id="timer-mode" onchange="updateDeviceTimerMode()" class="block w-full border rounded-lg p-2"><option>Tự động</option><option>Bật thủ công</option><option>Tắt thủ công</option></select></label>
+              <label class="space-y-1">Ngày áp dụng<input id="timer-date" type="date" required class="block w-full border rounded-lg p-2"></label>
+              <label class="space-y-1">Giờ bật<input id="timer-on" type="time" required class="block w-full border rounded-lg p-2"></label>
+              <label class="space-y-1">Giờ tắt<input id="timer-off" type="time" required class="block w-full border rounded-lg p-2"></label>
+              <label class="space-y-1">Ghi chú<textarea id="timer-notes" maxlength="1000" rows="2" class="block w-full border rounded-lg p-2"></textarea></label>
+            </div>
+            <p class="text-xs text-gray-500">Người cập nhật được ghi tự động theo tài khoản đăng nhập. Chế độ thủ công không bắt buộc nhập giờ.</p>
+            <div class="flex gap-2"><button type="submit" class="px-3 py-2 rounded-lg bg-gray-900 text-white text-xs">Lưu hẹn giờ</button><button type="button" onclick="document.getElementById('timer-form').hidden = true" class="px-3 py-2 border rounded-lg text-xs">Hủy</button></div>
+          </form>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs text-left" style="min-width: 780px">
+              <caption class="sr-only">Bảng thông số hẹn giờ bật/tắt thiết bị</caption>
+              <thead class="bg-gray-50"><tr><th scope="col" class="p-2">Thiết bị/khu vực</th><th scope="col" class="p-2">Chế độ</th><th scope="col" class="p-2">Giờ bật</th><th scope="col" class="p-2">Giờ tắt</th><th scope="col" class="p-2">Ngày áp dụng</th><th scope="col" class="p-2">Người cập nhật</th><th scope="col" class="p-2">Ghi chú</th><th scope="col" class="p-2">Thao tác</th></tr></thead>
+              <tbody id="timer-rows"></tbody>
+            </table>
+          </div>
+        </section>
         
         <!-- SECTION 1: LỐI TẮT THAO TÁC (Frappe Shortcuts) -->
         <div class="space-y-2">
@@ -4821,6 +4849,7 @@ const CONFIG = {
     }
 
     function renderDashboard() {
+      renderDeviceTimers();
       const sId = 'shift_' + repo.currentDate + '_' + repo.currentShiftType.replace(/\s+/g, '_');
       const shiftTasks = repo.tasks.filter(t => t.shiftId === sId);
       const doneCount = shiftTasks.filter(t => t.done).length;
@@ -4835,6 +4864,105 @@ const CONFIG = {
       if (barEl) barEl.style.width = pct + '%';
 
       renderDashboardShiftTasks();
+    }
+
+    function readDeviceTimers() {
+      const rows = JSON.parse(localStorage.getItem('app_device_timers_v1') || '[]');
+      if (!Array.isArray(rows) || rows.some(row => !row || typeof row.id !== 'string' || typeof row.device !== 'string')) {
+        throw new Error('Dữ liệu hẹn giờ không hợp lệ');
+      }
+      return rows;
+    }
+
+    function renderDeviceTimers() {
+      const body = document.getElementById('timer-rows');
+      body.replaceChildren();
+      try {
+        const rows = readDeviceTimers();
+        document.getElementById('timer-error').textContent = '';
+        if (!rows.length) {
+          const cell = body.insertRow().insertCell();
+          cell.colSpan = 8;
+          cell.className = 'p-4 text-gray-500 text-center';
+          cell.textContent = 'Chưa có thông số hẹn giờ. Chọn “Thêm hẹn giờ” để ghi nhận.';
+        }
+        rows.forEach(row => {
+          const tr = body.insertRow();
+          const overnight = row.mode === 'Tự động' && row.offTime && row.onTime && row.offTime < row.onTime;
+          [row.device, row.mode, row.onTime || '—', (row.offTime || '—') + (overnight ? ' (+1 ngày)' : ''), row.applyDate, row.updatedBy, row.notes || '—'].forEach(value => {
+            const cell = tr.insertCell();
+            cell.className = 'p-2 border-t align-top break-words';
+            cell.style.maxWidth = '220px';
+            cell.textContent = value || '—';
+          });
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'px-3 py-2 border rounded-lg';
+          button.textContent = 'Sửa';
+          button.addEventListener('click', () => openDeviceTimer(row.id));
+          tr.insertCell().appendChild(button);
+        });
+      } catch (error) {
+        document.getElementById('timer-error').textContent = 'Không thể đọc dữ liệu hẹn giờ. Vui lòng kiểm tra bộ nhớ trình duyệt hoặc bản sao lưu.';
+      }
+    }
+
+    function updateDeviceTimerMode() {
+      const automatic = document.getElementById('timer-mode').value === 'Tự động';
+      document.getElementById('timer-on').required = automatic;
+      document.getElementById('timer-off').required = automatic;
+    }
+
+    function openDeviceTimer(id = '') {
+      if (!repo.isLoggedIn()) return;
+      try {
+        const row = id ? readDeviceTimers().find(item => item.id === id) : null;
+        if (id && !row) throw new Error('Không tìm thấy lịch');
+        document.getElementById('timer-form').reset();
+        document.getElementById('timer-id').value = id;
+        document.getElementById('timer-device').value = row?.device || '';
+        document.getElementById('timer-mode').value = row?.mode || 'Tự động';
+        document.getElementById('timer-on').value = row?.onTime || '';
+        document.getElementById('timer-off').value = row?.offTime || '';
+        document.getElementById('timer-date').value = row?.applyDate || getTodayIsoDate();
+        document.getElementById('timer-notes').value = row?.notes || '';
+        updateDeviceTimerMode();
+        document.getElementById('timer-error').textContent = '';
+        document.getElementById('timer-form').hidden = false;
+        document.getElementById('timer-device').focus();
+      } catch (error) {
+        document.getElementById('timer-error').textContent = 'Không thể mở thông số hẹn giờ.';
+      }
+    }
+
+    function saveDeviceTimer(event) {
+      event.preventDefault();
+      const errorEl = document.getElementById('timer-error');
+      if (!repo.isLoggedIn()) { errorEl.textContent = 'Vui lòng đăng nhập để lưu.'; return; }
+      const value = id => document.getElementById(id).value.trim();
+      const mode = value('timer-mode');
+      const onTime = value('timer-on');
+      const offTime = value('timer-off');
+      if (!value('timer-device') || !value('timer-date') || (mode === 'Tự động' && (!onTime || !offTime || onTime === offTime))) {
+        errorEl.textContent = 'Nhập thiết bị, ngày áp dụng và giờ bật/tắt khác nhau cho chế độ tự động.';
+        return;
+      }
+      try {
+        const rows = readDeviceTimers();
+        const id = value('timer-id');
+        const index = rows.findIndex(row => row.id === id);
+        if (id && index < 0) throw new Error('Lịch đã thay đổi');
+        const row = { id: id || crypto.randomUUID(), device: value('timer-device'), mode, onTime, offTime,
+          applyDate: value('timer-date'), notes: value('timer-notes'), updatedById: repo.currentAuthUser.id,
+          updatedBy: repo.currentAuthUser.fullName, updatedAt: new Date().toISOString() };
+        if (index >= 0) rows[index] = row; else rows.push(row);
+        localStorage.setItem('app_device_timers_v1', JSON.stringify(rows));
+        document.getElementById('timer-form').hidden = true;
+        renderDeviceTimers();
+        showToast('Đã lưu thông số hẹn giờ');
+      } catch (error) {
+        errorEl.textContent = 'Không thể lưu thông số hẹn giờ. Dữ liệu nhập vẫn được giữ lại; hãy kiểm tra bộ nhớ trình duyệt.';
+      }
     }
 
     function renderDashboardFormsGrid() {
