@@ -5,6 +5,7 @@ test('giữ đủ lịch văn phòng, ghi chú và bảng công cộng', async (
   await page.selectOption('#select-login-employee', 'ADMIN01');
   await page.fill('#input-login-pin', '0204');
   await page.click('#btn-submit-login');
+  await page.getByRole('button', { name: 'Xem danh sách văn phòng' }).click();
   await expect(page.locator('#office-timer-table')).toBeVisible();
   const cell = address => page.locator('#office-timer-table [data-source-cell="' + address + '"]');
   await expect(cell('D8')).toHaveText('TOMITA');
@@ -25,9 +26,11 @@ test('giữ đủ lịch văn phòng, ghi chú và bảng công cộng', async (
   for (const row of source.rows) for (const [col, value] of Object.entries(row.cells)) {
     if (value) expect(rendered[col + row.row], col + row.row).toBe(value);
   }
+  await page.getByRole('button', { name: 'Đóng danh sách hẹn giờ' }).click();
+  await page.getByRole('button', { name: 'Xem danh sách hẹn giờ công cộng' }).click();
   await expect(page.locator('#public-timer-table [data-source-cell="G8"]')).toHaveText('05:45');
   expect(await page.evaluate(() => localStorage.getItem('app_device_timers_v1'))).toBeNull();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await page.locator('#office-timer-source').scrollIntoViewIfNeeded();
-  await page.screenshot({ path: test.info().outputPath('office-timers.png') });
+  await page.locator('#public-timer-source').scrollIntoViewIfNeeded();
+  await page.screenshot({ path: test.info().outputPath('public-timers-after-office.png') });
 });
