@@ -5,6 +5,7 @@ test('bảng công cộng giữ mùa, ô gộp, giây và dữ liệu cuối ngu
   await page.selectOption('#select-login-employee', 'ADMIN01');
   await page.fill('#input-login-pin', '0204');
   await page.click('#btn-submit-login');
+  await page.getByRole('button', { name: 'Xem danh sách hẹn giờ công cộng' }).click();
   await expect(page.locator('#public-timer-table')).toBeVisible();
   await expect(page.locator('#public-timer-source')).toContainText('27/09/2026');
   await expect(page.locator('#public-timer-table thead')).toContainText('01/04–30/09');

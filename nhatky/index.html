@@ -293,7 +293,15 @@
             <button type="button" onclick="openDeviceTimer()" class="px-3 py-2 rounded-lg bg-gray-900 text-white text-xs font-semibold">Thêm hẹn giờ</button>
           </div>
           <p class="text-xs text-gray-500">Lưu trên trình duyệt này. Bảng ghi nhận thông số cài đặt, không tự điều khiển thiết bị. Giờ tắt trước giờ bật được hiểu là ngày kế tiếp.</p>
-          <div class="space-y-3 border rounded-lg p-3">
+          <div id="timer-reference-cards" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <button type="button" onclick="openTimerReference('public')" aria-label="Xem danh sách hẹn giờ công cộng" class="p-3.5 rounded-xl border border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300 text-left transition flex items-center justify-between gap-3">
+              <span class="flex items-center gap-3 min-w-0"><span class="w-9 h-9 rounded-lg bg-white border border-gray-200 flex items-center justify-center shrink-0"><i data-lucide="lamp-wall-up" class="w-4 h-4"></i></span><span class="min-w-0"><span class="block text-xs font-semibold text-gray-900 truncate">Hẹn giờ công cộng</span><span class="block text-[11px] text-gray-500">314 mục · lịch hè/đông</span></span></span><i data-lucide="chevron-right" class="w-4 h-4 text-gray-400 shrink-0"></i>
+            </button>
+            <button type="button" onclick="openTimerReference('office')" aria-label="Xem danh sách văn phòng" class="p-3.5 rounded-xl border border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300 text-left transition flex items-center justify-between gap-3">
+              <span class="flex items-center gap-3 min-w-0"><span class="w-9 h-9 rounded-lg bg-white border border-gray-200 flex items-center justify-center shrink-0"><i data-lucide="building-2" class="w-4 h-4"></i></span><span class="min-w-0"><span class="block text-xs font-semibold text-gray-900 truncate">Đóng/ngắt điện văn phòng</span><span class="block text-[11px] text-gray-500">197 mục · chiếu sáng/điều hòa</span></span></span><i data-lucide="chevron-right" class="w-4 h-4 text-gray-400 shrink-0"></i>
+            </button>
+          </div>
+          <div id="public-timer-reference-content" class="hidden space-y-3 border rounded-lg p-3">
             <div id="public-timer-source" class="space-y-1">
               <h3 class="text-sm font-semibold">Danh sách lộ điện hẹn giờ công cộng</h3>
               <p class="text-xs text-gray-600">Nguồn: <a class="underline text-blue-700" href="https://docs.google.com/spreadsheets/d/1d_dbPMeToPfP86rRJVoB_BF15J4xh912jVfcjcagxXs/edit?gid=745357933#gid=745357933" target="_blank" rel="noopener noreferrer">DS hẹn giờ công cộng · DS.01.BD</a> · Ngày cập nhật nguồn: 27/09/2026.</p>
@@ -309,7 +317,7 @@
               </table>
             </div>
           </div>
-          <div class="space-y-3 border rounded-lg p-3">
+          <div id="office-timer-reference-content" class="hidden space-y-3 border rounded-lg p-3">
             <div id="office-timer-source" class="space-y-1">
               <h3 class="text-sm font-semibold">Danh sách hẹn giờ đóng/ngắt điện văn phòng</h3>
               <p class="text-xs text-gray-600">Nguồn: <a class="underline text-blue-700" href="https://docs.google.com/spreadsheets/d/1d_dbPMeToPfP86rRJVoB_BF15J4xh912jVfcjcagxXs/edit?gid=1507714426#gid=1507714426" target="_blank" rel="noopener noreferrer">6.DS giờ đóng ngắt điện văn phòng · DS.02.BD</a>.</p>
@@ -867,6 +875,20 @@
       </button>
     </nav>
 
+  </div>
+
+  <!-- MODAL: DANH SÁCH HẸN GIỜ THAM KHẢO -->
+  <div id="modal-timer-reference" role="dialog" aria-modal="true" aria-labelledby="timer-reference-title" class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs hidden items-center justify-center z-[140] p-2 sm:p-4" onclick="if (event.target === this) closeTimerReference()">
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-2xl w-full h-[92vh] flex flex-col overflow-hidden">
+      <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between gap-3 shrink-0">
+        <div class="min-w-0"><h2 id="timer-reference-title" class="font-bold text-sm sm:text-base text-gray-900 truncate">Danh sách hẹn giờ</h2><p id="timer-reference-result-count" class="text-[11px] text-gray-500 mt-0.5"></p></div>
+        <button type="button" onclick="closeTimerReference()" aria-label="Đóng danh sách hẹn giờ" class="p-2 rounded-lg border border-gray-200 hover:bg-gray-100 shrink-0"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="px-4 py-3 border-b border-gray-100 shrink-0">
+        <label class="relative block"><i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i><input id="timer-reference-search" type="search" oninput="filterTimerReference()" placeholder="Tìm thiết bị, khu vực, khách hàng, mã..." class="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"></label>
+      </div>
+      <div id="timer-reference-modal-body" class="flex-1 overflow-auto custom-scrollbar p-3 sm:p-4"></div>
+    </div>
   </div>
 
   <!-- MODAL: KHÓA BÀN LÀM VIỆC NHANH (#modal-workstation-lock) [MỚI] -->
@@ -4897,8 +4919,6 @@ const CONFIG = {
     }
 
     function renderDashboard() {
-      renderOfficeDeviceTimers();
-      renderPublicDeviceTimers();
       renderDeviceTimers();
       const sId = 'shift_' + repo.currentDate + '_' + repo.currentShiftType.replace(/\s+/g, '_');
       const shiftTasks = repo.tasks.filter(t => t.shiftId === sId);
@@ -4923,6 +4943,55 @@ const CONFIG = {
     function renderOfficeDeviceTimers() {
       renderSourceDeviceTimers('office');
     }
+
+    let activeTimerReference = '';
+
+    function openTimerReference(prefix) {
+      const config = {
+        public: { title: 'Danh sách lộ điện hẹn giờ công cộng', contentId: 'public-timer-reference-content' },
+        office: { title: 'Hẹn giờ đóng/ngắt điện văn phòng', contentId: 'office-timer-reference-content' }
+      }[prefix];
+      if (!config) return;
+      activeTimerReference = prefix;
+      renderSourceDeviceTimers(prefix);
+      const content = document.getElementById(config.contentId);
+      content.classList.remove('hidden');
+      document.getElementById('timer-reference-modal-body').replaceChildren(content);
+      document.getElementById('timer-reference-title').textContent = config.title;
+      document.getElementById('timer-reference-search').value = '';
+      filterTimerReference();
+      const modal = document.getElementById('modal-timer-reference');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.classList.add('overflow-hidden');
+      document.getElementById('timer-reference-search').focus();
+      lucide.createIcons();
+    }
+
+    function closeTimerReference() {
+      const modal = document.getElementById('modal-timer-reference');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.classList.remove('overflow-hidden');
+      activeTimerReference = '';
+    }
+
+    function filterTimerReference() {
+      if (!activeTimerReference) return;
+      const query = document.getElementById('timer-reference-search').value.trim().toLocaleLowerCase('vi');
+      const rows = document.querySelectorAll(`#${activeTimerReference}-timer-rows tr`);
+      let visible = 0;
+      rows.forEach(row => {
+        const matches = !query || row.textContent.toLocaleLowerCase('vi').includes(query);
+        row.hidden = !matches;
+        if (matches && row.textContent.replaceAll('—', '').trim()) visible++;
+      });
+      document.getElementById('timer-reference-result-count').textContent = query ? `${visible} kết quả` : `${visible} mục trong danh sách`;
+    }
+
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && activeTimerReference) closeTimerReference();
+    });
 
     function renderSourceDeviceTimers(prefix) {
       const body = document.getElementById(prefix + '-timer-rows');
