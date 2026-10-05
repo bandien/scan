@@ -30,6 +30,7 @@ test('blank, rest, leave and administrative days have distinct states',()=>{
   assert.equal(schedule.describeDay(['','','']).kind,'unassigned');
   assert.equal(schedule.describeDay(['CN','','']).kind,'rest');
   assert.equal(schedule.describeDay(['P','','']).kind,'leave');
+  assert.equal(schedule.describeDay(['KL','','']).kind,'leave');
   assert.equal(schedule.describeDay(['hc','','']).kind,'administrative');
   assert.equal(schedule.describeDay(['HB','','']).kind,'other');
   assert.equal(schedule.describeDay(['Nghỉ việc','','']).kind,'inactive');
@@ -57,3 +58,22 @@ test('missing week and missing employee are not inferred from a different week',
   assert.equal(schedule.selectCurrent([week],'Nguyễn Quang Cường',new Date('2026-10-05T05:00:00Z')).kind,'unmatched');
   assert.equal(schedule.selectCurrent([week],week.members[0].name,new Date('2026-10-12T05:00:00Z')).kind,'unpublished');
 });
+test('convertGolfGridToWeeks converts loader mock into valid week structures',()=>{
+  const mockLoader = {
+    viewingMonday: new Date('2026-10-05T00:00:00Z'),
+    grid: Array(10).fill([]),
+    getWeekInfo: () => ({
+      weekNum: '41',
+      teams: [{
+        name: 'Tổ cơ điện Sân Golf',
+        staff: [{ name: 'Ngô Quyết Thắng', shifts: Array(21).fill('x') }]
+      }]
+    })
+  };
+  const weeks = schedule.convertGolfGridToWeeks(mockLoader);
+  assert.equal(weeks.length, 5);
+  assert.equal(weeks[2].weekLabel, '41');
+  assert.equal(weeks[2].members[0].name, 'Ngô Quyết Thắng');
+  assert.equal(weeks[2].members[0].days[0].length, 3);
+});
+

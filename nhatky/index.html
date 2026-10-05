@@ -6716,6 +6716,9 @@ const repo = new AppRepository();
               this.syncToRepoRoster(nextMon);
 
               this.renderAll();
+              if (typeof myShiftController !== 'undefined' && myShiftController && typeof myShiftController.refresh === 'function') {
+                try { myShiftController.refresh(true); } catch (_) {}
+              }
               showToast('Đã đồng bộ dữ liệu phân ca từ Google Sheet gốc');
               resolve(this);
             } catch (err) {
@@ -6853,9 +6856,11 @@ const repo = new AppRepository();
             if (!repo.rosterMatrix[weekKey][emp.id]) {
               repo.rosterMatrix[weekKey][emp.id] = {};
             }
+            const slotToShift = [3, 1, 2];
             for (let d = 0; d < 7; d++) {
-              for (let c = 1; c <= 3; c++) {
-                const shiftVal = member.shifts[d * 3 + (c - 1)] || '';
+              for (let s = 0; s < 3; s++) {
+                const shiftVal = member.shifts[d * 3 + s] || '';
+                const c = slotToShift[s];
                 repo.rosterMatrix[weekKey][emp.id][`d${d}_c${c}`] = shiftVal;
               }
             }
@@ -6869,6 +6874,9 @@ const repo = new AppRepository();
 
       renderAll() {
         renderDashboardShiftWidget();
+        if (typeof myShiftController !== 'undefined' && myShiftController && typeof myShiftController.render === 'function') {
+          try { myShiftController.render(); } catch (_) {}
+        }
         const modal = document.getElementById('modal-shift-schedule');
         if (modal && !modal.classList.contains('hidden')) {
           renderGolfScheduleMatrix();

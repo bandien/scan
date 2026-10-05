@@ -13,7 +13,13 @@
     { id: 'ca1', label: 'Ca 1', time: '06:00–14:00', start: 360, end: 840 },
     { id: 'ca2', label: 'Ca 2', time: '14:00–22:00', start: 840, end: 1320 }
   ];
-  const OTHER_CODES = { cn: ['rest', 'Nghỉ tuần (CN)'], p: ['leave', 'Nghỉ phép (P)'], n: ['rest', 'Nghỉ (N)'], hb: ['other', 'Hội thảo/Bù (HB)'] };
+  const OTHER_CODES = {
+    cn: ['rest', 'Nghỉ tuần (CN)'],
+    p: ['leave', 'Nghỉ phép (P)'],
+    kl: ['leave', 'Nghỉ không lương (KL)'],
+    n: ['rest', 'Nghỉ việc / Nghỉ (N)'],
+    hb: ['other', 'Lịch HC Hòa Bình 7h00–11h30 & 13h30–17h00 (HB)']
+  };
 
   function normalizeName(value) {
     return String(value || '').normalize('NFC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('vi');
@@ -104,8 +110,8 @@
     codes.forEach((code, slot) => {
       if (!code || code === '·' || code === '—') return;
       const key = normalizeName(code);
-      if (key === 'x' || key === 'tx') assignments.push({ ...SLOTS[slot], code });
-      else if (key === 'hc') { assignments.push({ id: 'hc', label: 'Hành chính', time: 'Theo lịch hành chính', code }); kinds.push('administrative'); }
+      if (key === 'x' || key === 'tx') assignments.push({ ...SLOTS[slot], code, ...(key === 'tx' ? { time: '06:00–10:00 & 14:00–18:00' } : {}) });
+      else if (key === 'hc') { assignments.push({ id: 'hc', label: 'Hành chính', time: '07:30–11:30 & 13:00–17:00', code }); kinds.push('administrative'); }
       else if (OTHER_CODES[key]) { kinds.push(OTHER_CODES[key][0]); notes.push(OTHER_CODES[key][1]); }
       else if (key === 'nghỉ việc') { kinds.push('inactive'); notes.push('Nghỉ việc theo nguồn'); }
       else { kinds.push('other'); notes.push('Ký hiệu ' + code); }
@@ -137,6 +143,50 @@
   }
   function validCache(cache, user) {
     return cache?.version === 1 && cache.employeeId === user?.id && cache.employeeName === user?.fullName && Number.isFinite(Date.parse(cache.fetchedAt)) && Array.isArray(cache.weeks) && cache.weeks.length > 0 && cache.weeks.every(week => /^\d{4}-\d{2}-\d{2}$/.test(week.startDate) && addDays(week.startDate, 6) === week.endDate && Array.isArray(week.members) && week.members.every(member => typeof member.name === 'string' && typeof member.team === 'string' && member.days.length === 7 && member.days.every(day => day.length === 3 && day.every(code => typeof code === 'string'))));
+  }
+
+  function convertGolfGridToWeeks(loader) {
+    if (!loader || !loader.grid || loader.grid.length < 4) return [];
+    const baseMonday = loader.viewingMonday || new Date();
+    const mondays = [-2, -1, 0, 1, 2].map(offset => {
+      const m = new Date(baseMonday);
+      const day = m.getDay();
+      const diff = m.getDate() - day + (day === 0 ? -6 : 1) + offset * 7;
+      m.setDate(diff);
+      m.setHours(0, 0, 0, 0);
+      return m;
+    });
+
+    const parsedWeeks = [];
+    for (const mon of mondays) {
+      const weekInfo = loader.getWeekInfo(mon);
+      if (!weekInfo || !weekInfo.teams || !weekInfo.teams.length) continue;
+      const startDate = vietnamDate(mon);
+      const endDate = addDays(startDate, 6);
+      const weekLabel = String(weekInfo.weekNum || '');
+      const members = [];
+      weekInfo.teams.forEach(team => {
+        team.staff.forEach(s => {
+          const days = [];
+          for (let d = 0; d < 7; d++) {
+            days.push([
+              s.shifts[d * 3 + 0] || '',
+              s.shifts[d * 3 + 1] || '',
+              s.shifts[d * 3 + 2] || ''
+            ]);
+          }
+          members.push({
+            name: s.name,
+            team: team.name,
+            days
+          });
+        });
+      });
+      if (members.length) {
+        parsedWeeks.push({ startDate, endDate, weekLabel, members });
+      }
+    }
+    return parsedWeeks;
   }
 
   function createController({ getUser, onSelection }) {
@@ -185,6 +235,16 @@
           const cache = JSON.parse(localStorage.getItem(CACHE_KEY));
           if (validCache(cache, user)) { weeks = cache.weeks; fetchedAt = cache.fetchedAt; syncState = 'cached'; }
         } catch (_) {}
+        if (!weeks.length && typeof GolfRootSheetLoader !== 'undefined' && GolfRootSheetLoader.grid && GolfRootSheetLoader.grid.length > 3) {
+          try {
+            const rootWeeks = convertGolfGridToWeeks(GolfRootSheetLoader);
+            if (rootWeeks && rootWeeks.length) {
+              weeks = rootWeeks;
+              fetchedAt = GolfRootSheetLoader.lastSyncTime ? new Date(GolfRootSheetLoader.lastSyncTime).toISOString() : new Date().toISOString();
+              syncState = 'synced';
+            }
+          } catch (_) {}
+        }
         render(); refresh(true);
       } else render();
     }
@@ -210,6 +270,25 @@
           const personalWeeks = weeks.map(week => ({ ...week, members: week.members.filter(member => normalizeName(member.name) === normalizeName(user.fullName)) }));
           try { localStorage.setItem(CACHE_KEY, JSON.stringify({ version: 1, employeeId: user.id, employeeName: user.fullName, fetchedAt, weeks: personalWeeks })); } catch (_) {}
         } catch (error) {
+          if (typeof GolfRootSheetLoader !== 'undefined') {
+            try {
+              if (!GolfRootSheetLoader.grid) {
+                await GolfRootSheetLoader.fetchLive();
+              }
+              if (GolfRootSheetLoader.grid && GolfRootSheetLoader.grid.length > 3) {
+                const rootWeeks = convertGolfGridToWeeks(GolfRootSheetLoader);
+                if (rootWeeks && rootWeeks.length) {
+                  if (currentGeneration !== generation || key !== userKey(getUser())) return;
+                  weeks = rootWeeks;
+                  fetchedAt = GolfRootSheetLoader.lastSyncTime ? new Date(GolfRootSheetLoader.lastSyncTime).toISOString() : new Date().toISOString();
+                  syncState = 'synced';
+                  const personalWeeks = weeks.map(week => ({ ...week, members: week.members.filter(member => normalizeName(member.name) === normalizeName(user.fullName)) }));
+                  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ version: 1, employeeId: user.id, employeeName: user.fullName, fetchedAt, weeks: personalWeeks })); } catch (_) {}
+                  return;
+                }
+              }
+            } catch (_) {}
+          }
           if (currentGeneration !== generation || key !== userKey(getUser())) return;
           syncState = weeks.length ? 'cached' : 'error';
           syncError = error.name === 'AbortError' ? 'Kết nối quá thời gian chờ.' : 'Không đọc được nguồn phân ca.';
@@ -274,5 +353,5 @@
     }
     return { activate, refresh, render };
   }
-  return { SOURCE_URL, SHEET_URL, parseSourceHtml, normalizeName, vietnamDate, addDays, findMember, describeDay, dayFor, selectCurrent, createController };
+  return { SOURCE_URL, SHEET_URL, parseSourceHtml, normalizeName, vietnamDate, addDays, findMember, describeDay, dayFor, selectCurrent, convertGolfGridToWeeks, createController };
 });
