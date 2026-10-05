@@ -14,6 +14,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="my-shift.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -34,6 +35,12 @@
     input, textarea, select {
       user-select: text;
     }
+    #my-shift-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+    .my-shift-day { border: 1px solid #d1d5db; border-radius: 10px; background: #fff; padding: 12px 8px; min-height: 80px; text-align: left; }
+    .my-shift-day[aria-pressed="true"] { background: #111827; border-color: #111827; color: #fff; }
+    .my-shift-day-date { display: block; font-size: 11px; opacity: .8; margin-bottom: 8px; }
+    .my-shift-day-assignment { display: block; font-size: 12px; font-weight: 600; overflow-wrap: anywhere; }
+    @media (max-width: 640px) { #my-shift-days { grid-template-columns: repeat(2, minmax(0, 1fr)); } .my-shift-day { min-height: 66px; } }
     .custom-scrollbar::-webkit-scrollbar {
       width: 5px;
       height: 5px;
@@ -287,6 +294,25 @@
       <!-- TAB 0: BÀN LÀM VIỆC DASHBOARD NHÂN VIÊN (#tab-dashboard) -->
       <!-- ============================================================== -->
       <section id="tab-dashboard" class="space-y-4">
+        <section id="my-shift-card" class="bg-white rounded-xl border border-gray-200 p-4 space-y-4" aria-labelledby="my-shift-heading">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div><h2 id="my-shift-heading" class="text-lg font-bold text-gray-900">Ca của tôi</h2><p id="my-shift-employee" class="text-sm font-semibold text-gray-700 mt-1"></p><p id="my-shift-team" class="text-xs text-gray-500 mt-1"></p></div>
+            <button type="button" id="my-shift-sync" class="px-3 py-2 rounded-lg border border-gray-300 text-xs font-semibold disabled:opacity-50">Đồng bộ lịch</button>
+          </div>
+          <div class="bg-gray-50 rounded-xl p-4 space-y-2">
+            <p id="my-shift-date-label" class="text-xs text-gray-500"></p>
+            <p id="my-shift-today" class="text-base font-bold text-gray-900" aria-live="polite">Đang chờ đọc lịch phân ca</p>
+            <p id="my-shift-hours" class="text-sm text-gray-700"></p>
+            <p id="my-shift-notes" class="text-xs text-gray-600"></p>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <h3 id="my-shift-week" class="text-sm font-semibold text-gray-800">Lịch trong tuần</h3>
+            <div class="flex flex-wrap items-center gap-2"><label for="my-shift-date" class="text-xs text-gray-600">Ngày xem</label><input type="date" id="my-shift-date" class="border border-gray-300 rounded-lg px-2 py-2 text-sm" style="max-width:100%"><button id="my-shift-today-button" type="button" class="px-3 py-2 rounded-lg border border-gray-300 text-xs">Hôm nay</button></div>
+          </div>
+          <div id="my-shift-days" aria-label="Lịch phân ca cá nhân trong tuần"></div>
+          <div class="flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 pt-3"><p id="my-shift-sync-status" class="text-xs text-gray-500" role="status">Chưa đồng bộ</p><a id="my-shift-source" href="https://amd500.tail030e1.ts.net/shifts" target="_blank" rel="noopener noreferrer" class="text-xs underline text-gray-700">Mở bảng phân ca CMMS</a></div>
+          <p class="text-xs text-gray-500">Đọc cùng Google Sheet với CMMS. Ký hiệu và ca hiển thị theo bảng nguồn; ô trống là chưa phân công.</p>
+        </section>
         <section class="bg-white rounded-xl border border-gray-200 p-4 space-y-3" aria-labelledby="timer-heading">
           <div class="flex items-center justify-between gap-3">
             <h2 id="timer-heading" class="text-sm font-bold">Thông số hẹn giờ bật/tắt</h2>
@@ -851,9 +877,9 @@
     <!-- BOTTOM NAVIGATION BAR (ERPNext Desk Style - 4 Tabs) -->
     <nav class="bg-white border-t border-gray-200 px-3 py-1.5 flex items-center justify-around z-30 shrink-0 select-none shadow-none">
       <!-- Nav 1: Dashboard -->
-      <button onclick="switchTab('dashboard')" id="nav-dashboard" aria-label="Tab Bàn Làm Việc" class="flex flex-col items-center py-1 px-3 rounded-lg text-gray-900 font-semibold transition flex-1">
+      <button onclick="switchTab('dashboard')" id="nav-dashboard" aria-label="Tab Ca của tôi" class="flex flex-col items-center py-1 px-3 rounded-lg text-gray-900 font-semibold transition flex-1">
         <div class="p-0.5"><i data-lucide="layout-grid" class="w-5 h-5"></i></div>
-        <span class="text-[10px] mt-0.5">Bàn Làm Việc</span>
+        <span class="text-[10px] mt-0.5">Ca của tôi</span>
       </button>
 
       <!-- Nav 2: Calendar -->
@@ -4464,7 +4490,7 @@ const CONFIG = {
         try {
           localStorage.setItem(this.STORAGE_KEYS.CURRENT_AUTH_USER, JSON.stringify(this.currentAuthUser));
         } catch (e) {}
-        this.setCurrentShift(emp.id, detectShiftByHour(), getTodayIsoDate());
+        this.setCurrentShift(emp.id, 'Đang đọc lịch phân ca', MyShiftSchedule.vietnamDate());
         this.logSecurityEvent('ĐĂNG_NHẬP_THÀNH_CÔNG', emp.fullName, 'Đăng nhập vào ca: ' + this.currentShiftType);
         return { success: true };
       }
@@ -4919,6 +4945,7 @@ const CONFIG = {
     }
 
     function renderDashboard() {
+      myShiftController.render();
       renderDeviceTimers();
       const sId = 'shift_' + repo.currentDate + '_' + repo.currentShiftType.replace(/\s+/g, '_');
       const shiftTasks = repo.tasks.filter(t => t.shiftId === sId);
@@ -5844,6 +5871,16 @@ const CONFIG = {
 
 
 const repo = new AppRepository();
+    const myShiftController = MyShiftSchedule.createController({
+      getUser: () => repo.currentAuthUser,
+      onSelection: selection => {
+        const assignment = selection.assignment;
+        const savedPrefix = selection.sourceState !== 'synced' && selection.week ? 'Lịch đã lưu · ' : '';
+        const label = savedPrefix + (assignment ? assignment.label + ' (' + assignment.time + ')' : selection.label || 'Chưa xác định theo lịch');
+        repo.setCurrentShift(repo.currentAuthUser.id, label, selection.date || MyShiftSchedule.vietnamDate());
+        updateShiftHeaderUI();
+      }
+    });
     let currentTaskFilter = 'all';
     let currentTaskScope = 'shift'; // 'shift' | 'week' | 'month' | 'year'
     let planViewingMonday = getMonday(new Date(repo.currentDate || getTodayIsoDate()));
@@ -5937,6 +5974,7 @@ const repo = new AppRepository();
     function checkAuthAndRenderScreen() {
       const loginScreen = document.getElementById('screen-login');
       const appScreen = document.getElementById('screen-app');
+      myShiftController.activate();
 
       if (repo.isLoggedIn()) {
         loginScreen.classList.add('hidden');
@@ -6244,6 +6282,7 @@ const repo = new AppRepository();
         errorMsg.classList.add('hidden');
         document.getElementById('input-login-pin').value = '';
         checkAuthAndRenderScreen();
+        switchTab('dashboard');
         showToast(`Chào mừng ${repo.getCurrentEmployee().fullName} vào ca trực`);
       } else {
         errorMsg.innerText = result.message || 'Mật khẩu không chính xác';
@@ -6301,6 +6340,13 @@ const repo = new AppRepository();
     function openShiftModal() {
       populateEmployeeSelect();
       document.getElementById('select-active-employee').value = repo.currentEmployeeId;
+      const shiftSelect = document.getElementById('select-active-shift-type');
+      if (!Array.from(shiftSelect.options).some(option => option.value === repo.currentShiftType)) {
+        const sourceOption = document.createElement('option');
+        sourceOption.value = repo.currentShiftType;
+        sourceOption.textContent = repo.currentShiftType;
+        shiftSelect.appendChild(sourceOption);
+      }
       document.getElementById('select-active-shift-type').value = repo.currentShiftType;
       document.getElementById('input-shift-date').value = repo.currentDate;
       updateShiftRecommendation();
@@ -8964,7 +9010,7 @@ const repo = new AppRepository();
 
       const tabs = ['dashboard', 'calendar', 'checklist', 'report', 'personal'];
       const titles = {
-        dashboard: 'Bàn Làm Việc Vận Hành',
+        dashboard: 'Ca của tôi',
         calendar: 'Lịch Nhật Ký Google Calendar',
         checklist: 'Biểu Mẫu & Quy Trình SOP',
         report: 'Báo Cáo Thống Kê Ca Trực',
