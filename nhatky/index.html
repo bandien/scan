@@ -453,6 +453,124 @@
           </div>
         </div>
 
+        <!-- SECTION 1.5: LỊCH PHÂN CA TRỰC THỜI GIAN THỰC (GOOGLE SHEET GỐC) -->
+        <div id="section-dash-shifts" class="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs space-y-3.5">
+          <!-- Top Bar: Title, Live Dot, Week Badge, Refresh -->
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <div class="flex items-center space-x-2.5">
+              <div class="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center shrink-0">
+                <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <h3 class="font-extrabold text-sm text-gray-900">Lịch Phân Ca Trực</h3>
+                  <span id="dash-shift-sync-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Google Sheet Gốc</span>
+                  </span>
+                </div>
+                <p class="text-[11px] text-gray-500" id="dash-shift-sync-time">Đang kết nối Google Sheet (Tab 4.BẢNG PHÂN CA TRỰC)...</p>
+              </div>
+            </div>
+
+            <!-- Week Navigation Controls -->
+            <div class="flex items-center gap-1">
+              <button onclick="navigateDashShiftWeek(-1)" aria-label="Tuần trước" title="Tuần trước" class="p-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 transition active:scale-95">
+                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+              </button>
+              <span id="dash-shift-week-label" class="px-2.5 py-1 bg-indigo-50 border border-indigo-200 text-indigo-900 font-bold text-xs rounded-lg whitespace-nowrap">
+                Tuần 41 (05/10 - 11/10)
+              </span>
+              <button onclick="navigateDashShiftWeek(1)" aria-label="Tuần sau" title="Tuần sau" class="p-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 transition active:scale-95">
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </button>
+              <button onclick="jumpDashShiftToCurrentWeek()" id="dash-shift-btn-today" aria-label="Về tuần hiện tại" title="Về tuần hiện tại" class="hidden px-2 py-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-900 font-bold text-[11px] rounded-lg transition active:scale-95">
+                Tuần này
+              </button>
+              <button onclick="GolfRootSheetLoader.fetchLive(true)" aria-label="Làm mới từ Google Sheet" title="Làm mới từ Google Sheet" class="p-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition active:scale-95">
+                <i data-lucide="refresh-cw" class="w-4 h-4" id="dash-shift-refresh-icon"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Personal Shift Today Card -->
+          <div id="dash-personal-shift-card" class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
+            <!-- Rendered by JS -->
+          </div>
+
+          <!-- 7-Day Mini Horizontal Timeline / Week Strip -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-gray-700 flex items-center gap-1">
+                <i data-lucide="calendar" class="w-3.5 h-3.5 text-indigo-600"></i>
+                <span>Lịch 7 ngày của bạn:</span>
+              </span>
+              <div class="flex items-center gap-1.5">
+                <span class="text-[11px] text-gray-500 font-semibold" id="dash-shift-employee-selector-label">Ngô Quyết Thắng</span>
+                <select id="dash-shift-employee-select" onchange="handleDashShiftEmployeeChange(this.value)" class="text-[11px] bg-white border border-gray-200 rounded-md px-1.5 py-0.5 text-gray-700 font-medium">
+                  <!-- Populated by JS -->
+                </select>
+              </div>
+            </div>
+            <div id="dash-week-days-strip" class="grid grid-cols-7 gap-1 text-center">
+              <!-- 7 Day Columns rendered by JS -->
+            </div>
+          </div>
+
+          <!-- Today's Team Duty Overview -->
+          <div class="p-3 rounded-xl bg-slate-50/70 border border-slate-200 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-xs text-gray-800 flex items-center gap-1.5">
+                <i data-lucide="users" class="w-3.5 h-3.5 text-gray-600"></i>
+                <span>Đội trực hôm nay (<span id="dash-today-label">Thứ Hai 05/10</span>) • Tổ Sân Golf:</span>
+              </span>
+              <button onclick="openShiftScheduleModal()" class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-0.5">
+                <span>Xem cả tổ</span>
+                <i data-lucide="arrow-right" class="w-3 h-3"></i>
+              </button>
+            </div>
+            <div id="dash-today-team-roster" class="grid grid-cols-1 sm:grid-cols-3 gap-1.5 text-xs">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+          <!-- Working Hours & Timesheet Symbols Mini Bar -->
+          <div class="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200 text-[11px] text-amber-950 flex flex-col gap-1">
+            <div class="flex items-center gap-1.5 flex-wrap font-bold">
+              <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-700 shrink-0"></i>
+              <span>Giờ ca:</span>
+              <span class="bg-amber-100 px-1.5 py-0.2 rounded font-extrabold text-amber-900">Ca 1: 06h–14h</span>
+              <span class="bg-indigo-100 px-1.5 py-0.2 rounded font-extrabold text-indigo-900">Ca 2: 14h–22h</span>
+              <span class="bg-slate-900 px-1.5 py-0.2 rounded font-extrabold text-white">Ca 3: 22h–06h</span>
+              <span class="bg-blue-100 px-1.5 py-0.2 rounded font-extrabold text-blue-900">hc: 7h30–11h30 & 13h–17h</span>
+              <span class="bg-orange-100 px-1.5 py-0.2 rounded font-extrabold text-orange-950">HB: 7h00–11h30 & 13h30–17h00</span>
+              <span class="bg-cyan-100 px-1.5 py-0.2 rounded font-extrabold text-cyan-950">tx: 6h–10h & 14h00–18h00</span>
+            </div>
+            <div class="flex items-center gap-1.5 flex-wrap text-slate-700 font-medium">
+              <span class="font-bold text-slate-900">Ký hiệu:</span>
+              <span class="bg-slate-900 text-white font-bold px-1.5 py-0.5 rounded">x: Đi ca</span>
+              <span class="bg-blue-100 text-blue-900 font-bold px-1.5 py-0.5 rounded">hc: Hành chính</span>
+              <span class="bg-orange-100 text-orange-950 font-bold px-1.5 py-0.5 rounded">HB: Hòa Bình</span>
+              <span class="bg-cyan-100 text-cyan-950 font-bold px-1.5 py-0.5 rounded">tx: Thanh Xuân</span>
+              <span class="bg-rose-100 text-rose-900 font-bold px-1.5 py-0.5 rounded">P: Phép</span>
+              <span class="bg-purple-100 text-purple-900 font-bold px-1.5 py-0.5 rounded">KL: Không lương</span>
+              <span class="bg-yellow-200 text-yellow-900 font-bold px-1.5 py-0.5 rounded">CN: Nghỉ tuần</span>
+              <span class="bg-red-200 text-red-950 font-bold px-1.5 py-0.5 rounded">N: Nghỉ</span>
+            </div>
+          </div>
+
+          <!-- Bottom CTA: Open Full Schedule Modal -->
+          <div class="pt-1 flex items-center justify-between gap-2 border-t border-gray-100 flex-wrap">
+            <div class="text-[11px] text-gray-500 font-medium">
+              Dữ liệu đọc trực tiếp từ Google Sheet: <b>4.BẢNG PHÂN CA TRỰC</b>
+            </div>
+            <button onclick="openShiftScheduleModal()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5">
+              <i data-lucide="table" class="w-3.5 h-3.5"></i>
+              <span>Xem Bảng Phân Ca Chi Tiết</span>
+            </button>
+          </div>
+        </div>
+
         <!-- SECTION 2: BIỂU MẪU & WEB APP CHỦ CHỐT CA TRỰC -->
         <div class="space-y-2">
           <div class="flex items-center justify-between px-0.5">
@@ -1183,7 +1301,7 @@
       <!-- Modal Top Bar & Navigation -->
       <div class="space-y-2 shrink-0">
         <!-- Row 1: Primary Navigation & Close -->
-        <div class="flex items-center justify-between gap-1.5">
+        <div class="flex items-center justify-between gap-1.5 flex-wrap">
           <div class="flex items-center gap-1 sm:gap-1.5 flex-wrap">
             <button onclick="navigateScheduleWeek(-1)" aria-label="Tuần trước" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-1 transition active:scale-95">
               <i data-lucide="chevron-left" class="w-4 h-4"></i>
@@ -1196,12 +1314,26 @@
               <span class="hidden sm:inline">Tuần sau</span>
               <i data-lucide="chevron-right" class="w-4 h-4"></i>
             </button>
+
+            <!-- Team selector -->
+            <select id="schedule-team-filter" onchange="handleScheduleTeamChange(this.value)" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-xl text-xs font-extrabold text-slate-800 shadow-2xs cursor-pointer">
+              <option value="Tổ cơ điện Sân Golf" selected>Tổ cơ điện Sân Golf</option>
+              <option value="TỔ ĐIỆN NƯỚC">TỔ ĐIỆN NƯỚC</option>
+              <option value="TỔ PCCC">TỔ PCCC</option>
+              <option value="TỔ QLRV">TỔ QLRV</option>
+              <option value="Tổ thang máy">Tổ thang máy</option>
+              <option value="Tổ Điều Hòa">Tổ Điều Hòa</option>
+              <option value="Tổ Bảo Trì">Tổ Bảo Trì</option>
+              <option value="BỂ BƠI">BỂ BƠI</option>
+              <option value="Thực tập sinh">Thực tập sinh</option>
+              <option value="ALL">🏢 Tất cả các tổ</option>
+            </select>
           </div>
 
           <div class="flex items-center gap-1.5">
-            <button id="btn-sync-schedule-cloud" onclick="triggerManualSync(true)" aria-label="Đồng bộ bảng phân ca với Google Sheets" class="px-2 py-1.5 sm:px-2.5 bg-indigo-50 hover:bg-slate-100 text-slate-700 border border-indigo-200 rounded-xl text-xs font-bold transition flex items-center gap-1 active:scale-95 shadow-2xs" title="Đồng bộ Google Sheets">
-              <i data-lucide="cloud" class="w-3.5 h-3.5 text-slate-600"></i>
-              <span class="hidden sm:inline">☁️ Cloud</span>
+            <button id="btn-sync-schedule-cloud" onclick="GolfRootSheetLoader.fetchLive(true)" aria-label="Đồng bộ bảng phân ca với Google Sheets" class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-bold transition flex items-center gap-1.5 active:scale-95 shadow-2xs" title="Đồng bộ trực tiếp từ Google Sheet gốc">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-emerald-600" id="modal-sync-schedule-icon"></i>
+              <span class="hidden sm:inline">Đồng Bộ Sheet Gốc</span>
             </button>
             <button onclick="closeShiftScheduleModal()" aria-label="Đóng bảng phân ca trực" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700 active:scale-90 transition">
               <i data-lucide="x" class="w-4 h-4"></i>
@@ -1221,40 +1353,44 @@
             <span>Chu Trình T35–T40</span>
           </button>
 
-          <button id="btn-auto-schedule-next-week" onclick="handleAutoGenerateNextWeek()" aria-label="Tự động xếp ca tuần sau" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-95 flex items-center gap-1 shrink-0">
-            <i data-lucide="wand-2" class="w-3.5 h-3.5 text-emerald-200"></i>
-            <span>⚡ Xếp Ca Sau</span>
-          </button>
-
-          <button id="btn-clear-week-schedule" onclick="handleClearWeekSchedule()" aria-label="Xóa lịch phân ca tuần này" class="px-2 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 rounded-xl text-xs font-bold transition flex items-center gap-1 active:scale-95 shrink-0">
-            <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-600"></i>
-            <span>Xóa Tuần</span>
-          </button>
-
           <button id="btn-copy-schedule-sheet" onclick="handleCopyScheduleForSheets()" aria-label="Sao chép bảng phân ca cho Google Sheets" class="px-2.5 py-1.5 bg-blue-50 hover:bg-slate-100 text-slate-700 border border-blue-300 rounded-xl text-xs font-bold transition flex items-center gap-1 active:scale-95 shadow-xs shrink-0">
             <i data-lucide="copy" class="w-3.5 h-3.5 text-slate-600"></i>
-            <span>Sao Chép Sheet</span>
+            <span>Sao Chép Dữ Liệu</span>
           </button>
 
           <button id="btn-export-schedule-csv" onclick="handleExportScheduleCSV()" aria-label="Xuất bảng phân ca ra file CSV" class="px-2 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-xl text-xs font-bold transition flex items-center gap-1 active:scale-95 shrink-0">
             <i data-lucide="download" class="w-3.5 h-3.5 text-slate-600"></i>
             <span>CSV</span>
           </button>
+
+          <span class="text-[11px] text-slate-500 font-medium ml-auto hidden sm:inline flex items-center gap-1">
+            <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 text-emerald-600"></i>
+            <span>Google Sheet: 4.BẢNG PHÂN CA TRỰC</span>
+          </span>
         </div>
 
-        <!-- Legend & Autumn Schedule Quick Info Banner -->
-        <div class="bg-amber-50/90 border border-amber-300 rounded-xl p-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] shrink-0 shadow-2xs">
-          <div class="flex items-center gap-1 text-amber-950 font-bold">
-            <i data-lucide="sun-medium" class="w-3.5 h-3.5 text-amber-700 shrink-0"></i>
-            <span>Mùa Thu: <span class="text-amber-900 font-extrabold">Ca 1: 05h00–13h30</span> | <span class="text-emerald-900 font-extrabold">HC: 07h–17h</span> | <span class="text-rose-900 font-extrabold">Ca 2: 13h30–21h30</span> | <span class="text-blue-900 font-extrabold">TX/tx: Thanh Xuân 05:50–10:00, 13:50–18:00</span></span>
+        <!-- Legend & Working Hours Banner -->
+        <div class="bg-amber-50/90 border border-amber-300 rounded-xl p-2.5 flex flex-col gap-1.5 text-[11px] shrink-0 shadow-2xs">
+          <div class="flex items-center gap-1.5 text-amber-950 font-bold flex-wrap">
+            <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-700 shrink-0"></i>
+            <span>Quy định giờ làm việc:</span>
+            <span class="bg-amber-100 px-1.5 py-0.5 rounded text-amber-900 font-extrabold">Ca 1: 06h00–14h00</span>
+            <span class="bg-indigo-100 px-1.5 py-0.5 rounded text-indigo-900 font-extrabold">Ca 2: 14h00–22h00</span>
+            <span class="bg-slate-900 px-1.5 py-0.5 rounded text-white font-extrabold">Ca 3: 22h00–06h00</span>
+            <span class="bg-blue-100 px-1.5 py-0.5 rounded text-blue-900 font-extrabold">hc: Hành chính 7h30–11h30 & 13h–17h</span>
+            <span class="bg-orange-100 px-1.5 py-0.5 rounded text-orange-950 font-extrabold">HB: Hành chính Hòa Bình 7h00–11h30 & 13h30–17h00</span>
+            <span class="bg-cyan-100 px-1.5 py-0.5 rounded text-cyan-950 font-extrabold">tx: Công trường Thanh Xuân 6h–10h & 14h00–18h00</span>
           </div>
-          <div class="text-slate-600 flex items-center gap-1 flex-wrap font-medium">
-            <span>Ký hiệu:</span>
-            <span class="bg-rose-100 font-bold px-1 rounded text-slate-900">x: Ca</span>
-            <span class="bg-emerald-100 font-bold text-emerald-900 px-1 rounded">hc: HC</span>
-            <span class="bg-blue-100 font-bold text-blue-900 px-1 rounded">TX/tx: Thanh Xuân</span>
-            <span class="bg-yellow-300 font-bold px-1 rounded text-slate-900">CN: Nghỉ</span>
-            <span class="font-bold px-1 rounded border bg-white">P: Phép</span>
+          <div class="text-slate-700 flex items-center gap-1.5 flex-wrap font-medium pt-1 border-t border-amber-200/60">
+            <span class="font-bold text-slate-900">Biểu tượng chấm công:</span>
+            <span class="bg-slate-900 text-white font-bold px-1.5 py-0.5 rounded">x: Đi ca</span>
+            <span class="bg-blue-100 text-blue-900 font-bold px-1.5 py-0.5 rounded">hc: Hành chính</span>
+            <span class="bg-orange-100 text-orange-950 font-bold px-1.5 py-0.5 rounded">HB: Hòa Bình</span>
+            <span class="bg-cyan-100 text-cyan-950 font-bold px-1.5 py-0.5 rounded">tx: Thanh Xuân</span>
+            <span class="bg-rose-100 text-rose-900 font-bold px-1.5 py-0.5 rounded">P: Nghỉ phép</span>
+            <span class="bg-purple-100 text-purple-900 font-bold px-1.5 py-0.5 rounded">KL: Nghỉ không lương</span>
+            <span class="bg-yellow-200 text-yellow-900 font-bold px-1.5 py-0.5 rounded">CN: Nghỉ tuần</span>
+            <span class="bg-red-200 text-red-950 font-bold px-1.5 py-0.5 rounded">N: Nghỉ</span>
           </div>
         </div>
 
@@ -1287,7 +1423,11 @@
                 <span class="font-bold text-slate-700">Từ: </span>
                 <span id="header-start-date" class="font-extrabold text-slate-900 mr-4">17/8/2026</span>
                 <span class="font-bold text-slate-700">Đến: </span>
-                <span id="header-end-date" class="font-extrabold text-slate-900">23/8/2026</span>
+                <span id="header-end-date" class="font-extrabold text-slate-900 mr-3">23/8/2026</span>
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  <span>Google Sheet Gốc (4.BẢNG PHÂN CA TRỰC)</span>
+                </span>
               </th>
             </tr>
 
@@ -4961,6 +5101,9 @@ const CONFIG = {
       if (barEl) barEl.style.width = pct + '%';
 
       renderDashboardShiftTasks();
+      if (typeof renderDashboardShiftWidget === 'function') {
+        renderDashboardShiftWidget();
+      }
     }
 
     function renderPublicDeviceTimers() {
@@ -5909,6 +6052,9 @@ const repo = new AppRepository();
       populateEmployeeSelect();
       renderEmployeesList();
       renderShiftDefinitions();
+      if (typeof GolfRootSheetLoader !== 'undefined') {
+        GolfRootSheetLoader.init();
+      }
 
       checkAuthAndRenderScreen();
 
@@ -6472,10 +6618,681 @@ const repo = new AppRepository();
     }
 
     // ==========================================
-    // 6. BẢNG PHÂN CA MA TRẬN CHUẨN TỔ CƠ ĐIỆN SÂN GOLF
+    // 6. BẢNG PHÂN CA MA TRẬN ĐỌC TỪ GỐC GOOGLE SHEET (TAB 4.BẢNG PHÂN CA TRỰC)
     // ==========================================
+
+    function getNormalizedMonday(d) {
+      const date = new Date(d);
+      const day = date.getDay();
+      const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+      const res = new Date(date.setDate(diff));
+      res.setHours(0, 0, 0, 0);
+      return res;
+    }
+
+    const GolfRootSheetLoader = {
+      SPREADSHEET_ID: '1d_dbPMeToPfP86rRJVoB_BF15J4xh912jVfcjcagxXs',
+      GID: '36044768',
+      BASELINE_MONDAY: new Date(2025, 5, 9, 0, 0, 0, 0), // Tuần 24 bắt đầu Thứ 2 ngày 09/06/2025
+      CACHE_KEY: 'app_gsheet_root_shifts_cache_v2',
+      status: 'idle', // 'idle' | 'loading' | 'synced' | 'cached' | 'error'
+      lastSyncTime: null,
+      grid: null, // Mảng 2 chiều lưu toàn bộ dữ liệu bảng tính
+      selectedTeam: 'Tổ cơ điện Sân Golf',
+      viewingMonday: null,
+
+      init() {
+        this.viewingMonday = getNormalizedMonday(new Date(repo.currentDate || getTodayIsoDate()));
+        this.loadCache();
+        this.fetchLive();
+      },
+
+      loadCache() {
+        try {
+          const raw = localStorage.getItem(this.CACHE_KEY);
+          if (!raw) return false;
+          const cached = JSON.parse(raw);
+          if (cached && cached.grid && Array.isArray(cached.grid) && cached.grid.length > 0) {
+            this.grid = cached.grid;
+            this.lastSyncTime = cached.timestamp || null;
+            this.status = 'cached';
+            this.syncToRepoRoster(this.viewingMonday);
+            this.renderAll();
+            return true;
+          }
+        } catch (e) {
+          console.warn('[GolfRootSheetLoader] Lỗi đọc bộ nhớ đệm:', e);
+        }
+        return false;
+      },
+
+      saveCache() {
+        try {
+          if (!this.grid) return;
+          localStorage.setItem(this.CACHE_KEY, JSON.stringify({
+            timestamp: Date.now(),
+            grid: this.grid
+          }));
+        } catch (e) {
+          console.warn('[GolfRootSheetLoader] Lỗi ghi bộ nhớ đệm:', e);
+        }
+      },
+
+      fetchLive(force = false) {
+        if (this.status === 'loading' && !force) return;
+        this.status = 'loading';
+        this.updateStatusUI();
+
+        return new Promise((resolve, reject) => {
+          window._onGolfRootSheetLoaded = (response) => {
+            try {
+              if (!response || !response.table || !response.table.rows) {
+                throw new Error('Dữ liệu từ Google Sheets không hợp lệ');
+              }
+              const table = response.table;
+              this.grid = table.rows.map(row => {
+                if (!row || !row.c) return [];
+                return row.c.map(cell => {
+                  if (!cell) return '';
+                  const val = cell.f !== undefined ? cell.f : cell.v;
+                  return val !== null && val !== undefined ? String(val).trim() : '';
+                });
+              });
+
+              this.lastSyncTime = Date.now();
+              this.status = 'synced';
+              this.saveCache();
+
+              // Đồng bộ tuần hiện tại và các tuần lân cận vào repo.rosterMatrix
+              const monday = this.viewingMonday || getNormalizedMonday(new Date());
+              this.syncToRepoRoster(monday);
+
+              const prevMon = new Date(monday);
+              prevMon.setDate(prevMon.getDate() - 7);
+              this.syncToRepoRoster(prevMon);
+
+              const nextMon = new Date(monday);
+              nextMon.setDate(nextMon.getDate() + 7);
+              this.syncToRepoRoster(nextMon);
+
+              this.renderAll();
+              showToast('Đã đồng bộ dữ liệu phân ca từ Google Sheet gốc');
+              resolve(this);
+            } catch (err) {
+              console.error('[GolfRootSheetLoader] Lỗi phân tích dữ liệu:', err);
+              this.status = this.grid ? 'cached' : 'error';
+              this.updateStatusUI(err.message);
+              reject(err);
+            }
+          };
+
+          const oldScript = document.getElementById('script-gsheet-golf');
+          if (oldScript) oldScript.remove();
+
+          const script = document.createElement('script');
+          script.id = 'script-gsheet-golf';
+          script.src = `https://docs.google.com/spreadsheets/d/${this.SPREADSHEET_ID}/gviz/tq?tqx=responseHandler:_onGolfRootSheetLoaded&gid=${this.GID}&_t=${Date.now()}`;
+          script.onerror = (e) => {
+            console.warn('[GolfRootSheetLoader] Lỗi mạng khi gọi JSONP', e);
+            this.status = this.grid ? 'cached' : 'error';
+            this.updateStatusUI('Không thể kết nối Google Sheets (Ngoại tuyến)');
+            reject(e);
+          };
+          document.head.appendChild(script);
+        });
+      },
+
+      getColStartForMonday(monday) {
+        const normMonday = getNormalizedMonday(monday);
+        const diffDays = Math.round((normMonday.getTime() - this.BASELINE_MONDAY.getTime()) / 86400000);
+        const diffWeeks = Math.round(diffDays / 7);
+        return 2 + diffWeeks * 21;
+      },
+
+      getWeekInfo(monday) {
+        const colStart = this.getColStartForMonday(monday);
+        if (!this.grid || this.grid.length < 3 || colStart < 2 || colStart >= (this.grid[0] || []).length) {
+          const weekNum = getIsoWeekNumber(monday);
+          const weekDays = [];
+          for (let i = 0; i < 7; i++) {
+            const d = new Date(monday);
+            d.setDate(monday.getDate() + i);
+            weekDays.push(d);
+          }
+          return {
+            colStart,
+            weekNum: String(weekNum),
+            from: `${weekDays[0].getDate()}/${weekDays[0].getMonth() + 1}/${weekDays[0].getFullYear()}`,
+            to: `${weekDays[6].getDate()}/${weekDays[6].getMonth() + 1}/${weekDays[6].getFullYear()}`,
+            dayLabels: weekDays.map((d, i) => `${['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'][i]} ${d.getDate()}/ ${d.getMonth() + 1}`),
+            teams: []
+          };
+        }
+
+        const row0 = this.grid[0] || [];
+        const row1 = this.grid[1] || [];
+        const weekNumVal = row0.slice(colStart, colStart + 21).find(v => /^\d+$/.test(v)) || String(getIsoWeekNumber(monday));
+        const fromIdx = row0.findIndex((v, i) => i >= colStart && i < colStart + 21 && v.includes('Từ:'));
+        const fromVal = fromIdx >= 0 ? row0[fromIdx + 1] : '';
+        const toIdx = row0.findIndex((v, i) => i >= colStart && i < colStart + 21 && v.includes('Đến:'));
+        const toVal = toIdx >= 0 ? row0[toIdx + 1] : '';
+
+        const dayLabels = [];
+        for (let d = 0; d < 7; d++) {
+          const cell = row1[colStart + d * 3];
+          if (cell) {
+            dayLabels.push(cell);
+          } else {
+            const temp = new Date(monday);
+            temp.setDate(monday.getDate() + d);
+            dayLabels.push(`${['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'][d]} ${temp.getDate()}/ ${temp.getMonth() + 1}`);
+          }
+        }
+
+        const teams = [];
+        let curTeam = null;
+
+        for (let r = 3; r < this.grid.length; r++) {
+          const row = this.grid[r];
+          const stt = row[0] || '';
+          const name = row[1] || '';
+          const weekCells = row.slice(colStart, colStart + 21);
+
+          if (!name && !stt) continue;
+
+          const isTeamHeader = (!stt && name && !weekCells.some(v => v !== '')) || 
+                               /^(tổ|hành chính|bể bơi|thực tập sinh|láng hạ)/i.test(name);
+          const isSummary = /^(trực|báo cơm)/i.test(stt || name);
+
+          if (isTeamHeader && !isSummary) {
+            curTeam = { name, staff: [], summaryRows: [] };
+            teams.push(curTeam);
+            continue;
+          }
+
+          if (isSummary) {
+            if (curTeam) {
+              curTeam.summaryRows.push({ label: stt || name, cells: weekCells });
+            }
+            continue;
+          }
+
+          if (curTeam && name) {
+            curTeam.staff.push({ stt, name, shifts: weekCells });
+          }
+        }
+
+        return {
+          colStart,
+          weekNum: weekNumVal,
+          from: fromVal,
+          to: toVal,
+          dayLabels,
+          teams
+        };
+      },
+
+      syncToRepoRoster(monday) {
+        const weekData = this.getWeekInfo(monday);
+        const weekKey = `${monday.getFullYear()}_W${getIsoWeekNumber(monday)}`;
+        if (!repo.rosterMatrix[weekKey]) {
+          repo.rosterMatrix[weekKey] = {};
+        }
+
+        const golfTeam = weekData.teams.find(t => t.name.toLowerCase().includes('sân golf'));
+        if (!golfTeam) return;
+
+        repo.employees.forEach(emp => {
+          if (emp.id === 'ADMIN01') return;
+          const member = golfTeam.staff.find(s => {
+            const cleanA = s.name.toLowerCase().replace(/\(.*?\)/g, '').trim();
+            const cleanB = emp.fullName.toLowerCase().replace(/\(.*?\)/g, '').trim();
+            return cleanA === cleanB || cleanA.includes(cleanB) || cleanB.includes(cleanA);
+          });
+          if (member) {
+            if (!repo.rosterMatrix[weekKey][emp.id]) {
+              repo.rosterMatrix[weekKey][emp.id] = {};
+            }
+            for (let d = 0; d < 7; d++) {
+              for (let c = 1; c <= 3; c++) {
+                const shiftVal = member.shifts[d * 3 + (c - 1)] || '';
+                repo.rosterMatrix[weekKey][emp.id][`d${d}_c${c}`] = shiftVal;
+              }
+            }
+          }
+        });
+
+        try {
+          localStorage.setItem(repo.STORAGE_KEYS.ROSTER_MATRIX, JSON.stringify(repo.rosterMatrix));
+        } catch (e) {}
+      },
+
+      renderAll() {
+        renderDashboardShiftWidget();
+        const modal = document.getElementById('modal-shift-schedule');
+        if (modal && !modal.classList.contains('hidden')) {
+          renderGolfScheduleMatrix();
+        }
+        this.updateStatusUI();
+      },
+
+      updateStatusUI(customMsg = '') {
+        const badge = document.getElementById('dash-shift-sync-badge');
+        const syncTime = document.getElementById('dash-shift-sync-time');
+        const refreshIcon = document.getElementById('dash-shift-refresh-icon');
+        const modalSyncIcon = document.getElementById('modal-sync-schedule-icon');
+
+        if (this.status === 'loading') {
+          if (refreshIcon) refreshIcon.classList.add('animate-spin');
+          if (modalSyncIcon) modalSyncIcon.classList.add('animate-spin');
+          if (syncTime) syncTime.innerText = 'Đang tải từ Google Sheet gốc...';
+          if (badge) {
+            badge.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200';
+            badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span><span>Đang tải...</span>';
+          }
+        } else if (this.status === 'synced') {
+          if (refreshIcon) refreshIcon.classList.remove('animate-spin');
+          if (modalSyncIcon) modalSyncIcon.classList.remove('animate-spin');
+          const timeStr = this.lastSyncTime ? new Date(this.lastSyncTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : 'Vừa xong';
+          if (syncTime) syncTime.innerText = `Đã đồng bộ Google Sheet lúc ${timeStr}`;
+          if (badge) {
+            badge.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+            badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span><span>Google Sheet Gốc (Live)</span>';
+          }
+        } else if (this.status === 'cached') {
+          if (refreshIcon) refreshIcon.classList.remove('animate-spin');
+          if (modalSyncIcon) modalSyncIcon.classList.remove('animate-spin');
+          const timeStr = this.lastSyncTime ? new Date(this.lastSyncTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '';
+          if (syncTime) syncTime.innerText = `Dữ liệu đệm từ Google Sheet ${timeStr ? '(' + timeStr + ')' : ''}`;
+          if (badge) {
+            badge.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200';
+            badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span><span>Bộ nhớ đệm (Google Sheet)</span>';
+          }
+        } else {
+          if (refreshIcon) refreshIcon.classList.remove('animate-spin');
+          if (modalSyncIcon) modalSyncIcon.classList.remove('animate-spin');
+          if (syncTime) syncTime.innerText = customMsg || 'Lỗi kết nối Google Sheet';
+          if (badge) {
+            badge.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200';
+            badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span><span>Lỗi đồng bộ</span>';
+          }
+        }
+      }
+    };
+
+    function resolveShiftDisplay(c1, c2, c3) {
+      const vals = [c1, c2, c3].map(v => (v || '').trim()).filter(Boolean);
+      if (vals.length === 0) {
+        return {
+          code: '-',
+          title: 'Không có ca',
+          hours: 'Nghỉ / Không phân ca',
+          colorClass: 'bg-slate-100 text-slate-400 border-slate-200',
+          badgeClass: 'bg-slate-100 text-slate-500'
+        };
+      }
+
+      if (vals.some(v => v.toLowerCase() === 'tx')) {
+        return {
+          code: 'tx',
+          title: 'Công trường Thanh Xuân',
+          hours: '06h00–10h00 & 14h00–18h00',
+          colorClass: 'bg-cyan-100 text-cyan-950 border-cyan-300 font-extrabold',
+          badgeClass: 'bg-cyan-600 text-white'
+        };
+      }
+      if (vals.some(v => v.toUpperCase() === 'HB')) {
+        return {
+          code: 'HB',
+          title: 'Hành chính Hòa Bình',
+          hours: '07h00–11h30 & 13h30–17h00',
+          colorClass: 'bg-amber-100 text-amber-950 border-amber-300 font-bold',
+          badgeClass: 'bg-amber-600 text-white'
+        };
+      }
+      if (vals.some(v => v.toLowerCase() === 'hc')) {
+        return {
+          code: 'hc',
+          title: 'Hành chính',
+          hours: '07h30–11h30 & 13h00–17h00',
+          colorClass: 'bg-blue-100 text-blue-900 border-blue-300 font-bold',
+          badgeClass: 'bg-blue-600 text-white'
+        };
+      }
+      if (vals.some(v => v.toUpperCase() === 'CN')) {
+        return {
+          code: 'CN',
+          title: 'Nghỉ tuần',
+          hours: 'Nghỉ hàng tuần',
+          colorClass: 'bg-yellow-200 text-yellow-950 border-yellow-300 font-bold',
+          badgeClass: 'bg-yellow-500 text-slate-900'
+        };
+      }
+      if (vals.some(v => v.toUpperCase() === 'P')) {
+        return {
+          code: 'P',
+          title: 'Nghỉ phép',
+          hours: 'Nghỉ phép hưởng lương',
+          colorClass: 'bg-rose-100 text-rose-900 border-rose-300 font-bold',
+          badgeClass: 'bg-rose-500 text-white'
+        };
+      }
+      if (vals.some(v => v.toUpperCase() === 'KL')) {
+        return {
+          code: 'KL',
+          title: 'Nghỉ không lương',
+          hours: 'Nghỉ không hưởng lương',
+          colorClass: 'bg-purple-100 text-purple-900 border-purple-300 font-bold',
+          badgeClass: 'bg-purple-600 text-white'
+        };
+      }
+      if (vals.some(v => v.toUpperCase() === 'N' || v.toLowerCase().includes('nghỉ việc'))) {
+        return {
+          code: 'N',
+          title: 'Nghỉ việc / Nghỉ',
+          hours: 'Nghỉ việc',
+          colorClass: 'bg-red-100 text-red-900 border-red-300 font-bold',
+          badgeClass: 'bg-red-600 text-white'
+        };
+      }
+
+      if ((c1 || '').trim().toLowerCase() === 'x') {
+        return {
+          code: 'Ca 1',
+          title: 'Trực Ca 1',
+          hours: '06h00 – 14h00',
+          colorClass: 'bg-amber-100 text-amber-900 border-amber-300 font-bold',
+          badgeClass: 'bg-amber-500 text-white'
+        };
+      }
+      if ((c2 || '').trim().toLowerCase() === 'x') {
+        return {
+          code: 'Ca 2',
+          title: 'Trực Ca 2',
+          hours: '14h00 – 22h00',
+          colorClass: 'bg-indigo-100 text-indigo-900 border-indigo-300 font-bold',
+          badgeClass: 'bg-indigo-600 text-white'
+        };
+      }
+      if ((c3 || '').trim().toLowerCase() === 'x') {
+        return {
+          code: 'Ca 3',
+          title: 'Trực Ca 3 (Đêm)',
+          hours: '22h00 – 06h00',
+          colorClass: 'bg-slate-900 text-white border-slate-900 font-bold',
+          badgeClass: 'bg-slate-900 text-white'
+        };
+      }
+
+      const first = vals[0];
+      return {
+        code: first,
+        title: `Ca trực (${first})`,
+        hours: '',
+        colorClass: 'bg-slate-200 text-slate-800 border-slate-300 font-semibold',
+        badgeClass: 'bg-slate-700 text-white'
+      };
+    }
+
+    function renderDashboardShiftWidget() {
+      const container = document.getElementById('section-dash-shifts');
+      if (!container) return;
+
+      const monday = GolfRootSheetLoader.viewingMonday || getNormalizedMonday(new Date());
+      const weekInfo = GolfRootSheetLoader.getWeekInfo(monday);
+      const weekNum = weekInfo.weekNum || getIsoWeekNumber(monday);
+
+      // Label tuần
+      const weekLabelEl = document.getElementById('dash-shift-week-label');
+      if (weekLabelEl) {
+        weekLabelEl.innerText = `Tuần ${weekNum} (${weekInfo.from || ''} - ${weekInfo.to || ''})`;
+      }
+
+      // Nút về tuần hiện tại
+      const currentWeekMonday = getNormalizedMonday(new Date());
+      const isCurrentWeek = Math.abs(monday.getTime() - currentWeekMonday.getTime()) < 86400000;
+      const todayBtn = document.getElementById('dash-shift-btn-today');
+      if (todayBtn) {
+        if (isCurrentWeek) todayBtn.classList.add('hidden');
+        else todayBtn.classList.remove('hidden');
+      }
+
+      // Tìm tổ Sân Golf
+      const golfTeam = (weekInfo.teams || []).find(t => t.name.toLowerCase().includes('sân golf'));
+      const staffList = golfTeam ? golfTeam.staff : [];
+
+      // Xác định nhân sự đang xem
+      const currentAuth = repo.getCurrentEmployee();
+      const activeEmpName = (window._dashSelectedEmpName || currentAuth.fullName || '').trim();
+
+      // Populate dropdown nhân viên trên Dashboard
+      const empSelect = document.getElementById('dash-shift-employee-select');
+      if (empSelect && staffList.length > 0) {
+        empSelect.innerHTML = staffList.map(s => {
+          const selected = s.name === activeEmpName ? 'selected' : '';
+          return `<option value="${s.name}" ${selected}>${s.name}</option>`;
+        }).join('');
+      }
+
+      // Tìm nhân viên trong danh sách Sân Golf
+      let member = staffList.find(s => {
+        const cleanA = s.name.toLowerCase().replace(/\(.*?\)/g, '').trim();
+        const cleanB = activeEmpName.toLowerCase().replace(/\(.*?\)/g, '').trim();
+        return cleanA === cleanB || cleanA.includes(cleanB) || cleanB.includes(cleanA);
+      });
+
+      if (!member && staffList.length > 0) {
+        member = staffList.find(s => !s.name.toLowerCase().includes('nghỉ việc')) || staffList[0];
+      }
+
+      // Ngày hôm nay (0 = T2, 1 = T3, ..., 6 = CN)
+      const now = new Date();
+      const todayDayIdx = (now.getDay() + 6) % 7;
+      const dayNames = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'];
+      const todayLabelEl = document.getElementById('dash-today-label');
+      if (todayLabelEl) {
+        todayLabelEl.innerText = `${dayNames[todayDayIdx]} ${now.getDate()}/${now.getMonth() + 1}`;
+      }
+
+      // Render Personal Shift Card
+      const personalCard = document.getElementById('dash-personal-shift-card');
+      if (personalCard) {
+        if (member) {
+          const shifts = member.shifts || [];
+          const todayC1 = shifts[todayDayIdx * 3] || '';
+          const todayC2 = shifts[todayDayIdx * 3 + 1] || '';
+          const todayC3 = shifts[todayDayIdx * 3 + 2] || '';
+          const shiftInfo = resolveShiftDisplay(todayC1, todayC2, todayC3);
+
+          personalCard.innerHTML = `
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <div class="flex items-center space-x-2.5">
+                <div class="w-10 h-10 rounded-xl bg-slate-900 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-xs">
+                  ${generateCleanInitials(member.name)}
+                </div>
+                <div>
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <h4 class="font-extrabold text-sm text-slate-900">${member.name}</h4>
+                    <span class="text-[10px] px-1.5 py-0.2 rounded-md font-bold bg-slate-200 text-slate-700">Tổ Sân Golf</span>
+                  </div>
+                  <p class="text-xs text-slate-500 font-medium">Hôm nay (${dayNames[todayDayIdx]}):</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <div class="px-3 py-1.5 rounded-xl border ${shiftInfo.colorClass} shadow-2xs text-right">
+                  <div class="text-xs font-black leading-tight">${shiftInfo.title}</div>
+                  ${shiftInfo.hours ? `<div class="text-[10px] font-semibold opacity-90">${shiftInfo.hours}</div>` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        } else {
+          personalCard.innerHTML = `
+            <div class="text-center py-2 text-xs text-slate-500">
+              Chưa có dữ liệu phân ca cho tuần này. Bấm <button onclick="GolfRootSheetLoader.fetchLive(true)" class="font-bold text-indigo-600 underline">Đồng bộ từ Google Sheet</button>.
+            </div>
+          `;
+        }
+      }
+
+      // Render 7-Day Strip
+      const daysStrip = document.getElementById('dash-week-days-strip');
+      if (daysStrip) {
+        daysStrip.innerHTML = '';
+        const dayAbbrs = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+        const weekDays = [];
+        for (let i = 0; i < 7; i++) {
+          const d = new Date(monday);
+          d.setDate(monday.getDate() + i);
+          weekDays.push(d);
+        }
+
+        dayAbbrs.forEach((abbr, idx) => {
+          const d = weekDays[idx];
+          const isToday = isCurrentWeek && idx === todayDayIdx;
+          let c1 = '', c2 = '', c3 = '';
+          if (member && member.shifts) {
+            c1 = member.shifts[idx * 3] || '';
+            c2 = member.shifts[idx * 3 + 1] || '';
+            c3 = member.shifts[idx * 3 + 2] || '';
+          }
+          const sInfo = resolveShiftDisplay(c1, c2, c3);
+
+          const dayCol = document.createElement('div');
+          dayCol.className = `p-1.5 rounded-xl border flex flex-col items-center justify-between min-h-[64px] transition ${
+            isToday ? 'bg-indigo-50 border-indigo-300 ring-2 ring-indigo-400 font-bold' : 'bg-white border-slate-200'
+          }`;
+          dayCol.innerHTML = `
+            <span class="text-[10px] text-slate-500 font-semibold">${abbr}</span>
+            <span class="text-[9px] text-slate-400 font-medium">${d.getDate()}/${d.getMonth() + 1}</span>
+            <span class="px-1 py-0.5 rounded text-[10px] font-black w-full text-center mt-1 truncate ${sInfo.colorClass}">
+              ${sInfo.code}
+            </span>
+          `;
+          daysStrip.appendChild(dayCol);
+        });
+      }
+
+      // Render Today's Team Duty Overview
+      const teamRosterEl = document.getElementById('dash-today-team-roster');
+      if (teamRosterEl) {
+        teamRosterEl.innerHTML = '';
+        if (staffList.length > 0) {
+          const ca1Staff = [];
+          const ca2Staff = [];
+          const ca3Staff = [];
+          const txStaff = [];
+          const offStaff = [];
+
+          staffList.forEach(st => {
+            const shifts = st.shifts || [];
+            const c1 = shifts[todayDayIdx * 3] || '';
+            const c2 = shifts[todayDayIdx * 3 + 1] || '';
+            const c3 = shifts[todayDayIdx * 3 + 2] || '';
+
+            if (c1.toLowerCase() === 'x') ca1Staff.push(st.name);
+            if (c2.toLowerCase() === 'x') ca2Staff.push(st.name);
+            if (c3.toLowerCase() === 'x') ca3Staff.push(st.name);
+            if (c1.toLowerCase() === 'tx' || c2.toLowerCase() === 'tx' || c3.toLowerCase() === 'tx') txStaff.push(st.name);
+            if ([c1, c2, c3].some(v => ['CN', 'P', 'KL'].includes(v.toUpperCase()))) {
+              const code = [c1, c2, c3].find(v => ['CN', 'P', 'KL'].includes(v.toUpperCase()));
+              offStaff.push(`${st.name} (${code})`);
+            }
+          });
+
+          teamRosterEl.innerHTML = `
+            <div class="p-2 rounded-lg bg-amber-50/70 border border-amber-200">
+              <div class="text-[10px] font-bold text-amber-800 uppercase flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                <span>Ca 1 (06h–14h)</span>
+              </div>
+              <div class="text-xs font-bold text-slate-800 mt-0.5 truncate">
+                ${ca1Staff.length > 0 ? ca1Staff.join(', ') : '<span class="text-slate-400 font-normal">Trống</span>'}
+              </div>
+            </div>
+
+            <div class="p-2 rounded-lg bg-indigo-50/70 border border-indigo-200">
+              <div class="text-[10px] font-bold text-indigo-800 uppercase flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                <span>Ca 2 (14h–22h)</span>
+              </div>
+              <div class="text-xs font-bold text-slate-800 mt-0.5 truncate">
+                ${ca2Staff.length > 0 ? ca2Staff.join(', ') : '<span class="text-slate-400 font-normal">Trống</span>'}
+              </div>
+            </div>
+
+            <div class="p-2 rounded-lg bg-slate-100 border border-slate-300">
+              <div class="text-[10px] font-bold text-slate-700 uppercase flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-slate-900"></span>
+                <span>Ca 3 (22h–06h)</span>
+              </div>
+              <div class="text-xs font-bold text-slate-800 mt-0.5 truncate">
+                ${ca3Staff.length > 0 ? ca3Staff.join(', ') : '<span class="text-slate-400 font-normal">Trống</span>'}
+              </div>
+            </div>
+
+            ${txStaff.length > 0 ? `
+              <div class="col-span-full p-2 rounded-lg bg-cyan-50/80 border border-cyan-200 flex items-center justify-between text-xs">
+                <span class="font-bold text-cyan-950 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-cyan-500"></span>
+                  <span>Công trường Thanh Xuân (tx):</span>
+                </span>
+                <span class="font-extrabold text-cyan-900">${txStaff.join(', ')}</span>
+              </div>
+            ` : ''}
+
+            ${offStaff.length > 0 ? `
+              <div class="col-span-full text-[11px] text-slate-500 flex items-center gap-1 px-1">
+                <span class="font-semibold text-slate-600">Nghỉ hôm nay:</span>
+                <span>${offStaff.join(', ')}</span>
+              </div>
+            ` : ''}
+          `;
+        }
+      }
+
+      const empLabel = document.getElementById('dash-shift-employee-selector-label');
+      if (empLabel && member) {
+        empLabel.innerText = member.name;
+      }
+
+      lucide.createIcons();
+    }
+
+    function navigateDashShiftWeek(delta) {
+      if (!GolfRootSheetLoader.viewingMonday) {
+        GolfRootSheetLoader.viewingMonday = getNormalizedMonday(new Date());
+      }
+      GolfRootSheetLoader.viewingMonday.setDate(GolfRootSheetLoader.viewingMonday.getDate() + delta * 7);
+      renderDashboardShiftWidget();
+    }
+
+    function jumpDashShiftToCurrentWeek() {
+      GolfRootSheetLoader.viewingMonday = getNormalizedMonday(new Date());
+      renderDashboardShiftWidget();
+    }
+
+    function handleDashShiftEmployeeChange(empName) {
+      window._dashSelectedEmpName = empName;
+      renderDashboardShiftWidget();
+    }
+
+    function handleScheduleTeamChange(teamVal) {
+      GolfRootSheetLoader.selectedTeam = teamVal;
+      renderGolfScheduleMatrix();
+    }
+
     function openShiftScheduleModal() {
-      scheduleViewingMonday = getMonday(new Date(repo.currentDate || getTodayIsoDate()));
+      scheduleViewingMonday = GolfRootSheetLoader.viewingMonday 
+        ? new Date(GolfRootSheetLoader.viewingMonday) 
+        : getNormalizedMonday(new Date(repo.currentDate || getTodayIsoDate()));
+
+      const teamFilter = document.getElementById('schedule-team-filter');
+      if (teamFilter && GolfRootSheetLoader.selectedTeam) {
+        teamFilter.value = GolfRootSheetLoader.selectedTeam;
+      }
+
       renderGolfScheduleMatrix();
       document.getElementById('modal-shift-schedule').classList.remove('hidden');
       document.getElementById('modal-shift-schedule').classList.add('flex');
@@ -6495,16 +7312,20 @@ const repo = new AppRepository();
     }
 
     function jumpToCurrentWeek() {
-      scheduleViewingMonday = getMonday(new Date());
+      scheduleViewingMonday = getNormalizedMonday(new Date());
       renderGolfScheduleMatrix();
     }
 
     function renderGolfScheduleMatrix() {
       const monday = new Date(scheduleViewingMonday);
-      const weekNum = getIsoWeekNumber(monday);
+      const weekInfo = GolfRootSheetLoader.getWeekInfo(monday);
+      const weekNum = weekInfo.weekNum || getIsoWeekNumber(monday);
       const weekKey = `${monday.getFullYear()}_W${weekNum}`;
 
-      // 7 Ngày trong tuần
+      document.getElementById('header-week-num').innerText = weekNum;
+      document.getElementById('header-start-date').innerText = weekInfo.from || '';
+      document.getElementById('header-end-date').innerText = weekInfo.to || '';
+
       const weekDays = [];
       for (let i = 0; i < 7; i++) {
         const d = new Date(monday);
@@ -6512,31 +7333,37 @@ const repo = new AppRepository();
         weekDays.push(d);
       }
 
-      const startDateStr = `${weekDays[0].getDate()}/${weekDays[0].getMonth() + 1}/${weekDays[0].getFullYear()}`;
-      const endDateStr = `${weekDays[6].getDate()}/${weekDays[6].getMonth() + 1}/${weekDays[6].getFullYear()}`;
-
-      document.getElementById('header-week-num').innerText = weekNum;
-      document.getElementById('header-start-date').innerText = startDateStr;
-      document.getElementById('header-end-date').innerText = endDateStr;
-
-      // Render Days Header Row (Thứ Hai 17/ 8 ... Chủ Nhật 23/ 8)
+      const todayIso = getTodayIsoDate();
       const dayNames = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'];
+
+      // Days Header Row
       const daysHeaderRow = document.getElementById('schedule-days-header-row');
       daysHeaderRow.innerHTML = `
         <th class="w-8 py-1.5 text-center font-bold">STT</th>
         <th class="w-52 py-1.5 text-center font-extrabold">HỌ & TÊN</th>
         ${weekDays.map((d, idx) => {
           const isSun = idx === 6;
-          const dayLabel = `${dayNames[idx]} ${d.getDate()}/ ${d.getMonth() + 1}`;
-          return `<th colspan="3" class="text-center py-1.5 font-extrabold day-border-right ${isSun ? 'text-rose-600 bg-rose-50/70' : 'text-slate-800'}">${dayLabel}</th>`;
+          const dIso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+          const isToday = dIso === todayIso;
+          const dayLabel = weekInfo.dayLabels[idx] || `${dayNames[idx]} ${d.getDate()}/ ${d.getMonth() + 1}`;
+          let thClass = 'text-center py-1.5 font-extrabold day-border-right ';
+          if (isToday) {
+            thClass += 'bg-indigo-100 text-indigo-950 ring-2 ring-indigo-400';
+          } else if (isSun) {
+            thClass += 'text-rose-600 bg-rose-50/70';
+          } else {
+            thClass += 'text-slate-800';
+          }
+          return `<th colspan="3" class="${thClass}">${dayLabel} ${isToday ? '<span class="text-[9px] bg-indigo-600 text-white px-1 py-0.2 rounded font-bold ml-1">Hôm nay</span>' : ''}</th>`;
         }).join('')}
       `;
 
-      // Render Shifts Header Row (Ca.1, Ca.2, Ca.3 x 7)
+      // Shifts Header Row
       const shiftsHeaderRow = document.getElementById('schedule-shifts-header-row');
+      const activeTeamName = GolfRootSheetLoader.selectedTeam || 'Tổ cơ điện Sân Golf';
       let shiftsHeaderHtml = `
         <th class="w-8"></th>
-        <th class="w-52 text-left pl-3 text-slate-900 font-extrabold italic">Tổ cơ điện Sân Golf</th>
+        <th class="w-52 text-left pl-3 text-slate-900 font-extrabold italic truncate">${activeTeamName === 'ALL' ? '🏢 Toàn bộ các tổ' : activeTeamName}</th>
       `;
       for (let i = 0; i < 7; i++) {
         shiftsHeaderHtml += `
@@ -6551,64 +7378,151 @@ const repo = new AppRepository();
       const tbody = document.getElementById('schedule-matrix-tbody');
       tbody.innerHTML = '';
 
-      const staffList = repo.employees.filter(e => e.id !== 'ADMIN01' && e.status !== 'inactive');
-      const roster = repo.getRosterForWeek(weekKey);
-
-      // Mảng đếm tổng số "x" cho 21 cột (7 ngày x 3 ca)
       const columnSums = new Array(21).fill(0);
 
-      staffList.forEach((emp, staffIdx) => {
-        const tr = document.createElement('tr');
-        tr.className = 'h-10 hover:bg-slate-50/80 transition-colors';
+      let teamsToRender = [];
+      if (weekInfo.teams && weekInfo.teams.length > 0) {
+        if (activeTeamName === 'ALL') {
+          teamsToRender = weekInfo.teams;
+        } else {
+          const t = weekInfo.teams.find(tm => tm.name.toLowerCase().includes(activeTeamName.toLowerCase()));
+          if (t) teamsToRender = [t];
+          else teamsToRender = weekInfo.teams;
+        }
+      }
 
-        let cellsHtml = `
-          <td class="text-center font-bold text-slate-500 bg-white">${staffIdx + 1}</td>
-          <td class="text-left pl-2.5 font-bold text-slate-900 truncate bg-white" title="${emp.fullName}">
-            ${emp.fullName} ${emp.role === 'Thử việc' ? '<span class="text-[10px] text-slate-400 font-normal">(thử việc)</span>' : ''}
-          </td>
-        `;
+      const currentEmp = repo.getCurrentEmployee();
+      const currentEmpNameClean = (currentEmp.fullName || '').toLowerCase().replace(/\(.*?\)/g, '').trim();
 
-        for (let d = 0; d < 7; d++) {
-          for (let c = 1; c <= 3; c++) {
-            const colIndex = d * 3 + (c - 1);
-            const cellKey = `d${d}_c${c}`;
-            const val = roster[emp.id]?.[cellKey] || '';
-            const isLastShiftOfDay = (c === 3);
-
-            if (val === 'x') columnSums[colIndex]++;
-
-            let cellClass = 'roster-cell cursor-pointer text-center text-xs transition select-none';
-            if (isLastShiftOfDay) cellClass += ' day-border-right';
-
-            if (val === 'x') cellClass += ' bg-slate-900 text-white font-bold rounded-xs';
-            else if (val === 'hc' || val === 'HC') cellClass += ' bg-slate-200 text-slate-800 font-semibold';
-            else if (val === 'TX') cellClass += ' bg-blue-700 text-white font-extrabold rounded-xs';
-            else if (val === 'tx') cellClass += ' bg-cyan-100 text-cyan-950 font-extrabold';
-            else if (val === 'CN') cellClass += ' bg-slate-300 text-slate-900 font-bold';
-            else if (val === 'P') cellClass += ' font-extrabold text-slate-700 bg-amber-50';
-
-            cellsHtml += `
-              <td class="${cellClass}" onclick="openCellStatusPicker(event, '${weekKey}', '${emp.id}', '${cellKey}', '${val}')" title="${emp.fullName} - ${dayNames[d]} Ca ${c}: ${val || 'Trống'}">
-                ${val}
+      if (teamsToRender.length > 0) {
+        teamsToRender.forEach(team => {
+          if (activeTeamName === 'ALL' || teamsToRender.length > 1) {
+            const teamTr = document.createElement('tr');
+            teamTr.className = 'bg-slate-100 font-extrabold text-slate-800 text-left';
+            teamTr.innerHTML = `
+              <td colspan="23" class="py-1.5 px-3 uppercase tracking-wider text-xs bg-slate-200 text-slate-900 font-black border-y border-slate-300">
+                🏢 ${team.name} (${team.staff.length} nhân sự)
               </td>
             `;
+            tbody.appendChild(teamTr);
           }
-        }
 
-        tr.innerHTML = cellsHtml;
-        tbody.appendChild(tr);
-      });
+          team.staff.forEach((member, staffIdx) => {
+            const tr = document.createElement('tr');
+            const memberClean = member.name.toLowerCase().replace(/\(.*?\)/g, '').trim();
+            const isCurrentEmp = memberClean && (currentEmpNameClean === memberClean || currentEmpNameClean.includes(memberClean) || memberClean.includes(currentEmpNameClean));
+            tr.className = `h-10 hover:bg-slate-50/80 transition-colors ${isCurrentEmp ? 'bg-indigo-50/40 ring-1 ring-indigo-300' : ''}`;
 
-      // Render Summary Footer Row (Trực điện nước)
+            let cellsHtml = `
+              <td class="text-center font-bold text-slate-500 ${isCurrentEmp ? 'bg-indigo-100 text-indigo-900' : 'bg-white'}">${member.stt || (staffIdx + 1)}</td>
+              <td class="text-left pl-2.5 font-bold ${isCurrentEmp ? 'bg-indigo-50 text-indigo-950 font-black' : 'text-slate-900 bg-white'} truncate" title="${member.name}">
+                ${member.name} ${isCurrentEmp ? '<span class="text-[9px] bg-indigo-600 text-white px-1.5 py-0.5 rounded font-bold ml-1">Bạn</span>' : ''}
+              </td>
+            `;
+
+            for (let colIdx = 0; colIdx < 21; colIdx++) {
+              const val = member.shifts[colIdx] || '';
+              const dayIdx = Math.floor(colIdx / 3);
+              const shiftNum = (colIdx % 3) + 1;
+              const isLastShiftOfDay = (shiftNum === 3);
+
+              if (val && val.toLowerCase() === 'x') columnSums[colIdx]++;
+
+              let cellClass = 'roster-cell cursor-pointer text-center text-xs transition select-none';
+              if (isLastShiftOfDay) cellClass += ' day-border-right';
+
+              const vLower = val.toLowerCase().trim();
+              if (vLower === 'x') {
+                cellClass += ' bg-slate-900 text-white font-bold rounded-xs';
+              } else if (vLower === 'tx') {
+                cellClass += ' bg-cyan-100 text-cyan-950 font-extrabold';
+              } else if (vLower === 'hc') {
+                cellClass += ' bg-blue-100 text-blue-900 font-bold';
+              } else if (val.toUpperCase().trim() === 'HB') {
+                cellClass += ' bg-amber-100 text-amber-950 font-bold';
+              } else if (val.toUpperCase().trim() === 'CN') {
+                cellClass += ' bg-yellow-200 text-yellow-950 font-bold';
+              } else if (val.toUpperCase().trim() === 'P') {
+                cellClass += ' bg-rose-100 text-rose-900 font-bold';
+              } else if (val.toUpperCase().trim() === 'KL') {
+                cellClass += ' bg-purple-100 text-purple-900 font-bold';
+              } else if (val.toUpperCase().trim() === 'N' || vLower.includes('nghỉ việc')) {
+                cellClass += ' bg-red-100 text-red-900 font-bold';
+              } else if (val) {
+                cellClass += ' bg-slate-100 text-slate-800 font-medium';
+              }
+
+              cellsHtml += `
+                <td class="${cellClass}" title="${member.name} - ${dayNames[dayIdx]} Ca ${shiftNum}: ${val || 'Trống'}">
+                  ${val}
+                </td>
+              `;
+            }
+
+            tr.innerHTML = cellsHtml;
+            tbody.appendChild(tr);
+          });
+
+          if (team.summaryRows && team.summaryRows.length > 0) {
+            team.summaryRows.forEach(sRow => {
+              const sTr = document.createElement('tr');
+              sTr.className = 'bg-slate-100/60 font-semibold text-xs text-slate-700';
+              let sHtml = `
+                <td colspan="2" class="text-left pl-3 font-bold border-r border-slate-300 py-1 bg-slate-100 truncate">${sRow.label}</td>
+              `;
+              for (let colIdx = 0; colIdx < 21; colIdx++) {
+                const isDayEnd = ((colIdx + 1) % 3 === 0);
+                const val = sRow.cells[colIdx] || '';
+                sHtml += `<td class="text-center font-bold text-slate-800 py-1 ${isDayEnd ? 'day-border-right' : ''}">${val}</td>`;
+              }
+              sTr.innerHTML = sHtml;
+              tbody.appendChild(sTr);
+            });
+          }
+        });
+      } else {
+        const staffList = repo.employees.filter(e => e.id !== 'ADMIN01' && e.status !== 'inactive');
+        const roster = repo.getRosterForWeek(weekKey);
+        staffList.forEach((emp, staffIdx) => {
+          const tr = document.createElement('tr');
+          tr.className = 'h-10 hover:bg-slate-50/80 transition-colors';
+          let cellsHtml = `
+            <td class="text-center font-bold text-slate-500 bg-white">${staffIdx + 1}</td>
+            <td class="text-left pl-2.5 font-bold text-slate-900 truncate bg-white" title="${emp.fullName}">${emp.fullName}</td>
+          `;
+          for (let d = 0; d < 7; d++) {
+            for (let c = 1; c <= 3; c++) {
+              const colIndex = d * 3 + (c - 1);
+              const cellKey = `d${d}_c${c}`;
+              const val = roster[emp.id]?.[cellKey] || '';
+              if (val === 'x') columnSums[colIndex]++;
+              const isLastShiftOfDay = (c === 3);
+              let cellClass = 'roster-cell text-center text-xs select-none';
+              if (isLastShiftOfDay) cellClass += ' day-border-right';
+              if (val === 'x') cellClass += ' bg-slate-900 text-white font-bold rounded-xs';
+              else if (val === 'hc') cellClass += ' bg-blue-100 text-blue-900 font-bold';
+              else if (val === 'tx' || val === 'TX') cellClass += ' bg-cyan-100 text-cyan-950 font-extrabold';
+              else if (val === 'CN') cellClass += ' bg-yellow-200 text-yellow-950 font-bold';
+              else if (val === 'P') cellClass += ' bg-rose-100 text-rose-900 font-bold';
+
+              cellsHtml += `<td class="${cellClass}">${val}</td>`;
+            }
+          }
+          tr.innerHTML = cellsHtml;
+          tbody.appendChild(tr);
+        });
+      }
+
+      // Summary Row (Footer)
       const summaryRow = document.getElementById('schedule-summary-row');
       let summaryHtml = `
         <td colspan="2" class="text-center font-extrabold border-r border-slate-300 py-1.5 text-slate-900 bg-slate-100">
-          Trực điện nước
+          Tổng trực ca (x)
         </td>
       `;
       columnSums.forEach((count, idx) => {
         const isDayEnd = ((idx + 1) % 3 === 0);
-        summaryHtml += `<td class="text-center font-extrabold text-slate-900 py-1.5 ${isDayEnd ? 'day-border-right' : ''}">${count}</td>`;
+        summaryHtml += `<td class="text-center font-extrabold text-slate-900 py-1.5 ${isDayEnd ? 'day-border-right' : ''}">${count || ''}</td>`;
       });
       summaryRow.innerHTML = summaryHtml;
 
