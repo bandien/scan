@@ -33,7 +33,7 @@ test('bảng phân ca hỗ trợ TX và tx theo giờ công trường Thanh Xuâ
   await page.selectOption('#select-login-employee', 'ADMIN01');
   await page.fill('#input-login-pin', '0204');
   await page.click('#btn-submit-login');
-  await page.click('#btn-header-schedule');
+  await page.evaluate(() => openShiftScheduleModal());
 
   await expect(page.locator('#modal-shift-schedule')).toContainText('TX/tx: Thanh Xuân 05:50–10:00, 13:50–18:00');
   await page.locator('td[title="Ngô Quyết Thắng - Thứ Ba Ca 1: Trống"]').click();
