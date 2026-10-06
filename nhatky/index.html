@@ -262,6 +262,12 @@
         </button>
 
         <!-- Shift Schedule Matrix Button -->
+        <!-- Quick Actions / Apps Menu Button -->
+        <button id="btn-header-quick-menu" onclick="openQuickActionsMenu()" aria-label="Mở Menu Tiện Ích & Phím Tắt" title="Menu Tiện Ích & Phím Tắt" class="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg cursor-pointer transition text-xs font-bold text-indigo-700 flex items-center gap-1.5 active:scale-95 shadow-2xs">
+          <i data-lucide="layout-grid" class="w-3.5 h-3.5 text-indigo-600"></i>
+          <span class="hidden sm:inline">Tiện Ích</span>
+        </button>
+
         <button id="btn-header-schedule" onclick="openShiftScheduleModal()" aria-label="Xem bảng phân ca trực" class="px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg cursor-pointer transition text-xs font-medium text-gray-700 flex items-center gap-1.5">
           <i data-lucide="calendar" class="w-3.5 h-3.5 text-gray-500"></i>
           <span class="hidden sm:inline">Phân Ca</span>
@@ -286,237 +292,68 @@
       <!-- ============================================================== -->
       <!-- TAB 0: BÀN LÀM VIỆC DASHBOARD NHÂN VIÊN (#tab-dashboard) -->
       <!-- ============================================================== -->
-      <section id="tab-dashboard" class="space-y-4">
-        <section class="bg-white rounded-xl border border-gray-200 p-4 space-y-3" aria-labelledby="timer-heading">
-          <div class="flex items-center justify-between gap-3">
-            <h2 id="timer-heading" class="text-sm font-bold">Thông số hẹn giờ bật/tắt</h2>
-            <button type="button" onclick="openDeviceTimer()" class="px-3 py-2 rounded-lg bg-gray-900 text-white text-xs font-semibold">Thêm hẹn giờ</button>
-          </div>
-          <p class="text-xs text-gray-500">Lưu trên trình duyệt này. Bảng ghi nhận thông số cài đặt, không tự điều khiển thiết bị. Giờ tắt trước giờ bật được hiểu là ngày kế tiếp.</p>
-          <div class="space-y-3 border rounded-lg p-3">
-            <div id="public-timer-source" class="space-y-1">
-              <h3 class="text-sm font-semibold">Danh sách lộ điện hẹn giờ công cộng</h3>
-              <p class="text-xs text-gray-600">Nguồn: <a class="underline text-blue-700" href="https://docs.google.com/spreadsheets/d/1d_dbPMeToPfP86rRJVoB_BF15J4xh912jVfcjcagxXs/edit?gid=745357933#gid=745357933" target="_blank" rel="noopener noreferrer">DS hẹn giờ công cộng · DS.01.BD</a> · Ngày cập nhật nguồn: 27/09/2026.</p>
-              <p class="text-xs text-gray-500">Bản tra cứu đã nhập từ Google Sheets, chưa tự đồng bộ. Giữ lịch tiết giảm, mùa hè và mùa đông theo nguồn. Dấu “—” là ô nguồn chưa ghi; 00:00 là nửa đêm. Cuộn bảng để xem đầy đủ.</p>
-            </div>
-            <details class="text-xs text-gray-600"><summary class="cursor-pointer font-semibold">Quy trình kiểm tra hàng tuần</summary><p id="public-timer-procedure" class="mt-2 whitespace-pre-wrap"></p></details>
-            <div class="overflow-auto border rounded-lg custom-scrollbar" style="max-height: 430px" tabindex="0" role="region" aria-label="Bảng hẹn giờ công cộng, cuộn để xem các khu vực">
-              <table id="public-timer-table" class="text-xs">
-                <caption class="sr-only">Danh sách lộ điện hẹn giờ công cộng từ Google Sheets, vùng A6:L341</caption>
-                <colgroup><col style="width: 45px"><col style="width: 250px"><col span="8" style="width: 75px"><col style="width: 85px"><col style="width: 330px"></colgroup>
-                <thead><tr><th rowspan="2" scope="col">STT</th><th rowspan="2" scope="col">Thiết bị/khu vực</th><th colspan="4" scope="colgroup">Tiết giảm</th><th colspan="2" scope="colgroup">Mùa hè<br>01/04–30/09</th><th colspan="2" scope="colgroup">Mùa đông<br>01/10–31/03</th><th rowspan="2" scope="col">Ngày</th><th rowspan="2" scope="col">Cách thức, vị trí thực hiện</th></tr><tr><th scope="col">Bật</th><th scope="col">Tắt</th><th scope="col">Bật</th><th scope="col">Tắt</th><th scope="col">Bật</th><th scope="col">Tắt</th><th scope="col">Bật</th><th scope="col">Tắt</th></tr></thead>
-                <tbody id="public-timer-rows"></tbody>
-              </table>
-            </div>
-          </div>
-          <div class="space-y-3 border rounded-lg p-3">
-            <div id="office-timer-source" class="space-y-1">
-              <h3 class="text-sm font-semibold">Danh sách hẹn giờ đóng/ngắt điện văn phòng</h3>
-              <p class="text-xs text-gray-600">Nguồn: <a class="underline text-blue-700" href="https://docs.google.com/spreadsheets/d/1d_dbPMeToPfP86rRJVoB_BF15J4xh912jVfcjcagxXs/edit?gid=1507714426#gid=1507714426" target="_blank" rel="noopener noreferrer">6.DS giờ đóng ngắt điện văn phòng · DS.02.BD</a>.</p>
-              <p class="text-xs text-gray-500">Giờ chiếu sáng và điều hòa theo từng đơn vị, tách thứ 2–6, thứ 7 và chủ nhật. Bản tra cứu tĩnh từ nguồn; dấu “—” là ô chưa ghi. Các ghi chú và trường hợp đặc biệt được giữ nguyên.</p>
-              <p class="text-xs text-gray-600">Quy định tại nguồn: theo giờ làm việc trước 30 phút, sau 60 phút; CSCC + WC theo văn phòng. Cập nhật danh sách mỗi khi có thay đổi.</p>
-            </div>
-            <div class="overflow-auto border rounded-lg custom-scrollbar" style="max-height: 430px" tabindex="0" role="region" aria-label="Bảng hẹn giờ văn phòng, cuộn để xem các đơn vị">
-              <table id="office-timer-table" class="text-xs">
-                <caption class="sr-only">Lịch đóng ngắt điện văn phòng và ghi chú theo Google Sheets</caption>
-                <colgroup><col style="width: 60px"><col span="2" style="width: 65px"><col style="width: 250px"><col style="width: 140px"><col style="width: 80px"><col span="10" style="width: 85px"><col style="width: 300px"><col style="width: 75px"></colgroup>
-                <thead>
-                  <tr><th rowspan="3" scope="col">STT</th><th rowspan="3" scope="col">Tòa</th><th rowspan="3" scope="col">Tầng</th><th rowspan="3" scope="col">Khách hàng</th><th rowspan="3" scope="col">Mã</th><th rowspan="3" scope="col">Diện tích (m²)</th><th colspan="4" scope="colgroup">Thứ 2–6</th><th colspan="4" scope="colgroup">Thứ 7</th><th colspan="2" scope="colgroup">Chủ nhật</th><th rowspan="3" scope="col">Ghi chú</th><th rowspan="3" scope="col">Số lượng pin</th></tr>
-                  <tr><th colspan="2" scope="colgroup">Đóng</th><th colspan="2" scope="colgroup">Ngắt</th><th colspan="2" scope="colgroup">Đóng</th><th colspan="2" scope="colgroup">Ngắt</th><th rowspan="2" scope="col">Đóng CS, ĐH</th><th rowspan="2" scope="col">Ngắt CS, ĐH</th></tr>
-                  <tr><th scope="col">Chiếu sáng</th><th scope="col">Điều hòa</th><th scope="col">Chiếu sáng</th><th scope="col">Điều hòa</th><th scope="col">Chiếu sáng</th><th scope="col">Điều hòa</th><th scope="col">Chiếu sáng</th><th scope="col">Điều hòa</th></tr>
-                </thead>
-                <tbody id="office-timer-rows"></tbody>
-              </table>
-            </div>
-          </div>
-          <h3 class="text-xs font-semibold text-gray-600">Thông số bổ sung trên trình duyệt</h3>
-          <p id="timer-error" role="alert" class="text-xs text-rose-700"></p>
-          <form id="timer-form" hidden onsubmit="saveDeviceTimer(event)" class="border rounded-lg p-3 space-y-3">
-            <input id="timer-id" type="hidden">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
-              <label class="space-y-1">Thiết bị/khu vực<input id="timer-device" required maxlength="160" class="block w-full border rounded-lg p-2" placeholder="VD: Đèn sân tập – Tủ số 1"></label>
-              <label class="space-y-1">Chế độ<select id="timer-mode" onchange="updateDeviceTimerMode()" class="block w-full border rounded-lg p-2"><option>Tự động</option><option>Bật thủ công</option><option>Tắt thủ công</option></select></label>
-              <label class="space-y-1">Ngày áp dụng<input id="timer-date" type="date" required class="block w-full border rounded-lg p-2"></label>
-              <label class="space-y-1">Giờ bật<input id="timer-on" type="time" required class="block w-full border rounded-lg p-2"></label>
-              <label class="space-y-1">Giờ tắt<input id="timer-off" type="time" required class="block w-full border rounded-lg p-2"></label>
-              <label class="space-y-1">Ghi chú<textarea id="timer-notes" maxlength="1000" rows="2" class="block w-full border rounded-lg p-2"></textarea></label>
-            </div>
-            <p class="text-xs text-gray-500">Người cập nhật được ghi tự động theo tài khoản đăng nhập. Chế độ thủ công không bắt buộc nhập giờ.</p>
-            <div class="flex gap-2"><button type="submit" class="px-3 py-2 rounded-lg bg-gray-900 text-white text-xs">Lưu hẹn giờ</button><button type="button" onclick="document.getElementById('timer-form').hidden = true" class="px-3 py-2 border rounded-lg text-xs">Hủy</button></div>
-          </form>
-          <div class="overflow-x-auto">
-            <table class="w-full text-xs text-left" style="min-width: 780px">
-              <caption class="sr-only">Bảng thông số hẹn giờ bật/tắt thiết bị</caption>
-              <thead class="bg-gray-50"><tr><th scope="col" class="p-2">Thiết bị/khu vực</th><th scope="col" class="p-2">Chế độ</th><th scope="col" class="p-2">Giờ bật</th><th scope="col" class="p-2">Giờ tắt</th><th scope="col" class="p-2">Ngày áp dụng</th><th scope="col" class="p-2">Người cập nhật</th><th scope="col" class="p-2">Ghi chú</th><th scope="col" class="p-2">Thao tác</th></tr></thead>
-              <tbody id="timer-rows"></tbody>
-            </table>
-          </div>
-        </section>
-        
-        <!-- SECTION 1: LỐI TẮT THAO TÁC (Frappe Shortcuts) -->
-        <div class="space-y-2">
-          <div class="flex items-center justify-between px-0.5">
-            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Lối Tắt Thao Tác Nhanh (Shortcuts)</h3>
-            <span class="text-[11px] text-gray-400 font-medium">Lịch & Biểu Mẫu Dùng Chung</span>
-          </div>
-
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-            <!-- Shortcut 1: Ghi Lịch -->
-            <button onclick="openQuickCalendarEventModal()" class="p-3.5 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-xs text-left transition flex items-center justify-between group">
-              <div class="flex items-center space-x-2.5 min-w-0">
-                <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-800 flex items-center justify-center shrink-0 border border-gray-200">
-                  <i data-lucide="calendar-plus" class="w-4 h-4"></i>
-                </div>
-                <div class="min-w-0">
-                  <div class="font-semibold text-xs text-gray-900 truncate">Ghi Lịch Google</div>
-                  <div class="text-[10px] text-gray-500 truncate">Nhật ký trực ca</div>
-                </div>
-              </div>
-              <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-700 transition shrink-0 ml-1"></i>
-            </button>
-
-            <!-- Shortcut 2: Form Checklist -->
-            <button onclick="switchTab('checklist'); switchChecklistSopView('forms');" class="p-3.5 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-xs text-left transition flex items-center justify-between group">
-              <div class="flex items-center space-x-2.5 min-w-0">
-                <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-800 flex items-center justify-center shrink-0 border border-gray-200">
-                  <i data-lucide="clipboard-check" class="w-4 h-4"></i>
-                </div>
-                <div class="min-w-0">
-                  <div class="font-semibold text-xs text-gray-900 truncate">Form Checklist</div>
-                  <div class="text-[10px] text-gray-500 truncate">Biểu mẫu sân golf</div>
-                </div>
-              </div>
-              <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-700 transition shrink-0 ml-1"></i>
-            </button>
-
-            <!-- Shortcut 3: Sổ Tay SOP -->
-            <button onclick="switchTab('checklist'); switchChecklistSopView('sop');" class="p-3.5 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-xs text-left transition flex items-center justify-between group">
-              <div class="flex items-center space-x-2.5 min-w-0">
-                <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-800 flex items-center justify-center shrink-0 border border-gray-200">
-                  <i data-lucide="book-open" class="w-4 h-4"></i>
-                </div>
-                <div class="min-w-0">
-                  <div class="font-semibold text-xs text-gray-900 truncate">Sổ Tay Hướng Dẫn</div>
-                  <div class="text-[10px] text-gray-500 truncate">Quy trình SOP</div>
-                </div>
-              </div>
-              <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-700 transition shrink-0 ml-1"></i>
-            </button>
-
-            <!-- Shortcut 4: Phân Ca -->
-            <button onclick="openShiftScheduleModal()" class="p-3.5 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-xs text-left transition flex items-center justify-between group">
-              <div class="flex items-center space-x-2.5 min-w-0">
-                <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-800 flex items-center justify-center shrink-0 border border-gray-200">
-                  <i data-lucide="calendar-range" class="w-4 h-4"></i>
-                </div>
-                <div class="min-w-0">
-                  <div class="font-semibold text-xs text-gray-900 truncate">Bảng Phân Ca</div>
-                  <div class="text-[10px] text-gray-500 truncate">Lịch trực toàn tổ</div>
-                </div>
-              </div>
-              <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-700 transition shrink-0 ml-1"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- SECTION 2: BIỂU MẪU & WEB APP CHỦ CHỐT CA TRỰC -->
-        <div class="space-y-2">
-          <div class="flex items-center justify-between px-0.5">
-            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Biểu Mẫu & Web App Trực Ca</h3>
-            <button onclick="switchTab('checklist')" class="text-xs font-medium text-gray-700 hover:text-black flex items-center gap-1">
-              <span>Xem tất cả biểu mẫu</span>
-              <i data-lucide="arrow-right" class="w-3 h-3"></i>
-            </button>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <!-- Form 1: Checklist ca vận hành -->
-            <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-3">
-              <div class="flex items-start justify-between gap-2">
-                <div class="flex items-center space-x-3">
-                  <div class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center border border-gray-200 text-gray-800 shrink-0">
-                    <i data-lucide="clipboard-check" class="w-4 h-4"></i>
-                  </div>
-                  <div>
-                    <h4 class="font-semibold text-sm text-gray-900">Checklist Ca Vận Hành Sân Golf</h4>
-                    <p class="text-[11px] text-gray-500 mt-0.5">Biểu mẫu chính • Mỗi ca trực</p>
-                  </div>
-                </div>
-              </div>
-              <p class="text-xs text-gray-600 leading-relaxed">Kiểm tra TBA, Trạm Bơm Tăng Áp, Vận Hành Bơm Suối Cun (Không chạy/Tự động/Giờ bật-tắt), PCCC & Bàn Giao Ca.</p>
-              <div class="pt-2 border-t border-gray-100 flex items-center gap-2">
-                <a href="https://forms.gle/7gNBsFcX12ikeNXX9" target="_blank" rel="noopener noreferrer" class="flex-1 py-2 bg-gray-900 hover:bg-black text-white font-medium rounded-lg text-xs flex items-center justify-center gap-1.5 transition">
-                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-                  <span>Điền Form Nhanh</span>
-                </a>
-                <button onclick="openSopDetailByCode('SOP-FORMS-01')" class="px-3 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-lg text-xs font-medium flex items-center gap-1.5 transition" title="Đọc quy trình SOP-FORMS-01">
-                  <i data-lucide="book-open" class="w-3.5 h-3.5 text-gray-500"></i>
-                  <span>Đọc SOP</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Form 2: Chốt công tơ cuối tháng -->
-            <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-3">
-              <div class="flex items-start justify-between gap-2">
-                <div class="flex items-center space-x-3">
-                  <div class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center border border-gray-200 text-gray-800 shrink-0">
-                    <i data-lucide="gauge" class="w-4 h-4"></i>
-                  </div>
-                  <div>
-                    <h4 class="font-semibold text-sm text-gray-900">Chốt Công Tơ Điện Nước Cuối Tháng</h4>
-                    <p class="text-[11px] text-gray-500 mt-0.5">Ứng dụng Web App • Cuối tháng</p>
-                  </div>
-                </div>
-              </div>
-              <p class="text-xs text-gray-600 leading-relaxed">Chốt chỉ số công tơ điện nước tổng và các phụ tải định kỳ cuối tháng, tự động tính sản lượng.</p>
-              <div class="pt-2 border-t border-gray-100 flex items-center gap-2">
-                <a href="https://script.google.com/macros/s/AKfycbxOoWSsDiQ5DpngJrbkKegHYQhs--hcC6u0h3dj24dzH6W3EpK3NG1j5XJvD6HEF5Zh/exec" target="_blank" rel="noopener noreferrer" class="flex-1 py-2 bg-gray-900 hover:bg-black text-white font-medium rounded-lg text-xs flex items-center justify-center gap-1.5 transition">
-                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-                  <span>Mở Web App Chốt Số</span>
-                </a>
-                <button onclick="openSopDetailByCode('SOP-CONGTO-01')" class="px-3 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-lg text-xs font-medium flex items-center gap-1.5 transition" title="Đọc quy trình SOP-CONGTO-01">
-                  <i data-lucide="book-open" class="w-3.5 h-3.5 text-gray-500"></i>
-                  <span>Đọc SOP</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- SECTION 3: KHUNG GOOGLE CALENDAR NHẬT KÝ CA TRỰC DÙNG CHUNG -->
+      <section id="tab-dashboard" class="space-y-3">
+        <!-- KHUNG GOOGLE CALENDAR NHẬT KÝ CA TRỰC CHỦ ĐẠO (ERPNEXT DESK STYLE) -->
         <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-3">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-2.5">
-              <div class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center border border-gray-200 text-gray-800">
+          <!-- Calendar Header -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-100">
+            <div class="flex items-center space-x-3">
+              <div class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center border border-gray-200 text-gray-800 shrink-0">
                 <i data-lucide="calendar" class="w-4 h-4"></i>
               </div>
               <div>
-                <h3 class="font-semibold text-sm text-gray-900">Lịch Nhật Ký Ca Trực Thời Gian Thực (Google Calendar)</h3>
-                <p class="text-xs text-gray-500 font-mono">trucdienhapulico@gmail.com</p>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h2 class="font-semibold text-sm text-gray-900">Lịch Nhật Ký Ca Trực Thời Gian Thực</h2>
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 inline-block"></span>
+                    <span>Google Calendar Live</span>
+                  </span>
+                </div>
+                <p class="text-xs text-gray-500 font-mono mt-0.5">trucdienhapulico@gmail.com</p>
               </div>
             </div>
 
+            <!-- Actions for Calendar -->
             <div class="flex items-center gap-2">
               <button onclick="openQuickCalendarEventModal()" class="px-3 py-1.5 bg-gray-900 hover:bg-black text-white font-medium rounded-lg text-xs transition flex items-center gap-1.5 shadow-xs">
                 <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                <span>Ghi Sự Kiện Lịch</span>
+                <span>Ghi Nhật Ký Ca</span>
               </button>
-              <button onclick="reloadCalendarIframe('dash-calendar-iframe')" class="p-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-200 transition" title="Làm mới lịch">
-                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              <button onclick="reloadCalendarIframe('dash-calendar-iframe')" class="p-1.5 bg-white hover:bg-gray-50 text-gray-700 rounded-lg border border-gray-200 transition" title="Làm mới lịch">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-gray-500"></i>
               </button>
+              <a href="https://calendar.google.com/calendar/r" target="_blank" rel="noopener noreferrer" class="p-1.5 bg-white hover:bg-gray-50 text-gray-700 rounded-lg border border-gray-200 transition" title="Mở trên Google Calendar riêng">
+                <i data-lucide="external-link" class="w-3.5 h-3.5 text-gray-500"></i>
+              </a>
             </div>
           </div>
 
+          <!-- Syntax Guideline Note -->
+          <div class="bg-gray-50 rounded-lg p-2.5 border border-gray-200 text-xs text-gray-600 flex items-center gap-2">
+            <i data-lucide="info" class="w-4 h-4 text-gray-500 shrink-0"></i>
+            <div class="min-w-0 flex-1 truncate sm:whitespace-normal">
+              <span class="font-medium text-gray-900">Quy tắc ghi nhật ký: </span>
+              <span class="font-mono text-gray-700 bg-white px-2 py-0.5 rounded border border-gray-200 text-[11px]">Nội dung công việc / Sự cố - [Số lượng, kết quả đã xong hay chưa] - [NV: Tên]</span>
+            </div>
+          </div>
+
+          <!-- Responsive Embedded Google Calendar -->
           <div class="border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
-            <iframe id="dash-calendar-iframe" src="https://calendar.google.com/calendar/embed?src=trucdienhapulico%40gmail.com&ctz=Asia%2FHo_Chi_Minh&mode=AGENDA" style="border: 0" width="100%" height="360" frameborder="0" scrolling="no" class="w-full"></iframe>
+            <iframe id="dash-calendar-iframe" src="https://calendar.google.com/calendar/embed?src=trucdienhapulico%40gmail.com&ctz=Asia%2FHo_Chi_Minh&mode=AGENDA" style="border: 0" width="100%" height="640" frameborder="0" scrolling="no" class="w-full"></iframe>
+          </div>
+
+          <!-- Bottom subtle helper -->
+          <div class="flex items-center justify-between text-xs text-gray-500 pt-1 px-1">
+            <span>💡 Biểu mẫu checklist, quy trình SOP, kho tạm & hẹn giờ đã được chuyển vào Menu</span>
+            <button onclick="openQuickActionsMenu()" class="text-gray-900 font-medium hover:underline">Mở Menu Tiện Ích</button>
           </div>
         </div>
-
       </section>
 
       <!-- ============================================================== -->
-      <section id="tab-calendar" class="space-y-3.5 hidden">
+      <!-- TAB: LỊCH NHẬT KÝ GOOGLE CALENDAR (#tab-calendar) [ERPNEXT DESK STYLE] -->
+      <!-- ============================================================== -->
+      <section id="tab-calendar" class="space-y-3 hidden">
         <!-- Top Action Header (ERPNext Clean Card) -->
         <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-3">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -535,7 +372,7 @@
                 <i data-lucide="plus" class="w-3.5 h-3.5"></i>
                 <span>Ghi Nhật Ký</span>
               </button>
-              <a href="https://calendar.google.com/calendar/r" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-xs border border-gray-200 transition flex items-center gap-1.5">
+              <a href="https://calendar.google.com/calendar/r" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-lg text-xs border border-gray-200 transition flex items-center gap-1.5">
                 <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
                 <span>Mở Google Calendar</span>
               </a>
@@ -547,25 +384,25 @@
             <i data-lucide="info" class="w-4 h-4 text-gray-500 shrink-0"></i>
             <div>
               <span class="font-medium text-gray-900">Quy tắc ghi nhật ký: </span>
-              <span class="font-mono text-gray-700 bg-white px-2 py-0.5 rounded border border-gray-200">Nội dung công việc / Sự cố - [Số lượng đã thực hiện, kết quả xong hay chưa xong] - [NV: Tên]</span>
+              <span class="font-mono text-gray-700 bg-white px-2 py-0.5 rounded border border-gray-200 text-[11px]">Nội dung công việc / Sự cố - [Số lượng đã thực hiện, kết quả xong hay chưa xong] - [NV: Tên]</span>
             </div>
           </div>
         </div>
 
-        <!-- Responsive Embedded Google Calendar -->
-        <div class="bg-white p-3 sm:p-4 rounded-3xl border border-slate-200 shadow-xs space-y-3">
+        <!-- Embedded Google Calendar Card (ERPNext Clean Card) -->
+        <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-3">
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2 text-xs font-bold text-slate-700">
-              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+            <div class="flex items-center gap-2 text-xs font-semibold text-gray-900">
+              <span class="w-2 h-2 rounded-full bg-emerald-600 inline-block"></span>
               <span>Lịch Vận Hành Trực Tuyến Thời Gian Thực</span>
             </div>
-            <button onclick="reloadCalendarIframe('full-calendar-iframe')" class="text-xs font-bold text-slate-600 hover:text-slate-600 flex items-center gap-1">
-              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            <button onclick="reloadCalendarIframe('full-calendar-iframe')" class="px-2.5 py-1 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-lg text-xs font-medium flex items-center gap-1.5 transition">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-gray-500"></i>
               <span>Làm mới lịch</span>
             </button>
           </div>
 
-          <div class="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50">
+          <div class="border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
             <iframe id="full-calendar-iframe" src="https://calendar.google.com/calendar/embed?src=trucdienhapulico%40gmail.com&ctz=Asia%2FHo_Chi_Minh" style="border: 0" width="100%" height="560" frameborder="0" scrolling="no" class="w-full"></iframe>
           </div>
         </div>
@@ -900,23 +737,23 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- MODAL: GHI NHẬT KÝ GOOGLE CALENDAR NHANH (#modal-quick-calendar-event) -->
+  <!-- MODAL: GHI NHẬT KÝ GOOGLE CALENDAR NHANH (#modal-quick-calendar-event) [ERPNEXT DESK STYLE] -->
   <!-- ========================================== -->
-  <div id="modal-quick-calendar-event" class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200 overflow-y-auto">
-    <div class="bg-white rounded-3xl w-full max-w-md p-5 shadow-2xl space-y-4">
+  <div id="modal-quick-calendar-event" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center z-50 p-3 sm:p-4 transition-all duration-200 overflow-y-auto">
+    <div class="bg-white rounded-xl w-full max-w-md p-4 sm:p-5 shadow-xl border border-gray-200 space-y-4">
       
       <!-- Header -->
-      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+      <div class="flex justify-between items-center border-b border-gray-200 pb-3">
         <div class="flex items-center space-x-2.5">
-          <div class="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
+          <div class="w-8 h-8 rounded-lg bg-gray-100 border border-gray-200 text-gray-800 flex items-center justify-center">
             <i data-lucide="calendar-plus" class="w-4 h-4"></i>
           </div>
           <div>
-            <h3 class="font-extrabold text-slate-900 text-base">Ghi Lịch Google Calendar</h3>
-            <p class="text-xs text-slate-500 font-medium">Lịch: <span class="text-slate-700 font-bold font-mono">trucdienhapulico@gmail.com</span></p>
+            <h3 class="font-semibold text-gray-900 text-sm">Ghi Lịch Google Calendar</h3>
+            <p class="text-xs text-gray-500 font-mono">trucdienhapulico@gmail.com</p>
           </div>
         </div>
-        <button onclick="closeQuickCalendarEventModal()" aria-label="Đóng popup" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">
+        <button onclick="closeQuickCalendarEventModal()" aria-label="Đóng popup" class="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
@@ -925,43 +762,43 @@
       <div class="space-y-3">
         <!-- 1. Content Input -->
         <div>
-          <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">1. Nội dung công việc / Sự cố:</label>
-          <input type="text" id="cal-input-content" placeholder="VD: Kiểm tra TBA, Thay aptomat đèn..." oninput="updateCalTitlePreview()" class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400">
+          <label class="block text-xs font-medium text-gray-700 mb-1">1. Nội dung công việc / Sự cố:</label>
+          <input type="text" id="cal-input-content" placeholder="VD: Kiểm tra TBA, Thay aptomat đèn..." oninput="updateCalTitlePreview()" class="w-full px-3 py-2 bg-white rounded-lg border border-gray-300 text-xs font-normal text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900">
         </div>
 
-        <!-- 3. Result Input + Quick Tag Pills -->
+        <!-- 2. Result Input + Quick Tag Pills -->
         <div>
           <div class="flex justify-between items-center mb-1">
-            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">2. Kết quả thực hiện:</label>
+            <label class="block text-xs font-medium text-gray-700">2. Kết quả thực hiện:</label>
             <div class="flex gap-1">
-              <button type="button" onclick="setResultTag('Bình thường')" class="text-[10px] text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded font-semibold hover:bg-slate-200">+ Bình thường</button>
-              <button type="button" onclick="setResultTag('Đã hoàn thành')" class="text-[10px] text-slate-700 bg-blue-50 px-1.5 py-0.5 rounded font-bold hover:bg-blue-100">+ Đã xong</button>
-              <button type="button" onclick="setResultTag('Đang xử lý')" class="text-[10px] text-slate-700 bg-amber-50 px-1.5 py-0.5 rounded font-bold hover:bg-amber-100">+ Đang xử lý</button>
+              <button type="button" onclick="setResultTag('Bình thường')" class="text-[11px] text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2 py-0.5 rounded font-medium transition">+ Bình thường</button>
+              <button type="button" onclick="setResultTag('Đã hoàn thành')" class="text-[11px] text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded font-medium transition">+ Đã xong</button>
+              <button type="button" onclick="setResultTag('Đang xử lý')" class="text-[11px] text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-2 py-0.5 rounded font-medium transition">+ Đang xử lý</button>
             </div>
           </div>
-          <input type="text" id="cal-input-result" placeholder="VD: Đã hoàn thành, Hoạt động tốt..." oninput="updateCalTitlePreview()" class="w-full px-3.5 py-2 bg-slate-50 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400">
+          <input type="text" id="cal-input-result" placeholder="VD: Đã hoàn thành, Hoạt động tốt..." oninput="updateCalTitlePreview()" class="w-full px-3 py-2 bg-white rounded-lg border border-gray-300 text-xs font-normal text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900">
         </div>
 
-        <!-- 4. Live Preview Banner -->
-        <div class="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-1">
-          <div class="text-[10px] font-bold uppercase text-slate-700 tracking-wider flex items-center gap-1">
-            <i data-lucide="sparkles" class="w-3 h-3 text-slate-500"></i>
+        <!-- 3. Live Preview Banner -->
+        <div class="p-3 bg-gray-50 border border-gray-200 rounded-lg space-y-1.5">
+          <div class="text-[10px] font-semibold uppercase text-gray-500 tracking-wider flex items-center gap-1">
+            <i data-lucide="sparkles" class="w-3 h-3 text-gray-400"></i>
             <span>Tiêu đề sự kiện chuẩn hóa:</span>
           </div>
-          <div id="cal-preview-text" class="text-xs font-bold text-slate-900 break-words leading-tight">
+          <div id="cal-preview-text" class="text-xs font-mono font-medium text-gray-900 break-words leading-tight bg-white p-2 rounded border border-gray-200">
             ...
           </div>
         </div>
       </div>
 
       <!-- Action Buttons -->
-      <div class="flex gap-2 pt-2 border-t border-slate-100">
-        <button type="button" onclick="copyCalEventTitle()" class="px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition flex items-center justify-center gap-1" title="Sao chép tiêu đề">
-          <i data-lucide="copy" class="w-4 h-4"></i>
+      <div class="flex gap-2 pt-3 border-t border-gray-200">
+        <button type="button" onclick="copyCalEventTitle()" class="px-3.5 py-2 bg-white hover:bg-gray-50 text-gray-700 font-medium border border-gray-200 rounded-lg text-xs transition flex items-center justify-center gap-1.5" title="Sao chép tiêu đề">
+          <i data-lucide="copy" class="w-3.5 h-3.5 text-gray-500"></i>
           <span>Copy</span>
         </button>
-        <button type="button" onclick="launchGoogleCalendarCreate()" class="flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-extrabold rounded-xl text-xs shadow-md transition flex items-center justify-center gap-1.5">
-          <i data-lucide="external-link" class="w-4 h-4"></i>
+        <button type="button" onclick="launchGoogleCalendarCreate()" class="flex-1 py-2 bg-gray-900 hover:bg-black text-white font-medium rounded-lg text-xs transition flex items-center justify-center gap-1.5 shadow-xs">
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
           <span>Tạo Sự Kiện Lịch ➔</span>
         </button>
       </div>
@@ -1303,7 +1140,596 @@
 
   <!-- ========================================== -->
   <!-- MODAL: QUY TẮC PHÂN CA VẬN HÀNH (#modal-shift-rules) -->
+  
   <!-- ========================================== -->
+  <!-- MODAL: KHO TẠM SỐ 3, THẺ KHO & CHECK DỤNG CỤ (#modal-kho-tools) -->
+  <!-- ========================================== -->
+  <div id="modal-kho-tools" class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs hidden items-center justify-center z-50 p-2 sm:p-4 transition-all duration-200 overflow-y-auto">
+    <div class="bg-white rounded-3xl w-full max-w-5xl p-4 sm:p-6 shadow-2xl space-y-4 max-h-[94vh] flex flex-col">
+      
+      <!-- Modal Top Bar -->
+      <div class="flex items-center justify-between gap-2 border-b border-gray-100 pb-3 shrink-0">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 flex items-center justify-center shrink-0 shadow-xs">
+            <i data-lucide="boxes" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h2 class="text-base font-extrabold text-gray-900">Kho Tạm Số 3 & Bàn Giao Dụng Cụ</h2>
+              <span id="kho-sync-badge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span id="kho-sync-label">Google Sheet Live</span>
+              </span>
+            </div>
+            <p class="text-xs text-gray-500">Đồng bộ 2 chiều với Google Apps Script Web App & Google Sheet gốc</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+          <button onclick="syncKhoDataFromCloud(true)" title="Làm mới từ Google Sheets" class="p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition active:scale-95 flex items-center gap-1 text-xs font-semibold">
+            <i data-lucide="refresh-cw" id="kho-refresh-icon" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Làm mới</span>
+          </button>
+          <button onclick="closeKhoToolsModal()" aria-label="Đóng" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700 active:scale-90 transition">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Segmented Tab Navigation -->
+      <div class="flex p-1 bg-slate-100 rounded-2xl gap-1 shrink-0">
+        <button id="tab-btn-kho-check" onclick="switchKhoModalTab('check')" class="flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold transition flex-1 bg-white text-gray-900 shadow-xs">
+          <i data-lucide="wrench" class="w-4 h-4 text-indigo-600"></i>
+          <span>Check Dụng Cụ</span>
+          <span id="badge-check-count" class="px-2 py-0.5 text-[10px] rounded-full bg-emerald-100 text-emerald-800 font-extrabold">--/--</span>
+        </button>
+        <button id="tab-btn-kho-items" onclick="switchKhoModalTab('items')" class="flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold transition flex-1 text-gray-600 hover:text-gray-900">
+          <i data-lucide="boxes" class="w-4 h-4"></i>
+          <span>Giá Kệ & Tồn Kho</span>
+          <span id="badge-items-count" class="px-2 py-0.5 text-[10px] rounded-full bg-gray-200 text-gray-700 font-extrabold">42 VT</span>
+        </button>
+        <button id="tab-btn-kho-thekho" onclick="switchKhoModalTab('thekho')" class="flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold transition flex-1 text-gray-600 hover:text-gray-900">
+          <i data-lucide="receipt" class="w-4 h-4"></i>
+          <span>Thẻ Kho (Nhập/Xuất)</span>
+        </button>
+      </div>
+
+      <!-- TAB 1: CHECK DỤNG CỤ -->
+      <div id="kho-tab-check" class="space-y-3.5 flex-1 overflow-y-auto custom-scrollbar pr-1">
+        <!-- Bag Selector & Session Controls -->
+        <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 space-y-3">
+          <!-- Bags -->
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xs font-bold text-gray-600">Chọn vị trí:</span>
+              <div id="kho-bag-selector" class="flex gap-1.5 flex-wrap">
+                <!-- Rendered by JS -->
+              </div>
+            </div>
+            <button onclick="markAllToolsFull()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 active:scale-95 shadow-xs">
+              <i data-lucide="check-check" class="w-3.5 h-3.5"></i>
+              <span>Đánh dấu đủ 100%</span>
+            </button>
+          </div>
+
+          <!-- Session row: Người kiểm, Ca trực, Nút Gửi bàn giao -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t border-slate-200 text-xs">
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-500 mb-1">Người kiểm tra:</label>
+              <select id="kho-check-inspector" class="w-full bg-white border border-gray-200 rounded-xl px-2.5 py-1.5 font-medium text-gray-800">
+                <!-- Populated by JS -->
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-500 mb-1">Ca trực:</label>
+              <select id="kho-check-shift" class="w-full bg-white border border-gray-200 rounded-xl px-2.5 py-1.5 font-medium text-gray-800">
+                <option value="Ca 1">Ca 1 (06:00 - 14:00)</option>
+                <option value="Ca 2">Ca 2 (14:00 - 22:00)</option>
+                <option value="Ca 3">Ca 3 (22:00 - 06:00)</option>
+              </select>
+            </div>
+            <div class="flex items-end gap-1.5">
+              <button onclick="submitKhoBagCheck()" id="btn-submit-bag-check" class="flex-1 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition flex items-center justify-center gap-1.5 active:scale-95 shadow-xs">
+                <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                <span>Xác nhận & Gửi ca</span>
+              </button>
+              <button onclick="copyKhoCheckZalo()" title="Sao chép báo cáo Zalo" class="px-2.5 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl font-bold transition flex items-center justify-center active:scale-95">
+                <i data-lucide="copy" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tools List -->
+        <div id="kho-tools-list" class="space-y-2">
+          <!-- Rendered by JS -->
+        </div>
+
+        <!-- Recent Checks (Collapsible) -->
+        <details class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs">
+          <summary class="font-bold text-gray-700 cursor-pointer flex items-center justify-between">
+            <span class="flex items-center gap-2">
+              <i data-lucide="history" class="w-4 h-4 text-indigo-600"></i>
+              <span>Lịch sử kiểm tra gần nhất từ Google Sheet</span>
+            </span>
+            <span class="text-gray-400 font-normal text-[11px]">Bấm để xem</span>
+          </summary>
+          <div id="kho-recent-checks-list" class="mt-3 space-y-2">
+            <!-- Rendered by JS -->
+          </div>
+        </details>
+      </div>
+
+      <!-- TAB 2: GIÁ KỆ & TỒN KHO -->
+      <div id="kho-tab-items" class="hidden space-y-3.5 flex-1 overflow-y-auto custom-scrollbar pr-1">
+        <!-- Search & Filters -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+          <div class="relative flex-1">
+            <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+            <input id="kho-items-search" oninput="handleKhoItemsSearch(this.value)" placeholder="Tìm kiếm theo mã SKU, tên vật tư, vị trí kệ..." class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs font-medium focus:bg-white focus:border-indigo-500 transition">
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="openKhoTransactionModal()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 active:scale-95 shrink-0 shadow-xs">
+              <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+              <span>Xuất / Nhập Kho</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Shelf Chips -->
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1" id="kho-shelf-chips">
+          <!-- Rendered by JS -->
+        </div>
+
+        <!-- Stat Badges -->
+        <div class="grid grid-cols-3 gap-2.5 text-center">
+          <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+            <div class="text-[10px] text-gray-500 font-semibold uppercase">Tổng Mặt Hàng</div>
+            <div id="kho-stat-total-items" class="text-base font-black text-gray-900">42</div>
+          </div>
+          <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+            <div class="text-[10px] text-gray-500 font-semibold uppercase">Tổng Số Lượng Tồn</div>
+            <div id="kho-stat-total-qty" class="text-base font-black text-indigo-600">70</div>
+          </div>
+          <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+            <div class="text-[10px] text-gray-500 font-semibold uppercase">Vị Trí Giá Kệ</div>
+            <div id="kho-stat-total-shelves" class="text-base font-black text-gray-900">7</div>
+          </div>
+        </div>
+
+        <!-- Items Grid / List -->
+        <div id="kho-items-container" class="space-y-2">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <!-- TAB 3: THẺ KHO (NHẬP / XUẤT) -->
+      <div id="kho-tab-thekho" class="hidden space-y-3.5 flex-1 overflow-y-auto custom-scrollbar pr-1">
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+          <div>
+            <h3 class="text-xs font-bold text-gray-900">Nhật Ký Nhập Xuất Thẻ Kho</h3>
+            <p class="text-[11px] text-gray-500">Lịch sử xuất vật tư bảo dưỡng, sửa chữa và nhập bổ sung</p>
+          </div>
+          <button onclick="openKhoTransactionModal()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 active:scale-95 shadow-xs">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>Tạo phiếu mới</span>
+          </button>
+        </div>
+
+        <!-- The Kho List -->
+        <div id="kho-thekho-container" class="space-y-2">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- SUB-MODAL: TẠO PHIẾU XUẤT / NHẬP KHO (#modal-kho-transaction) -->
+  <!-- ========================================== -->
+  <div id="modal-kho-transaction" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-60 p-3">
+    <div class="bg-white rounded-3xl w-full max-w-lg p-5 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-gray-100 pb-2.5">
+        <h3 class="text-sm font-extrabold text-gray-900 flex items-center gap-2">
+          <i data-lucide="receipt" class="w-4 h-4 text-indigo-600"></i>
+          <span>Phiếu Giao Dịch Thẻ Kho</span>
+        </h3>
+        <button onclick="closeKhoTransactionModal()" class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700 active:scale-90 transition">
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleKhoTransactionSubmit(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-gray-700 mb-1">Loại giao dịch:</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center justify-center gap-1.5 p-2 rounded-xl border border-gray-200 cursor-pointer has-[:checked]:bg-rose-50 has-[:checked]:border-rose-300 has-[:checked]:text-rose-800 font-bold transition">
+              <input type="radio" name="tx-type" value="OUT" checked class="hidden">
+              <i data-lucide="arrow-up-right" class="w-4 h-4 text-rose-600"></i>
+              <span>XUẤT KHO (Sửa chữa)</span>
+            </label>
+            <label class="flex items-center justify-center gap-1.5 p-2 rounded-xl border border-gray-200 cursor-pointer has-[:checked]:bg-emerald-50 has-[:checked]:border-emerald-300 has-[:checked]:text-emerald-800 font-bold transition">
+              <input type="radio" name="tx-type" value="IN" class="hidden">
+              <i data-lucide="arrow-down-left" class="w-4 h-4 text-emerald-600"></i>
+              <span>NHẬP KHO (Bổ sung)</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-gray-700 mb-1">Chọn vật tư / Thiết bị:</label>
+          <select id="tx-item-select" onchange="onTxItemSelectChange(this.value)" required class="w-full bg-white border border-gray-200 rounded-xl p-2 font-medium text-gray-800">
+            <!-- Populated by JS -->
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">Số lượng:</label>
+            <input id="tx-qty" type="number" min="1" step="1" value="1" required class="w-full border border-gray-200 rounded-xl p-2 font-bold text-gray-900">
+          </div>
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">Tồn hiện tại:</label>
+            <input id="tx-current-qty" type="text" readonly class="w-full bg-gray-50 border border-gray-200 rounded-xl p-2 font-bold text-gray-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-gray-700 mb-1">Lý do / Hạng mục sửa chữa:</label>
+          <input id="tx-reason" required placeholder="VD: Thay thế đèn sân tập đợt 2, đấu nối tủ điện..." class="w-full border border-gray-200 rounded-xl p-2">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-gray-700 mb-1">Người thực hiện:</label>
+          <select id="tx-performer" class="w-full bg-white border border-gray-200 rounded-xl p-2 font-medium text-gray-800">
+            <!-- Populated by JS -->
+          </select>
+        </div>
+
+        <div class="flex gap-2 pt-2 border-t border-gray-100">
+          <button type="submit" class="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition active:scale-95 shadow-xs">
+            Xác nhận giao dịch
+          </button>
+          <button type="button" onclick="closeKhoTransactionModal()" class="px-4 py-2 border border-gray-200 rounded-xl font-semibold text-gray-700 hover:bg-gray-50 transition">
+            Hủy
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: MENU LỐI TẮT & TIỆN ÍCH THAO TÁC (#modal-quick-actions-menu) -->
+  <!-- ========================================== -->
+  <div id="modal-quick-actions-menu" class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs hidden items-center justify-center z-50 p-2 sm:p-4 transition-all duration-200 overflow-y-auto">
+    <div class="bg-white rounded-3xl w-full max-w-2xl p-4 sm:p-6 shadow-2xl space-y-4 max-h-[94vh] flex flex-col">
+      <!-- Top Bar -->
+      <div class="flex items-center justify-between border-b border-gray-100 pb-3 shrink-0">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 flex items-center justify-center shrink-0 shadow-xs">
+            <i data-lucide="layout-grid" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h2 class="text-base font-extrabold text-gray-900">Menu Tiện Ích & Lối Tắt Nhanh</h2>
+            <p class="text-xs text-gray-500">Truy cập nhanh toàn bộ chức năng, biểu mẫu & lịch hẹn giờ M&E</p>
+          </div>
+        </div>
+        <button onclick="closeQuickActionsMenu()" aria-label="Đóng" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700 active:scale-90 transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 overflow-y-auto custom-scrollbar flex-1 pr-1">
+        <!-- NHÓM 1: LỐI TẮT THAO TÁC NHANH (SHORTCUTS) -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-600"></i>
+              <span>Lối Tắt Thao Tác Nhanh (Shortcuts)</span>
+            </h3>
+            <span class="text-[11px] text-gray-400 font-medium">6 Lối Tắt</span>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            <!-- Shortcut 1: Ghi Lịch -->
+            <button onclick="closeQuickActionsMenu(); openQuickCalendarEventModal();" class="p-3 bg-white rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-xs text-left transition flex items-center space-x-2.5 group">
+              <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-800 flex items-center justify-center shrink-0 border border-gray-200 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition">
+                <i data-lucide="calendar-plus" class="w-4 h-4"></i>
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-xs text-gray-900 truncate">Ghi Lịch Google</div>
+                <div class="text-[10px] text-gray-500 truncate">Nhật ký trực ca</div>
+              </div>
+            </button>
+
+            <!-- Shortcut 2: Form Checklist -->
+            <button onclick="closeQuickActionsMenu(); switchTab('checklist'); switchChecklistSopView('forms');" class="p-3 bg-white rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-xs text-left transition flex items-center space-x-2.5 group">
+              <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-800 flex items-center justify-center shrink-0 border border-gray-200 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition">
+                <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-xs text-gray-900 truncate">Form Checklist</div>
+                <div class="text-[10px] text-gray-500 truncate">Biểu mẫu sân golf</div>
+              </div>
+            </button>
+
+            <!-- Shortcut 3: Sổ Tay SOP -->
+            <button onclick="closeQuickActionsMenu(); switchTab('checklist'); switchChecklistSopView('sop');" class="p-3 bg-white rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-xs text-left transition flex items-center space-x-2.5 group">
+              <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-800 flex items-center justify-center shrink-0 border border-gray-200 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition">
+                <i data-lucide="book-open" class="w-4 h-4"></i>
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-xs text-gray-900 truncate">Sổ Tay SOP</div>
+                <div class="text-[10px] text-gray-500 truncate">Quy trình kỹ thuật</div>
+              </div>
+            </button>
+
+            <!-- Shortcut 4: Phân Ca -->
+            <button onclick="closeQuickActionsMenu(); openShiftScheduleModal();" class="p-3 bg-white rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-xs text-left transition flex items-center space-x-2.5 group">
+              <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-800 flex items-center justify-center shrink-0 border border-gray-200 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition">
+                <i data-lucide="calendar-range" class="w-4 h-4"></i>
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-xs text-gray-900 truncate">Bảng Phân Ca</div>
+                <div class="text-[10px] text-gray-500 truncate">Lịch trực toàn tổ</div>
+              </div>
+            </button>
+
+            <!-- Shortcut 5: Kho Tạm Số 3 -->
+            <button onclick="closeQuickActionsMenu(); openKhoToolsModal('items');" class="p-3 bg-white rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-xs text-left transition flex items-center space-x-2.5 group">
+              <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-800 flex items-center justify-center shrink-0 border border-gray-200 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition">
+                <i data-lucide="boxes" class="w-4 h-4"></i>
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-xs text-gray-900 truncate">Kho Tạm & Thẻ Kho</div>
+                <div class="text-[10px] text-gray-500 truncate">Giá kệ, tồn kho</div>
+              </div>
+            </button>
+
+            <!-- Shortcut 6: Check Dụng Cụ -->
+            <button onclick="closeQuickActionsMenu(); openKhoToolsModal('check');" class="p-3 bg-white rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-xs text-left transition flex items-center space-x-2.5 group">
+              <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-800 flex items-center justify-center shrink-0 border border-gray-200 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition">
+                <i data-lucide="wrench" class="w-4 h-4"></i>
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-xs text-gray-900 truncate">Check Dụng Cụ</div>
+                <div class="text-[10px] text-gray-500 truncate">Túi 1, 2 & Máy móc</div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- NHÓM 2: BIỂU MẪU & WEB APP TRỰC CA -->
+        <div class="space-y-2 pt-2 border-t border-gray-100">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+              <i data-lucide="clipboard-list" class="w-3.5 h-3.5 text-indigo-600"></i>
+              <span>Biểu Mẫu & Web App Trực Ca</span>
+            </h3>
+            <button onclick="closeQuickActionsMenu(); switchTab('checklist');" class="text-[11px] text-indigo-600 font-bold hover:underline">Xem tất cả</button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <!-- Form 1 -->
+            <div class="p-3 bg-white rounded-xl border border-gray-200 space-y-2">
+              <div class="flex items-center space-x-2.5">
+                <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-800 flex items-center justify-center shrink-0 border border-gray-200">
+                  <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+                </div>
+                <div class="min-w-0">
+                  <div class="font-bold text-xs text-gray-900 truncate">Checklist Ca Vận Hành Sân Golf</div>
+                  <div class="text-[10px] text-gray-500">Mỗi ca trực · TBA, Bơm, PCCC</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 pt-1 border-t border-gray-100 text-xs">
+                <a href="https://forms.gle/7gNBsFcX12ikeNXX9" target="_blank" rel="noopener noreferrer" class="flex-1 py-1.5 bg-gray-900 hover:bg-black text-white rounded-lg font-medium flex items-center justify-center gap-1 text-[11px] transition">
+                  <i data-lucide="external-link" class="w-3 h-3"></i>
+                  <span>Điền Form</span>
+                </a>
+                <button onclick="closeQuickActionsMenu(); openSopDetailByCode('SOP-FORMS-01');" class="px-2.5 py-1.5 border border-gray-200 hover:bg-gray-50 rounded-lg text-gray-700 font-medium text-[11px] transition">
+                  Đọc SOP
+                </button>
+              </div>
+            </div>
+
+            <!-- Form 2 -->
+            <div class="p-3 bg-white rounded-xl border border-gray-200 space-y-2">
+              <div class="flex items-center space-x-2.5">
+                <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-800 flex items-center justify-center shrink-0 border border-gray-200">
+                  <i data-lucide="gauge" class="w-4 h-4"></i>
+                </div>
+                <div class="min-w-0">
+                  <div class="font-bold text-xs text-gray-900 truncate">Chốt Công Tơ Điện Nước</div>
+                  <div class="text-[10px] text-gray-500">Web App · Định kỳ cuối tháng</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 pt-1 border-t border-gray-100 text-xs">
+                <a href="https://script.google.com/macros/s/AKfycbxOoWSsDiQ5DpngJrbkKegHYQhs--hcC6u0h3dj24dzH6W3EpK3NG1j5XJvD6HEF5Zh/exec" target="_blank" rel="noopener noreferrer" class="flex-1 py-1.5 bg-gray-900 hover:bg-black text-white rounded-lg font-medium flex items-center justify-center gap-1 text-[11px] transition">
+                  <i data-lucide="external-link" class="w-3 h-3"></i>
+                  <span>Mở Web App</span>
+                </a>
+                <button onclick="closeQuickActionsMenu(); openSopDetailByCode('SOP-CONGTO-01');" class="px-2.5 py-1.5 border border-gray-200 hover:bg-gray-50 rounded-lg text-gray-700 font-medium text-[11px] transition">
+                  Đọc SOP
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NHÓM 3: THÔNG SỐ HẸN GIỜ BẬT/TẮT -->
+        <div class="space-y-2 pt-2 border-t border-gray-100">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+              <i data-lucide="timer" class="w-3.5 h-3.5 text-indigo-600"></i>
+              <span>Thông Số Hẹn Giờ Bật/Tắt</span>
+            </h3>
+            <span class="text-[11px] text-gray-400 font-medium">Hapulico M&E</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <!-- Timer 1: Hẹn Giờ Công Cộng -->
+            <button onclick="closeQuickActionsMenu(); openDeviceTimersModal('public');" class="p-3 bg-white rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-xs text-left transition flex items-center space-x-2.5 group">
+              <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center shrink-0 border border-amber-200">
+                <i data-lucide="lamp-wall-up" class="w-4 h-4"></i>
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-xs text-gray-900 truncate">Hẹn Giờ Công Cộng</div>
+                <div class="text-[10px] text-gray-500 truncate">314 mục · Lịch hè/đông</div>
+              </div>
+            </button>
+
+            <!-- Timer 2: Đóng/Ngắt Điện Văn Phòng -->
+            <button onclick="closeQuickActionsMenu(); openDeviceTimersModal('office');" class="p-3 bg-white rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-xs text-left transition flex items-center space-x-2.5 group">
+              <div class="w-8 h-8 rounded-lg bg-sky-50 text-sky-700 flex items-center justify-center shrink-0 border border-sky-200">
+                <i data-lucide="building-2" class="w-4 h-4"></i>
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-xs text-gray-900 truncate">Điện Văn Phòng</div>
+                <div class="text-[10px] text-gray-500 truncate">197 mục · Chiếu sáng/ĐH</div>
+              </div>
+            </button>
+
+            <!-- Timer 3: Cài Đặt Hẹn Giờ Bổ Sung -->
+            <button onclick="closeQuickActionsMenu(); openDeviceTimersModal('custom');" class="p-3 bg-white rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-xs text-left transition flex items-center space-x-2.5 group">
+              <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 border border-emerald-200">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-xs text-gray-900 truncate">Cài Đặt Bổ Sung</div>
+                <div class="text-[10px] text-gray-500 truncate">Thêm & lưu trình duyệt</div>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- ========================================== -->
+  <!-- MODAL: THÔNG SỐ HẸN GIỜ BẬT/TẮT THIẾT BỊ (#modal-device-timer-settings) -->
+  <!-- ========================================== -->
+  <div id="modal-device-timer-settings" class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs hidden items-center justify-center z-50 p-2 sm:p-4 transition-all duration-200 overflow-y-auto">
+    <div class="bg-white rounded-3xl w-full max-w-6xl p-4 sm:p-6 shadow-2xl space-y-4 max-h-[95vh] flex flex-col">
+      <!-- Modal Top Bar -->
+      <div class="flex items-center justify-between gap-2 border-b border-gray-100 pb-3 shrink-0">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 flex items-center justify-center shrink-0 shadow-xs">
+            <i data-lucide="timer" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h2 id="timer-heading" class="text-base font-extrabold text-gray-900">Thông Số Hẹn Giờ Bật/Tắt Thiết Bị M&E</h2>
+              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                <span>Google Sheets Live</span>
+              </span>
+            </div>
+            <p class="text-xs text-gray-500">Tra cứu danh sách lộ điện công cộng, giờ đóng ngắt văn phòng & thông số ghi nhận</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="openDeviceTimer()" class="px-3 py-2 rounded-xl bg-gray-900 hover:bg-black text-white text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>Thêm hẹn giờ</span>
+          </button>
+          <button onclick="closeDeviceTimersModal()" aria-label="Đóng" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700 active:scale-90 transition">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Segmented Tab Navigation for Timers -->
+      <div class="flex p-1 bg-slate-100 rounded-2xl gap-1 shrink-0">
+        <button id="tab-btn-timer-public" onclick="switchDeviceTimerModalTab('public')" class="flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold transition flex-1 bg-white text-gray-900 shadow-xs">
+          <i data-lucide="lamp-wall-up" class="w-4 h-4 text-amber-600"></i>
+          <span>Hẹn Giờ Công Cộng</span>
+          <span class="px-2 py-0.5 text-[10px] rounded-full bg-amber-100 text-amber-800 font-extrabold">314 mục</span>
+        </button>
+        <button id="tab-btn-timer-office" onclick="switchDeviceTimerModalTab('office')" class="flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold transition flex-1 text-gray-600 hover:text-gray-900">
+          <i data-lucide="building-2" class="w-4 h-4 text-sky-600"></i>
+          <span>Đóng/Ngắt Điện Văn Phòng</span>
+          <span class="px-2 py-0.5 text-[10px] rounded-full bg-sky-100 text-sky-800 font-extrabold">197 mục</span>
+        </button>
+        <button id="tab-btn-timer-custom" onclick="switchDeviceTimerModalTab('custom')" class="flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold transition flex-1 text-gray-600 hover:text-gray-900">
+          <i data-lucide="settings-2" class="w-4 h-4 text-emerald-600"></i>
+          <span>Cài Đặt Bổ Sung (Trình duyệt)</span>
+        </button>
+      </div>
+
+      <!-- Content Views -->
+      <div class="flex-1 overflow-y-auto custom-scrollbar space-y-3 pr-1">
+        <!-- TAB 1: HẸN GIỜ CÔNG CỘNG -->
+        <div id="view-timer-public" class="space-y-3">
+          <div id="public-timer-source" class="space-y-1">
+            <h3 class="text-sm font-semibold">Danh sách lộ điện hẹn giờ công cộng</h3>
+            <p class="text-xs text-gray-600">Nguồn: <a class="underline text-blue-700" href="https://docs.google.com/spreadsheets/d/1d_dbPMeToPfP86rRJVoB_BF15J4xh912jVfcjcagxXs/edit?gid=745357933#gid=745357933" target="_blank" rel="noopener noreferrer">DS hẹn giờ công cộng · DS.01.BD</a> · Ngày cập nhật nguồn: 27/09/2026.</p>
+            <p class="text-xs text-gray-500">Bản tra cứu đã nhập từ Google Sheets, chưa tự đồng bộ. Giữ lịch tiết giảm, mùa hè và mùa đông theo nguồn. Dấu “—” là ô nguồn chưa ghi; 00:00 là nửa đêm. Cuộn bảng để xem đầy đủ.</p>
+          </div>
+          <details class="text-xs text-gray-600"><summary class="cursor-pointer font-semibold">Quy trình kiểm tra hàng tuần</summary><p id="public-timer-procedure" class="mt-2 whitespace-pre-wrap"></p></details>
+          <div class="overflow-auto border rounded-xl custom-scrollbar" style="max-height: 520px" tabindex="0" role="region" aria-label="Bảng hẹn giờ công cộng, cuộn để xem các khu vực">
+            <table id="public-timer-table" class="text-xs">
+              <caption class="sr-only">Danh sách lộ điện hẹn giờ công cộng từ Google Sheets, vùng A6:L341</caption>
+              <colgroup><col style="width: 45px"><col style="width: 250px"><col span="8" style="width: 75px"><col style="width: 85px"><col style="width: 330px"></colgroup>
+              <thead><tr><th rowspan="2" scope="col">STT</th><th rowspan="2" scope="col">Thiết bị/khu vực</th><th colspan="4" scope="colgroup">Tiết giảm</th><th colspan="2" scope="colgroup">Mùa hè<br>01/04–30/09</th><th colspan="2" scope="colgroup">Mùa đông<br>01/10–31/03</th><th rowspan="2" scope="col">Ngày</th><th rowspan="2" scope="col">Cách thức, vị trí thực hiện</th></tr><tr><th scope="col">Bật</th><th scope="col">Tắt</th><th scope="col">Bật</th><th scope="col">Tắt</th><th scope="col">Bật</th><th scope="col">Tắt</th><th scope="col">Bật</th><th scope="col">Tắt</th></tr></thead>
+              <tbody id="public-timer-rows"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 2: ĐÓNG/NGẮT ĐIỆN VĂN PHÒNG -->
+        <div id="view-timer-office" class="hidden space-y-3">
+          <div id="office-timer-source" class="space-y-1">
+            <h3 class="text-sm font-semibold">Danh sách hẹn giờ đóng/ngắt điện văn phòng</h3>
+            <p class="text-xs text-gray-600">Nguồn: <a class="underline text-blue-700" href="https://docs.google.com/spreadsheets/d/1d_dbPMeToPfP86rRJVoB_BF15J4xh912jVfcjcagxXs/edit?gid=1507714426#gid=1507714426" target="_blank" rel="noopener noreferrer">6.DS giờ đóng ngắt điện văn phòng · DS.02.BD</a>.</p>
+            <p class="text-xs text-gray-500">Giờ chiếu sáng và điều hòa theo từng đơn vị, tách thứ 2–6, thứ 7 và chủ nhật. Bản tra cứu tĩnh từ nguồn; dấu “—” là ô chưa ghi. Các ghi chú và trường hợp đặc biệt được giữ nguyên.</p>
+            <p class="text-xs text-gray-600">Quy định tại nguồn: theo giờ làm việc trước 30 phút, sau 60 phút; CSCC + WC theo văn phòng. Cập nhật danh sách mỗi khi có thay đổi.</p>
+          </div>
+          <div class="overflow-auto border rounded-xl custom-scrollbar" style="max-height: 520px" tabindex="0" role="region" aria-label="Bảng hẹn giờ văn phòng, cuộn để xem các đơn vị">
+            <table id="office-timer-table" class="text-xs">
+              <caption class="sr-only">Lịch đóng ngắt điện văn phòng và ghi chú theo Google Sheets</caption>
+              <colgroup><col style="width: 60px"><col span="2" style="width: 65px"><col style="width: 250px"><col style="width: 140px"><col style="width: 80px"><col span="10" style="width: 85px"><col style="width: 300px"><col style="width: 75px"></colgroup>
+              <thead>
+                <tr><th rowspan="3" scope="col">STT</th><th rowspan="3" scope="col">Tòa</th><th rowspan="3" scope="col">Tầng</th><th rowspan="3" scope="col">Khách hàng</th><th rowspan="3" scope="col">Mã</th><th rowspan="3" scope="col">Diện tích (m²)</th><th colspan="4" scope="colgroup">Thứ 2–6</th><th colspan="4" scope="colgroup">Thứ 7</th><th colspan="2" scope="colgroup">Chủ nhật</th><th rowspan="3" scope="col">Ghi chú</th><th rowspan="3" scope="col">Số lượng pin</th></tr>
+                <tr><th colspan="2" scope="colgroup">Đóng</th><th colspan="2" scope="colgroup">Ngắt</th><th colspan="2" scope="colgroup">Đóng</th><th colspan="2" scope="colgroup">Ngắt</th><th rowspan="2" scope="col">Đóng CS, ĐH</th><th rowspan="2" scope="col">Ngắt CS, ĐH</th></tr>
+                <tr><th scope="col">Chiếu sáng</th><th scope="col">Điều hòa</th><th scope="col">Chiếu sáng</th><th scope="col">Điều hòa</th><th scope="col">Chiếu sáng</th><th scope="col">Điều hòa</th><th scope="col">Chiếu sáng</th><th scope="col">Điều hòa</th></tr>
+              </thead>
+              <tbody id="office-timer-rows"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 3: CÀI ĐẶT BỔ SUNG TRÊN TRÌNH DUYỆT -->
+        <div id="view-timer-custom" class="hidden space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wider">Thông Số Bổ Sung Trên Trình Duyệt</h3>
+            <p class="text-xs text-gray-500">Lưu trên bộ nhớ máy này. Bảng ghi nhận thông số cài đặt, không tự điều khiển thiết bị.</p>
+          </div>
+          <p id="timer-error" role="alert" class="text-xs text-rose-700"></p>
+          <form id="timer-form" hidden onsubmit="saveDeviceTimer(event)" class="border rounded-xl p-3.5 bg-slate-50 space-y-3">
+            <input id="timer-id" type="hidden">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+              <label class="space-y-1 font-semibold text-gray-700">Thiết bị/khu vực<input id="timer-device" required maxlength="160" class="block w-full border rounded-lg p-2 font-normal" placeholder="VD: Đèn sân tập – Tủ số 1"></label>
+              <label class="space-y-1 font-semibold text-gray-700">Chế độ<select id="timer-mode" onchange="updateDeviceTimerMode()" class="block w-full border rounded-lg p-2 font-normal"><option>Tự động</option><option>Bật thủ công</option><option>Tắt thủ công</option></select></label>
+              <label class="space-y-1 font-semibold text-gray-700">Ngày áp dụng<input id="timer-date" type="date" required class="block w-full border rounded-lg p-2 font-normal"></label>
+              <label class="space-y-1 font-semibold text-gray-700">Giờ bật<input id="timer-on" type="time" required class="block w-full border rounded-lg p-2 font-normal"></label>
+              <label class="space-y-1 font-semibold text-gray-700">Giờ tắt<input id="timer-off" type="time" required class="block w-full border rounded-lg p-2 font-normal"></label>
+              <label class="space-y-1 font-semibold text-gray-700">Ghi chú<textarea id="timer-notes" maxlength="1000" rows="2" class="block w-full border rounded-lg p-2 font-normal"></textarea></label>
+            </div>
+            <p class="text-xs text-gray-500">Người cập nhật được ghi tự động theo tài khoản đăng nhập. Chế độ thủ công không bắt buộc nhập giờ.</p>
+            <div class="flex gap-2"><button type="submit" class="px-3.5 py-2 rounded-xl bg-gray-900 text-white text-xs font-bold transition">Lưu hẹn giờ</button><button type="button" onclick="document.getElementById('timer-form').hidden = true" class="px-3.5 py-2 border rounded-xl text-xs font-medium hover:bg-gray-100 transition">Hủy</button></div>
+          </form>
+          <div class="overflow-x-auto border rounded-xl">
+            <table class="w-full text-xs text-left" style="min-width: 780px">
+              <caption class="sr-only">Bảng thông số hẹn giờ bật/tắt thiết bị</caption>
+              <thead class="bg-gray-50"><tr><th scope="col" class="p-2.5">Thiết bị/khu vực</th><th scope="col" class="p-2.5">Chế độ</th><th scope="col" class="p-2.5">Giờ bật</th><th scope="col" class="p-2.5">Giờ tắt</th><th scope="col" class="p-2.5">Ngày áp dụng</th><th scope="col" class="p-2.5">Người cập nhật</th><th scope="col" class="p-2.5">Ghi chú</th><th scope="col" class="p-2.5">Thao tác</th></tr></thead>
+              <tbody id="timer-rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- ========================================== -->
   <div id="modal-shift-rules" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4 transition-all duration-200 overflow-y-auto" style="z-index: 50;">
     <div class="bg-white rounded-3xl w-full max-w-3xl p-5 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] flex flex-col">
       <div class="flex justify-between items-center shrink-0 border-b border-slate-100 pb-3 flex-wrap gap-2">
@@ -5135,13 +5561,13 @@ const CONFIG = {
           </div>
           <div class="flex items-center gap-1.5 shrink-0">
             ${matchedSop ? `
-              <button onclick="openSopDetailByCode('${matchedSop}')" class="p-1.5 bg-amber-50 hover:bg-slate-100 text-slate-700 border border-amber-300 rounded-xl transition text-[10px] font-bold flex items-center gap-1" title="Xem hướng dẫn ${matchedSop}">
-                <i data-lucide="book-open" class="w-3.5 h-3.5 text-slate-600"></i>
+              <button onclick="openSopDetailByCode('${matchedSop}')" class="p-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-lg transition text-xs font-medium flex items-center gap-1" title="Xem hướng dẫn ${matchedSop}">
+                <i data-lucide="book-open" class="w-3.5 h-3.5 text-amber-700"></i>
                 <span class="hidden sm:inline">SOP</span>
               </button>
             ` : ''}
-            <button onclick="openQuickCalendarEventModal('${task.title.replace(/'/g, '')}', '${task.done ? 'Đã hoàn thành' : 'Đang xử lý'}')" class="p-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl transition text-[10px] font-bold flex items-center gap-1" title="Ghi vào lịch Google">
-              <i data-lucide="calendar-plus" class="w-3.5 h-3.5"></i>
+            <button onclick="openQuickCalendarEventModal('${task.title.replace(/'/g, '')}', '${task.done ? 'Đã hoàn thành' : 'Đang xử lý'}')" class="p-1.5 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-lg transition text-xs font-medium flex items-center gap-1" title="Ghi vào lịch Google">
+              <i data-lucide="calendar-plus" class="w-3.5 h-3.5 text-gray-500"></i>
               <span class="hidden sm:inline">Ghi Lịch</span>
             </button>
           </div>
@@ -8998,6 +9424,701 @@ const repo = new AppRepository();
         showToast('Đã xóa sạch dữ liệu');
       }
     }
-  </script>
+  
+    // =========================================================================
+    // MODULE: KHO TẠM SỐ 3, THẺ KHO & CHECK DỤNG CỤ (GOOGLE APPS SCRIPT SYNC)
+    // =========================================================================
+    const KHO_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzJpshDX3_2fVXmzylot-DS7h1TlVQTHadbct4dH8e5GdzgIVLCIdFeX-KMBDh0uSb0-w/exec";
+    const KHO_STORAGE_KEY = "MNE_KHO_TOOLS_CACHE_V2";
+
+    // Initial preloaded data bundled as offline fallback
+    const KHO_BUNDLED_INITIAL_DATA = {"tools": {"ok": true, "groups": {"tui1": {"key": "tui1", "title": "Túi số 1 (Cơ động lớn)", "items": [{"rowIndex": 5, "sku": "", "name": "Kìm mỏ nhọn 6\" (Tolsen 10005)", "qty": 1, "unit": "Cái", "location": "", "status": "ĐÃ KIỂM ✓", "notes": "", "lastUpdated": "23:40:49 05/10/2026 (Ngô Quyết Thắng - Ca 1)", "lastInspector": "Ngô Quyết Thắng", "lastCheckTime": "23:40:49 05/10/2026"}, {"rowIndex": 6, "sku": "", "name": "Kìm điện 7\" (Tolsen 10001 - Kìm bằng)", "qty": 1, "unit": "Cái", "location": "", "status": "ĐÃ KIỂM ✓", "notes": "5/10 Thắng báo mang bù", "lastUpdated": "23:40:49 05/10/2026 (Ngô Quyết Thắng - Ca 1)", "lastInspector": "Ngô Quyết Thắng", "lastCheckTime": "23:40:49 05/10/2026"}, {"rowIndex": 7, "sku": "", "name": "Kìm cắt 6\" (Tolsen 10003)", "qty": 1, "unit": "Cái", "location": "", "status": "CHƯA KIỂM", "notes": "5/10 Hoảng bảo nhân công dùng", "lastUpdated": "22:46:18 5/10/2026", "lastInspector": "", "lastCheckTime": "22:46:18 5/10/2026"}, {"rowIndex": 8, "sku": "", "name": "Tô vít 2 cạnh 6.5x150mm (Tolsen 20004)", "qty": 1, "unit": "Cái", "location": "", "status": "CHƯA KIỂM", "notes": "", "lastUpdated": "22:46:18 5/10/2026", "lastInspector": "", "lastCheckTime": "22:46:18 5/10/2026"}, {"rowIndex": 9, "sku": "", "name": "Tô vít 4 cạnh PH2x150mm (Tolsen 20008)", "qty": 1, "unit": "Cái", "location": "", "status": "CHƯA KIỂM", "notes": "5/10 Thắng báo mang bù", "lastUpdated": "22:46:18 5/10/2026", "lastInspector": "", "lastCheckTime": "22:46:18 5/10/2026"}, {"rowIndex": 11, "sku": "", "name": "Bút thử điện (Tolsen 38114)", "qty": 1, "unit": "Cái", "location": "", "status": "CHƯA KIỂM", "notes": "5/10/26 Cấp mới", "lastUpdated": "22:46:18 5/10/2026", "lastInspector": "", "lastCheckTime": "22:46:18 5/10/2026"}, {"rowIndex": 12, "sku": "", "name": "Cờ lê 13", "qty": 1, "unit": "Cái", "location": "", "status": "CHƯA KIỂM", "notes": "", "lastUpdated": "22:46:18 5/10/2026", "lastInspector": "", "lastCheckTime": "22:46:18 5/10/2026"}, {"rowIndex": 13, "sku": "", "name": "Cờ lê 14", "qty": 1, "unit": "Cái", "location": "", "status": "CHƯA KIỂM", "notes": "", "lastUpdated": "22:46:18 5/10/2026", "lastInspector": "", "lastCheckTime": "22:46:18 5/10/2026"}, {"rowIndex": 14, "sku": "", "name": "Cờ lê 17", "qty": 1, "unit": "Cái", "location": "", "status": "CHƯA KIỂM", "notes": "", "lastUpdated": "22:46:18 5/10/2026", "lastInspector": "", "lastCheckTime": "22:46:18 5/10/2026"}, {"rowIndex": 15, "sku": "", "name": "Cờ lê 19", "qty": 1, "unit": "Cái", "location": "", "status": "CHƯA KIỂM", "notes": "", "lastUpdated": "22:46:18 5/10/2026", "lastInspector": "", "lastCheckTime": "22:46:18 5/10/2026"}, {"rowIndex": 16, "sku": "", "name": "Lục giác gấp", "qty": 1, "unit": "Bộ", "location": "", "status": "CHƯA KIỂM", "notes": "", "lastUpdated": "", "lastInspector": "", "lastCheckTime": ""}, {"rowIndex": 17, "sku": "", "name": "Mỏ lết 12''/300mm, mã STMT87434-8, hiệu Stanley", "qty": 1, "unit": "Cái", "location": "", "status": "CHƯA KIỂM", "notes": "5/10 Thắng bảo nhân công để túi Hậu", "lastUpdated": "", "lastInspector": "", "lastCheckTime": ""}, {"rowIndex": 18, "sku": "", "name": "Cờ lê xích 12inch 300mm", "qty": 2, "unit": "Cái", "location": "", "status": "CHƯA KIỂM", "notes": "5/10 thiếu 1, cần chi quỹ bù", "lastUpdated": "", "lastInspector": "", "lastCheckTime": ""}, {"rowIndex": 19, "sku": "", "name": "Dao rọc giấy Total THT522136 18x100mm", "qty": 1, "unit": "Cái", "location": "", "status": "CHƯA KIỂM", "notes": "", "lastUpdated": "", "lastInspector": "", "lastCheckTime": ""}, {"rowIndex": 20, "sku": "", "name": "Thước 5 mét", "qty": 1, "unit": "Cái", "location": "", "status": "ĐÃ KIỂM ✓", "notes": "", "lastUpdated": "23:21:46 05/10/2026 (Thắng (Test WebApp) - Ca 1)", "lastInspector": "Thắng (Test WebApp)", "lastCheckTime": "23:21:46 05/10/2026"}]}, "tui2": {"key": "tui2", "title": "Túi số 2 (Cơ động nhỏ)", "items": [{"rowIndex": 21, "sku": "", "name": "Kìm mỏ nhọn 6\" (Tolsen 10005)", "qty": 1, "unit": "Cái", "location": "", "status": "ĐÃ KIỂM ✓", "notes": "5/10/26 Cấp mới", "lastUpdated": "23:21:46 05/10/2026 (Thắng (Test WebApp) - Ca 1)", "lastInspector": "Thắng (Test WebApp)", "lastCheckTime": "23:21:46 05/10/2026"}, {"rowIndex": 22, "sku": "", "name": "Kìm điện 7\" (Tolsen 10001 - Kìm bằng)", "qty": 1, "unit": "Cái", "location": "", "status": "ĐÃ KIỂM ✓", "notes": "5/10/26 Cấp mới", "lastUpdated": "23:21:46 05/10/2026 (Thắng (Test WebApp) - Ca 1)", "lastInspector": "Thắng (Test WebApp)", "lastCheckTime": "23:21:46 05/10/2026"}, {"rowIndex": 23, "sku": "", "name": "Kìm cắt 6\" (Tolsen 10003)", "qty": 1, "unit": "Cái", "location": "", "status": "ĐÃ KIỂM ✓", "notes": "5/10/26 Cấp mới", "lastUpdated": "23:21:46 05/10/2026 (Thắng (Test WebApp) - Ca 1)", "lastInspector": "Thắng (Test WebApp)", "lastCheckTime": "23:21:46 05/10/2026"}, {"rowIndex": 24, "sku": "", "name": "Tô vít 2 cạnh 6.5x150mm (Tolsen 20004)", "qty": 1, "unit": "Cái", "location": "", "status": "ĐÃ KIỂM ✓", "notes": "", "lastUpdated": "23:21:46 05/10/2026 (Thắng (Test WebApp) - Ca 1)", "lastInspector": "Thắng (Test WebApp)", "lastCheckTime": "23:21:46 05/10/2026"}, {"rowIndex": 25, "sku": "", "name": "Tô vít 4 cạnh PH2x150mm (Tolsen 20008)", "qty": 1, "unit": "Cái", "location": "", "status": "ĐÃ KIỂM ✓", "notes": "5/10/26 Cấp mới", "lastUpdated": "23:21:46 05/10/2026 (Thắng (Test WebApp) - Ca 1)", "lastInspector": "Thắng (Test WebApp)", "lastCheckTime": "23:21:46 05/10/2026"}, {"rowIndex": 26, "sku": "", "name": "Bút thử điện (Tolsen 38114)", "qty": 1, "unit": "Cái", "location": "", "status": "ĐÃ KIỂM ✓", "notes": "5/10/26 Cấp mới", "lastUpdated": "23:21:46 05/10/2026 (Thắng (Test WebApp) - Ca 1)", "lastInspector": "Thắng (Test WebApp)", "lastCheckTime": "23:21:46 05/10/2026"}, {"rowIndex": 27, "sku": "", "name": "Mỏ lết 10\" 250mm (Tolsen 15003)", "qty": 1, "unit": "Cái", "location": "", "status": "ĐÃ KIỂM ✓", "notes": "5/10/26 Cấp mới", "lastUpdated": "23:21:46 05/10/2026 (Thắng (Test WebApp) - Ca 1)", "lastInspector": "Thắng (Test WebApp)", "lastCheckTime": "23:21:46 05/10/2026"}, {"rowIndex": 28, "sku": "", "name": "Cờ lê xích 8\" (200mm)", "qty": 2, "unit": "Cái", "location": "", "status": "ĐÃ KIỂM ✓", "notes": "", "lastUpdated": "23:21:46 05/10/2026 (Thắng (Test WebApp) - Ca 1)", "lastInspector": "Thắng (Test WebApp)", "lastCheckTime": "23:21:46 05/10/2026"}, {"rowIndex": 29, "sku": "", "name": "Dao rọc giấy Total THT522136 18x100mm", "qty": 1, "unit": "Cái", "location": "", "status": "CHƯA KIỂM", "notes": "5/10/26 Cấp mới", "lastUpdated": "", "lastInspector": "", "lastCheckTime": ""}]}, "khochung": {"key": "khochung", "title": "Kho dùng chung (Máy móc lớn)", "items": [{"rowIndex": 30, "sku": "KT3-MM-20", "name": "Máy cắt pin (kèm chắn bảo vệ)", "qty": 1, "unit": "cái", "location": "", "status": "CHƯA KIỂM", "notes": "", "lastUpdated": "22:46:18 5/10/2026", "lastInspector": "", "lastCheckTime": "22:46:18 5/10/2026"}, {"rowIndex": 31, "sku": "KT3-MM-21", "name": "Súng bắn khẩu (dùng pin)", "qty": 1, "unit": "cái", "location": "", "status": "CHƯA KIỂM", "notes": "", "lastUpdated": "22:46:18 5/10/2026", "lastInspector": "", "lastCheckTime": "22:46:18 5/10/2026"}, {"rowIndex": 32, "sku": "KT3-MM-22", "name": "Pin DeWalt (kiểm tra sạc)", "qty": 4, "unit": "quả", "location": "", "status": "CHƯA KIỂM", "notes": "", "lastUpdated": "22:46:18 5/10/2026", "lastInspector": "", "lastCheckTime": "22:46:18 5/10/2026"}, {"rowIndex": 33, "sku": "KT3-MM-23", "name": "Máy đục pin (kèm 02 pin)", "qty": 1, "unit": "cái", "location": "", "status": "CHƯA KIỂM", "notes": "", "lastUpdated": "22:46:18 5/10/2026", "lastInspector": "", "lastCheckTime": "22:46:18 5/10/2026"}, {"rowIndex": 34, "sku": "KT3-MM-24", "name": "Máy đục bê tông điện (220V)", "qty": 1, "unit": "cái", "location": "", "status": "CHƯA KIỂM", "notes": "", "lastUpdated": "22:46:18 5/10/2026", "lastInspector": "", "lastCheckTime": "22:46:18 5/10/2026"}, {"rowIndex": 35, "sku": "KT3-MM-25", "name": "Ép cốt thuỷ lực tay (kèm hàm ép)", "qty": 1, "unit": "cái", "location": "", "status": "CHƯA KIỂM", "notes": "", "lastUpdated": "22:46:18 5/10/2026", "lastInspector": "", "lastCheckTime": "22:46:18 5/10/2026"}, {"rowIndex": 36, "sku": "KT3-MM-26", "name": "Máy ép cốt", "qty": 1, "unit": "cái", "location": "", "status": "CHƯA KIỂM", "notes": "", "lastUpdated": "22:46:18 5/10/2026", "lastInspector": "", "lastCheckTime": "22:46:18 5/10/2026"}, {"rowIndex": 37, "sku": "KT3-MM-27", "name": "Cưa tay (khung cưa sắt)", "qty": 1, "unit": "cái", "location": "", "status": "CHƯA KIỂM", "notes": "", "lastUpdated": "22:46:18 5/10/2026", "lastInspector": "", "lastCheckTime": "22:46:18 5/10/2026"}, {"rowIndex": 38, "sku": "KT3-MM-28", "name": "Bộ khẩu chụp (đủ đầu tuýp)", "qty": 1, "unit": "bộ", "location": "", "status": "CHƯA KIỂM", "notes": "", "lastUpdated": "22:46:18 5/10/2026", "lastInspector": "", "lastCheckTime": "22:46:18 5/10/2026"}, {"rowIndex": 39, "sku": "KT3-MM-29", "name": "Bộ khẩu lục giác (đủ size)", "qty": 1, "unit": "bộ", "location": "", "status": "CHƯA KIỂM", "notes": "", "lastUpdated": "22:46:18 5/10/2026", "lastInspector": "", "lastCheckTime": "22:46:18 5/10/2026"}, {"rowIndex": 40, "sku": "KT3-MM-30", "name": "Máy cắt điện (cắt/mài 220V)", "qty": 1, "unit": "cái", "location": "", "status": "CHƯA KIỂM", "notes": "", "lastUpdated": "22:46:18 5/10/2026", "lastInspector": "", "lastCheckTime": "22:46:18 5/10/2026"}, {"rowIndex": 41, "sku": "KT3-MM-31", "name": "Máy cắt cáp (kèm 02 pin)", "qty": 1, "unit": "cái", "location": "", "status": "CHƯA KIỂM", "notes": "", "lastUpdated": "22:46:18 5/10/2026", "lastInspector": "", "lastCheckTime": "22:46:18 5/10/2026"}, {"rowIndex": 42, "sku": "KT3-MM-32", "name": "Máy hàn nhiệt PPR (kèm đầu hàn)", "qty": 1, "unit": "cái", "location": "", "status": "CHƯA KIỂM", "notes": "", "lastUpdated": "22:46:18 5/10/2026", "lastInspector": "", "lastCheckTime": "22:46:18 5/10/2026"}, {"rowIndex": 43, "sku": "KT3-MM-33", "name": "Thước mét (thước kho)", "qty": 5, "unit": "cái", "location": "", "status": "CHƯA KIỂM", "notes": "", "lastUpdated": "22:46:18 5/10/2026", "lastInspector": "", "lastCheckTime": "22:46:18 5/10/2026"}, {"rowIndex": 44, "sku": "KT3-MM-34", "name": "Tua vít (các cỡ)", "qty": 3, "unit": "bộ", "location": "", "status": "CHƯA KIỂM", "notes": "", "lastUpdated": "22:46:18 5/10/2026", "lastInspector": "", "lastCheckTime": "22:46:18 5/10/2026"}, {"rowIndex": 45, "sku": "KT3-MM-35", "name": "Cờ lê xích (ống lớn)", "qty": 3, "unit": "cái", "location": "", "status": "CHƯA KIỂM", "notes": "", "lastUpdated": "22:46:18 5/10/2026", "lastInspector": "", "lastCheckTime": "22:46:18 5/10/2026"}, {"rowIndex": 46, "sku": "KT3-MM-36", "name": "Mỏ lết (kho)", "qty": 1, "unit": "cái", "location": "", "status": "CHƯA KIỂM", "notes": "", "lastUpdated": "22:46:18 5/10/2026", "lastInspector": "", "lastCheckTime": "22:46:18 5/10/2026"}]}}, "recentChecks": [{"id": "CHK-20261005-2340-382", "time": "23:40:49 05/10/2026", "bag": "Túi số 1 (Cơ động lớn)", "shift": "Ca 1", "inspector": "Ngô Quyết Thắng", "verdict": "ĐỦ 100% (2/2)", "total": 2, "full": 2, "abnormal": 0, "details": "", "notes": "Bàn giao ca đầy đủ, dụng cụ nguyên vẹn"}, {"id": "CHK-20261005-2321-632", "time": "23:21:46 05/10/2026", "bag": "Túi số 2 (Cơ động nhỏ)", "shift": "Ca 1", "inspector": "Thắng (Test WebApp)", "verdict": "ĐỦ 100% (9/9)", "total": 9, "full": 9, "abnormal": 0, "details": "", "notes": "Kiểm thử kết nối tự động từ Web App"}], "lastCheckByBag": {"tui1": {"id": "CHK-20261005-2340-382", "time": "23:40:49 05/10/2026", "bag": "Túi số 1 (Cơ động lớn)", "shift": "Ca 1", "inspector": "Ngô Quyết Thắng", "verdict": "ĐỦ 100% (2/2)", "total": 2, "full": 2, "abnormal": 0, "details": "", "notes": "Bàn giao ca đầy đủ, dụng cụ nguyên vẹn"}, "tui2": {"id": "CHK-20261005-2321-632", "time": "23:21:46 05/10/2026", "bag": "Túi số 2 (Cơ động nhỏ)", "shift": "Ca 1", "inspector": "Thắng (Test WebApp)", "verdict": "ĐỦ 100% (9/9)", "total": 9, "full": 9, "abnormal": 0, "details": "", "notes": "Kiểm thử kết nối tự động từ Web App"}, "khochung": null}}, "items": {"ok": true, "items": [{"rowIndex": 2, "sku": "KT3-0001", "name": "Đồng hồ đa năng Kyoritsu KEW 2117R", "shelfLocation": "Kệ A1 - Tầng 2 - Hộp 01", "unit": "Cái", "qty": 1, "purpose": "Sẵn sàng sử dụng", "assignedTo": "Tổ Cơ Điện", "notes": "Thiết bị đo kiểm điện áp, dòng điện", "lastUpdated": "05:09:55 2/10/2026", "id": "KT3_AUTO_0001"}, {"rowIndex": 3, "sku": "KT3-0002", "name": "Aptomat khối MCCB 3P 100A LS", "shelfLocation": "Kệ A2 - Tầng 1", "unit": "Cái", "qty": 2, "purpose": "Dự phòng tủ điện", "assignedTo": "Tổ Điện Nước", "notes": "Hàng dự phòng thay thế khẩn cấp", "lastUpdated": "03:42:31 2/10/2026", "id": "KT3_AUTO_0002"}, {"rowIndex": 4, "sku": "KT3-0003", "name": "Đèn pha LED 400W chiếu sáng sân tập", "shelfLocation": "Kệ B1 - Tầng Trệt", "unit": "Bộ", "qty": 4, "purpose": "Chờ thay thế", "assignedTo": "Tổ Chiếu Sáng", "notes": "Vật tư bảo dưỡng đợt 2", "lastUpdated": "03:42:31 2/10/2026", "id": "KT3_AUTO_0003"}, {"rowIndex": 5, "sku": "", "name": "Bộ nguồn đèn Tospo 400W", "shelfLocation": "Kệ B", "unit": "Cái", "qty": 2, "purpose": "", "assignedTo": "", "notes": "", "lastUpdated": "", "id": "KT3_ROW_5"}, {"rowIndex": 6, "sku": "KT3-0005", "name": "LCU bộ điều khiển đèn Tospo", "shelfLocation": "Kệ B", "unit": "Cái", "qty": 5, "purpose": "", "assignedTo": "", "notes": "", "lastUpdated": "05:54:26 04/10/2026", "id": "KT3_ROW_6"}, {"rowIndex": 7, "sku": "", "name": "Bóng mặt led", "shelfLocation": "Kệ B", "unit": "Bộ", "qty": 1, "purpose": "", "assignedTo": "", "notes": "", "lastUpdated": "", "id": "KT3_ROW_7"}, {"rowIndex": 8, "sku": "KT3-T1-01", "name": "Thước mét (thước cuộn)", "shelfLocation": "Túi 1 - Tổ Cơ Điện", "unit": "cái", "qty": 2, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_T1_01"}, {"rowIndex": 9, "sku": "KT3-T1-02", "name": "Tua vít (đa năng/2 đầu)", "shelfLocation": "Túi 1 - Tổ Cơ Điện", "unit": "bộ", "qty": 2, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_T1_02"}, {"rowIndex": 10, "sku": "KT3-T1-03", "name": "Cờ lê xích (mở ống nước)", "shelfLocation": "Túi 1 - Tổ Cơ Điện", "unit": "cái", "qty": 2, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_T1_03"}, {"rowIndex": 11, "sku": "KT3-T1-04", "name": "Mỏ lết", "shelfLocation": "Túi 1 - Tổ Cơ Điện", "unit": "cái", "qty": 1, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_T1_04"}, {"rowIndex": 12, "sku": "KT3-T1-05", "name": "Cờ lê 24 & 23", "shelfLocation": "Túi 1 - Tổ Cơ Điện", "unit": "cái", "qty": 2, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Thuộc: Bộ cờ lê các số (tổng 09 cái):", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_T1_05"}, {"rowIndex": 13, "sku": "KT3-T1-06", "name": "Cờ lê 19", "shelfLocation": "Túi 1 - Tổ Cơ Điện", "unit": "cái", "qty": 1, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Thuộc: Bộ cờ lê các số (tổng 09 cái):", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_T1_06"}, {"rowIndex": 14, "sku": "KT3-T1-07", "name": "Cờ lê 17 & 16", "shelfLocation": "Túi 1 - Tổ Cơ Điện", "unit": "cái", "qty": 2, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Thuộc: Bộ cờ lê các số (tổng 09 cái):", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_T1_07"}, {"rowIndex": 15, "sku": "KT3-T1-08", "name": "Cờ lê 14", "shelfLocation": "Túi 1 - Tổ Cơ Điện", "unit": "cái", "qty": 1, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Thuộc: Bộ cờ lê các số (tổng 09 cái):", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_T1_08"}, {"rowIndex": 16, "sku": "KT3-T1-09", "name": "Cờ lê 13", "shelfLocation": "Túi 1 - Tổ Cơ Điện", "unit": "cái", "qty": 3, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Thuộc: Bộ cờ lê các số (tổng 09 cái):", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_T1_09"}, {"rowIndex": 17, "sku": "KT3-T1-10", "name": "Kìm các loại (điện, nhọn)", "shelfLocation": "Túi 1 - Tổ Cơ Điện", "unit": "bộ", "qty": 1, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_T1_10"}, {"rowIndex": 18, "sku": "KT3-T1-11", "name": "Đồng hồ Ampe kìm", "shelfLocation": "Túi 1 - Tổ Cơ Điện", "unit": "cái", "qty": 1, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_T1_11"}, {"rowIndex": 19, "sku": "KT3-T2-12", "name": "Cờ lê xích (mở ống nước)", "shelfLocation": "Túi 2 - Tổ Cơ Điện", "unit": "cái", "qty": 1, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_T2_12"}, {"rowIndex": 20, "sku": "KT3-T2-13", "name": "Tua vít (đa năng)", "shelfLocation": "Túi 2 - Tổ Cơ Điện", "unit": "bộ", "qty": 1, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_T2_13"}, {"rowIndex": 21, "sku": "KT3-T2-14", "name": "Thước mét (thước cuộn)", "shelfLocation": "Túi 2 - Tổ Cơ Điện", "unit": "cái", "qty": 1, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_T2_14"}, {"rowIndex": 22, "sku": "KT3-T2-15", "name": "Cờ lê 19", "shelfLocation": "Túi 2 - Tổ Cơ Điện", "unit": "cái", "qty": 1, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Thuộc: Bộ cờ lê các số (tổng 04 cái):", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_T2_15"}, {"rowIndex": 23, "sku": "KT3-T2-16", "name": "Cờ lê 14", "shelfLocation": "Túi 2 - Tổ Cơ Điện", "unit": "cái", "qty": 1, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Thuộc: Bộ cờ lê các số (tổng 04 cái):", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_T2_16"}, {"rowIndex": 24, "sku": "KT3-T2-17", "name": "Cờ lê 13 (hoặc 15)", "shelfLocation": "Túi 2 - Tổ Cơ Điện", "unit": "cái", "qty": 2, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Thuộc: Bộ cờ lê các số (tổng 04 cái):", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_T2_17"}, {"rowIndex": 25, "sku": "KT3-T2-18", "name": "Kìm, kéo, băng dính", "shelfLocation": "Túi 2 - Tổ Cơ Điện", "unit": "bộ", "qty": 1, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_T2_18"}, {"rowIndex": 26, "sku": "KT3-T2-19", "name": "Dụng cụ phụ trợ khác", "shelfLocation": "Túi 2 - Tổ Cơ Điện", "unit": "--", "qty": 1, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_T2_19"}, {"rowIndex": 27, "sku": "KT3-MM-20", "name": "Máy cắt pin (kèm chắn bảo vệ)", "shelfLocation": "Kho chung", "unit": "cái", "qty": 1, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_MM_20"}, {"rowIndex": 28, "sku": "KT3-MM-21", "name": "Súng bắn khẩu (dùng pin)", "shelfLocation": "Kho chung", "unit": "cái", "qty": 1, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_MM_21"}, {"rowIndex": 29, "sku": "KT3-MM-22", "name": "Pin DeWalt (kiểm tra sạc)", "shelfLocation": "Kho chung", "unit": "quả", "qty": 4, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_MM_22"}, {"rowIndex": 30, "sku": "KT3-MM-23", "name": "Máy đục pin (kèm 02 pin)", "shelfLocation": "Kho chung", "unit": "cái", "qty": 1, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_MM_23"}, {"rowIndex": 31, "sku": "KT3-MM-24", "name": "Máy đục bê tông điện (220V)", "shelfLocation": "Kho chung", "unit": "cái", "qty": 1, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_MM_24"}, {"rowIndex": 32, "sku": "KT3-MM-25", "name": "Ép cốt thuỷ lực tay (kèm hàm ép)", "shelfLocation": "Kho chung", "unit": "cái", "qty": 1, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_MM_25"}, {"rowIndex": 33, "sku": "KT3-MM-26", "name": "Máy ép cốt", "shelfLocation": "Kho chung", "unit": "cái", "qty": 1, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_MM_26"}, {"rowIndex": 34, "sku": "KT3-MM-27", "name": "Cưa tay (khung cưa sắt)", "shelfLocation": "Kho chung", "unit": "cái", "qty": 1, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_MM_27"}, {"rowIndex": 35, "sku": "KT3-MM-28", "name": "Bộ khẩu chụp (đủ đầu tuýp)", "shelfLocation": "Kho chung", "unit": "bộ", "qty": 1, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_MM_28"}, {"rowIndex": 36, "sku": "KT3-MM-29", "name": "Bộ khẩu lục giác (đủ size)", "shelfLocation": "Kho chung", "unit": "bộ", "qty": 1, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_MM_29"}, {"rowIndex": 37, "sku": "KT3-MM-30", "name": "Máy cắt điện (cắt/mài 220V)", "shelfLocation": "Kho chung", "unit": "cái", "qty": 1, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_MM_30"}, {"rowIndex": 38, "sku": "KT3-MM-31", "name": "Máy cắt cáp (kèm 02 pin)", "shelfLocation": "Kho chung", "unit": "cái", "qty": 1, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_MM_31"}, {"rowIndex": 39, "sku": "KT3-MM-32", "name": "Máy hàn nhiệt PPR (kèm đầu hàn)", "shelfLocation": "Kho chung", "unit": "cái", "qty": 1, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_MM_32"}, {"rowIndex": 40, "sku": "KT3-MM-33", "name": "Thước mét (thước kho)", "shelfLocation": "Kho chung", "unit": "cái", "qty": 5, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_MM_33"}, {"rowIndex": 41, "sku": "KT3-MM-34", "name": "Tua vít (các cỡ)", "shelfLocation": "Kho chung", "unit": "bộ", "qty": 3, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_MM_34"}, {"rowIndex": 42, "sku": "KT3-MM-35", "name": "Cờ lê xích (ống lớn)", "shelfLocation": "Kho chung", "unit": "cái", "qty": 3, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_MM_35"}, {"rowIndex": 43, "sku": "KT3-MM-36", "name": "Mỏ lết (kho)", "shelfLocation": "Kho chung", "unit": "cái", "qty": 1, "purpose": "Sẵn sàng sử dụng (Tổ Cơ Điện Sân Golf)", "assignedTo": "Tổ Cơ Điện", "notes": "Dụng cụ bảo dưỡng Cơ điện Sân Golf", "lastUpdated": "22:46:18 5/10/2026", "id": "KT3_AUTO_KT3_MM_36"}], "shelves": ["Kho chung", "Kệ A1 - Tầng 2 - Hộp 01", "Kệ A2 - Tầng 1", "Kệ B", "Kệ B1 - Tầng Trệt", "Túi 1 - Tổ Cơ Điện", "Túi 2 - Tổ Cơ Điện"], "totalItems": 42, "totalQty": 70}, "thekho": {"ok": true, "transactions": [], "stats": {"totalIn": 0, "totalOut": 0, "count": 0}}};
+
+    let khoState = {
+      currentTab: 'check',
+      currentBagKey: 'tui1',
+      items: [],
+      shelves: [],
+      golfGroups: {},
+      recentChecks: [],
+      transactions: [],
+      shelfFilter: 'ALL',
+      searchKeyword: '',
+      isSyncing: false,
+      lastSyncTime: null
+    };
+
+    function initKhoModule() {
+      try {
+        const cached = localStorage.getItem(KHO_STORAGE_KEY);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          khoState.items = parsed.items || [];
+          khoState.shelves = parsed.shelves || [];
+          khoState.golfGroups = parsed.golfGroups || {};
+          khoState.recentChecks = parsed.recentChecks || [];
+          khoState.transactions = parsed.transactions || [];
+          khoState.lastSyncTime = parsed.lastSyncTime || null;
+        }
+      } catch (e) {
+        console.warn('Kho cache read error:', e);
+      }
+
+      // Fallback to bundled data if empty
+      if (!khoState.items || khoState.items.length === 0) {
+        khoState.items = (KHO_BUNDLED_INITIAL_DATA.items && KHO_BUNDLED_INITIAL_DATA.items.items) || [];
+        khoState.shelves = (KHO_BUNDLED_INITIAL_DATA.items && KHO_BUNDLED_INITIAL_DATA.items.shelves) || [];
+      }
+      if (!khoState.golfGroups || Object.keys(khoState.golfGroups).length === 0) {
+        khoState.golfGroups = (KHO_BUNDLED_INITIAL_DATA.tools && KHO_BUNDLED_INITIAL_DATA.tools.groups) || {};
+        khoState.recentChecks = (KHO_BUNDLED_INITIAL_DATA.tools && KHO_BUNDLED_INITIAL_DATA.tools.recentChecks) || [];
+      }
+      if (!khoState.transactions || khoState.transactions.length === 0) {
+        khoState.transactions = (KHO_BUNDLED_INITIAL_DATA.thekho && KHO_BUNDLED_INITIAL_DATA.thekho.transactions) || [];
+      }
+    }
+
+    function saveKhoStateToCache() {
+      try {
+        localStorage.setItem(KHO_STORAGE_KEY, JSON.stringify({
+          items: khoState.items,
+          shelves: khoState.shelves,
+          golfGroups: khoState.golfGroups,
+          recentChecks: khoState.recentChecks,
+          transactions: khoState.transactions,
+          lastSyncTime: khoState.lastSyncTime
+        }));
+      } catch (e) {
+        console.warn('Kho cache save error:', e);
+      }
+    }
+
+    function openKhoToolsModal(defaultTab = 'check') {
+      initKhoModule();
+      const modal = document.getElementById('modal-kho-tools');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      populateKhoInspectors();
+      switchKhoModalTab(defaultTab);
+      syncKhoDataFromCloud(false);
+      lucide.createIcons();
+    }
+
+    function closeKhoToolsModal() {
+      const modal = document.getElementById('modal-kho-tools');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function switchKhoModalTab(tab) {
+      khoState.currentTab = tab;
+      const tabs = ['check', 'items', 'thekho'];
+      tabs.forEach(t => {
+        const btn = document.getElementById('tab-btn-kho-' + t);
+        const section = document.getElementById('kho-tab-' + t);
+        if (t === tab) {
+          if (btn) {
+            btn.classList.add('bg-white', 'text-gray-900', 'shadow-xs');
+            btn.classList.remove('text-gray-600');
+          }
+          if (section) section.classList.remove('hidden');
+        } else {
+          if (btn) {
+            btn.classList.remove('bg-white', 'text-gray-900', 'shadow-xs');
+            btn.classList.add('text-gray-600');
+          }
+          if (section) section.classList.add('hidden');
+        }
+      });
+
+      if (tab === 'check') renderKhoCheckView();
+      if (tab === 'items') renderKhoItemsView();
+      if (tab === 'thekho') renderKhoTheKhoView();
+      lucide.createIcons();
+    }
+
+    function populateKhoInspectors() {
+      const selCheck = document.getElementById('kho-check-inspector');
+      const selTx = document.getElementById('tx-performer');
+      const employees = (repo && repo.employees) ? repo.employees.filter(e => e.status !== 'inactive') : [];
+      const currentEmp = (repo && repo.getCurrentEmployee) ? repo.getCurrentEmployee() : null;
+
+      [selCheck, selTx].forEach(sel => {
+        if (!sel) return;
+        sel.innerHTML = '';
+        employees.forEach(emp => {
+          const opt = document.createElement('option');
+          opt.value = emp.fullName;
+          opt.textContent = emp.fullName + (emp.shortName ? ` (${emp.shortName})` : '');
+          if (currentEmp && emp.id === currentEmp.id) {
+            opt.selected = true;
+          }
+          sel.appendChild(opt);
+        });
+      });
+
+      // Auto detect shift
+      const shiftSel = document.getElementById('kho-check-shift');
+      if (shiftSel) {
+        const hr = new Date().getHours();
+        if (hr >= 6 && hr < 14) shiftSel.value = 'Ca 1';
+        else if (hr >= 14 && hr < 22) shiftSel.value = 'Ca 2';
+        else shiftSel.value = 'Ca 3';
+      }
+    }
+
+    async function syncKhoDataFromCloud(isManual = false) {
+      if (khoState.isSyncing) return;
+      khoState.isSyncing = true;
+      const icon = document.getElementById('kho-refresh-icon');
+      const badge = document.getElementById('kho-sync-label');
+      if (icon) icon.classList.add('animate-spin');
+      if (badge) badge.innerText = 'Đang đồng bộ...';
+
+      try {
+        const [toolsRes, itemsRes, theKhoRes] = await Promise.allSettled([
+          fetch(KHO_APPS_SCRIPT_URL + '?action=getGolfTools').then(r => r.json()),
+          fetch(KHO_APPS_SCRIPT_URL + '?action=getItems').then(r => r.json()),
+          fetch(KHO_APPS_SCRIPT_URL + '?action=getTheKho').then(r => r.json())
+        ]);
+
+        if (toolsRes.status === 'fulfilled' && toolsRes.value && toolsRes.value.ok) {
+          khoState.golfGroups = toolsRes.value.groups || khoState.golfGroups;
+          khoState.recentChecks = toolsRes.value.recentChecks || khoState.recentChecks;
+        }
+        if (itemsRes.status === 'fulfilled' && itemsRes.value && itemsRes.value.ok) {
+          khoState.items = itemsRes.value.items || khoState.items;
+          khoState.shelves = itemsRes.value.shelves || khoState.shelves;
+        }
+        if (theKhoRes.status === 'fulfilled' && theKhoRes.value && theKhoRes.value.ok) {
+          khoState.transactions = theKhoRes.value.transactions || khoState.transactions;
+        }
+
+        khoState.lastSyncTime = new Date().toLocaleTimeString('vi-VN');
+        saveKhoStateToCache();
+
+        if (badge) badge.innerText = 'Đã đồng bộ ' + khoState.lastSyncTime;
+        if (isManual) showToast('Đã đồng bộ dữ liệu Kho & Dụng cụ thành công');
+      } catch (err) {
+        console.error('syncKhoDataFromCloud error:', err);
+        if (badge) badge.innerText = 'Dùng bản lưu tạm (Offline)';
+        if (isManual) showToast('Lỗi kết nối mạng! Đang hiển thị bản lưu gần nhất');
+      } finally {
+        khoState.isSyncing = false;
+        if (icon) icon.classList.remove('animate-spin');
+        if (khoState.currentTab === 'check') renderKhoCheckView();
+        if (khoState.currentTab === 'items') renderKhoItemsView();
+        if (khoState.currentTab === 'thekho') renderKhoTheKhoView();
+        lucide.createIcons();
+      }
+    }
+
+    // ─── TAB 1: CHECK DỤNG CỤ IMPLEMENTATION ──────────────────────────────────
+    function renderKhoCheckView() {
+      const bagContainer = document.getElementById('kho-bag-selector');
+      const toolsList = document.getElementById('kho-tools-list');
+      const badgeCount = document.getElementById('badge-check-count');
+      const recentList = document.getElementById('kho-recent-checks-list');
+
+      const groups = khoState.golfGroups || {};
+      const bagKeys = Object.keys(groups);
+      if (bagKeys.length === 0) return;
+
+      if (!groups[khoState.currentBagKey] && bagKeys.length > 0) {
+        khoState.currentBagKey = bagKeys[0];
+      }
+
+      // 1. Render bag selector buttons
+      if (bagContainer) {
+        bagContainer.innerHTML = bagKeys.map(k => {
+          const grp = groups[k];
+          const isAct = k === khoState.currentBagKey;
+          const items = grp.items || [];
+          const checkedCount = items.filter(it => it.status === 'ĐÃ KIỂM ✓' || it.status === 'ĐỦ').length;
+          const isFull = items.length > 0 && checkedCount === items.length;
+          const badgeClass = isFull ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800';
+
+          return `
+            <button onclick="selectKhoBag('${k}')" class="px-3 py-1.5 rounded-xl border text-xs font-bold transition flex items-center gap-1.5 ${isAct ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs' : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'}">
+              <span>${grp.title || k}</span>
+              <span class="text-[10px] px-1.5 py-0.2 rounded-full ${badgeClass}">${checkedCount}/${items.length}</span>
+            </button>
+          `;
+        }).join('');
+      }
+
+      // 2. Render items in active bag
+      const currentGrp = groups[khoState.currentBagKey];
+      if (!currentGrp || !currentGrp.items) return;
+
+      const items = currentGrp.items;
+      const checkedCount = items.filter(it => it.status === 'ĐÃ KIỂM ✓' || it.status === 'ĐỦ').length;
+      if (badgeCount) {
+        badgeCount.innerText = `${checkedCount}/${items.length}`;
+        badgeCount.className = checkedCount === items.length ?
+          'px-2 py-0.5 text-[10px] rounded-full bg-emerald-100 text-emerald-800 font-extrabold' :
+          'px-2 py-0.5 text-[10px] rounded-full bg-amber-100 text-amber-800 font-extrabold';
+      }
+
+      if (toolsList) {
+        toolsList.innerHTML = items.map((it, idx) => {
+          const isChecked = it.status === 'ĐÃ KIỂM ✓' || it.status === 'ĐỦ';
+          const btnClass = isChecked ?
+            'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100' :
+            'bg-amber-50 text-amber-700 border-amber-300 hover:bg-amber-100';
+
+          return `
+            <div class="p-3 bg-white rounded-xl border border-gray-200 hover:border-gray-300 transition space-y-2">
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <div class="font-bold text-xs text-gray-900">${it.name}</div>
+                  <div class="text-[11px] text-gray-500 flex items-center gap-2 mt-0.5">
+                    <span>Số lượng: <strong class="text-gray-800">${it.qty} ${it.unit || 'Cái'}</strong></span>
+                    ${it.sku ? `<span class="bg-gray-100 text-gray-600 px-1.5 py-0.2 rounded text-[10px]">${it.sku}</span>` : ''}
+                  </div>
+                </div>
+                <button onclick="toggleKhoItemStatus(${idx})" class="px-2.5 py-1 rounded-lg border text-xs font-bold transition flex items-center gap-1 shrink-0 ${btnClass}">
+                  <i data-lucide="${isChecked ? 'check-circle-2' : 'alert-circle'}" class="w-3.5 h-3.5"></i>
+                  <span>${isChecked ? 'ĐÃ KIỂM ✓' : 'CHƯA KIỂM ⚠️'}</span>
+                </button>
+              </div>
+
+              <div class="flex items-center gap-2 pt-1 border-t border-gray-100">
+                <input type="text" value="${it.notes || ''}" onchange="setKhoItemNote(${idx}, this.value)" placeholder="Ghi chú (thiếu, mang bù, sửa chữa...)" class="flex-1 bg-slate-50 border border-gray-200 rounded-lg px-2.5 py-1 text-[11px] text-gray-800 focus:bg-white focus:border-indigo-500 transition">
+                ${it.lastInspector ? `<span class="text-[10px] text-gray-400 shrink-0 font-medium">Lần trước: ${it.lastInspector} (${it.lastCheckTime ? it.lastCheckTime.split(' ')[0] : ''})</span>` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // 3. Render recent checks
+      if (recentList) {
+        const checks = khoState.recentChecks || [];
+        if (checks.length === 0) {
+          recentList.innerHTML = '<div class="text-gray-400 text-center py-2">Chưa có lượt kiểm tra nào được ghi nhận.</div>';
+        } else {
+          recentList.innerHTML = checks.map(c => `
+            <div class="p-2.5 rounded-xl border border-slate-200 bg-white space-y-1">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-gray-800">${c.bag || 'Túi dụng cụ'}</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${String(c.verdict).includes('100%') ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${c.verdict || 'ĐÃ KIỂM'}</span>
+              </div>
+              <div class="text-[11px] text-gray-500 flex items-center justify-between">
+                <span>👤 ${c.inspector || 'Kỹ thuật viên'} (${c.shift || 'Ca'})</span>
+                <span class="font-mono text-[10px]">${c.time || ''}</span>
+              </div>
+              ${c.details ? `<div class="text-[11px] text-rose-600 font-medium">⚠️ ${c.details}</div>` : ''}
+              ${c.notes ? `<div class="text-[11px] text-gray-600 italic">📝 ${c.notes}</div>` : ''}
+            </div>
+          `).join('');
+        }
+      }
+    }
+
+    function selectKhoBag(bagKey) {
+      khoState.currentBagKey = bagKey;
+      renderKhoCheckView();
+      lucide.createIcons();
+    }
+
+    function toggleKhoItemStatus(idx) {
+      const grp = khoState.golfGroups[khoState.currentBagKey];
+      if (!grp || !grp.items || !grp.items[idx]) return;
+      const it = grp.items[idx];
+      it.status = (it.status === 'ĐÃ KIỂM ✓' || it.status === 'ĐỦ') ? 'CHƯA KIỂM' : 'ĐÃ KIỂM ✓';
+      saveKhoStateToCache();
+      renderKhoCheckView();
+      lucide.createIcons();
+    }
+
+    function setKhoItemNote(idx, val) {
+      const grp = khoState.golfGroups[khoState.currentBagKey];
+      if (!grp || !grp.items || !grp.items[idx]) return;
+      grp.items[idx].notes = val.trim();
+      saveKhoStateToCache();
+    }
+
+    function markAllToolsFull() {
+      const grp = khoState.golfGroups[khoState.currentBagKey];
+      if (!grp || !grp.items) return;
+      grp.items.forEach(it => {
+        it.status = 'ĐÃ KIỂM ✓';
+      });
+      saveKhoStateToCache();
+      renderKhoCheckView();
+      lucide.createIcons();
+      showToast('Đã đánh dấu tất cả dụng cụ đủ 100%');
+    }
+
+    async function submitKhoBagCheck() {
+      const grp = khoState.golfGroups[khoState.currentBagKey];
+      if (!grp || !grp.items) return;
+
+      const inspectorSel = document.getElementById('kho-check-inspector');
+      const shiftSel = document.getElementById('kho-check-shift');
+      const inspector = inspectorSel ? inspectorSel.value : 'Kỹ thuật viên';
+      const shift = shiftSel ? shiftSel.value : 'Ca 1';
+
+      const items = grp.items;
+      const abnormalItems = items.filter(it => it.status !== 'ĐÃ KIỂM ✓' && it.status !== 'ĐỦ');
+      const abnormalCount = abnormalItems.length;
+      const verdict = abnormalCount === 0 ? '100% ĐỦ' : `Thiếu/Hỏng ${abnormalCount}/${items.length}`;
+
+      const payload = {
+        bag: grp.title || khoState.currentBagKey,
+        bagKey: khoState.currentBagKey,
+        inspector: inspector,
+        shift: shift,
+        verdict: verdict,
+        abnormal: abnormalCount,
+        time: new Date().toLocaleString('vi-VN'),
+        items: items.map(it => ({
+          rowIndex: it.rowIndex,
+          name: it.name,
+          qty: it.qty,
+          unit: it.unit,
+          status: it.status,
+          notes: it.notes || ''
+        }))
+      };
+
+      const btn = document.getElementById('btn-submit-bag-check');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i><span>Đang gửi...</span>';
+        lucide.createIcons();
+      }
+
+      try {
+        // Send to Apps Script GET query string endpoint to bypass browser CORS
+        const url = KHO_APPS_SCRIPT_URL + '?action=submitBagCheck&payload=' + encodeURIComponent(JSON.stringify(payload));
+        const resp = await fetch(url);
+        const resJson = await resp.json();
+
+        // Update local recent checks
+        khoState.recentChecks.unshift({
+          bag: payload.bag,
+          inspector: payload.inspector,
+          shift: payload.shift,
+          time: payload.time,
+          verdict: payload.verdict,
+          abnormal: payload.abnormal,
+          details: abnormalItems.map(a => a.name + (a.notes ? ` (${a.notes})` : '')).join(', ')
+        });
+        saveKhoStateToCache();
+
+        showToast(`Đã ghi nhận bàn giao ${payload.bag} lên Google Sheet!`);
+      } catch (err) {
+        console.warn('submitKhoBagCheck network warn:', err);
+        showToast('Đã lưu kết quả bàn giao vào máy (Offline). Sẽ tự đồng bộ khi có mạng.');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i data-lucide="send" class="w-3.5 h-3.5"></i><span>Xác nhận & Gửi ca</span>';
+          lucide.createIcons();
+        }
+        renderKhoCheckView();
+      }
+    }
+
+    function copyKhoCheckZalo() {
+      const grp = khoState.golfGroups[khoState.currentBagKey];
+      if (!grp) return;
+      const inspector = document.getElementById('kho-check-inspector')?.value || 'KTV';
+      const shift = document.getElementById('kho-check-shift')?.value || 'Ca trực';
+      const items = grp.items || [];
+      const checked = items.filter(it => it.status === 'ĐÃ KIỂM ✓' || it.status === 'ĐỦ').length;
+      const abnormals = items.filter(it => it.status !== 'ĐÃ KIỂM ✓' && it.status !== 'ĐỦ');
+
+      let msg = `[BÀN GIAO CA - KIỂM TÚI DỤNG CỤ M&E]\n`;
+      msg += `📍 Vị trí: ${grp.title || khoState.currentBagKey}\n`;
+      msg += `👤 Người kiểm: ${inspector}\n`;
+      msg += `⏰ Ca trực: ${shift} (${new Date().toLocaleTimeString('vi-VN')} ${new Date().toLocaleDateString('vi-VN')})\n`;
+      msg += `📊 Kết quả: ${checked}/${items.length} (${abnormals.length === 0 ? 'ĐỦ 100%' : 'CÓ VẬT TƯ CẦN LƯU Ý'})\n`;
+      if (abnormals.length > 0) {
+        msg += `⚠️ Dụng cụ cần chú ý:\n`;
+        abnormals.forEach((a, i) => {
+          msg += `  ${i+1}. ${a.name}${a.notes ? ' - ' + a.notes : ''}\n`;
+        });
+      }
+
+      navigator.clipboard.writeText(msg).then(() => {
+        showToast('Đã sao chép nội dung báo cáo Zalo!');
+      }).catch(() => {
+        showToast('Vui lòng cấp quyền clipboard để sao chép!');
+      });
+    }
+
+    // ─── TAB 2: GIÁ KỆ & TỒN KHO IMPLEMENTATION ──────────────────────────────
+    function renderKhoItemsView() {
+      const container = document.getElementById('kho-items-container');
+      const chipsEl = document.getElementById('kho-shelf-chips');
+      const statItems = document.getElementById('kho-stat-total-items');
+      const statQty = document.getElementById('kho-stat-total-qty');
+      const statShelves = document.getElementById('kho-stat-total-shelves');
+
+      const items = khoState.items || [];
+      const shelves = khoState.shelves || [];
+
+      if (statItems) statItems.innerText = items.length;
+      if (statQty) {
+        const total = items.reduce((sum, it) => sum + (Number(it.qty) || 0), 0);
+        statQty.innerText = total;
+      }
+      if (statShelves) statShelves.innerText = shelves.length || 7;
+
+      // Render shelf chips
+      if (chipsEl) {
+        const allShelves = ['ALL', ...shelves];
+        chipsEl.innerHTML = allShelves.map(s => {
+          const isAct = khoState.shelfFilter === s;
+          const label = s === 'ALL' ? 'Tất cả vị trí' : s;
+          return `
+            <button onclick="setKhoShelfFilter('${s}')" class="px-2.5 py-1 rounded-xl text-xs font-semibold whitespace-nowrap transition ${isAct ? 'bg-indigo-600 text-white shadow-xs' : 'bg-slate-100 text-gray-700 hover:bg-slate-200'}">
+              ${label}
+            </button>
+          `;
+        }).join('');
+      }
+
+      // Filter items
+      const kw = (khoState.searchKeyword || '').toLowerCase().trim();
+      const filtered = items.filter(it => {
+        const matchShelf = (khoState.shelfFilter === 'ALL' || !khoState.shelfFilter) ? true : (it.shelfLocation === khoState.shelfFilter);
+        const matchKw = !kw ||
+          (it.name && it.name.toLowerCase().includes(kw)) ||
+          (it.sku && it.sku.toLowerCase().includes(kw)) ||
+          (it.shelfLocation && it.shelfLocation.toLowerCase().includes(kw));
+        return matchShelf && matchKw;
+      });
+
+      if (container) {
+        if (filtered.length === 0) {
+          container.innerHTML = '<div class="text-gray-400 text-center py-6">Không tìm thấy vật tư nào phù hợp.</div>';
+          return;
+        }
+
+        container.innerHTML = filtered.map(it => `
+          <div class="p-3.5 bg-white rounded-xl border border-gray-200 hover:border-gray-300 transition flex items-center justify-between gap-3">
+            <div class="min-w-0 space-y-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                ${it.sku ? `<span class="px-2 py-0.5 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 text-[10px] font-extrabold font-mono">${it.sku}</span>` : ''}
+                <span class="px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-bold">📍 ${it.shelfLocation || 'Chưa xếp kệ'}</span>
+                ${it.assignedTo ? `<span class="text-[10px] text-gray-500">👤 ${it.assignedTo}</span>` : ''}
+              </div>
+              <div class="font-bold text-xs text-gray-900 leading-tight">${it.name}</div>
+              ${it.purpose ? `<div class="text-[11px] text-gray-500 truncate">Mục đích: ${it.purpose}</div>` : ''}
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <div class="text-right">
+                <div class="text-base font-black text-indigo-600 leading-none">${it.qty}</div>
+                <div class="text-[10px] text-gray-400 font-semibold mt-0.5">${it.unit || 'Cái'}</div>
+              </div>
+              <button onclick="openKhoTransactionModal('${it.sku || it.name}')" class="p-2 bg-slate-100 hover:bg-slate-200 text-gray-700 rounded-xl text-xs font-bold transition active:scale-95" title="Xuất / Nhập">
+                <i data-lucide="arrow-left-right" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function setKhoShelfFilter(s) {
+      khoState.shelfFilter = s;
+      renderKhoItemsView();
+      lucide.createIcons();
+    }
+
+    function handleKhoItemsSearch(val) {
+      khoState.searchKeyword = val;
+      renderKhoItemsView();
+      lucide.createIcons();
+    }
+
+    // ─── TAB 3: THẺ KHO IMPLEMENTATION ────────────────────────────────────────
+    function renderKhoTheKhoView() {
+      const container = document.getElementById('kho-thekho-container');
+      const txs = khoState.transactions || [];
+
+      if (!container) return;
+      if (txs.length === 0) {
+        container.innerHTML = '<div class="text-gray-400 text-center py-6">Chưa có giao dịch thẻ kho nào được ghi lại trên Google Sheet.</div>';
+        return;
+      }
+
+      container.innerHTML = txs.map(tx => {
+        const isOut = tx.type === 'OUT' || String(tx.type).includes('XUẤT');
+        const badgeCls = isOut ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        const sign = isOut ? '-' : '+';
+
+        return `
+          <div class="p-3 bg-white rounded-xl border border-gray-200 space-y-1.5">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-[10px] font-extrabold border ${badgeCls}">${isOut ? 'XUẤT KHO' : 'NHẬP KHO'}</span>
+                <span class="font-bold text-xs text-gray-900">${tx.name || tx.sku}</span>
+              </div>
+              <span class="font-black text-xs ${isOut ? 'text-rose-600' : 'text-emerald-600'}">${sign}${tx.qty} ${tx.unit || ''}</span>
+            </div>
+            <div class="text-[11px] text-gray-500 flex items-center justify-between">
+              <span>👤 ${tx.performer || 'Kỹ thuật viên'} · ${tx.reason || 'Bảo dưỡng'}</span>
+              <span class="font-mono text-[10px]">${tx.date || tx.time || ''}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openKhoTransactionModal(preselectItem = '') {
+      const modal = document.getElementById('modal-kho-transaction');
+      const sel = document.getElementById('tx-item-select');
+      const items = khoState.items || [];
+
+      if (sel) {
+        sel.innerHTML = items.map(it => `
+          <option value="${it.sku || it.name}" data-qty="${it.qty}" data-unit="${it.unit || ''}">
+            ${it.sku ? `[${it.sku}] ` : ''}${it.name} (Tồn: ${it.qty} ${it.unit || ''})
+          </option>
+        `).join('');
+
+        if (preselectItem) {
+          sel.value = preselectItem;
+        }
+        onTxItemSelectChange(sel.value);
+      }
+
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+      lucide.createIcons();
+    }
+
+    function closeKhoTransactionModal() {
+      const modal = document.getElementById('modal-kho-transaction');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function onTxItemSelectChange(val) {
+      const sel = document.getElementById('tx-item-select');
+      const currentQtyInp = document.getElementById('tx-current-qty');
+      if (!sel || !currentQtyInp) return;
+      const opt = sel.options[sel.selectedIndex];
+      if (opt) {
+        currentQtyInp.value = `${opt.dataset.qty || 0} ${opt.dataset.unit || ''}`;
+      }
+    }
+
+    function handleKhoTransactionSubmit(e) {
+      e.preventDefault();
+      const type = document.querySelector('input[name="tx-type"]:checked')?.value || 'OUT';
+      const itemKey = document.getElementById('tx-item-select')?.value;
+      const qty = Number(document.getElementById('tx-qty')?.value) || 1;
+      const reason = document.getElementById('tx-reason')?.value || '';
+      const performer = document.getElementById('tx-performer')?.value || 'KTV';
+
+      const it = khoState.items.find(x => (x.sku && x.sku === itemKey) || x.name === itemKey);
+      if (!it) return;
+
+      const beforeQty = Number(it.qty) || 0;
+      const afterQty = type === 'OUT' ? Math.max(0, beforeQty - qty) : beforeQty + qty;
+      it.qty = afterQty;
+
+      // Add to transactions
+      khoState.transactions.unshift({
+        date: new Date().toLocaleString('vi-VN'),
+        sku: it.sku || '',
+        name: it.name,
+        type: type,
+        qty: qty,
+        unit: it.unit || 'Cái',
+        beforeQty: beforeQty,
+        afterQty: afterQty,
+        reason: reason,
+        performer: performer
+      });
+
+      saveKhoStateToCache();
+      closeKhoTransactionModal();
+      renderKhoItemsView();
+      renderKhoTheKhoView();
+      showToast(`Đã tạo phiếu ${type === 'OUT' ? 'Xuất' : 'Nhập'} kho thành công!`);
+    }
+
+
+    // =========================================================================
+    // QUICK ACTIONS MENU & DEVICE TIMERS MODAL HELPERS
+    // =========================================================================
+    function openQuickActionsMenu() {
+      const modal = document.getElementById('modal-quick-actions-menu');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        lucide.createIcons();
+      }
+    }
+
+    function closeQuickActionsMenu() {
+      const modal = document.getElementById('modal-quick-actions-menu');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function openDeviceTimersModal(defaultTab = 'public') {
+      const modal = document.getElementById('modal-device-timer-settings');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      renderPublicDeviceTimers();
+      renderOfficeDeviceTimers();
+      renderDeviceTimers();
+
+      switchDeviceTimerModalTab(defaultTab);
+      lucide.createIcons();
+    }
+
+    function closeDeviceTimersModal() {
+      const modal = document.getElementById('modal-device-timer-settings');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function switchDeviceTimerModalTab(tabKey) {
+      const tabs = ['public', 'office', 'custom'];
+      tabs.forEach(t => {
+        const btn = document.getElementById('tab-btn-timer-' + t);
+        const view = document.getElementById('view-timer-' + t);
+        if (t === tabKey) {
+          if (btn) {
+            btn.classList.add('bg-white', 'text-gray-900', 'shadow-xs');
+            btn.classList.remove('text-gray-600');
+          }
+          if (view) view.classList.remove('hidden');
+        } else {
+          if (btn) {
+            btn.classList.remove('bg-white', 'text-gray-900', 'shadow-xs');
+            btn.classList.add('text-gray-600');
+          }
+          if (view) view.classList.add('hidden');
+        }
+      });
+      lucide.createIcons();
+    }
+
+</script>
 </body>
 </html>
