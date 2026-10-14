@@ -5,6 +5,7 @@ test('giữ đủ lịch văn phòng, ghi chú và bảng công cộng', async (
   await page.selectOption('#select-login-employee', 'ADMIN01');
   await page.fill('#input-login-pin', '0204');
   await page.click('#btn-submit-login');
+  await page.click('#nav-checklist');
   await page.getByRole('button', { name: 'Xem danh sách văn phòng' }).click();
   await expect(page.locator('#office-timer-table')).toBeVisible();
   const cell = address => page.locator('#office-timer-table [data-source-cell="' + address + '"]');

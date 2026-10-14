@@ -313,79 +313,6 @@
           <div class="flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 pt-3"><p id="my-shift-sync-status" class="text-xs text-gray-500" role="status">Chưa đồng bộ</p><a id="my-shift-source" href="https://amd500.tail030e1.ts.net/shifts" target="_blank" rel="noopener noreferrer" class="text-xs underline text-gray-700">Mở bảng phân ca CMMS</a></div>
           <p class="text-xs text-gray-500">Đọc cùng Google Sheet với CMMS. Ký hiệu và ca hiển thị theo bảng nguồn; ô trống là chưa phân công.</p>
         </section>
-        <section class="bg-white rounded-xl border border-gray-200 p-4 space-y-3" aria-labelledby="timer-heading">
-          <div class="flex items-center justify-between gap-3">
-            <h2 id="timer-heading" class="text-sm font-bold">Thông số hẹn giờ bật/tắt</h2>
-            <button type="button" onclick="openDeviceTimer()" class="px-3 py-2 rounded-lg bg-gray-900 text-white text-xs font-semibold">Thêm hẹn giờ</button>
-          </div>
-          <p class="text-xs text-gray-500">Lưu trên trình duyệt này. Bảng ghi nhận thông số cài đặt, không tự điều khiển thiết bị. Giờ tắt trước giờ bật được hiểu là ngày kế tiếp.</p>
-          <div id="timer-reference-cards" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <button type="button" onclick="openTimerReference('public')" aria-label="Xem danh sách hẹn giờ công cộng" class="p-3.5 rounded-xl border border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300 text-left transition flex items-center justify-between gap-3">
-              <span class="flex items-center gap-3 min-w-0"><span class="w-9 h-9 rounded-lg bg-white border border-gray-200 flex items-center justify-center shrink-0"><i data-lucide="lamp-wall-up" class="w-4 h-4"></i></span><span class="min-w-0"><span class="block text-xs font-semibold text-gray-900 truncate">Hẹn giờ công cộng</span><span class="block text-[11px] text-gray-500">314 mục · lịch hè/đông</span></span></span><i data-lucide="chevron-right" class="w-4 h-4 text-gray-400 shrink-0"></i>
-            </button>
-            <button type="button" onclick="openTimerReference('office')" aria-label="Xem danh sách văn phòng" class="p-3.5 rounded-xl border border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300 text-left transition flex items-center justify-between gap-3">
-              <span class="flex items-center gap-3 min-w-0"><span class="w-9 h-9 rounded-lg bg-white border border-gray-200 flex items-center justify-center shrink-0"><i data-lucide="building-2" class="w-4 h-4"></i></span><span class="min-w-0"><span class="block text-xs font-semibold text-gray-900 truncate">Đóng/ngắt điện văn phòng</span><span class="block text-[11px] text-gray-500">197 mục · chiếu sáng/điều hòa</span></span></span><i data-lucide="chevron-right" class="w-4 h-4 text-gray-400 shrink-0"></i>
-            </button>
-          </div>
-          <div id="public-timer-reference-content" class="hidden space-y-3 border rounded-lg p-3">
-            <div id="public-timer-source" class="space-y-1">
-              <h3 class="text-sm font-semibold">Danh sách lộ điện hẹn giờ công cộng</h3>
-              <p class="text-xs text-gray-600">Nguồn: <a class="underline text-blue-700" href="https://docs.google.com/spreadsheets/d/1d_dbPMeToPfP86rRJVoB_BF15J4xh912jVfcjcagxXs/edit?gid=745357933#gid=745357933" target="_blank" rel="noopener noreferrer">DS hẹn giờ công cộng · DS.01.BD</a> · Ngày cập nhật nguồn: 27/09/2026.</p>
-              <p class="text-xs text-gray-500">Bản tra cứu đã nhập từ Google Sheets, chưa tự đồng bộ. Giữ lịch tiết giảm, mùa hè và mùa đông theo nguồn. Dấu “—” là ô nguồn chưa ghi; 00:00 là nửa đêm. Cuộn bảng để xem đầy đủ.</p>
-            </div>
-            <details class="text-xs text-gray-600"><summary class="cursor-pointer font-semibold">Quy trình kiểm tra hàng tuần</summary><p id="public-timer-procedure" class="mt-2 whitespace-pre-wrap"></p></details>
-            <div class="overflow-auto border rounded-lg custom-scrollbar" style="max-height: 430px" tabindex="0" role="region" aria-label="Bảng hẹn giờ công cộng, cuộn để xem các khu vực">
-              <table id="public-timer-table" class="text-xs">
-                <caption class="sr-only">Danh sách lộ điện hẹn giờ công cộng từ Google Sheets, vùng A6:L341</caption>
-                <colgroup><col style="width: 45px"><col style="width: 250px"><col span="8" style="width: 75px"><col style="width: 85px"><col style="width: 330px"></colgroup>
-                <thead><tr><th rowspan="2" scope="col">STT</th><th rowspan="2" scope="col">Thiết bị/khu vực</th><th colspan="4" scope="colgroup">Tiết giảm</th><th colspan="2" scope="colgroup">Mùa hè<br>01/04–30/09</th><th colspan="2" scope="colgroup">Mùa đông<br>01/10–31/03</th><th rowspan="2" scope="col">Ngày</th><th rowspan="2" scope="col">Cách thức, vị trí thực hiện</th></tr><tr><th scope="col">Bật</th><th scope="col">Tắt</th><th scope="col">Bật</th><th scope="col">Tắt</th><th scope="col">Bật</th><th scope="col">Tắt</th><th scope="col">Bật</th><th scope="col">Tắt</th></tr></thead>
-                <tbody id="public-timer-rows"></tbody>
-              </table>
-            </div>
-          </div>
-          <div id="office-timer-reference-content" class="hidden space-y-3 border rounded-lg p-3">
-            <div id="office-timer-source" class="space-y-1">
-              <h3 class="text-sm font-semibold">Danh sách hẹn giờ đóng/ngắt điện văn phòng</h3>
-              <p class="text-xs text-gray-600">Nguồn: <a class="underline text-blue-700" href="https://docs.google.com/spreadsheets/d/1d_dbPMeToPfP86rRJVoB_BF15J4xh912jVfcjcagxXs/edit?gid=1507714426#gid=1507714426" target="_blank" rel="noopener noreferrer">6.DS giờ đóng ngắt điện văn phòng · DS.02.BD</a>.</p>
-              <p class="text-xs text-gray-500">Giờ chiếu sáng và điều hòa theo từng đơn vị, tách thứ 2–6, thứ 7 và chủ nhật. Bản tra cứu tĩnh từ nguồn; dấu “—” là ô chưa ghi. Các ghi chú và trường hợp đặc biệt được giữ nguyên.</p>
-              <p class="text-xs text-gray-600">Quy định tại nguồn: theo giờ làm việc trước 30 phút, sau 60 phút; CSCC + WC theo văn phòng. Cập nhật danh sách mỗi khi có thay đổi.</p>
-            </div>
-            <div class="overflow-auto border rounded-lg custom-scrollbar" style="max-height: 430px" tabindex="0" role="region" aria-label="Bảng hẹn giờ văn phòng, cuộn để xem các đơn vị">
-              <table id="office-timer-table" class="text-xs">
-                <caption class="sr-only">Lịch đóng ngắt điện văn phòng và ghi chú theo Google Sheets</caption>
-                <colgroup><col style="width: 60px"><col span="2" style="width: 65px"><col style="width: 250px"><col style="width: 140px"><col style="width: 80px"><col span="10" style="width: 85px"><col style="width: 300px"><col style="width: 75px"></colgroup>
-                <thead>
-                  <tr><th rowspan="3" scope="col">STT</th><th rowspan="3" scope="col">Tòa</th><th rowspan="3" scope="col">Tầng</th><th rowspan="3" scope="col">Khách hàng</th><th rowspan="3" scope="col">Mã</th><th rowspan="3" scope="col">Diện tích (m²)</th><th colspan="4" scope="colgroup">Thứ 2–6</th><th colspan="4" scope="colgroup">Thứ 7</th><th colspan="2" scope="colgroup">Chủ nhật</th><th rowspan="3" scope="col">Ghi chú</th><th rowspan="3" scope="col">Số lượng pin</th></tr>
-                  <tr><th colspan="2" scope="colgroup">Đóng</th><th colspan="2" scope="colgroup">Ngắt</th><th colspan="2" scope="colgroup">Đóng</th><th colspan="2" scope="colgroup">Ngắt</th><th rowspan="2" scope="col">Đóng CS, ĐH</th><th rowspan="2" scope="col">Ngắt CS, ĐH</th></tr>
-                  <tr><th scope="col">Chiếu sáng</th><th scope="col">Điều hòa</th><th scope="col">Chiếu sáng</th><th scope="col">Điều hòa</th><th scope="col">Chiếu sáng</th><th scope="col">Điều hòa</th><th scope="col">Chiếu sáng</th><th scope="col">Điều hòa</th></tr>
-                </thead>
-                <tbody id="office-timer-rows"></tbody>
-              </table>
-            </div>
-          </div>
-          <h3 class="text-xs font-semibold text-gray-600">Thông số bổ sung trên trình duyệt</h3>
-          <p id="timer-error" role="alert" class="text-xs text-rose-700"></p>
-          <form id="timer-form" hidden onsubmit="saveDeviceTimer(event)" class="border rounded-lg p-3 space-y-3">
-            <input id="timer-id" type="hidden">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
-              <label class="space-y-1">Thiết bị/khu vực<input id="timer-device" required maxlength="160" class="block w-full border rounded-lg p-2" placeholder="VD: Đèn sân tập – Tủ số 1"></label>
-              <label class="space-y-1">Chế độ<select id="timer-mode" onchange="updateDeviceTimerMode()" class="block w-full border rounded-lg p-2"><option>Tự động</option><option>Bật thủ công</option><option>Tắt thủ công</option></select></label>
-              <label class="space-y-1">Ngày áp dụng<input id="timer-date" type="date" required class="block w-full border rounded-lg p-2"></label>
-              <label class="space-y-1">Giờ bật<input id="timer-on" type="time" required class="block w-full border rounded-lg p-2"></label>
-              <label class="space-y-1">Giờ tắt<input id="timer-off" type="time" required class="block w-full border rounded-lg p-2"></label>
-              <label class="space-y-1">Ghi chú<textarea id="timer-notes" maxlength="1000" rows="2" class="block w-full border rounded-lg p-2"></textarea></label>
-            </div>
-            <p class="text-xs text-gray-500">Người cập nhật được ghi tự động theo tài khoản đăng nhập. Chế độ thủ công không bắt buộc nhập giờ.</p>
-            <div class="flex gap-2"><button type="submit" class="px-3 py-2 rounded-lg bg-gray-900 text-white text-xs">Lưu hẹn giờ</button><button type="button" onclick="document.getElementById('timer-form').hidden = true" class="px-3 py-2 border rounded-lg text-xs">Hủy</button></div>
-          </form>
-          <div class="overflow-x-auto">
-            <table class="w-full text-xs text-left" style="min-width: 780px">
-              <caption class="sr-only">Bảng thông số hẹn giờ bật/tắt thiết bị</caption>
-              <thead class="bg-gray-50"><tr><th scope="col" class="p-2">Thiết bị/khu vực</th><th scope="col" class="p-2">Chế độ</th><th scope="col" class="p-2">Giờ bật</th><th scope="col" class="p-2">Giờ tắt</th><th scope="col" class="p-2">Ngày áp dụng</th><th scope="col" class="p-2">Người cập nhật</th><th scope="col" class="p-2">Ghi chú</th><th scope="col" class="p-2">Thao tác</th></tr></thead>
-              <tbody id="timer-rows"></tbody>
-            </table>
-          </div>
-        </section>
         
         <!-- SECTION 1: LỐI TẮT THAO TÁC (Frappe Shortcuts) -->
         <div class="space-y-2">
@@ -759,6 +686,81 @@
             </button>
           </div>
         </div>
+
+        <!-- THÔNG SỐ HẸN GIỜ BẬT/TẮT THIẾT BỊ -->
+        <section class="bg-white rounded-xl border border-gray-200 p-4 space-y-3" aria-labelledby="timer-heading">
+          <div class="flex items-center justify-between gap-3">
+            <h2 id="timer-heading" class="text-sm font-bold">Thông số hẹn giờ bật/tắt</h2>
+            <button type="button" onclick="openDeviceTimer()" class="px-3 py-2 rounded-lg bg-gray-900 text-white text-xs font-semibold">Thêm hẹn giờ</button>
+          </div>
+          <p class="text-xs text-gray-500">Lưu trên trình duyệt này. Bảng ghi nhận thông số cài đặt, không tự điều khiển thiết bị. Giờ tắt trước giờ bật được hiểu là ngày kế tiếp.</p>
+          <div id="timer-reference-cards" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <button type="button" onclick="openTimerReference('public')" aria-label="Xem danh sách hẹn giờ công cộng" class="p-3.5 rounded-xl border border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300 text-left transition flex items-center justify-between gap-3">
+              <span class="flex items-center gap-3 min-w-0"><span class="w-9 h-9 rounded-lg bg-white border border-gray-200 flex items-center justify-center shrink-0"><i data-lucide="lamp-wall-up" class="w-4 h-4"></i></span><span class="min-w-0"><span class="block text-xs font-semibold text-gray-900 truncate">Hẹn giờ công cộng</span><span class="block text-[11px] text-gray-500">314 mục · lịch hè/đông</span></span></span><i data-lucide="chevron-right" class="w-4 h-4 text-gray-400 shrink-0"></i>
+            </button>
+            <button type="button" onclick="openTimerReference('office')" aria-label="Xem danh sách văn phòng" class="p-3.5 rounded-xl border border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300 text-left transition flex items-center justify-between gap-3">
+              <span class="flex items-center gap-3 min-w-0"><span class="w-9 h-9 rounded-lg bg-white border border-gray-200 flex items-center justify-center shrink-0"><i data-lucide="building-2" class="w-4 h-4"></i></span><span class="min-w-0"><span class="block text-xs font-semibold text-gray-900 truncate">Đóng/ngắt điện văn phòng</span><span class="block text-[11px] text-gray-500">197 mục · chiếu sáng/điều hòa</span></span></span><i data-lucide="chevron-right" class="w-4 h-4 text-gray-400 shrink-0"></i>
+            </button>
+          </div>
+          <div id="public-timer-reference-content" class="hidden space-y-3 border rounded-lg p-3">
+            <div id="public-timer-source" class="space-y-1">
+              <h3 class="text-sm font-semibold">Danh sách lộ điện hẹn giờ công cộng</h3>
+              <p class="text-xs text-gray-600">Nguồn: <a class="underline text-blue-700" href="https://docs.google.com/spreadsheets/d/1d_dbPMeToPfP86rRJVoB_BF15J4xh912jVfcjcagxXs/edit?gid=745357933#gid=745357933" target="_blank" rel="noopener noreferrer">DS hẹn giờ công cộng · DS.01.BD</a> · Ngày cập nhật nguồn: 27/09/2026.</p>
+              <p class="text-xs text-gray-500">Bản tra cứu đã nhập từ Google Sheets, chưa tự đồng bộ. Giữ lịch tiết giảm, mùa hè và mùa đông theo nguồn. Dấu “—” là ô nguồn chưa ghi; 00:00 là nửa đêm. Cuộn bảng để xem đầy đủ.</p>
+            </div>
+            <details class="text-xs text-gray-600"><summary class="cursor-pointer font-semibold">Quy trình kiểm tra hàng tuần</summary><p id="public-timer-procedure" class="mt-2 whitespace-pre-wrap"></p></details>
+            <div class="overflow-auto border rounded-lg custom-scrollbar" style="max-height: 430px" tabindex="0" role="region" aria-label="Bảng hẹn giờ công cộng, cuộn để xem các khu vực">
+              <table id="public-timer-table" class="text-xs">
+                <caption class="sr-only">Danh sách lộ điện hẹn giờ công cộng từ Google Sheets, vùng A6:L341</caption>
+                <colgroup><col style="width: 45px"><col style="width: 250px"><col span="8" style="width: 75px"><col style="width: 85px"><col style="width: 330px"></colgroup>
+                <thead><tr><th rowspan="2" scope="col">STT</th><th rowspan="2" scope="col">Thiết bị/khu vực</th><th colspan="4" scope="colgroup">Tiết giảm</th><th colspan="2" scope="colgroup">Mùa hè<br>01/04–30/09</th><th colspan="2" scope="colgroup">Mùa đông<br>01/10–31/03</th><th rowspan="2" scope="col">Ngày</th><th rowspan="2" scope="col">Cách thức, vị trí thực hiện</th></tr><tr><th scope="col">Bật</th><th scope="col">Tắt</th><th scope="col">Bật</th><th scope="col">Tắt</th><th scope="col">Bật</th><th scope="col">Tắt</th><th scope="col">Bật</th><th scope="col">Tắt</th></tr></thead>
+                <tbody id="public-timer-rows"></tbody>
+              </table>
+            </div>
+          </div>
+          <div id="office-timer-reference-content" class="hidden space-y-3 border rounded-lg p-3">
+            <div id="office-timer-source" class="space-y-1">
+              <h3 class="text-sm font-semibold">Danh sách hẹn giờ đóng/ngắt điện văn phòng</h3>
+              <p class="text-xs text-gray-600">Nguồn: <a class="underline text-blue-700" href="https://docs.google.com/spreadsheets/d/1d_dbPMeToPfP86rRJVoB_BF15J4xh912jVfcjcagxXs/edit?gid=1507714426#gid=1507714426" target="_blank" rel="noopener noreferrer">6.DS giờ đóng ngắt điện văn phòng · DS.02.BD</a>.</p>
+              <p class="text-xs text-gray-500">Giờ chiếu sáng và điều hòa theo từng đơn vị, tách thứ 2–6, thứ 7 và chủ nhật. Bản tra cứu tĩnh từ nguồn; dấu “—” là ô chưa ghi. Các ghi chú và trường hợp đặc biệt được giữ nguyên.</p>
+              <p class="text-xs text-gray-600">Quy định tại nguồn: theo giờ làm việc trước 30 phút, sau 60 phút; CSCC + WC theo văn phòng. Cập nhật danh sách mỗi khi có thay đổi.</p>
+            </div>
+            <div class="overflow-auto border rounded-lg custom-scrollbar" style="max-height: 430px" tabindex="0" role="region" aria-label="Bảng hẹn giờ văn phòng, cuộn để xem các đơn vị">
+              <table id="office-timer-table" class="text-xs">
+                <caption class="sr-only">Lịch đóng ngắt điện văn phòng và ghi chú theo Google Sheets</caption>
+                <colgroup><col style="width: 60px"><col span="2" style="width: 65px"><col style="width: 250px"><col style="width: 140px"><col style="width: 80px"><col span="10" style="width: 85px"><col style="width: 300px"><col style="width: 75px"></colgroup>
+                <thead>
+                  <tr><th rowspan="3" scope="col">STT</th><th rowspan="3" scope="col">Tòa</th><th rowspan="3" scope="col">Tầng</th><th rowspan="3" scope="col">Khách hàng</th><th rowspan="3" scope="col">Mã</th><th rowspan="3" scope="col">Diện tích (m²)</th><th colspan="4" scope="colgroup">Thứ 2–6</th><th colspan="4" scope="colgroup">Thứ 7</th><th colspan="2" scope="colgroup">Chủ nhật</th><th rowspan="3" scope="col">Ghi chú</th><th rowspan="3" scope="col">Số lượng pin</th></tr>
+                  <tr><th colspan="2" scope="colgroup">Đóng</th><th colspan="2" scope="colgroup">Ngắt</th><th colspan="2" scope="colgroup">Đóng</th><th colspan="2" scope="colgroup">Ngắt</th><th rowspan="2" scope="col">Đóng CS, ĐH</th><th rowspan="2" scope="col">Ngắt CS, ĐH</th></tr>
+                  <tr><th scope="col">Chiếu sáng</th><th scope="col">Điều hòa</th><th scope="col">Chiếu sáng</th><th scope="col">Điều hòa</th><th scope="col">Chiếu sáng</th><th scope="col">Điều hòa</th><th scope="col">Chiếu sáng</th><th scope="col">Điều hòa</th></tr>
+                </thead>
+                <tbody id="office-timer-rows"></tbody>
+              </table>
+            </div>
+          </div>
+          <h3 class="text-xs font-semibold text-gray-600">Thông số bổ sung trên trình duyệt</h3>
+          <p id="timer-error" role="alert" class="text-xs text-rose-700"></p>
+          <form id="timer-form" hidden onsubmit="saveDeviceTimer(event)" class="border rounded-lg p-3 space-y-3">
+            <input id="timer-id" type="hidden">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+              <label class="space-y-1">Thiết bị/khu vực<input id="timer-device" required maxlength="160" class="block w-full border rounded-lg p-2" placeholder="VD: Đèn sân tập – Tủ số 1"></label>
+              <label class="space-y-1">Chế độ<select id="timer-mode" onchange="updateDeviceTimerMode()" class="block w-full border rounded-lg p-2"><option>Tự động</option><option>Bật thủ công</option><option>Tắt thủ công</option></select></label>
+              <label class="space-y-1">Ngày áp dụng<input id="timer-date" type="date" required class="block w-full border rounded-lg p-2"></label>
+              <label class="space-y-1">Giờ bật<input id="timer-on" type="time" required class="block w-full border rounded-lg p-2"></label>
+              <label class="space-y-1">Giờ tắt<input id="timer-off" type="time" required class="block w-full border rounded-lg p-2"></label>
+              <label class="space-y-1">Ghi chú<textarea id="timer-notes" maxlength="1000" rows="2" class="block w-full border rounded-lg p-2"></textarea></label>
+            </div>
+            <p class="text-xs text-gray-500">Người cập nhật được ghi tự động theo tài khoản đăng nhập. Chế độ thủ công không bắt buộc nhập giờ.</p>
+            <div class="flex gap-2"><button type="submit" class="px-3 py-2 rounded-lg bg-gray-900 text-white text-xs">Lưu hẹn giờ</button><button type="button" onclick="document.getElementById('timer-form').hidden = true" class="px-3 py-2 border rounded-lg text-xs">Hủy</button></div>
+          </form>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs text-left" style="min-width: 780px">
+              <caption class="sr-only">Bảng thông số hẹn giờ bật/tắt thiết bị</caption>
+              <thead class="bg-gray-50"><tr><th scope="col" class="p-2">Thiết bị/khu vực</th><th scope="col" class="p-2">Chế độ</th><th scope="col" class="p-2">Giờ bật</th><th scope="col" class="p-2">Giờ tắt</th><th scope="col" class="p-2">Ngày áp dụng</th><th scope="col" class="p-2">Người cập nhật</th><th scope="col" class="p-2">Ghi chú</th><th scope="col" class="p-2">Thao tác</th></tr></thead>
+              <tbody id="timer-rows"></tbody>
+            </table>
+          </div>
+        </section>
 
         <!-- Search Bar & Category Filters -->
         <div class="space-y-2">
@@ -9964,6 +9966,7 @@ const repo = new AppRepository();
       if (tabName === 'dashboard') renderDashboard();
       if (tabName === 'checklist') {
         renderUnifiedGrid();
+        renderDeviceTimers();
       }
       if (tabName === 'report') updateStats();
       if (tabName === 'personal') {

@@ -5,6 +5,7 @@ test('lưu và sửa lịch qua đêm, giữ dữ liệu sau tải lại', async
   await page.selectOption('#select-login-employee', 'ADMIN01');
   await page.fill('#input-login-pin', '0204');
   await page.click('#btn-submit-login');
+  await page.click('#nav-checklist');
   await page.getByRole('button', { name: 'Thêm hẹn giờ', exact: true }).click();
   await page.fill('#timer-device', 'Đèn sân tập <b>01</b>');
   await page.fill('#timer-on', '18:00');
@@ -15,6 +16,7 @@ test('lưu và sửa lịch qua đêm, giữ dữ liệu sau tải lại', async
   await expect(page.locator('#timer-rows')).toContainText('Đèn sân tập <b>01</b>');
   await expect(page.locator('#timer-rows b')).toHaveCount(0);
   await page.reload();
+  await page.click('#nav-checklist');
   await expect(page.locator('#timer-rows')).toContainText('18:00');
   await page.locator('#timer-rows').getByRole('button', { name: 'Sửa' }).click();
   await page.fill('#timer-off', '06:00');
@@ -34,6 +36,7 @@ test('kiểm tra giờ trùng nhau và chế độ thủ công không cần gi�
   await page.selectOption('#select-login-employee', 'ADMIN01');
   await page.fill('#input-login-pin', '0204');
   await page.click('#btn-submit-login');
+  await page.click('#nav-checklist');
   await page.getByRole('button', { name: 'Thêm hẹn giờ', exact: true }).click();
   await page.fill('#timer-device', 'Bơm dự phòng');
   await page.fill('#timer-on', '08:00');
@@ -53,6 +56,7 @@ test('dữ liệu hỏng không bị ghi đè khi thêm lịch', async ({ page }
   await page.selectOption('#select-login-employee', 'ADMIN01');
   await page.fill('#input-login-pin', '0204');
   await page.click('#btn-submit-login');
+  await page.click('#nav-checklist');
   await expect(page.locator('#timer-error')).toContainText('Không thể đọc');
   await page.getByRole('button', { name: 'Thêm hẹn giờ', exact: true }).click();
   await page.fill('#timer-device', 'Đèn');
@@ -67,6 +71,7 @@ test('không báo lưu thành công khi bộ nhớ từ chối ghi', async ({ pa
   await page.selectOption('#select-login-employee', 'ADMIN01');
   await page.fill('#input-login-pin', '0204');
   await page.click('#btn-submit-login');
+  await page.click('#nav-checklist');
   await page.getByRole('button', { name: 'Thêm hẹn giờ', exact: true }).click();
   await page.fill('#timer-device', 'Bơm');
   await page.fill('#timer-on', '08:00');

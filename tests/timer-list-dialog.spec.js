@@ -1,10 +1,11 @@
 const { test, expect } = require('@playwright/test');
 
-test('dashboard chỉ hiện thẻ tóm tắt và mở danh sách trong cửa sổ riêng', async ({ page }) => {
+test('checklist chỉ hiện thẻ tóm tắt và mở danh sách trong cửa sổ riêng', async ({ page }) => {
   await page.goto('/nhatky/index.html');
   await page.selectOption('#select-login-employee', 'ADMIN01');
   await page.fill('#input-login-pin', '0204');
   await page.click('#btn-submit-login');
+  await page.click('#nav-checklist');
 
   await expect(page.locator('#timer-reference-cards')).toBeVisible();
   await expect(page.locator('#timer-reference-cards')).toContainText('314 mục');
