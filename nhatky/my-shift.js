@@ -211,13 +211,13 @@
     function initialize() {
       if (initialized) return;
       initialized = true;
-      el('my-shift-sync').addEventListener('click', () => refresh(true));
-      el('my-shift-date').addEventListener('change', e => {
+      el('my-shift-sync')?.addEventListener('click', () => refresh(true));
+      el('my-shift-date')?.addEventListener('change', e => {
         const value = e.target.value;
         if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return;
         viewingDate = value; followToday = value === vietnamDate(); render();
       });
-      el('my-shift-today-button').addEventListener('click', () => { viewingDate = vietnamDate(); followToday = true; render(); });
+      el('my-shift-today-button')?.addEventListener('click', () => { viewingDate = vietnamDate(); followToday = true; render(); });
       setInterval(() => { if (getUser() && document.visibilityState === 'visible') render(); }, 60000);
       setInterval(() => { if (getUser() && document.visibilityState === 'visible') refresh(); }, 300000);
       document.addEventListener('visibilitychange', () => { if (getUser() && document.visibilityState === 'visible') { render(); refresh(); } });
@@ -304,15 +304,17 @@
       if (!user || owner !== userKey(user)) return;
       if (followToday) viewingDate = vietnamDate();
       text('my-shift-employee', user.fullName);
-      el('my-shift-date').value = viewingDate;
+      const dateEl = el('my-shift-date');
+      if (dateEl) dateEl.value = viewingDate;
       text('my-shift-date-label', (viewingDate === vietnamDate() ? 'Hôm nay · ' : 'Ngày xem · ') + displayDate(viewingDate));
       const status = syncState === 'loading' ? 'Đang đọc lịch phân ca…' : syncState === 'synced' ? 'Đã đồng bộ · ' + formatSyncTime(fetchedAt) : syncState === 'cached' ? 'Đang dùng bản đã lưu · ' + formatSyncTime(fetchedAt) + (syncError ? ' · ' + syncError : ' · Đang chờ đồng bộ') : 'Chưa đồng bộ · ' + (syncError || 'Đang chờ đọc lịch');
       text('my-shift-sync-status', status);
-      el('my-shift-sync').disabled = syncState === 'loading';
+      const syncBtn = el('my-shift-sync');
+      if (syncBtn) syncBtn.disabled = syncState === 'loading';
       const week = weeks.find(w => w.startDate <= viewingDate && viewingDate <= w.endDate);
       text('my-shift-week', week ? `Tuần ${week.weekLabel} · ${displayDate(week.startDate)}–${displayDate(week.endDate)}` : 'Lịch trong tuần');
       const container = el('my-shift-days');
-      container.replaceChildren();
+      if (container) container.replaceChildren();
       let selection;
       try {
         selection = weeks.length ? (followToday ? selectCurrent(weeks, user.fullName) : dayFor(weeks, user.fullName, viewingDate)) : { kind: 'unavailable' };
