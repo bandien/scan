@@ -563,10 +563,14 @@
                 </div>
               </div>
               <p class="text-xs text-gray-600 leading-relaxed">Chốt chỉ số công tơ điện nước tổng và các phụ tải định kỳ cuối tháng, tự động tính sản lượng.</p>
-              <div class="pt-2 border-t border-gray-100 flex items-center gap-2">
-                <a href="https://script.google.com/macros/s/AKfycbxOoWSsDiQ5DpngJrbkKegHYQhs--hcC6u0h3dj24dzH6W3EpK3NG1j5XJvD6HEF5Zh/exec" target="_blank" rel="noopener noreferrer" class="flex-1 py-2 bg-gray-900 hover:bg-black text-white font-medium rounded-lg text-xs flex items-center justify-center gap-1.5 transition">
+              <div class="pt-2 border-t border-gray-100 flex items-center gap-2 flex-wrap">
+                <a href="https://script.google.com/macros/s/AKfycbxOoWSsDiQ5DpngJrbkKegHYQhs--hcC6u0h3dj24dzH6W3EpK3NG1j5XJvD6HEF5Zh/exec" target="_blank" rel="noopener noreferrer" class="flex-1 min-w-[120px] py-2 bg-gray-900 hover:bg-black text-white font-medium rounded-lg text-xs flex items-center justify-center gap-1.5 transition">
                   <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
                   <span>Mở Web App Chốt Số</span>
+                </a>
+                <a href="https://docs.google.com/spreadsheets/d/1E9smGZnuCCkHYRQU_VK-YAhoQfw5sckAmIjQcTPjQFs/edit?gid=329904244#gid=329904244" target="_blank" rel="noopener noreferrer" class="px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-lg text-xs font-medium flex items-center gap-1.5 transition" title="Mở bảng tổng hợp điện nước sân golf">
+                  <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 text-amber-700"></i>
+                  <span>Tổng hợp điện nước</span>
                 </a>
                 <button onclick="openSopDetailByCode('SOP-CONGTO-01')" class="px-3 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-lg text-xs font-medium flex items-center gap-1.5 transition" title="Đọc quy trình SOP-CONGTO-01">
                   <i data-lucide="book-open" class="w-3.5 h-3.5 text-gray-500"></i>
@@ -685,6 +689,10 @@
             <a id="checklist-report-link" href="https://docs.google.com/spreadsheets/d/1wVYYWoJKLU_-nXdpKQGjxW5yTtj_8k_eQBC7tpHXxdY/edit?gid=2114189017#gid=2114189017" target="_blank" rel="noopener noreferrer" aria-label="Mở báo cáo vận hành trên Google Sheets" class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
               <i data-lucide="sheet" class="w-3.5 h-3.5"></i>
               <span>Báo cáo</span>
+            </a>
+            <a id="checklist-golf-meter-summary-link" href="https://docs.google.com/spreadsheets/d/1E9smGZnuCCkHYRQU_VK-YAhoQfw5sckAmIjQcTPjQFs/edit?gid=329904244#gid=329904244" target="_blank" rel="noopener noreferrer" aria-label="Mở bảng tổng hợp điện nước sân golf trên Google Sheets" class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
+              <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
+              <span>Tổng hợp điện nước</span>
             </a>
             <a id="checklist-hapulico-report-link" href="https://docs.google.com/spreadsheets/d/1CKwy_SNbXnyZEkwgMZWRtBgzlg6NI6Ob/edit?gid=1271630179#gid=1271630179" target="_blank" rel="noopener noreferrer" aria-label="Mở báo cáo Hapulico trên Google Sheets" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-800 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
               <i data-lucide="building-2" class="w-3.5 h-3.5"></i>
@@ -3202,6 +3210,18 @@
         frequency: 'Cuối tháng (Định kỳ)'
       },
       {
+        id: 'form_meter_summary',
+        title: 'Tổng Hợp Điện Nước Sân Golf',
+        category: 'Công tơ',
+        icon: 'file-spreadsheet',
+        color: 'emerald',
+        badge: 'Google Sheets',
+        sopCode: 'SOP-CONGTO-01',
+        desc: 'Bảng tính Google Sheets tổng hợp chi tiết chỉ số công tơ điện nước và sản lượng tiêu thụ các khu vực sân golf.',
+        url: 'https://docs.google.com/spreadsheets/d/1E9smGZnuCCkHYRQU_VK-YAhoQfw5sckAmIjQcTPjQFs/edit?gid=329904244#gid=329904244',
+        frequency: 'Định kỳ hàng tháng'
+      },
+      {
         id: 'form_tba',
         title: 'Kiểm Tra Trạm Biến Áp (TBA) & Lưới Điện',
         category: 'Trạm điện',
@@ -3345,7 +3365,7 @@
           '⏰ BƯỚC 1: Thời gian thực hiện:\n• Định kỳ ngày cuối cùng của tháng (hoặc theo thông báo lịch ghi số điện lực).',
           '📱 BƯỚC 2: Mở ứng dụng Chốt Công Tơ Web App:\n• Đường link: https://script.google.com/macros/s/AKfycbxOoWSsDiQ5DpngJrbkKegHYQhs--hcC6u0h3dj24dzH6W3EpK3NG1j5XJvD6HEF5Zh/exec',
           '📸 BƯỚC 3: Ghi nhận chỉ số công tơ & đồng hồ nước:\n• Công tơ điện tổng TBA và các lộ phụ tải\n• Đồng hồ nước tổng, nước tưới sân golf và sinh hoạt\n• Nhập số mới và kiểm tra chênh lệch sản lượng tiêu thụ\n• Chụp ảnh lại mặt số nếu nghi ngờ chỉ số bất thường',
-          '💾 BƯỚC 4: Bấm Lưu và Gửi dữ liệu:\n• Kiểm tra xác nhận dữ liệu đã đồng bộ vào bảng tính tổng hợp'
+          '💾 BƯỚC 4: Bấm Lưu và Gửi dữ liệu:\n• Kiểm tra xác nhận dữ liệu đã đồng bộ vào bảng tính tổng hợp:\n• Link bảng tổng hợp điện nước: https://docs.google.com/spreadsheets/d/1E9smGZnuCCkHYRQU_VK-YAhoQfw5sckAmIjQcTPjQFs/edit?gid=329904244#gid=329904244'
         ]
       },
       {
@@ -4342,15 +4362,23 @@ const CONFIG = {
           const raw = localStorage.getItem(this.STORAGE_KEYS.GOOGLE_FORMS);
           if (!raw) return DEFAULT_GOOGLE_FORMS;
           let forms = JSON.parse(raw);
-          // Tự động bổ sung hoặc đồng bộ form Chốt Công Tơ Cuối Tháng
+          // Tự động bổ sung hoặc đồng bộ form Chốt Công Tơ Cuối Tháng & Tổng Hợp Điện Nước
           if (!forms.some(f => f.id === 'form_meter_monthly')) {
             const meterForm = DEFAULT_GOOGLE_FORMS.find(f => f.id === 'form_meter_monthly');
             if (meterForm) forms.splice(1, 0, meterForm);
+          }
+          if (!forms.some(f => f.id === 'form_meter_summary')) {
+            const sumForm = DEFAULT_GOOGLE_FORMS.find(f => f.id === 'form_meter_summary');
+            if (sumForm) forms.splice(2, 0, sumForm);
           }
           forms.forEach(f => {
             if (f.id === 'form_meter_monthly') {
               f.title = 'Chốt Công Tơ Điện Nước Cuối Tháng';
               f.url = 'https://script.google.com/macros/s/AKfycbxOoWSsDiQ5DpngJrbkKegHYQhs--hcC6u0h3dj24dzH6W3EpK3NG1j5XJvD6HEF5Zh/exec';
+            }
+            if (f.id === 'form_meter_summary') {
+              f.title = 'Tổng Hợp Điện Nước Sân Golf';
+              f.url = 'https://docs.google.com/spreadsheets/d/1E9smGZnuCCkHYRQU_VK-YAhoQfw5sckAmIjQcTPjQFs/edit?gid=329904244#gid=329904244';
             }
             if (f.id === 'form_checklist_ca') {
               f.title = 'Checklist Ca Vận Hành Điện Nước Sân Golf';
