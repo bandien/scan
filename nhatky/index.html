@@ -294,85 +294,38 @@
       <!-- TAB 0: BÀN LÀM VIỆC DASHBOARD NHÂN VIÊN (#tab-dashboard) -->
       <!-- ============================================================== -->
       <section id="tab-dashboard" class="space-y-4">
-
-        <!-- BANNER CHÀO MỪNG / TRUNG TÂM ĐIỀU HÀNH MONTANA GC -->
-        <div class="bg-white p-4 rounded-xl border border-gray-200 flex items-center justify-between flex-wrap gap-3">
-          <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-xl bg-gray-900 text-white flex items-center justify-center font-bold text-base shadow-sm">
-              <i data-lucide="compass" class="w-5 h-5"></i>
-            </div>
-            <div>
-              <h2 class="text-base font-bold text-gray-900 leading-tight">Cổng Điều Hành Cơ Điện M&amp;E • Montana GC</h2>
-              <p class="text-xs text-gray-500 mt-0.5">Danh mục liên kết biểu mẫu trực ca, nhật ký vận hành &amp; sổ tay quy trình kỹ thuật SOP</p>
-            </div>
+        <section id="my-shift-card" class="bg-white rounded-xl border border-gray-200 p-4 space-y-4" aria-labelledby="my-shift-heading">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div><h2 id="my-shift-heading" class="text-lg font-bold text-gray-900">Ca của tôi</h2><p id="my-shift-employee" class="text-sm font-semibold text-gray-700 mt-1"></p><p id="my-shift-team" class="text-xs text-gray-500 mt-1"></p></div>
+            <button type="button" id="my-shift-sync" class="px-3 py-2 rounded-lg border border-gray-300 text-xs font-semibold disabled:opacity-50">Đồng bộ lịch</button>
           </div>
-
-          <div class="flex items-center gap-2 flex-wrap">
-            <button onclick="openShiftScheduleModal()" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 border border-gray-200 text-gray-800 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
-              <i data-lucide="calendar-range" class="w-3.5 h-3.5 text-gray-600"></i>
-              <span>Bảng Phân Ca</span>
-            </button>
-            <a href="https://docs.google.com/spreadsheets/d/1wVYYWoJKLU_-nXdpKQGjxW5yTtj_8k_eQBC7tpHXxdY/edit?gid=2114189017#gid=2114189017" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
-              <i data-lucide="sheet" class="w-3.5 h-3.5"></i>
-              <span>Báo Cáo Sân Golf</span>
-            </a>
+          <div class="bg-gray-50 rounded-xl p-4 space-y-2">
+            <p id="my-shift-date-label" class="text-xs text-gray-500"></p>
+            <p id="my-shift-today" class="text-base font-bold text-gray-900" aria-live="polite">Đang chờ đọc lịch phân ca</p>
+            <p id="my-shift-hours" class="text-sm text-gray-700"></p>
+            <p id="my-shift-notes" class="text-xs text-gray-600"></p>
           </div>
-        </div>
-
-        <!-- SECTION 1: LỐI TẮT THAO TÁC NHANH (Frappe Shortcuts) -->
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <h3 id="my-shift-week" class="text-sm font-semibold text-gray-800">Lịch trong tuần</h3>
+            <div class="flex flex-wrap items-center gap-2"><label for="my-shift-date" class="text-xs text-gray-600">Ngày xem</label><input type="date" id="my-shift-date" class="border border-gray-300 rounded-lg px-2 py-2 text-sm" style="max-width:100%"><button id="my-shift-today-button" type="button" class="px-3 py-2 rounded-lg border border-gray-300 text-xs">Hôm nay</button></div>
+          </div>
+          <div id="my-shift-days" aria-label="Lịch phân ca cá nhân trong tuần"></div>
+          <div class="flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 pt-3"><p id="my-shift-sync-status" class="text-xs text-gray-500" role="status">Chưa đồng bộ</p><a id="my-shift-source" href="https://amd500.tail030e1.ts.net/shifts" target="_blank" rel="noopener noreferrer" class="text-xs underline text-gray-700">Mở bảng phân ca CMMS</a></div>
+          <p class="text-xs text-gray-500">Đọc cùng Google Sheet với CMMS. Ký hiệu và ca hiển thị theo bảng nguồn; ô trống là chưa phân công.</p>
+        </section>
+        
+        <!-- SECTION 1: LỐI TẮT THAO TÁC (Frappe Shortcuts) -->
         <div class="space-y-2">
           <div class="flex items-center justify-between px-0.5">
             <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Lối Tắt Thao Tác Nhanh (Shortcuts)</h3>
-            <span class="text-[11px] text-gray-400 font-medium">Truy Cập Nhanh 1 Chạm</span>
+            <span class="text-[11px] text-gray-400 font-medium">Lịch & Biểu Mẫu Dùng Chung</span>
           </div>
 
-          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-            <!-- Shortcut 1: Form Checklist -->
-            <a href="https://forms.gle/7gNBsFcX12ikeNXX9" target="_blank" rel="noopener noreferrer" class="p-3.5 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-xs text-left transition flex items-center justify-between group">
-              <div class="flex items-center space-x-2.5 min-w-0">
-                <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center shrink-0 border border-purple-200">
-                  <i data-lucide="clipboard-check" class="w-4 h-4"></i>
-                </div>
-                <div class="min-w-0">
-                  <div class="font-semibold text-xs text-gray-900 truncate">Form Checklist</div>
-                  <div class="text-[10px] text-gray-500 truncate">Biểu mẫu sân golf</div>
-                </div>
-              </div>
-              <i data-lucide="external-link" class="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-700 transition shrink-0 ml-1"></i>
-            </a>
-
-            <!-- Shortcut 2: Chốt Công Tơ -->
-            <a href="https://script.google.com/macros/s/AKfycbxOoWSsDiQ5DpngJrbkKegHYQhs--hcC6u0h3dj24dzH6W3EpK3NG1j5XJvD6HEF5Zh/exec" target="_blank" rel="noopener noreferrer" class="p-3.5 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-xs text-left transition flex items-center justify-between group">
-              <div class="flex items-center space-x-2.5 min-w-0">
-                <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center shrink-0 border border-blue-200">
-                  <i data-lucide="gauge" class="w-4 h-4"></i>
-                </div>
-                <div class="min-w-0">
-                  <div class="font-semibold text-xs text-gray-900 truncate">Chốt Công Tơ</div>
-                  <div class="text-[10px] text-gray-500 truncate">Web App tính sản lượng</div>
-                </div>
-              </div>
-              <i data-lucide="external-link" class="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-700 transition shrink-0 ml-1"></i>
-            </a>
-
-            <!-- Shortcut 3: HappyTime -->
-            <a href="https://app.happytime.vn/schedule" target="_blank" rel="noopener noreferrer" class="p-3.5 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-xs text-left transition flex items-center justify-between group">
-              <div class="flex items-center space-x-2.5 min-w-0">
-                <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 border border-emerald-200">
-                  <i data-lucide="calendar-check" class="w-4 h-4"></i>
-                </div>
-                <div class="min-w-0">
-                  <div class="font-semibold text-xs text-gray-900 truncate">Lịch HappyTime</div>
-                  <div class="text-[10px] text-gray-500 truncate">Chấm công &amp; ca trực</div>
-                </div>
-              </div>
-              <i data-lucide="external-link" class="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-700 transition shrink-0 ml-1"></i>
-            </a>
-
-            <!-- Shortcut 4: Ghi Lịch Google -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+            <!-- Shortcut 1: Ghi Lịch -->
             <button onclick="openQuickCalendarEventModal()" class="p-3.5 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-xs text-left transition flex items-center justify-between group">
               <div class="flex items-center space-x-2.5 min-w-0">
-                <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center shrink-0 border border-amber-200">
+                <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-800 flex items-center justify-center shrink-0 border border-gray-200">
                   <i data-lucide="calendar-plus" class="w-4 h-4"></i>
                 </div>
                 <div class="min-w-0">
@@ -383,24 +336,38 @@
               <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-700 transition shrink-0 ml-1"></i>
             </button>
 
-            <!-- Shortcut 5: Sổ Tay SOP -->
-            <button onclick="switchTab('checklist'); switchChecklistSopView('sop');" class="p-3.5 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-xs text-left transition flex items-center justify-between group">
+            <!-- Shortcut 2: Form Checklist -->
+            <button onclick="switchTab('checklist'); switchChecklistSopView('forms');" class="p-3.5 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-xs text-left transition flex items-center justify-between group">
               <div class="flex items-center space-x-2.5 min-w-0">
-                <div class="w-8 h-8 rounded-lg bg-rose-50 text-rose-700 flex items-center justify-center shrink-0 border border-rose-200">
-                  <i data-lucide="book-open" class="w-4 h-4"></i>
+                <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-800 flex items-center justify-center shrink-0 border border-gray-200">
+                  <i data-lucide="clipboard-check" class="w-4 h-4"></i>
                 </div>
                 <div class="min-w-0">
-                  <div class="font-semibold text-xs text-gray-900 truncate">Sổ Tay Hướng Dẫn</div>
-                  <div class="text-[10px] text-gray-500 truncate">Quy trình kỹ thuật SOP</div>
+                  <div class="font-semibold text-xs text-gray-900 truncate">Form Checklist</div>
+                  <div class="text-[10px] text-gray-500 truncate">Biểu mẫu sân golf</div>
                 </div>
               </div>
               <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-700 transition shrink-0 ml-1"></i>
             </button>
 
-            <!-- Shortcut 6: Bảng Phân Ca -->
+            <!-- Shortcut 3: Sổ Tay SOP -->
+            <button onclick="switchTab('checklist'); switchChecklistSopView('sop');" class="p-3.5 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-xs text-left transition flex items-center justify-between group">
+              <div class="flex items-center space-x-2.5 min-w-0">
+                <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-800 flex items-center justify-center shrink-0 border border-gray-200">
+                  <i data-lucide="book-open" class="w-4 h-4"></i>
+                </div>
+                <div class="min-w-0">
+                  <div class="font-semibold text-xs text-gray-900 truncate">Sổ Tay Hướng Dẫn</div>
+                  <div class="text-[10px] text-gray-500 truncate">Quy trình SOP</div>
+                </div>
+              </div>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-700 transition shrink-0 ml-1"></i>
+            </button>
+
+            <!-- Shortcut 4: Phân Ca -->
             <button onclick="openShiftScheduleModal()" class="p-3.5 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-xs text-left transition flex items-center justify-between group">
               <div class="flex items-center space-x-2.5 min-w-0">
-                <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center shrink-0 border border-indigo-200">
+                <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-800 flex items-center justify-center shrink-0 border border-gray-200">
                   <i data-lucide="calendar-range" class="w-4 h-4"></i>
                 </div>
                 <div class="min-w-0">
@@ -410,36 +377,166 @@
               </div>
               <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-700 transition shrink-0 ml-1"></i>
             </button>
+
+            <!-- Shortcut 5: HappyTime -->
+            <a href="https://app.happytime.vn/schedule" target="_blank" rel="noopener noreferrer" class="p-3.5 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-xs text-left transition flex items-center justify-between group">
+              <div class="flex items-center space-x-2.5 min-w-0">
+                <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-800 flex items-center justify-center shrink-0 border border-gray-200">
+                  <i data-lucide="calendar-check" class="w-4 h-4"></i>
+                </div>
+                <div class="min-w-0">
+                  <div class="font-semibold text-xs text-gray-900 truncate">Lịch HappyTime</div>
+                  <div class="text-[10px] text-gray-500 truncate">Chấm công & ca trực</div>
+                </div>
+              </div>
+              <i data-lucide="external-link" class="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-700 transition shrink-0 ml-1"></i>
+            </a>
           </div>
         </div>
 
-        <!-- SECTION 2: MENU ĐƯỜNG DẪN BIỂU MẪU & WEB APP TRỰC CA -->
+        <!-- SECTION 1.5: LỊCH PHÂN CA TRỰC THỜI GIAN THỰC (GOOGLE SHEET GỐC) -->
+        <div id="section-dash-shifts" class="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs space-y-3.5">
+          <!-- Top Bar: Title, Live Dot, Week Badge, Refresh -->
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <div class="flex items-center space-x-2.5">
+              <div class="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center shrink-0">
+                <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <h3 class="font-extrabold text-sm text-gray-900">Lịch Phân Ca Trực</h3>
+                  <span id="dash-shift-sync-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Google Sheet Gốc</span>
+                  </span>
+                </div>
+                <p class="text-[11px] text-gray-500" id="dash-shift-sync-time">Đang kết nối Google Sheet (Tab 4.BẢNG PHÂN CA TRỰC)...</p>
+              </div>
+            </div>
+
+            <!-- Week Navigation Controls -->
+            <div class="flex items-center gap-1">
+              <button onclick="navigateDashShiftWeek(-1)" aria-label="Tuần trước" title="Tuần trước" class="p-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 transition active:scale-95">
+                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+              </button>
+              <span id="dash-shift-week-label" class="px-2.5 py-1 bg-indigo-50 border border-indigo-200 text-indigo-900 font-bold text-xs rounded-lg whitespace-nowrap">
+                Tuần 41 (05/10 - 11/10)
+              </span>
+              <button onclick="navigateDashShiftWeek(1)" aria-label="Tuần sau" title="Tuần sau" class="p-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 transition active:scale-95">
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </button>
+              <button onclick="jumpDashShiftToCurrentWeek()" id="dash-shift-btn-today" aria-label="Về tuần hiện tại" title="Về tuần hiện tại" class="hidden px-2 py-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-900 font-bold text-[11px] rounded-lg transition active:scale-95">
+                Tuần này
+              </button>
+              <button onclick="GolfRootSheetLoader.fetchLive(true)" aria-label="Làm mới từ Google Sheet" title="Làm mới từ Google Sheet" class="p-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition active:scale-95">
+                <i data-lucide="refresh-cw" class="w-4 h-4" id="dash-shift-refresh-icon"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Personal Shift Today Card -->
+          <div id="dash-personal-shift-card" class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
+            <!-- Rendered by JS -->
+          </div>
+
+          <!-- 7-Day Mini Horizontal Timeline / Week Strip -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-gray-700 flex items-center gap-1">
+                <i data-lucide="calendar" class="w-3.5 h-3.5 text-indigo-600"></i>
+                <span>Lịch 7 ngày của bạn:</span>
+              </span>
+              <div class="flex items-center gap-1.5">
+                <span class="text-[11px] text-gray-500 font-semibold" id="dash-shift-employee-selector-label">Ngô Quyết Thắng</span>
+                <select id="dash-shift-employee-select" onchange="handleDashShiftEmployeeChange(this.value)" class="text-[11px] bg-white border border-gray-200 rounded-md px-1.5 py-0.5 text-gray-700 font-medium">
+                  <!-- Populated by JS -->
+                </select>
+              </div>
+            </div>
+            <div id="dash-week-days-strip" class="grid grid-cols-7 gap-1 text-center">
+              <!-- 7 Day Columns rendered by JS -->
+            </div>
+          </div>
+
+          <!-- Today's Team Duty Overview -->
+          <div class="p-3 rounded-xl bg-slate-50/70 border border-slate-200 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-xs text-gray-800 flex items-center gap-1.5">
+                <i data-lucide="users" class="w-3.5 h-3.5 text-gray-600"></i>
+                <span>Đội trực hôm nay (<span id="dash-today-label">Thứ Hai 05/10</span>) • Tổ Sân Golf:</span>
+              </span>
+              <button onclick="openShiftScheduleModal()" class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-0.5">
+                <span>Xem cả tổ</span>
+                <i data-lucide="arrow-right" class="w-3 h-3"></i>
+              </button>
+            </div>
+            <div id="dash-today-team-roster" class="grid grid-cols-1 sm:grid-cols-3 gap-1.5 text-xs">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+          <!-- Working Hours & Timesheet Symbols Mini Bar -->
+          <div class="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200 text-[11px] text-amber-950 flex flex-col gap-1">
+            <div class="flex items-center gap-1.5 flex-wrap font-bold">
+              <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-700 shrink-0"></i>
+              <span>Giờ ca:</span>
+              <span class="bg-amber-100 px-1.5 py-0.2 rounded font-extrabold text-amber-900">Ca 1: 06h–14h</span>
+              <span class="bg-indigo-100 px-1.5 py-0.2 rounded font-extrabold text-indigo-900">Ca 2: 14h–22h</span>
+              <span class="bg-slate-900 px-1.5 py-0.2 rounded font-extrabold text-white">Ca 3: 22h–06h</span>
+              <span class="bg-blue-100 px-1.5 py-0.2 rounded font-extrabold text-blue-900">hc: 7h30–11h30 & 13h–17h</span>
+              <span class="bg-orange-100 px-1.5 py-0.2 rounded font-extrabold text-orange-950">HB: 7h00–11h30 & 13h30–17h00</span>
+              <span class="bg-cyan-100 px-1.5 py-0.2 rounded font-extrabold text-cyan-950">tx: 6h–10h & 14h00–18h00</span>
+            </div>
+            <div class="flex items-center gap-1.5 flex-wrap text-slate-700 font-medium">
+              <span class="font-bold text-slate-900">Ký hiệu:</span>
+              <span class="bg-slate-900 text-white font-bold px-1.5 py-0.5 rounded">x: Đi ca</span>
+              <span class="bg-blue-100 text-blue-900 font-bold px-1.5 py-0.5 rounded">hc: Hành chính</span>
+              <span class="bg-orange-100 text-orange-950 font-bold px-1.5 py-0.5 rounded">HB: Hòa Bình</span>
+              <span class="bg-cyan-100 text-cyan-950 font-bold px-1.5 py-0.5 rounded">tx: Thanh Xuân</span>
+              <span class="bg-rose-100 text-rose-900 font-bold px-1.5 py-0.5 rounded">P: Phép</span>
+              <span class="bg-purple-100 text-purple-900 font-bold px-1.5 py-0.5 rounded">KL: Không lương</span>
+              <span class="bg-yellow-200 text-yellow-900 font-bold px-1.5 py-0.5 rounded">CN: Nghỉ tuần</span>
+              <span class="bg-red-200 text-red-950 font-bold px-1.5 py-0.5 rounded">N: Nghỉ</span>
+            </div>
+          </div>
+
+          <!-- Bottom CTA: Open Full Schedule Modal -->
+          <div class="pt-1 flex items-center justify-between gap-2 border-t border-gray-100 flex-wrap">
+            <div class="text-[11px] text-gray-500 font-medium">
+              Dữ liệu đọc trực tiếp từ Google Sheet: <b>4.BẢNG PHÂN CA TRỰC</b>
+            </div>
+            <button onclick="openShiftScheduleModal()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5">
+              <i data-lucide="table" class="w-3.5 h-3.5"></i>
+              <span>Xem Bảng Phân Ca Chi Tiết</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- SECTION 2: BIỂU MẪU & WEB APP CHỦ CHỐT CA TRỰC -->
         <div class="space-y-2">
           <div class="flex items-center justify-between px-0.5">
-            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Menu Đường Dẫn Biểu Mẫu &amp; Web App</h3>
+            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Biểu Mẫu & Web App Trực Ca</h3>
             <button onclick="switchTab('checklist')" class="text-xs font-medium text-gray-700 hover:text-black flex items-center gap-1">
-              <span>Xem tất cả biểu mẫu &amp; link</span>
+              <span>Xem tất cả biểu mẫu</span>
               <i data-lucide="arrow-right" class="w-3 h-3"></i>
             </button>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <!-- Form 1: Checklist ca vận hành -->
-            <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-3 flex flex-col justify-between">
-              <div class="space-y-2">
-                <div class="flex items-start justify-between gap-2">
-                  <div class="flex items-center space-x-3">
-                    <div class="w-9 h-9 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center border border-purple-200 shrink-0">
-                      <i data-lucide="clipboard-check" class="w-4 h-4"></i>
-                    </div>
-                    <div>
-                      <h4 class="font-semibold text-sm text-gray-900">Checklist Ca Vận Hành Sân Golf</h4>
-                      <p class="text-[11px] text-gray-500 mt-0.5">Biểu mẫu chính • Mỗi ca trực</p>
-                    </div>
+            <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-3">
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex items-center space-x-3">
+                  <div class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center border border-gray-200 text-gray-800 shrink-0">
+                    <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-semibold text-sm text-gray-900">Checklist Ca Vận Hành Sân Golf</h4>
+                    <p class="text-[11px] text-gray-500 mt-0.5">Biểu mẫu chính • Mỗi ca trực</p>
                   </div>
                 </div>
-                <p class="text-xs text-gray-600 leading-relaxed">Kiểm tra thông số TBA, Bơm Tăng Áp, Vận Hành Bơm Suối Cun (Không chạy/Tự động/Giờ bật-tắt), PCCC &amp; Giao Ca.</p>
               </div>
+              <p class="text-xs text-gray-600 leading-relaxed">Kiểm tra TBA, Trạm Bơm Tăng Áp, Vận Hành Bơm Suối Cun (Không chạy/Tự động/Giờ bật-tắt), PCCC & Bàn Giao Ca.</p>
               <div class="pt-2 border-t border-gray-100 flex items-center gap-2">
                 <a href="https://forms.gle/7gNBsFcX12ikeNXX9" target="_blank" rel="noopener noreferrer" class="flex-1 py-2 bg-gray-900 hover:bg-black text-white font-medium rounded-lg text-xs flex items-center justify-center gap-1.5 transition">
                   <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
@@ -453,21 +550,19 @@
             </div>
 
             <!-- Form 2: Chốt công tơ cuối tháng -->
-            <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-3 flex flex-col justify-between">
-              <div class="space-y-2">
-                <div class="flex items-start justify-between gap-2">
-                  <div class="flex items-center space-x-3">
-                    <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center border border-blue-200 shrink-0">
-                      <i data-lucide="gauge" class="w-4 h-4"></i>
-                    </div>
-                    <div>
-                      <h4 class="font-semibold text-sm text-gray-900">Chốt Công Tơ Điện Nước</h4>
-                      <p class="text-[11px] text-gray-500 mt-0.5">Ứng dụng Web App • Cuối tháng</p>
-                    </div>
+            <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-3">
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex items-center space-x-3">
+                  <div class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center border border-gray-200 text-gray-800 shrink-0">
+                    <i data-lucide="gauge" class="w-4 h-4"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-semibold text-sm text-gray-900">Chốt Công Tơ Điện Nước Cuối Tháng</h4>
+                    <p class="text-[11px] text-gray-500 mt-0.5">Ứng dụng Web App • Cuối tháng</p>
                   </div>
                 </div>
-                <p class="text-xs text-gray-600 leading-relaxed">Chốt chỉ số công tơ điện nước tổng và các phụ tải định kỳ cuối tháng, tự động tính toán sản lượng tiêu thụ.</p>
               </div>
+              <p class="text-xs text-gray-600 leading-relaxed">Chốt chỉ số công tơ điện nước tổng và các phụ tải định kỳ cuối tháng, tự động tính sản lượng.</p>
               <div class="pt-2 border-t border-gray-100 flex items-center gap-2">
                 <a href="https://script.google.com/macros/s/AKfycbxOoWSsDiQ5DpngJrbkKegHYQhs--hcC6u0h3dj24dzH6W3EpK3NG1j5XJvD6HEF5Zh/exec" target="_blank" rel="noopener noreferrer" class="flex-1 py-2 bg-gray-900 hover:bg-black text-white font-medium rounded-lg text-xs flex items-center justify-center gap-1.5 transition">
                   <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
@@ -479,114 +574,12 @@
                 </button>
               </div>
             </div>
-
-            <!-- Form 3: Tra cứu Hẹn giờ thiết bị -->
-            <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-3 flex flex-col justify-between">
-              <div class="space-y-2">
-                <div class="flex items-start justify-between gap-2">
-                  <div class="flex items-center space-x-3">
-                    <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200 shrink-0">
-                      <i data-lucide="timer" class="w-4 h-4"></i>
-                    </div>
-                    <div>
-                      <h4 class="font-semibold text-sm text-gray-900">Thông Số Hẹn Giờ Bật/Tắt</h4>
-                      <p class="text-[11px] text-gray-500 mt-0.5">314 mục công cộng • 197 mục văn phòng</p>
-                    </div>
-                  </div>
-                </div>
-                <p class="text-xs text-gray-600 leading-relaxed">Tra cứu thông số hẹn giờ chiếu sáng, điều hòa, quạt thông gió hầm, tưới cây tự động theo lịch mùa hè / đông.</p>
-              </div>
-              <div class="pt-2 border-t border-gray-100 flex items-center gap-2">
-                <button onclick="openTimerReference('public')" class="flex-1 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg text-xs flex items-center justify-center gap-1.5 transition">
-                  <i data-lucide="lamp-wall-up" class="w-3.5 h-3.5"></i>
-                  <span>Hẹn Giờ Công Cộng</span>
-                </button>
-                <button onclick="openTimerReference('office')" class="flex-1 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg text-xs flex items-center justify-center gap-1.5 transition">
-                  <i data-lucide="building-2" class="w-3.5 h-3.5"></i>
-                  <span>Điện Văn Phòng</span>
-                </button>
-              </div>
-            </div>
           </div>
         </div>
 
-        <!-- SECTION 3: SỔ TAY HƯỚNG DẪN & QUY TRÌNH KỸ THUẬT (SOP GUIDES) -->
-        <div class="space-y-2">
-          <div class="flex items-center justify-between px-0.5">
-            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Sổ Tay Hướng Dẫn &amp; Quy Trình Kỹ Thuật (SOP)</h3>
-            <span class="text-[11px] text-gray-400 font-medium">Quy Chuẩn Vận Hành Tiêu Chuẩn</span>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <!-- SOP 1: TBA -->
-            <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-3 flex flex-col justify-between hover:border-gray-300 transition">
-              <div class="space-y-1.5">
-                <div class="flex items-center justify-between gap-1">
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">SOP-TBA-01</span>
-                  <span class="text-[10px] text-gray-400 font-medium">⚡ Trạm điện</span>
-                </div>
-                <h4 class="font-bold text-sm text-gray-900 leading-snug">Vận Hành &amp; Kiểm Tra Trạm Biến Áp (TBA)</h4>
-                <p class="text-xs text-gray-500 leading-relaxed">Đo nhiệt độ tiếp xúc MBA (≤65°C), điện áp 380V ±5%, dòng cân pha, hệ số Cosφ ≥ 0.92, mức dầu Min-Max.</p>
-              </div>
-              <button onclick="openSopDetailByCode('SOP-TBA-01')" class="w-full py-2 bg-gray-50 hover:bg-gray-900 hover:text-white text-gray-800 border border-gray-200 font-medium rounded-lg text-xs flex items-center justify-center gap-1.5 transition">
-                <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
-                <span>Xem Chi Tiết Quy Trình</span>
-              </button>
-            </div>
-
-            <!-- SOP 2: An Toàn & LOTO -->
-            <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-3 flex flex-col justify-between hover:border-gray-300 transition">
-              <div class="space-y-1.5">
-                <div class="flex items-center justify-between gap-1">
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-800 border border-rose-200">SOP-ANTOAN-01</span>
-                  <span class="text-[10px] text-gray-400 font-medium">🛡️ An Toàn &amp; LOTO</span>
-                </div>
-                <h4 class="font-bold text-sm text-gray-900 leading-snug">An Toàn Lao Động, Cắt Điện Cô Lập &amp; Cứu Hộ</h4>
-                <p class="text-xs text-gray-500 leading-relaxed">Quy trình 5 bước cắt điện an toàn (Cắt nguồn, Khóa LOTO, Thử điện, Tiếp đất, Rào chắn). Hotline ứng cứu khẩn cấp.</p>
-              </div>
-              <button onclick="openSopDetailByCode('SOP-ANTOAN-01')" class="w-full py-2 bg-gray-50 hover:bg-gray-900 hover:text-white text-gray-800 border border-gray-200 font-medium rounded-lg text-xs flex items-center justify-center gap-1.5 transition">
-                <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
-                <span>Xem Chi Tiết Quy Trình</span>
-              </button>
-            </div>
-
-            <!-- SOP 3: Máy Bơm & Suối Cun -->
-            <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-3 flex flex-col justify-between hover:border-gray-300 transition">
-              <div class="space-y-1.5">
-                <div class="flex items-center justify-between gap-1">
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-800 border border-blue-200">SOP-FORMS-01</span>
-                  <span class="text-[10px] text-gray-400 font-medium">💧 Trạm Bơm &amp; PCCC</span>
-                </div>
-                <h4 class="font-bold text-sm text-gray-900 leading-snug">Vận Hành Máy Bơm Suối Cun &amp; Bơm Tăng Áp</h4>
-                <p class="text-xs text-gray-500 leading-relaxed">Duy trì áp lực 4.0 - 5.5 bar, biến tần GD200A, mực nước bể ngầm, kiểm tra động cơ diesel và bơm Suối Cun.</p>
-              </div>
-              <button onclick="openSopDetailByCode('SOP-FORMS-01')" class="w-full py-2 bg-gray-50 hover:bg-gray-900 hover:text-white text-gray-800 border border-gray-200 font-medium rounded-lg text-xs flex items-center justify-center gap-1.5 transition">
-                <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
-                <span>Xem Chi Tiết Quy Trình</span>
-              </button>
-            </div>
-
-            <!-- SOP 4: Chốt Công Tơ -->
-            <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-3 flex flex-col justify-between hover:border-gray-300 transition">
-              <div class="space-y-1.5">
-                <div class="flex items-center justify-between gap-1">
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">SOP-CONGTO-01</span>
-                  <span class="text-[10px] text-gray-400 font-medium">📊 Công Tơ</span>
-                </div>
-                <h4 class="font-bold text-sm text-gray-900 leading-snug">Quy Trình Chốt Chỉ Số Công Tơ Điện Nước</h4>
-                <p class="text-xs text-gray-500 leading-relaxed">Các bước ghi nhận chỉ số công tơ tổng, các nhánh phụ tải định kỳ cuối tháng, kiểm tra sai lệch &amp; nhập Web App.</p>
-              </div>
-              <button onclick="openSopDetailByCode('SOP-CONGTO-01')" class="w-full py-2 bg-gray-50 hover:bg-gray-900 hover:text-white text-gray-800 border border-gray-200 font-medium rounded-lg text-xs flex items-center justify-center gap-1.5 transition">
-                <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
-                <span>Xem Chi Tiết Quy Trình</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- SECTION 4: KHUNG GOOGLE CALENDAR NHẬT KÝ CA TRỰC DÙNG CHUNG -->
+        <!-- SECTION 3: KHUNG GOOGLE CALENDAR NHẬT KÝ CA TRỰC DÙNG CHUNG -->
         <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-3">
-          <div class="flex items-center justify-between flex-wrap gap-2">
+          <div class="flex items-center justify-between">
             <div class="flex items-center space-x-2.5">
               <div class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center border border-gray-200 text-gray-800">
                 <i data-lucide="calendar" class="w-4 h-4"></i>
@@ -610,31 +603,6 @@
 
           <div class="border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
             <iframe id="dash-calendar-iframe" src="https://calendar.google.com/calendar/embed?src=trucdienhapulico%40gmail.com&ctz=Asia%2FHo_Chi_Minh&mode=AGENDA" style="border: 0" width="100%" height="360" frameborder="0" scrolling="no" class="w-full"></iframe>
-          </div>
-        </div>
-
-        <!-- SECTION 5: QUY CHUẨN GIỜ CA & KÝ HIỆU (THAM KHẢO) -->
-        <div class="p-3 rounded-xl bg-gray-50 border border-gray-200 text-[11px] text-gray-800 flex flex-col gap-1.5">
-          <div class="flex items-center gap-1.5 flex-wrap font-bold">
-            <i data-lucide="clock" class="w-3.5 h-3.5 text-gray-600 shrink-0"></i>
-            <span>Quy chuẩn giờ ca:</span>
-            <span class="bg-amber-100 px-1.5 py-0.5 rounded text-amber-900">Ca 1: 06h–14h</span>
-            <span class="bg-indigo-100 px-1.5 py-0.5 rounded text-indigo-900">Ca 2: 14h–22h</span>
-            <span class="bg-slate-900 px-1.5 py-0.5 rounded text-white">Ca 3: 22h–06h</span>
-            <span class="bg-blue-100 px-1.5 py-0.5 rounded text-blue-900">hc: 7h30–11h30 &amp; 13h–17h</span>
-            <span class="bg-orange-100 px-1.5 py-0.5 rounded text-orange-950">HB: 7h00–11h30 &amp; 13h30–17h00</span>
-            <span class="bg-cyan-100 px-1.5 py-0.5 rounded text-cyan-950">tx: 6h–10h &amp; 14h00–18h00</span>
-          </div>
-          <div class="flex items-center gap-1.5 flex-wrap text-gray-600 font-medium">
-            <span class="font-bold text-gray-800">Ký hiệu phân ca:</span>
-            <span class="bg-slate-900 text-white font-bold px-1.5 py-0.5 rounded">x: Đi ca</span>
-            <span class="bg-blue-100 text-blue-900 font-bold px-1.5 py-0.5 rounded">hc: Hành chính</span>
-            <span class="bg-orange-100 text-orange-950 font-bold px-1.5 py-0.5 rounded">HB: Hòa Bình</span>
-            <span class="bg-cyan-100 text-cyan-950 font-bold px-1.5 py-0.5 rounded">tx: Thanh Xuân</span>
-            <span class="bg-rose-100 text-rose-900 font-bold px-1.5 py-0.5 rounded">P: Phép</span>
-            <span class="bg-purple-100 text-purple-900 font-bold px-1.5 py-0.5 rounded">KL: Không lương</span>
-            <span class="bg-yellow-200 text-yellow-900 font-bold px-1.5 py-0.5 rounded">CN: Nghỉ tuần</span>
-            <span class="bg-red-200 text-red-950 font-bold px-1.5 py-0.5 rounded">N: Nghỉ</span>
           </div>
         </div>
 
@@ -1043,9 +1011,9 @@
     <!-- BOTTOM NAVIGATION BAR (ERPNext Desk Style - 4 Tabs) -->
     <nav class="bg-white border-t border-gray-200 px-3 py-1.5 flex items-center justify-around z-30 shrink-0 select-none shadow-none">
       <!-- Nav 1: Dashboard -->
-      <button onclick="switchTab('dashboard')" id="nav-dashboard" aria-label="Tab Bàn làm việc" class="flex flex-col items-center py-1 px-3 rounded-lg text-gray-900 font-semibold transition flex-1">
+      <button onclick="switchTab('dashboard')" id="nav-dashboard" aria-label="Tab Ca của tôi" class="flex flex-col items-center py-1 px-3 rounded-lg text-gray-900 font-semibold transition flex-1">
         <div class="p-0.5"><i data-lucide="layout-grid" class="w-5 h-5"></i></div>
-        <span class="text-[10px] mt-0.5">Bàn Làm Việc</span>
+        <span class="text-[10px] mt-0.5">Ca của tôi</span>
       </button>
 
       <!-- Nav 2: Calendar -->
@@ -3379,6 +3347,24 @@
           '📸 BƯỚC 3: Ghi nhận chỉ số công tơ & đồng hồ nước:\n• Công tơ điện tổng TBA và các lộ phụ tải\n• Đồng hồ nước tổng, nước tưới sân golf và sinh hoạt\n• Nhập số mới và kiểm tra chênh lệch sản lượng tiêu thụ\n• Chụp ảnh lại mặt số nếu nghi ngờ chỉ số bất thường',
           '💾 BƯỚC 4: Bấm Lưu và Gửi dữ liệu:\n• Kiểm tra xác nhận dữ liệu đã đồng bộ vào bảng tính tổng hợp'
         ]
+      },
+      {
+        id: 'sop_hengio_01',
+        code: 'SOP-HENGIO-01',
+        title: 'Quy Trình Kiểm Tra & Cài Đặt Hẹn Giờ Bật/Tắt Thiết Bị',
+        category: 'workflow',
+        categoryName: '⏱️ Hẹn Giờ Bật/Tắt',
+        summary: 'Kiểm tra và cài đặt hệ thống đồng hồ hẹn giờ chiếu sáng công cộng (314 mục), điện điều hòa văn phòng (197 mục), quạt thông gió hầm và tưới cây tự động.',
+        author: 'Tổ Cơ Điện M&E',
+        target: 'Kiểm tra và cài đặt hệ thống đồng hồ hẹn giờ chiếu sáng công cộng, điều hòa văn phòng, quạt thông gió hầm và tưới cây đúng khung giờ tiết giảm, mùa hè & mùa đông.',
+        safetyNotes: 'Chỉ thao tác chỉnh giờ trên rơ-le thời gian (Timer) hoặc cài đặt bảng hẹn giờ khi đã nắm vững danh sách lộ điện. Không tự ý cắt điện phụ tải văn phòng sai khung giờ quy định.',
+        steps: [
+          '⏰ BƯỚC 1: Thời gian thực hiện kiểm tra định kỳ:\n• CA 3 NGÀY CHỦ NHẬT HÀNG TUẦN (thực hiện đi cùng sổ đồng hồ hẹn giờ văn phòng).',
+          '⏱️ BƯỚC 2: Kiểm tra đồng hồ hẹn giờ tại tủ điện:\n• Đồng hồ ở chế độ tự động (AUTO), kiểm tra đúng thứ trong tuần.\n• Giờ thực tế chạy chuẩn (chỉ cho phép lệch < 1 phút so với giờ chuẩn).',
+          '📋 BƯỚC 3: Đối chiếu thông số cài đặt công cộng (314 mục):\n• Kiểm tra theo danh sách DS.01.BD.\n• Đúng chế độ tiết giảm, lịch mùa hè (01/04–30/09) hoặc mùa đông (01/10–31/03).\n• Dấu “—” là ô nguồn chưa ghi; 00:00 là nửa đêm; giờ tắt trước giờ bật được hiểu là sang ngày kế tiếp.',
+          '🏢 BƯỚC 4: Đối chiếu giờ đóng/ngắt điện văn phòng (197 mục):\n• Kiểm tra theo danh sách DS.02.BD.\n• Quy định tại nguồn: Đóng điện trước giờ làm việc 30 phút, ngắt sau giờ làm việc 60 phút.\n• Chiếu sáng công cộng + WC vận hành theo văn phòng.',
+          '💾 BƯỚC 5: Ghi nhận và lưu thông số bổ sung:\n• Các thay đổi hẹn giờ tạm thời hoặc đồng hồ hỏng phải ghi nhận ngay vào bảng "Thông số bổ sung trên trình duyệt" hoặc cập nhật phiếu đề nghị.'
+        ]
       }
     ];
 
@@ -4410,6 +4396,14 @@ const CONFIG = {
             guides[meterSopIndex] = defaultMeterSop;
           } else if (defaultMeterSop) {
             guides.push(defaultMeterSop);
+          }
+          // Tự động bổ sung hoặc đồng bộ SOP-HENGIO-01
+          const hengioSopIndex = guides.findIndex(g => g.code === 'SOP-HENGIO-01');
+          const defaultHengioSop = DEFAULT_SOP_GUIDES.find(g => g.code === 'SOP-HENGIO-01');
+          if (hengioSopIndex !== -1 && defaultHengioSop) {
+            guides[hengioSopIndex] = defaultHengioSop;
+          } else if (defaultHengioSop) {
+            guides.push(defaultHengioSop);
           }
           const formGuide = guides.find(g => g.code === 'SOP-FORMS-01');
           const defaultFormGuide = DEFAULT_SOP_GUIDES.find(g => g.code === 'SOP-FORMS-01');
@@ -9980,7 +9974,7 @@ const repo = new AppRepository();
 
       const tabs = ['dashboard', 'calendar', 'checklist', 'report', 'personal'];
       const titles = {
-        dashboard: 'Bàn Làm Việc & Điều Hành Montana GC',
+        dashboard: 'Ca của tôi',
         calendar: 'Lịch Nhật Ký Google Calendar',
         checklist: 'Biểu Mẫu & Quy Trình SOP',
         report: 'Báo Cáo Thống Kê Ca Trực',
