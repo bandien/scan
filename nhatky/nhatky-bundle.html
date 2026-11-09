@@ -683,7 +683,7 @@
             <span class="text-[11px] text-gray-400 font-medium">Lịch & Biểu Mẫu Dùng Chung</span>
           </div>
 
-          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-2.5">
             <!-- Shortcut 1: Ghi Lịch -->
             <button onclick="openQuickCalendarEventModal()" class="p-3.5 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-xs text-left transition flex items-center justify-between group">
               <div class="flex items-center space-x-2.5 min-w-0">
@@ -740,7 +740,35 @@
               <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-700 transition shrink-0 ml-1"></i>
             </button>
 
-            <!-- Shortcut 5: HappyTime -->
+            <!-- Shortcut 5: E-Learning Cơ Điện -->
+            <a href="../elearning/" class="p-3.5 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-xs text-left transition flex items-center justify-between group">
+              <div class="flex items-center space-x-2.5 min-w-0">
+                <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center shrink-0 border border-indigo-200">
+                  <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+                </div>
+                <div class="min-w-0">
+                  <div class="font-semibold text-xs text-gray-900 truncate">E-Learning M&amp;E</div>
+                  <div class="text-[10px] text-gray-500 truncate">Bài giảng &amp; Sát hạch</div>
+                </div>
+              </div>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-700 transition shrink-0 ml-1"></i>
+            </a>
+
+            <!-- Shortcut 6: Phỏng Vấn Tuyển Dụng -->
+            <a href="../phongvan/" class="p-3.5 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-xs text-left transition flex items-center justify-between group">
+              <div class="flex items-center space-x-2.5 min-w-0">
+                <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center shrink-0 border border-purple-200">
+                  <i data-lucide="user-check" class="w-4 h-4"></i>
+                </div>
+                <div class="min-w-0">
+                  <div class="font-semibold text-xs text-gray-900 truncate">Tuyển Dụng M&amp;E</div>
+                  <div class="text-[10px] text-gray-500 truncate">Phỏng vấn &amp; Chấm điểm</div>
+                </div>
+              </div>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-700 transition shrink-0 ml-1"></i>
+            </a>
+
+            <!-- Shortcut 7: HappyTime -->
             <a href="https://app.happytime.vn/schedule" target="_blank" rel="noopener noreferrer" class="p-3.5 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-xs text-left transition flex items-center justify-between group">
               <div class="flex items-center space-x-2.5 min-w-0">
                 <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-800 flex items-center justify-center shrink-0 border border-gray-200">
@@ -1060,6 +1088,10 @@
               <i data-lucide="building-2" class="w-3.5 h-3.5"></i>
               <span>Báo cáo Hapulico</span>
             </a>
+            <a id="checklist-elearning-link" href="../elearning/" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-900 rounded-lg text-xs font-medium transition flex items-center gap-1.5" title="Phân hệ Đào Tạo &amp; Sát Hạch E-Learning">
+              <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-indigo-700"></i>
+              <span>E-Learning Sát Hạch</span>
+            </a>
             <button id="btn-admin-config-forms" onclick="openFormConfigModal()" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 border border-gray-200 text-gray-700 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
               <i data-lucide="settings" class="w-3.5 h-3.5 text-gray-500"></i>
               <span>Cấu hình Link</span>
@@ -1340,6 +1372,34 @@
             </div>
             <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
           </button>
+
+          <!-- E-Learning Link Button -->
+          <a href="../elearning/" class="w-full text-left px-4 py-3.5 flex items-center justify-between hover:bg-slate-50 transition text-sm text-slate-700 font-medium">
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center">
+                <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+              </div>
+              <div class="flex flex-col">
+                <span class="font-bold text-slate-800">Phân Hệ E-Learning &amp; Sát Hạch</span>
+                <span class="text-[11px] text-slate-500">6 chuyên đề bài giảng, trắc nghiệm online &amp; cấp chứng chỉ</span>
+              </div>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+          </a>
+
+          <!-- Recruitment Interview Form Link Button -->
+          <a href="../phongvan/" class="w-full text-left px-4 py-3.5 flex items-center justify-between hover:bg-slate-50 transition text-sm text-slate-700 font-medium">
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
+                <i data-lucide="user-check" class="w-4 h-4"></i>
+              </div>
+              <div class="flex flex-col">
+                <span class="font-bold text-slate-800">Bộ Câu Hỏi Tuyển Dụng &amp; Phỏng Vấn</span>
+                <span class="text-[11px] text-slate-500">16 câu hỏi chuyên sâu, biểu mẫu chấm điểm &amp; xuất CSV</span>
+              </div>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+          </a>
 
           <!-- Changelog Button -->
           <button onclick="openChangelogModal()" class="w-full text-left px-4 py-3.5 flex items-center justify-between hover:bg-slate-50 transition text-sm text-slate-700 font-medium">

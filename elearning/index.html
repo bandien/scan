@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>E-Learning & Sát Hạch Cơ Điện | BanDienScan</title>
+  <link rel="icon" type="image/svg+xml" href="../nhatky/favicon.svg">
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    input, textarea, select { user-select: text; }
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    @media print {
+      body { background: white !important; color: black !important; padding: 0 !important; }
+      .no-print, header, nav, #toast, .action-buttons { display: none !important; }
+      #certificate-printable {
+        display: block !important;
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+        border: none !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+        padding: 40px !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-[#f4f5f7] text-gray-800 flex flex-col min-h-screen antialiased font-sans">
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 opacity-0 pointer-events-none translate-y-[-20px]">
+    <div class="flex items-center gap-2 bg-slate-900/95 backdrop-blur-md text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-2xl border border-slate-700">
+      <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400" id="toast-icon"></i>
+      <span id="toast-message">Đã lưu thành công</span>
+    </div>
+  </div>
+
+  <!-- TOP HEADER -->
+  <header class="bg-white text-gray-900 px-4 py-3 flex items-center justify-between border-b border-gray-200 shadow-xs z-20 shrink-0 sticky top-0 no-print">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-sm shrink-0">
+        <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <h1 class="font-extrabold text-sm sm:text-base text-gray-900 leading-tight">E-Learning &amp; Sát Hạch Cơ Điện</h1>
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+            <span class="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse"></span>
+            <span>M&amp;E Training v1.0</span>
+          </span>
+        </div>
+        <p class="text-[11px] text-gray-500 font-normal">Tổ Cơ Điện Sân Golf • Khóa Học Kỹ Thuật, SOP &amp; Sát Hạch Năng Lực</p>
+      </div>
+    </div>
+
+    <!-- Right Header Controls -->
+    <div class="flex items-center space-x-2">
+      <!-- Trainee Selector -->
+      <div class="hidden sm:flex items-center gap-1.5 bg-gray-50 border border-gray-200 px-2.5 py-1 rounded-lg">
+        <i data-lucide="user" class="w-3.5 h-3.5 text-gray-500"></i>
+        <span class="text-[11px] text-gray-500 font-medium">Học viên:</span>
+        <select id="select-active-trainee" onchange="changeTrainee(this.value)" class="text-xs bg-transparent border-0 text-gray-900 font-bold focus:outline-none cursor-pointer">
+          <!-- Populated by JS -->
+        </select>
+      </div>
+
+      <!-- Quick Back Links -->
+      <a href="../nhatky/index.html" class="px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 flex items-center gap-1.5 transition" title="Mở Bàn Làm Việc Vận Hành">
+        <i data-lucide="layout-grid" class="w-3.5 h-3.5 text-gray-500"></i>
+        <span class="hidden md:inline">Bàn Làm Việc</span>
+      </a>
+
+      <a href="../phongvan/" class="px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 flex items-center gap-1.5 transition" title="Bộ câu hỏi phỏng vấn tuyển dụng">
+        <i data-lucide="clipboard-check" class="w-3.5 h-3.5 text-gray-500"></i>
+        <span class="hidden lg:inline">Phỏng Vấn Tuyển Dụng</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 max-w-6xl w-full mx-auto p-3 sm:p-5 space-y-4">
+
+    <!-- SUB-NAV / TABS (ERPNext Desk Tabbed style) -->
+    <div class="bg-white p-1.5 rounded-2xl border border-gray-200 shadow-xs flex items-center justify-between gap-1 overflow-x-auto no-scrollbar no-print">
+      <div class="flex items-center gap-1 min-w-max">
+        <button onclick="switchTab('courses')" id="tab-btn-courses" class="px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-indigo-600 text-white shadow-xs">
+          <i data-lucide="book-open" class="w-4 h-4"></i>
+          <span>1. Khóa Học &amp; Bài Giảng</span>
+        </button>
+
+        <button onclick="switchTab('exam')" id="tab-btn-exam" class="px-3.5 py-2 rounded-xl text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition flex items-center gap-2">
+          <i data-lucide="check-square" class="w-4 h-4"></i>
+          <span>2. Sát Hạch Trắc Nghiệm</span>
+        </button>
+
+        <button onclick="switchTab('certificates')" id="tab-btn-certificates" class="px-3.5 py-2 rounded-xl text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition flex items-center gap-2">
+          <i data-lucide="award" class="w-4 h-4"></i>
+          <span>3. Chứng Chỉ &amp; Lịch Sử</span>
+        </button>
+
+        <button onclick="switchTab('questions')" id="tab-btn-questions" class="px-3.5 py-2 rounded-xl text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition flex items-center gap-2">
+          <i data-lucide="database" class="w-4 h-4"></i>
+          <span>4. Ngân Hàng Câu Hỏi</span>
+        </button>
+      </div>
+
+      <div class="hidden md:flex items-center gap-2 pr-2 text-xs text-gray-500 font-medium">
+        <span>Kỳ thi gần nhất: <b id="top-last-score" class="text-indigo-600 font-bold">—</b></span>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- TAB 1: KHÓA HỌC & BÀI GIẢNG (#tab-courses) -->
+    <!-- ============================================================== -->
+    <section id="tab-courses" class="space-y-4">
+
+      <!-- Banner / Stats Overview -->
+      <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-5 text-white shadow-md relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div class="space-y-1.5 z-10">
+          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-500/30 text-indigo-200 border border-indigo-400/30">
+            🎯 Đào Tạo &amp; Tiêu Chuẩn Hóa Tay Nghề
+          </span>
+          <h2 class="text-lg sm:text-xl font-extrabold tracking-tight">Chương Trình Đào Tạo Kỹ Thuật M&amp;E Chuẩn Sân Golf</h2>
+          <p class="text-xs text-slate-300 max-w-2xl leading-relaxed">
+            Hệ thống 6 chuyên đề lý thuyết &amp; thực hành gắn liền quy trình vận hành tiêu chuẩn (SOP), an toàn điện 3 pha và sát hạch nâng bậc kỹ thuật viên.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2.5 shrink-0 z-10 w-full md:w-auto">
+          <div class="bg-white/10 backdrop-blur-xs border border-white/15 p-3 rounded-xl text-center">
+            <span class="block text-lg font-black text-amber-400" id="stat-course-count">6</span>
+            <span class="block text-[10px] text-slate-300 font-medium">Chuyên đề</span>
+          </div>
+          <div class="bg-white/10 backdrop-blur-xs border border-white/15 p-3 rounded-xl text-center">
+            <span class="block text-lg font-black text-emerald-400" id="stat-q-count">30</span>
+            <span class="block text-[10px] text-slate-300 font-medium">Câu hỏi thi</span>
+          </div>
+          <div class="bg-white/10 backdrop-blur-xs border border-white/15 p-3 rounded-xl text-center">
+            <span class="block text-lg font-black text-sky-400" id="stat-cert-count">0</span>
+            <span class="block text-[10px] text-slate-300 font-medium">Chứng chỉ</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Action Shortcuts -->
+      <div class="flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <h3 class="font-extrabold text-sm text-gray-900">Danh Mục Chuyên Đề Đào Tạo</h3>
+          <p class="text-xs text-gray-500">Bấm "Xem bài học" để đọc lý thuyết, xem checklist SOP và luyện thi</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="startComprehensiveExam()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs active:scale-95">
+            <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+            <span>Thi Sát Hạch Toàn Diện Ngay</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Course Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5" id="course-grid">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 2: SÁT HẠCH TRẮC NGHIỆM (#tab-exam) -->
+    <!-- ============================================================== -->
+    <section id="tab-exam" class="space-y-4 hidden">
+
+      <!-- Exam Welcome / Setup Card -->
+      <div id="exam-setup-box" class="bg-white rounded-2xl border border-gray-200 p-5 shadow-xs space-y-4">
+        <div class="flex items-start justify-between gap-3 border-b border-gray-100 pb-3.5">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 flex items-center justify-center font-bold">
+              <i data-lucide="clipboard-edit" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-base text-gray-900">Chuẩn Bị Sát Hạch Kiến Thức Kỹ Thuật</h3>
+              <p class="text-xs text-gray-500">Chọn chuyên đề hoặc làm bài thi sát hạch toàn diện (chấm điểm &amp; cấp chứng chỉ tự động)</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="p-3.5 rounded-xl border border-gray-200 bg-gray-50 space-y-1">
+            <span class="text-xs text-gray-500 font-medium">Học viên dự thi:</span>
+            <p class="text-sm font-bold text-gray-900" id="exam-trainee-display">Ngô Quyết Thắng</p>
+          </div>
+          <div class="p-3.5 rounded-xl border border-gray-200 bg-gray-50 space-y-1">
+            <span class="text-xs text-gray-500 font-medium">Chế độ thi:</span>
+            <select id="select-exam-topic" class="w-full text-xs font-bold bg-white border border-gray-300 rounded-lg p-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-600">
+              <option value="all">⭐ Bài Thi Sát Hạch Toàn Diện (15 câu)</option>
+              <option value="safety">🛡️ An Toàn Lao Động &amp; LOTO</option>
+              <option value="tba">⚡ Trạm Biến Áp (TBA) 22/0.4kV</option>
+              <option value="pump">💧 Trạm Bơm Tăng Áp, Suối Cun &amp; PCCC</option>
+              <option value="lighting">⏱️ Chiếu Sáng &amp; Hẹn Giờ</option>
+              <option value="meter">📊 Chốt Công Tơ &amp; Sản Lượng</option>
+              <option value="schematic">📐 Đọc Sơ Đồ &amp; Động Cơ 3 Pha</option>
+            </select>
+          </div>
+          <div class="p-3.5 rounded-xl border border-gray-200 bg-gray-50 space-y-1">
+            <span class="text-xs text-gray-500 font-medium">Thời gian &amp; Điểm đạt:</span>
+            <p class="text-xs font-semibold text-gray-700 leading-snug">⏱️ 15 Phút • Đạt: <span class="text-emerald-700 font-bold">≥ 70% (70 điểm)</span></p>
+          </div>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2">
+          <button onclick="startExamSession()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-2">
+            <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+            <span>Bắt Đầu Làm Bài Ngay</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Exam In-Progress Container (Initially Hidden) -->
+      <div id="exam-active-box" class="space-y-4 hidden">
+        <!-- Floating Exam Status Bar -->
+        <div class="bg-white rounded-2xl border border-gray-200 p-4 shadow-xs flex items-center justify-between gap-3 sticky top-16 z-10 flex-wrap">
+          <div class="flex items-center space-x-3">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <div>
+              <h4 class="font-bold text-xs sm:text-sm text-gray-900" id="active-exam-title">Bài Thi Sát Hạch Toàn Diện</h4>
+              <p class="text-[11px] text-gray-500">Học viên: <b id="active-exam-trainee" class="text-gray-800">Ngô Quyết Thắng</b></p>
+            </div>
+          </div>
+
+          <!-- Countdown Timer -->
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 text-white rounded-xl font-mono font-bold text-sm shadow-xs" id="timer-box">
+              <i data-lucide="clock" class="w-4 h-4 text-amber-400"></i>
+              <span id="countdown-timer">15:00</span>
+            </div>
+
+            <button onclick="submitExamConfirmation()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5">
+              <i data-lucide="check-circle" class="w-4 h-4"></i>
+              <span>Nộp Bài</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Question Palette Navigator -->
+        <div class="bg-white rounded-xl border border-gray-200 p-3 shadow-xs space-y-1.5">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-semibold text-gray-600">Bảng điều hướng câu hỏi:</span>
+            <span class="text-[11px] text-gray-400" id="answered-count-label">Đã làm: 0/0</span>
+          </div>
+          <div class="flex flex-wrap gap-1.5" id="question-palette">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Questions List Container -->
+        <div class="space-y-3" id="exam-questions-list">
+          <!-- Rendered by JS -->
+        </div>
+
+        <!-- Bottom Submit Button -->
+        <div class="p-4 bg-white rounded-2xl border border-gray-200 shadow-xs flex items-center justify-between gap-3">
+          <p class="text-xs text-gray-500">Vui lòng rà soát lại các câu hỏi trước khi bấm nộp bài.</p>
+          <button onclick="submitExamConfirmation()" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-2">
+            <i data-lucide="send" class="w-4 h-4"></i>
+            <span>Nộp Bài &amp; Xem Kết Quả</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Exam Result Review Box (Initially Hidden) -->
+      <div id="exam-result-box" class="space-y-4 hidden">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 3: CHỨNG CHỈ & LỊCH SỬ ĐÀO TẠO (#tab-certificates) -->
+    <!-- ============================================================== -->
+    <section id="tab-certificates" class="space-y-4 hidden">
+
+      <!-- Certificate Preview Container -->
+      <div id="certificate-preview-container" class="space-y-3">
+        <div class="flex items-center justify-between gap-2 flex-wrap no-print">
+          <div>
+            <h3 class="font-extrabold text-sm text-gray-900">Chứng Chỉ Sát Hạch Kỹ Thuật Điện Tử</h3>
+            <p class="text-xs text-gray-500">Cấp tự động khi học viên đạt bài thi sát hạch từ 70/100 điểm trở lên</p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="window.print()" class="px-3.5 py-2 bg-gray-900 hover:bg-black text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+              <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+              <span>In Chứng Chỉ A4</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Printable Certificate Card -->
+        <div id="certificate-printable" class="bg-white rounded-3xl border-8 border-double border-amber-300 p-8 sm:p-10 shadow-lg relative overflow-hidden text-center space-y-6 max-w-3xl mx-auto">
+          <!-- Background watermark pattern -->
+          <div class="absolute inset-0 opacity-[0.03] pointer-events-none flex items-center justify-center">
+            <i data-lucide="shield" class="w-96 h-96"></i>
+          </div>
+
+          <!-- Top Institution Header -->
+          <div class="space-y-1">
+            <p class="text-xs tracking-widest font-extrabold text-slate-500 uppercase">HỆ THỐNG QUẢN LÝ KỸ THUẬT VẬN HÀNH M&amp;E • MONTANA GC</p>
+            <div class="w-16 h-1 bg-amber-400 mx-auto rounded-full my-2"></div>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight uppercase">GIẤY CHỨNG NHẬN ĐẠT CHUẨN SÁT HẠCH</h2>
+            <p class="text-xs text-slate-500 italic">Certificate of Technical Proficiency &amp; Safety Compliance</p>
+          </div>
+
+          <!-- Trainee Info Section -->
+          <div class="py-2 space-y-2">
+            <p class="text-xs text-slate-500">Chứng nhận nhân sự kỹ thuật:</p>
+            <h3 class="text-2xl sm:text-3xl font-extrabold text-indigo-950 font-serif tracking-wide underline decoration-amber-400 decoration-2 underline-offset-8" id="cert-trainee-name">
+              Ngô Quyết Thắng
+            </h3>
+            <p class="text-xs text-slate-600 mt-2 font-medium">Vị trí: <span class="font-bold text-slate-800">Nhân viên kỹ thuật cơ điện</span> • Tổ: <span class="font-bold text-slate-800">Tổ Cơ Điện Sân Golf</span></p>
+          </div>
+
+          <!-- Exam Details -->
+          <div class="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4 max-w-xl mx-auto text-xs space-y-1 text-amber-950">
+            <p>Đã hoàn thành xuất sắc kỳ sát hạch:</p>
+            <p class="font-bold text-sm text-indigo-950" id="cert-exam-title">Sát Hạch Năng Lực Toàn Diện &amp; An Toàn Điện M&amp;E</p>
+            <div class="flex items-center justify-center gap-4 pt-1 font-semibold">
+              <span>Điểm số: <b class="text-emerald-700 text-sm" id="cert-score">95/100</b></span>
+              <span>•</span>
+              <span>Xếp loại: <b class="text-indigo-700 text-sm" id="cert-verdict">Xuất Sắc</b></span>
+            </div>
+          </div>
+
+          <!-- Bottom Signature / Stamp Section -->
+          <div class="pt-6 grid grid-cols-2 gap-4 text-xs">
+            <div class="space-y-1">
+              <p class="text-slate-400">Mã định danh xác thực:</p>
+              <p class="font-mono font-bold text-slate-700 tracking-wider" id="cert-code">ME-CERT-2026-9481</p>
+              <p class="text-[10px] text-slate-400" id="cert-date">Cấp ngày: 09/11/2026</p>
+            </div>
+
+            <div class="space-y-1 text-center">
+              <p class="font-bold text-slate-800">BAN KỸ THUẬT &amp; VẬN HÀNH</p>
+              <p class="text-[10px] text-emerald-600 font-bold uppercase tracking-widest mt-1">✓ XÁC THỰC KỸ THUẬT SỐ</p>
+              <div class="w-20 h-10 mx-auto flex items-center justify-center text-emerald-600 opacity-80">
+                <i data-lucide="stamp" class="w-8 h-8"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Training Records History Table -->
+      <div class="bg-white rounded-2xl border border-gray-200 p-4 shadow-xs space-y-3 no-print">
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+          <div>
+            <h4 class="font-extrabold text-sm text-gray-900">Lịch Sử Các Kỳ Thi Sát Hạch</h4>
+            <p class="text-xs text-gray-500">Lưu trữ toàn bộ các lượt sát hạch kiến thức của học viên trên thiết bị</p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="exportTrainingRecordsCSV()" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 border border-gray-200 text-gray-700 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>Xuất Báo Cáo CSV</span>
+            </button>
+            <button onclick="clearTrainingRecords()" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              <span>Xóa Lịch Sử</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left" id="table-training-records">
+            <thead class="bg-gray-50 text-gray-600 border-b border-gray-200">
+              <tr>
+                <th class="p-2.5">Thời Gian</th>
+                <th class="p-2.5">Học Viên</th>
+                <th class="p-2.5">Chuyên Đề</th>
+                <th class="p-2.5">Điểm Số</th>
+                <th class="p-2.5">Xếp Loại</th>
+                <th class="p-2.5 text-center">Thao Tác</th>
+              </tr>
+            </thead>
+            <tbody id="records-table-body" class="divide-y divide-gray-100">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 4: NGÂN HÀNG CÂU HỎI & QUẢN TRỊ (#tab-questions) -->
+    <!-- ============================================================== -->
+    <section id="tab-questions" class="space-y-4 hidden no-print">
+
+      <!-- Top Question Bank Actions -->
+      <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <h3 class="font-extrabold text-sm text-gray-900">Quản Lý Ngân Hàng Câu Hỏi Trắc Nghiệm</h3>
+          <p class="text-xs text-gray-500">Tra cứu, bổ sung câu hỏi mới hoặc điều chỉnh đáp án &amp; căn cứ SOP</p>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+          <button onclick="openAddQuestionModal()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>Thêm Câu Hỏi Mới</span>
+          </button>
+          <button onclick="resetDefaultQuestionBank()" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-semibold border border-gray-200 transition">
+            Khôi Phục Mặc Định
+          </button>
+        </div>
+      </div>
+
+      <!-- Search & Category Filters -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <div class="relative flex-1 min-w-[200px]">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          <input type="text" id="question-search-input" oninput="renderQuestionsList()" placeholder="Tìm kiếm câu hỏi, từ khóa kỹ thuật..." class="w-full pl-9 pr-4 py-2 bg-white rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600">
+        </div>
+
+        <select id="question-topic-filter" onchange="renderQuestionsList()" class="px-3 py-2 bg-white rounded-xl border border-gray-200 text-xs font-medium text-gray-700 focus:outline-none focus:border-indigo-600">
+          <option value="all">Tất cả chuyên đề</option>
+          <option value="safety">An Toàn &amp; LOTO</option>
+          <option value="tba">Trạm Biến Áp TBA</option>
+          <option value="pump">Trạm Bơm &amp; Suối Cun</option>
+          <option value="lighting">Chiếu Sáng &amp; Hẹn Giờ</option>
+          <option value="meter">Chốt Công Tơ</option>
+          <option value="schematic">Sơ Đồ &amp; Động Cơ 3 Pha</option>
+        </select>
+      </div>
+
+      <!-- Question Cards List -->
+      <div class="space-y-3" id="admin-questions-list">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: XEM CHI TIẾT BÀI HỌC CHUYÊN ĐỀ -->
+  <div id="modal-course-detail" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs hidden items-center justify-center z-50 p-3 sm:p-4 no-print" onclick="if (event.target === this) closeCourseModal()">
+    <div class="w-full max-w-2xl bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <!-- Modal Header -->
+      <div class="p-4 sm:p-5 border-b border-gray-100 flex items-start justify-between gap-3 shrink-0 bg-slate-50/70">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0" id="modal-course-icon">
+            <i data-lucide="book-open" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800" id="modal-course-badge">Chuyên đề 1</span>
+              <span class="text-xs text-gray-500 font-mono" id="modal-course-sop">SOP-ANTOAN-01</span>
+            </div>
+            <h3 class="text-base font-bold text-gray-900 mt-0.5" id="modal-course-title">Tên Chuyên Đề</h3>
+          </div>
+        </div>
+        <button type="button" onclick="closeCourseModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div class="p-5 overflow-y-auto space-y-4 text-xs text-gray-700 custom-scrollbar flex-1" id="modal-course-body">
+        <!-- Injected by JS -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between gap-2 shrink-0">
+        <button type="button" onclick="closeCourseModal()" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-xl text-xs font-semibold hover:bg-gray-100 transition">Đóng</button>
+        <button type="button" id="btn-modal-start-quiz" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+          <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+          <span>Luyện Tập Chuyên Đề Này</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: THÊM / SỬA CÂU HỎI TRẮC NGHIỆM -->
+  <div id="modal-edit-question" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs hidden items-center justify-center z-50 p-3 sm:p-4 no-print" onclick="if (event.target === this) closeEditQuestionModal()">
+    <div class="w-full max-w-xl bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="p-4 border-b border-gray-100 flex items-center justify-between bg-slate-50">
+        <h3 class="font-bold text-sm text-gray-900" id="modal-q-title">Thêm Câu Hỏi Trắc Nghiệm</h3>
+        <button onclick="closeEditQuestionModal()" class="text-gray-400 hover:text-gray-700"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="form-edit-question" onsubmit="handleSaveQuestion(event)" class="p-4 overflow-y-auto space-y-3 text-xs custom-scrollbar">
+        <input type="hidden" id="edit-q-id">
+
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">Chuyên đề:</label>
+          <select id="edit-q-topic" class="w-full p-2 border border-gray-300 rounded-lg text-xs">
+            <option value="safety">An Toàn Lao Động &amp; LOTO</option>
+            <option value="tba">Trạm Biến Áp (TBA) 22/0.4kV</option>
+            <option value="pump">Trạm Bơm Tăng Áp, Suối Cun &amp; PCCC</option>
+            <option value="lighting">Chiếu Sáng &amp; Hẹn Giờ</option>
+            <option value="meter">Chốt Công Tơ &amp; Sản Lượng</option>
+            <option value="schematic">Sơ Đồ &amp; Động Cơ 3 Pha</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">Nội dung câu hỏi:</label>
+          <textarea id="edit-q-text" rows="2" required placeholder="Nhập câu hỏi trắc nghiệm..." class="w-full p-2 border border-gray-300 rounded-lg text-xs"></textarea>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block font-bold text-gray-700">4 Lựa chọn trả lời (Chọn nút tròn đáp án đúng):</label>
+
+          <div class="flex items-center gap-2">
+            <input type="radio" name="correct-answer" value="0" id="opt-radio-0" required class="w-4 h-4 text-indigo-600">
+            <span class="font-bold w-4 text-center">A.</span>
+            <input type="text" id="edit-q-opt-0" required placeholder="Nội dung đáp án A" class="flex-1 p-2 border border-gray-300 rounded-lg text-xs">
+          </div>
+
+          <div class="flex items-center gap-2">
+            <input type="radio" name="correct-answer" value="1" id="opt-radio-1" class="w-4 h-4 text-indigo-600">
+            <span class="font-bold w-4 text-center">B.</span>
+            <input type="text" id="edit-q-opt-1" required placeholder="Nội dung đáp án B" class="flex-1 p-2 border border-gray-300 rounded-lg text-xs">
+          </div>
+
+          <div class="flex items-center gap-2">
+            <input type="radio" name="correct-answer" value="2" id="opt-radio-2" class="w-4 h-4 text-indigo-600">
+            <span class="font-bold w-4 text-center">C.</span>
+            <input type="text" id="edit-q-opt-2" required placeholder="Nội dung đáp án C" class="flex-1 p-2 border border-gray-300 rounded-lg text-xs">
+          </div>
+
+          <div class="flex items-center gap-2">
+            <input type="radio" name="correct-answer" value="3" id="opt-radio-3" class="w-4 h-4 text-indigo-600">
+            <span class="font-bold w-4 text-center">D.</span>
+            <input type="text" id="edit-q-opt-3" required placeholder="Nội dung đáp án D" class="flex-1 p-2 border border-gray-300 rounded-lg text-xs">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">Giải thích kỹ thuật / Căn cứ SOP:</label>
+          <textarea id="edit-q-explain" rows="2" placeholder="Giải thích lý do đáp án đúng và trích dẫn quy trình..." class="w-full p-2 border border-gray-300 rounded-lg text-xs"></textarea>
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2 border-t border-gray-100">
+          <button type="button" onclick="closeEditQuestionModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-xs">Hủy</button>
+          <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold">Lưu Câu Hỏi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- SCRIPT LOGIC -->
+  <script src="elearning-app.js"></script>
+</body>
+</html>
