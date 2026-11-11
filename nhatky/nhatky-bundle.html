@@ -15,369 +15,6 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>
-/* --- Inlined my-shift.js --- */
-(function (root, factory) {
-  const api = factory();
-  if (typeof module === 'object' && module.exports) module.exports = api;
-  else root.MyShiftSchedule = api;
-})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
-  'use strict';
-  const SOURCE_URL = 'https://amd500.tail030e1.ts.net/shifts';
-  const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1d_dbPMeToPfP86rRJVoB_BF15J4xh912jVfcjcagxXs/htmlview/sheet?headers=true&gid=36044768';
-  const CACHE_KEY = 'app_my_shift_source_v1';
-  // Preserve the slot order shown by the CMMS shifts page, including its raw codes.
-  const SLOTS = [
-    { id: 'ca3', label: 'Ca 3', time: '22:00–06:00', start: 1320, end: 1800 },
-    { id: 'ca1', label: 'Ca 1', time: '06:00–14:00', start: 360, end: 840 },
-    { id: 'ca2', label: 'Ca 2', time: '14:00–22:00', start: 840, end: 1320 }
-  ];
-  const OTHER_CODES = {
-    cn: ['rest', 'Nghỉ tuần (CN)'],
-    p: ['leave', 'Nghỉ phép (P)'],
-    kl: ['leave', 'Nghỉ không lương (KL)'],
-    n: ['rest', 'Nghỉ việc / Nghỉ (N)'],
-    hb: ['other', 'Lịch HC Hòa Bình 7h00–11h30 & 13h30–17h00 (HB)']
-  };
-
-  function normalizeName(value) {
-    return String(value || '').normalize('NFC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('vi');
-  }
-  function vietnamParts(now = new Date()) {
-    const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Ho_Chi_Minh', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(now);
-    return Object.fromEntries(parts.filter(p => p.type !== 'literal').map(p => [p.type, p.value]));
-  }
-  function vietnamDate(now = new Date()) {
-    const p = vietnamParts(now);
-    return `${p.year}-${p.month}-${p.day}`;
-  }
-  function addDays(isoDate, days) {
-    const date = new Date(isoDate + 'T12:00:00Z');
-    date.setUTCDate(date.getUTCDate() + days);
-    return date.toISOString().slice(0, 10);
-  }
-  function parseDate(text) {
-    const match = String(text).trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-    if (!match) return null;
-    const iso = `${match[3]}-${match[2].padStart(2, '0')}-${match[1].padStart(2, '0')}`;
-    const date = new Date(iso + 'T12:00:00Z');
-    return !Number.isNaN(date.valueOf()) && date.toISOString().slice(0, 10) === iso ? iso : null;
-  }
-  function displayDate(iso) {
-    return iso.slice(8, 10) + '/' + iso.slice(5, 7) + '/' + iso.slice(0, 4);
-  }
-  function expandedCells(row) {
-    const values = [];
-    for (const cell of row.children) {
-      if (cell.tagName !== 'TD' || cell.classList.contains('freezebar-cell')) continue;
-      const span = Math.max(1, Math.min(2000, Number(cell.getAttribute('colspan')) || 1));
-      values.push(cell.textContent.trim().replace(/\s+/g, ' '));
-      for (let i = 1; i < span; i++) values.push('');
-    }
-    return values;
-  }
-  function parseSourceHtml(html) {
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    const rows = Array.from(doc.querySelectorAll('tr')).map(row => {
-      const header = Array.from(row.children).find(cell => cell.tagName === 'TH' && /^36044768R\d+$/.test(cell.id));
-      return header ? { number: Number(header.id.match(/R(\d+)$/)[1]) + 1, cells: expandedCells(row) } : null;
-    }).filter(Boolean);
-    const metadata = rows.find(row => row.number === 2)?.cells;
-    const dayHeaders = rows.find(row => row.number === 3)?.cells;
-    if (!metadata || !dayHeaders) throw new Error('Nguồn chưa trả về bảng phân ca hợp lệ.');
-    const weeks = [];
-    dayHeaders.forEach((label, column) => {
-      const dayMatch = label.match(/^Thứ\s+Hai\s+(\d+)\s*\/\s*(\d+)/i);
-      if (!dayMatch) return;
-      const dates = metadata.slice(column, column + 21).map(parseDate).filter(Boolean);
-      const startDate = dates.find(date => Number(date.slice(8)) === Number(dayMatch[1]) && Number(date.slice(5, 7)) === Number(dayMatch[2]));
-      if (!startDate || !dates.includes(addDays(startDate, 6)) || new Date(startDate + 'T12:00:00Z').getUTCDay() !== 1) return;
-      const validDays = Array.from({ length: 7 }, (_, day) => {
-        const date = addDays(startDate, day);
-        const match = (dayHeaders[column + day * 3] || '').match(/(\d+)\s*\/\s*(\d+)/);
-        return match && Number(match[1]) === Number(date.slice(8)) && Number(match[2]) === Number(date.slice(5, 7));
-      }).every(Boolean);
-      if (!validDays) return;
-      const weekLabel = metadata.slice(column, column + 21).find(value => /^\d{1,2}$/.test(value)) || '';
-      let team = '';
-      const members = [];
-      for (const row of rows.filter(r => r.number > 4)) {
-        const [stt, name] = row.cells;
-        if (!name) continue;
-        // Summary columns after the roster may contain totals on team heading rows.
-        if (!stt && !row.cells.slice(column, column + 21).some(Boolean)) { team = name; continue; }
-        if (!/^\d+$/.test(stt || '')) continue;
-        members.push({ name, team, days: Array.from({ length: 7 }, (_, day) => Array.from({ length: 3 }, (_, slot) => row.cells[column + day * 3 + slot] || '')) });
-      }
-      if (members.length) weeks.push({ startDate, endDate: addDays(startDate, 6), weekLabel, members });
-    });
-    if (!weeks.length) throw new Error('Nguồn chưa có tuần phân ca hợp lệ.');
-    return weeks;
-  }
-  function findMember(week, name) {
-    const candidates = week.members.filter(member => normalizeName(member.name) === normalizeName(name));
-    const preferred = candidates.filter(member => normalizeName(member.team) === normalizeName('Tổ cơ điện Sân Golf'));
-    const matches = preferred.length ? preferred : candidates;
-    if (matches.length > 1) throw new Error('Tên nhân viên bị trùng trong nguồn phân ca; cần đối chiếu với người phụ trách.');
-    return matches[0] || null;
-  }
-  function describeDay(cells = []) {
-    const codes = Array.from({ length: 3 }, (_, i) => String(cells[i] || '').trim());
-    const assignments = [];
-    const notes = [];
-    const kinds = [];
-    codes.forEach((code, slot) => {
-      if (!code || code === '·' || code === '—') return;
-      const key = normalizeName(code);
-      if (key === 'x' || key === 'tx') assignments.push({ ...SLOTS[slot], code, ...(key === 'tx' ? { time: '06:00–10:00 & 14:00–18:00' } : {}) });
-      else if (key === 'hc') { assignments.push({ id: 'hc', label: 'Hành chính', time: '07:30–11:30 & 13:00–17:00', code }); kinds.push('administrative'); }
-      else if (OTHER_CODES[key]) { kinds.push(OTHER_CODES[key][0]); notes.push(OTHER_CODES[key][1]); }
-      else if (key === 'nghỉ việc') { kinds.push('inactive'); notes.push('Nghỉ việc theo nguồn'); }
-      else { kinds.push('other'); notes.push('Ký hiệu ' + code); }
-    });
-    const kind = assignments.some(a => a.id !== 'hc') ? 'working' : kinds[0] || 'unassigned';
-    return { kind, assignments, notes, codes, label: assignments.length ? assignments.map(a => a.label + (normalizeName(a.code) === 'tx' ? ' (tx)' : '')).join(' · ') : notes.join(' · ') || 'Chưa phân công' };
-  }
-  function dayFor(weeks, name, date) {
-    const week = weeks.find(w => w.startDate <= date && date <= w.endDate);
-    if (!week) return { kind: 'unpublished', date };
-    const member = findMember(week, name);
-    if (!member) return { kind: 'unmatched', week, date };
-    const index = Math.round((Date.parse(date + 'T12:00:00Z') - Date.parse(week.startDate + 'T12:00:00Z')) / 86400000);
-    return { ...describeDay(member.days[index]), date, week, member };
-  }
-  function selectCurrent(weeks, name, now = new Date()) {
-    const today = vietnamDate(now);
-    const p = vietnamParts(now);
-    const minute = Number(p.hour) * 60 + Number(p.minute);
-    if (minute < 360) {
-      const previous = dayFor(weeks, name, addDays(today, -1));
-      const overnight = previous.assignments?.find(a => a.id === 'ca3');
-      if (overnight) return { ...previous, assignment: overnight, overnight: true };
-    }
-    const current = dayFor(weeks, name, today);
-    const ordered = (current.assignments || []).slice().sort((a, b) => (a.start || 0) - (b.start || 0));
-    const assignment = ordered.find(a => a.start <= minute && minute < a.end) || ordered.find(a => a.start > minute) || ordered.at(-1);
-    return { ...current, assignment: assignment || null, overnight: false };
-  }
-  function validCache(cache, user) {
-    return cache?.version === 1 && cache.employeeId === user?.id && cache.employeeName === user?.fullName && Number.isFinite(Date.parse(cache.fetchedAt)) && Array.isArray(cache.weeks) && cache.weeks.length > 0 && cache.weeks.every(week => /^\d{4}-\d{2}-\d{2}$/.test(week.startDate) && addDays(week.startDate, 6) === week.endDate && Array.isArray(week.members) && week.members.every(member => typeof member.name === 'string' && typeof member.team === 'string' && member.days.length === 7 && member.days.every(day => day.length === 3 && day.every(code => typeof code === 'string'))));
-  }
-
-  function convertGolfGridToWeeks(loader) {
-    if (!loader || !loader.grid || loader.grid.length < 4) return [];
-    const baseMonday = loader.viewingMonday || new Date();
-    const mondays = [-2, -1, 0, 1, 2].map(offset => {
-      const m = new Date(baseMonday);
-      const day = m.getDay();
-      const diff = m.getDate() - day + (day === 0 ? -6 : 1) + offset * 7;
-      m.setDate(diff);
-      m.setHours(0, 0, 0, 0);
-      return m;
-    });
-
-    const parsedWeeks = [];
-    for (const mon of mondays) {
-      const weekInfo = loader.getWeekInfo(mon);
-      if (!weekInfo || !weekInfo.teams || !weekInfo.teams.length) continue;
-      const startDate = vietnamDate(mon);
-      const endDate = addDays(startDate, 6);
-      const weekLabel = String(weekInfo.weekNum || '');
-      const members = [];
-      weekInfo.teams.forEach(team => {
-        team.staff.forEach(s => {
-          const days = [];
-          for (let d = 0; d < 7; d++) {
-            days.push([
-              s.shifts[d * 3 + 0] || '',
-              s.shifts[d * 3 + 1] || '',
-              s.shifts[d * 3 + 2] || ''
-            ]);
-          }
-          members.push({
-            name: s.name,
-            team: team.name,
-            days
-          });
-        });
-      });
-      if (members.length) {
-        parsedWeeks.push({ startDate, endDate, weekLabel, members });
-      }
-    }
-    return parsedWeeks;
-  }
-
-  function createController({ getUser, onSelection }) {
-    let weeks = [];
-    let fetchedAt = '';
-    let viewingDate = vietnamDate();
-    let owner = '';
-    let generation = 0;
-    let pending = null;
-    let controller = null;
-    let initialized = false;
-    let followToday = true;
-    let lastAttempt = 0;
-    let syncState = 'empty';
-    let syncError = '';
-    let selectionSignature = '';
-    const el = id => document.getElementById(id);
-    const userKey = user => user ? `${user.id}:${user.fullName}` : '';
-    const text = (id, value) => { const target = el(id); if (target) target.textContent = value; };
-    const formatSyncTime = value => new Intl.DateTimeFormat('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', dateStyle: 'short', timeStyle: 'short' }).format(new Date(value));
-
-    function initialize() {
-      if (initialized) return;
-      initialized = true;
-      el('my-shift-sync')?.addEventListener('click', () => refresh(true));
-      el('my-shift-date')?.addEventListener('change', e => {
-        const value = e.target.value;
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return;
-        viewingDate = value; followToday = value === vietnamDate(); render();
-      });
-      el('my-shift-today-button')?.addEventListener('click', () => { viewingDate = vietnamDate(); followToday = true; render(); });
-      setInterval(() => { if (getUser() && document.visibilityState === 'visible') render(); }, 60000);
-      setInterval(() => { if (getUser() && document.visibilityState === 'visible') refresh(); }, 300000);
-      document.addEventListener('visibilitychange', () => { if (getUser() && document.visibilityState === 'visible') { render(); refresh(); } });
-    }
-    function activate() {
-      initialize();
-      const user = getUser();
-      if (!user) {
-        generation++; controller?.abort(); owner = ''; weeks = []; fetchedAt = ''; pending = null; selectionSignature = ''; return;
-      }
-      const key = userKey(user);
-      if (owner !== key) {
-        generation++; controller?.abort(); pending = null; owner = key; weeks = []; fetchedAt = ''; syncState = 'empty'; viewingDate = vietnamDate(); followToday = true; selectionSignature = '';
-        try {
-          const cache = JSON.parse(localStorage.getItem(CACHE_KEY));
-          if (validCache(cache, user)) { weeks = cache.weeks; fetchedAt = cache.fetchedAt; syncState = 'cached'; }
-        } catch (_) {}
-        if (!weeks.length && typeof GolfRootSheetLoader !== 'undefined' && GolfRootSheetLoader.grid && GolfRootSheetLoader.grid.length > 3) {
-          try {
-            const rootWeeks = convertGolfGridToWeeks(GolfRootSheetLoader);
-            if (rootWeeks && rootWeeks.length) {
-              weeks = rootWeeks;
-              fetchedAt = GolfRootSheetLoader.lastSyncTime ? new Date(GolfRootSheetLoader.lastSyncTime).toISOString() : new Date().toISOString();
-              syncState = 'synced';
-            }
-          } catch (_) {}
-        }
-        render(); refresh(true);
-      } else render();
-    }
-    async function refresh(force = false) {
-      const user = getUser();
-      if (!user) return;
-      if (owner !== userKey(user)) { activate(); return; }
-      if (pending || (!force && Date.now() - lastAttempt < 30000)) return pending;
-      const currentGeneration = generation;
-      const key = owner;
-      controller = new AbortController();
-      const requestController = controller;
-      lastAttempt = Date.now(); syncState = 'loading'; syncError = ''; render();
-      const timeout = setTimeout(() => requestController.abort(), 15000);
-      pending = (async () => {
-        try {
-          const response = await fetch(SHEET_URL, { credentials: 'omit', cache: 'no-store', signal: requestController.signal });
-          if (!response.ok) throw new Error('Không thể đọc lịch phân ca.');
-          const parsed = parseSourceHtml(await response.text());
-          if (currentGeneration !== generation || key !== userKey(getUser())) return;
-          weeks = parsed;
-          fetchedAt = new Date().toISOString(); syncState = 'synced';
-          const personalWeeks = weeks.map(week => ({ ...week, members: week.members.filter(member => normalizeName(member.name) === normalizeName(user.fullName)) }));
-          try { localStorage.setItem(CACHE_KEY, JSON.stringify({ version: 1, employeeId: user.id, employeeName: user.fullName, fetchedAt, weeks: personalWeeks })); } catch (_) {}
-        } catch (error) {
-          if (typeof GolfRootSheetLoader !== 'undefined') {
-            try {
-              if (!GolfRootSheetLoader.grid) {
-                await GolfRootSheetLoader.fetchLive();
-              }
-              if (GolfRootSheetLoader.grid && GolfRootSheetLoader.grid.length > 3) {
-                const rootWeeks = convertGolfGridToWeeks(GolfRootSheetLoader);
-                if (rootWeeks && rootWeeks.length) {
-                  if (currentGeneration !== generation || key !== userKey(getUser())) return;
-                  weeks = rootWeeks;
-                  fetchedAt = GolfRootSheetLoader.lastSyncTime ? new Date(GolfRootSheetLoader.lastSyncTime).toISOString() : new Date().toISOString();
-                  syncState = 'synced';
-                  const personalWeeks = weeks.map(week => ({ ...week, members: week.members.filter(member => normalizeName(member.name) === normalizeName(user.fullName)) }));
-                  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ version: 1, employeeId: user.id, employeeName: user.fullName, fetchedAt, weeks: personalWeeks })); } catch (_) {}
-                  return;
-                }
-              }
-            } catch (_) {}
-          }
-          if (currentGeneration !== generation || key !== userKey(getUser())) return;
-          syncState = weeks.length ? 'cached' : 'error';
-          syncError = error.name === 'AbortError' ? 'Kết nối quá thời gian chờ.' : 'Không đọc được nguồn phân ca.';
-        } finally {
-          clearTimeout(timeout);
-          if (currentGeneration === generation) { pending = null; render(); }
-        }
-      })();
-      return pending;
-    }
-    function render() {
-      const user = getUser();
-      if (!user || owner !== userKey(user)) return;
-      if (followToday) viewingDate = vietnamDate();
-      text('my-shift-employee', user.fullName);
-      const dateEl = el('my-shift-date');
-      if (dateEl) dateEl.value = viewingDate;
-      text('my-shift-date-label', (viewingDate === vietnamDate() ? 'Hôm nay · ' : 'Ngày xem · ') + displayDate(viewingDate));
-      const status = syncState === 'loading' ? 'Đang đọc lịch phân ca…' : syncState === 'synced' ? 'Đã đồng bộ · ' + formatSyncTime(fetchedAt) : syncState === 'cached' ? 'Đang dùng bản đã lưu · ' + formatSyncTime(fetchedAt) + (syncError ? ' · ' + syncError : ' · Đang chờ đồng bộ') : 'Chưa đồng bộ · ' + (syncError || 'Đang chờ đọc lịch');
-      text('my-shift-sync-status', status);
-      const syncBtn = el('my-shift-sync');
-      if (syncBtn) syncBtn.disabled = syncState === 'loading';
-      const week = weeks.find(w => w.startDate <= viewingDate && viewingDate <= w.endDate);
-      text('my-shift-week', week ? `Tuần ${week.weekLabel} · ${displayDate(week.startDate)}–${displayDate(week.endDate)}` : 'Lịch trong tuần');
-      const container = el('my-shift-days');
-      if (container) container.replaceChildren();
-      let selection;
-      try {
-        selection = weeks.length ? (followToday ? selectCurrent(weeks, user.fullName) : dayFor(weeks, user.fullName, viewingDate)) : { kind: 'unavailable' };
-        const member = week && findMember(week, user.fullName);
-        if (week && member) {
-          ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].forEach((label, day) => {
-            const date = addDays(week.startDate, day);
-            const description = describeDay(member.days[day]);
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'my-shift-day';
-            button.setAttribute('aria-pressed', String(date === viewingDate));
-            button.setAttribute('aria-label', label + ' ' + displayDate(date) + ': ' + description.label);
-            for (const [className, value] of [['my-shift-day-date', label + ' · ' + date.slice(8, 10) + '/' + date.slice(5, 7)], ['my-shift-day-assignment', description.label]]) {
-              const span = document.createElement('span'); span.className = className; span.textContent = value; button.appendChild(span);
-            }
-            button.addEventListener('click', () => { viewingDate = date; followToday = date === vietnamDate(); render(); });
-            container.appendChild(button);
-          });
-        }
-        const messages = {
-          unavailable: 'Chưa đọc được lịch phân ca. Bấm Đồng bộ lịch để thử lại.',
-          unpublished: 'Chưa có lịch phân ca cho tuần này trong nguồn.',
-          unmatched: 'Chưa tìm thấy tên tài khoản trong bảng phân ca. Cần đối chiếu với người phụ trách.',
-          unassigned: 'Chưa phân công ca trong ngày này.'
-        };
-        text('my-shift-today', messages[selection.kind] || selection.label);
-        text('my-shift-team', selection.member?.team || 'Theo tài khoản đang đăng nhập');
-        text('my-shift-hours', (selection.assignments || []).map(a => `${a.label}: ${a.time}${normalizeName(a.code) === 'tx' ? ' · ký hiệu tx' : ''}`).join(' / '));
-        text('my-shift-notes', selection.overnight ? `Đang trong Ca 3 bắt đầu ngày ${displayDate(selection.date)}, kết thúc lúc 06:00 hôm nay.` : (selection.notes || []).join(' · '));
-        const current = weeks.length ? selectCurrent(weeks, user.fullName) : { kind: 'unavailable', date: vietnamDate(), label: syncState === 'loading' ? 'Đang đọc lịch phân ca' : 'Chưa đồng bộ lịch' };
-        const signature = [user.id, syncState, current.date, current.kind, current.assignment?.id, current.assignment?.code, current.label].join('|');
-        if (signature !== selectionSignature) { selectionSignature = signature; onSelection({ ...current, sourceState: syncState }); }
-      } catch (error) {
-        text('my-shift-today', error.message); text('my-shift-hours', ''); text('my-shift-notes', ''); text('my-shift-team', 'Cần đối chiếu nguồn phân ca');
-        onSelection({ kind: 'unavailable', date: vietnamDate(), label: 'Cần đối chiếu lịch phân ca', sourceState: syncState });
-      }
-    }
-    return { activate, refresh, render };
-  }
-  return { SOURCE_URL, SHEET_URL, parseSourceHtml, normalizeName, vietnamDate, addDays, findMember, describeDay, dayFor, selectCurrent, convertGolfGridToWeeks, createController };
-});
-
-</script>
-  <script>
     tailwind.config = {
       theme: {
         extend: {
@@ -397,12 +34,6 @@
     input, textarea, select {
       user-select: text;
     }
-    #my-shift-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
-    .my-shift-day { border: 1px solid #d1d5db; border-radius: 10px; background: #fff; padding: 12px 8px; min-height: 80px; text-align: left; }
-    .my-shift-day[aria-pressed="true"] { background: #111827; border-color: #111827; color: #fff; }
-    .my-shift-day-date { display: block; font-size: 11px; opacity: .8; margin-bottom: 8px; }
-    .my-shift-day-assignment { display: block; font-size: 12px; font-weight: 600; overflow-wrap: anywhere; }
-    @media (max-width: 640px) { #my-shift-days { grid-template-columns: repeat(2, minmax(0, 1fr)); } .my-shift-day { min-height: 66px; } }
     .custom-scrollbar::-webkit-scrollbar {
       width: 5px;
       height: 5px;
@@ -630,12 +261,6 @@
           <span class="hidden lg:inline" id="header-sync-text">Cloud</span>
         </button>
 
-        <!-- Shift Schedule Matrix Button -->
-        <button id="btn-header-schedule" onclick="openShiftScheduleModal()" aria-label="Xem bảng phân ca trực" class="px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg cursor-pointer transition text-xs font-medium text-gray-700 flex items-center gap-1.5">
-          <i data-lucide="calendar" class="w-3.5 h-3.5 text-gray-500"></i>
-          <span class="hidden sm:inline">Phân Ca</span>
-        </button>
-
         <!-- User / Shift Badge -->
         <button id="header-user-badge" onclick="openShiftModal()" aria-label="Đổi ca trực" class="flex items-center space-x-2 bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-lg cursor-pointer transition text-left">
           <div class="w-6 h-6 rounded-full bg-gray-900 text-white font-bold text-xs flex items-center justify-center" id="header-avatar">
@@ -656,347 +281,480 @@
       <!-- TAB 0: BÀN LÀM VIỆC DASHBOARD NHÂN VIÊN (#tab-dashboard) -->
       <!-- ============================================================== -->
       <section id="tab-dashboard" class="space-y-4">
-        <section id="my-shift-card" class="bg-white rounded-xl border border-gray-200 p-4 space-y-4" aria-labelledby="my-shift-heading">
-          <div class="flex flex-wrap items-start justify-between gap-3">
-            <div><h2 id="my-shift-heading" class="text-lg font-bold text-gray-900">Ca của tôi</h2><p id="my-shift-employee" class="text-sm font-semibold text-gray-700 mt-1"></p><p id="my-shift-team" class="text-xs text-gray-500 mt-1"></p></div>
-            <button type="button" id="my-shift-sync" class="px-3 py-2 rounded-lg border border-gray-300 text-xs font-semibold disabled:opacity-50">Đồng bộ lịch</button>
-          </div>
-          <div class="bg-gray-50 rounded-xl p-4 space-y-2">
-            <p id="my-shift-date-label" class="text-xs text-gray-500"></p>
-            <p id="my-shift-today" class="text-base font-bold text-gray-900" aria-live="polite">Đang chờ đọc lịch phân ca</p>
-            <p id="my-shift-hours" class="text-sm text-gray-700"></p>
-            <p id="my-shift-notes" class="text-xs text-gray-600"></p>
-          </div>
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <h3 id="my-shift-week" class="text-sm font-semibold text-gray-800">Lịch trong tuần</h3>
-            <div class="flex flex-wrap items-center gap-2"><label for="my-shift-date" class="text-xs text-gray-600">Ngày xem</label><input type="date" id="my-shift-date" class="border border-gray-300 rounded-lg px-2 py-2 text-sm" style="max-width:100%"><button id="my-shift-today-button" type="button" class="px-3 py-2 rounded-lg border border-gray-300 text-xs">Hôm nay</button></div>
-          </div>
-          <div id="my-shift-days" aria-label="Lịch phân ca cá nhân trong tuần"></div>
-          <div class="flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 pt-3"><p id="my-shift-sync-status" class="text-xs text-gray-500" role="status">Chưa đồng bộ</p><a id="my-shift-source" href="https://amd500.tail030e1.ts.net/shifts" target="_blank" rel="noopener noreferrer" class="text-xs underline text-gray-700">Mở bảng phân ca CMMS</a></div>
-          <p class="text-xs text-gray-500">Đọc cùng Google Sheet với CMMS. Ký hiệu và ca hiển thị theo bảng nguồn; ô trống là chưa phân công.</p>
-        </section>
-        
-        <!-- SECTION 1: LỐI TẮT THAO TÁC (Frappe Shortcuts) -->
-        <div class="space-y-2">
-          <div class="flex items-center justify-between px-0.5">
-            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Lối Tắt Thao Tác Nhanh (Shortcuts)</h3>
-            <span class="text-[11px] text-gray-400 font-medium">Lịch & Biểu Mẫu Dùng Chung</span>
-          </div>
+        <!-- 2.A: HERO HEADER CARD (Brand Teal #0b4d5e Gradient) -->
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0b4d5e] via-[#083e4c] to-[#052832] text-white p-4 sm:p-6 shadow-md border border-[#0b4d5e]/40">
+          <div class="absolute -right-10 -bottom-10 w-44 h-44 rounded-full bg-cyan-400/10 blur-2xl pointer-events-none"></div>
+          <div class="absolute -left-10 -top-10 w-40 h-40 rounded-full bg-teal-400/10 blur-2xl pointer-events-none"></div>
 
-          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-2.5">
-            <!-- Shortcut 1: Ghi Lịch -->
-            <button onclick="openQuickCalendarEventModal()" class="p-3.5 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-xs text-left transition flex items-center justify-between group">
-              <div class="flex items-center space-x-2.5 min-w-0">
-                <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-800 flex items-center justify-center shrink-0 border border-gray-200">
-                  <i data-lucide="calendar-plus" class="w-4 h-4"></i>
+          <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <!-- Left: Title, Tagline, Live Badges -->
+            <div class="space-y-2">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span>Hệ thống M&amp;E sẵn sàng 24/7</span>
+                </span>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-white/10 text-cyan-200 border border-white/10">
+                  <i data-lucide="shield-check" class="w-3.5 h-3.5 text-cyan-300"></i>
+                  <span>Ban Điện &amp; Cơ Điện Vận Hành</span>
+                </span>
+              </div>
+
+              <div>
+                <h2 class="text-lg sm:text-xl md:text-2xl font-black tracking-tight text-white flex items-center gap-2">
+                  <i data-lucide="layout-dashboard" class="w-6 h-6 text-teal-300 shrink-0"></i>
+                  <span>Bàn Làm Việc Kỹ Thuật &amp; Điều Hành M&amp;E</span>
+                </h2>
+                <p class="text-xs sm:text-sm text-cyan-100/90 mt-1">
+                  Trung tâm quản trị vận hành điện nước, máy bơm, trạm biến áp, hẹn giờ chiếu sáng &amp; hệ thống biểu mẫu trực ca.
+                </p>
+              </div>
+            </div>
+
+            <!-- Right: Real-time Live Clock & Quick Refresh Action -->
+            <div class="flex items-center sm:items-end md:flex-col md:items-end justify-between gap-3 pt-2 md:pt-0 border-t md:border-t-0 border-white/10">
+              <div class="bg-black/25 backdrop-blur-xs px-3.5 py-2 rounded-xl border border-white/15 text-left md:text-right">
+                <div class="flex items-center gap-1.5 text-[11px] text-teal-200 font-medium">
+                  <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                  <span id="dash-live-date">Đang cập nhật...</span>
                 </div>
-                <div class="min-w-0">
-                  <div class="font-semibold text-xs text-gray-900 truncate">Ghi Lịch Google</div>
-                  <div class="text-[10px] text-gray-500 truncate">Nhật ký trực ca</div>
+                <div class="text-lg sm:text-xl font-black font-mono tracking-wider text-white mt-0.5" id="dash-live-clock">
+                  --:--:--
                 </div>
               </div>
-              <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-700 transition shrink-0 ml-1"></i>
+
+              <button onclick="triggerManualSync(); updateLiveClock();" class="px-3.5 py-2 bg-white/15 hover:bg-white/25 active:scale-95 text-white text-xs font-semibold rounded-xl border border-white/20 transition flex items-center gap-1.5 shadow-xs shrink-0" title="Làm mới đồng bộ dữ liệu">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                <span class="hidden sm:inline">Làm mới dữ liệu</span>
+                <span class="sm:hidden">Làm mới</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2.B: QUICK KPI / SYSTEM STATUS (Grid 2 cols mobile, 4 cols desktop) -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
+          <!-- Card 1: Trạm Biến Áp & MPĐ -->
+          <div class="p-3.5 sm:p-4 rounded-2xl bg-white border border-gray-200/90 shadow-xs hover:shadow-md transition space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center shrink-0">
+                <i data-lucide="zap" class="w-4 h-4"></i>
+              </div>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span>Chuẩn 380V
+              </span>
+            </div>
+            <div>
+              <div class="text-xs font-bold text-gray-500 uppercase tracking-wide">Trạm Điện &amp; Máy Phát</div>
+              <div class="text-sm sm:text-base font-extrabold text-gray-900 mt-0.5">3 TBA &amp; MPĐ Sẵn Sàng</div>
+              <p class="text-[11px] text-gray-500 mt-0.5 truncate">TBA 1, 2, 3 &amp; ATS máy phát 100%</p>
+            </div>
+          </div>
+
+          <!-- Card 2: Bơm & Cấp Thoát Nước -->
+          <div class="p-3.5 sm:p-4 rounded-2xl bg-white border border-gray-200/90 shadow-xs hover:shadow-md transition space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="w-9 h-9 rounded-xl bg-cyan-50 text-cyan-600 border border-cyan-200 flex items-center justify-center shrink-0">
+                <i data-lucide="droplets" class="w-4 h-4"></i>
+              </div>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1"></span>4.5 - 5.5 bar
+              </span>
+            </div>
+            <div>
+              <div class="text-xs font-bold text-gray-500 uppercase tracking-wide">Bơm &amp; Cấp Thoát Nước</div>
+              <div class="text-sm sm:text-base font-extrabold text-gray-900 mt-0.5">Suối Cun &amp; Tăng Áp</div>
+              <p class="text-[11px] text-gray-500 mt-0.5 truncate">Áp lực ổn định, biến tần Auto</p>
+            </div>
+          </div>
+
+          <!-- Card 3: Chiếu Sáng Sân Golf Tospo -->
+          <div class="p-3.5 sm:p-4 rounded-2xl bg-white border border-gray-200/90 shadow-xs hover:shadow-md transition space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="w-9 h-9 rounded-xl bg-teal-50 text-teal-600 border border-teal-200 flex items-center justify-center shrink-0">
+                <i data-lucide="sun-medium" class="w-4 h-4"></i>
+              </div>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200">
+                <i data-lucide="timer" class="w-3 h-3 mr-1"></i>Hẹn Giờ
+              </span>
+            </div>
+            <div>
+              <div class="text-xs font-bold text-gray-500 uppercase tracking-wide">Chiếu Sáng Sân Golf</div>
+              <div class="text-sm sm:text-base font-extrabold text-gray-900 mt-0.5">18 Hố &amp; Sân Tập Tospo</div>
+              <p class="text-[11px] text-gray-500 mt-0.5 truncate">Đèn sân tập &amp; chiếu sáng cảnh quan</p>
+            </div>
+          </div>
+
+          <!-- Card 4: Biểu Mẫu & Quy Trình SOP -->
+          <div class="p-3.5 sm:p-4 rounded-2xl bg-white border border-gray-200/90 shadow-xs hover:shadow-md transition space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-200 flex items-center justify-center shrink-0">
+                <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+              </div>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                12+ Mẫu Form
+              </span>
+            </div>
+            <div>
+              <div class="text-xs font-bold text-gray-500 uppercase tracking-wide">Quy Chuẩn Vận Hành</div>
+              <div class="text-sm sm:text-base font-extrabold text-gray-900 mt-0.5">SOP &amp; Biểu Mẫu Số</div>
+              <p class="text-[11px] text-gray-500 mt-0.5 truncate">Quy trình M&amp;E chuẩn hóa 100%</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 2.C: LỐI TẮT THAO TÁC NHANH (Shortcuts Grid dạng Modern Cards, touch >= 48px) -->
+        <div class="space-y-2.5">
+          <div class="flex items-center justify-between px-0.5">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-[#0b4d5e]"></span>
+              <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wider">Lối Tắt Thao Tác Nhanh (Quick Shortcuts)</h3>
+            </div>
+            <span class="text-[11px] text-gray-400 font-medium">Truy cập tức thì</span>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-2.5 sm:gap-3">
+            <!-- Shortcut 1: Ghi Lịch Google -->
+            <button onclick="openQuickCalendarEventModal()" class="p-3.5 bg-white rounded-2xl border border-gray-200/90 hover:border-[#0b4d5e]/40 hover:shadow-md text-left transition duration-200 flex flex-col justify-between group min-h-[92px]">
+              <div class="flex items-center justify-between w-full">
+                <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 border border-blue-200 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                  <i data-lucide="calendar-plus" class="w-4 h-4"></i>
+                </div>
+                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-gray-300 group-hover:text-[#0b4d5e] transition"></i>
+              </div>
+              <div class="min-w-0 mt-2">
+                <div class="font-bold text-xs text-gray-900 truncate">Ghi Lịch Google</div>
+                <div class="text-[10px] text-gray-500 truncate mt-0.5">Nhật ký trực ca &amp; sự cố</div>
+              </div>
             </button>
 
             <!-- Shortcut 2: Form Checklist -->
-            <button onclick="switchTab('checklist'); switchChecklistSopView('forms');" class="p-3.5 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-xs text-left transition flex items-center justify-between group">
-              <div class="flex items-center space-x-2.5 min-w-0">
-                <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-800 flex items-center justify-center shrink-0 border border-gray-200">
+            <button onclick="switchTab('checklist'); switchChecklistSopView('forms');" class="p-3.5 bg-white rounded-2xl border border-gray-200/90 hover:border-[#0b4d5e]/40 hover:shadow-md text-left transition duration-200 flex flex-col justify-between group min-h-[92px]">
+              <div class="flex items-center justify-between w-full">
+                <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
                   <i data-lucide="clipboard-check" class="w-4 h-4"></i>
                 </div>
-                <div class="min-w-0">
-                  <div class="font-semibold text-xs text-gray-900 truncate">Form Checklist</div>
-                  <div class="text-[10px] text-gray-500 truncate">Biểu mẫu sân golf</div>
-                </div>
+                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-gray-300 group-hover:text-[#0b4d5e] transition"></i>
               </div>
-              <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-700 transition shrink-0 ml-1"></i>
+              <div class="min-w-0 mt-2">
+                <div class="font-bold text-xs text-gray-900 truncate">Form Checklist</div>
+                <div class="text-[10px] text-gray-500 truncate mt-0.5">Biểu mẫu sân golf</div>
+              </div>
             </button>
 
             <!-- Shortcut 3: Sổ Tay SOP -->
-            <button onclick="switchTab('checklist'); switchChecklistSopView('sop');" class="p-3.5 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-xs text-left transition flex items-center justify-between group">
-              <div class="flex items-center space-x-2.5 min-w-0">
-                <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-800 flex items-center justify-center shrink-0 border border-gray-200">
+            <button onclick="switchTab('checklist'); switchChecklistSopView('sop');" class="p-3.5 bg-white rounded-2xl border border-gray-200/90 hover:border-[#0b4d5e]/40 hover:shadow-md text-left transition duration-200 flex flex-col justify-between group min-h-[92px]">
+              <div class="flex items-center justify-between w-full">
+                <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
                   <i data-lucide="book-open" class="w-4 h-4"></i>
                 </div>
-                <div class="min-w-0">
-                  <div class="font-semibold text-xs text-gray-900 truncate">Sổ Tay Hướng Dẫn</div>
-                  <div class="text-[10px] text-gray-500 truncate">Quy trình SOP</div>
-                </div>
+                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-gray-300 group-hover:text-[#0b4d5e] transition"></i>
               </div>
-              <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-700 transition shrink-0 ml-1"></i>
+              <div class="min-w-0 mt-2">
+                <div class="font-bold text-xs text-gray-900 truncate">Sổ Tay SOP</div>
+                <div class="text-[10px] text-gray-500 truncate mt-0.5">Quy trình vận hành M&amp;E</div>
+              </div>
             </button>
 
-            <!-- Shortcut 4: Phân Ca -->
-            <button onclick="openShiftScheduleModal()" class="p-3.5 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-xs text-left transition flex items-center justify-between group">
-              <div class="flex items-center space-x-2.5 min-w-0">
-                <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-800 flex items-center justify-center shrink-0 border border-gray-200">
-                  <i data-lucide="calendar-range" class="w-4 h-4"></i>
-                </div>
-                <div class="min-w-0">
-                  <div class="font-semibold text-xs text-gray-900 truncate">Bảng Phân Ca</div>
-                  <div class="text-[10px] text-gray-500 truncate">Lịch trực toàn tổ</div>
-                </div>
-              </div>
-              <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-700 transition shrink-0 ml-1"></i>
-            </button>
-
-            <!-- Shortcut 5: E-Learning Cơ Điện -->
-            <a href="../elearning/" class="p-3.5 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-xs text-left transition flex items-center justify-between group">
-              <div class="flex items-center space-x-2.5 min-w-0">
-                <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center shrink-0 border border-indigo-200">
-                  <i data-lucide="graduation-cap" class="w-4 h-4"></i>
-                </div>
-                <div class="min-w-0">
-                  <div class="font-semibold text-xs text-gray-900 truncate">E-Learning M&amp;E</div>
-                  <div class="text-[10px] text-gray-500 truncate">Bài giảng &amp; Sát hạch</div>
-                </div>
-              </div>
-              <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-700 transition shrink-0 ml-1"></i>
-            </a>
-
-            <!-- Shortcut 6: Phỏng Vấn Tuyển Dụng -->
-            <a href="../phongvan/" class="p-3.5 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-xs text-left transition flex items-center justify-between group">
-              <div class="flex items-center space-x-2.5 min-w-0">
-                <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center shrink-0 border border-purple-200">
-                  <i data-lucide="user-check" class="w-4 h-4"></i>
-                </div>
-                <div class="min-w-0">
-                  <div class="font-semibold text-xs text-gray-900 truncate">Tuyển Dụng M&amp;E</div>
-                  <div class="text-[10px] text-gray-500 truncate">Phỏng vấn &amp; Chấm điểm</div>
-                </div>
-              </div>
-              <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-700 transition shrink-0 ml-1"></i>
-            </a>
-
-            <!-- Shortcut 7: HappyTime -->
-            <a href="https://app.happytime.vn/schedule" target="_blank" rel="noopener noreferrer" class="p-3.5 bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-xs text-left transition flex items-center justify-between group">
-              <div class="flex items-center space-x-2.5 min-w-0">
-                <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-800 flex items-center justify-center shrink-0 border border-gray-200">
+            <!-- Shortcut 4: HappyTime -->
+            <a href="https://app.happytime.vn/schedule" target="_blank" rel="noopener noreferrer" class="p-3.5 bg-white rounded-2xl border border-gray-200/90 hover:border-[#0b4d5e]/40 hover:shadow-md text-left transition duration-200 flex flex-col justify-between group min-h-[92px]">
+              <div class="flex items-center justify-between w-full">
+                <div class="w-8 h-8 rounded-xl bg-teal-50 text-teal-600 border border-teal-200 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
                   <i data-lucide="calendar-check" class="w-4 h-4"></i>
                 </div>
-                <div class="min-w-0">
-                  <div class="font-semibold text-xs text-gray-900 truncate">Lịch HappyTime</div>
-                  <div class="text-[10px] text-gray-500 truncate">Chấm công & ca trực</div>
-                </div>
+                <i data-lucide="external-link" class="w-3.5 h-3.5 text-gray-300 group-hover:text-[#0b4d5e] transition"></i>
               </div>
-              <i data-lucide="external-link" class="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-700 transition shrink-0 ml-1"></i>
+              <div class="min-w-0 mt-2">
+                <div class="font-bold text-xs text-gray-900 truncate">Lịch HappyTime</div>
+                <div class="text-[10px] text-gray-500 truncate mt-0.5">Chấm công &amp; lịch trực</div>
+              </div>
+            </a>
+
+            <!-- Shortcut 5: E-Learning Cơ Điện -->
+            <a href="../elearning/" class="p-3.5 bg-white rounded-2xl border border-gray-200/90 hover:border-[#0b4d5e]/40 hover:shadow-md text-left transition duration-200 flex flex-col justify-between group min-h-[92px]">
+              <div class="flex items-center justify-between w-full">
+                <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-200 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                  <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+                </div>
+                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-gray-300 group-hover:text-[#0b4d5e] transition"></i>
+              </div>
+              <div class="min-w-0 mt-2">
+                <div class="font-bold text-xs text-gray-900 truncate">E-Learning M&amp;E</div>
+                <div class="text-[10px] text-gray-500 truncate mt-0.5">Đào tạo &amp; sát hạch</div>
+              </div>
+            </a>
+
+            <!-- Shortcut 6: Hồ Sơ Tuyển Dụng -->
+            <a href="tuyendung.html" class="p-3.5 bg-white rounded-2xl border border-gray-200/90 hover:border-[#0b4d5e]/40 hover:shadow-md text-left transition duration-200 flex flex-col justify-between group min-h-[92px]">
+              <div class="flex items-center justify-between w-full">
+                <div class="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 border border-purple-200 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                  <i data-lucide="folder-kanban" class="w-4 h-4"></i>
+                </div>
+                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-gray-300 group-hover:text-[#0b4d5e] transition"></i>
+              </div>
+              <div class="min-w-0 mt-2">
+                <div class="font-bold text-xs text-gray-900 truncate">Hồ Sơ Tuyển Dụng</div>
+                <div class="text-[10px] text-gray-500 truncate mt-0.5">JD &amp; quản lý tài liệu</div>
+              </div>
+            </a>
+
+            <!-- Shortcut 7: Bảng Tổng Hợp Điện Nước -->
+            <a href="https://docs.google.com/spreadsheets/d/1E9smGZnuCCkHYRQU_VK-YAhoQfw5sckAmIjQcTPjQFs/edit?gid=329904244#gid=329904244" target="_blank" rel="noopener noreferrer" class="p-3.5 bg-white rounded-2xl border border-gray-200/90 hover:border-[#0b4d5e]/40 hover:shadow-md text-left transition duration-200 flex flex-col justify-between group min-h-[92px]">
+              <div class="flex items-center justify-between w-full">
+                <div class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                  <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                </div>
+                <i data-lucide="external-link" class="w-3.5 h-3.5 text-gray-300 group-hover:text-[#0b4d5e] transition"></i>
+              </div>
+              <div class="min-w-0 mt-2">
+                <div class="font-bold text-xs text-gray-900 truncate">Tổng Hợp Điện Nước</div>
+                <div class="text-[10px] text-gray-500 truncate mt-0.5">Bảng dữ liệu Sân Golf</div>
+              </div>
             </a>
           </div>
         </div>
 
-        <!-- SECTION 1.5: LỊCH PHÂN CA TRỰC THỜI GIAN THỰC (GOOGLE SHEET GỐC) -->
-        <div id="section-dash-shifts" class="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs space-y-3.5">
-          <!-- Top Bar: Title, Live Dot, Week Badge, Refresh -->
-          <div class="flex items-center justify-between gap-2 flex-wrap">
-            <div class="flex items-center space-x-2.5">
-              <div class="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center shrink-0">
-                <i data-lucide="calendar-clock" class="w-4 h-4"></i>
-              </div>
-              <div>
-                <div class="flex items-center gap-1.5 flex-wrap">
-                  <h3 class="font-extrabold text-sm text-gray-900">Lịch Phân Ca Trực</h3>
-                  <span id="dash-shift-sync-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>Google Sheet Gốc</span>
-                  </span>
-                </div>
-                <p class="text-[11px] text-gray-500" id="dash-shift-sync-time">Đang kết nối Google Sheet (Tab 4.BẢNG PHÂN CA TRỰC)...</p>
-              </div>
-            </div>
 
-            <!-- Week Navigation Controls -->
-            <div class="flex items-center gap-1">
-              <button onclick="navigateDashShiftWeek(-1)" aria-label="Tuần trước" title="Tuần trước" class="p-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 transition active:scale-95">
-                <i data-lucide="chevron-left" class="w-4 h-4"></i>
-              </button>
-              <span id="dash-shift-week-label" class="px-2.5 py-1 bg-indigo-50 border border-indigo-200 text-indigo-900 font-bold text-xs rounded-lg whitespace-nowrap">
-                Tuần 41 (05/10 - 11/10)
-              </span>
-              <button onclick="navigateDashShiftWeek(1)" aria-label="Tuần sau" title="Tuần sau" class="p-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 transition active:scale-95">
-                <i data-lucide="chevron-right" class="w-4 h-4"></i>
-              </button>
-              <button onclick="jumpDashShiftToCurrentWeek()" id="dash-shift-btn-today" aria-label="Về tuần hiện tại" title="Về tuần hiện tại" class="hidden px-2 py-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-900 font-bold text-[11px] rounded-lg transition active:scale-95">
-                Tuần này
-              </button>
-              <button onclick="GolfRootSheetLoader.fetchLive(true)" aria-label="Làm mới từ Google Sheet" title="Làm mới từ Google Sheet" class="p-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition active:scale-95">
-                <i data-lucide="refresh-cw" class="w-4 h-4" id="dash-shift-refresh-icon"></i>
-              </button>
-            </div>
-          </div>
 
-          <!-- Personal Shift Today Card -->
-          <div id="dash-personal-shift-card" class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
-            <!-- Rendered by JS -->
-          </div>
-
-          <!-- 7-Day Mini Horizontal Timeline / Week Strip -->
-          <div class="space-y-1.5">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-bold text-gray-700 flex items-center gap-1">
-                <i data-lucide="calendar" class="w-3.5 h-3.5 text-indigo-600"></i>
-                <span>Lịch 7 ngày của bạn:</span>
-              </span>
-              <div class="flex items-center gap-1.5">
-                <span class="text-[11px] text-gray-500 font-semibold" id="dash-shift-employee-selector-label">Ngô Quyết Thắng</span>
-                <select id="dash-shift-employee-select" onchange="handleDashShiftEmployeeChange(this.value)" class="text-[11px] bg-white border border-gray-200 rounded-md px-1.5 py-0.5 text-gray-700 font-medium">
-                  <!-- Populated by JS -->
-                </select>
-              </div>
-            </div>
-            <div id="dash-week-days-strip" class="grid grid-cols-7 gap-1 text-center">
-              <!-- 7 Day Columns rendered by JS -->
-            </div>
-          </div>
-
-          <!-- Today's Team Duty Overview -->
-          <div class="p-3 rounded-xl bg-slate-50/70 border border-slate-200 space-y-2">
-            <div class="flex items-center justify-between">
-              <span class="font-bold text-xs text-gray-800 flex items-center gap-1.5">
-                <i data-lucide="users" class="w-3.5 h-3.5 text-gray-600"></i>
-                <span>Đội trực hôm nay (<span id="dash-today-label">Thứ Hai 05/10</span>) • Tổ Sân Golf:</span>
-              </span>
-              <button onclick="openShiftScheduleModal()" class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-0.5">
-                <span>Xem cả tổ</span>
-                <i data-lucide="arrow-right" class="w-3 h-3"></i>
-              </button>
-            </div>
-            <div id="dash-today-team-roster" class="grid grid-cols-1 sm:grid-cols-3 gap-1.5 text-xs">
-              <!-- Rendered by JS -->
-            </div>
-          </div>
-
-          <!-- Working Hours & Timesheet Symbols Mini Bar -->
-          <div class="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200 text-[11px] text-amber-950 flex flex-col gap-1">
-            <div class="flex items-center gap-1.5 flex-wrap font-bold">
-              <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-700 shrink-0"></i>
-              <span>Giờ ca:</span>
-              <span class="bg-amber-100 px-1.5 py-0.2 rounded font-extrabold text-amber-900">Ca 1: 06h–14h</span>
-              <span class="bg-indigo-100 px-1.5 py-0.2 rounded font-extrabold text-indigo-900">Ca 2: 14h–22h</span>
-              <span class="bg-slate-900 px-1.5 py-0.2 rounded font-extrabold text-white">Ca 3: 22h–06h</span>
-              <span class="bg-blue-100 px-1.5 py-0.2 rounded font-extrabold text-blue-900">hc: 7h30–11h30 & 13h–17h</span>
-              <span class="bg-orange-100 px-1.5 py-0.2 rounded font-extrabold text-orange-950">HB: 7h00–11h30 & 13h30–17h00</span>
-              <span class="bg-cyan-100 px-1.5 py-0.2 rounded font-extrabold text-cyan-950">tx: 6h–10h & 14h00–18h00</span>
-            </div>
-            <div class="flex items-center gap-1.5 flex-wrap text-slate-700 font-medium">
-              <span class="font-bold text-slate-900">Ký hiệu:</span>
-              <span class="bg-slate-900 text-white font-bold px-1.5 py-0.5 rounded">x: Đi ca</span>
-              <span class="bg-blue-100 text-blue-900 font-bold px-1.5 py-0.5 rounded">hc: Hành chính</span>
-              <span class="bg-orange-100 text-orange-950 font-bold px-1.5 py-0.5 rounded">HB: Hòa Bình</span>
-              <span class="bg-cyan-100 text-cyan-950 font-bold px-1.5 py-0.5 rounded">tx: Thanh Xuân</span>
-              <span class="bg-rose-100 text-rose-900 font-bold px-1.5 py-0.5 rounded">P: Phép</span>
-              <span class="bg-purple-100 text-purple-900 font-bold px-1.5 py-0.5 rounded">KL: Không lương</span>
-              <span class="bg-yellow-200 text-yellow-900 font-bold px-1.5 py-0.5 rounded">CN: Nghỉ tuần</span>
-              <span class="bg-red-200 text-red-950 font-bold px-1.5 py-0.5 rounded">N: Nghỉ</span>
-            </div>
-          </div>
-
-          <!-- Bottom CTA: Open Full Schedule Modal -->
-          <div class="pt-1 flex items-center justify-between gap-2 border-t border-gray-100 flex-wrap">
-            <div class="text-[11px] text-gray-500 font-medium">
-              Dữ liệu đọc trực tiếp từ Google Sheet: <b>4.BẢNG PHÂN CA TRỰC</b>
-            </div>
-            <button onclick="openShiftScheduleModal()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5">
-              <i data-lucide="table" class="w-3.5 h-3.5"></i>
-              <span>Xem Bảng Phân Ca Chi Tiết</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- SECTION 2: BIỂU MẪU & WEB APP CHỦ CHỐT CA TRỰC -->
-        <div class="space-y-2">
+        <!-- 2.D: KHỐI BIỂU MẪU CHỦ CHỐT (Featured Action Cards) -->
+        <div class="space-y-2.5">
           <div class="flex items-center justify-between px-0.5">
-            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Biểu Mẫu & Web App Trực Ca</h3>
-            <button onclick="switchTab('checklist')" class="text-xs font-medium text-gray-700 hover:text-black flex items-center gap-1">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-[#0b4d5e]"></span>
+              <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wider">Biểu Mẫu &amp; Tác Vụ Chủ Chốt Ca Trực</h3>
+            </div>
+            <button onclick="switchTab('checklist')" class="text-xs font-semibold text-[#0b4d5e] hover:underline flex items-center gap-1">
               <span>Xem tất cả biểu mẫu</span>
               <i data-lucide="arrow-right" class="w-3 h-3"></i>
             </button>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <!-- Form 1: Checklist ca vận hành -->
-            <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-3">
-              <div class="flex items-start justify-between gap-2">
-                <div class="flex items-center space-x-3">
-                  <div class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center border border-gray-200 text-gray-800 shrink-0">
-                    <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+            <!-- Featured Card 1: Checklist ca vận hành -->
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200/90 shadow-xs hover:shadow-md transition flex flex-col justify-between space-y-3">
+              <div class="space-y-2.5">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-200 shrink-0">
+                      <i data-lucide="clipboard-check" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                      <h4 class="font-bold text-sm text-gray-900">Checklist Vận Hành Sân Golf</h4>
+                      <p class="text-[11px] text-gray-500">Mỗi ca trực • Bắt buộc thực hiện</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 class="font-semibold text-sm text-gray-900">Checklist Ca Vận Hành Sân Golf</h4>
-                    <p class="text-[11px] text-gray-500 mt-0.5">Biểu mẫu chính • Mỗi ca trực</p>
-                  </div>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Ưu tiên số 1</span>
                 </div>
+                <p class="text-xs text-gray-600 leading-relaxed">
+                  Kiểm tra 3 TBA, Trạm Bơm Tăng Áp, Vận Hành Bơm Suối Cun (Không chạy/Tự động/Giờ bật-tắt), Hệ Thống PCCC &amp; Bàn Giao Ca.
+                </p>
               </div>
-              <p class="text-xs text-gray-600 leading-relaxed">Kiểm tra TBA, Trạm Bơm Tăng Áp, Vận Hành Bơm Suối Cun (Không chạy/Tự động/Giờ bật-tắt), PCCC & Bàn Giao Ca.</p>
+
               <div class="pt-2 border-t border-gray-100 flex items-center gap-2">
-                <a href="https://forms.gle/7gNBsFcX12ikeNXX9" target="_blank" rel="noopener noreferrer" class="flex-1 py-2 bg-gray-900 hover:bg-black text-white font-medium rounded-lg text-xs flex items-center justify-center gap-1.5 transition">
+                <a href="https://forms.gle/7gNBsFcX12ikeNXX9" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 bg-[#0b4d5e] hover:bg-[#083845] text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs transition active:scale-95">
                   <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
                   <span>Điền Form Nhanh</span>
                 </a>
-                <button onclick="openSopDetailByCode('SOP-FORMS-01')" class="px-3 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-lg text-xs font-medium flex items-center gap-1.5 transition" title="Đọc quy trình SOP-FORMS-01">
+                <button onclick="openSopDetailByCode('SOP-FORMS-01')" class="px-3 py-2.5 bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition" title="Đọc quy trình SOP-FORMS-01">
                   <i data-lucide="book-open" class="w-3.5 h-3.5 text-gray-500"></i>
                   <span>Đọc SOP</span>
                 </button>
               </div>
             </div>
 
-            <!-- Form 2: Chốt công tơ cuối tháng -->
-            <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-3">
-              <div class="flex items-start justify-between gap-2">
-                <div class="flex items-center space-x-3">
-                  <div class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center border border-gray-200 text-gray-800 shrink-0">
-                    <i data-lucide="gauge" class="w-4 h-4"></i>
+            <!-- Featured Card 2: Chốt công tơ cuối tháng -->
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200/90 shadow-xs hover:shadow-md transition flex flex-col justify-between space-y-3">
+              <div class="space-y-2.5">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center border border-blue-200 shrink-0">
+                      <i data-lucide="gauge" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                      <h4 class="font-bold text-sm text-gray-900">Chốt Công Tơ Điện Nước</h4>
+                      <p class="text-[11px] text-gray-500">Định kỳ ngày cuối tháng</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 class="font-semibold text-sm text-gray-900">Chốt Công Tơ Điện Nước Cuối Tháng</h4>
-                    <p class="text-[11px] text-gray-500 mt-0.5">Ứng dụng Web App • Cuối tháng</p>
-                  </div>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">Web App</span>
                 </div>
+                <p class="text-xs text-gray-600 leading-relaxed">
+                  Chốt chỉ số công tơ điện nước tổng và các trạm biến áp, phụ tải định kỳ cuối tháng; tự động tính toán sản lượng điện tiêu thụ.
+                </p>
               </div>
-              <p class="text-xs text-gray-600 leading-relaxed">Chốt chỉ số công tơ điện nước tổng và các phụ tải định kỳ cuối tháng, tự động tính sản lượng.</p>
-              <div class="pt-2 border-t border-gray-100 flex items-center gap-2 flex-wrap">
-                <a href="https://script.google.com/macros/s/AKfycbxOoWSsDiQ5DpngJrbkKegHYQhs--hcC6u0h3dj24dzH6W3EpK3NG1j5XJvD6HEF5Zh/exec" target="_blank" rel="noopener noreferrer" class="flex-1 min-w-[120px] py-2 bg-gray-900 hover:bg-black text-white font-medium rounded-lg text-xs flex items-center justify-center gap-1.5 transition">
+
+              <div class="pt-2 border-t border-gray-100 flex items-center gap-1.5 flex-wrap">
+                <a href="https://script.google.com/macros/s/AKfycbxOoWSsDiQ5DpngJrbkKegHYQhs--hcC6u0h3dj24dzH6W3EpK3NG1j5XJvD6HEF5Zh/exec" target="_blank" rel="noopener noreferrer" class="flex-1 min-w-[120px] py-2.5 bg-[#0b4d5e] hover:bg-[#083845] text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs transition active:scale-95">
                   <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
                   <span>Mở Web App Chốt Số</span>
                 </a>
-                <a href="https://docs.google.com/spreadsheets/d/1E9smGZnuCCkHYRQU_VK-YAhoQfw5sckAmIjQcTPjQFs/edit?gid=329904244#gid=329904244" target="_blank" rel="noopener noreferrer" class="px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-lg text-xs font-medium flex items-center gap-1.5 transition" title="Mở bảng tổng hợp điện nước sân golf">
-                  <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 text-amber-700"></i>
-                  <span>Tổng hợp điện nước</span>
-                </a>
-                <button onclick="openSopDetailByCode('SOP-CONGTO-01')" class="px-3 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-lg text-xs font-medium flex items-center gap-1.5 transition" title="Đọc quy trình SOP-CONGTO-01">
+                <button onclick="openSopDetailByCode('SOP-CONGTO-01')" class="px-3 py-2.5 bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition" title="Đọc quy trình SOP-CONGTO-01">
                   <i data-lucide="book-open" class="w-3.5 h-3.5 text-gray-500"></i>
-                  <span>Đọc SOP</span>
+                  <span>SOP</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Featured Card 3: Sổ Giao Ca & Bàn Giao Thiết Bị -->
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200/90 shadow-xs hover:shadow-md transition flex flex-col justify-between space-y-3">
+              <div class="space-y-2.5">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center border border-purple-200 shrink-0">
+                      <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                      <h4 class="font-bold text-sm text-gray-900">Sổ Giao Ca &amp; Thiết Bị</h4>
+                      <p class="text-[11px] text-gray-500">Đầu / Cuối mỗi ca làm việc</p>
+                    </div>
+                  </div>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800">Giao ca</span>
+                </div>
+                <p class="text-xs text-gray-600 leading-relaxed">
+                  Bàn giao tình trạng thiết bị, chìa khóa trạm, vật tư phụ tùng và tồn đọng ca trực cho kỹ thuật viên ca tiếp theo nắm bắt.
+                </p>
+              </div>
+
+              <div class="pt-2 border-t border-gray-100 flex items-center gap-2">
+                <button onclick="openShiftModal()" class="flex-1 py-2.5 bg-[#0b4d5e] hover:bg-[#083845] text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs transition active:scale-95">
+                  <i data-lucide="arrow-left-right" class="w-3.5 h-3.5"></i>
+                  <span>Đổi Ca / Giao Ca</span>
+                </button>
+                <button onclick="openQuickCalendarEventModal('Bàn giao ca trực', 'Hoàn thành ca trực, bàn giao thiết bị cho ca sau')" class="px-3 py-2.5 bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition" title="Ghi sự kiện bàn giao ca">
+                  <i data-lucide="calendar-plus" class="w-3.5 h-3.5 text-gray-500"></i>
+                  <span>Ghi Lịch</span>
                 </button>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- SECTION 3: KHUNG GOOGLE CALENDAR NHẬT KÝ CA TRỰC DÙNG CHUNG -->
-        <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-3">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-2.5">
-              <div class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center border border-gray-200 text-gray-800">
-                <i data-lucide="calendar" class="w-4 h-4"></i>
+        <!-- 2.F: THẺ THÔNG SỐ HẸN GIỜ BẬT/TẮT THIẾT BỊ (SOP-HENGIO-01) -->
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200/90 shadow-xs space-y-3.5">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center shrink-0">
+                <i data-lucide="clock" class="w-5 h-5"></i>
               </div>
               <div>
-                <h3 class="font-semibold text-sm text-gray-900">Lịch Nhật Ký Ca Trực Thời Gian Thực (Google Calendar)</h3>
-                <p class="text-xs text-gray-500 font-mono">trucdienhapulico@gmail.com</p>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h3 class="font-extrabold text-sm text-gray-900">Bảng Thông Số Hẹn Giờ Bật/Tắt Thiết Bị</h3>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">SOP-HENGIO-01</span>
+                </div>
+                <p class="text-xs text-gray-500 mt-0.5">Tiết giảm năng lượng theo mùa • Kiểm tra định kỳ Ca 3 Chủ Nhật hàng tuần</p>
               </div>
             </div>
 
-            <div class="flex items-center gap-2">
-              <button onclick="openQuickCalendarEventModal()" class="px-3 py-1.5 bg-gray-900 hover:bg-black text-white font-medium rounded-lg text-xs transition flex items-center gap-1.5 shadow-xs">
-                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                <span>Ghi Sự Kiện Lịch</span>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <button onclick="openTimerReference('public')" class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 font-bold rounded-xl text-xs transition flex items-center gap-1.5 active:scale-95 shadow-2xs">
+                <i data-lucide="lightbulb" class="w-3.5 h-3.5 text-amber-700"></i>
+                <span>314 Lộ Công Cộng</span>
               </button>
-              <button onclick="reloadCalendarIframe('dash-calendar-iframe')" class="p-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-200 transition" title="Làm mới lịch">
-                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              <button onclick="openTimerReference('office')" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 font-bold rounded-xl text-xs transition flex items-center gap-1.5 active:scale-95 shadow-2xs">
+                <i data-lucide="building-2" class="w-3.5 h-3.5 text-blue-700"></i>
+                <span>197 Lộ Văn Phòng</span>
+              </button>
+              <button onclick="openSopDetailByCode('SOP-HENGIO-01')" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200 font-semibold rounded-xl text-xs transition flex items-center gap-1" title="Xem quy trình chi tiết">
+                <i data-lucide="book-open" class="w-3.5 h-3.5 text-gray-500"></i>
+                <span>Xem Quy Trình</span>
               </button>
             </div>
           </div>
 
-          <div class="border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
-            <iframe id="dash-calendar-iframe" src="https://calendar.google.com/calendar/embed?src=trucdienhapulico%40gmail.com&ctz=Asia%2FHo_Chi_Minh&mode=AGENDA" style="border: 0" width="100%" height="360" frameborder="0" scrolling="no" class="w-full"></iframe>
+          <!-- Quick Reference Highlights Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-xs">
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1">
+              <div class="font-bold text-slate-800 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                <span>Chiếu Sáng Tầng Hầm</span>
+              </div>
+              <p class="text-[11px] text-slate-600 leading-relaxed">
+                • <b>Sáng (S):</b> 06:00 – 18:00<br>
+                • <b>Tối (T):</b> 18:00 – 23:30<br>
+                • <b>Đêm (Đ):</b> 23:30 – 06:00
+              </p>
+            </div>
+
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1">
+              <div class="font-bold text-slate-800 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span>Sảnh Căn Hộ Tầng 1</span>
+              </div>
+              <p class="text-[11px] text-slate-600 leading-relaxed">
+                • <b>100% CS:</b> 18:00 – 22:00 &amp; 06:00 – 07:00<br>
+                • <b>50% Tiết giảm:</b> 22:00 – 06:00<br>
+                • An ninh bật/tắt công tắc sảnh.
+              </p>
+            </div>
+
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1">
+              <div class="font-bold text-slate-800 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-cyan-500"></span>
+                <span>Đèn Đường &amp; Sân Vườn</span>
+              </div>
+              <p class="text-[11px] text-slate-600 leading-relaxed">
+                • <b>Lộ 1:</b> 18:45 – 05:00 (Mùa hè)<br>
+                • <b>Lộ 1:</b> 17:30 – 06:30 (Mùa đông)<br>
+                • <b>Lộ 2 &amp; 3 (Trang trí):</b> Tắt 23:30
+              </p>
+            </div>
+
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1">
+              <div class="font-bold text-slate-800 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                <span>Văn Phòng 24VP &amp; Sảnh</span>
+              </div>
+              <p class="text-[11px] text-slate-600 leading-relaxed">
+                • <b>Đóng điện:</b> Trước giờ làm 30p (07:20)<br>
+                • <b>Ngắt điện:</b> Sau giờ làm 60p (18:00)<br>
+                • Daikin DAM3 &amp; app eWelink T1-B1.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2.E: KHUNG GOOGLE CALENDAR NHẬT KÝ CA TRỰC THỜI GIAN THỰC -->
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200/90 shadow-xs space-y-3.5">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 rounded-xl bg-[#0b4d5e]/10 text-[#0b4d5e] border border-[#0b4d5e]/20 flex items-center justify-center shrink-0">
+                <i data-lucide="calendar" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="font-extrabold text-sm text-gray-900">Lịch Nhật Ký Ca Trực Thời Gian Thực (Google Calendar)</h3>
+                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                </div>
+                <p class="text-xs text-gray-500 font-mono mt-0.5">trucdienhapulico@gmail.com • Đồng bộ tức thì trên Cloud</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button onclick="openQuickCalendarEventModal()" class="px-3.5 py-2 bg-[#0b4d5e] hover:bg-[#083845] text-white font-bold rounded-xl text-xs transition flex items-center gap-1.5 shadow-xs active:scale-95">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>Ghi Sự Kiện Lịch</span>
+              </button>
+              <a href="https://calendar.google.com/calendar/r" target="_blank" rel="noopener noreferrer" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl text-xs border border-gray-200 transition flex items-center gap-1.5">
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                <span class="hidden sm:inline">Mở Google Calendar</span>
+              </a>
+              <button onclick="reloadCalendarIframe('dash-calendar-iframe')" class="p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl border border-gray-200 transition active:scale-95" title="Tải lại lịch">
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Guideline banner -->
+          <div class="bg-slate-50 rounded-xl p-3 border border-slate-200 text-xs text-slate-700 flex items-start gap-2.5">
+            <i data-lucide="info" class="w-4 h-4 text-[#0b4d5e] shrink-0 mt-0.5"></i>
+            <div>
+              <span class="font-bold text-gray-900">Quy tắc ghi nhật ký ca: </span>
+              <span class="font-mono text-gray-800 bg-white px-2 py-0.5 rounded border border-gray-200 font-semibold">Nội dung công việc / Sự cố - [Số lượng/kết quả đã thực hiện] - [NV: Tên]</span>
+            </div>
+          </div>
+
+          <!-- Calendar Iframe Container -->
+          <div class="border border-gray-200 rounded-xl overflow-hidden bg-gray-50 shadow-inner">
+            <iframe id="dash-calendar-iframe" src="https://calendar.google.com/calendar/embed?src=trucdienhapulico%40gmail.com&ctz=Asia%2FHo_Chi_Minh&mode=AGENDA" style="border: 0" width="100%" height="380" frameborder="0" scrolling="no" class="w-full"></iframe>
           </div>
         </div>
 
@@ -1387,6 +1145,20 @@
             <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
           </a>
 
+          <!-- Recruitment Documents Management Link Button -->
+          <a href="tuyendung.html" class="w-full text-left px-4 py-3.5 flex items-center justify-between hover:bg-slate-50 transition text-sm text-slate-700 font-medium">
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 rounded-xl bg-teal-50 text-[#0b4d5e] flex items-center justify-center">
+                <i data-lucide="folder-kanban" class="w-4 h-4"></i>
+              </div>
+              <div class="flex flex-col">
+                <span class="font-bold text-slate-800">Quản Lý Tài Liệu Tuyển Dụng M&amp;E</span>
+                <span class="text-[11px] text-slate-500">Kho mô tả công việc (JD), định biên, biểu mẫu &amp; quy trình</span>
+              </div>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+          </a>
+
           <!-- Recruitment Interview Form Link Button -->
           <a href="../phongvan/" class="w-full text-left px-4 py-3.5 flex items-center justify-between hover:bg-slate-50 transition text-sm text-slate-700 font-medium">
             <div class="flex items-center space-x-3">
@@ -1441,9 +1213,9 @@
     <!-- BOTTOM NAVIGATION BAR (ERPNext Desk Style - 4 Tabs) -->
     <nav class="bg-white border-t border-gray-200 px-3 py-1.5 flex items-center justify-around z-30 shrink-0 select-none shadow-none">
       <!-- Nav 1: Dashboard -->
-      <button onclick="switchTab('dashboard')" id="nav-dashboard" aria-label="Tab Ca của tôi" class="flex flex-col items-center py-1 px-3 rounded-lg text-gray-900 font-semibold transition flex-1">
-        <div class="p-0.5"><i data-lucide="layout-grid" class="w-5 h-5"></i></div>
-        <span class="text-[10px] mt-0.5">Ca của tôi</span>
+      <button onclick="switchTab('dashboard')" id="nav-dashboard" aria-label="Tab Bàn làm việc" class="flex flex-col items-center py-1 px-3 rounded-lg text-gray-900 font-semibold transition flex-1">
+        <div class="p-0.5"><i data-lucide="layout-dashboard" class="w-5 h-5"></i></div>
+        <span class="text-[10px] mt-0.5">Bàn làm việc</span>
       </button>
 
       <!-- Nav 2: Calendar -->
@@ -5122,7 +4894,7 @@ const CONFIG = {
         try {
           localStorage.setItem(this.STORAGE_KEYS.CURRENT_AUTH_USER, JSON.stringify(this.currentAuthUser));
         } catch (e) {}
-        this.setCurrentShift(emp.id, 'Đang đọc lịch phân ca', MyShiftSchedule.vietnamDate());
+        this.setCurrentShift(emp.id, 'Ca trực ' + this.currentShiftType, (typeof MyShiftSchedule !== 'undefined' && MyShiftSchedule.vietnamDate) ? MyShiftSchedule.vietnamDate() : getTodayIsoDate());
         this.logSecurityEvent('ĐĂNG_NHẬP_THÀNH_CÔNG', emp.fullName, 'Đăng nhập vào ca: ' + this.currentShiftType);
         return { success: true };
       }
@@ -5577,7 +5349,9 @@ const CONFIG = {
     }
 
     function renderDashboard() {
-      myShiftController.render();
+      if (typeof myShiftController !== 'undefined' && myShiftController && typeof myShiftController.render === 'function') {
+        myShiftController.render();
+      }
       renderDeviceTimers();
       const sId = 'shift_' + repo.currentDate + '_' + repo.currentShiftType.replace(/\s+/g, '_');
       const shiftTasks = repo.tasks.filter(t => t.shiftId === sId);
@@ -6506,16 +6280,16 @@ const CONFIG = {
 
 
 const repo = new AppRepository();
-    const myShiftController = MyShiftSchedule.createController({
+    const myShiftController = (typeof MyShiftSchedule !== 'undefined' && MyShiftSchedule.createController) ? MyShiftSchedule.createController({
       getUser: () => repo.currentAuthUser,
       onSelection: selection => {
         const assignment = selection.assignment;
         const savedPrefix = selection.sourceState !== 'synced' && selection.week ? 'Lịch đã lưu · ' : '';
         const label = savedPrefix + (assignment ? assignment.label + ' (' + assignment.time + ')' : selection.label || 'Chưa xác định theo lịch');
-        repo.setCurrentShift(repo.currentAuthUser.id, label, selection.date || MyShiftSchedule.vietnamDate());
+        repo.setCurrentShift(repo.currentAuthUser.id, label, selection.date || ((typeof MyShiftSchedule !== 'undefined' && MyShiftSchedule.vietnamDate) ? MyShiftSchedule.vietnamDate() : getTodayIsoDate()));
         updateShiftHeaderUI();
       }
-    });
+    }) : { render: () => {}, activate: () => {}, refresh: () => {} };
     let currentTaskFilter = 'all';
     let currentTaskScope = 'shift'; // 'shift' | 'week' | 'month' | 'year'
     let planViewingMonday = getMonday(new Date(repo.currentDate || getTodayIsoDate()));
@@ -6612,7 +6386,9 @@ const repo = new AppRepository();
     function checkAuthAndRenderScreen() {
       const loginScreen = document.getElementById('screen-login');
       const appScreen = document.getElementById('screen-app');
-      myShiftController.activate();
+      if (typeof myShiftController !== 'undefined' && myShiftController && typeof myShiftController.activate === 'function') {
+        myShiftController.activate();
+      }
 
       if (repo.isLoggedIn()) {
         loginScreen.classList.add('hidden');
@@ -10424,7 +10200,7 @@ const repo = new AppRepository();
 
       const tabs = ['dashboard', 'calendar', 'checklist', 'report', 'personal'];
       const titles = {
-        dashboard: 'Ca của tôi',
+        dashboard: 'Bàn Làm Việc & Điều Hành M&E',
         calendar: 'Lịch Nhật Ký Google Calendar',
         checklist: 'Biểu Mẫu & Quy Trình SOP',
         report: 'Báo Cáo Thống Kê Ca Trực',

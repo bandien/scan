@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Quản Lý Tài Liệu Tuyển Dụng M&E | BanDienScan</title>
+  <meta name="description" content="Hệ thống quản lý tài liệu tuyển dụng, mô tả công việc (JD/MTCV), định biên nhân sự, câu hỏi phỏng vấn và biểu mẫu tiếp nhận khối Cơ Điện M&E.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f9fa',
+              100: '#d7f0f3',
+              500: '#0b4d5e',
+              600: '#093f4e',
+              700: '#07323e',
+              800: '#05252f',
+              900: '#041b22',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #94a3b8;
+      border-radius: 4px;
+    }
+    .pb-safe {
+      padding-bottom: env(safe-area-inset-bottom, 1.5rem);
+    }
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #print-modal-content, #print-modal-content * {
+        visibility: visible;
+      }
+      #print-modal-content {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col antialiased">
+
+  <!-- ============================================================== -->
+  <!-- TOP APP HEADER -->
+  <!-- ============================================================== -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+    <div class="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-14 sm:h-16 gap-3">
+        <!-- Left: Back button & Title -->
+        <div class="flex items-center gap-3 min-w-0">
+          <a href="index.html#dashboard" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 flex items-center justify-center transition border border-slate-200 shrink-0" title="Quay về Bàn Làm Việc M&E">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          </a>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <h1 class="text-sm sm:text-base font-extrabold text-slate-900 truncate">Quản Lý Tài Liệu Tuyển Dụng</h1>
+              <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#0b4d5e]/10 text-[#0b4d5e] border border-[#0b4d5e]/20">
+                HR & M&E Portal
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-500 truncate hidden xs:block">Hapulico Complex • Sân Golf Kỳ Sơn Montana • Tudi Group</p>
+          </div>
+        </div>
+
+        <!-- Right: Action links -->
+        <div class="flex items-center gap-2 shrink-0">
+          <a href="../phongvan/" class="px-2.5 sm:px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 active:scale-95" title="Mở bộ câu hỏi phỏng vấn ứng viên">
+            <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">Phỏng Vấn</span>
+          </a>
+          <a href="../elearning/" class="px-2.5 sm:px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 active:scale-95" title="Mở cổng đào tạo E-Learning">
+            <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">E-Learning</span>
+          </a>
+          <button onclick="openAddDocModal()" class="px-3 sm:px-3.5 py-1.5 bg-[#0b4d5e] hover:bg-[#083f4e] text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs active:scale-95">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span class="hidden xs:inline">Thêm Tài Liệu</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================== -->
+  <!-- MAIN CONTENT AREA -->
+  <!-- ============================================================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-6">
+
+    <!-- HERO BANNER -->
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0b4d5e] via-[#083e4c] to-[#052832] text-white p-4 sm:p-6 shadow-md border border-[#0b4d5e]/40">
+      <div class="absolute -right-10 -bottom-10 w-44 h-44 rounded-full bg-cyan-400/10 blur-2xl pointer-events-none"></div>
+      <div class="absolute -left-10 -top-10 w-40 h-40 rounded-full bg-teal-400/10 blur-2xl pointer-events-none"></div>
+
+      <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="space-y-2">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              Kho Tài Liệu Chuẩn Hóa
+            </span>
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-white/10 text-cyan-200 border border-white/10">
+              <i data-lucide="database" class="w-3 h-3 text-cyan-300"></i>
+              Đồng bộ DSH &amp; Google Drive
+            </span>
+          </div>
+          <div>
+            <h2 class="text-lg sm:text-xl md:text-2xl font-black tracking-tight text-white flex items-center gap-2">
+              <i data-lucide="folder-kanban" class="w-6 h-6 text-teal-300 shrink-0"></i>
+              <span>Trung Tâm Quản Lý Hồ Sơ &amp; Quy Trình Tuyển Dụng</span>
+            </h2>
+            <p class="text-xs sm:text-sm text-cyan-100/90 mt-1 max-w-2xl">
+              Tra cứu nhanh bản mô tả công việc (JD), báo cáo định biên, ngân hàng câu hỏi phỏng vấn kỹ thuật điện nước, biểu mẫu tiếp nhận thử việc và thỏa thuận lương.
+            </p>
+          </div>
+        </div>
+
+        <!-- Quick Metrics -->
+        <div class="grid grid-cols-3 gap-2.5 shrink-0 bg-black/20 backdrop-blur-xs p-3 rounded-xl border border-white/15 text-center">
+          <div class="px-2">
+            <div class="text-lg sm:text-xl font-black text-white" id="stat-total-docs">12</div>
+            <div class="text-[10px] text-teal-200 font-medium">Tài liệu lưu</div>
+          </div>
+          <div class="px-2 border-x border-white/15">
+            <div class="text-lg sm:text-xl font-black text-amber-300" id="stat-jd-count">5</div>
+            <div class="text-[10px] text-amber-200 font-medium">Bản JD/MTCV</div>
+          </div>
+          <div class="px-2">
+            <div class="text-lg sm:text-xl font-black text-emerald-300">100%</div>
+            <div class="text-[10px] text-emerald-200 font-medium">Sẵn sàng</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- SEARCH & FILTER TOOLBAR -->
+    <!-- ============================================================== -->
+    <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+      <!-- Row 1: Search input & Unit selector -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+        <div class="relative flex-1">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+          <input 
+            type="text" 
+            id="search-input" 
+            oninput="handleSearch()"
+            placeholder="Tìm kiếm tài liệu, chức danh, mã hiệu, mức lương, kỹ năng..."
+            class="w-full pl-9 pr-9 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#0b4d5e] focus:bg-white transition"
+          >
+          <button onclick="clearSearch()" id="clear-search-btn" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <select id="unit-filter" onchange="handleFilterChange()" class="py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0b4d5e] transition">
+            <option value="all">🏢 Toàn bộ đơn vị</option>
+            <option value="golf">⛳ Sân Golf Kỳ Sơn</option>
+            <option value="hapu">🏢 Hapulico Complex</option>
+            <option value="tudi">🌐 Tập đoàn TUDI</option>
+          </select>
+
+          <button onclick="exportToCsv()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 active:scale-95 shrink-0" title="Xuất danh mục tài liệu ra file CSV">
+            <i data-lucide="download" class="w-3.5 h-3.5 text-slate-600"></i>
+            <span class="hidden sm:inline">Xuất CSV</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Row 2: Category Filter Pills -->
+      <div class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-1 text-xs">
+        <button onclick="setCategoryFilter('all')" data-cat="all" class="cat-pill px-3 py-1.5 rounded-xl font-bold transition whitespace-nowrap bg-[#0b4d5e] text-white shadow-xs">
+          Tất cả (<span id="count-cat-all">0</span>)
+        </button>
+        <button onclick="setCategoryFilter('jd')" data-cat="jd" class="cat-pill px-3 py-1.5 rounded-xl font-semibold transition whitespace-nowrap bg-slate-100 hover:bg-slate-200 text-slate-700">
+          📋 Mô Tả CV (JD) (<span id="count-cat-jd">0</span>)
+        </button>
+        <button onclick="setCategoryFilter('dinhbien')" data-cat="dinhbien" class="cat-pill px-3 py-1.5 rounded-xl font-semibold transition whitespace-nowrap bg-slate-100 hover:bg-slate-200 text-slate-700">
+          📊 Định Biên &amp; Đề Xuất (<span id="count-cat-dinhbien">0</span>)
+        </button>
+        <button onclick="setCategoryFilter('phongvan')" data-cat="phongvan" class="cat-pill px-3 py-1.5 rounded-xl font-semibold transition whitespace-nowrap bg-slate-100 hover:bg-slate-200 text-slate-700">
+          🎯 Câu Hỏi Phỏng Vấn (<span id="count-cat-phongvan">0</span>)
+        </button>
+        <button onclick="setCategoryFilter('bieumau')" data-cat="bieumau" class="cat-pill px-3 py-1.5 rounded-xl font-semibold transition whitespace-nowrap bg-slate-100 hover:bg-slate-200 text-slate-700">
+          📝 Biểu Mẫu &amp; Thử Việc (<span id="count-cat-bieumau">0</span>)
+        </button>
+        <button onclick="setCategoryFilter('hopdong_truong')" data-cat="hopdong_truong" class="cat-pill px-3 py-1.5 rounded-xl font-semibold transition whitespace-nowrap bg-slate-100 hover:bg-slate-200 text-slate-700">
+          🤝 Hợp Tác Trường Nghề (<span id="count-cat-hopdong_truong">0</span>)
+        </button>
+        <button onclick="setCategoryFilter('saved')" data-cat="saved" class="cat-pill px-3 py-1.5 rounded-xl font-semibold transition whitespace-nowrap bg-slate-100 hover:bg-slate-200 text-slate-700">
+          ⭐ Đã Lưu / Bookmark (<span id="count-cat-saved">0</span>)
+        </button>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- DOCUMENT GRID -->
+    <!-- ============================================================== -->
+    <div id="doc-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
+      <!-- Javascript will populate document cards here -->
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div id="empty-state" class="hidden py-12 text-center bg-white rounded-2xl border border-slate-200 p-6 space-y-3">
+      <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 mx-auto flex items-center justify-center">
+        <i data-lucide="folder-search" class="w-6 h-6"></i>
+      </div>
+      <div>
+        <h3 class="text-sm font-bold text-slate-800">Không tìm thấy tài liệu phù hợp</h3>
+        <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Vui lòng thử tìm kiếm với từ khóa khác hoặc chuyển danh mục bộ lọc.</p>
+      </div>
+      <button onclick="resetFilters()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">
+        Xóa bộ lọc
+      </button>
+    </div>
+
+    <!-- QUICK INTEGRATION LINKS BANNER -->
+    <div class="bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 border border-indigo-200/80 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div class="space-y-1">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-purple-600"></span>
+          <h3 class="text-sm font-extrabold text-slate-900">Liên Kết Trực Tiếp Đến Ứng Dụng Phỏng Vấn Tuyển Dụng</h3>
+        </div>
+        <p class="text-xs text-slate-600 max-w-2xl leading-relaxed">
+          Sử dụng Web App Bộ Câu Hỏi Phỏng Vấn Kỹ Thuật để chấm điểm trực tiếp ứng viên theo từng tiêu chí, ghi chú phỏng vấn và xuất kết quả file Excel.
+        </p>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <a href="../phongvan/" class="px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-xs transition active:scale-95">
+          <i data-lucide="play-circle" class="w-4 h-4"></i>
+          <span>Mở Ứng Dụng Phỏng Vấn</span>
+        </a>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- MODAL: DOCUMENT PREVIEW (FULL CONTENT) -->
+  <!-- ============================================================== -->
+  <div id="preview-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      
+      <!-- Modal Header -->
+      <div class="p-4 sm:p-5 border-b border-slate-200 flex items-start justify-between gap-3 bg-slate-50/80">
+        <div class="min-w-0 space-y-1">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span id="modal-doc-category" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#0b4d5e]/10 text-[#0b4d5e] border border-[#0b4d5e]/20">MTCV</span>
+            <span id="modal-doc-code" class="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-slate-200 text-slate-700">CODE</span>
+            <span id="modal-doc-unit" class="text-xs text-slate-500 font-medium">Đơn vị</span>
+          </div>
+          <h3 id="modal-doc-title" class="text-base sm:text-lg font-black text-slate-900 leading-snug">Tiêu đề tài liệu</h3>
+        </div>
+        <button onclick="closePreviewModal()" class="w-8 h-8 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-600 flex items-center justify-center transition shrink-0">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div id="print-modal-content" class="p-4 sm:p-6 overflow-y-auto custom-scrollbar flex-1 space-y-4 text-xs sm:text-sm text-slate-700 leading-relaxed">
+        <div id="modal-doc-body">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-3.5 sm:p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between gap-2 flex-wrap">
+        <div class="flex items-center gap-2">
+          <button onclick="copyDocContent()" class="px-3 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold rounded-xl text-xs transition flex items-center gap-1.5 active:scale-95">
+            <i data-lucide="copy" class="w-3.5 h-3.5 text-slate-500"></i>
+            <span id="copy-btn-text">Sao chép nội dung</span>
+          </button>
+          <button onclick="window.print()" class="px-3 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold rounded-xl text-xs transition flex items-center gap-1.5 active:scale-95">
+            <i data-lucide="printer" class="w-3.5 h-3.5 text-slate-500"></i>
+            <span>In văn bản</span>
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="toggleBookmarkCurrent()" id="modal-bookmark-btn" class="px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-bold rounded-xl text-xs transition flex items-center gap-1.5 active:scale-95">
+            <i data-lucide="star" class="w-3.5 h-3.5"></i>
+            <span id="modal-bookmark-text">Lưu tài liệu</span>
+          </button>
+          <button onclick="closePreviewModal()" class="px-4 py-2 bg-[#0b4d5e] hover:bg-[#083f4e] text-white font-bold rounded-xl text-xs transition">
+            Đóng
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL: ADD CUSTOM DOCUMENT -->
+  <!-- ============================================================== -->
+  <div id="add-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-lg bg-[#0b4d5e] text-white flex items-center justify-center">
+            <i data-lucide="file-plus-2" class="w-4 h-4"></i>
+          </div>
+          <h3 class="font-extrabold text-sm text-slate-900">Thêm Tài Liệu Mới Vào Hệ Thống</h3>
+        </div>
+        <button onclick="closeAddDocModal()" class="w-7 h-7 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-600 flex items-center justify-center transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form id="add-doc-form" onsubmit="handleSaveCustomDoc(event)" class="p-4 sm:p-5 space-y-3.5 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Mã hiệu văn bản *</label>
+          <input type="text" id="add-code" required placeholder="VD: MTCV-2026-05, BC-DX-01..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0b4d5e]">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Tiêu đề tài liệu *</label>
+          <input type="text" id="add-title" required placeholder="VD: Mô tả công việc Nhân viên Vận hành Bơm..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0b4d5e]">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Phân loại *</label>
+            <select id="add-category" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-[#0b4d5e]">
+              <option value="jd">Mô Tả Công Việc (JD)</option>
+              <option value="dinhbien">Định Biên &amp; Đề Xuất</option>
+              <option value="phongvan">Câu Hỏi Phỏng Vấn</option>
+              <option value="bieumau">Biểu Mẫu &amp; Thử Việc</option>
+              <option value="hopdong_truong">Hợp Tác Đào Tạo</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Đơn vị áp dụng *</label>
+            <select id="add-unit" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-[#0b4d5e]">
+              <option value="golf">Sân Golf Kỳ Sơn</option>
+              <option value="hapu">Hapulico Complex</option>
+              <option value="tudi">Tập đoàn TUDI</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Tóm tắt ngắn gọn *</label>
+          <input type="text" id="add-summary" required placeholder="Mục đích, đối tượng và phạm vi chính..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0b4d5e]">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Nội dung chi tiết (Văn bản / Mẫu) *</label>
+          <textarea id="add-body" rows="6" required placeholder="Nhập toàn văn nội dung quy chuẩn, tiêu chí, nhiệm vụ..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-[#0b4d5e]"></textarea>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+          <button type="button" onclick="closeAddDocModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition">
+            Hủy
+          </button>
+          <button type="submit" class="px-4 py-2 bg-[#0b4d5e] hover:bg-[#083f4e] text-white font-bold rounded-xl shadow-xs transition">
+            Lưu Tài Liệu
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- FOOTER -->
+  <!-- ============================================================== -->
+  <footer class="bg-white border-t border-slate-200 py-4 px-4 text-center text-xs text-slate-500 pb-safe">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="font-bold text-slate-700">Hệ Thống Quản Lý Tuyển Dụng &amp; Vận Hành M&amp;E</span>
+        <span>•</span>
+        <span>Ban Kỹ Thuật &amp; P.TCHC</span>
+      </div>
+      <div>
+        <span>Phiên bản v4.1.0 • Cập nhật: 11/11/2026</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================== -->
+  <!-- JAVASCRIPT LOGIC & DATABASE -->
+  <!-- ============================================================== -->
+  <script>
+    // CORE RECRUITMENT DOCUMENTS DATABASE
+    const DEFAULT_DOCUMENTS = [
+      {
+        id: 'doc-01',
+        code: 'MTCV-GOLF-01',
+        title: 'Mô Tả Công Việc Kỹ Thuật Điện - Nước Sân Golf Kỳ Sơn',
+        category: 'jd',
+        unit: 'golf',
+        salary: '9.000.000 - 11.000.000 đ/tháng',
+        location: 'Kỳ Sơn, Hòa Bình (có xe đưa đón & ký túc xá)',
+        updatedDate: '06/2026',
+        badgeColor: 'emerald',
+        summary: 'Thi công, lắp đặt và trực ca vận hành hệ thống điện 35kV/0.4kV, trạm bơm tưới, cấp thoát nước và chiếu sáng cảnh quan 18 hố.',
+        detailsHtml: `
+          <div class="space-y-4">
+            <div class="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl">
+              <div class="font-bold text-emerald-900 text-sm mb-1">MỨC LƯƠNG & CHẾ ĐỘ ĐÃI NGỘ</div>
+              <ul class="list-disc list-inside text-emerald-800 space-y-0.5">
+                <li><b>Mức lương thỏa thuận:</b> 9.000.000 – 11.000.000 VNĐ/tháng (theo năng lực).</li>
+                <li><b>Chế độ làm việc:</b> Toàn thời gian, theo ca trực kỹ thuật (3 ca luân phiên có nghỉ bù).</li>
+                <li><b>Phụ cấp:</b> Hỗ trợ nhà ở công trường (Ký túc xá), phụ cấp ăn ca và điện thoại trực.</li>
+                <li><b>Bảo hiểm:</b> Đóng đầy đủ BHXH, BHYT, BHTN theo quy định Bộ luật Lao động.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-slate-900 text-sm mb-1.5">1. MỤC ĐÍCH CÔNG VIỆC</h4>
+              <p>Đảm bảo toàn bộ hệ thống cơ điện (M&E), trạm biến áp, trạm bơm tưới tiêu, bơm cấp nước sinh hoạt, hệ thống thoát nước và chiếu sáng sân golf hoạt động liên tục, an toàn 24/7 phục vụ thi công và khai thác sân golf Kỳ Sơn Montana.</p>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-slate-900 text-sm mb-1.5">2. TRÁCH NHIỆM & NHIỆM VỤ CHÍNH</h4>
+              <ul class="list-disc list-inside space-y-1">
+                <li><b>Vận hành hệ thống điện:</b> Trực vận hành 3 Trạm biến áp (TBA 1, 2, 3), tủ phân phối tổng MSB, máy phát điện dự phòng và bộ chuyển nguồn tự động ATS.</li>
+                <li><b>Trạm bơm tưới tiêu & cấp nước:</b> Kiểm tra, khởi động và giám sát hệ thống bơm chìm, bơm tăng áp, bơm chuyển nước Suối Cun đi hồ 16, 17 công suất 160kW; điều chỉnh biến tần và rơ-le áp suất.</li>
+                <li><b>Hệ thống chiếu sáng:</b> Kiểm tra, hẹn giờ và bảo trì hệ thống chiếu sáng sân tập, đèn đường hố golf (Tospo/Poles), đèn cảnh quan và tủ điều khiển tự động.</li>
+                <li><b>Bảo trì ngăn ngừa & sửa chữa:</b> Thực hiện checklist định kỳ mỗi ca trực, vệ sinh tủ điện, đo điện trở cách điện, khắc phục ngay sự cố chạm chập, mất nguồn.</li>
+                <li><b>An toàn lao động & PCCC:</b> Tuân thủ tuyệt đối quy trình cắt điện an toàn LOTO (Lockout/Tagout), kiểm tra định kỳ bình chữa cháy và máy bơm cứu hỏa diesel/điện.</li>
+                <li><b>Báo cáo & bàn giao ca:</b> Ghi nhật ký vận hành vào Google Calendar và sổ giao ca điện tử, báo cáo sự cố phát sinh cho Tổ trưởng và Ban chỉ huy.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-slate-900 text-sm mb-1.5">3. TIÊU CHUẨN ỨNG VIÊN</h4>
+              <ul class="list-disc list-inside space-y-1">
+                <li><b>Trình độ:</b> Trung cấp, Cao đẳng hoặc Đại học chuyên ngành Hệ thống điện, Kỹ thuật điện - điện tử, Cấp thoát nước hoặc Cơ điện công trình.</li>
+                <li><b>Kinh nghiệm:</b> Ưu tiên từ 01 năm kinh nghiệm trở lên trong công tác thi công, vận hành cơ điện hạ tầng, trạm bơm hoặc tòa nhà. Chấp nhận sinh viên mới tốt nghiệp khá/giỏi có tinh thần cầu tiến.</li>
+                <li><b>Kỹ năng:</b> Đọc hiểu bản vẽ thi công điện nước (AutoCAD), sử dụng thành thạo đồng hồ vạn năng, ampe kìm, máy đo cách điện megohmmeter.</li>
+                <li><b>Phẩm chất:</b> Trung thực, chịu khó, có sức khỏe tốt, sẵn sàng trực ca đêm và xử lý sự cố khẩn cấp.</li>
+              </ul>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 'doc-02',
+        code: 'BC-DB-GOLF-2026',
+        title: 'Báo Cáo Đề Xuất Bổ Sung Nhân Sự Tổ Cơ Điện - Nước Sân Golf',
+        category: 'dinhbien',
+        unit: 'golf',
+        salary: 'Theo bảng lương Cty',
+        location: 'Sân Golf Kỳ Sơn',
+        updatedDate: '04/06/2026',
+        badgeColor: 'amber',
+        summary: 'Tờ trình đề xuất kiện toàn tổ cơ điện từ 4 người lên 7-8 người để nhận bàn giao nhà CLH, trạm bơm 160kW và tổ chức trực 3 ca 24/7.',
+        detailsHtml: `
+          <div class="space-y-4">
+            <div class="border-b pb-3 text-center">
+              <div class="font-bold text-slate-900">CÔNG TY CỔ PHẦN HAPULICO • BAN ĐIỆN VẬN HÀNH</div>
+              <div class="text-sm font-extrabold text-[#0b4d5e] mt-1">BÁO CÁO ĐỀ XUẤT BỔ SUNG NHÂN SỰ TỔ CƠ ĐIỆN – NƯỚC SÂN GOLF KỲ SƠN</div>
+              <div class="text-xs text-slate-500 mt-0.5">Ngày trình: 04/06/2026 • Người lập: Tổ trưởng Cơ điện • Kính gửi: Ban Tổng Giám Đốc</div>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-slate-900 text-sm mb-1">I. HIỆN TRẠNG NHÂN LỰC</h4>
+              <p>Hiện tại tổ cơ điện – nước tại công trường có <b>04 nhân sự</b>, thực hiện công tác trực ca 1, ca 2 và sửa chữa phát sinh trong giờ hành chính. Nhân sự hiện tại đang quá tải khi dự án mở rộng sang phía Tây và chuẩn bị nhận bàn giao thiết bị Nhà Câu Lạc Hội (Clubhouse).</p>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-slate-900 text-sm mb-1">II. KHỐI LƯỢNG CÔNG VIỆC MỚI CẦN ĐẢM BẢO</h4>
+              <ol class="list-decimal list-inside space-y-1">
+                <li>Nhận bàn giao hệ thống điện, điều hòa không khí VRV, nước nóng năng lượng mặt trời và thang máy Nhà CLH.</li>
+                <li>Vận hành cụm máy bơm chuyển nước hồ 16, 17 công suất 160kW và mạng lưới tưới tự động cỏ sân golf.</li>
+                <li>Triển khai hạ tầng cấp điện, cấp nước sạch cho khu vực mở rộng phía Tây sân golf.</li>
+                <li>Đáp ứng chế độ trực ca 24/7 (3 ca liên tục, mỗi ca có ít nhất 1 kỹ thuật viên và 1 công nhân vận hành bơm).</li>
+              </ol>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-slate-900 text-sm mb-1">III. ĐỀ XUẤT ĐỊNH BIÊN NHÂN LỰC KIỆN TOÀN</h4>
+              <div class="overflow-x-auto">
+                <table class="w-full text-xs border border-slate-300 mt-2">
+                  <thead class="bg-slate-100 text-slate-800">
+                    <tr>
+                      <th class="p-2 border">STT</th>
+                      <th class="p-2 border">Vị trí / Chức danh</th>
+                      <th class="p-2 border">Hiện có</th>
+                      <th class="p-2 border">Tuyển thêm</th>
+                      <th class="p-2 border">Tổng định biên</th>
+                      <th class="p-2 border">Ghi chú</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="p-2 border text-center">1</td>
+                      <td class="p-2 border font-bold">Tổ trưởng kiêm KTV điện điều hành</td>
+                      <td class="p-2 border text-center">0</td>
+                      <td class="p-2 border text-center font-bold text-emerald-600">+1</td>
+                      <td class="p-2 border text-center font-bold">1</td>
+                      <td class="p-2 border">Quản trị chung, đầu mối liên hệ Cty & BQL</td>
+                    </tr>
+                    <tr>
+                      <td class="p-2 border text-center">2</td>
+                      <td class="p-2 border font-bold">Kỹ thuật viên điện trực ca 3 ca</td>
+                      <td class="p-2 border text-center">2</td>
+                      <td class="p-2 border text-center font-bold text-emerald-600">+1 đến 2</td>
+                      <td class="p-2 border text-center font-bold">3 - 4</td>
+                      <td class="p-2 border">Trực ca 1, ca 2, ca 3 luân phiên (24/7)</td>
+                    </tr>
+                    <tr>
+                      <td class="p-2 border text-center">3</td>
+                      <td class="p-2 border font-bold">Công nhân vận hành trạm bơm - cơ khí</td>
+                      <td class="p-2 border text-center">2</td>
+                      <td class="p-2 border text-center font-bold text-emerald-600">+1</td>
+                      <td class="p-2 border text-center font-bold">3</td>
+                      <td class="p-2 border">Bơm Suối Cun, tăng áp, kiểm tra đường ống</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 'doc-03',
+        code: 'CD-BLD-0626',
+        title: 'Chỉ Đạo Định Biên Của Lãnh Đạo Về Tổ Cơ Điện Sân Golf',
+        category: 'dinhbien',
+        unit: 'golf',
+        salary: 'Chỉ đạo điều hành',
+        location: 'Hapulico - Sân Golf',
+        updatedDate: '09/06/2026',
+        badgeColor: 'blue',
+        summary: 'Kết luận của Chủ tịch HĐQT Phạm Đình Mạnh và Tổng Giám Đốc: Định biên vận hành ổn định là 4 - 5 người, chú trọng bảo dưỡng định kỳ.',
+        detailsHtml: `
+          <div class="space-y-4">
+            <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl">
+              <div class="font-bold text-blue-900 text-sm mb-1">NỘI DUNG Ý KIẾN CHỈ ĐẠO CỦA CHỦ TỊCH HĐQT PHẠM ĐÌNH MẠNH</div>
+              <p class="italic text-blue-800 text-xs sm:text-sm">
+                "Hiện tại công việc của sân Golf Ban điện có trách nhiệm hỗ trợ trong quá trình thi công. Việc vận hành (khi đã vào ổn định thì không cần nhiều người: toàn thiết bị mới có cần sửa chữa gì nhiều đâu, chủ yếu là công tác trực vận hành và bảo dưỡng định kỳ). Vì vậy, <b>nhiều thì 5 người, ít thì 4 người</b> là hợp lý."
+              </p>
+              <div class="text-[11px] text-blue-700 mt-2 font-semibold">Trích Email trao đổi ngày 09/06/2026 gửi Ban TGĐ, Ban Điện & P.TCHC</div>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-slate-900 text-sm mb-1">Ý KIẾN PHÊ DUYỆT CỦA TỔNG GIÁM ĐỐC PHẠM ĐÌNH HƯNG</h4>
+              <p class="text-xs sm:text-sm">Phê duyệt: <b>"ĐỒNG Ý"</b> phương án tuyển dụng bổ sung ngay 02 - 03 nhân sự kỹ thuật có tay nghề tốt để vừa hỗ trợ thi công hoàn thiện hố golf, vừa đào tạo tại chỗ để sẵn sàng tiếp quản vận hành khi sân golf chính thức khai trương.</p>
+            </div>
+
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+              <div class="font-bold text-slate-800 mb-1">HƯỚNG DẪN TRIỂN KHAI CỦA PHÒNG TCHC</div>
+              <p>• Phối hợp với Ban Điện đăng tuyển khẩn trương trên các kênh tuyển dụng địa phương (Kỳ Sơn, Hòa Bình) và trường đào tạo nghề tại Hà Nội.<br>
+              • Tổ chức phỏng vấn chuyên môn và ký kết hợp đồng thử việc theo khung lương đã được phê duyệt.</p>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 'doc-04',
+        code: 'CH-PV-MEP-01',
+        title: 'Bộ Ngân Hàng Câu Hỏi Phỏng Vấn Chuyên Môn Cơ Điện (16 Chủ Đề)',
+        category: 'phongvan',
+        unit: 'golf',
+        salary: 'Bộ công cụ phỏng vấn',
+        location: 'Áp dụng toàn khối Kỹ thuật',
+        updatedDate: '11/2026',
+        badgeColor: 'purple',
+        summary: 'Bộ 16 câu hỏi chuyên sâu kiểm tra kiến thức động cơ 3 pha, tủ điện, rơ-le, bơm ly tâm, biến tần, máy đo, an toàn LOTO và trực ca đêm.',
+        detailsHtml: `
+          <div class="space-y-4">
+            <div class="p-3 bg-purple-50 border border-purple-200 rounded-xl flex items-center justify-between">
+              <div>
+                <div class="font-bold text-purple-900 text-sm">CÔNG CỤ PHỎNG VẤN TRỰC TUYẾN</div>
+                <div class="text-xs text-purple-700">Bộ câu hỏi đã được tích hợp thành Web App chấm điểm trực tiếp ứng viên.</div>
+              </div>
+              <a href="../phongvan/" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs transition">
+                Mở Form Chấm Điểm
+              </a>
+            </div>
+
+            <div class="space-y-3">
+              <h4 class="font-bold text-slate-900 text-sm">TRÍCH ĐOẠN CÁC CÂU HỎI TIÊU BIỂU:</h4>
+              
+              <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                <div class="font-bold text-slate-800 text-xs">Câu 1: Thiết bị &amp; Hệ thống đã từng vận hành, lắp đặt?</div>
+                <div class="text-slate-600 text-xs mt-1"><b>Gợi ý đánh giá:</b> Động cơ 3 pha, tủ điện phân phối MSB/DB, trạm bơm chìm, bơm ly tâm trục ngang, hệ thống đèn chiếu sáng cao áp, khởi động mềm, biến tần.</div>
+              </div>
+
+              <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                <div class="font-bold text-slate-800 text-xs">Câu 2: Các phương pháp khởi động động cơ 3 pha và ưu nhược điểm?</div>
+                <div class="text-slate-600 text-xs mt-1"><b>Gợi ý đánh giá:</b> 1. Khởi động trực tiếp (DOL - dòng khởi động lớn); 2. Khởi động Sao - Tam giác (giảm 1/3 dòng khởi động); 3. Biến tần / Khởi động mềm (điều khiển tốc độ mịn, bảo vệ động cơ tối đa).</div>
+              </div>
+
+              <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                <div class="font-bold text-slate-800 text-xs">Câu 3: Nguyên nhân máy bơm nước không chạy dù đã cấp điện? Quy trình xử lý?</div>
+                <div class="text-slate-600 text-xs mt-1"><b>Gợi ý đánh giá:</b> Kiểm tra nguồn vào bằng đồng hồ VOM -> Kiểm tra rơ-le nhiệt/pha có tác động không -> Kiểm tra phao điện báo cạn -> Thử quay trục bơm xem kẹt cơ khí -> Đo cách điện cuộn dây.</div>
+              </div>
+
+              <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                <div class="font-bold text-slate-800 text-xs">Câu 4: Quy trình an toàn cắt điện sửa chữa (LOTO)?</div>
+                <div class="text-slate-600 text-xs mt-1"><b>Gợi ý đánh giá:</b> Cắt aptomat -> Khóa cách ly -> Treo biển cảnh báo "Cấm đóng điện, có người đang làm việc" -> Thử hết điện bằng bút thử -> Tiếp địa di động (nếu trung/hạ thế lớn).</div>
+              </div>
+
+              <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                <div class="font-bold text-slate-800 text-xs">Câu 5: Khả năng làm việc theo ca kíp 24/7 và trực đêm?</div>
+                <div class="text-slate-600 text-xs mt-1"><b>Gợi ý đánh giá:</b> Sẵn sàng luân chuyển ca 1 (06h-14h), ca 2 (14h-22h), ca 3 (22h-06h sáng hôm sau), có tinh thần hỗ trợ đồng đội khi có sự cố bão lũ, mưa lớn.</div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 'doc-05',
+        code: 'MTCV-HAPU-02',
+        title: 'MTCV Kỹ Thuật Viên Vận Hành Tòa Nhà Hapulico Complex',
+        category: 'jd',
+        unit: 'hapu',
+        salary: '10.000.000 - 12.000.000 đ/tháng',
+        location: 'Số 1 Nguyễn Huy Tưởng, Thanh Xuân, Hà Nội',
+        updatedDate: '2025 - 2026',
+        badgeColor: 'teal',
+        summary: 'Vận hành hệ thống kỹ thuật tổ hợp tòa nhà cao tầng: TBA 22kV, máy phát Cummins 2000kVA, điều hòa trung tâm Chiller, BMS, PCCC tự động.',
+        detailsHtml: `
+          <div class="space-y-4">
+            <div class="p-3.5 bg-teal-50 border border-teal-200 rounded-xl">
+              <div class="font-bold text-teal-900 text-sm mb-1">MỨC LƯƠNG & CHẾ ĐỘ ĐÃI NGỘ</div>
+              <ul class="list-disc list-inside text-teal-800 space-y-0.5 text-xs sm:text-sm">
+                <li><b>Mức lương chính:</b> 10.000.000 – 12.000.000 đ/tháng (chưa bao gồm phụ cấp trực ca và làm thêm giờ OT).</li>
+                <li><b>Thưởng:</b> Thưởng KPI tháng, thưởng lễ tết, lương tháng 13 đầy đủ theo quy chế công ty.</li>
+                <li><b>Chế độ ca:</b> Ca ngày 8h, ca đêm có phụ cấp đêm theo Luật Lao động.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-slate-900 text-sm mb-1.5">1. PHẠM VI HỆ THỐNG PHỤ TRÁCH</h4>
+              <p>Tổ hợp Hapulico Complex gồm các tòa nhà 17 tầng, 21 tầng, 24 tầng văn phòng, trung tâm thương mại dược phẩm và tầng hầm để xe quy mô lớn.</p>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-slate-900 text-sm mb-1.5">2. NHIỆM VỤ CỤ THỂ</h4>
+              <ul class="list-disc list-inside space-y-1">
+                <li>Theo dõi thông số điện áp, dòng điện, cos phi tại phòng điều độ trung tâm và các trạm biến áp khô.</li>
+                <li>Thực hiện lịch hẹn giờ bật tắt chiếu sáng tầng hầm, sảnh chung cư, chiếu sáng cảnh quan theo SOP-HENGIO-01.</li>
+                <li>Kiểm tra hệ thống cấp thoát nước sinh hoạt, trạm xử lý nước thải 450m3/ngày đêm và cụm bơm bù áp PCCC.</li>
+                <li>Xử lý các yêu cầu kỹ thuật phát sinh từ cư dân và khách thuê văn phòng (cháy bóng đèn, rò rỉ nước, nghẹt ống, nhảy aptomat).</li>
+              </ul>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 'doc-06',
+        code: 'BM-TIN-TD-01',
+        title: 'Mẫu Tin Đăng Tuyển Dụng Kỹ Thuật Viên Cơ Điện Chuẩn Hóa',
+        category: 'bieumau',
+        unit: 'tudi',
+        salary: 'Mẫu chuẩn đăng tin',
+        location: 'Facebook, Zalo, Website, Trường nghề',
+        updatedDate: '10/2026',
+        badgeColor: 'sky',
+        summary: 'Bản tin mẫu tuyển dụng chuẩn dành cho bộ phận nhân sự đăng tải trên các nền tảng mạng xã hội và liên kết các trường cao đẳng.',
+        detailsHtml: `
+          <div class="space-y-4">
+            <div class="bg-slate-900 text-white p-4 rounded-xl font-mono text-xs space-y-2 select-all leading-relaxed">
+              <p class="text-amber-400 font-bold text-sm">🔥 TUYỂN DỤNG GẤP: KỸ THUẬT VIÊN ĐIỆN – NƯỚC SÂN GOLF & TÒA NHÀ CAO TẦNG</p>
+              <p>🏢 <b>ĐƠN VỊ:</b> Công ty Cổ phần Hapulico / Tập đoàn TUDI<br>
+              📍 <b>Địa điểm làm việc:</b> Sân Golf Kỳ Sơn (Hòa Bình) hoặc Tổ hợp Hapulico Complex (Thanh Xuân, Hà Nội)</p>
+              
+              <p class="text-emerald-300 font-bold">💰 QUYỀN LỢI & THU NHẬP:</p>
+              <p>• Thu nhập từ <b>9.000.000 - 12.000.000 VNĐ/tháng</b> + Phụ cấp ca đêm + Thưởng lễ tết.<br>
+              • Được bố trí chỗ ở đầy đủ tiện nghi tại Ký túc xá công trường (đối với Sân Golf).<br>
+              • Đóng BHXH, BHYT, BHTN theo đúng quy định nhà nước.<br>
+              • Cơ hội đào tạo chuyên sâu về vận hành Trạm biến áp 35kV, hệ thống biến tần và BMS.</p>
+
+              <p class="text-emerald-300 font-bold">📋 MÔ TẢ CÔNG VIỆC:</p>
+              <p>• Trực ca vận hành hệ thống điện, trạm biến áp, máy phát điện dự phòng.<br>
+              • Vận hành trạm bơm tưới tiêu, bơm cấp thoát nước và chiếu sáng tự động.<br>
+              • Bảo trì định kỳ thiết bị theo checklist và khắc phục sự cố kỹ thuật.</p>
+
+              <p class="text-emerald-300 font-bold">🎯 YÊU CẦU:</p>
+              <p>• Tốt nghiệp Trung cấp/Cao đẳng trở lên ngành Điện, Nước, Tự động hóa.<br>
+              • Chăm chỉ, chịu khó, có tinh thần trách nhiệm và sẵn sàng trực ca.<br>
+              • Ưu tiên người đã có kinh nghiệm thực tế hoặc bộ đội xuất ngũ học nghề.</p>
+
+              <p class="text-cyan-300 font-bold">📞 THÔNG TIN LIÊN HỆ ỨNG TUYỂN:</p>
+              <p>• Phòng Tổ chức Hành chính: Số 1 Nguyễn Huy Tưởng, Thanh Xuân, Hà Nội<br>
+              • Email nhận hồ sơ: tchc@hapucomplex.com / tchc@tudigroup.com.vn<br>
+              • Hotline/Zalo: 0944.xxx.xxx (Ms. Hằng - P.TCHC) / 0903.xxx.xxx (Mr. Hải - Ban Điện)</p>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 'doc-07',
+        code: 'CV-HT-71-2025',
+        title: 'Công Văn Hợp Tác Tiếp Nhận SV Thực Tập & Tuyển Dụng',
+        category: 'hopdong_truong',
+        unit: 'hapu',
+        salary: 'Hợp tác đào tạo',
+        location: 'Trường CĐ Bách Khoa, CĐ Điện Tử Điện Lạnh',
+        updatedDate: '12/2025',
+        badgeColor: 'rose',
+        summary: 'Công văn chính thức gửi Ban giám hiệu các trường Cao đẳng kỹ thuật về chương trình tiếp nhận sinh viên thực tập có phụ cấp và tuyển dụng chính thức.',
+        detailsHtml: `
+          <div class="space-y-4">
+            <div class="border p-4 rounded-xl bg-white space-y-3">
+              <div class="flex justify-between items-start text-[11px] border-b pb-3">
+                <div>
+                  <div class="font-bold">CÔNG TY CỔ PHẦN HAPULICO</div>
+                  <div>Số: 71/2025/CV-CTY</div>
+                </div>
+                <div class="text-right">
+                  <div class="font-bold">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+                  <div>Độc lập – Tự do – Hạnh phúc</div>
+                  <div class="italic text-slate-500">Hà Nội, ngày 06 tháng 12 năm 2025</div>
+                </div>
+              </div>
+
+              <div class="text-center py-2">
+                <h4 class="font-bold text-sm text-slate-900">CÔNG VĂN</h4>
+                <div class="font-semibold text-xs text-slate-700">V/v Hợp tác trong việc tiếp nhận sinh viên thực tập và tuyển dụng nhân sự</div>
+              </div>
+
+              <div class="text-xs space-y-2">
+                <p><b>Kính gửi:</b> Ban Giám hiệu Trường Cao Đẳng Công Nghệ Bách Khoa Hà Nội</p>
+                <p>Công ty Cổ phần Hapulico là chủ đầu tư và đơn vị trực tiếp quản lý, vận hành các dự án bất động sản, tổ hợp trung tâm thương mại và dự án Sân Golf Kỳ Sơn Montana quy mô lớn. Nhằm tạo điều kiện cho sinh viên khối kỹ thuật tiếp cận môi trường làm việc thực tế, Công ty trân trọng đề xuất chương trình hợp tác:</p>
+                
+                <ul class="list-disc list-inside space-y-1 pl-2">
+                  <li><b>Tiếp nhận thực tập sinh:</b> Tiếp nhận từ 10 - 15 sinh viên năm cuối các chuyên ngành Kỹ thuật Điện, Điện Lạnh, Cấp thoát nước tham gia thực tập tốt nghiệp.</li>
+                  <li><b>Chế độ hỗ trợ:</b> Hỗ trợ chi phí đi lại, ăn trưa tại công ty, cung cấp trang thiết bị bảo hộ lao động và có kỹ sư tay nghề cao kèm cặp 1:1.</li>
+                  <li><b>Cơ hội tuyển dụng:</b> Các sinh viên đạt đánh giá thực tập loại Khá/Giỏi sẽ được Công ty ký hợp đồng lao động chính thức ngay sau khi tốt nghiệp.</li>
+                </ul>
+
+                <p>Công ty rất mong nhận được sự hợp tác quý báu từ phía Quý Nhà trường.</p>
+              </div>
+
+              <div class="flex justify-between items-end pt-4 text-xs">
+                <div>
+                  <b>Nơi nhận:</b><br>
+                  - Như trên;<br>
+                  - Lưu: VT, TCHC.
+                </div>
+                <div class="text-center font-bold">
+                  <div>TỔNG GIÁM ĐỐC</div>
+                  <div class="h-12"></div>
+                  <div>PHẠM ĐÌNH HƯNG</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 'doc-08',
+        code: 'BM-TIEP-NHAN-01',
+        title: 'Mẫu Tờ Trình Đề Nghị Tiếp Nhận Thử Việc & Thỏa Thuận Lương',
+        category: 'bieumau',
+        unit: 'tudi',
+        salary: 'Khung 9 - 12 tr/tháng',
+        location: 'Khối Kỹ thuật & P.TCHC',
+        updatedDate: '03/2026',
+        badgeColor: 'indigo',
+        summary: 'Biểu mẫu chuẩn tờ trình Ban Tổng Giám Đốc tiếp nhận nhân sự sau phỏng vấn chuyên môn, xác định thời gian thử việc 60 ngày và chế độ lương.',
+        detailsHtml: `
+          <div class="space-y-4">
+            <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-xs">
+              <div class="font-bold text-slate-800 text-sm">CÁC NỘI DUNG CHÍNH TRONG TỜ TRÌNH TIẾP NHẬN:</div>
+              <ul class="list-disc list-inside space-y-1">
+                <li><b>Họ tên ứng viên & thông tin cá nhân:</b> Năm sinh, số CCCD, hộ khẩu, trình độ chuyên môn đào tạo.</li>
+                <li><b>Vị trí tiếp nhận:</b> Kỹ thuật viên vận hành điện / Công nhân cơ điện nước.</li>
+                <li><b>Đơn vị công tác:</b> Tổ Cơ điện Sân Golf Kỳ Sơn / Ban Quản lý Tòa nhà Hapulico.</li>
+                <li><b>Thời gian thử việc:</b> 02 tháng (60 ngày) theo đúng Điều 25 Bộ luật Lao động 2019.</li>
+                <li><b>Mức lương thử việc:</b> 85% mức lương chính thức theo thỏa thuận hoặc thỏa thuận 100% lương nếu đã có kinh nghiệm dày dặn.</li>
+                <li><b>Người hướng dẫn & đánh giá:</b> Phân công Trưởng Ban Điện hoặc Tổ trưởng ca trực chịu trách nhiệm kèm cặp, chấm điểm sau 60 ngày.</li>
+              </ul>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 'doc-09',
+        code: 'QT-TCHC-2026',
+        title: 'Quy Trình Tuyển Dụng Chuẩn Tập Đoàn TUDI Group (SOP-HR-01)',
+        category: 'bieumau',
+        unit: 'tudi',
+        salary: 'Quy chế tập đoàn',
+        location: 'Toàn hệ thống TUDI Group',
+        updatedDate: '11/11/2026',
+        badgeColor: 'rose',
+        summary: 'Tài liệu hướng dẫn quy trình 7 bước tuyển dụng nhân sự: Lập đề xuất -> Phê duyệt -> Đăng tuyển -> Phỏng vấn chuyên môn -> Đàm phán lương -> Thử việc -> Ký HĐLĐ.',
+        detailsHtml: `
+          <div class="space-y-4">
+            <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl">
+              <div class="font-bold text-rose-900 text-sm">QUY TRÌNH CHUẨN ĐÀO TẠO NGÀY 11/11/2026 (P. TCHC TUDI GROUP)</div>
+              <p class="text-xs text-rose-800 mt-1">Được chuẩn hóa áp dụng đồng bộ cho các công ty thành viên: TUDI, Hapulico, Sân Golf Kỳ Sơn Montana, Trường FFS, Thanh Xuân JSC.</p>
+            </div>
+
+            <div class="space-y-2 text-xs">
+              <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-start gap-2">
+                <span class="w-5 h-5 rounded-full bg-[#0b4d5e] text-white flex items-center justify-center font-bold text-[10px] shrink-0">1</span>
+                <div>
+                  <b>Bước 1: Xác định nhu cầu &amp; Lập Phiếu đề xuất tuyển dụng</b>
+                  <p class="text-slate-600">Đơn vị lập phiếu đề xuất kèm Bản mô tả công việc (JD) gửi P.TCHC.</p>
+                </div>
+              </div>
+
+              <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-start gap-2">
+                <span class="w-5 h-5 rounded-full bg-[#0b4d5e] text-white flex items-center justify-center font-bold text-[10px] shrink-0">2</span>
+                <div>
+                  <b>Bước 2: Phê duyệt định biên &amp; ngân sách</b>
+                  <p class="text-slate-600">Ban TGĐ / Chủ tịch HĐQT xem xét phê duyệt số lượng và khung lương.</p>
+                </div>
+              </div>
+
+              <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-start gap-2">
+                <span class="w-5 h-5 rounded-full bg-[#0b4d5e] text-white flex items-center justify-center font-bold text-[10px] shrink-0">3</span>
+                <div>
+                  <b>Bước 3: Đăng thông báo tuyển dụng &amp; Thu hút hồ sơ</b>
+                  <p class="text-slate-600">P.TCHC triển khai qua các kênh online, trường nghề và nội bộ.</p>
+                </div>
+              </div>
+
+              <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-start gap-2">
+                <span class="w-5 h-5 rounded-full bg-[#0b4d5e] text-white flex items-center justify-center font-bold text-[10px] shrink-0">4</span>
+                <div>
+                  <b>Bước 4: Sơ tuyển hồ sơ &amp; Phỏng vấn chuyên môn</b>
+                  <p class="text-slate-600">Ban Kỹ thuật và P.TCHC cùng phỏng vấn trực tiếp bằng Bộ câu hỏi chuẩn.</p>
+                </div>
+              </div>
+
+              <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-start gap-2">
+                <span class="w-5 h-5 rounded-full bg-[#0b4d5e] text-white flex items-center justify-center font-bold text-[10px] shrink-0">5</span>
+                <div>
+                  <b>Bước 5: Thỏa thuận lương &amp; Ban hành Thư mời nhận việc</b>
+                  <p class="text-slate-600">Thương thảo mức lương, phụ cấp, ngày bắt đầu thử việc.</p>
+                </div>
+              </div>
+
+              <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-start gap-2">
+                <span class="w-5 h-5 rounded-full bg-[#0b4d5e] text-white flex items-center justify-center font-bold text-[10px] shrink-0">6</span>
+                <div>
+                  <b>Bước 6: Tiếp nhận thử việc &amp; Đào tạo hội nhập</b>
+                  <p class="text-slate-600">Cấp phát đồng phục, bảo hộ lao động, học an toàn và SOP vận hành.</p>
+                </div>
+              </div>
+
+              <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-start gap-2">
+                <span class="w-5 h-5 rounded-full bg-[#0b4d5e] text-white flex items-center justify-center font-bold text-[10px] shrink-0">7</span>
+                <div>
+                  <b>Bước 7: Đánh giá hết thử việc &amp; Ký HĐLĐ chính thức</b>
+                  <p class="text-slate-600">Tổ trưởng nhận xét tay nghề, P.TCHC làm thủ tục ký hợp đồng có thời hạn.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 'doc-10',
+        code: 'MTCV-TO-TRUONG-01',
+        title: 'MTCV Tổ Trưởng Kiêm Kỹ Thuật Viên Vận Hành Ca MEP Sân Golf',
+        category: 'jd',
+        unit: 'golf',
+        salary: '12.000.000 - 15.000.000 đ/tháng',
+        location: 'Sân Golf Kỳ Sơn Montana',
+        updatedDate: '06/2026',
+        badgeColor: 'emerald',
+        summary: 'Chịu trách nhiệm phân ca, điều phối công việc hàng ngày, giám sát vận hành bơm tưới, TBA, an toàn lao động và giải quyết sự cố.',
+        detailsHtml: `
+          <div class="space-y-4">
+            <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs">
+              <div class="font-bold text-emerald-900 text-sm mb-1">MỨC LƯƠNG &amp; TRÁCH NHIỆM</div>
+              <p>Mức lương: <b>12.000.000 – 15.000.000 đ/tháng</b>. Chịu trách nhiệm cao nhất trước Ban Giám Đốc và Ban Điện về an toàn điện nước toàn bộ công trường sân golf 18 hố.</p>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-900 text-sm mb-1">NHIỆM VỤ CHÍNH:</h4>
+              <ul class="list-disc list-inside space-y-1 text-xs">
+                <li>Lập lịch phân ca hàng tuần cho các kỹ thuật viên và công nhân bơm.</li>
+                <li>Kiểm tra, đôn đốc ghi chép nhật ký ca trực và biểu mẫu checklist.</li>
+                <li>Chỉ huy xử lý khi có sự cố khẩn cấp (cháy nổ, bục vỡ ống nước chính, sét đánh hỏng biến tần).</li>
+                <li>Đào tạo, hướng dẫn tay nghề cho nhân viên mới tiếp nhận thử việc.</li>
+              </ul>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 'doc-11',
+        code: 'MTCV-BOM-NUOC-01',
+        title: 'MTCV Công Nhân Vận Hành Trạm Bơm Suối Cun & PCCC',
+        category: 'jd',
+        unit: 'golf',
+        salary: '8.500.000 - 10.000.000 đ/tháng',
+        location: 'Sân Golf Kỳ Sơn',
+        updatedDate: '05/2026',
+        badgeColor: 'cyan',
+        summary: 'Theo dõi mực nước hồ chứa, vận hành bơm chuyển nước 160kW, bơm tưới hố golf, kiểm tra đường ống và bảo dưỡng cơ khí đường ống.',
+        detailsHtml: `
+          <div class="space-y-4">
+            <div class="p-3 bg-cyan-50 border border-cyan-200 rounded-xl text-xs">
+              <div class="font-bold text-cyan-900 text-sm mb-1">VỊ TRÍ CÔNG NHÂN VẬN HÀNH BƠM</div>
+              <p>Thu nhập: <b>8.500.000 – 10.000.000 đ/tháng</b> + Nhà ở miễn phí tại công trường + Cơm ca.</p>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-900 text-sm mb-1">NHIỆM VỤ TRỌNG TÂM:</h4>
+              <ul class="list-disc list-inside space-y-1 text-xs">
+                <li>Theo dõi mực nước hồ điều hòa và nguồn suối Cun, vận hành bơm theo lịch trình đã được phê duyệt.</li>
+                <li>Kiểm tra rò rỉ khớp nối, van bướm, van xả khí và bôi trơn bạc đạn bơm định kỳ.</li>
+                <li>Vận hành máy bơm tăng áp rửa xe golf, bơm nước sinh hoạt nhà CLH.</li>
+                <li>Thực hiện vệ sinh rác tại cửa hút các trạm bơm, bảo dưỡng phao chống cạn.</li>
+              </ul>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 'doc-12',
+        code: 'BM-DANH-GIA-TV-01',
+        title: 'Mẫu Đánh Giá Kết Quả Thử Việc Kỹ Thuật Viên Cơ Điện',
+        category: 'bieumau',
+        unit: 'tudi',
+        salary: 'Biểu mẫu hành chính',
+        location: 'Toàn hệ thống',
+        updatedDate: '10/2026',
+        badgeColor: 'slate',
+        summary: 'Phiếu chấm điểm 6 tiêu chí thử việc: Tay nghề chuyên môn, tuân thủ kỷ luật ca, an toàn LOTO, thái độ làm việc, kỹ năng xử lý sự cố và báo cáo.',
+        detailsHtml: `
+          <div class="space-y-4">
+            <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-2">
+              <div class="font-bold text-slate-800 text-sm">6 TIÊU CHÍ ĐÁNH GIÁ HẾT THỬ VIỆC (THANG ĐIỂM 100):</div>
+              <ol class="list-decimal list-inside space-y-1">
+                <li><b>Kiến thức chuyên môn & tay nghề:</b> Đọc bản vẽ, đấu nối tủ điện, phát hiện lỗi (Tối đa 30 điểm).</li>
+                <li><b>Tuân thủ quy trình & An toàn LOTO:</b> Chấp hành nội quy an toàn lao động, trang bị BHLĐ (Tối đa 20 điểm).</li>
+                <li><b>Kỷ luật giờ giấc & Trực ca:</b> Đi làm đúng giờ, bàn giao ca đầy đủ, không bỏ vị trí trực (Tối đa 20 điểm).</li>
+                <li><b>Tinh thần trách nhiệm & Chủ động:</b> Tích cực trong công việc, hỗ trợ đồng đội (Tối đa 15 điểm).</li>
+                <li><b>Giao tiếp & Kỹ năng làm việc nhóm:</b> Hòa đồng, trung thực, tôn trọng cấp trên (Tối đa 10 điểm).</li>
+                <li><b>Ý thức bảo quản công cụ dụng cụ:</b> Giữ gìn máy đo, đồ nghề chuyên dụng (Tối đa 5 điểm).</li>
+              </ol>
+              <div class="pt-2 border-t font-semibold text-slate-700">
+                • Trên 80 điểm: Đề xuất ký HĐLĐ chính thức 01 năm.<br>
+                • Từ 60 - 79 điểm: Đề xuất kéo dài thử việc thêm 01 tháng (nếu thỏa thuận).<br>
+                • Dưới 60 điểm: Không tiếp nhận chính thức.
+              </div>
+            </div>
+          </div>
+        `
+      }
+    ];
+
+    // STATE MANAGEMENT
+    let documents = [];
+    let currentCategory = 'all';
+    let currentUnit = 'all';
+    let currentSearch = '';
+    let bookmarkedDocIds = new Set();
+    let currentViewingDoc = null;
+
+    // INIT FUNCTION
+    function initApp() {
+      // Load custom docs from localStorage if any
+      const customDocsJson = localStorage.getItem('nhatky_custom_recruitment_docs');
+      let customDocs = [];
+      if (customDocsJson) {
+        try {
+          customDocs = JSON.parse(customDocsJson);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // Load bookmarks
+      const savedBookmarks = localStorage.getItem('nhatky_recruitment_bookmarks');
+      if (savedBookmarks) {
+        try {
+          bookmarkedDocIds = new Set(JSON.parse(savedBookmarks));
+        } catch (e) {}
+      }
+
+      documents = [...DEFAULT_DOCUMENTS, ...customDocs];
+      updateCategoryCounts();
+      renderDocumentGrid();
+      lucide.createIcons();
+    }
+
+    // UPDATE COUNTS
+    function updateCategoryCounts() {
+      const counts = {
+        all: documents.length,
+        jd: 0,
+        dinhbien: 0,
+        phongvan: 0,
+        bieumau: 0,
+        hopdong_truong: 0,
+        saved: 0
+      };
+
+      documents.forEach(doc => {
+        if (counts[doc.category] !== undefined) {
+          counts[doc.category]++;
+        }
+        if (bookmarkedDocIds.has(doc.id)) {
+          counts.saved++;
+        }
+      });
+
+      document.getElementById('count-cat-all').textContent = counts.all;
+      document.getElementById('count-cat-jd').textContent = counts.jd;
+      document.getElementById('count-cat-dinhbien').textContent = counts.dinhbien;
+      document.getElementById('count-cat-phongvan').textContent = counts.phongvan;
+      document.getElementById('count-cat-bieumau').textContent = counts.bieumau;
+      document.getElementById('count-cat-hopdong_truong').textContent = counts.hopdong_truong;
+      document.getElementById('count-cat-saved').textContent = counts.saved;
+
+      document.getElementById('stat-total-docs').textContent = counts.all;
+      document.getElementById('stat-jd-count').textContent = counts.jd;
+    }
+
+    // RENDER GRID
+    function renderDocumentGrid() {
+      const grid = document.getElementById('doc-grid');
+      const emptyState = document.getElementById('empty-state');
+      grid.innerHTML = '';
+
+      const filtered = documents.filter(doc => {
+        // Category filter
+        if (currentCategory === 'saved') {
+          if (!bookmarkedDocIds.has(doc.id)) return false;
+        } else if (currentCategory !== 'all' && doc.category !== currentCategory) {
+          return false;
+        }
+
+        // Unit filter
+        if (currentUnit !== 'all' && doc.unit !== currentUnit) {
+          return false;
+        }
+
+        // Search query
+        if (currentSearch) {
+          const q = currentSearch.toLowerCase();
+          const matchCode = (doc.code || '').toLowerCase().includes(q);
+          const matchTitle = (doc.title || '').toLowerCase().includes(q);
+          const matchSummary = (doc.summary || '').toLowerCase().includes(q);
+          const matchSalary = (doc.salary || '').toLowerCase().includes(q);
+          const matchLocation = (doc.location || '').toLowerCase().includes(q);
+          if (!matchCode && !matchTitle && !matchSummary && !matchSalary && !matchLocation) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        emptyState.classList.remove('hidden');
+        return;
+      } else {
+        emptyState.classList.add('hidden');
+      }
+
+      filtered.forEach(doc => {
+        const isBookmarked = bookmarkedDocIds.has(doc.id);
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md transition p-4 sm:p-5 flex flex-col justify-between space-y-3.5 group";
+        
+        let unitBadge = '';
+        if (doc.unit === 'golf') {
+          unitBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">⛳ Sân Golf</span>';
+        } else if (doc.unit === 'hapu') {
+          unitBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">🏢 Hapulico</span>';
+        } else {
+          unitBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">🌐 TUDI Group</span>';
+        }
+
+        let catName = 'Tài liệu';
+        if (doc.category === 'jd') catName = 'Mô Tả CV (JD)';
+        else if (doc.category === 'dinhbien') catName = 'Định Biên';
+        else if (doc.category === 'phongvan') catName = 'Phỏng Vấn';
+        else if (doc.category === 'bieumau') catName = 'Biểu Mẫu';
+        else if (doc.category === 'hopdong_truong') catName = 'Hợp Tác ĐT';
+
+        card.innerHTML = `
+          <div class="space-y-2.5">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200">${doc.code}</span>
+                ${unitBadge}
+              </div>
+              <button onclick="toggleBookmark('${doc.id}', event)" class="p-1.5 rounded-lg text-slate-400 hover:text-amber-500 hover:bg-amber-50 transition" title="Lưu tài liệu">
+                <i data-lucide="star" class="w-4 h-4 ${isBookmarked ? 'fill-amber-400 text-amber-500' : ''}"></i>
+              </button>
+            </div>
+
+            <div>
+              <h3 class="font-extrabold text-sm text-slate-900 group-hover:text-[#0b4d5e] transition leading-snug line-clamp-2">${doc.title}</h3>
+              <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">${doc.summary}</p>
+            </div>
+
+            <div class="pt-2 border-t border-slate-100 text-[11px] text-slate-600 space-y-1">
+              <div class="flex items-center gap-1.5">
+                <i data-lucide="banknote" class="w-3.5 h-3.5 text-emerald-600 shrink-0"></i>
+                <span class="font-bold text-emerald-700 truncate">${doc.salary || 'Thỏa thuận'}</span>
+              </div>
+              <div class="flex items-center gap-1.5 text-slate-500">
+                <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
+                <span>Cập nhật: ${doc.updatedDate || '2026'}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-100 flex items-center gap-2">
+            <button onclick="openPreviewModal('${doc.id}')" class="flex-1 py-2 bg-[#0b4d5e] hover:bg-[#083f4e] text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-xs active:scale-95">
+              <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+              <span>Xem Toàn Văn</span>
+            </button>
+            <button onclick="quickCopyDoc('${doc.id}')" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl border border-slate-200 transition active:scale-95" title="Sao chép nhanh">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      lucide.createIcons();
+    }
+
+    // SEARCH & FILTER HANDLERS
+    function handleSearch() {
+      currentSearch = document.getElementById('search-input').value.trim();
+      const clearBtn = document.getElementById('clear-search-btn');
+      if (currentSearch) {
+        clearBtn.classList.remove('hidden');
+      } else {
+        clearBtn.classList.add('hidden');
+      }
+      renderDocumentGrid();
+    }
+
+    function clearSearch() {
+      document.getElementById('search-input').value = '';
+      currentSearch = '';
+      document.getElementById('clear-search-btn').classList.add('hidden');
+      renderDocumentGrid();
+    }
+
+    function handleFilterChange() {
+      currentUnit = document.getElementById('unit-filter').value;
+      renderDocumentGrid();
+    }
+
+    function setCategoryFilter(cat) {
+      currentCategory = cat;
+      document.querySelectorAll('.cat-pill').forEach(btn => {
+        if (btn.getAttribute('data-cat') === cat) {
+          btn.className = "cat-pill px-3 py-1.5 rounded-xl font-bold transition whitespace-nowrap bg-[#0b4d5e] text-white shadow-xs";
+        } else {
+          btn.className = "cat-pill px-3 py-1.5 rounded-xl font-semibold transition whitespace-nowrap bg-slate-100 hover:bg-slate-200 text-slate-700";
+        }
+      });
+      renderDocumentGrid();
+    }
+
+    function resetFilters() {
+      currentCategory = 'all';
+      currentUnit = 'all';
+      currentSearch = '';
+      document.getElementById('search-input').value = '';
+      document.getElementById('unit-filter').value = 'all';
+      setCategoryFilter('all');
+    }
+
+    // BOOKMARKS
+    function toggleBookmark(docId, event) {
+      if (event) event.stopPropagation();
+      if (bookmarkedDocIds.has(docId)) {
+        bookmarkedDocIds.delete(docId);
+      } else {
+        bookmarkedDocIds.add(docId);
+      }
+      localStorage.setItem('nhatky_recruitment_bookmarks', JSON.stringify([...bookmarkedDocIds]));
+      updateCategoryCounts();
+      renderDocumentGrid();
+      if (currentViewingDoc && currentViewingDoc.id === docId) {
+        updateModalBookmarkUI();
+      }
+    }
+
+    function toggleBookmarkCurrent() {
+      if (!currentViewingDoc) return;
+      toggleBookmark(currentViewingDoc.id);
+    }
+
+    function updateModalBookmarkUI() {
+      const btn = document.getElementById('modal-bookmark-btn');
+      const text = document.getElementById('modal-bookmark-text');
+      const isBookmarked = bookmarkedDocIds.has(currentViewingDoc.id);
+      if (isBookmarked) {
+        btn.className = "px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white border border-amber-600 font-bold rounded-xl text-xs transition flex items-center gap-1.5 active:scale-95";
+        text.textContent = "Đã lưu";
+      } else {
+        btn.className = "px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-bold rounded-xl text-xs transition flex items-center gap-1.5 active:scale-95";
+        text.textContent = "Lưu tài liệu";
+      }
+    }
+
+    // MODAL PREVIEW
+    function openPreviewModal(docId) {
+      const doc = documents.find(d => d.id === docId);
+      if (!doc) return;
+      currentViewingDoc = doc;
+
+      document.getElementById('modal-doc-code').textContent = doc.code;
+      document.getElementById('modal-doc-title').textContent = doc.title;
+      document.getElementById('modal-doc-unit').textContent = doc.unit === 'golf' ? 'Sân Golf Kỳ Sơn' : (doc.unit === 'hapu' ? 'Hapulico Complex' : 'Tập đoàn TUDI');
+      
+      let catName = 'Mô Tả Công Việc';
+      if (doc.category === 'dinhbien') catName = 'Định Biên & Đề Xuất';
+      else if (doc.category === 'phongvan') catName = 'Bộ Câu Hỏi Phỏng Vấn';
+      else if (doc.category === 'bieumau') catName = 'Biểu Mẫu Nhân Sự';
+      else if (doc.category === 'hopdong_truong') catName = 'Hợp Tác Nhà Trường';
+      document.getElementById('modal-doc-category').textContent = catName;
+
+      document.getElementById('modal-doc-body').innerHTML = doc.detailsHtml || `<p class="whitespace-pre-wrap">${doc.summary}</p>`;
+      
+      updateModalBookmarkUI();
+      document.getElementById('copy-btn-text').textContent = "Sao chép nội dung";
+      document.getElementById('preview-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closePreviewModal() {
+      document.getElementById('preview-modal').classList.add('hidden');
+      currentViewingDoc = null;
+    }
+
+    function copyDocContent() {
+      if (!currentViewingDoc) return;
+      const textToCopy = document.getElementById('modal-doc-body').innerText;
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        const btnText = document.getElementById('copy-btn-text');
+        btnText.textContent = "Đã sao chép!";
+        setTimeout(() => {
+          btnText.textContent = "Sao chép nội dung";
+        }, 2000);
+      });
+    }
+
+    function quickCopyDoc(docId) {
+      const doc = documents.find(d => d.id === docId);
+      if (!doc) return;
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = doc.detailsHtml || doc.summary;
+      const cleanText = doc.title + "\n" + (doc.code || '') + "\n\n" + tempDiv.innerText;
+      navigator.clipboard.writeText(cleanText).then(() => {
+        alert("Đã sao chép nội dung: " + doc.title);
+      });
+    }
+
+    // MODAL ADD CUSTOM DOC
+    function openAddDocModal() {
+      document.getElementById('add-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeAddDocModal() {
+      document.getElementById('add-modal').classList.add('hidden');
+      document.getElementById('add-doc-form').reset();
+    }
+
+    function handleSaveCustomDoc(e) {
+      e.preventDefault();
+      const code = document.getElementById('add-code').value.trim();
+      const title = document.getElementById('add-title').value.trim();
+      const category = document.getElementById('add-category').value;
+      const unit = document.getElementById('add-unit').value;
+      const summary = document.getElementById('add-summary').value.trim();
+      const body = document.getElementById('add-body').value.trim();
+
+      const newDoc = {
+        id: 'custom-' + Date.now(),
+        code: code,
+        title: title,
+        category: category,
+        unit: unit,
+        salary: 'Thỏa thuận',
+        location: unit === 'golf' ? 'Sân Golf Kỳ Sơn' : 'Hapulico Complex',
+        updatedDate: new Date().toLocaleDateString('vi-VN'),
+        badgeColor: 'indigo',
+        summary: summary,
+        detailsHtml: `<div class="p-3 bg-slate-50 rounded-xl border border-slate-200 whitespace-pre-wrap font-sans text-xs leading-relaxed">${body}</div>`
+      };
+
+      // save to localStorage
+      const customDocsJson = localStorage.getItem('nhatky_custom_recruitment_docs');
+      let customDocs = [];
+      if (customDocsJson) {
+        try { customDocs = JSON.parse(customDocsJson); } catch (e) {}
+      }
+      customDocs.unshift(newDoc);
+      localStorage.setItem('nhatky_custom_recruitment_docs', JSON.stringify(customDocs));
+
+      documents.unshift(newDoc);
+      updateCategoryCounts();
+      renderDocumentGrid();
+      closeAddDocModal();
+      alert("Đã thêm tài liệu mới thành công!");
+    }
+
+    // EXPORT TO CSV
+    function exportToCsv() {
+      let csv = "\uFEFFMã hiệu,Tiêu đề,Phân loại,Đơn vị,Mức lương,Ngày cập nhật,Tóm tắt\n";
+      documents.forEach(doc => {
+        const row = [
+          `"${(doc.code || '').replace(/"/g, '""')}"`,
+          `"${(doc.title || '').replace(/"/g, '""')}"`,
+          `"${(doc.category || '').replace(/"/g, '""')}"`,
+          `"${(doc.unit || '').replace(/"/g, '""')}"`,
+          `"${(doc.salary || '').replace(/"/g, '""')}"`,
+          `"${(doc.updatedDate || '').replace(/"/g, '""')}"`,
+          `"${(doc.summary || '').replace(/"/g, '""')}"`
+        ];
+        csv += row.join(",") + "\n";
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Danh_Muc_Tai_Lieu_Tuyen_Dung_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // START
+    window.addEventListener('DOMContentLoaded', () => {
+      initApp();
+    });
+  </script>
+</body>
+</html>
