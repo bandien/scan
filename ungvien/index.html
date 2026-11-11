@@ -1,0 +1,1973 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Cổng Ứng Viên & Sát Hạch Tuyển Dụng M&E | BanDienScan</title>
+  <meta name="description" content="Cổng thông tin tuyển dụng, trắc nghiệm sát hạch năng lực kỹ thuật cơ điện (M&E) tự động cho ứng viên Sân Golf Kỳ Sơn Montana, Hapulico Complex và Tudi Group.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f9fa',
+              100: '#d7f0f3',
+              500: '#0b4d5e',
+              600: '#093f4e',
+              700: '#07323e',
+              800: '#05252f',
+              900: '#041b22',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .pb-safe {
+      padding-bottom: env(safe-area-inset-bottom, 1.5rem);
+    }
+    @media print {
+      body * {
+        visibility: hidden !important;
+      }
+      #print-certificate-area, #print-certificate-area * {
+        visibility: visible !important;
+      }
+      #print-certificate-area {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col antialiased selection:bg-[#0b4d5e]/20 selection:text-[#0b4d5e]">
+
+  <!-- ============================================================== -->
+  <!-- TOP APP HEADER -->
+  <!-- ============================================================== -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-xs no-print">
+    <div class="max-w-5xl mx-auto px-3.5 sm:px-6">
+      <div class="flex items-center justify-between h-14 sm:h-16 gap-3">
+        
+        <!-- Left: Logo & Portal Title -->
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-[#0b4d5e] to-[#052832] text-white flex items-center justify-center shrink-0 shadow-xs border border-[#0b4d5e]/30">
+            <i data-lucide="check-check" class="w-5 h-5 text-teal-300"></i>
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <span class="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight truncate">Cổng Sát Hạch Tuyển Dụng</span>
+              <span id="role-mode-badge" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                Ứng viên tự làm
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-500 truncate hidden xs:block">Khối Cơ Điện M&amp;E • Sân Golf Kỳ Sơn &amp; Tòa Nhà</p>
+          </div>
+        </div>
+
+        <!-- Right: Controls & Mode Switcher -->
+        <div class="flex items-center gap-2 shrink-0">
+          <!-- Recruiter mode toggle -->
+          <button onclick="toggleRecruiterMode()" id="btn-mode-toggle" class="px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5 active:scale-95" title="Chuyển chế độ Người phỏng vấn điền hộ">
+            <i data-lucide="user-cog" class="w-3.5 h-3.5 text-slate-600"></i>
+            <span class="hidden sm:inline" id="btn-mode-text">Người PV Điền Hộ</span>
+            <span class="sm:hidden">Chế độ</span>
+          </button>
+
+          <!-- Manage Questions modal toggle -->
+          <button onclick="openQuestionManagerModal()" class="w-9 h-9 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 flex items-center justify-center transition active:scale-95" title="Quản lý & Chỉnh sửa ngân hàng câu hỏi">
+            <i data-lucide="settings" class="w-4 h-4 text-slate-600"></i>
+          </button>
+
+          <!-- Back to home/docs -->
+          <a href="../nhatky/tuyendung.html" class="w-9 h-9 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 flex items-center justify-center transition active:scale-95" title="Mở kho tài liệu tuyển dụng">
+            <i data-lucide="folder-kanban" class="w-4 h-4 text-slate-600"></i>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================== -->
+  <!-- MAIN CONTAINER (3 PHASES) -->
+  <!-- ============================================================== -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-3.5 sm:px-6 py-4 sm:py-6">
+
+    <!-- ============================================================== -->
+    <!-- PHASE 1: REGISTRATION / CHECK-IN FORM -->
+    <!-- ============================================================== -->
+    <section id="phase-checkin" class="space-y-4 sm:space-y-6">
+      
+      <!-- Welcome Hero Banner -->
+      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0b4d5e] via-[#083e4c] to-[#052832] text-white p-5 sm:p-8 shadow-md border border-[#0b4d5e]/40">
+        <div class="absolute -right-10 -bottom-10 w-48 h-48 rounded-full bg-cyan-400/10 blur-2xl pointer-events-none"></div>
+        <div class="absolute -left-10 -top-10 w-40 h-40 rounded-full bg-teal-400/10 blur-2xl pointer-events-none"></div>
+
+        <div class="relative z-10 space-y-3 max-w-2xl">
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Khảo Sát Năng Lực Trực Tuyến</span>
+          </div>
+          
+          <h2 class="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-white leading-tight">
+            Chào Mừng Bạn Đến Với Vòng Sát Hạch Kỹ Thuật Cơ Điện
+          </h2>
+          
+          <p class="text-xs sm:text-sm text-cyan-100/90 leading-relaxed">
+            Bài kiểm tra gồm <b>15 câu hỏi trắc nghiệm</b> chọn lọc liên quan đến vận hành điện 3 pha, trạm biến áp, máy bơm, an toàn LOTO và xử lý sự cố thực tế. Kết quả sẽ được chấm điểm tự động ngay sau khi hoàn thành.
+          </p>
+
+          <!-- Quick Features -->
+          <div class="pt-2 grid grid-cols-3 gap-2 text-center text-xs">
+            <div class="p-2.5 rounded-xl bg-white/10 border border-white/15 backdrop-blur-xs">
+              <div class="font-extrabold text-amber-300">15 Câu</div>
+              <div class="text-[10px] text-cyan-100 mt-0.5">Trắc nghiệm A, B, C, D</div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-white/10 border border-white/15 backdrop-blur-xs">
+              <div class="font-extrabold text-teal-300">15 - 20 Phút</div>
+              <div class="text-[10px] text-cyan-100 mt-0.5">Thời gian tiêu chuẩn</div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-white/10 border border-white/15 backdrop-blur-xs">
+              <div class="font-extrabold text-emerald-300">Chấm Ngay</div>
+              <div class="text-[10px] text-cyan-100 mt-0.5">Xuất phiếu kết quả A4</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recruiter Mode Notification Banner (Visible when Recruiter Mode is ON) -->
+      <div id="recruiter-alert-box" class="hidden p-3.5 bg-purple-50 border border-purple-200 rounded-2xl flex items-center gap-3 text-xs text-purple-900">
+        <div class="w-8 h-8 rounded-xl bg-purple-200 text-purple-800 flex items-center justify-center shrink-0">
+          <i data-lucide="user-check" class="w-4 h-4"></i>
+        </div>
+        <div class="flex-1">
+          <span class="font-bold">Đang ở chế độ Người Tuyển Dụng Điền Hộ:</span>
+          <span> Bạn có thể phỏng vấn trực tiếp ứng viên, ghi nhận câu trả lời và xem gợi ý đáp án/rubric chấm điểm.</span>
+        </div>
+      </div>
+
+      <!-- Check-in Form Card -->
+      <div class="bg-white rounded-3xl border border-slate-200/90 p-5 sm:p-7 shadow-xs space-y-5">
+        <div class="border-b border-slate-100 pb-3">
+          <h3 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
+            <i data-lucide="user-plus" class="w-5 h-5 text-[#0b4d5e]"></i>
+            <span>Thông Tin Ứng Viên Dự Tuyển</span>
+          </h3>
+          <p class="text-xs text-slate-500 mt-0.5">Vui lòng nhập chính xác để hệ thống lưu hồ sơ và xuất biên bản kết quả.</p>
+        </div>
+
+        <form id="form-checkin" onsubmit="handleStartExam(event)" class="space-y-4">
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Họ và tên -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5" for="input-fullname">
+                Họ và tên ứng viên <span class="text-rose-500">*</span>
+              </label>
+              <div class="relative">
+                <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                <input 
+                  type="text" 
+                  id="input-fullname" 
+                  required 
+                  placeholder="Ví dụ: Nguyễn Văn An" 
+                  class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0b4d5e] focus:bg-white transition"
+                >
+              </div>
+            </div>
+
+            <!-- Số điện thoại -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5" for="input-phone">
+                Số điện thoại liên hệ <span class="text-rose-500">*</span>
+              </label>
+              <div class="relative">
+                <i data-lucide="phone" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                <input 
+                  type="tel" 
+                  id="input-phone" 
+                  required 
+                  placeholder="Ví dụ: 0988123456" 
+                  class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0b4d5e] focus:bg-white transition"
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Vị trí ứng tuyển -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5" for="select-position">
+                Vị trí ứng tuyển <span class="text-rose-500">*</span>
+              </label>
+              <div class="relative">
+                <i data-lucide="briefcase" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                <select 
+                  id="select-position" 
+                  required 
+                  class="w-full pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0b4d5e] focus:bg-white transition appearance-none"
+                >
+                  <option value="electrician">⚡ Kỹ thuật viên Điện (Sân Golf / Tòa nhà)</option>
+                  <option value="pump_operator">💧 Công nhân Vận hành Bơm &amp; Cấp thoát nước</option>
+                  <option value="hvac">❄️ Kỹ thuật viên Điều hòa &amp; Thông gió (HVAC)</option>
+                  <option value="general_mep">🛠️ Kỹ thuật viên Cơ Điện Tổng Hợp (General M&amp;E)</option>
+                </select>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+              </div>
+            </div>
+
+            <!-- Đơn vị dự tuyển -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5" for="select-unit">
+                Khu vực / Dự án làm việc <span class="text-rose-500">*</span>
+              </label>
+              <div class="relative">
+                <i data-lucide="map-pin" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                <select 
+                  id="select-unit" 
+                  required 
+                  class="w-full pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0b4d5e] focus:bg-white transition appearance-none"
+                >
+                  <option value="golf">⛳ Sân Golf Kỳ Sơn Montana (Hòa Bình)</option>
+                  <option value="hapu">🏢 Tòa nhà Hapulico Complex (Hà Nội)</option>
+                  <option value="tudi">🌐 Tập đoàn TUDI Group</option>
+                </select>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <!-- Năm sinh -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5" for="input-birthyear">
+                Năm sinh
+              </label>
+              <input 
+                type="number" 
+                id="input-birthyear" 
+                placeholder="VD: 1995" 
+                min="1960" 
+                max="2008" 
+                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0b4d5e] focus:bg-white transition"
+              >
+            </div>
+
+            <!-- Kinh nghiệm -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5" for="select-exp">
+                Số năm kinh nghiệm
+              </label>
+              <select 
+                id="select-exp" 
+                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0b4d5e] focus:bg-white transition"
+              >
+                <option value="0">Dưới 1 năm (Mới tốt nghiệp)</option>
+                <option value="1_2" selected>1 – 2 năm kinh nghiệm</option>
+                <option value="3_5">3 – 5 năm kinh nghiệm</option>
+                <option value="5_plus">Trên 5 năm kinh nghiệm</option>
+              </select>
+            </div>
+
+            <!-- Tùy chọn thời gian làm bài -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5" for="select-duration">
+                Thời gian làm bài
+              </label>
+              <select 
+                id="select-duration" 
+                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-bold text-[#0b4d5e] focus:outline-none focus:ring-2 focus:ring-[#0b4d5e] focus:bg-white transition"
+              >
+                <option value="15" selected>⏱️ 15 Phút (Chuẩn)</option>
+                <option value="20">⏱️ 20 Phút</option>
+                <option value="0">♾️ Không giới hạn (Phỏng vấn trực tiếp)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100">
+            <p class="text-[11px] text-slate-500">
+              * Bấm <b>"Bắt Đầu Làm Bài"</b> để hệ thống kích hoạt đề thi và tính giờ.
+            </p>
+            <button 
+              type="submit" 
+              class="w-full sm:w-auto px-6 py-3 bg-[#0b4d5e] hover:bg-[#083f4e] text-white font-extrabold text-sm rounded-2xl shadow-md transition flex items-center justify-center gap-2 active:scale-95"
+            >
+              <span>Bắt Đầu Làm Bài Ngay</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- PHASE 2: EXAM RUNNER (QUESTIONS & TIMER) -->
+    <!-- ============================================================== -->
+    <section id="phase-exam" class="hidden space-y-4">
+      
+      <!-- Top Exam Sticky Status Bar -->
+      <div class="sticky top-16 z-30 bg-white/95 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between gap-3 flex-wrap">
+        
+        <!-- Candidate Info pill -->
+        <div class="flex items-center gap-2 min-w-0">
+          <div class="w-8 h-8 rounded-xl bg-slate-100 text-[#0b4d5e] flex items-center justify-center shrink-0 font-bold text-xs">
+            <i data-lucide="user" class="w-4 h-4"></i>
+          </div>
+          <div class="min-w-0">
+            <div class="font-extrabold text-xs text-slate-900 truncate" id="exam-header-name">Nguyễn Văn An</div>
+            <div class="text-[10px] text-slate-500 truncate" id="exam-header-pos">Kỹ thuật viên Điện</div>
+          </div>
+        </div>
+
+        <!-- Progress Counter -->
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-slate-600">Tiến độ:</span>
+          <span class="px-2.5 py-1 rounded-xl bg-slate-100 text-[#0b4d5e] font-extrabold text-xs" id="exam-progress-text">0/15 câu</span>
+        </div>
+
+        <!-- Countdown Timer -->
+        <div id="exam-timer-box" class="flex items-center gap-2 px-3 py-1 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 font-mono font-bold text-xs sm:text-sm">
+          <i data-lucide="timer" class="w-4 h-4 text-amber-700 animate-pulse"></i>
+          <span id="exam-timer-display">15:00</span>
+        </div>
+
+        <!-- Submit Early Button -->
+        <button onclick="confirmSubmitExam()" class="px-3 sm:px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5 active:scale-95">
+          <i data-lucide="send" class="w-3.5 h-3.5"></i>
+          <span>Nộp Bài</span>
+        </button>
+
+      </div>
+
+      <!-- Quick Question Jump Grid (1 -> 15) -->
+      <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs overflow-x-auto custom-scrollbar">
+        <div class="flex items-center gap-1.5 min-w-max" id="question-navigator-pills">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Question Card Box -->
+      <div class="bg-white rounded-3xl border border-slate-200 p-5 sm:p-7 shadow-xs space-y-5">
+        
+        <!-- Question Header -->
+        <div class="flex items-start justify-between gap-3">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span id="current-q-index-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-[#0b4d5e] text-white">
+                Câu 1 / 15
+              </span>
+              <span id="current-q-topic-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                ⚡ Kỹ thuật Điện
+              </span>
+            </div>
+            <h3 id="current-q-text" class="text-base sm:text-lg font-black text-slate-900 leading-snug pt-1">
+              Đang tải nội dung câu hỏi...
+            </h3>
+          </div>
+        </div>
+
+        <!-- Options List (A, B, C, D) -->
+        <div class="space-y-2.5" id="current-q-options-container">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Recruiter Assistance Box (Visible only in Recruiter Mode) -->
+        <div id="recruiter-q-hint-box" class="hidden p-4 rounded-2xl bg-purple-50/80 border border-purple-200 space-y-2 text-xs">
+          <div class="font-bold text-purple-900 flex items-center gap-1.5">
+            <i data-lucide="lightbulb" class="w-4 h-4 text-purple-700"></i>
+            <span>Gợi Ý Chuyên Môn Cho Người Phỏng Vấn:</span>
+          </div>
+          <p id="recruiter-q-cue" class="text-purple-950 font-medium leading-relaxed italic">
+            Mong đợi: Cắt nguồn, treo cảnh báo LOTO, thử hết điện...
+          </p>
+          <div class="pt-2 border-t border-purple-200/60">
+            <label class="block font-bold text-purple-900 mb-1">Ghi chú nhận xét câu trả lời của ứng viên:</label>
+            <input type="text" id="recruiter-q-note" onchange="saveRecruiterNoteForCurrentQ(this.value)" placeholder="VD: Nắm chắc lý thuyết, trả lời tự tin, có kinh nghiệm..." class="w-full p-2 bg-white border border-purple-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-purple-600">
+          </div>
+        </div>
+
+        <!-- Question Navigation Buttons -->
+        <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+          <button 
+            type="button" 
+            onclick="navigateQuestion(-1)" 
+            id="btn-prev-q" 
+            class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition flex items-center gap-1.5 active:scale-95 disabled:opacity-40 disabled:pointer-events-none"
+          >
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            <span>Câu Trước</span>
+          </button>
+
+          <div class="flex items-center gap-2">
+            <button 
+              type="button" 
+              onclick="navigateQuestion(1)" 
+              id="btn-next-q" 
+              class="px-5 py-2.5 bg-[#0b4d5e] hover:bg-[#083f4e] text-white font-extrabold rounded-xl text-xs shadow-xs transition flex items-center gap-1.5 active:scale-95"
+            >
+              <span>Câu Tiếp Theo</span>
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- PHASE 3: RESULT & REPORT (EVALUATION & CERTIFICATE) -->
+    <!-- ============================================================== -->
+    <section id="phase-result" class="hidden space-y-4 sm:space-y-6">
+
+      <!-- Result Score Summary Card -->
+      <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs text-center space-y-4">
+        
+        <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-3xl flex items-center justify-center text-white shadow-md" id="result-icon-box">
+          <i data-lucide="award" class="w-9 h-9 sm:w-11 sm:h-11"></i>
+        </div>
+
+        <div class="space-y-1">
+          <span id="result-rank-badge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-100 text-emerald-800">
+            KẾT QUẢ: ĐẠT YÊU CẦU
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900" id="result-score-text">13 / 15 Câu Đúng (86.7%)</h2>
+          <p class="text-xs sm:text-sm text-slate-500 max-w-md mx-auto" id="result-comment-text">
+            Ứng viên nắm vững các quy chuẩn an toàn, vận hành điện 3 pha và máy bơm, đủ điều kiện vào vòng phỏng vấn chuyên sâu.
+          </p>
+        </div>
+
+        <!-- Result Metrics Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 max-w-xl mx-auto pt-2 text-left">
+          <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-2xl">
+            <div class="text-[10px] text-slate-500 font-bold uppercase">Họ và tên</div>
+            <div class="font-extrabold text-xs text-slate-900 mt-0.5 truncate" id="res-cand-name">—</div>
+          </div>
+          <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-2xl">
+            <div class="text-[10px] text-slate-500 font-bold uppercase">Vị trí dự tuyển</div>
+            <div class="font-extrabold text-xs text-slate-900 mt-0.5 truncate" id="res-cand-pos">—</div>
+          </div>
+          <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-2xl">
+            <div class="text-[10px] text-slate-500 font-bold uppercase">Thời gian làm</div>
+            <div class="font-extrabold text-xs text-slate-900 mt-0.5" id="res-cand-time">—</div>
+          </div>
+          <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-2xl">
+            <div class="text-[10px] text-slate-500 font-bold uppercase">Trạng thái</div>
+            <div class="font-extrabold text-xs text-emerald-700 mt-0.5" id="res-cand-status">Đã lưu trữ</div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="pt-4 flex items-center justify-center gap-2.5 flex-wrap no-print">
+          <button onclick="printResultA4()" class="px-4 py-2.5 bg-[#0b4d5e] hover:bg-[#083f4e] text-white font-extrabold text-xs rounded-xl shadow-xs transition flex items-center gap-2 active:scale-95">
+            <i data-lucide="printer" class="w-4 h-4"></i>
+            <span>In Phiếu Đánh Giá A4</span>
+          </button>
+          
+          <button onclick="exportCandidateResultsCsv()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 transition flex items-center gap-2 active:scale-95">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>Tải Bảng Kết Quả CSV</span>
+          </button>
+
+          <button onclick="restartExam()" class="px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 transition flex items-center gap-2 active:scale-95">
+            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+            <span>Làm Bài Khác</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Detailed Review of Questions -->
+      <div class="bg-white rounded-3xl border border-slate-200 p-5 sm:p-7 shadow-xs space-y-4 no-print">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div>
+            <h3 class="text-base font-black text-slate-900">Chi Tiết Từng Câu Hỏi &amp; Đáp Án Chuẩn</h3>
+            <p class="text-xs text-slate-500">Đối chiếu đáp án của ứng viên với tiêu chuẩn kỹ thuật.</p>
+          </div>
+          <span class="text-xs font-bold text-slate-600" id="res-detail-count">15 câu hỏi</span>
+        </div>
+
+        <div class="space-y-3" id="result-detail-list">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- MODAL: MANAGE QUESTIONS & GOOGLE SHEETS SYNC -->
+  <!-- ============================================================== -->
+  <div id="modal-manage-questions" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4 no-print">
+    <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      
+      <!-- Modal Header -->
+      <div class="p-4 sm:p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-[#0b4d5e] text-white flex items-center justify-center shrink-0">
+            <i data-lucide="database" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="font-extrabold text-sm sm:text-base text-slate-900">Quản Lý Ngân Hàng Câu Hỏi Sát Hạch</h3>
+            <p class="text-[11px] text-slate-500">Linh hoạt chỉnh sửa, thêm câu hỏi hoặc đồng bộ trực tiếp từ Google Sheets</p>
+          </div>
+        </div>
+        <button onclick="closeQuestionManagerModal()" class="w-8 h-8 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-600 flex items-center justify-center transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-4 sm:p-6 overflow-y-auto custom-scrollbar flex-1 space-y-5 text-xs">
+        
+        <!-- Section 1: Google Sheets Connection -->
+        <div class="p-4 rounded-2xl bg-teal-50/70 border border-teal-200 space-y-3">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div class="font-bold text-teal-900 flex items-center gap-1.5 text-xs sm:text-sm">
+              <i data-lucide="sheet" class="w-4 h-4 text-teal-700"></i>
+              <span>1. Đồng Bộ Trực Tiếp Từ Google Sheets (Khuyên dùng)</span>
+            </div>
+            <a href="https://docs.google.com/spreadsheets/d/1E9smGZnuCCkHYRQU_VK-YAhoQfw5sckAmIjQcTPjQFs/edit" target="_blank" rel="noopener noreferrer" class="text-[11px] text-teal-700 underline font-semibold">
+              Mở mẫu Google Sheet
+            </a>
+          </div>
+          
+          <p class="text-teal-800 text-[11px] leading-relaxed">
+            Dán đường link file Google Sheets (hoặc URL định dạng CSV/JSON) bên dưới. Khi HR sửa câu hỏi trên Google Sheet, chỉ cần bấm nút đồng bộ thì cổng sẽ tự động cập nhật câu hỏi mới.
+          </p>
+
+          <div class="flex items-center gap-2">
+            <input 
+              type="url" 
+              id="input-gsheet-url" 
+              placeholder="https://docs.google.com/spreadsheets/d/.../export?format=csv" 
+              class="flex-1 p-2 bg-white border border-teal-300 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0b4d5e]"
+            >
+            <button 
+              type="button" 
+              onclick="syncQuestionsFromGSheet()" 
+              id="btn-sync-gsheet" 
+              class="px-3.5 py-2 bg-[#0b4d5e] hover:bg-[#083f4e] text-white font-bold rounded-xl transition flex items-center gap-1.5 shrink-0 active:scale-95"
+            >
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              <span>Đồng Bộ Ngay</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Section 2: Manage Questions Locally -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="font-extrabold text-slate-800 text-xs sm:text-sm">2. Danh Sách Câu Hỏi Hiện Tại (<span id="modal-q-total-count">0</span> câu)</h4>
+            <div class="flex items-center gap-1.5">
+              <button onclick="openAddNewQuestionSubForm()" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg font-bold transition flex items-center gap-1">
+                <i data-lucide="plus" class="w-3 h-3"></i>
+                <span>Thêm Câu Mới</span>
+              </button>
+              <button onclick="resetDefaultQuestions()" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg font-bold transition" title="Khôi phục ngân hàng câu hỏi gốc">
+                Khôi phục gốc
+              </button>
+            </div>
+          </div>
+
+          <!-- Add/Edit Sub Form (Collapsible) -->
+          <div id="subform-add-q" class="hidden p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+            <div class="font-bold text-slate-800 border-b pb-1" id="subform-title">Thêm Câu Hỏi Mới</div>
+            
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block font-semibold mb-1">Mã câu:</label>
+                <input type="text" id="sub-q-id" placeholder="VD: Q_NEW_01" class="w-full p-2 bg-white border border-slate-200 rounded-lg">
+              </div>
+              <div>
+                <label class="block font-semibold mb-1">Chủ đề:</label>
+                <select id="sub-q-topic" class="w-full p-2 bg-white border border-slate-200 rounded-lg font-semibold">
+                  <option value="electric">⚡ Điện & TBA</option>
+                  <option value="pump">💧 Bơm & Nước</option>
+                  <option value="safety">🛡️ An toàn LOTO</option>
+                  <option value="hvac">❄️ HVAC / Lạnh</option>
+                  <option value="operation">📋 Vận hành ca</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-semibold mb-1">Nội dung câu hỏi:</label>
+              <textarea id="sub-q-text" rows="2" placeholder="Nhập câu hỏi..." class="w-full p-2 bg-white border border-slate-200 rounded-lg"></textarea>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block font-semibold">4 Phương án trả lời:</label>
+              <input type="text" id="sub-q-opt-0" placeholder="Phương án A" class="w-full p-1.5 bg-white border border-slate-200 rounded-lg">
+              <input type="text" id="sub-q-opt-1" placeholder="Phương án B" class="w-full p-1.5 bg-white border border-slate-200 rounded-lg">
+              <input type="text" id="sub-q-opt-2" placeholder="Phương án C" class="w-full p-1.5 bg-white border border-slate-200 rounded-lg">
+              <input type="text" id="sub-q-opt-3" placeholder="Phương án D" class="w-full p-1.5 bg-white border border-slate-200 rounded-lg">
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block font-semibold mb-1">Đáp án đúng:</label>
+                <select id="sub-q-correct" class="w-full p-2 bg-white border border-slate-200 rounded-lg font-bold text-emerald-700">
+                  <option value="0">Phương án A</option>
+                  <option value="1">Phương án B</option>
+                  <option value="2">Phương án C</option>
+                  <option value="3">Phương án D</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-semibold mb-1">Gợi ý cho Recruiter:</label>
+                <input type="text" id="sub-q-cue" placeholder="Gợi ý đáp án..." class="w-full p-2 bg-white border border-slate-200 rounded-lg">
+              </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-2">
+              <button type="button" onclick="closeAddNewQuestionSubForm()" class="px-3 py-1.5 bg-slate-200 text-slate-700 font-bold rounded-lg">Hủy</button>
+              <button type="button" onclick="saveSubFormQuestion()" class="px-4 py-1.5 bg-[#0b4d5e] text-white font-bold rounded-lg">Lưu Câu Hỏi</button>
+            </div>
+          </div>
+
+          <!-- Question Table / List -->
+          <div class="border border-slate-200 rounded-2xl overflow-hidden bg-white max-h-60 overflow-y-auto custom-scrollbar">
+            <table class="w-full text-left border-collapse text-[11px]">
+              <thead class="bg-slate-100 text-slate-700 sticky top-0 font-bold">
+                <tr>
+                  <th class="p-2 border-b">STT</th>
+                  <th class="p-2 border-b">Chủ đề</th>
+                  <th class="p-2 border-b">Câu hỏi</th>
+                  <th class="p-2 border-b">Đáp án</th>
+                  <th class="p-2 border-b text-center">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="modal-q-list-tbody" class="divide-y divide-slate-100">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Section 3: Backup / Restore JSON -->
+        <div class="pt-3 border-t border-slate-200 flex items-center justify-between gap-2 flex-wrap">
+          <div class="text-[11px] text-slate-500">Sao lưu hoặc tải lên ngân hàng câu hỏi định dạng JSON:</div>
+          <div class="flex items-center gap-2">
+            <button onclick="exportQuestionsJson()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl flex items-center gap-1">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>Xuất JSON</span>
+            </button>
+            <label class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl flex items-center gap-1 cursor-pointer">
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+              <span>Nhập JSON</span>
+              <input type="file" accept=".json" onchange="importQuestionsJson(event)" class="hidden">
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-3.5 sm:p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-end">
+        <button onclick="closeQuestionManagerModal()" class="px-5 py-2 bg-[#0b4d5e] hover:bg-[#083f4e] text-white font-bold rounded-xl text-xs">
+          Xong &amp; Đóng
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- HIDDEN PRINTABLE A4 AREA (IN PHIẾU ĐÁNH GIÁ SÁT HẠCH) -->
+  <!-- ============================================================== -->
+  <div id="print-certificate-area" class="hidden">
+    <div style="font-family: 'Plus Jakarta Sans', Arial, sans-serif; padding: 25px 35px; color: #000; line-height: 1.5; font-size: 13px;">
+      
+      <!-- Print Header -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #0b4d5e; padding-bottom: 12px; margin-bottom: 18px;">
+        <div>
+          <div style="font-weight: 800; font-size: 14px; text-transform: uppercase;">CÔNG TY CỔ PHẦN HAPULICO • TẬP ĐOÀN TUDI</div>
+          <div style="font-size: 12px; color: #333;">BAN KỸ THUẬT M&amp;E • PHÒNG TỔ CHỨC HÀNH CHÍNH</div>
+          <div style="font-size: 11px; color: #666; margin-top: 3px;">Dự án: Sân Golf Kỳ Sơn Montana &amp; Tổ Hợp Tòa Nhà</div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-weight: 800; font-size: 14px; color: #0b4d5e;">MÃ BIÊN BẢN: <span id="print-report-code">BB-TD-2026</span></div>
+          <div style="font-size: 11px; color: #666;" id="print-timestamp">Ngày: ...</div>
+          <div style="font-size: 11px; color: #166534; font-weight: bold;">HỆ THỐNG SÁT HẠCH ONLINE</div>
+        </div>
+      </div>
+
+      <!-- Document Title -->
+      <div style="text-align: center; margin-bottom: 20px;">
+        <h2 style="font-size: 18px; font-weight: 900; margin: 0; text-transform: uppercase; color: #0b4d5e;">PHIẾU ĐÁNH GIÁ SÁT HẠCH NĂNG LỰC KỸ THUẬT CƠ ĐIỆN</h2>
+        <div style="font-size: 12px; color: #555; margin-top: 4px;">(Kẹp vào hồ sơ phỏng vấn tuyển dụng &amp; lưu trữ tại Phòng TCHC)</div>
+      </div>
+
+      <!-- Candidate Meta Table -->
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 18px; font-size: 12px;">
+        <tr>
+          <td style="padding: 6px 10px; border: 1px solid #ccc; width: 25%; font-weight: bold; background: #f8fafc;">Họ và tên ứng viên:</td>
+          <td style="padding: 6px 10px; border: 1px solid #ccc; width: 25%; font-weight: 800;" id="print-cand-name">—</td>
+          <td style="padding: 6px 10px; border: 1px solid #ccc; width: 25%; font-weight: bold; background: #f8fafc;">Số điện thoại:</td>
+          <td style="padding: 6px 10px; border: 1px solid #ccc; width: 25%; font-weight: 700;" id="print-cand-phone">—</td>
+        </tr>
+        <tr>
+          <td style="padding: 6px 10px; border: 1px solid #ccc; font-weight: bold; background: #f8fafc;">Vị trí dự tuyển:</td>
+          <td style="padding: 6px 10px; border: 1px solid #ccc; font-weight: 700;" id="print-cand-pos">—</td>
+          <td style="padding: 6px 10px; border: 1px solid #ccc; font-weight: bold; background: #f8fafc;">Dự án / Đơn vị:</td>
+          <td style="padding: 6px 10px; border: 1px solid #ccc; font-weight: 700;" id="print-cand-unit">—</td>
+        </tr>
+        <tr>
+          <td style="padding: 6px 10px; border: 1px solid #ccc; font-weight: bold; background: #f8fafc;">Năm sinh / Kinh nghiệm:</td>
+          <td style="padding: 6px 10px; border: 1px solid #ccc;" id="print-cand-exp">—</td>
+          <td style="padding: 6px 10px; border: 1px solid #ccc; font-weight: bold; background: #f8fafc;">Hình thức sát hạch:</td>
+          <td style="padding: 6px 10px; border: 1px solid #ccc; font-weight: bold; color: #0b4d5e;" id="print-exam-mode">Trắc nghiệm Online</td>
+        </tr>
+      </table>
+
+      <!-- Exam Scores Box -->
+      <div style="border: 2px solid #0b4d5e; border-radius: 8px; padding: 14px; background: #f0fdfa; margin-bottom: 20px; display: flex; justify-content: space-around; text-align: center;">
+        <div>
+          <div style="font-size: 11px; font-weight: bold; color: #555; text-transform: uppercase;">Số câu trả lời đúng</div>
+          <div style="font-size: 20px; font-weight: 900; color: #0b4d5e;" id="print-score-count">13 / 15 Câu</div>
+        </div>
+        <div style="border-left: 1px solid #99f6e4; border-right: 1px solid #99f6e4; padding: 0 25px;">
+          <div style="font-size: 11px; font-weight: bold; color: #555; text-transform: uppercase;">Tỷ lệ đạt chuẩn</div>
+          <div style="font-size: 20px; font-weight: 900; color: #047857;" id="print-score-pct">86.7%</div>
+        </div>
+        <div>
+          <div style="font-size: 11px; font-weight: bold; color: #555; text-transform: uppercase;">Xếp loại chuyên môn</div>
+          <div style="font-size: 18px; font-weight: 900; color: #0b4d5e;" id="print-rank-title">ĐẠT YÊU CẦU</div>
+        </div>
+      </div>
+
+      <!-- Recruiter Evaluation Notes Section -->
+      <div style="border: 1px solid #ccc; border-radius: 6px; padding: 10px 14px; margin-bottom: 22px; background: #fff;">
+        <div style="font-weight: 800; font-size: 12px; margin-bottom: 5px; text-transform: uppercase; color: #333;">Ý KIẾN NHẬN XÉT CỦA HỘI ĐỒNG PHỎNG VẤN CHUYÊN MÔN:</div>
+        <div style="min-height: 55px; font-size: 12px; color: #444;" id="print-recruiter-notes">
+          • Ứng viên thể hiện sự hiểu biết vững vàng về an toàn điện 3 pha và bảo dưỡng trạm bơm.<br>
+          • Đề xuất: Đủ điều kiện tiếp nhận thử việc 60 ngày tại Tổ Cơ Điện.
+        </div>
+      </div>
+
+      <!-- Signatures Footer -->
+      <div style="display: flex; justify-content: space-between; text-align: center; margin-top: 30px; font-size: 12px;">
+        <div style="width: 40%;">
+          <div style="font-weight: bold; text-transform: uppercase;">ỨNG VIÊN XÁC NHẬN</div>
+          <div style="font-style: italic; font-size: 11px; color: #666;">(Ký và ghi rõ họ tên)</div>
+          <div style="height: 60px;"></div>
+          <div style="font-weight: bold;" id="print-cand-sign-name">...</div>
+        </div>
+        
+        <div style="width: 40%;">
+          <div style="font-weight: bold; text-transform: uppercase;">CÁN BỘ PHỎNG VẤN / P.TCHC</div>
+          <div style="font-style: italic; font-size: 11px; color: #666;">(Ký và ghi rõ họ tên)</div>
+          <div style="height: 60px;"></div>
+          <div style="font-weight: bold;">BAN KỸ THUẬT &amp; P.TCHC</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- FOOTER -->
+  <!-- ============================================================== -->
+  <footer class="bg-white border-t border-slate-200/90 py-4 px-4 text-center text-xs text-slate-500 pb-safe no-print">
+    <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="font-bold text-slate-700">Hệ Thống Tuyển Dụng &amp; Vận Hành M&amp;E BanDienScan</span>
+        <span>•</span>
+        <span>Bản quyền nội bộ</span>
+      </div>
+      <div>
+        <span>Phiên bản v4.2.0 • Sẵn sàng 24/7</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================== -->
+  <!-- JAVASCRIPT APPLICATION CORE -->
+  <!-- ============================================================== -->
+  <script>
+    // 1. DEFAULT QUESTION BANK (20 REAL-WORLD TECHNICAL M&E QUESTIONS)
+    const DEFAULT_QUESTIONS = [
+      {
+        id: 'Q_SAFE_01',
+        topic: 'safety',
+        topicName: '🛡️ An Toàn & LOTO',
+        pos: ['electrician', 'pump_operator', 'hvac', 'general_mep'],
+        q: 'Quy trình 5 bước cắt điện an toàn (LOTO) theo tiêu chuẩn kỹ thuật gồm thứ tự nào sau đây?',
+        options: [
+          'Cắt nguồn -> Thử hết điện -> Khóa LOTO -> Tiếp đất -> Rào chắn',
+          'Cắt nguồn hoàn toàn -> Khóa và treo biển cảnh báo LOTO -> Thử hết điện bằng bút/đồng hồ -> Tiếp đất di động -> Đặt rào chắn khu vực làm việc',
+          'Khóa LOTO -> Cắt nguồn -> Tiếp đất -> Thử hết điện -> Tiến hành công việc',
+          'Cắt nguồn -> Đặt rào chắn -> Khóa LOTO -> Thử hết điện'
+        ],
+        correct: 1,
+        cue: 'Mong đợi: Cắt nguồn trước, treo thẻ biển cảnh báo LOTO, thử hết điện, tiếp địa di động và rào chắn.',
+        explain: 'Căn cứ SOP-ANTOAN-01: Bắt buộc ngắt nguồn, cô lập bằng khóa/thẻ LOTO, kiểm tra không còn điện, lắp tiếp địa và căng dây rào chắn an toàn.'
+      },
+      {
+        id: 'Q_SAFE_02',
+        topic: 'safety',
+        topicName: '🛡️ An Toàn & Cứu Hộ',
+        pos: ['electrician', 'pump_operator', 'hvac', 'general_mep'],
+        q: 'Khi phát hiện một người bị điện giật tại hiện trường ẩm ướt hoặc hố bơm, hành động ĐẦU TIÊN của bạn là gì?',
+        options: [
+          'Lao vào túm tay áo kéo ngay nạn nhân ra khỏi vùng nguy hiểm',
+          'Tát nước hoặc gọi to để nạn nhân hồi tỉnh lại',
+          'Ngắt ngay cầu dao/aptomat nguồn tổng hoặc dùng vật cách điện khô gạt dây điện, tuyệt đối không chạm tay trần vào nạn nhân',
+          'Chạy đi tìm tủ thuốc lấy bông băng gạc'
+        ],
+        correct: 2,
+        cue: 'Mong đợi: Tuyệt đối không chạm tay trần; phải ngắt nguồn hoặc dùng vật cách điện khô tách nạn nhân.',
+        explain: 'Nguyên tắc cứu hộ điện: Người cứu hộ tuyệt đối không chạm trực tiếp vào nạn nhân khi chưa cắt nguồn điện để tránh bị giật liên đới.'
+      },
+      {
+        id: 'Q_SAFE_03',
+        topic: 'safety',
+        topicName: '🛡️ An Toàn Lao Động',
+        pos: ['electrician', 'pump_operator', 'general_mep'],
+        q: 'Quy định an toàn khi thao tác đóng cắt điện 3 pha hoặc làm việc trong không gian kín (hố bơm, bể ngầm) là:',
+        options: [
+          'Chỉ cần 1 kỹ thuật viên có kinh nghiệm thao tác là đủ',
+          'Bắt buộc tối thiểu 2 người (1 người thao tác kỹ thuật, 1 người giám sát an toàn)',
+          'Làm việc lúc nào thuận tiện, không cần thông báo ca trực',
+          'Chỉ cần mang theo điện thoại để gọi khi có sự cố'
+        ],
+        correct: 1,
+        cue: 'Mong đợi: Bắt buộc tối thiểu 2 người (1 thao tác, 1 giám sát cứu hộ).',
+        explain: 'Quy chuẩn an toàn điện và không gian kín bắt buộc tối thiểu 2 người để kịp thời hỗ trợ và xử lý ứng cứu khẩn cấp.'
+      },
+      {
+        id: 'Q_SAFE_04',
+        topic: 'safety',
+        topicName: '🛡️ Khí Cụ Bảo Vệ',
+        pos: ['electrician', 'hvac', 'general_mep'],
+        q: 'Thiết bị chống dòng rò (ELCB / RCD) lắp trong tủ điện có chức năng quan trọng nhất là gì?',
+        options: [
+          'Bảo vệ chống sét lan truyền từ bên ngoài',
+          'Tăng điện áp cho các bóng đèn chiếu sáng ngoài sân',
+          'Tự động ngắt mạch khi phát hiện dòng điện rò ra vỏ thiết bị hoặc tiếp đất để bảo vệ tính mạng con người',
+          'Đo đếm điện năng tiêu thụ hàng tháng'
+        ],
+        correct: 2,
+        cue: 'Mong đợi: Tự động ngắt mạch khi có dòng rò để bảo vệ tính mạng con người và phòng chống cháy nổ.',
+        explain: 'ELCB/RCD so sánh dòng điện giữa dây pha và trung tính; khi xuất hiện dòng rò > 30mA sẽ ngắt mạch ngay tức thì.'
+      },
+      {
+        id: 'Q_TBA_01',
+        topic: 'electric',
+        topicName: '⚡ Trạm Biến Áp (TBA)',
+        pos: ['electrician', 'general_mep'],
+        q: 'Nhiệt độ tiếp xúc tối đa cho phép tại các đầu cốt máy biến áp và thanh cái tổng khi đo bằng súng nhiệt hồng ngoại là bao nhiêu?',
+        options: [
+          '≤ 40°C',
+          '≤ 65°C và không có điểm nóng cục bộ bất thường',
+          '≤ 95°C',
+          'Không giới hạn nhiệt độ'
+        ],
+        correct: 1,
+        cue: 'Mong đợi: ≤ 65°C, không có điểm phát nhiệt cục bộ.',
+        explain: 'Theo SOP-TBA-01: Nhiệt độ đầu cốt máy biến áp yêu cầu ≤ 65°C. Nhiệt độ vượt ngưỡng báo hiệu mối siết bị lỏng hoặc quá tải.'
+      },
+      {
+        id: 'Q_TBA_02',
+        topic: 'electric',
+        topicName: '⚡ Lưới Điện Hạ Thế',
+        pos: ['electrician', 'hvac', 'general_mep'],
+        q: 'Điện áp 3 pha hạ thế cấp từ trạm biến áp theo quy chuẩn vận hành cần duy trì trong dải nào sau đây?',
+        options: [
+          '220V ± 20%',
+          '380V ± 5% (khoảng 361V – 399V, tần số 50Hz)',
+          '450V – 500V',
+          '300V – 340V'
+        ],
+        correct: 1,
+        cue: 'Mong đợi: 380V ± 5%, tần số ổn định 50Hz.',
+        explain: 'Quy chuẩn điện lực Việt Nam quy định điện áp danh định 3 pha là 380V với dung sai cho phép trong điều kiện vận hành bình thường là ± 5%.'
+      },
+      {
+        id: 'Q_TBA_03',
+        topic: 'electric',
+        topicName: '⚡ Tụ Bù Công Suất',
+        pos: ['electrician', 'general_mep'],
+        q: 'Hệ số công suất Cosφ tại tủ tụ bù tự động của trạm biến áp yêu cầu duy trì tối thiểu là bao nhiêu để không bị phạt tiền công suất phản kháng?',
+        options: [
+          'Cosφ ≥ 0.70',
+          'Cosφ ≥ 0.92 (khuyến khích 0.95 – 0.98)',
+          'Cosφ = 0.50',
+          'Cosφ > 1.00'
+        ],
+        correct: 1,
+        cue: 'Mong đợi: Cosφ ≥ 0.92 (tránh bị điện lực tính tiền phạt vô công).',
+        explain: 'Quy định ngành điện lực: Khách hàng mua điện phải duy trì hệ số công suất Cosφ ≥ 0.92, nếu dưới mức này sẽ phải trả tiền mua công suất phản kháng.'
+      },
+      {
+        id: 'Q_TBA_04',
+        topic: 'electric',
+        topicName: '⚡ Cân Bằng Pha',
+        pos: ['electrician', 'general_mep'],
+        q: 'Độ lệch dòng điện giữa các pha (Ia, Ib, Ic) tại máy biến áp hoặc tủ phân phối tổng không được vượt quá bao nhiêu %?',
+        options: [
+          'Không quá 15%',
+          'Không quá 50%',
+          'Tùy ý, pha nào tải nhiều dùng nhiều',
+          'Không quá 80%'
+        ],
+        correct: 0,
+        cue: 'Mong đợi: Không vượt quá 15% giữa các pha.',
+        explain: 'Lệch pha quá 15% gây quá nhiệt cuộn dây máy biến áp, sụt áp pha chịu tải nặng và làm tăng tổn thất trên đường dây trung tính.'
+      },
+      {
+        id: 'Q_PUMP_01',
+        topic: 'pump',
+        topicName: '💧 Trạm Bơm Tăng Áp',
+        pos: ['pump_operator', 'general_mep'],
+        q: 'Áp lực đường ống cấp nước sinh hoạt và tưới tiêu tiêu chuẩn tại trạm bơm tăng áp duy trì ổn định trong dải nào?',
+        options: [
+          '1.0 bar – 2.0 bar',
+          '4.0 bar – 5.5 bar',
+          '8.0 bar – 10.0 bar',
+          'Càng cao càng tốt (> 12 bar)'
+        ],
+        correct: 1,
+        cue: 'Mong đợi: 4.0 – 5.5 bar để bảo đảm tưới hố golf và không bục vỡ ống.',
+        explain: 'Căn cứ SOP-FORMS-01: Áp lực đường ống cấp nước duy trì từ 4.0 đến 5.5 bar đảm bảo tưới cỏ và sinh hoạt ổn định, an toàn đường ống.'
+      },
+      {
+        id: 'Q_PUMP_02',
+        topic: 'pump',
+        topicName: '💧 Khắc Phục Sự Cố Bơm',
+        pos: ['pump_operator', 'electrician', 'general_mep'],
+        q: 'Khi máy bơm nước ly tâm đã khởi động, động cơ vẫn quay bình thường nhưng nước KHÔNG LÊN hoặc không lên áp, nguyên nhân phổ biến nhất là gì?',
+        options: [
+          'Điện áp nguồn đang ở mức 380V',
+          'Bơm bị mất nước mồi (e khí), hở van hút (lúp-bê), hoặc tắc nghẽn rác tại rọ hút',
+          'Đồng hồ đo áp lực bị thừa áp',
+          'Bóng đèn phòng bơm chưa bật'
+        ],
+        correct: 1,
+        cue: 'Mong đợi: Mất nước mồi, hở luppe/chõ hút, rò khí đường hút, tắc rác.',
+        explain: 'Bơm ly tâm không thể tự hút chân không khi có bọt khí; mất nước mồi hoặc hở van một chiều đường hút là nguyên nhân phổ biến nhất.'
+      },
+      {
+        id: 'Q_PUMP_03',
+        topic: 'pump',
+        topicName: '💧 Biến Tần Trạm Bơm',
+        pos: ['pump_operator', 'electrician', 'general_mep'],
+        q: 'Biến tần (Inverter) điều khiển máy bơm trong trạm cấp nước có chức năng quan trọng nhất là gì?',
+        options: [
+          'Làm máy bơm quay ngược chiều để xả cặn',
+          'Tự động thay đổi tốc độ quay của động cơ theo tín hiệu áp suất đường ống để duy trì áp lực không đổi và tiết kiệm điện năng',
+          'Biến đổi điện 3 pha thành điện 1 pha gia dụng',
+          'Chống rỉ sét thân máy bơm'
+        ],
+        correct: 1,
+        cue: 'Mong đợi: Điều khiển tốc độ theo áp lực cảm biến (PID), giữ áp ổn định và tiết kiệm điện.',
+        explain: 'Biến tần điều chỉnh tần số (Hz) tương ứng với tốc độ quay của motor, bám sát giá trị cài đặt áp lực nước, loại bỏ hiện tượng búa nước.'
+      },
+      {
+        id: 'Q_PUMP_04',
+        topic: 'pump',
+        topicName: '💧 Bơm PCCC Diesel',
+        pos: ['pump_operator', 'electrician', 'general_mep'],
+        q: 'Trước khi khởi động kiểm tra máy bơm cứu hỏa PCCC động cơ Diesel, kỹ thuật viên bắt buộc phải kiểm tra những gì?',
+        options: [
+          'Chỉ cần lau bụi bẩn bên ngoài động cơ',
+          'Kiểm tra mức dầu bôi trơn, nước làm mát két nước, mức nhiên liệu dầu diesel và điện áp ắc quy khởi động (≥ 24V)',
+          'Không cần kiểm tra nếu tuần trước máy vẫn chạy tốt',
+          'Chỉ cần kiểm tra còi báo cháy'
+        ],
+        correct: 1,
+        cue: 'Mong đợi: Nhớt máy, nước mát két nước, nhiên liệu dầu diesel, bình ắc quy khởi động.',
+        explain: 'Bơm PCCC Diesel là phòng tuyến khẩn cấp sống còn; thiếu nhớt, cạn nước làm mát hoặc ắc quy yếu sẽ làm động cơ bó kẹt hoặc không thể đề nổ.'
+      },
+      {
+        id: 'Q_LIGHT_01',
+        topic: 'electric',
+        topicName: '⚡ Chiếu Sáng Ngoài Trời',
+        pos: ['electrician', 'general_mep'],
+        q: 'Khi một nhánh đèn chiếu sáng sân golf hoặc đèn đường bị nhảy CB liên tục sau cơn mưa lớn, bước khoanh vùng đầu tiên là gì?',
+        options: [
+          'Thay ngay CB mới có dòng định mức lớn hơn gấp đôi',
+          'Tách tải từng phân đoạn, đo kiểm tra điện trở cách điện bằng Megohmmeter, kiểm tra các hộp nối ngầm và chấn lưu đèn ẩm ướt',
+          'Cứ đóng lại CB nhiều lần cho cạn nước',
+          'Để nguyên không sửa vì trời sẽ tự nắng ráo'
+        ],
+        correct: 1,
+        cue: 'Mong đợi: Không được tự ý tăng cỡ CB; tách tải khoanh vùng, đo cách điện cáp ngầm, kiểm tra hộp nối ẩm.',
+        explain: 'Nước mưa ngấm vào hộp nối cáp ngầm hoặc đuôi đèn gây chạm chập/dòng rò; tuyệt đối không tăng dung lượng CB vì sẽ gây cháy nổ cáp ngầm.'
+      },
+      {
+        id: 'Q_MOTOR_01',
+        topic: 'electric',
+        topicName: '⚡ Động Cơ Điện 3 Pha',
+        pos: ['electrician', 'pump_operator', 'hvac', 'general_mep'],
+        q: 'Ưu điểm chính của phương pháp khởi động Sao - Tam giác (Star - Delta) cho động cơ 3 pha là gì?',
+        options: [
+          'Làm động cơ quay nhanh hơn bình thường',
+          'Giảm dòng điện khởi động xuống còn 1/3 so với khởi động trực tiếp, giúp tránh sụt áp lưới điện',
+          'Tăng gấp đôi công suất động cơ',
+          'Làm động cơ êm hơn mà không tốn contactor'
+        ],
+        correct: 1,
+        cue: 'Mong đợi: Giảm dòng khởi động xuống còn 1/3 (khoảng 33%) so với khởi động trực tiếp DOL.',
+        explain: 'Khi đấu Sao (Y), điện áp đặt lên mỗi cuộn dây chỉ bằng Up = Ud/√3, do đó dòng điện khởi động giảm 3 lần so với khi đấu Tam giác (Δ).'
+      },
+      {
+        id: 'Q_MOTOR_02',
+        topic: 'electric',
+        topicName: '⚡ Đấu Nối Động Cơ',
+        pos: ['electrician', 'general_mep'],
+        q: 'Trên nameplate động cơ 3 pha ghi ký hiệu: "Δ/Y - 380/660V". Khi sử dụng với lưới điện hạ thế 3 pha 380V tại Việt Nam, động cơ này phải đấu nối theo kiểu nào?',
+        options: [
+          'Đấu hình Sao (Y)',
+          'Đấu hình Tam Giác (Δ)',
+          'Đấu 1 pha 220V',
+          'Kiểu nào cũng được'
+        ],
+        correct: 1,
+        cue: 'Mong đợi: Đấu Tam giác (Δ) để cuộn dây chịu đúng điện áp 380V danh định.',
+        explain: 'Thông số ghi cấp điện áp thấp tương ứng với kiểu đấu trước: Điện áp 380V tương ứng với Tam giác (Δ); điện áp 660V tương ứng với Sao (Y).'
+      },
+      {
+        id: 'Q_HVAC_01',
+        topic: 'hvac',
+        topicName: '❄️ Điều Hòa Không Khí',
+        pos: ['hvac', 'general_mep'],
+        q: 'Dấu hiệu nào sau đây cho thấy hệ thống máy lạnh / điều hòa không khí đang bị thiếu môi chất lạnh (thiếu gas)?',
+        options: [
+          'Ống đồng đẩy (ống nhỏ) bị bám tuyết trắng, dòng điện làm việc thấp hơn định mức, độ lạnh kém',
+          'Nước thải ngưng tụ chảy ra xối xả liên tục',
+          'Quạt dàn lạnh thổi ra hơi nóng như lò sưởi',
+          'Đèn nguồn nhấp nháy xanh liên tục'
+        ],
+        correct: 0,
+        cue: 'Mong đợi: Ống đẩy nhỏ bám tuyết, áp suất hút thấp, dòng điện thấp hơn định mức, phòng không mát.',
+        explain: 'Khi thiếu gas, áp suất bay hơi giảm làm nhiệt độ sôi hạ xuống dưới 0°C khiến hơi ẩm ngưng tụ đóng thành lớp tuyết trắng tại đầu ống đẩy.'
+      },
+      {
+        id: 'Q_CA_01',
+        topic: 'operation',
+        topicName: '📋 Xử Lý Sự Cố Ca Trực',
+        pos: ['electrician', 'pump_operator', 'hvac', 'general_mep'],
+        q: 'Trong ca trực đêm, nếu xảy ra sự cố mất điện lưới và máy phát điện dự phòng KHÔNG TỰ KHỞI ĐỘNG qua tủ ATS, bạn làm gì trong 10 phút đầu tiên?',
+        options: [
+          'Bỏ vị trí đi tìm chỗ ngủ chờ đến sáng',
+          'Báo ngay cho Trưởng ca/Tổ trưởng, kiểm tra bình ắc quy khởi động, kiểm tra nút dừng khẩn cấp (Emergency Stop) và thử chuyển sang chế độ khởi động tay (Manual) nếu an toàn',
+          'Tự ý leo lên trạm biến áp 35kV xem xét',
+          'Đóng tất cả các aptomat phụ tải lên mức cao nhất'
+        ],
+        correct: 1,
+        cue: 'Mong đợi: Báo cáo ca trực, kiểm tra tủ ATS, kiểm tra ắc quy/nút dừng khẩn cấp, khởi động tay an toàn.',
+        explain: 'Cần bình tĩnh kiểm tra các nguyên nhân thường gặp (nút E-stop bị ấn, ắc quy yếu, lỗi tín hiệu ATS) và chuyển đề nổ bằng tay để cấp điện ưu tiên.'
+      },
+      {
+        id: 'Q_CA_02',
+        topic: 'operation',
+        topicName: '📋 Giao Ca & Bàn Giao',
+        pos: ['electrician', 'pump_operator', 'hvac', 'general_mep'],
+        q: 'Nguyên tắc QUAN TRỌNG NHẤT khi bàn giao ca trực kỹ thuật M&E là gì?',
+        options: [
+          'Bàn giao xong trước giờ quy định 30 phút để về sớm',
+          'Chỉ cần nhắn một tin ngắn gọn qua Zalo là đủ',
+          'Kiểm tra trực tiếp hiện trường, bàn giao tình trạng thiết bị vận hành, vật tư chìa khóa, các tồn đọng sự cố chưa dứt điểm và cả hai người cùng ký sổ giao ca',
+          'Chỉ bàn giao cho người quen trong tổ'
+        ],
+        correct: 2,
+        cue: 'Mong đợi: Kiểm tra hiện trường, ghi chép nhật ký, bàn giao chìa khóa, xác nhận tồn đọng và cùng ký sổ.',
+        explain: 'Bàn giao trực tiếp tại hiện trường và ký biên bản giúp phân định rõ trách nhiệm ca trực, đảm bảo hệ thống vận hành liên tục không bị gián đoạn.'
+      },
+      {
+        id: 'Q_METER_01',
+        topic: 'electric',
+        topicName: '⚡ Dụng Cụ Đo Kiểm',
+        pos: ['electrician', 'general_mep'],
+        q: 'Khi sử dụng đồng hồ vạn năng (VOM) để đo điện áp nguồn 3 pha 380V, thang đo nào là chính xác và an toàn nhất?',
+        options: [
+          'Thang đo dòng điện DC mA',
+          'Thang đo điện trở Ôm (Ω)',
+          'Thang đo điện áp xoay chiều ACV (mức 500V hoặc 750V / 1000V)',
+          'Thang đo thông mạch có còi bip'
+        ],
+        correct: 2,
+        cue: 'Mong đợi: Chọn thang ACV dải đo lớn hơn 380V (thường là 500V - 750V / 1000V).',
+        explain: 'Đo nhầm thang đo điện trở hoặc dòng điện vào nguồn điện 380V sẽ gây nổ đồng hồ đo và nguy hiểm đến tính mạng người thao tác.'
+      },
+      {
+        id: 'Q_MECH_01',
+        topic: 'pump',
+        topicName: '💧 Cơ Khí Vận Hành',
+        pos: ['pump_operator', 'general_mep'],
+        q: 'Dấu hiệu nào chứng tỏ ổ bi / bạc đạn của máy bơm hoặc động cơ điện đang bị hỏng cần kiểm tra thay thế ngay?',
+        options: [
+          'Thân motor mát rượi, không nghe thấy tiếng động nào',
+          'Vùng gối đỡ ổ bi phát nhiệt rất cao (> 80°C), có tiếng rít kim loại rào rạo, máy rung lắc vượt mức cho phép',
+          'Áp lực nước phun lên rất cao',
+          'Màu sơn bên ngoài vỏ bơm bị bóng loáng'
+        ],
+        correct: 1,
+        cue: 'Mong đợi: Nhiệt độ gối bi tăng cao, tiếng kêu rào rạo kim loại, độ rung cơ khí vượt ngưỡng cho phép.',
+        explain: 'Khô mỡ bôi trơn hoặc vỡ rế bi làm ma sát tăng vọt, phát sinh nhiệt độ cao và tiếng ồn bất thường; nếu không dừng máy sẽ gây bó trục vỡ stato.'
+      }
+    ];
+
+    // 2. STATE MANAGEMENT
+    const STORAGE_KEY_QUESTIONS = 'bandien_candidate_portal_questions';
+    const STORAGE_KEY_EXAM_RECORDS = 'bandien_candidate_exam_records';
+    const STORAGE_KEY_GSHEET_URL = 'bandien_candidate_gsheet_url';
+
+    let questionsBank = [];
+    let currentExamQuestions = [];
+    let currentQuestionIndex = 0;
+    let candidateAnswers = {}; // { qId: selectedOptionIndex }
+    let recruiterNotes = {}; // { qId: 'note text' }
+    let candidateInfo = {};
+    let isRecruiterMode = false;
+    let examTimerInterval = null;
+    let examSecondsRemaining = 900; // 15 mins default
+    let examTotalSeconds = 900;
+
+    // 3. INITIALIZATION
+    window.addEventListener('DOMContentLoaded', () => {
+      loadQuestionsBank();
+      checkRecruiterModePreference();
+      lucide.createIcons();
+    });
+
+    function loadQuestionsBank() {
+      const stored = localStorage.getItem(STORAGE_KEY_QUESTIONS);
+      if (stored) {
+        try {
+          questionsBank = JSON.parse(stored);
+        } catch (e) {
+          questionsBank = [...DEFAULT_QUESTIONS];
+        }
+      } else {
+        questionsBank = [...DEFAULT_QUESTIONS];
+      }
+      updateModalQuestionsUI();
+    }
+
+    function checkRecruiterModePreference() {
+      const isRecruiter = localStorage.getItem('bandien_candidate_recruiter_mode') === 'true';
+      if (isRecruiter) {
+        enableRecruiterMode(true);
+      }
+    }
+
+    function toggleRecruiterMode() {
+      enableRecruiterMode(!isRecruiterMode);
+    }
+
+    function enableRecruiterMode(enable) {
+      isRecruiterMode = enable;
+      localStorage.setItem('bandien_candidate_recruiter_mode', enable ? 'true' : 'false');
+      
+      const badge = document.getElementById('role-mode-badge');
+      const btnText = document.getElementById('btn-mode-text');
+      const alertBox = document.getElementById('recruiter-alert-box');
+      const hintBox = document.getElementById('recruiter-q-hint-box');
+
+      if (isRecruiterMode) {
+        badge.className = "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-300";
+        badge.textContent = "Chế độ Người PV Điền Hộ";
+        btnText.textContent = "Chế độ: Người PV";
+        if (alertBox) alertBox.classList.remove('hidden');
+        if (hintBox) hintBox.classList.remove('hidden');
+      } else {
+        badge.className = "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200";
+        badge.textContent = "Ứng viên tự làm";
+        btnText.textContent = "Người PV Điền Hộ";
+        if (alertBox) alertBox.classList.add('hidden');
+        if (hintBox) hintBox.classList.add('hidden');
+      }
+      lucide.createIcons();
+    }
+
+    // 4. PHASE 1: START EXAM
+    function handleStartExam(e) {
+      e.preventDefault();
+      
+      const fullName = document.getElementById('input-fullname').value.trim();
+      const phone = document.getElementById('input-phone').value.trim();
+      const position = document.getElementById('select-position').value;
+      const unit = document.getElementById('select-unit').value;
+      const birthYear = document.getElementById('input-birthyear').value.trim();
+      const experience = document.getElementById('select-exp').value;
+      const duration = parseInt(document.getElementById('select-duration').value, 10);
+
+      candidateInfo = {
+        fullName,
+        phone,
+        position,
+        positionName: document.getElementById('select-position').selectedOptions[0].text,
+        unit,
+        unitName: document.getElementById('select-unit').selectedOptions[0].text,
+        birthYear: birthYear || 'N/A',
+        experience: document.getElementById('select-exp').selectedOptions[0].text,
+        durationMinutes: duration,
+        startTime: new Date().toISOString(),
+        isRecruiterMode
+      };
+
+      // Filter and pick 15 questions relevant to candidate's position
+      currentExamQuestions = selectQuestionsForExam(position, 15);
+      currentQuestionIndex = 0;
+      candidateAnswers = {};
+      recruiterNotes = {};
+
+      // Setup UI for Exam
+      document.getElementById('phase-checkin').classList.add('hidden');
+      document.getElementById('phase-exam').classList.remove('hidden');
+      document.getElementById('phase-result').classList.add('hidden');
+
+      document.getElementById('exam-header-name').textContent = candidateInfo.fullName;
+      document.getElementById('exam-header-pos').textContent = candidateInfo.positionName;
+
+      renderQuestionNavigator();
+      renderCurrentQuestion();
+
+      // Setup Timer
+      if (duration > 0) {
+        examTotalSeconds = duration * 60;
+        examSecondsRemaining = examTotalSeconds;
+        document.getElementById('exam-timer-box').classList.remove('hidden');
+        startCountdownTimer();
+      } else {
+        document.getElementById('exam-timer-box').classList.add('hidden');
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function selectQuestionsForExam(position, count = 15) {
+      // 1. Filter questions matching the position or common questions
+      let matched = questionsBank.filter(q => !q.pos || q.pos.includes(position));
+      if (matched.length < count) {
+        matched = [...questionsBank];
+      }
+      
+      // Shuffle array randomly
+      const shuffled = [...matched].sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, count);
+    }
+
+    // 5. PHASE 2: EXAM RUNNER LOGIC
+    function startCountdownTimer() {
+      if (examTimerInterval) clearInterval(examTimerInterval);
+      updateTimerDisplay();
+
+      examTimerInterval = setInterval(() => {
+        examSecondsRemaining--;
+        updateTimerDisplay();
+
+        if (examSecondsRemaining <= 0) {
+          clearInterval(examTimerInterval);
+          alert("⏱️ Đã hết thời gian làm bài sát hạch! Hệ thống sẽ tự động tổng kết và nộp bài.");
+          submitExam();
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const mins = Math.floor(examSecondsRemaining / 60);
+      const secs = examSecondsRemaining % 60;
+      const display = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      const elem = document.getElementById('exam-timer-display');
+      if (elem) elem.textContent = display;
+
+      const timerBox = document.getElementById('exam-timer-box');
+      if (timerBox) {
+        if (examSecondsRemaining <= 180) { // < 3 mins warning
+          timerBox.className = "flex items-center gap-2 px-3 py-1 rounded-xl bg-rose-50 border border-rose-300 text-rose-700 font-mono font-bold text-xs sm:text-sm animate-pulse";
+        } else {
+          timerBox.className = "flex items-center gap-2 px-3 py-1 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 font-mono font-bold text-xs sm:text-sm";
+        }
+      }
+    }
+
+    function renderQuestionNavigator() {
+      const container = document.getElementById('question-navigator-pills');
+      container.innerHTML = '';
+
+      currentExamQuestions.forEach((q, idx) => {
+        const isAnswered = candidateAnswers[q.id] !== undefined;
+        const isCurrent = idx === currentQuestionIndex;
+        
+        let pillClass = "w-8 h-8 rounded-xl font-bold text-xs flex items-center justify-center transition border ";
+        if (isCurrent) {
+          pillClass += "bg-[#0b4d5e] text-white border-[#0b4d5e] ring-2 ring-[#0b4d5e]/30 scale-105";
+        } else if (isAnswered) {
+          pillClass += "bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100";
+        } else {
+          pillClass += "bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200";
+        }
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = pillClass;
+        btn.textContent = idx + 1;
+        btn.onclick = () => jumpToQuestion(idx);
+        container.appendChild(btn);
+      });
+
+      // Update progress text
+      const answeredCount = Object.keys(candidateAnswers).length;
+      document.getElementById('exam-progress-text').textContent = `${answeredCount}/${currentExamQuestions.length} câu`;
+    }
+
+    function jumpToQuestion(index) {
+      if (index >= 0 && index < currentExamQuestions.length) {
+        currentQuestionIndex = index;
+        renderCurrentQuestion();
+        renderQuestionNavigator();
+      }
+    }
+
+    function navigateQuestion(delta) {
+      jumpToQuestion(currentQuestionIndex + delta);
+    }
+
+    function renderCurrentQuestion() {
+      const q = currentExamQuestions[currentQuestionIndex];
+      if (!q) return;
+
+      document.getElementById('current-q-index-badge').textContent = `Câu ${currentQuestionIndex + 1} / ${currentExamQuestions.length}`;
+      document.getElementById('current-q-topic-badge').textContent = q.topicName || 'Kỹ thuật';
+      document.getElementById('current-q-text').textContent = q.q;
+
+      // Render Options A, B, C, D
+      const optionsContainer = document.getElementById('current-q-options-container');
+      optionsContainer.innerHTML = '';
+
+      const selectedOptIdx = candidateAnswers[q.id];
+
+      q.options.forEach((optText, optIdx) => {
+        const isSelected = selectedOptIdx === optIdx;
+        const optLetter = ['A', 'B', 'C', 'D'][optIdx] || (optIdx + 1);
+
+        const card = document.createElement('label');
+        card.className = `p-3.5 sm:p-4 rounded-2xl border transition cursor-pointer flex items-start gap-3 select-none ${
+          isSelected 
+            ? 'bg-[#0b4d5e]/5 border-[#0b4d5e] ring-2 ring-[#0b4d5e]/20 text-slate-900 font-semibold' 
+            : 'bg-white border-slate-200/90 hover:border-slate-300 text-slate-700 hover:bg-slate-50'
+        }`;
+
+        card.innerHTML = `
+          <input 
+            type="radio" 
+            name="q_option_${q.id}" 
+            value="${optIdx}" 
+            ${isSelected ? 'checked' : ''} 
+            onchange="selectOptionForCurrentQ(${optIdx})" 
+            class="hidden"
+          >
+          <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center shrink-0 border transition ${
+            isSelected 
+              ? 'bg-[#0b4d5e] text-white border-[#0b4d5e]' 
+              : 'bg-slate-100 text-slate-600 border-slate-200'
+          }">
+            ${optLetter}
+          </div>
+          <div class="text-xs sm:text-sm leading-relaxed pt-0.5 flex-1">
+            ${optText}
+          </div>
+        `;
+
+        optionsContainer.appendChild(card);
+      });
+
+      // Recruiter Mode Hint & Note
+      const hintBox = document.getElementById('recruiter-q-hint-box');
+      if (isRecruiterMode) {
+        hintBox.classList.remove('hidden');
+        document.getElementById('recruiter-q-cue').textContent = q.cue || q.explain || 'Kiểm tra độ chính xác và thái độ trả lời.';
+        document.getElementById('recruiter-q-note').value = recruiterNotes[q.id] || '';
+      } else {
+        hintBox.classList.add('hidden');
+      }
+
+      // Prev/Next buttons state
+      document.getElementById('btn-prev-q').disabled = currentQuestionIndex === 0;
+      const nextBtn = document.getElementById('btn-next-q');
+      if (currentQuestionIndex === currentExamQuestions.length - 1) {
+        nextBtn.innerHTML = `<span>Xem Lại & Nộp Bài</span> <i data-lucide="check-circle" class="w-4 h-4"></i>`;
+        nextBtn.onclick = confirmSubmitExam;
+      } else {
+        nextBtn.innerHTML = `<span>Câu Tiếp Theo</span> <i data-lucide="chevron-right" class="w-4 h-4"></i>`;
+        nextBtn.onclick = () => navigateQuestion(1);
+      }
+
+      lucide.createIcons();
+    }
+
+    function selectOptionForCurrentQ(optIdx) {
+      const q = currentExamQuestions[currentQuestionIndex];
+      if (!q) return;
+
+      candidateAnswers[q.id] = optIdx;
+      renderCurrentQuestion();
+      renderQuestionNavigator();
+    }
+
+    function saveRecruiterNoteForCurrentQ(val) {
+      const q = currentExamQuestions[currentQuestionIndex];
+      if (!q) return;
+      recruiterNotes[q.id] = val.trim();
+    }
+
+    // 6. SUBMISSION & SCORING LOGIC
+    function confirmSubmitExam() {
+      const total = currentExamQuestions.length;
+      const answered = Object.keys(candidateAnswers).length;
+      const unanswered = total - answered;
+
+      let msg = `Bạn đã hoàn thành ${answered}/${total} câu hỏi.`;
+      if (unanswered > 0) {
+        msg += ` Vẫn còn ${unanswered} câu chưa chọn đáp án!\nBạn có chắc chắn muốn nộp bài ngay bây giờ không?`;
+      } else {
+        msg += ` Bạn có chắc chắn muốn nộp bài sát hạch?`;
+      }
+
+      if (confirm(msg)) {
+        submitExam();
+      }
+    }
+
+    function submitExam() {
+      if (examTimerInterval) clearInterval(examTimerInterval);
+
+      // Calculate Scores
+      let correctCount = 0;
+      let wrongCount = 0;
+      let unansweredCount = 0;
+
+      const details = currentExamQuestions.map((q, idx) => {
+        const userChoice = candidateAnswers[q.id];
+        const isAnswered = userChoice !== undefined;
+        const isCorrect = isAnswered && userChoice === q.correct;
+
+        if (isCorrect) correctCount++;
+        else if (isAnswered) wrongCount++;
+        else unansweredCount++;
+
+        return {
+          index: idx + 1,
+          qId: q.id,
+          topic: q.topicName,
+          question: q.q,
+          options: q.options,
+          userChoice,
+          correctChoice: q.correct,
+          isCorrect,
+          explain: q.explain,
+          recruiterNote: recruiterNotes[q.id] || ''
+        };
+      });
+
+      const totalQuestions = currentExamQuestions.length;
+      const scorePercentage = Math.round((correctCount / totalQuestions) * 1000) / 10; // 86.7%
+
+      // Rank evaluation
+      let rankTitle = 'ĐẠT YÊU CẦU';
+      let rankColor = 'emerald';
+      let comment = 'Ứng viên nắm vững quy chuẩn kỹ thuật, đủ điều kiện vào vòng đàm phán lương và tiếp nhận thử việc.';
+
+      if (scorePercentage >= 85) {
+        rankTitle = 'XUẤT SẮC / ĐẠT CHUẨN CAO';
+        rankColor = 'emerald';
+        comment = 'Tay nghề vững vàng, kiến thức chuyên môn và an toàn điện rất tốt. Ưu tiên bố trí phụ trách các ca kỹ thuật trọng điểm.';
+      } else if (scorePercentage >= 65) {
+        rankTitle = 'ĐẠT YÊU CẦU TIÊU CHUẨN';
+        rankColor = 'teal';
+        comment = 'Đáp ứng tốt các yêu cầu vận hành cơ bản, cần bồi dưỡng thêm về quy trình SOP trạm bơm và hệ thống biến tần.';
+      } else if (scorePercentage >= 50) {
+        rankTitle = 'CẦN PHỎNG VẤN THÊM TẠI HIỆN TRƯỜNG';
+        rankColor = 'amber';
+        comment = 'Kiến thức lý thuyết ở mức trung bình, đề nghị Trưởng ban kỹ thuật kiểm tra tay nghề đấu tủ điện thực tế.';
+      } else {
+        rankTitle = 'CHƯA ĐẠT TIÊU CHUẨN';
+        rankColor = 'rose';
+        comment = 'Chưa nắm vững quy chuẩn an toàn LOTO và vận hành cơ điện, chưa đáp ứng yêu cầu công việc hiện tại.';
+      }
+
+      const examRecord = {
+        id: 'REC_' + Date.now(),
+        timestamp: new Date().toISOString(),
+        candidate: candidateInfo,
+        totalQuestions,
+        correctCount,
+        wrongCount,
+        unansweredCount,
+        scorePercentage,
+        rankTitle,
+        details,
+        recruiterNotes
+      };
+
+      // Save record to LocalStorage
+      saveExamRecordToStorage(examRecord);
+
+      // Display Results UI
+      renderResultsUI(examRecord);
+    }
+
+    function saveExamRecordToStorage(record) {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY_EXAM_RECORDS);
+        let records = stored ? JSON.parse(stored) : [];
+        records.unshift(record);
+        localStorage.setItem(STORAGE_KEY_EXAM_RECORDS, JSON.stringify(records));
+      } catch (e) {
+        console.error("Storage error:", e);
+      }
+    }
+
+    // 7. PHASE 3: RENDER RESULTS & REVIEW
+    function renderResultsUI(record) {
+      document.getElementById('phase-checkin').classList.add('hidden');
+      document.getElementById('phase-exam').classList.add('hidden');
+      document.getElementById('phase-result').classList.remove('hidden');
+
+      // Rank Badge & Colors
+      const rankBadge = document.getElementById('result-rank-badge');
+      const iconBox = document.getElementById('result-icon-box');
+
+      rankBadge.textContent = `KẾT QUẢ: ${record.rankTitle}`;
+      document.getElementById('result-score-text').textContent = `${record.correctCount} / ${record.totalQuestions} Câu Đúng (${record.scorePercentage}%)`;
+      document.getElementById('result-comment-text').textContent = record.details ? (record.scorePercentage >= 65 ? 'Ứng viên đủ điều kiện tay nghề để tiếp nhận thử việc 60 ngày.' : 'Cần đối chiếu thêm tay nghề thực hành.') : '';
+
+      if (record.scorePercentage >= 65) {
+        iconBox.className = "w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-3xl flex items-center justify-center text-white shadow-md bg-emerald-600";
+        rankBadge.className = "inline-flex items-center px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-100 text-emerald-800";
+      } else if (record.scorePercentage >= 50) {
+        iconBox.className = "w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-3xl flex items-center justify-center text-white shadow-md bg-amber-500";
+        rankBadge.className = "inline-flex items-center px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-100 text-amber-800";
+      } else {
+        iconBox.className = "w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-3xl flex items-center justify-center text-white shadow-md bg-rose-600";
+        rankBadge.className = "inline-flex items-center px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-rose-100 text-rose-800";
+      }
+
+      // Metadata
+      document.getElementById('res-cand-name').textContent = record.candidate.fullName;
+      document.getElementById('res-cand-pos').textContent = record.candidate.positionName;
+      document.getElementById('res-cand-time').textContent = new Date(record.timestamp).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+
+      // Detailed questions review list
+      const detailContainer = document.getElementById('result-detail-list');
+      detailContainer.innerHTML = '';
+
+      record.details.forEach(item => {
+        const itemBox = document.createElement('div');
+        itemBox.className = `p-4 rounded-2xl border text-xs space-y-2.5 ${
+          item.isCorrect 
+            ? 'bg-emerald-50/40 border-emerald-200' 
+            : 'bg-rose-50/40 border-rose-200'
+        }`;
+
+        const userAnsText = item.userChoice !== undefined ? item.options[item.userChoice] : '(Bỏ trống)';
+        const correctAnsText = item.options[item.correctChoice];
+
+        itemBox.innerHTML = `
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-lg font-bold text-[11px] flex items-center justify-center ${
+                item.isCorrect ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'
+              }">
+                ${item.index}
+              </span>
+              <span class="font-bold text-slate-800">${item.topic || 'Kỹ thuật'}</span>
+            </div>
+            <span class="font-bold text-[11px] ${item.isCorrect ? 'text-emerald-700' : 'text-rose-600'}">
+              ${item.isCorrect ? '✓ Đúng' : '✗ Chưa đúng'}
+            </span>
+          </div>
+
+          <div class="font-semibold text-slate-900 leading-snug">
+            ${item.question}
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] pt-1 border-t border-slate-100">
+            <div class="p-2 rounded-xl bg-white border border-slate-200">
+              <span class="text-slate-500 font-medium">Lựa chọn của bạn: </span>
+              <b class="${item.isCorrect ? 'text-emerald-700' : 'text-rose-600'}">${userAnsText}</b>
+            </div>
+            <div class="p-2 rounded-xl bg-white border border-emerald-200">
+              <span class="text-emerald-700 font-medium">Đáp án chuẩn: </span>
+              <b class="text-emerald-800">${correctAnsText}</b>
+            </div>
+          </div>
+
+          ${item.explain ? `
+            <div class="text-[11px] text-slate-600 bg-white/70 p-2 rounded-xl border border-slate-200/80 leading-relaxed">
+              💡 <b>Căn cứ kỹ thuật:</b> ${item.explain}
+            </div>
+          ` : ''}
+
+          ${item.recruiterNote ? `
+            <div class="text-[11px] text-purple-900 bg-purple-50 p-2 rounded-xl border border-purple-200">
+              📝 <b>Ghi chú người phỏng vấn:</b> ${item.recruiterNote}
+            </div>
+          ` : ''}
+        `;
+
+        detailContainer.appendChild(itemBox);
+      });
+
+      // Populate hidden printable certificate data
+      populatePrintArea(record);
+
+      lucide.createIcons();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function populatePrintArea(record) {
+      document.getElementById('print-report-code').textContent = record.id;
+      document.getElementById('print-timestamp').textContent = 'Ngày thi: ' + new Date(record.timestamp).toLocaleDateString('vi-VN');
+      
+      document.getElementById('print-cand-name').textContent = record.candidate.fullName;
+      document.getElementById('print-cand-phone').textContent = record.candidate.phone;
+      document.getElementById('print-cand-pos').textContent = record.candidate.positionName;
+      document.getElementById('print-cand-unit').textContent = record.candidate.unitName;
+      document.getElementById('print-cand-exp').textContent = (record.candidate.birthYear || '—') + ' • ' + (record.candidate.experience || '—');
+      
+      document.getElementById('print-score-count').textContent = `${record.correctCount} / ${record.totalQuestions} Câu`;
+      document.getElementById('print-score-pct').textContent = `${record.scorePercentage}%`;
+      document.getElementById('print-rank-title').textContent = record.rankTitle;
+      document.getElementById('print-cand-sign-name').textContent = record.candidate.fullName;
+
+      // Summary recruiter notes
+      const notesArray = Object.values(record.recruiterNotes || {}).filter(n => n && n.trim());
+      const notesContainer = document.getElementById('print-recruiter-notes');
+      if (notesArray.length > 0) {
+        notesContainer.innerHTML = notesArray.map(n => `• ${n}`).join('<br>');
+      } else {
+        notesContainer.innerHTML = `• Kết quả làm bài trắc nghiệm đạt ${record.scorePercentage}%, đủ điều kiện đánh giá tay nghề.<br>• Ý kiến: Đồng ý tiếp tục các bước đàm phán hợp đồng theo quy trình tuyển dụng.`;
+      }
+    }
+
+    function printResultA4() {
+      window.print();
+    }
+
+    function exportCandidateResultsCsv() {
+      const stored = localStorage.getItem(STORAGE_KEY_EXAM_RECORDS);
+      if (!stored) {
+        alert("Chưa có dữ liệu bài thi để xuất!");
+        return;
+      }
+      const records = JSON.parse(stored);
+      let csv = "\uFEFFMã bài thi,Thời gian,Họ và tên,Số điện thoại,Vị trí,Dự án,Số câu đúng,Tổng câu,Điểm %,Xếp loại\n";
+      records.forEach(r => {
+        csv += `"${r.id}","${r.timestamp}","${r.candidate.fullName}","${r.candidate.phone}","${r.candidate.positionName}","${r.candidate.unitName}",${r.correctCount},${r.totalQuestions},${r.scorePercentage},"${r.rankTitle}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Ket_Qua_Sat_Hach_Ung_Vien_${new Date().toISOString().slice(0,10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function restartExam() {
+      document.getElementById('phase-result').classList.add('hidden');
+      document.getElementById('phase-exam').classList.add('hidden');
+      document.getElementById('phase-checkin').classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 8. QUESTION MANAGEMENT MODAL LOGIC
+    function openQuestionManagerModal() {
+      document.getElementById('modal-manage-questions').classList.remove('hidden');
+      const gsheetUrl = localStorage.getItem(STORAGE_KEY_GSHEET_URL) || '';
+      document.getElementById('input-gsheet-url').value = gsheetUrl;
+      updateModalQuestionsUI();
+      lucide.createIcons();
+    }
+
+    function closeQuestionManagerModal() {
+      document.getElementById('modal-manage-questions').classList.add('hidden');
+      closeAddNewQuestionSubForm();
+    }
+
+    function updateModalQuestionsUI() {
+      const tbody = document.getElementById('modal-q-list-tbody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      document.getElementById('modal-q-total-count').textContent = questionsBank.length;
+
+      questionsBank.forEach((q, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50";
+
+        const optLetter = ['A', 'B', 'C', 'D'][q.correct] || 'A';
+
+        tr.innerHTML = `
+          <td class="p-2 border-b font-mono font-bold text-slate-500">${idx + 1}</td>
+          <td class="p-2 border-b font-bold text-slate-700 whitespace-nowrap">${q.topicName || q.topic}</td>
+          <td class="p-2 border-b font-medium text-slate-900 max-w-xs truncate" title="${q.q}">${q.q}</td>
+          <td class="p-2 border-b font-extrabold text-emerald-700">${optLetter}</td>
+          <td class="p-2 border-b text-center whitespace-nowrap">
+            <button onclick="deleteQuestion(${idx})" class="p-1 text-slate-400 hover:text-rose-600 transition" title="Xóa câu hỏi">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+
+      lucide.createIcons();
+    }
+
+    function deleteQuestion(idx) {
+      if (confirm(`Bạn có chắc chắn muốn xóa câu hỏi số ${idx + 1}?`)) {
+        questionsBank.splice(idx, 1);
+        saveQuestionsBank();
+        updateModalQuestionsUI();
+      }
+    }
+
+    function resetDefaultQuestions() {
+      if (confirm("Khôi phục toàn bộ ngân hàng 20 câu hỏi mặc định chuẩn ban đầu?")) {
+        questionsBank = [...DEFAULT_QUESTIONS];
+        saveQuestionsBank();
+        updateModalQuestionsUI();
+        alert("Đã khôi phục ngân hàng câu hỏi gốc thành công!");
+      }
+    }
+
+    function saveQuestionsBank() {
+      localStorage.setItem(STORAGE_KEY_QUESTIONS, JSON.stringify(questionsBank));
+    }
+
+    // Sub form: add new question
+    function openAddNewQuestionSubForm() {
+      document.getElementById('subform-add-q').classList.remove('hidden');
+      document.getElementById('sub-q-id').value = 'Q_' + Date.now().toString().slice(-4);
+      document.getElementById('sub-q-text').value = '';
+      document.getElementById('sub-q-opt-0').value = '';
+      document.getElementById('sub-q-opt-1').value = '';
+      document.getElementById('sub-q-opt-2').value = '';
+      document.getElementById('sub-q-opt-3').value = '';
+      document.getElementById('sub-q-cue').value = '';
+    }
+
+    function closeAddNewQuestionSubForm() {
+      document.getElementById('subform-add-q').classList.add('hidden');
+    }
+
+    function saveSubFormQuestion() {
+      const qText = document.getElementById('sub-q-text').value.trim();
+      const opt0 = document.getElementById('sub-q-opt-0').value.trim();
+      const opt1 = document.getElementById('sub-q-opt-1').value.trim();
+      const opt2 = document.getElementById('sub-q-opt-2').value.trim();
+      const opt3 = document.getElementById('sub-q-opt-3').value.trim();
+
+      if (!qText || !opt0 || !opt1 || !opt2 || !opt3) {
+        alert("Vui lòng điền đầy đủ câu hỏi và 4 phương án A, B, C, D!");
+        return;
+      }
+
+      const topic = document.getElementById('sub-q-topic').value;
+      const topicName = document.getElementById('sub-q-topic').selectedOptions[0].text;
+      const correct = parseInt(document.getElementById('sub-q-correct').value, 10);
+      const cue = document.getElementById('sub-q-cue').value.trim();
+      const qId = document.getElementById('sub-q-id').value.trim() || ('Q_' + Date.now());
+
+      const newQ = {
+        id: qId,
+        topic,
+        topicName,
+        q: qText,
+        options: [opt0, opt1, opt2, opt3],
+        correct,
+        cue,
+        explain: cue || 'Căn cứ quy chuẩn kỹ thuật.'
+      };
+
+      questionsBank.unshift(newQ);
+      saveQuestionsBank();
+      updateModalQuestionsUI();
+      closeAddNewQuestionSubForm();
+      alert("Đã thêm câu hỏi mới thành công!");
+    }
+
+    // 9. GOOGLE SHEETS LIVE SYNC
+    async function syncQuestionsFromGSheet() {
+      const url = document.getElementById('input-gsheet-url').value.trim();
+      if (!url) {
+        alert("Vui lòng nhập đường link Google Sheet CSV xuất bản!");
+        return;
+      }
+
+      localStorage.setItem(STORAGE_KEY_GSHEET_URL, url);
+      const btn = document.getElementById('btn-sync-gsheet');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<i data-lucide="loader" class="w-3.5 h-3.5 animate-spin"></i> <span>Đang tải...</span>`;
+
+      try {
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
+        const text = await resp.text();
+
+        // Parse CSV to questions
+        const parsedQuestions = parseQuestionsFromCsv(text);
+        if (parsedQuestions.length > 0) {
+          questionsBank = parsedQuestions;
+          saveQuestionsBank();
+          updateModalQuestionsUI();
+          alert(`Đồng bộ thành công ${parsedQuestions.length} câu hỏi từ Google Sheets!`);
+        } else {
+          alert("Không tìm thấy dòng câu hỏi hợp lệ trong file CSV!");
+        }
+      } catch (err) {
+        alert("Lỗi khi kết nối Google Sheets: " + err.message + "\nHãy đảm bảo bạn đã 'Xuất bản lên web' (Publish to Web) dưới định dạng CSV.");
+      } finally {
+        btn.innerHTML = originalText;
+        lucide.createIcons();
+      }
+    }
+
+    function parseQuestionsFromCsv(csvText) {
+      const lines = csvText.split(/\r?\n/).filter(l => l.trim());
+      if (lines.length < 2) return [];
+
+      const parsed = [];
+      // Columns: ID, Topic, Level, Question, OptA, OptB, OptC, OptD, Correct, Explain
+      for (let i = 1; i < lines.length; i++) {
+        const cols = parseCsvLine(lines[i]);
+        if (cols.length >= 8) {
+          const id = cols[0] || ('Q_' + i);
+          const topicName = cols[1] || 'Kỹ thuật';
+          const q = cols[3];
+          const options = [cols[4], cols[5], cols[6], cols[7]];
+          
+          let correct = 0;
+          const correctChar = (cols[8] || 'A').toUpperCase().trim();
+          if (correctChar === 'B' || correctChar === '1') correct = 1;
+          else if (correctChar === 'C' || correctChar === '2') correct = 2;
+          else if (correctChar === 'D' || correctChar === '3') correct = 3;
+
+          const explain = cols[9] || '';
+
+          if (q && options[0] && options[1]) {
+            parsed.push({
+              id,
+              topic: 'general',
+              topicName,
+              q,
+              options,
+              correct,
+              explain,
+              cue: explain
+            });
+          }
+        }
+      }
+      return parsed;
+    }
+
+    function parseCsvLine(line) {
+      const result = [];
+      let insideQuote = false;
+      let entry = '';
+      for (let i = 0; i < line.length; i++) {
+        const c = line[i];
+        if (c === '"') {
+          insideQuote = !insideQuote;
+        } else if (c === ',' && !insideQuote) {
+          result.push(entry.trim());
+          entry = '';
+        } else {
+          entry += c;
+        }
+      }
+      result.push(entry.trim());
+      return result;
+    }
+
+    // 10. EXPORT / IMPORT JSON
+    function exportQuestionsJson() {
+      const blob = new Blob([JSON.stringify(questionsBank, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Ngan_Hang_Cau_Hoi_ME_${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function importQuestionsJson(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (Array.isArray(imported) && imported.length > 0 && imported[0].q && imported[0].options) {
+            questionsBank = imported;
+            saveQuestionsBank();
+            updateModalQuestionsUI();
+            alert(`Đã nhập thành công ${imported.length} câu hỏi!`);
+          } else {
+            alert("File JSON không đúng cấu trúc ngân hàng câu hỏi!");
+          }
+        } catch (err) {
+          alert("Lỗi đọc file JSON: " + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+  </script>
+</body>
+</html>

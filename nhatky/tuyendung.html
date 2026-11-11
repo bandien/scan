@@ -96,6 +96,10 @@
 
         <!-- Right: Action links -->
         <div class="flex items-center gap-2 shrink-0">
+          <a href="../ungvien/" target="_blank" rel="noopener noreferrer" class="px-2.5 sm:px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-bold transition flex items-center gap-1.5 active:scale-95 shadow-2xs" title="Mở Cổng Ứng Viên Trắc Nghiệm Online">
+            <i data-lucide="check-check" class="w-3.5 h-3.5 text-emerald-600"></i>
+            <span class="hidden sm:inline">Cổng Ứng Viên</span>
+          </a>
           <a href="../phongvan/" class="px-2.5 sm:px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 active:scale-95" title="Mở bộ câu hỏi phỏng vấn ứng viên">
             <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
             <span class="hidden sm:inline">Phỏng Vấn</span>
@@ -247,21 +251,43 @@
     </div>
 
     <!-- QUICK INTEGRATION LINKS BANNER -->
-    <div class="bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 border border-indigo-200/80 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-      <div class="space-y-1">
-        <div class="flex items-center gap-2">
-          <span class="w-2.5 h-2.5 rounded-full bg-purple-600"></span>
-          <h3 class="text-sm font-extrabold text-slate-900">Liên Kết Trực Tiếp Đến Ứng Dụng Phỏng Vấn Tuyển Dụng</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
+      <!-- Card 1: Candidate Public Portal -->
+      <div class="bg-gradient-to-r from-teal-50 via-emerald-50 to-cyan-50 border border-teal-200/90 rounded-2xl p-4 sm:p-5 flex flex-col justify-between gap-3">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#0b4d5e]"></span>
+            <h3 class="text-sm font-extrabold text-slate-900">Cổng Ứng Viên Sát Hạch Trắc Nghiệm (Public)</h3>
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Cho phép ứng viên quét QR hoặc tự truy cập làm bài test kỹ thuật 15 câu, tự động chấm điểm và xuất phiếu kết quả A4 lưu vào hồ sơ tuyển dụng.
+          </p>
         </div>
-        <p class="text-xs text-slate-600 max-w-2xl leading-relaxed">
-          Sử dụng Web App Bộ Câu Hỏi Phỏng Vấn Kỹ Thuật để chấm điểm trực tiếp ứng viên theo từng tiêu chí, ghi chú phỏng vấn và xuất kết quả file Excel.
-        </p>
+        <div>
+          <a href="../ungvien/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-4 py-2.5 bg-[#0b4d5e] hover:bg-[#083f4e] text-white font-bold rounded-xl text-xs shadow-xs transition active:scale-95">
+            <i data-lucide="check-check" class="w-4 h-4 text-teal-300"></i>
+            <span>Mở Cổng Ứng Viên (Public)</span>
+          </a>
+        </div>
       </div>
-      <div class="flex items-center gap-2 shrink-0">
-        <a href="../phongvan/" class="px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-xs transition active:scale-95">
-          <i data-lucide="play-circle" class="w-4 h-4"></i>
-          <span>Mở Ứng Dụng Phỏng Vấn</span>
-        </a>
+
+      <!-- Card 2: Interview App for Recruiters -->
+      <div class="bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 border border-indigo-200/80 rounded-2xl p-4 sm:p-5 flex flex-col justify-between gap-3">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-purple-600"></span>
+            <h3 class="text-sm font-extrabold text-slate-900">Bộ Câu Hỏi Phỏng Vấn Chuyên Sâu (Recruiter)</h3>
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Ứng dụng hỗ trợ cán bộ kỹ thuật phỏng vấn ứng viên theo 16 chủ đề, gợi ý câu trả lời mong đợi, rubric chấm điểm và xuất kết quả Excel.
+          </p>
+        </div>
+        <div>
+          <a href="../phongvan/" class="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs shadow-xs transition active:scale-95">
+            <i data-lucide="play-circle" class="w-4 h-4"></i>
+            <span>Mở Ứng Dụng Phỏng Vấn</span>
+          </a>
+        </div>
       </div>
     </div>
 
