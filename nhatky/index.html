@@ -3481,21 +3481,26 @@
 
     // Thư Viện Hướng Dẫn & Cẩm Nang Quy Trình SOP Kỹ Thuật M&E
     const DEFAULT_SOP_GUIDES = [
-        {
-        id: 'sop_golf_phutai_01',
+      {
+        id: 'sop_phutai_01',
         code: 'SOP-PHUTAI-01',
-        title: 'Quy Trình Điều Chỉnh Phụ Tải Điện Với Điện Lực Thanh Xuân',
-        category: 'golf',
-        categoryName: '⚡ Điều Chỉnh Phụ Tải',
-        author: 'Ban Kỹ Thuật M&E',
-        target: 'Thực hiện cắt/giảm tải điện theo yêu cầu của Điện Lực Thanh Xuân (Chương trình DR).',
-        safetyNotes: 'Đảm bảo an toàn tuyệt đối khi chuyển đổi nguồn từ lưới sang máy phát điện.',
+        title: 'Quy Trình Thao Tác Điều Chỉnh Phụ Tải Điện (DR) Với Điện Lực Thanh Xuân',
+        category: 'tba',
+        categoryName: '⚡ Điều Chỉnh Phụ Tải (DR)',
+        summary: 'Hướng dẫn chi tiết thao tác giảm tải 10% (800A–1.000A) trong 3 giờ theo sự kiện DR của Điện lực Thanh Xuân: Vị trí tủ điện máy phát tầng hầm và vị trí tủ điện điều hòa (DB-AC) tại 39 tầng thực hiện cắt luân phiên 30 phút.',
+        author: 'Ban Quản Lý & Kinh Doanh Điện',
+        target: 'Thực hiện cắt giảm tải điện an toàn 10% (tương đương 800A – 1.000A trên tổng dòng điện cao điểm 8.000A – 10.000A) trong thời gian 3 giờ theo thỏa thuận điều chỉnh phụ tải DR với Công ty Điện lực Thanh Xuân (Mã KH: PD11000023359), bảo đảm an toàn hệ thống, không gây sốc sụt áp và hạn chế tối đa ảnh hưởng đến hoạt động tòa nhà.',
+        safetyNotes: '• TUYỆT ĐỐI KHÔNG chỉ chỉnh nhiệt độ điều hòa lên 30°C (máy nén ngoài trời vẫn chạy liên tục không giảm được dòng).\n• BẮT BUỘC thao tác ngắt/đóng Aptomat tại TỦ ĐIỆN ĐIỀU HÒA TẦNG (DB-AC) trong phòng kỹ thuật điện từng tầng, không ngắt nhầm tủ điện chiếu sáng/ổ cắm (DB-LP).\n• Luôn đóng điện cho nhóm cũ trước, chờ 02 phút ổn định điện áp mới ngắt nhóm tiếp theo để tránh sụt áp đột ngột.\n• Khi kết thúc: Đóng điện lại từng tầng cách nhau 30s - 1p tránh dòng khởi động máy nén đồng thời quá lớn gây nhảy Aptomat tổng trạm biến áp.',
         steps: [
-          '1. Tiếp nhận yêu cầu: Khi nhận thông báo giảm tải (trước 24h), xác định công suất cần giảm (thường là 10% tổng dòng điện, khoảng 800A).',
-          '2. Phương án 1 (Chuyển sang máy phát): Chuyển điện ổ cắm, chiếu sáng khối đế 21T, điện thang máy, chiếu sáng công cộng 24T sang máy phát điện.',
-          '3. Phương án 2 (Cắt luân phiên điều hòa - Ưu tiên): Nếu vẫn thiếu tải, cắt luân phiên 5-8 tầng điều hòa/lần trong 30 phút, sau đó bật lại và xoay vòng.',
-          '4. Phối hợp vận hành: Tổ trưởng kỹ thuật điều phối nhân sự trực, ghi chép thời điểm cắt/đóng tải và báo cáo Điện lực.',
-          '5. Kết thúc: Báo cáo bằng văn bản/email cho Ban Giám Đốc và Điện lực sau khi hoàn thành.'
+          '⏰ BƯỚC 1: TIẾP NHẬN YÊU CẦU & BỐ TRÍ NHÂN SỰ TRỰC\n• Tiếp nhận thông báo sự kiện DR từ Công ty Điện lực Thanh Xuân (thông báo trước 24h qua công văn/email dr.evnhanoi@evnhanoi.vn hoặc điện thoại Điều độ).\n• Xác nhận khung giờ thực hiện sự kiện (thường diễn ra trong 03 giờ cao điểm, ví dụ từ 13h30 đến 16h30).\n• Xác định công suất cần tiết giảm: 10% dòng điện tổng toàn khu Hapulico Complex (tương đương 800A – 1.000A trên tổng dòng cao điểm 8.000A - 10.000A).\n• Phân công 02 nhân viên kỹ thuật trực thao tác:\n  - 01 KTV trực tại Trạm biến áp & Phòng máy phát điện tầng hầm: Giám sát dòng điện tổng trên tủ MSB, điều độ chung.\n  - 01 KTV mang bộ đàm, chìa khóa phòng kỹ thuật điện, trực tiếp tuần tra thao tác tại các tầng.',
+
+          '⚙️ BƯỚC 2: PHƯƠNG ÁN 1 - CHUYỂN PHỤ TẢI SANG MÁY PHÁT ĐIỆN DỰ PHÒNG (NẾU ĐƯỢC LỆNH CHẠY MÁY PHÁT)\n• VỊ TRÍ THAO TÁC: Phòng máy phát điện & Tủ điện tổng MSB/ATS tại Trạm biến áp tầng hầm Hapulico.\n• Thao tác kỹ thuật:\n  - Bước 2.1: Kiểm tra nhiên liệu dầu Diesel, nước làm mát, điện áp ắc quy. Khởi động chạy không tải máy phát điện 05 phút trước giờ DR.\n  - Bước 2.2: Tại Tủ ATS Khối đế 21T: Thao tác chuyển nguồn điện ổ cắm và chiếu sáng khối đế nhà 21T sang dùng điện máy phát.\n  - Bước 2.3: Tại Tủ phân phối 24T: Thao tác chuyển điện thang máy và chiếu sáng công cộng tòa 24T sang dùng điện máy phát.\n  - Bước 2.4: Nếu tiếp tục cần giảm tải thêm: Chuyển điện ổ cắm và chiếu sáng Trung tâm Thuốc sang máy phát điện.\n• Mức giảm dự kiến: Giảm ngay khoảng 400A – 600A phụ tải lưới.',
+
+          '🏢 BƯỚC 3: PHƯƠNG ÁN 2 - CẮT LUÂN PHIÊN ĐIỀU HÒA 39 TẦNG (PHƯƠNG ÁN CHỦ ĐẠO - TIẾT KIỆM DẦU)\n• NGUYÊN LÝ: Mỗi tầng văn phòng khi sử dụng điều hòa ăn dòng 100A – 150A. Cần cắt luân phiên 5 đến 8 tầng/lượt (tương đương giảm 800A). Chu kỳ cắt mỗi nhóm đúng 30 phút rồi đóng lại và chuyển sang nhóm tiếp theo.\n\n• VỊ TRÍ THAO TÁC CỤ THỂ TẠI CÁC TÒA NHÀ:\n  - Địa điểm: Đến PHÒNG KỸ THUẬT ĐIỆN HÀNH LANG TỪNG TẦNG (Hộp KTĐ từng tầng) của các tòa nhà.\n  - Thiết bị thao tác: Mở Tủ điện phân phối điều hòa tầng (Ký hiệu: Tủ DB-AC / Tủ Điều Hòa Tầng) -> Gạt ngắt Aptomat (MCCB) tổng cấp nguồn dàn nóng/lạnh điều hòa của tầng đó.\n  - (Hoặc nếu thao tác từ phòng điều khiển BMS/VRV: Tắt cụm dàn lạnh/dàn nóng các tầng theo danh sách trên phần mềm điều khiển).\n\n• BẢNG PHÂN CHIA 5 NHÓM CẮT LUÂN PHIÊN (Chu kỳ 30 phút/nhóm xoay vòng):\n  🔹 NHÓM 1 (7 tầng - Giảm ~750A): Gồm Tủ ĐH kho thuốc tầng KT tòa 24CH + Tủ ĐH kho thuốc tầng KT tòa 24VP (2 tầng) & Tủ ĐH từ tầng 1 đến tầng 5 tòa 21T1 (5 tầng).\n  🔹 NHÓM 2 (7 tầng - Giảm ~800A): Gồm Tủ ĐH các tầng văn phòng thấp tòa 24VP: Tầng 8, tầng 9, tầng 10, tầng 11, tầng 12, tầng 12A, tầng 14.\n  🔹 NHÓM 3 (8 tầng - Giảm ~850A): Gồm Tủ ĐH các tầng văn phòng cao tòa 24VP: Tầng 15, tầng 16, tầng 17, tầng 18, tầng 19, tầng 20, tầng 21, tầng 22.\n  🔹 NHÓM 4 (8 tầng - Giảm ~800A): Gồm Tủ ĐH khối đế tầng 1 đến tầng 5 tòa 21T2 (5 tầng) & Tủ ĐH khối đế tầng 1 đến tầng 3 tòa 17T1 (3 tầng).\n  🔹 NHÓM 5 (9 tầng - Giảm ~800A): Gồm Tủ ĐH tầng 1 đến 3 tòa 17T2 (3 tầng) + Tủ ĐH tầng 1 đến KT tòa 17T3 (3 tầng) + Tủ ĐH tầng 1 đến KT tòa 17T4 (3 tầng).',
+
+          '📊 BƯỚC 4: THEO DÕI ĐỒNG HỒ ĐO ĐẾM & QUY TRÌNH ĐẢO NHÓM AN TOÀN\n• KTV trực tại Trạm biến áp tầng hầm liên tục theo dõi đồng hồ Ampe / đồng hồ đo đa năng trên tủ MSB, kiểm tra dòng tổng giảm thực tế (đảm bảo đạt mức giảm ≥ 800A theo đúng cam kết).\n• QUY TRÌNH ĐẢO NHÓM (Cứ sau mỗi 30 phút):\n  - Khi hết 30 phút của Nhóm hiện tại: Đến phòng KTĐ các tầng của nhóm đó đóng Aptomat cấp điện trở lại.\n  - BẮT BUỘC CHỜ 02 PHÚT để điện áp lưới và máy nén ổn định, sau đó KTV mới di chuyển ngắt Aptomat của nhóm kế tiếp (tránh hiện tượng mất cân bằng hoặc sụt áp đột ngột).\n  - Lặp lại luân phiên tuần tự qua 5 nhóm cho đến khi hết thời gian sự kiện DR.\n• Ghi chép chi tiết: Giờ bắt đầu cắt, dòng điện trước/sau cắt, số lượng tầng đã ngắt vào Sổ nhật ký ca trực và Google Calendar.',
+
+          '🔄 BƯỚC 5: KHÔI PHỤC VẬN HÀNH BÌNH THƯỜNG & BÁO CÁO KẾT THÚC\n• Khi hết khung giờ sự kiện DR: Đóng điện trở lại cho toàn bộ các tầng điều hòa.\n• Trình tự đóng điện: Đóng từng tầng một, mỗi tầng cách nhau 30 giây đến 1 phút để tránh dòng khởi động máy nén đồng thời quá lớn gây quá tải hoặc nhảy Aptomat tổng trạm biến áp.\n• Nếu có chạy máy phát điện (Phương án 1): Thao tác chuyển đổi nguồn tủ ATS từ máy phát về lại nguồn lưới; cho máy phát chạy không tải làm mát 05 phút trước khi dừng máy.\n• Báo cáo kết quả: Gọi điện thông báo cho Điều độ Điện lực Thanh Xuân xác nhận sự kiện hoàn thành; lập báo cáo ngắn (dòng tiết giảm, thời gian thực hiện, trạng thái vận hành) gửi email báo cáo Ban Giám Đốc.'
         ]
       },
       {
@@ -4657,6 +4662,14 @@ const CONFIG = {
             guides[hengioSopIndex] = defaultHengioSop;
           } else if (defaultHengioSop) {
             guides.push(defaultHengioSop);
+          }
+          // Tự động bổ sung hoặc đồng bộ SOP-PHUTAI-01
+          const phutaiSopIndex = guides.findIndex(g => g.code === 'SOP-PHUTAI-01');
+          const defaultPhutaiSop = DEFAULT_SOP_GUIDES.find(g => g.code === 'SOP-PHUTAI-01');
+          if (phutaiSopIndex !== -1 && defaultPhutaiSop) {
+            guides[phutaiSopIndex] = defaultPhutaiSop;
+          } else if (defaultPhutaiSop) {
+            guides.push(defaultPhutaiSop);
           }
           const formGuide = guides.find(g => g.code === 'SOP-FORMS-01');
           const defaultFormGuide = DEFAULT_SOP_GUIDES.find(g => g.code === 'SOP-FORMS-01');
@@ -5985,6 +5998,7 @@ const CONFIG = {
       if (combined.includes('sân golf') || combined.includes('cột đèn') || combined.includes('sân tập') || combined.includes('chống sét')) return 'SOP-GOLF-01';
       if (combined.includes('calendar') || combined.includes('lịch trực')) return 'SOP-CAL-01';
       if (combined.includes('checklist') || combined.includes('giao ca') || combined.includes('biểu mẫu')) return 'SOP-FORMS-01';
+      if (combined.includes('phụ tải') || combined.includes('tiết giảm') || combined.includes('giảm tải') || combined.includes('thanh xuân') || combined.includes('dr')) return 'SOP-PHUTAI-01';
       return null;
     }
 
